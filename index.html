@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Performance &amp; Sustainability Fabric Development</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -325,6 +326,119 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .nav-item:hover .nav-edit-hint,
 .nav-section-item:hover .nav-edit-hint,
 .nav-group-header:hover .nav-edit-hint{opacity:0.6}
+
+/* ══ SCENARIO B HOME ══ */
+.b-hero{position:relative;padding:28px 28px 22px;margin-bottom:18px;border-radius:16px;
+  background:linear-gradient(135deg,rgba(6,182,212,0.09),rgba(139,92,246,0.06));
+  border:1px solid rgba(6,182,212,0.18);overflow:hidden}
+.b-hero::after{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;
+  border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,0.1),transparent 70%);pointer-events:none;z-index:0}
+.b-hero>*{position:relative;z-index:1}
+.b-team-lbl{font-size:.62rem;font-weight:700;letter-spacing:.15em;color:#67e8f9;text-transform:uppercase;margin-bottom:7px}
+.b-title{font-size:1.5rem;font-weight:900;
+  background:linear-gradient(90deg,#e2e8f0,#67e8f9 55%,#c4b5fd);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.2;margin-bottom:6px}
+.b-sub{font-size:.73rem;color:#64748b;margin-bottom:16px}
+.b-hero-bottom{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.season-track{display:inline-flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  border-radius:999px;padding:6px 16px}
+.s-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.s-done{background:#10b981}
+.s-now{background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,0.7);animation:pulseDot 1.6s ease-in-out infinite}
+.s-next{background:rgba(255,255,255,0.15)}
+.s-line{width:22px;height:1px;background:rgba(255,255,255,0.12)}
+.s-txt{font-size:.67rem;color:#94a3b8}
+.s-txt.cur{color:#fcd34d;font-weight:700}
+.b-kpi-chips{display:flex;gap:8px;flex-wrap:wrap}
+.b-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);
+  border-radius:10px;padding:7px 14px;text-align:center}
+.b-chip-lbl{font-size:.55rem;color:#475569;margin-bottom:2px;letter-spacing:.05em;text-transform:uppercase}
+.b-chip-val{font-size:.92rem;font-weight:800;color:#e2e8f0}
+
+/* 카테고리 카드 행 */
+.sample-cat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.sample-cat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:14px;padding:16px;position:relative;overflow:hidden;transition:.2s}
+.sample-cat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.25)}
+.sample-cat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+.cat-eu::before{background:linear-gradient(90deg,#06b6d4,#22d3ee)}
+.cat-season::before{background:linear-gradient(90deg,#8b5cf6,#a855f7)}
+.cat-core::before{background:linear-gradient(90deg,#10b981,#34d399)}
+.cat-project::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.cat-ico{font-size:1.3rem;margin-bottom:8px}
+.cat-name{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;margin-bottom:4px}
+.cat-total{font-size:1.6rem;font-weight:900;color:#e2e8f0;line-height:1;margin-bottom:4px}
+.cat-unit{font-size:.6rem;color:#475569}
+.cat-stage-row{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+.cat-stage-badge{font-size:.57rem;padding:2px 7px;border-radius:4px;font-weight:600}
+.stage-ip{background:rgba(245,158,11,0.15);color:#fcd34d}
+.stage-comp{background:rgba(6,182,212,0.15);color:#67e8f9}
+.stage-done{background:rgba(16,185,129,0.15);color:#6ee7b7}
+.cat-minibar{height:3px;border-radius:2px;background:rgba(255,255,255,0.06);margin-top:8px;overflow:hidden}
+.cat-minibar-fill{height:100%;border-radius:2px}
+
+/* 홈 하단 3컬럼 */
+.home-b-grid{display:grid;grid-template-columns:1fr 1.2fr auto;gap:14px}
+.pipeline-item{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pipeline-lbl{font-size:.68rem;color:#94a3b8;width:56px;flex-shrink:0}
+.pipeline-bar{flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.pipeline-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.pipeline-num{font-size:.72rem;font-weight:700;color:#e2e8f0;width:28px;text-align:right;flex-shrink:0}
+.pipeline-unit{font-size:.58rem;color:#475569;margin-top:8px}
+.buyer-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.buyer-name-lbl{font-size:.67rem;font-weight:600;color:#94a3b8;width:72px;flex-shrink:0}
+.buyer-act-dots{display:flex;gap:3px}
+.b-act-dot{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.52rem;font-weight:700}
+.bad-dev{background:rgba(139,92,246,0.2);color:#a78bfa}
+.bad-core{background:rgba(6,182,212,0.2);color:#67e8f9}
+.bad-tech{background:rgba(16,185,129,0.2);color:#6ee7b7}
+.bad-eu{background:rgba(245,158,11,0.2);color:#fcd34d}
+.bad-none{background:rgba(255,255,255,0.04);color:#334155}
+.bad-leg{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+.bad-leg-item{display:flex;align-items:center;gap:3px;font-size:.57rem;color:#475569}
+.bad-leg-dot{width:9px;height:9px;border-radius:3px}
+
+/* 엑셀 동기화 카드 */
+.sync-card{width:200px;flex-shrink:0}
+.sync-btn{width:100%;padding:10px 0;border-radius:10px;
+  background:linear-gradient(135deg,rgba(6,182,212,0.15),rgba(139,92,246,0.1));
+  border:1px solid rgba(6,182,212,0.3);color:#67e8f9;font-size:.75rem;font-weight:700;
+  cursor:pointer;transition:.2s;letter-spacing:.05em;margin-bottom:10px}
+.sync-btn:hover{background:linear-gradient(135deg,rgba(6,182,212,0.25),rgba(139,92,246,0.2));
+  box-shadow:0 4px 16px rgba(6,182,212,0.2)}
+.sync-info{font-size:.62rem;color:#475569;line-height:1.6}
+.sync-date{font-size:.65rem;color:#67e8f9;font-weight:600;margin-top:4px}
+
+/* 업로드 모달 */
+.upload-modal{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.upload-modal.open{opacity:1;pointer-events:all}
+.upload-box{background:#0f1520;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:520px;max-width:95vw}
+.upload-box h3{font-size:1rem;font-weight:800;margin-bottom:6px;
+  background:linear-gradient(90deg,#67e8f9,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.upload-box p{font-size:.72rem;color:#64748b;margin-bottom:24px}
+.upload-zones{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.upload-zone{border:1.5px dashed rgba(255,255,255,0.15);border-radius:12px;padding:20px;text-align:center;
+  transition:.2s;cursor:pointer;position:relative}
+.upload-zone:hover,.upload-zone.drag-over{border-color:rgba(6,182,212,0.5);background:rgba(6,182,212,0.04)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone-icon{font-size:1.4rem;margin-bottom:6px}
+.upload-zone-title{font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:3px}
+.upload-zone-sub{font-size:.62rem;color:#475569}
+.upload-zone.loaded{border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.05)}
+.upload-zone.loaded .upload-zone-icon::after{content:' ✓';color:#10b981}
+.upload-actions{display:flex;gap:10px}
+.btn-upload-ok{flex:1;padding:11px;border-radius:10px;
+  background:linear-gradient(135deg,#06b6d4,#8b5cf6);border:none;
+  color:#fff;font-size:.8rem;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.04em}
+.btn-upload-ok:hover{opacity:.88;box-shadow:0 4px 16px rgba(6,182,212,0.3)}
+.btn-upload-ok:disabled{opacity:.4;cursor:not-allowed}
+.btn-upload-cancel{padding:11px 20px;border-radius:10px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  color:#94a3b8;font-size:.8rem;cursor:pointer}
+.upload-progress{font-size:.7rem;color:#67e8f9;text-align:center;margin-top:10px;min-height:20px}
+
 </style>
 </head>
 <body>
@@ -415,30 +529,78 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
   <!-- ── HOME ── -->
   <div class="screen active visible" id="screen-home">
     <div class="screen-pad">
-      <div class="page-header">
-        <div class="today-badge-home"><div class="pulse-dot"></div><span id="homeTodayText"></span></div>
-        <div class="page-title">Performance &amp; Sustainability</div>
-        <div class="page-sub">Fabric Development Dashboard</div>
-      </div>
-      <div class="home-kpi">
-        <div class="kpi-card"><div class="kpi-label">총 작업</div><div class="kpi-value" id="hKpiTotal">—</div></div>
-        <div class="kpi-card"><div class="kpi-label">✅ 완료</div><div class="kpi-value" id="hKpiDone">—</div></div>
-        <div class="kpi-card"><div class="kpi-label">🔄 진행중</div><div class="kpi-value" id="hKpiInprog">—</div></div>
-        <div class="kpi-card"><div class="kpi-label">📈 진행율</div><div class="kpi-value" id="hKpiPct">—</div></div>
-      </div>
-      <div class="home-grid">
-        <div class="card">
-          <div class="card-title">단계별 진행률</div>
-          <div id="homePhaseBars"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">작업 현황 분포</div>
-          <div class="donut-wrap">
-            <canvas id="homeDonut"></canvas>
-            <div class="donut-center"><span class="dn" id="homeDonutNum">0</span><span class="ds">완료 작업</span></div>
+
+      <!-- ─ Hero Banner ─ -->
+      <div class="b-hero">
+        <div class="b-team-lbl">통합원단부 3팀 · Performance &amp; Sustainability</div>
+        <div class="b-title">Fabric Development<br>Team Dashboard</div>
+        <div class="b-sub">R&amp;D Fabric Innovation for Global Buyers — Walmart · ANF · Duluth · EU Market</div>
+        <div class="b-hero-bottom">
+          <div class="season-track">
+            <span class="s-dot s-done"></span><span class="s-txt">FW'26 완료</span>
+            <span class="s-line"></span>
+            <span class="s-dot s-now"></span><span class="s-txt cur">SS'27 진행중</span>
+            <span class="s-line"></span>
+            <span class="s-dot s-next"></span><span class="s-txt">FW'27 예정</span>
           </div>
-          <div id="homeDonutLegend" style="display:flex;flex-direction:column;gap:7px"></div>
+          <div class="b-kpi-chips">
+            <div class="b-chip"><div class="b-chip-lbl">매출기여 목표</div><div class="b-chip-val">$13.2M</div></div>
+            <div class="b-chip"><div class="b-chip-lbl">샘플 총계</div><div class="b-chip-val" id="hChipOptions">—</div></div>
+            <div class="b-chip"><div class="b-chip-lbl">스타일 수</div><div class="b-chip-val" id="hChipStyles">—</div></div>
+            <div class="b-chip"><div class="b-chip-lbl">PI 목표</div><div class="b-chip-val">200건</div></div>
+            <div class="today-badge-home" style="margin-left:4px"><div class="pulse-dot"></div><span id="homeTodayText"></span></div>
+          </div>
         </div>
+      </div>
+
+      <!-- ─ 카테고리 카드 ─ -->
+      <div class="sample-cat-row" id="homeCatRow">
+        <div class="sample-cat-card cat-eu"><div class="cat-ico">🌍</div><div class="cat-name">EU MARKET</div><div class="cat-total" id="catEuTotal">—</div><div class="cat-unit">options</div><div class="cat-stage-row" id="catEuStages"></div><div class="cat-minibar"><div class="cat-minibar-fill" id="catEuBar" style="background:linear-gradient(90deg,#06b6d4,#22d3ee);width:0%"></div></div></div>
+        <div class="sample-cat-card cat-season"><div class="cat-ico">🌿</div><div class="cat-name">SEASON DVLP</div><div class="cat-total" id="catSeasonTotal">—</div><div class="cat-unit">options</div><div class="cat-stage-row" id="catSeasonStages"></div><div class="cat-minibar"><div class="cat-minibar-fill" id="catSeasonBar" style="background:linear-gradient(90deg,#8b5cf6,#a855f7);width:0%"></div></div></div>
+        <div class="sample-cat-card cat-core"><div class="cat-ico">🔄</div><div class="cat-name">CORE UPDATE</div><div class="cat-total" id="catCoreTotal">—</div><div class="cat-unit">options</div><div class="cat-stage-row" id="catCoreStages"></div><div class="cat-minibar"><div class="cat-minibar-fill" id="catCoreBar" style="background:linear-gradient(90deg,#10b981,#34d399);width:0%"></div></div></div>
+        <div class="sample-cat-card cat-project"><div class="cat-ico">⚡</div><div class="cat-name">PROJECT</div><div class="cat-total" id="catProjectTotal">—</div><div class="cat-unit">options</div><div class="cat-stage-row" id="catProjectStages"></div><div class="cat-minibar"><div class="cat-minibar-fill" id="catProjectBar" style="background:linear-gradient(90deg,#f59e0b,#fbbf24);width:0%"></div></div></div>
+      </div>
+
+      <!-- ─ 하단 3컬럼 ─ -->
+      <div class="home-b-grid">
+
+        <!-- 샘플 파이프라인 -->
+        <div class="card">
+          <div class="card-title">샘플 파이프라인</div>
+          <div id="homePipelineBars">
+            <div class="pipeline-item"><span class="pipeline-lbl">진행중</span><div class="pipeline-bar"><div class="pipeline-bar-fill" id="pipeIpBar" style="background:#f59e0b;width:0%"></div></div><span class="pipeline-num" id="pipeIpNum">—</span></div>
+            <div class="pipeline-item"><span class="pipeline-lbl">완료중</span><div class="pipeline-bar"><div class="pipeline-bar-fill" id="pipeCompBar" style="background:#06b6d4;width:0%"></div></div><span class="pipeline-num" id="pipeCompNum">—</span></div>
+            <div class="pipeline-item"><span class="pipeline-lbl">완료완료</span><div class="pipeline-bar"><div class="pipeline-bar-fill" id="pipeDoneBar" style="background:#10b981;width:0%"></div></div><span class="pipeline-num" id="pipeDoneNum">—</span></div>
+          </div>
+          <div class="pipeline-unit" id="homePipeUnit">엑셀 동기화 후 데이터가 표시됩니다</div>
+        </div>
+
+        <!-- 바이어 활동 -->
+        <div class="card">
+          <div class="card-title">주요 바이어 활동</div>
+          <div class="buyer-row"><span class="buyer-name-lbl">Walmart</span><div class="buyer-act-dots"><div class="b-act-dot bad-dev">Dev</div><div class="b-act-dot bad-core">Core</div><div class="b-act-dot bad-tech">T/S</div></div></div>
+          <div class="buyer-row"><span class="buyer-name-lbl">ANF / CK</span><div class="buyer-act-dots"><div class="b-act-dot bad-dev">Dev</div><div class="b-act-dot bad-core">Core</div><div class="b-act-dot bad-none">-</div></div></div>
+          <div class="buyer-row"><span class="buyer-name-lbl">Duluth</span><div class="buyer-act-dots"><div class="b-act-dot bad-core">Core</div><div class="b-act-dot bad-tech">T/S</div><div class="b-act-dot bad-none">-</div></div></div>
+          <div class="buyer-row"><span class="buyer-name-lbl">Aerie / Pink</span><div class="buyer-act-dots"><div class="b-act-dot bad-dev">Dev</div><div class="b-act-dot bad-tech">T/S</div><div class="b-act-dot bad-none">-</div></div></div>
+          <div class="buyer-row"><span class="buyer-name-lbl">EU Market</span><div class="buyer-act-dots"><div class="b-act-dot bad-eu">EU</div><div class="b-act-dot bad-eu">EU</div><div class="b-act-dot bad-eu">EU</div></div></div>
+          <div class="bad-leg">
+            <div class="bad-leg-item"><span class="bad-leg-dot" style="background:rgba(139,92,246,0.5)"></span>Dev</div>
+            <div class="bad-leg-item"><span class="bad-leg-dot" style="background:rgba(6,182,212,0.5)"></span>Core</div>
+            <div class="bad-leg-item"><span class="bad-leg-dot" style="background:rgba(16,185,129,0.5)"></span>T/S</div>
+            <div class="bad-leg-item"><span class="bad-leg-dot" style="background:rgba(245,158,11,0.5)"></span>EU</div>
+          </div>
+        </div>
+
+        <!-- 엑셀 동기화 -->
+        <div class="card sync-card">
+          <div class="card-title">엑셀 동기화</div>
+          <button class="sync-btn" id="btnExcelSync">📊 엑셀 업로드</button>
+          <div class="sync-info">
+            샘플 관리 대장 + Sample Count Total 엑셀 파일을 업로드하면 대시보드가 자동 업데이트됩니다.
+          </div>
+          <div class="sync-date" id="syncLastDate"></div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -619,7 +781,35 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
     </div>
   </div>
 
-</main><!-- end main -->
+</main>
+
+<!-- ══ EXCEL UPLOAD MODAL ══ -->
+<div class="upload-modal" id="uploadModal">
+  <div class="upload-box">
+    <h3>📊 엑셀 파일 업로드</h3>
+    <p>두 파일을 선택하거나 드래그하세요. 업로드 즉시 대시보드가 업데이트됩니다.</p>
+    <div class="upload-zones">
+      <div class="upload-zone" id="zone1">
+        <input type="file" id="fileCount" accept=".xlsx,.xls">
+        <div class="upload-zone-icon">📈</div>
+        <div class="upload-zone-title">Sample Count Total.xlsx</div>
+        <div class="upload-zone-sub">카테고리별 집계 파일</div>
+      </div>
+      <div class="upload-zone" id="zone2">
+        <input type="file" id="fileLedger" accept=".xlsx,.xls">
+        <div class="upload-zone-icon">📋</div>
+        <div class="upload-zone-title">샘플 관리 대장.xlsx</div>
+        <div class="upload-zone-sub">현황 시트 포함 파일</div>
+      </div>
+    </div>
+    <div class="upload-actions">
+      <button class="btn-upload-ok" id="btnUploadOk" disabled>업로드 &amp; 적용</button>
+      <button class="btn-upload-cancel" id="btnUploadCancel">취소</button>
+    </div>
+    <div class="upload-progress" id="uploadProgress"></div>
+  </div>
+</div>
+<!-- end main -->
 
 <!-- ── GANTT TOOLTIP ── -->
 <div class="gantt-tooltip" id="ganttTooltip">
@@ -745,6 +935,7 @@ const PHASES={
 };
 const PO=['PL','DS','DV','TS','DP','CL'];
 
+let sampleData=null;
 let cfg={projTitle:'Performance & Sustainability Fabric Development',projStart:'2026-04-01',projEnd:'2026-07-31',todayOverride:null};
 let tasks=[], events=[], editingFid=null, editingEvFid=null;
 let homeDonutInst=null, statsDonutInst=null, statsBarInst=null;
@@ -824,51 +1015,70 @@ async function initFirebase(){
     events=snap.docs.map(d=>({fid:d.id,...d.data()}));
     if(currentScreen==='calendar')renderCalendar();
   });
+  // sample data
+  onSnapshot(doc(db,'sampleData','summary'),snap=>{
+    if(snap.exists()){
+      sampleData=snap.data();
+      if(currentScreen==='home') renderSampleHome();
+    }
+  });
 }
 
 // ══ HOME ══
 function renderHome(){
   document.getElementById('homeTodayText').textContent='오늘: '+fdF(today());
-  const done=tasks.filter(t=>prog(t)>=1).length;
-  const inp=tasks.filter(t=>{const p=prog(t);return p>0&&p<1;}).length;
-  const avg=tasks.length?Math.round(tasks.reduce((s,t)=>s+prog(t),0)/tasks.length*100):0;
-  document.getElementById('hKpiTotal').textContent=tasks.length;
-  document.getElementById('hKpiDone').textContent=done;
-  document.getElementById('hKpiInprog').textContent=inp;
-  document.getElementById('hKpiPct').textContent=avg+'%';
-  document.getElementById('homeDonutNum').textContent=done;
+  renderSampleHome();
+}
 
-  // phase bars
-  const pb=document.getElementById('homePhaseBars');pb.innerHTML='';
-  PO.forEach(ph=>{
-    const pt=tasks.filter(t=>t.phase===ph);if(!pt.length)return;
-    const pct=Math.round(pt.reduce((s,t)=>s+prog(t),0)/pt.length*100);
-    const info=PHASES[ph];
-    pb.insertAdjacentHTML('beforeend',`<div style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-        <span class="phase-badge" style="background:${info.bg};color:${info.txt}">${info.name}</span>
-        <span style="font-size:.74rem;font-weight:700;color:var(--dim)">${pct}%</span>
-      </div>
-      <div style="height:8px;border-radius:999px;background:rgba(255,255,255,0.06);overflow:hidden">
-        <div style="height:100%;width:${pct}%;border-radius:999px;background:linear-gradient(90deg,${info.grad[0]},${info.grad[1]})"></div>
-      </div></div>`);
+function renderSampleHome(){
+  if(!sampleData) return;
+  const sd = sampleData;
+
+  // KPI chips
+  const totalOpts = sd.grand?.options || 0;
+  const totalStyles = sd.grand?.styles || 0;
+  document.getElementById('hChipOptions').textContent = totalOpts + '건';
+  document.getElementById('hChipStyles').textContent = totalStyles + '건';
+
+  // 파이프라인
+  const ip = sd.grand?.진행중 || {styles:0};
+  const comp = sd.grand?.완료중 || {styles:0};
+  const done = sd.grand?.완료완료 || {styles:0};
+  const maxS = Math.max(ip.styles, comp.styles, done.styles, 1);
+  document.getElementById('pipeIpNum').textContent = ip.styles;
+  document.getElementById('pipeCompNum').textContent = comp.styles;
+  document.getElementById('pipeDoneNum').textContent = done.styles;
+  document.getElementById('pipeIpBar').style.width = (ip.styles/maxS*100)+'%';
+  document.getElementById('pipeCompBar').style.width = (comp.styles/maxS*100)+'%';
+  document.getElementById('pipeDoneBar').style.width = (done.styles/maxS*100)+'%';
+  document.getElementById('homePipeUnit').textContent =
+    `styles 기준: 진행중 ${ip.styles} / 완료중 ${comp.styles} / 완료완료 ${done.styles} (총 ${totalStyles}건)`;
+
+  // 카테고리 카드
+  const catMap = [
+    {key:'euMarket',   totalId:'catEuTotal',     stagesId:'catEuStages',     barId:'catEuBar'},
+    {key:'seasonDvlp', totalId:'catSeasonTotal',  stagesId:'catSeasonStages', barId:'catSeasonBar'},
+    {key:'coreUpdate', totalId:'catCoreTotal',    stagesId:'catCoreStages',   barId:'catCoreBar'},
+    {key:'project',    totalId:'catProjectTotal', stagesId:'catProjectStages',barId:'catProjectBar'},
+  ];
+  catMap.forEach(({key,totalId,stagesId,barId})=>{
+    const c = sd.categories?.[key];
+    if(!c) return;
+    document.getElementById(totalId).textContent = c.options || c.total || 0;
+    const el = document.getElementById(stagesId);
+    el.innerHTML = '';
+    const ip2 = (c.진행중?.options||0), comp2 = (c.완료중?.options||0), done2 = (c.완료완료?.options||0);
+    if(ip2)   el.insertAdjacentHTML('beforeend',`<span class="cat-stage-badge stage-ip">진행중 ${ip2}</span>`);
+    if(comp2) el.insertAdjacentHTML('beforeend',`<span class="cat-stage-badge stage-comp">완료중 ${comp2}</span>`);
+    if(done2) el.insertAdjacentHTML('beforeend',`<span class="cat-stage-badge stage-done">완료 ${done2}</span>`);
+    const pct = totalOpts>0 ? Math.round((c.options||c.total||0)/totalOpts*100) : 0;
+    document.getElementById(barId).style.width = pct+'%';
   });
 
-  // donut
-  const up=tasks.filter(t=>prog(t)<=0).length;
-  if(homeDonutInst){homeDonutInst.destroy();homeDonutInst=null;}
-  const dw=document.querySelector('#screen-home .donut-wrap');
-  let oc=document.getElementById('homeDonut');
-  if(oc){const nc=document.createElement('canvas');nc.id='homeDonut';dw.replaceChild(nc,oc);oc=nc;}
-  if(oc)homeDonutInst=new Chart(oc.getContext('2d'),donutCfg([done,inp,up]));
-
-  const lg=document.getElementById('homeDonutLegend');lg.innerHTML='';
-  [{l:'완료',n:done,c:'#10b981'},{l:'진행중',n:inp,c:'#3b82f6'},{l:'예정',n:up,c:'#475569'}]
-    .forEach(d=>lg.insertAdjacentHTML('beforeend',
-      `<div style="display:flex;align-items:center;justify-content:space-between;font-size:.76rem">
-        <div style="display:flex;align-items:center;gap:8px;color:var(--dim)">
-          <div style="width:9px;height:9px;border-radius:50%;background:${d.c}"></div><span>${d.l}</span>
-        </div><span style="font-weight:700;color:var(--text)">${d.n}개</span></div>`));
+  // 마지막 업데이트
+  if(sd.uploadDate){
+    document.getElementById('syncLastDate').textContent = '최종 업데이트: '+sd.uploadDate;
+  }
 }
 function donutCfg(data){return{type:'doughnut',
   data:{labels:['완료','진행중','예정'],datasets:[{data,
@@ -1391,6 +1601,192 @@ function renderStats(){
   loadLayout();
   subscribeNavLayout();
 
+})();
+
+
+// ══ EXCEL UPLOAD & PARSE ══
+(function(){
+  // 모달 열기
+  document.getElementById('btnExcelSync').addEventListener('click',()=>{
+    document.getElementById('uploadModal').classList.add('open');
+    resetModal();
+  });
+  document.getElementById('btnUploadCancel').addEventListener('click',()=>{
+    document.getElementById('uploadModal').classList.remove('open');
+  });
+  document.getElementById('uploadModal').addEventListener('click',e=>{
+    if(e.target===document.getElementById('uploadModal'))
+      document.getElementById('uploadModal').classList.remove('open');
+  });
+
+  let fileCount=null, fileLedger=null;
+
+  function resetModal(){
+    fileCount=null; fileLedger=null;
+    document.getElementById('zone1').classList.remove('loaded');
+    document.getElementById('zone2').classList.remove('loaded');
+    document.getElementById('btnUploadOk').disabled=true;
+    document.getElementById('uploadProgress').textContent='';
+  }
+
+  function checkReady(){
+    document.getElementById('btnUploadOk').disabled=!(fileCount||fileLedger);
+  }
+
+  document.getElementById('fileCount').addEventListener('change',e=>{
+    if(e.target.files[0]){
+      fileCount=e.target.files[0];
+      document.getElementById('zone1').classList.add('loaded');
+      document.getElementById('zone1').querySelector('.upload-zone-sub').textContent='✓ '+fileCount.name;
+      checkReady();
+    }
+  });
+  document.getElementById('fileLedger').addEventListener('change',e=>{
+    if(e.target.files[0]){
+      fileLedger=e.target.files[0];
+      document.getElementById('zone2').classList.add('loaded');
+      document.getElementById('zone2').querySelector('.upload-zone-sub').textContent='✓ '+fileLedger.name;
+      checkReady();
+    }
+  });
+
+  document.getElementById('btnUploadOk').addEventListener('click', async()=>{
+    const prog=document.getElementById('uploadProgress');
+    const btn=document.getElementById('btnUploadOk');
+    btn.disabled=true;
+    prog.textContent='파싱 중...';
+    try{
+      const result={updatedAt:Date.now()};
+
+      if(fileCount){
+        prog.textContent='Sample Count 파싱 중...';
+        const buf=await fileCount.arrayBuffer();
+        const wb=XLSX.read(buf,{type:'array'});
+        Object.assign(result, parseSampleCount(wb));
+      }
+      if(fileLedger){
+        prog.textContent='샘플 관리 대장 파싱 중...';
+        const buf=await fileLedger.arrayBuffer();
+        const wb=XLSX.read(buf,{type:'array'});
+        const extra=parseSampleLedger(wb);
+        Object.assign(result, extra);
+      }
+
+      prog.textContent='Firebase에 저장 중...';
+      await setDoc(doc(db,'sampleData','summary'), result);
+      sampleData=result;
+      renderSampleHome();
+      prog.textContent='✅ 완료! 대시보드가 업데이트되었습니다.';
+      toast('📊 샘플 데이터 동기화 완료');
+      setTimeout(()=>document.getElementById('uploadModal').classList.remove('open'),1500);
+    }catch(err){
+      console.error(err);
+      prog.textContent='❌ 오류: '+err.message;
+      btn.disabled=false;
+    }
+  });
+
+  // ── Sample Count Total 파싱
+  function parseSampleCount(wb){
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+
+    // 업로드 날짜: row[1] 마지막 non-null 값
+    let uploadDate='';
+    for(const v of (rows[1]||[])){
+      if(v instanceof Date) uploadDate=v.toLocaleDateString('ko-KR');
+      else if(v && typeof v==='string' && v.includes('/')) uploadDate=v;
+    }
+
+    const catLabels={'EU MARKET':'euMarket','SEASON DVLP':'seasonDvlp',
+                     'CORE UPDATE':'coreUpdate','PROJECT':'project'};
+    const categories={};
+    let currentCat=null, grandTotal=null, styleTotals=null, optionTotals=null;
+
+    for(const row of rows){
+      if(!row) continue;
+      const col1=row[1];
+      if(catLabels[col1]) currentCat=catLabels[col1];
+
+      if(col1==='TOTAL'){
+        const parsed=parseCountRow(row);
+        if(currentCat && !categories[currentCat]){
+          categories[currentCat]=parsed;
+        } else if(!currentCat){
+          grandTotal=parsed;
+        }
+        // reset after PROJECT
+        if(currentCat==='project') currentCat=null;
+      }
+      if(col1==='STYLE TOTAL'){
+        styleTotals={진행중:row[4]||0, 완료중:row[10]||0, 완료완료:row[16]||0, total:row[22]||0};
+      }
+      if(col1==='OPTION TOTAL'){
+        optionTotals={진행중:row[4]||0, 완료중:row[10]||0, 완료완료:row[16]||0, total:row[22]||0};
+      }
+    }
+
+    // grand 집계 (STYLE TOTAL + OPTION TOTAL 우선)
+    const grand = styleTotals ? {
+      styles: styleTotals.total||0,
+      options: optionTotals?.total||0,
+      진행중:{styles:styleTotals.진행중||0, options:optionTotals?.진행중||0},
+      완료중:{styles:styleTotals.완료중||0, options:optionTotals?.완료중||0},
+      완료완료:{styles:styleTotals.완료완료||0, options:optionTotals?.완료완료||0},
+    } : grandTotal ? {
+      styles:(grandTotal.진행중.styles+grandTotal.완료중.styles+grandTotal.완료완료.styles),
+      options:grandTotal.total,
+      진행중:grandTotal.진행중,
+      완료중:grandTotal.완료중,
+      완료완료:grandTotal.완료완료,
+    } : null;
+
+    return {uploadDate, categories, grand};
+  }
+
+  function parseCountRow(row){
+    // col indices (0-based): 3=합계, 4/5=진행중GD, 6/7=진행중공장, 8/9=진행중완료
+    // 10/11=완료중GD, 12/13=완료중공장, 14/15=완료중완료
+    // 16/17=완료완료GD, 18/19=완료완료공장, 20/21=완료완료완료
+    const n=(i)=>row[i]||0;
+    return {
+      total: n(3),
+      options: n(3),
+      진행중:{styles:n(4)+n(6)+n(8), options:n(5)+n(7)+n(9)},
+      완료중:{styles:n(10)+n(12)+n(14), options:n(11)+n(13)+n(15)},
+      완료완료:{styles:n(16)+n(18)+n(20), options:n(17)+n(19)+n(21)},
+    };
+  }
+
+  // ── 샘플 관리 대장 파싱
+  function parseSampleLedger(wb){
+    const sheetName = wb.SheetNames.includes('현황') ? '현황' : wb.SheetNames[0];
+    const ws = wb.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+
+    // 헤더 행 위치 탐색 (No. 가 있는 행)
+    let headerRow=-1;
+    for(let i=0;i<Math.min(rows.length,10);i++){
+      if(rows[i] && rows[i][0]==='No.'){headerRow=i;break;}
+    }
+    if(headerRow<0) return {};
+
+    const dataStart = headerRow+2; // 헤더+서브헤더 건너뜀
+    const seasons={}, categories={}, developers={}, samples=[];
+
+    for(let i=dataStart;i<rows.length;i++){
+      const r=rows[i];
+      if(!r||r[0]==null) continue;
+      const no=r[0], season=r[1]||'', category=r[3]||'', developer=r[6]||'';
+      if(!no && !season) continue;
+      samples.push({no,season,category,developer,cons:r[10],targetWt:r[11]});
+      if(season) seasons[season]=(seasons[season]||0)+1;
+      if(category) categories[category]=(categories[category]||0)+1;
+      if(developer) developers[developer]=(developers[developer]||0)+1;
+    }
+
+    return {totalRows:samples.length, seasons, ledgerCategories:categories, developers};
+  }
 })();
 
 // ── 초기화
