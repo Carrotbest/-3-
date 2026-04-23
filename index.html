@@ -282,6 +282,49 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
   .gantt-right{overflow:visible!important}
   .gantt-timeline{width:auto!important}
 }
+
+/* ══ SIDEBAR DRAG & DROP + INLINE EDIT ══ */
+.drag-handle{
+  opacity:0;font-size:.78rem;cursor:grab;color:var(--muted);
+  flex-shrink:0;width:14px;text-align:center;
+  transition:opacity .15s;line-height:1;
+  user-select:none;
+}
+.drag-handle:active{cursor:grabbing}
+.nav-item:hover .drag-handle,
+.nav-section-item:hover .drag-handle,
+.nav-group-block:hover>.nav-item>.drag-handle,
+.nav-group-header:hover .drag-handle{opacity:0.5}
+.drag-handle:hover{opacity:1!important;color:var(--text)}
+.nav-dragging{opacity:0.3!important;background:rgba(139,92,246,0.08)!important}
+.dnd-over{
+  background:rgba(139,92,246,0.12)!important;
+  outline:1px dashed rgba(139,92,246,0.45);
+  outline-offset:-1px;
+}
+.dnd-insert-before{border-top:2px solid #8b5cf6!important}
+.dnd-insert-after {border-bottom:2px solid #8b5cf6!important}
+.nav-group-block{display:block}
+/* 인라인 편집 활성 상태 */
+.nav-label[contenteditable="true"],
+.nav-group-header .nav-label[contenteditable="true"]{
+  outline:1px solid rgba(139,92,246,0.6)!important;
+  border-radius:3px;
+  background:rgba(139,92,246,0.12)!important;
+  padding:1px 5px;
+  cursor:text!important;
+  -webkit-text-fill-color:var(--text)!important;
+  min-width:20px;
+}
+/* 편집 힌트 툴팁 */
+.nav-edit-hint{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  font-size:.58rem;color:var(--muted);opacity:0;
+  pointer-events:none;transition:opacity .2s;white-space:nowrap;
+}
+.nav-item:hover .nav-edit-hint,
+.nav-section-item:hover .nav-edit-hint,
+.nav-group-header:hover .nav-edit-hint{opacity:0.6}
 </style>
 </head>
 <body>
@@ -312,13 +355,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
       <span class="nav-icon">🌍</span><span class="nav-label">EU MARKET</span>
     </div>
     <!-- PROJECT (확장 가능) -->
-    <div class="nav-item" id="nav-project-toggle" data-nav-toggle="project-sub">
-      <span class="nav-icon">📁</span><span class="nav-label">PROJECT</span>
-      <span class="nav-arrow" id="project-arrow">›</span>
-    </div>
-    <div class="nav-sub" id="project-sub">
-      <div class="nav-item nav-sub-item" data-nav="gantt">
-        <span class="nav-icon">📊</span><span class="nav-label">GANTT CHART</span>
+    <div class="nav-group-block" data-block="project">
+      <div class="nav-item" id="nav-project-toggle" data-nav-toggle="project-sub">
+        <span class="nav-icon">📁</span><span class="nav-label">PROJECT</span>
+        <span class="nav-arrow" id="project-arrow">›</span>
+      </div>
+      <div class="nav-sub" id="project-sub">
+        <div class="nav-item nav-sub-item" data-nav="gantt">
+          <span class="nav-icon">📊</span><span class="nav-label">GANTT CHART</span>
+        </div>
       </div>
     </div>
     <div class="nav-item" data-nav="core">
@@ -1132,6 +1177,221 @@ function renderStats(){
     });
   }
 }
+
+// ══ SIDEBAR CUSTOMIZATION: Drag & Drop + Inline Edit ══
+(function(){
+  const navBody = document.querySelector('.nav-body');
+  const STORE_KEY = 'psfd_navLayout';
+
+  // ── 각 유닛에 고유 키 할당 ────────────────────────────
+  function assignKeys() {
+    let divIdx = 0;
+    Array.from(navBody.children).forEach(el => {
+      if (el.dataset.navKey) return;
+      if (el.classList.contains('nav-divider'))       el.dataset.navKey = 'div-' + (divIdx++);
+      else if (el.classList.contains('nav-group-block')) el.dataset.navKey = 'block-' + (el.dataset.block||'unknown');
+      else if (el.dataset.nav)                        el.dataset.navKey = 'nav-' + el.dataset.nav;
+      else if (el.classList.contains('nav-group-header')) el.dataset.navKey = 'hdr-' + el.textContent.trim().replace(/\s+/g,'-');
+      else                                            el.dataset.navKey = 'misc-' + Math.random().toString(36).slice(2,6);
+    });
+  }
+
+  // ── 드래그 핸들 추가 ──────────────────────────────────
+  function addHandle(el) {
+    if (el.classList.contains('nav-divider')) return;
+
+    const h = document.createElement('span');
+    h.className = 'drag-handle';
+    h.textContent = '⠿';
+    h.title = '드래그하여 이동';
+    h.addEventListener('click', e => e.stopPropagation());
+    h.addEventListener('mousedown', e => e.stopPropagation());
+
+    if (el.classList.contains('nav-group-header')) {
+      // 텍스트를 nav-label span으로 래핑
+      const txt = el.textContent.trim();
+      el.innerHTML = '';
+      el.style.cssText += ';display:flex;align-items:center;gap:6px;position:relative;';
+      const lbl = document.createElement('span');
+      lbl.className = 'nav-label';
+      lbl.textContent = txt;
+      el.appendChild(h);
+      el.appendChild(lbl);
+    } else if (el.classList.contains('nav-group-block')) {
+      // 내부 첫 번째 nav-item 앞에 핸들 삽입
+      const inner = el.querySelector('.nav-item');
+      if (inner) inner.prepend(h);
+    } else {
+      el.prepend(h);
+    }
+
+    // 편집 힌트 추가 (더블클릭 안내)
+    if (!el.classList.contains('nav-group-block')) {
+      const hint = document.createElement('span');
+      hint.className = 'nav-edit-hint';
+      hint.textContent = '더블클릭: 이름 변경';
+      el.style.position = 'relative';
+      el.appendChild(hint);
+    }
+  }
+
+  // ── 드래그 & 드롭 ────────────────────────────────────
+  let dragEl = null, insertBefore = null;
+
+  function clearDndState() {
+    navBody.querySelectorAll('.dnd-over,.dnd-insert-before,.dnd-insert-after')
+      .forEach(e => e.classList.remove('dnd-over','dnd-insert-before','dnd-insert-after'));
+  }
+
+  function initDnD() {
+    Array.from(navBody.children).forEach(el => {
+      if (el.classList.contains('nav-divider')) {
+        el.addEventListener('dragover', e => {
+          e.preventDefault(); clearDndState();
+          el.classList.add('dnd-over');
+          insertBefore = el.nextSibling;
+        });
+        el.addEventListener('drop', onDrop);
+        return;
+      }
+
+      el.setAttribute('draggable', 'true');
+
+      el.addEventListener('dragstart', e => {
+        dragEl = el;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => el.classList.add('nav-dragging'), 0);
+      });
+      el.addEventListener('dragend', () => {
+        el.classList.remove('nav-dragging');
+        clearDndState();
+        dragEl = null;
+        insertBefore = null;
+      });
+      el.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (!dragEl || dragEl === el) return;
+        clearDndState();
+        const rect = el.getBoundingClientRect();
+        if (e.clientY < rect.top + rect.height * 0.5) {
+          el.classList.add('dnd-insert-before');
+          insertBefore = el;
+        } else {
+          el.classList.add('dnd-insert-after');
+          insertBefore = el.nextSibling;
+        }
+      });
+      el.addEventListener('drop', onDrop);
+    });
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    clearDndState();
+    if (!dragEl) return;
+    if (insertBefore === dragEl || insertBefore === dragEl.nextSibling) return;
+    navBody.insertBefore(dragEl, insertBefore || null);
+    saveLayout();
+    toast('📌 메뉴 순서 저장됨');
+  }
+
+  // ── 인라인 편집 ────────────────────────────────────────
+  function initInlineEdit() {
+    navBody.addEventListener('dblclick', e => {
+      if (e.target.classList.contains('drag-handle')) return;
+      const label = e.target.closest('.nav-label');
+      if (!label) return;
+      // nav-sub-item 내부 라벨은 편집 제외
+      if (e.target.closest('.nav-sub-item')) return;
+
+      e.stopPropagation();
+      const orig = label.textContent;
+      label.contentEditable = 'true';
+      label.focus();
+
+      // 전체 선택
+      const range = document.createRange();
+      range.selectNodeContents(label);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      function commit() {
+        label.contentEditable = 'false';
+        const newTxt = label.textContent.trim() || orig;
+        label.textContent = newTxt;
+        saveLayout();
+        toast('✏️ "' + newTxt + '" 으로 변경됨');
+      }
+      label.addEventListener('blur',  commit, {once:true});
+      label.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter')  { ev.preventDefault(); commit(); }
+        if (ev.key === 'Escape') { label.textContent = orig; label.contentEditable = 'false'; }
+      }, {once:true});
+    });
+  }
+
+  // ── 저장 / 복원 ────────────────────────────────────────
+  function getLayoutSnapshot() {
+    return Array.from(navBody.children).map(el => ({
+      key: el.dataset.navKey,
+      label: el.querySelector('.nav-label')?.textContent.trim() || ''
+    }));
+  }
+
+  function saveLayout() {
+    const layout = getLayoutSnapshot();
+    localStorage.setItem(STORE_KEY, JSON.stringify(layout));
+    // Firestore 동기화
+    setDoc(doc(db,'config','navLayout'), {layout, updatedAt: Date.now()})
+      .catch(() => {});
+  }
+
+  function applyLayout(layout) {
+    if (!layout || !layout.length) return;
+    const keyMap = {};
+    Array.from(navBody.children).forEach(el => { keyMap[el.dataset.navKey] = el; });
+
+    layout.forEach(item => {
+      const el = keyMap[item.key];
+      if (!el) return;
+      // 순서 적용 (appendChild = 맨 뒤로 이동 → 순서대로 호출)
+      navBody.appendChild(el);
+      // 라벨 복원
+      if (item.label) {
+        const lbl = el.querySelector('.nav-label');
+        if (lbl) lbl.textContent = item.label;
+      }
+    });
+  }
+
+  function loadLayout() {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      try { applyLayout(JSON.parse(raw)); } catch(e) {}
+    }
+  }
+
+  // ── Firestore 실시간 동기화 ────────────────────────────
+  function subscribeNavLayout() {
+    onSnapshot(doc(db,'config','navLayout'), snap => {
+      if (!snap.exists()) return;
+      const {layout} = snap.data();
+      // localStorage보다 Firestore를 우선 (다른 기기 편집 반영)
+      localStorage.setItem(STORE_KEY, JSON.stringify(layout));
+      applyLayout(layout);
+    });
+  }
+
+  // ── 초기 실행 ─────────────────────────────────────────
+  assignKeys();
+  Array.from(navBody.children).forEach(el => addHandle(el));
+  initDnD();
+  initInlineEdit();
+  loadLayout();
+  subscribeNavLayout();
+
+})();
 
 // ── 초기화
 initFirebase();
