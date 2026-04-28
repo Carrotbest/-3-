@@ -720,29 +720,21 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         </div>
         <div class="sct-card">
           <table class="sct-table">
-            <thead>
+            <thead id="sctHead">
               <tr>
                 <th rowspan="2" style="text-align:left;width:160px">CATEGORY</th>
                 <th rowspan="2" class="col-total">합계<br><small style="font-weight:400;opacity:.7">OPTION</small></th>
-                <th colspan="2" class="stage-ip">진행중</th>
-                <th colspan="2" class="stage-comp">완료중</th>
-                <th colspan="2" class="stage-done">완료완료</th>
+                <th colspan="2" style="color:#94a3b8;background:rgba(255,255,255,.04)">담당자</th>
               </tr>
-              <tr>
-                <th class="stage-ip">STYLE</th><th class="stage-ip">OPTION</th>
-                <th class="stage-comp">STYLE</th><th class="stage-comp">OPTION</th>
-                <th class="stage-done">STYLE</th><th class="stage-done">OPTION</th>
+              <tr id="sctHeadRow2">
+                <th style="color:#94a3b8">STYLE</th><th style="color:#94a3b8">OPTION</th>
               </tr>
             </thead>
             <tbody id="sctBody">
-              <tr><td colspan="8" class="sct-no-data">엑셀 업로드 후 데이터가 표시됩니다</td></tr>
+              <tr><td colspan="4" class="sct-no-data">엑셀 업로드 후 데이터가 표시됩니다</td></tr>
             </tbody>
           </table>
-          <div class="sct-legend">
-            <div class="sct-leg-item"><span class="sct-leg-dot" style="background:#f59e0b"></span>진행중 — 원사 발주 완료</div>
-            <div class="sct-leg-item"><span class="sct-leg-dot" style="background:#06b6d4"></span>완료중 — 편직/염색 진행</div>
-            <div class="sct-leg-item"><span class="sct-leg-dot" style="background:#10b981"></span>완료완료 — 마무리 완료</div>
-          </div>
+          <div class="sct-legend" id="sctLegend"></div>
         </div>
       </div>
 
@@ -1197,22 +1189,56 @@ function renderSampleHome(){
   document.getElementById('hChipOptions').textContent = totalOpts+'건';
   document.getElementById('hChipStyles').textContent = totalStyles+'건';
 
-  // ── Sample Count Total 표
+  // ── Sample Count Total 표 (담당자별 STYLE/OPTION 구조)
   const catDefs = [
-    {key:'euMarket',   label:'🌍 EU MARKET',    color:'#06b6d4'},
-    {key:'seasonDvlp', label:'🌿 SEASON DVLP',  color:'#8b5cf6'},
-    {key:'coreUpdate', label:'🔄 CORE UPDATE',  color:'#10b981'},
+    {key:'euMarket',   label:'🌐 EU MARKET',    color:'#06b6d4'},
+    {key:'seasonDvlp', label:'🎨 SEASON DVLP',  color:'#8b5cf6'},
+    {key:'coreUpdate', label:'🔁 CORE UPDATE',  color:'#10b981'},
     {key:'project',    label:'⚡ PROJECT',       color:'#f59e0b'},
   ];
+  const sctDevs = sd.sctDevs || [];
+  const devColors = ['#06b6d4','#8b5cf6','#10b981'];
+
+  // 테이블 헤더 동적 생성
+  const sctHead = document.getElementById('sctHead');
+  const sctHeadRow2 = document.getElementById('sctHeadRow2');
+  if(sctHead && sctDevs.length){
+    const r1 = sctHead.querySelector('tr');
+    // 기존 담당자 헤더 컬럼 제거하고 다시 생성
+    while(r1.children.length > 2) r1.removeChild(r1.lastChild);
+    sctDevs.forEach((name,i)=>{
+      const th=document.createElement('th');
+      th.colSpan=2;
+      th.style.cssText=`color:${devColors[i]||'#94a3b8'};background:${devColors[i]||'#94a3b8'}1a`;
+      th.textContent=name;
+      r1.appendChild(th);
+    });
+    // 서브헤더 (STYLE/OPTION)
+    if(sctHeadRow2){
+      sctHeadRow2.innerHTML='';
+      sctDevs.forEach((name,i)=>{
+        ['STYLE','OPTION'].forEach(lbl=>{
+          const th=document.createElement('th');
+          th.style.color=devColors[i]||'#94a3b8';
+          th.textContent=lbl;
+          sctHeadRow2.appendChild(th);
+        });
+      });
+    }
+  }
+
   const body = document.getElementById('sctBody');
   if(body){
     body.innerHTML='';
     catDefs.forEach(({key,label,color})=>{
       const c = sd.categories?.[key];
       if(!c) return;
-      const ip=c.진행중||{}, comp=c.완료중||{}, done=c.완료완료||{};
       const total = c.options||c.total||0;
       const pct = totalOpts>0 ? Math.round(total/totalOpts*100) : 0;
+      const devCells = sctDevs.map(name=>{
+        const d=c.devs?.[name]||{};
+        return `<td style="text-align:center">${d.styles||0}</td><td style="text-align:center;color:var(--dim)">${d.options||0}</td>`;
+      }).join('');
       body.insertAdjacentHTML('beforeend',`<tr>
         <td class="cat-cell">
           <div class="cat-cell-inner">
@@ -1221,26 +1247,27 @@ function renderSampleHome(){
           </div>
         </td>
         <td class="col-total">${total}</td>
-        <td class="stage-ip">${ip.styles||0}</td>
-        <td class="stage-ip">${ip.options||0}</td>
-        <td class="stage-comp">${comp.styles||0}</td>
-        <td class="stage-comp">${comp.options||0}</td>
-        <td class="stage-done">${done.styles||0}</td>
-        <td class="stage-done">${done.options||0}</td>
+        ${devCells}
       </tr>`);
     });
     if(sd.grand){
       const g=sd.grand;
+      const grandCells = sctDevs.map(name=>{
+        const d=g.devs?.[name]||{};
+        return `<td style="text-align:center;font-weight:700">${d.styles||0}</td><td style="text-align:center;font-weight:700;color:var(--dim)">${d.options||0}</td>`;
+      }).join('');
       body.insertAdjacentHTML('beforeend',`<tr class="sct-grand-row">
         <td class="cat-cell" style="font-size:.82rem">GRAND TOTAL</td>
         <td class="col-total">${g.options||0}</td>
-        <td class="stage-ip">${g.진행중?.styles||0}</td>
-        <td class="stage-ip">${g.진행중?.options||0}</td>
-        <td class="stage-comp">${g.완료중?.styles||0}</td>
-        <td class="stage-comp">${g.완료중?.options||0}</td>
-        <td class="stage-done">${g.완료완료?.styles||0}</td>
-        <td class="stage-done">${g.완료완료?.options||0}</td>
+        ${grandCells}
       </tr>`);
+    }
+    // 범례: 담당자별 색상
+    const legend=document.getElementById('sctLegend');
+    if(legend && sctDevs.length){
+      legend.innerHTML=sctDevs.map((name,i)=>
+        `<div class="sct-leg-item"><span class="sct-leg-dot" style="background:${devColors[i]}"></span>${name}</div>`
+      ).join('');
     }
   }
   if(sd.uploadDate){
@@ -1978,64 +2005,64 @@ function renderStats(){
       else if(v && typeof v==='string' && v.includes('/')) uploadDate=v;
     }
 
+    // 실제 파일 구조: 담당자별(박향근/진영은/변재휘) STYLE+OPTION
+    // Row 5(idx4): col4=담당자1, col10=담당자2, col16=담당자3
+    // Row 6(idx5): GD/자체/사입 구분
+    // Row 7(idx6): STYLE/OPTION 반복
+    // 각 카테고리 TOTAL 행: col3=합계option, 담당자별 col4~9, col10~15, col16~21
+    // STYLE TOTAL 행: col4/10/16=담당자 style합계, col22=전체
+    // OPTION TOTAL 행: col4/10/16=담당자 option합계, col22=전체
+
+    // 담당자 이름 추출 (Row5, idx4)
+    const devRow = rows[4] || [];
+    const devSlots = [
+      {col: 4,  name: String(devRow[4] ||'박향근').trim()},
+      {col: 10, name: String(devRow[10]||'진영은').trim()},
+      {col: 16, name: String(devRow[16]||'변재휘').trim()},
+    ].filter(d=>d.name);
+
     const catLabels={'EU MARKET':'euMarket','SEASON DVLP':'seasonDvlp',
                      'CORE UPDATE':'coreUpdate','PROJECT':'project'};
     const categories={};
-    let currentCat=null, grandTotal=null, styleTotals=null, optionTotals=null;
+    let currentCat=null, styleTotals=null, optionTotals=null;
+    const n=(row,i)=>Number(row[i])||0;
 
     for(const row of rows){
       if(!row) continue;
-      const col1=row[1];
+      const col1 = String(row[1]||'').trim();
       if(catLabels[col1]) currentCat=catLabels[col1];
 
-      if(col1==='TOTAL'){
-        const parsed=parseCountRow(row);
-        if(currentCat && !categories[currentCat]){
-          categories[currentCat]=parsed;
-        } else if(!currentCat){
-          grandTotal=parsed;
-        }
-        // reset after PROJECT
+      if(col1==='TOTAL' && currentCat && !categories[currentCat]){
+        const devData={};
+        devSlots.forEach(({col,name})=>{
+          devData[name]={
+            styles:  n(row,col)+n(row,col+2)+n(row,col+4),
+            options: n(row,col+1)+n(row,col+3)+n(row,col+5)
+          };
+        });
+        categories[currentCat]={total:n(row,3), options:n(row,3), devs:devData};
         if(currentCat==='project') currentCat=null;
       }
       if(col1==='STYLE TOTAL'){
-        styleTotals={진행중:row[4]||0, 완료중:row[10]||0, 완료완료:row[16]||0, total:row[22]||0};
+        styleTotals={grand:n(row,22)};
+        devSlots.forEach(({col,name})=>{ styleTotals[name]=n(row,col); });
       }
       if(col1==='OPTION TOTAL'){
-        optionTotals={진행중:row[4]||0, 완료중:row[10]||0, 완료완료:row[16]||0, total:row[22]||0};
+        optionTotals={grand:n(row,22)};
+        devSlots.forEach(({col,name})=>{ optionTotals[name]=n(row,col); });
       }
     }
 
-    // grand 집계 (STYLE TOTAL + OPTION TOTAL 우선)
-    const grand = styleTotals ? {
-      styles: styleTotals.total||0,
-      options: optionTotals?.total||0,
-      진행중:{styles:styleTotals.진행중||0, options:optionTotals?.진행중||0},
-      완료중:{styles:styleTotals.완료중||0, options:optionTotals?.완료중||0},
-      완료완료:{styles:styleTotals.완료완료||0, options:optionTotals?.완료완료||0},
-    } : grandTotal ? {
-      styles:(grandTotal.진행중.styles+grandTotal.완료중.styles+grandTotal.완료완료.styles),
-      options:grandTotal.total,
-      진행중:grandTotal.진행중,
-      완료중:grandTotal.완료중,
-      완료완료:grandTotal.완료완료,
+    const grand = (styleTotals||optionTotals) ? {
+      styles: styleTotals?.grand||0,
+      options: optionTotals?.grand||0,
+      devs: devSlots.reduce((acc,{name})=>{
+        acc[name]={styles:styleTotals?.[name]||0, options:optionTotals?.[name]||0};
+        return acc;
+      },{})
     } : null;
 
-    return {uploadDate, categories, grand};
-  }
-
-  function parseCountRow(row){
-    // col indices (0-based): 3=합계, 4/5=진행중GD, 6/7=진행중공장, 8/9=진행중완료
-    // 10/11=완료중GD, 12/13=완료중공장, 14/15=완료중완료
-    // 16/17=완료완료GD, 18/19=완료완료공장, 20/21=완료완료완료
-    const n=(i)=>row[i]||0;
-    return {
-      total: n(3),
-      options: n(3),
-      진행중:{styles:n(4)+n(6)+n(8), options:n(5)+n(7)+n(9)},
-      완료중:{styles:n(10)+n(12)+n(14), options:n(11)+n(13)+n(15)},
-      완료완료:{styles:n(16)+n(18)+n(20), options:n(17)+n(19)+n(21)},
-    };
+    return {uploadDate, categories, grand, sctDevs: devSlots.map(d=>d.name)};
   }
 
   // ── 샘플 관리 대장 파싱
