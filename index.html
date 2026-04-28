@@ -503,7 +503,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .dev-total-lbl{font-size:.72rem;color:var(--muted);margin-top:2px}
 .dev-total-lbl b{color:var(--text);font-weight:700}
 .dev-donut-area{flex-shrink:0}
-.dev-cat-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.dev-cat-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;min-height:58px;align-content:flex-start}
 .dev-cat-tag{font-size:.66rem;font-weight:600;padding:2px 8px;border-radius:12px;border:1px solid;background:rgba(0,0,0,0.2);white-space:nowrap}
 .dev-stages{display:flex;flex-direction:column;gap:7px}
 .dev-stage-item{}
@@ -1114,6 +1114,7 @@ const PO=['PL','DS','DV','TS','DP','CL'];
 
 let sampleData=null;
 let devCharts={};
+let sctDonutChart=null;
 let cfg={projTitle:'Performance & Sustainability Fabric Development',projStart:'2026-04-01',projEnd:'2026-07-31',todayOverride:null};
 let tasks=[], events=[], editingFid=null, editingEvFid=null;
 let homeDonutInst=null, statsDonutInst=null, statsBarInst=null;
@@ -1301,6 +1302,52 @@ function renderSampleHome(){
     if(el) el.textContent='기준: '+sd.uploadDate;
     const el2=document.getElementById('syncLastDate');
     if(el2) el2.textContent='최종 업데이트: '+sd.uploadDate;
+  }
+
+  // ── SCT 도넛 차트 (카테고리별 비율)
+  const donutEl = document.getElementById('devCatDonut');
+  if(donutEl){
+    const hasCatData = catDefs.some(({key})=>(sd.categories?.[key]?.options||0)>0);
+    if(hasCatData){
+      donutEl.innerHTML='<div style="padding:12px 8px 4px;font-size:.7rem;font-weight:700;color:var(--muted)">카테고리별 OPTION 비율</div><canvas id="sctDonutCanvas" style="max-height:260px"></canvas>';
+      if(sctDonutChart){try{sctDonutChart.destroy();}catch(e){}}
+      const ctx=document.getElementById('sctDonutCanvas').getContext('2d');
+      const catLbls=catDefs.map(c=>c.label);
+      const catVals=catDefs.map(({key})=>sd.categories?.[key]?.options||0);
+      const catClrs=catDefs.map(c=>c.color);
+      sctDonutChart=new Chart(ctx,{
+        type:'doughnut',
+        data:{
+          labels:catLbls,
+          datasets:[{
+            data:catVals,
+            backgroundColor:catClrs.map(c=>c+'99'),
+            borderColor:catClrs,
+            borderWidth:2,
+            hoverOffset:6
+          }]
+        },
+        options:{
+          cutout:'65%',
+          responsive:true,
+          maintainAspectRatio:true,
+          plugins:{
+            legend:{
+              display:true,position:'bottom',
+              labels:{color:'#94a3b8',font:{size:10},padding:10,boxWidth:10,boxHeight:10}
+            },
+            tooltip:{
+              callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}건 (${totalOpts>0?Math.round(ctx.parsed/totalOpts*100):0}%)`},
+              backgroundColor:'rgba(15,20,30,.95)',borderColor:'rgba(255,255,255,.12)',borderWidth:1,
+              titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:9,cornerRadius:8
+            }
+          },
+          animation:{animateRotate:true,duration:800}
+        }
+      });
+    } else {
+      donutEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:200px;text-align:center;color:var(--muted);font-size:.78rem">SCT 업로드 시<br>차트 표시</div>';
+    }
   }
 
   // ── KPI 카드 렌더링 (작지 현황)
