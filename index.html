@@ -637,6 +637,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
   <div class="screen active visible" id="screen-home">
     <div class="screen-pad">
 
+      <!-- ─ 오늘 날짜 배지 ─ -->
+      <div class="today-badge-home" style="margin-bottom:14px"><div class="pulse-dot"></div><span id="homeTodayText"></span></div>
+
       <!-- ─ KPI Row : 작지 현황 ─ -->
       <div class="home-kpi" id="homeKpiRow">
         <div class="kpi-card">
@@ -713,9 +716,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         </div>
         <div class="work-pipe-note" id="workPipeNote"></div>
       </div>
-
-      <!-- ─ 오늘 날짜 배지 ─ -->
-      <div class="today-badge-home" style="margin-bottom:14px"><div class="pulse-dot"></div><span id="homeTodayText"></span></div>
 
       <!-- ─ 샘플 관리 대장 섹션 ─ -->
       <div class="dash-section">
@@ -1218,7 +1218,7 @@ function renderSampleHome(){
   // ── Sample Count Total 표 (담당자별 STYLE/OPTION 구조)
   const catDefs = [
     {key:'euMarket',   label:'🌐 EU MARKET',    color:'#06b6d4'},
-    {key:'seasonDvlp', label:'🎨 SEASON DVLP',  color:'#8b5cf6'},
+    {key:'seasonDvlp', label:'🎨 SEASON DEV',   color:'#8b5cf6'},
     {key:'coreUpdate', label:'🔁 CORE UPDATE',  color:'#10b981'},
     {key:'project',    label:'⚡ PROJECT',       color:'#f59e0b'},
   ];
@@ -2027,18 +2027,25 @@ function renderStats(){
     prog.textContent='파싱 중...';
     try{
       // 기존 데이터를 베이스로 시작 → 한 파일만 올려도 나머지 데이터 유지
-      const result = Object.assign({}, sampleData||{}, {updatedAt:Date.now()});
+      // 기존 데이터 보존 (단, 구조가 다른 구버전 키는 제거)
+      const oldData = sampleData||{};
+      const base = Object.assign({}, oldData, {updatedAt:Date.now()});
+      const result = base;
 
       if(fileCount){
         prog.textContent='Sample Count 파싱 중...';
         const buf=await fileCount.arrayBuffer();
         const wb=XLSX.read(buf,{type:'array'});
+        // SCT 관련 키 덮어쓰기 (구버전 데이터 제거)
+        delete result.categories; delete result.grand; delete result.sctDevs; delete result.uploadDate;
         Object.assign(result, parseSampleCount(wb));
       }
       if(fileLedger){
         prog.textContent='샘플 관리 대장 파싱 중...';
         const buf=await fileLedger.arrayBuffer();
         const wb=XLSX.read(buf,{type:'array'});
+        // 대장 관련 키 덮어쓰기
+        delete result.devs; delete result.saTotal; delete result.procTotal; delete result.ledgerDate;
         Object.assign(result, parseSampleLedger(wb));
       }
 
@@ -2084,18 +2091,29 @@ function renderStats(){
       {col: 16, name: String(devRow[16]||'변재휘').trim()},
     ].filter(d=>d.name);
 
-    const catLabels={'EU MARKET':'euMarket','SEASON DVLP':'seasonDvlp',
-                     'CORE UPDATE':'coreUpdate','PROJECT':'project'};
+    const catLabels={
+      'EU MARKET':'euMarket',
+      'SEASON DVLP':'seasonDvlp','SEASON DEV':'seasonDvlp','SEASON':'seasonDvlp',
+      'CORE UPDATE':'coreUpdate','CORE':'coreUpdate',
+      'PROJECT':'project'
+    };
     const categories={};
     let currentCat=null, styleTotals=null, optionTotals=null;
     const n=(row,i)=>Number(row[i])||0;
 
     for(const row of rows){
       if(!row) continue;
-      const col1 = String(row[1]||'').trim();
-      if(catLabels[col1]) currentCat=catLabels[col1];
+      // 카테고리 라벨: col0 또는 col1 에서 탐색
+      const col0 = String(row[0]||'').trim().toUpperCase();
+      const col1 = String(row[1]||'').trim().toUpperCase();
+      const labelCell = catLabels[col1] ? col1 : catLabels[col0] ? col0 : null;
+      if(labelCell) currentCat=catLabels[labelCell];
 
-      if(col1==='TOTAL' && currentCat && !categories[currentCat]){
+      const isTotal      = col1==='TOTAL'        || col0==='TOTAL';
+      const isStyleTotal = col1==='STYLE TOTAL'  || col0==='STYLE TOTAL';
+      const isOptTotal   = col1==='OPTION TOTAL' || col0==='OPTION TOTAL';
+
+      if(isTotal && currentCat && !categories[currentCat]){
         const devData={};
         devSlots.forEach(({col,name})=>{
           devData[name]={
@@ -2103,15 +2121,20 @@ function renderStats(){
             options: n(row,col+1)+n(row,col+3)+n(row,col+5)
           };
         });
-        categories[currentCat]={total:n(row,3), options:n(row,3), devs:devData};
+        // col3 합계 없으면 담당자 합산으로 보완
+        const totalVal = n(row,3) || devSlots.reduce((s,{name})=>s+(devData[name].options||0),0);
+        categories[currentCat]={total:totalVal, options:totalVal, devs:devData};
         if(currentCat==='project') currentCat=null;
       }
-      if(col1==='STYLE TOTAL'){
-        styleTotals={grand:n(row,22)};
+      if(isStyleTotal){
+        // grand: col22 또는 모든 담당자 합산
+        const grandS = n(row,22) || devSlots.reduce((s,{col})=>s+n(row,col),0);
+        styleTotals={grand:grandS};
         devSlots.forEach(({col,name})=>{ styleTotals[name]=n(row,col); });
       }
-      if(col1==='OPTION TOTAL'){
-        optionTotals={grand:n(row,22)};
+      if(isOptTotal){
+        const grandO = n(row,22) || devSlots.reduce((s,{col})=>s+n(row,col),0);
+        optionTotals={grand:grandO};
         devSlots.forEach(({col,name})=>{ optionTotals[name]=n(row,col); });
       }
     }
