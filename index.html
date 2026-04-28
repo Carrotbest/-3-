@@ -515,6 +515,31 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .dev-no-data{text-align:center;color:var(--muted);font-size:.8rem;padding:24px;grid-column:1/-1}
 
 /* ════ SYNC BAR ════ */
+/* ── DASH SECTION ── */
+.dash-section{margin-bottom:20px}
+.dash-sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:12px}
+.dash-sec-title{display:flex;flex-direction:column;gap:2px}
+.dash-sec-name{font-size:.82rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+.dash-sec-source{font-size:.64rem;color:var(--muted)}
+.dash-upload-btn{padding:6px 14px;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;border:1px solid;transition:.15s;white-space:nowrap;background:transparent}
+.dash-upload-btn.ldg{background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.35);color:#c4b5fd}
+.dash-upload-btn.ldg:hover{background:rgba(139,92,246,.22)}
+.dash-upload-btn.sct{background:rgba(6,182,212,.12);border-color:rgba(6,182,212,.35);color:#22d3ee}
+.dash-upload-btn.sct:hover{background:rgba(6,182,212,.22)}
+/* ── 담당자별 카테고리 BAR ── */
+.dev-cat-bar-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:14px}
+.dev-cat-bar-title{font-size:.76rem;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.dev-cat-bar-grid{display:grid;grid-template-columns:90px 1fr 50px;gap:6px;align-items:center;row-gap:10px}
+.dev-cat-bar-name{font-size:.74rem;font-weight:600;color:var(--dim)}
+.dev-cat-stacked{height:20px;border-radius:5px;overflow:hidden;display:flex;background:rgba(255,255,255,.05)}
+.dev-cat-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:rgba(255,255,255,.85)}
+.dev-cat-total{font-size:.74rem;font-weight:700;color:var(--text);text-align:right}
+.dev-cat-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.dev-cat-leg-item{display:flex;align-items:center;gap:4px;font-size:.66rem;color:var(--dim)}
+.dev-cat-leg-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+/* ── SCT 2-col ── */
+.sct-two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:14px}
+@media(max-width:1100px){.sct-two-col{grid-template-columns:1fr}}
 .home-sync-bar{display:flex;align-items:center;gap:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:14px 20px;margin-bottom:8px}
 .sync-btn{background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(6,182,212,0.15));border:1px solid rgba(139,92,246,0.4);color:#c4b5fd;padding:8px 20px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:background .2s}
 .sync-btn:hover{background:linear-gradient(135deg,rgba(139,92,246,0.4),rgba(6,182,212,0.25))}
@@ -689,67 +714,71 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         <div class="work-pipe-note" id="workPipeNote"></div>
       </div>
 
-      <!-- ─ Hero Banner ─ -->
-      <div class="b-hero">
-        <div class="b-team-lbl">통합원단부 3팀 · Performance &amp; Sustainability</div>
-        <div class="b-title">Fabric Development<br>Team Dashboard</div>
-        <div class="b-sub">R&amp;D Fabric Innovation for Global Buyers — Walmart · ANF · Duluth · EU Market</div>
-        <div class="b-hero-bottom">
-          <div class="season-track">
-            <span class="s-dot s-done"></span><span class="s-txt">FW'26 완료</span>
-            <span class="s-line"></span>
-            <span class="s-dot s-now"></span><span class="s-txt cur">SS'27 진행중</span>
-            <span class="s-line"></span>
-            <span class="s-dot s-next"></span><span class="s-txt">FW'27 예정</span>
+      <!-- ─ 오늘 날짜 배지 ─ -->
+      <div class="today-badge-home" style="margin-bottom:14px"><div class="pulse-dot"></div><span id="homeTodayText"></span></div>
+
+      <!-- ─ 샘플 관리 대장 섹션 ─ -->
+      <div class="dash-section">
+        <div class="dash-sec-hdr">
+          <div class="dash-sec-title">
+            <div class="dash-sec-name">📋 샘플 관리 대장</div>
+            <div class="dash-sec-source" id="ldgUploadDate">업로드 날짜 미확인</div>
           </div>
-          <div class="b-kpi-chips">
-            <div class="b-chip"><div class="b-chip-lbl">매출기여 목표</div><div class="b-chip-val">$13.2M</div></div>
-            <div class="b-chip"><div class="b-chip-lbl">샘플 총계</div><div class="b-chip-val" id="hChipOptions">—</div></div>
-            <div class="b-chip"><div class="b-chip-lbl">스타일 수</div><div class="b-chip-val" id="hChipStyles">—</div></div>
-            <div class="b-chip"><div class="b-chip-lbl">PI 목표</div><div class="b-chip-val">200건</div></div>
-            <div class="today-badge-home" style="margin-left:4px"><div class="pulse-dot"></div><span id="homeTodayText"></span></div>
+          <button class="dash-upload-btn ldg" id="btnLdgUpload">↑ 업로드</button>
+        </div>
+
+        <!-- 담당자별 카테고리 stacked bar -->
+        <div class="dev-cat-bar-card" id="devCatBarCard">
+          <div class="dev-cat-bar-title">📊 담당자별 작지 현황</div>
+          <div class="dev-cat-bar-grid" id="devCatBarGrid">
+            <div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.8rem;padding:12px">샘플 관리 대장을 업로드하면 현황이 표시됩니다.</div>
+          </div>
+          <div class="dev-cat-legend" id="devCatLegend"></div>
+        </div>
+
+        <!-- 담당자별 카드 -->
+        <div class="dev-grid" id="devGrid">
+          <div class="dev-no-data">샘플 관리 대장을 업로드하면 담당자별 현황이 표시됩니다.</div>
+        </div>
+      </div>
+
+      <!-- ─ Sample Count Total 섹션 ─ -->
+      <div class="dash-section">
+        <div class="dash-sec-hdr">
+          <div class="dash-sec-title">
+            <div class="dash-sec-name">📊 Sample Count Total</div>
+            <div class="dash-sec-source" id="sctUploadDate"></div>
+          </div>
+          <button class="dash-upload-btn sct" id="btnSctUpload">↑ 업로드</button>
+        </div>
+
+        <div class="sct-two-col">
+          <div class="sct-card">
+            <table class="sct-table">
+              <thead id="sctHead">
+                <tr>
+                  <th rowspan="2" style="text-align:left;width:160px">CATEGORY</th>
+                  <th rowspan="2" class="col-total">합계<br><small style="font-weight:400;opacity:.7">OPTION</small></th>
+                  <th colspan="2" style="color:#94a3b8;background:rgba(255,255,255,.04)">담당자</th>
+                </tr>
+                <tr id="sctHeadRow2">
+                  <th style="color:#94a3b8">STYLE</th><th style="color:#94a3b8">OPTION</th>
+                </tr>
+              </thead>
+              <tbody id="sctBody">
+                <tr><td colspan="4" class="sct-no-data">엑셀 업로드 후 데이터가 표시됩니다</td></tr>
+              </tbody>
+            </table>
+            <div class="sct-legend" id="sctLegend"></div>
+          </div>
+          <div id="devCatDonut" style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:center;min-height:200px">
+            <div style="text-align:center;color:var(--muted);font-size:.78rem">SCT 업로드 시<br>차트 표시</div>
           </div>
         </div>
       </div>
 
-      <!-- ─ Sample Count Total 표 ─ -->
-      <div class="sct-wrap">
-        <div class="sct-hdr-row">
-          <div class="sct-ttl">📊 Sample Count Total</div>
-          <div class="sct-date" id="sctUploadDate"></div>
-        </div>
-        <div class="sct-card">
-          <table class="sct-table">
-            <thead id="sctHead">
-              <tr>
-                <th rowspan="2" style="text-align:left;width:160px">CATEGORY</th>
-                <th rowspan="2" class="col-total">합계<br><small style="font-weight:400;opacity:.7">OPTION</small></th>
-                <th colspan="2" style="color:#94a3b8;background:rgba(255,255,255,.04)">담당자</th>
-              </tr>
-              <tr id="sctHeadRow2">
-                <th style="color:#94a3b8">STYLE</th><th style="color:#94a3b8">OPTION</th>
-              </tr>
-            </thead>
-            <tbody id="sctBody">
-              <tr><td colspan="4" class="sct-no-data">엑셀 업로드 후 데이터가 표시됩니다</td></tr>
-            </tbody>
-          </table>
-          <div class="sct-legend" id="sctLegend"></div>
-        </div>
-      </div>
-
-      <!-- ─ 담당자별 현황 ─ -->
-      <div class="dev-section-hdr">담당자별 현황</div>
-      <div class="dev-grid" id="devGrid">
-        <div class="dev-no-data">샘플 관리 대장을 업로드하면 담당자별 현황이 표시됩니다.</div>
-      </div>
-
-      <!-- ─ 동기화 ─ -->
-      <div class="home-sync-bar">
-        <button class="sync-btn" id="btnExcelSync">📊 엑셀 업로드</button>
-        <div class="sync-info">샘플 관리 대장 + Sample Count Total 업로드 시 대시보드 자동 업데이트</div>
-        <div class="sync-date" id="syncLastDate"></div>
-      </div>
+      <!-- ─ 최종 업데이트 ─ -->
+      <div style="text-align:right;font-size:.66rem;color:var(--muted);margin-top:4px" id="syncLastDate"></div>
     </div>
   </div>
 
@@ -1183,11 +1212,8 @@ function renderSampleHome(){
   if(!sampleData) return;
   const sd = sampleData;
 
-  // KPI chips
   const totalOpts = sd.grand?.options || 0;
   const totalStyles = sd.grand?.styles || 0;
-  document.getElementById('hChipOptions').textContent = totalOpts+'건';
-  document.getElementById('hChipStyles').textContent = totalStyles+'건';
 
   // ── Sample Count Total 표 (담당자별 STYLE/OPTION 구조)
   const catDefs = [
@@ -1309,6 +1335,42 @@ function renderSampleHome(){
     });
     const noteEl=document.getElementById('workPipeNote');
     if(noteEl) noteEl.textContent=`※ 완료 기준: 해당 공정 날짜가 오늘(${fdF(today())}) 이하 / 빈칸·TBD·TBA는 미완료 처리`;
+  }
+
+  // ── 담당자별 작지 현황 Stacked Bar
+  const catBarGrid = document.getElementById('devCatBarGrid');
+  const devs_for_bar = sd.devs || {};
+  const devNames_bar = Object.keys(devs_for_bar);
+  if(catBarGrid && devNames_bar.length){
+    const SA_SEGS=[
+      {key:'GD접수완료',color:'#06b6d4'},
+      {key:'GD접수대기',color:'#ef4444'},
+      {key:'국내작업',  color:'#3b82f6'},
+      {key:'기타',      color:'#475569'},
+    ];
+    catBarGrid.innerHTML='';
+    devNames_bar.forEach(name=>{
+      const sa=(devs_for_bar[name].sa)||{};
+      const tot=(sa.GD접수완료||0)+(sa.GD접수대기||0)+(sa.국내작업||0)+(sa.기타||0);
+      if(!tot) return;
+      const segs=SA_SEGS.map(({key,color})=>{
+        const v=sa[key]||0; const pct=(v/tot*100).toFixed(1);
+        return parseFloat(pct)>0?`<div class="dev-cat-seg" style="width:${pct}%;background:${color}" title="${key} ${v}건 (${pct}%)"></div>`:'';
+      }).join('');
+      catBarGrid.insertAdjacentHTML('beforeend',`
+        <div class="dev-cat-bar-name">${name}</div>
+        <div class="dev-cat-stacked">${segs}</div>
+        <div class="dev-cat-total">${tot}건</div>`);
+    });
+    const lgEl=document.getElementById('devCatLegend');
+    if(lgEl) lgEl.innerHTML=SA_SEGS.map(({key,color})=>
+      `<div class="dev-cat-leg-item"><div class="dev-cat-leg-dot" style="background:${color}"></div>${key}</div>`).join('');
+  }
+
+  // ldg 업로드 날짜 표시
+  if(sd.ledgerDate){
+    const el=document.getElementById('ldgUploadDate');
+    if(el) el.textContent='기준: '+sd.ledgerDate;
   }
 
   // ── 담당자별 카드
@@ -1913,10 +1975,11 @@ function renderStats(){
 
 // ══ EXCEL UPLOAD & PARSE ══
 (function(){
-  // 모달 열기
-  document.getElementById('btnExcelSync').addEventListener('click',()=>{
-    document.getElementById('uploadModal').classList.add('open');
-    resetModal();
+  // 모달 열기 (각 섹션 업로드 버튼 + 기존 동기화 버튼)
+  function openModal(){ document.getElementById('uploadModal').classList.add('open'); resetModal(); }
+  ['btnLdgUpload','btnSctUpload'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('click', openModal);
   });
   document.getElementById('btnUploadCancel').addEventListener('click',()=>{
     document.getElementById('uploadModal').classList.remove('open');
@@ -2147,7 +2210,8 @@ function renderStats(){
     // sort by total desc
     const devs={};
     Object.entries(devMap).sort((a,b)=>b[1].total-a[1].total).forEach(([k,v])=>devs[k]=v);
-    return {devs, saTotal, procTotal};
+    const ledgerDate=new Date().toLocaleDateString('ko-KR');
+    return {devs, saTotal, procTotal, ledgerDate};
   }
 })();
 
