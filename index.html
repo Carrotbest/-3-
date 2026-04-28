@@ -2111,91 +2111,101 @@ function renderStats(){
   });
 
   // ── Sample Count Total 파싱
+  // 실제 파일 구조 (이미지 기준):
+  //   col0: CATEGORY / TOTAL / STYLE TOTAL / OPTION TOTAL (merged)
+  //   col1: sub-label (1팀, Extend 등)
+  //   col2: 합계(option)
+  //   col3~8:  박향근 — GD(S/O), 자체(S/O), 사입(S/O)
+  //   col9~14: 진영은  — GD(S/O), 자체(S/O), 사입(S/O)
+  //   col15~20:변재휘  — GD(S/O), 자체(S/O), 사입(S/O)
   function parseSampleCount(wb){
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+    const uploadDate = new Date().toLocaleDateString('ko-KR');
+    const n = (row,i) => Number(row[i])||0;
 
-    // 업로드 날짜: row[1] 마지막 non-null 값
-    let uploadDate='';
-    for(const v of (rows[1]||[])){
-      if(v instanceof Date) uploadDate=v.toLocaleDateString('ko-KR');
-      else if(v && typeof v==='string' && v.includes('/')) uploadDate=v;
+    // 담당자 이름: row[0] col3/9/15 (헤더 행)
+    // 여러 row를 스캔해서 한국어 이름이 있는 행 찾기
+    let devSlots = [];
+    for(let ri=0; ri<Math.min(rows.length,6); ri++){
+      const r = rows[ri]||[];
+      const candidates = [
+        {col:3,  v:r[3]},
+        {col:9,  v:r[9]},
+        {col:15, v:r[15]},
+      ].filter(({v})=> v && typeof v==='string' && /[가-힣]/.test(v));
+      if(candidates.length>=2){
+        devSlots = candidates.map(({col,v})=>({col, name:String(v).trim()}));
+        break;
+      }
     }
+    // 담당자명 못 찾으면 기본값
+    if(!devSlots.length) devSlots=[
+      {col:3,  name:'박향근'},
+      {col:9,  name:'진영은'},
+      {col:15, name:'변재휘'},
+    ];
 
-    // 실제 파일 구조: 담당자별(박향근/진영은/변재휘) STYLE+OPTION
-    // Row 5(idx4): col4=담당자1, col10=담당자2, col16=담당자3
-    // Row 6(idx5): GD/자체/사입 구분
-    // Row 7(idx6): STYLE/OPTION 반복
-    // 각 카테고리 TOTAL 행: col3=합계option, 담당자별 col4~9, col10~15, col16~21
-    // STYLE TOTAL 행: col4/10/16=담당자 style합계, col22=전체
-    // OPTION TOTAL 행: col4/10/16=담당자 option합계, col22=전체
-
-    // 담당자 이름 추출 (Row5, idx4)
-    const devRow = rows[4] || [];
-    const devSlots = [
-      {col: 4,  name: String(devRow[4] ||'박향근').trim()},
-      {col: 10, name: String(devRow[10]||'진영은').trim()},
-      {col: 16, name: String(devRow[16]||'변재휘').trim()},
-    ].filter(d=>d.name);
-
-    const catLabels={
+    const catLabels = {
       'EU MARKET':'euMarket',
-      'SEASON DVLP':'seasonDvlp','SEASON DEV':'seasonDvlp','SEASON':'seasonDvlp',
-      'CORE UPDATE':'coreUpdate','CORE':'coreUpdate',
+      'SEASON DVLP':'seasonDvlp','SEASON DEV':'seasonDvlp',
+      'CORE UPDATE':'coreUpdate',
       'PROJECT':'project'
     };
     const categories={};
     let currentCat=null, styleTotals=null, optionTotals=null;
-    const n=(row,i)=>Number(row[i])||0;
 
     for(const row of rows){
       if(!row) continue;
-      // 카테고리 라벨: col0 또는 col1 에서 탐색
-      const col0 = String(row[0]||'').trim().toUpperCase();
-      const col1 = String(row[1]||'').trim().toUpperCase();
-      const labelCell = catLabels[col1] ? col1 : catLabels[col0] ? col0 : null;
-      if(labelCell) currentCat=catLabels[labelCell];
+      const c0 = String(row[0]||'').trim();
+      const c0up = c0.toUpperCase();
 
-      const isTotal      = col1==='TOTAL'        || col0==='TOTAL';
-      const isStyleTotal = col1==='STYLE TOTAL'  || col0==='STYLE TOTAL';
-      const isOptTotal   = col1==='OPTION TOTAL' || col0==='OPTION TOTAL';
+      // 카테고리 헤더 감지 (col0)
+      if(catLabels[c0up]){ currentCat=catLabels[c0up]; continue; }
 
-      if(isTotal && currentCat && !categories[currentCat]){
+      // 카테고리 TOTAL 행
+      if(c0up==='TOTAL' && currentCat && !categories[currentCat]){
         const devData={};
         devSlots.forEach(({col,name})=>{
+          // col+0: GD_S, col+1: GD_O, col+2: 자체_S, col+3: 자체_O, col+4: 사입_S, col+5: 사입_O
           devData[name]={
             styles:  n(row,col)+n(row,col+2)+n(row,col+4),
             options: n(row,col+1)+n(row,col+3)+n(row,col+5)
           };
         });
-        // col3 합계 없으면 담당자 합산으로 보완
-        const totalVal = n(row,3) || devSlots.reduce((s,{name})=>s+(devData[name].options||0),0);
+        // 합계 option: col2, 없으면 담당자 합산
+        const totalVal = n(row,2) || devSlots.reduce((s,{name})=>s+(devData[name].options||0),0);
         categories[currentCat]={total:totalVal, options:totalVal, devs:devData};
         if(currentCat==='project') currentCat=null;
       }
-      if(isStyleTotal){
-        // grand: col22 또는 모든 담당자 합산
-        const grandS = n(row,22) || devSlots.reduce((s,{col})=>s+n(row,col),0);
-        styleTotals={grand:grandS};
-        devSlots.forEach(({col,name})=>{ styleTotals[name]=n(row,col); });
+
+      // STYLE TOTAL / OPTION TOTAL 행 (per-dev 값이 col3/9/15에 merged)
+      if(c0up==='STYLE TOTAL'){
+        styleTotals={grand:0};
+        devSlots.forEach(({col,name})=>{
+          styleTotals[name]=n(row,col);
+          styleTotals.grand+=n(row,col);
+        });
       }
-      if(isOptTotal){
-        const grandO = n(row,22) || devSlots.reduce((s,{col})=>s+n(row,col),0);
-        optionTotals={grand:grandO};
-        devSlots.forEach(({col,name})=>{ optionTotals[name]=n(row,col); });
+      if(c0up==='OPTION TOTAL'){
+        optionTotals={grand:0};
+        devSlots.forEach(({col,name})=>{
+          optionTotals[name]=n(row,col);
+          optionTotals.grand+=n(row,col);
+        });
       }
     }
 
-    const grand = (styleTotals||optionTotals) ? {
+    const grand=(styleTotals||optionTotals)?{
       styles: styleTotals?.grand||0,
       options: optionTotals?.grand||0,
       devs: devSlots.reduce((acc,{name})=>{
         acc[name]={styles:styleTotals?.[name]||0, options:optionTotals?.[name]||0};
         return acc;
       },{})
-    } : null;
+    }:null;
 
-    return {uploadDate, categories, grand, sctDevs: devSlots.map(d=>d.name)};
+    return {uploadDate, categories, grand, sctDevs:devSlots.map(d=>d.name)};
   }
 
   // ── 샘플 관리 대장 파싱
