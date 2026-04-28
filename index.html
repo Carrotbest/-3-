@@ -1936,7 +1936,8 @@ function renderStats(){
     btn.disabled=true;
     prog.textContent='파싱 중...';
     try{
-      const result={updatedAt:Date.now()};
+      // 기존 데이터를 베이스로 시작 → 한 파일만 올려도 나머지 데이터 유지
+      const result = Object.assign({}, sampleData||{}, {updatedAt:Date.now()});
 
       if(fileCount){
         prog.textContent='Sample Count 파싱 중...';
@@ -1948,8 +1949,7 @@ function renderStats(){
         prog.textContent='샘플 관리 대장 파싱 중...';
         const buf=await fileLedger.arrayBuffer();
         const wb=XLSX.read(buf,{type:'array'});
-        const extra=parseSampleLedger(wb);
-        Object.assign(result, extra);
+        Object.assign(result, parseSampleLedger(wb));
       }
 
       prog.textContent='Firebase에 저장 중...';
