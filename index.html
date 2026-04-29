@@ -528,15 +528,19 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .dash-upload-btn.sct{background:rgba(6,182,212,.12);border-color:rgba(6,182,212,.35);color:#22d3ee}
 .dash-upload-btn.sct:hover{background:rgba(6,182,212,.22)}
 /* ── 담당자별 카테고리 BAR ── */
-.dev-cat-bar-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:14px}
-.dev-cat-bar-title{font-size:.76rem;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:6px}
-.dev-cat-bar-grid{display:grid;grid-template-columns:90px 1fr 50px;gap:6px;align-items:center;row-gap:10px}
-.dev-cat-bar-name{font-size:.74rem;font-weight:600;color:var(--dim)}
-.dev-cat-stacked{height:20px;border-radius:5px;overflow:hidden;display:flex;background:rgba(255,255,255,.05)}
-.dev-cat-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:rgba(255,255,255,.85)}
-.dev-cat-total{font-size:.74rem;font-weight:700;color:var(--text);text-align:right}
-.dev-cat-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
-.dev-cat-leg-item{display:flex;align-items:center;gap:4px;font-size:.66rem;color:var(--dim)}
+.dev-cat-bar-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:14px}
+.dev-cat-bar-title{font-size:.72rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.dev-cat-bar-inner{display:flex;gap:16px;align-items:center}
+.dev-cat-bar-left{flex:1;min-width:0}
+.dev-cat-bar-right{flex-shrink:0;width:150px}
+.dev-cat-bar-grid{display:grid;grid-template-columns:72px 1fr;gap:4px;align-items:center;row-gap:7px}
+.dev-cat-bar-name{font-size:.7rem;font-weight:600;color:var(--dim);white-space:nowrap}
+.dev-cat-bar-name span{font-size:.62rem;color:var(--muted);font-weight:400;margin-left:3px}
+.dev-cat-bar-track{height:14px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
+.dev-cat-bar-fill{height:100%;display:flex;border-radius:4px;overflow:hidden;transition:width .6s ease}
+.dev-cat-seg{height:100%}
+.dev-cat-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.dev-cat-leg-item{display:flex;align-items:center;gap:4px;font-size:.62rem;color:var(--dim)}
 .dev-cat-leg-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
 /* ── SCT 2-col ── */
 .sct-two-col{display:flex;gap:14px;align-items:flex-start}
@@ -733,10 +737,17 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         <!-- 담당자별 카테고리 stacked bar -->
         <div class="dev-cat-bar-card" id="devCatBarCard">
           <div class="dev-cat-bar-title">📊 담당자별 작지 현황</div>
-          <div class="dev-cat-bar-grid" id="devCatBarGrid">
-            <div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.8rem;padding:12px">샘플 관리 대장을 업로드하면 현황이 표시됩니다.</div>
+          <div class="dev-cat-bar-inner">
+            <div class="dev-cat-bar-left">
+              <div class="dev-cat-bar-grid" id="devCatBarGrid">
+                <div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0">샘플 관리 대장을 업로드하면 현황이 표시됩니다.</div>
+              </div>
+              <div class="dev-cat-legend" id="devCatLegend"></div>
+            </div>
+            <div class="dev-cat-bar-right">
+              <div id="devTotalDonut" style="position:relative;height:140px"></div>
+            </div>
           </div>
-          <div class="dev-cat-legend" id="devCatLegend"></div>
         </div>
 
         <!-- 담당자별 카드 -->
@@ -1120,6 +1131,7 @@ const PO=['PL','DS','DV','TS','DP','CL'];
 let sampleData=null;
 let devCharts={};
 let sctDonutChart=null;
+let devTotalDonutChart=null;
 let cfg={projTitle:'Performance & Sustainability Fabric Development',projStart:'2026-04-01',projEnd:'2026-07-31',todayOverride:null};
 let tasks=[], events=[], editingFid=null, editingEvFid=null;
 let homeDonutInst=null, statsDonutInst=null, statsBarInst=null;
@@ -1375,7 +1387,7 @@ function renderSampleHome(){
     if(noteEl) noteEl.textContent=`※ 완료 기준: 해당 공정 날짜가 오늘(${fdF(today())}) 이하 / 빈칸·TBD·TBA는 미완료 처리`;
   }
 
-  // ── 담당자별 작지 현황 Stacked Bar
+  // ── 담당자별 작지 현황 Stacked Bar (상대 비율)
   const catBarGrid = document.getElementById('devCatBarGrid');
   const devs_for_bar = sd.devs || {};
   const devNames_bar = Object.keys(devs_for_bar);
@@ -1386,23 +1398,57 @@ function renderSampleHome(){
       {key:'국내작업',  color:'#3b82f6'},
       {key:'기타',      color:'#475569'},
     ];
+    // 담당자별 총 건수 계산
+    const devTots=devNames_bar.map(n=>{const s=devs_for_bar[n].sa||{};return(s.GD접수완료||0)+(s.GD접수대기||0)+(s.국내작업||0)+(s.기타||0);});
+    const maxTot=Math.max(...devTots,1);
+
     catBarGrid.innerHTML='';
-    devNames_bar.forEach(name=>{
+    devNames_bar.forEach((name,idx)=>{
       const sa=(devs_for_bar[name].sa)||{};
-      const tot=(sa.GD접수완료||0)+(sa.GD접수대기||0)+(sa.국내작업||0)+(sa.기타||0);
+      const tot=devTots[idx];
       if(!tot) return;
+      const relPct=(tot/maxTot*100).toFixed(1); // 전체 트랙 대비 이 담당자 총건수 비율
       const segs=SA_SEGS.map(({key,color})=>{
-        const v=sa[key]||0; const pct=(v/tot*100).toFixed(1);
-        return parseFloat(pct)>0?`<div class="dev-cat-seg" style="width:${pct}%;background:${color}" title="${key} ${v}건 (${pct}%)"></div>`:'';
+        const v=sa[key]||0;
+        const segPct=(v/tot*100).toFixed(1); // 이 담당자 내 비율 (bar 안에서)
+        return parseFloat(segPct)>0
+          ?`<div class="dev-cat-seg" style="width:${segPct}%;background:${color};flex-shrink:0" title="${key} ${v}건 (${segPct}%)"></div>`:'';
       }).join('');
       catBarGrid.insertAdjacentHTML('beforeend',`
-        <div class="dev-cat-bar-name">${name}</div>
-        <div class="dev-cat-stacked">${segs}</div>
-        <div class="dev-cat-total">${tot}건</div>`);
+        <div class="dev-cat-bar-name">${name} <span>${tot}건</span></div>
+        <div class="dev-cat-bar-track">
+          <div class="dev-cat-bar-fill" style="width:${relPct}%">${segs}</div>
+        </div>`);
     });
     const lgEl=document.getElementById('devCatLegend');
     if(lgEl) lgEl.innerHTML=SA_SEGS.map(({key,color})=>
       `<div class="dev-cat-leg-item"><div class="dev-cat-leg-dot" style="background:${color}"></div>${key}</div>`).join('');
+
+    // ── 우측 담당자별 총 건수 도넛
+    const totalDonutEl=document.getElementById('devTotalDonut');
+    if(totalDonutEl){
+      totalDonutEl.innerHTML='<canvas id="devTotalDonutCanvas"></canvas>';
+      if(devTotalDonutChart){try{devTotalDonutChart.destroy();}catch(e){}}
+      const ctx2=document.getElementById('devTotalDonutCanvas').getContext('2d');
+      const dColors=['#06b6d4','#8b5cf6','#10b981'];
+      devTotalDonutChart=new Chart(ctx2,{
+        type:'doughnut',
+        data:{
+          labels:devNames_bar,
+          datasets:[{data:devTots,backgroundColor:dColors.map(c=>c+'99'),borderColor:dColors,borderWidth:2,hoverOffset:4}]
+        },
+        options:{
+          cutout:'58%',responsive:true,maintainAspectRatio:false,
+          plugins:{
+            legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:9},padding:6,boxWidth:8,boxHeight:8}},
+            tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}건`},
+              backgroundColor:'rgba(15,20,30,.95)',borderColor:'rgba(255,255,255,.12)',borderWidth:1,
+              titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:8,cornerRadius:7}
+          },
+          animation:{animateRotate:true,duration:600}
+        }
+      });
+    }
   }
 
   // ldg 업로드 날짜 표시
