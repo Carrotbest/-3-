@@ -462,8 +462,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .sct-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .sct-ttl{font-size:.88rem;font-weight:700;color:var(--text);letter-spacing:.04em}
 .sct-date{font-size:.72rem;color:var(--muted)}
-.sct-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;overflow-x:auto}
-.sct-table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:600px}
+.sct-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;min-width:0}
+.sct-table-wrap{overflow-x:auto}
+.sct-table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:520px}
 .sct-table th,.sct-table td{padding:8px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05)}
 .sct-table thead th{font-size:.7rem;font-weight:700;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,0.12)}
 .sct-table th.col-total{color:var(--dim)}
@@ -538,8 +539,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .dev-cat-leg-item{display:flex;align-items:center;gap:4px;font-size:.66rem;color:var(--dim)}
 .dev-cat-leg-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
 /* ── SCT 2-col ── */
-.sct-two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:14px}
-@media(max-width:1100px){.sct-two-col{grid-template-columns:1fr}}
+.sct-two-col{display:flex;gap:14px;align-items:flex-start}
+.sct-two-col>.sct-card{flex:1.5;min-width:0}
+.sct-two-col>#devCatDonut{flex:1;min-width:220px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px}
+@media(max-width:1100px){.sct-two-col{flex-direction:column}.sct-two-col>.sct-card,.sct-two-col>#devCatDonut{flex:none;width:100%}}
 .home-sync-bar{display:flex;align-items:center;gap:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:14px 20px;margin-bottom:8px}
 .sync-btn{background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(6,182,212,0.15));border:1px solid rgba(139,92,246,0.4);color:#c4b5fd;padding:8px 20px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:background .2s}
 .sync-btn:hover{background:linear-gradient(135deg,rgba(139,92,246,0.4),rgba(6,182,212,0.25))}
@@ -754,25 +757,27 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 
         <div class="sct-two-col">
           <div class="sct-card">
-            <table class="sct-table">
-              <thead id="sctHead">
-                <tr>
-                  <th rowspan="2" style="text-align:left;width:160px">CATEGORY</th>
-                  <th rowspan="2" class="col-total">합계<br><small style="font-weight:400;opacity:.7">OPTION</small></th>
-                  <th colspan="2" style="color:#94a3b8;background:rgba(255,255,255,.04)">담당자</th>
-                </tr>
-                <tr id="sctHeadRow2">
-                  <th style="color:#94a3b8">STYLE</th><th style="color:#94a3b8">OPTION</th>
-                </tr>
-              </thead>
-              <tbody id="sctBody">
-                <tr><td colspan="4" class="sct-no-data">엑셀 업로드 후 데이터가 표시됩니다</td></tr>
-              </tbody>
-            </table>
+            <div class="sct-table-wrap">
+              <table class="sct-table">
+                <thead id="sctHead">
+                  <tr>
+                    <th rowspan="2" style="text-align:left;width:140px">CATEGORY</th>
+                    <th rowspan="2" class="col-total">합계<br><small style="font-weight:400;opacity:.7">OPT</small></th>
+                    <th colspan="2" style="color:#94a3b8;background:rgba(255,255,255,.04)">담당자</th>
+                  </tr>
+                  <tr id="sctHeadRow2">
+                    <th style="color:#94a3b8">STY</th><th style="color:#94a3b8">OPT</th>
+                  </tr>
+                </thead>
+                <tbody id="sctBody">
+                  <tr><td colspan="4" class="sct-no-data">엑셀 업로드 후 데이터가 표시됩니다</td></tr>
+                </tbody>
+              </table>
+            </div>
             <div class="sct-legend" id="sctLegend"></div>
           </div>
-          <div id="devCatDonut" style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:center;min-height:200px">
-            <div style="text-align:center;color:var(--muted);font-size:.78rem">SCT 업로드 시<br>차트 표시</div>
+          <div id="devCatDonut">
+            <div style="text-align:center;color:var(--muted);font-size:.78rem;padding:60px 0">SCT 업로드 시<br>차트 표시</div>
           </div>
         </div>
       </div>
@@ -1309,7 +1314,9 @@ function renderSampleHome(){
   if(donutEl){
     const hasCatData = catDefs.some(({key})=>(sd.categories?.[key]?.options||0)>0);
     if(hasCatData){
-      donutEl.innerHTML='<div style="padding:12px 8px 4px;font-size:.7rem;font-weight:700;color:var(--muted)">카테고리별 OPTION 비율</div><canvas id="sctDonutCanvas" style="max-height:260px"></canvas>';
+      donutEl.innerHTML=`
+        <div style="font-size:.7rem;font-weight:700;color:var(--muted);margin-bottom:10px">카테고리별 OPTION 비율</div>
+        <div style="position:relative;width:100%;height:240px"><canvas id="sctDonutCanvas"></canvas></div>`;
       if(sctDonutChart){try{sctDonutChart.destroy();}catch(e){}}
       const ctx=document.getElementById('sctDonutCanvas').getContext('2d');
       const catLbls=catDefs.map(c=>c.label);
@@ -1317,36 +1324,20 @@ function renderSampleHome(){
       const catClrs=catDefs.map(c=>c.color);
       sctDonutChart=new Chart(ctx,{
         type:'doughnut',
-        data:{
-          labels:catLbls,
-          datasets:[{
-            data:catVals,
-            backgroundColor:catClrs.map(c=>c+'99'),
-            borderColor:catClrs,
-            borderWidth:2,
-            hoverOffset:6
-          }]
-        },
+        data:{labels:catLbls,datasets:[{data:catVals,backgroundColor:catClrs.map(c=>c+'99'),borderColor:catClrs,borderWidth:2,hoverOffset:6}]},
         options:{
-          cutout:'65%',
-          responsive:true,
-          maintainAspectRatio:true,
+          cutout:'62%',responsive:true,maintainAspectRatio:false,
           plugins:{
-            legend:{
-              display:true,position:'bottom',
-              labels:{color:'#94a3b8',font:{size:10},padding:10,boxWidth:10,boxHeight:10}
-            },
-            tooltip:{
-              callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}건 (${totalOpts>0?Math.round(ctx.parsed/totalOpts*100):0}%)`},
+            legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:10},padding:10,boxWidth:10,boxHeight:10}},
+            tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}건 (${totalOpts>0?Math.round(ctx.parsed/totalOpts*100):0}%)`},
               backgroundColor:'rgba(15,20,30,.95)',borderColor:'rgba(255,255,255,.12)',borderWidth:1,
-              titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:9,cornerRadius:8
-            }
+              titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:9,cornerRadius:8}
           },
           animation:{animateRotate:true,duration:800}
         }
       });
     } else {
-      donutEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:200px;text-align:center;color:var(--muted);font-size:.78rem">SCT 업로드 시<br>차트 표시</div>';
+      donutEl.innerHTML='<div style="padding:60px 0;text-align:center;color:var(--muted);font-size:.78rem">SCT 업로드 시<br>차트 표시</div>';
     }
   }
 
