@@ -130,6 +130,16 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .kpi-value{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#e2e8f0,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .kpi-sub{font-size:.66rem;color:var(--muted);margin-top:3px}
 .kpi-badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:.62rem;font-weight:700;margin-top:5px}
+/* ── 경고 배너 ── */
+.home-alerts{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:stretch}
+.home-alert-pill{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;font-weight:600;cursor:default;min-width:130px}
+.home-alert-pill .alert-ico{font-size:1.2rem}
+.home-alert-pill .alert-num{font-size:1.4rem;font-weight:800;line-height:1}
+.home-alert-pill .alert-lbl{font-size:.62rem;opacity:.85;margin-top:2px}
+.alert-pill-red{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#f87171}
+.alert-pill-amber{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#fbbf24}
+.alert-pill-teal{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.25);color:#67e8f9}
+.alert-pill-ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#34d399;font-size:.74rem;padding:10px 14px}
 /* ── 작업 현황 PIPELINE ── */
 .work-pipeline{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:16px}
 .work-pipeline-title{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
@@ -678,6 +688,25 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
           <div class="kpi-value" id="kpiGdRate" style="color:#34d399">—</div>
           <div class="kpi-sub" id="kpiGdRateSub">접수완료+국내 / 전체</div>
           <span class="kpi-badge" style="background:rgba(16,185,129,.15);color:#34d399">국내포함</span>
+        </div>
+      </div>
+
+      <!-- ─ 경고 배너 ─ -->
+      <div class="home-alerts" id="homeAlerts" style="display:none">
+        <div class="home-alert-pill alert-pill-red" id="alertOverdue">
+          <span class="alert-ico">⚠️</span>
+          <div><div class="alert-num" id="alertOverdueNum">0</div><div class="alert-lbl">마감 초과</div></div>
+        </div>
+        <div class="home-alert-pill alert-pill-amber" id="alertIdleYarn">
+          <span class="alert-ico">⏳</span>
+          <div><div class="alert-num" id="alertIdleYarnNum">0</div><div class="alert-lbl">원사 방치 (편직 미배정 14일+)</div></div>
+        </div>
+        <div class="home-alert-pill alert-pill-teal" id="alertLeadTime" style="display:none">
+          <span class="alert-ico">⏱</span>
+          <div><div class="alert-num" id="alertLeadTimeNum">—일</div><div class="alert-lbl">평균 리드타임 (원사→피니싱)</div></div>
+        </div>
+        <div class="home-alert-pill alert-pill-ok" id="alertAllClear" style="display:none">
+          ✅ 마감 초과·원사 방치 없음
         </div>
       </div>
 
@@ -1368,6 +1397,37 @@ function renderSampleHome(){
   setText('kpiDomesticSub',`SA번호 등록 · ${totalSa>0?(dom/totalSa*100).toFixed(1):'0'}%`);
   setText('kpiGdRate',gdRate+'%');
   setText('kpiGdRateSub',`접수완료+국내 ${gdDone+dom} / ${totalSa}`);
+
+  // ── 경고 배너 렌더링
+  const alertsEl=document.getElementById('homeAlerts');
+  if(alertsEl && totalSa>0){
+    const overdue=sd.overdueCount||0;
+    const idle=sd.idleYarnCount||0;
+    const avgLT=sd.avgLeadTime;
+    alertsEl.style.display='flex';
+    setText('alertOverdueNum',overdue+'건');
+    setText('alertIdleYarnNum',idle+'건');
+    // 마감 초과 : 없으면 투명 처리
+    const ov=document.getElementById('alertOverdue');
+    if(ov) ov.style.opacity=overdue>0?'1':'0.4';
+    // 원사 방치 : 없으면 투명 처리
+    const id2=document.getElementById('alertIdleYarn');
+    if(id2) id2.style.opacity=idle>0?'1':'0.4';
+    // 평균 리드타임
+    const ltEl=document.getElementById('alertLeadTime');
+    if(ltEl){
+      if(avgLT){
+        ltEl.style.display='flex';
+        setText('alertLeadTimeNum',avgLT+'일');
+        document.getElementById('alertLeadTime').title=`${sd.leadTimeSampleN}건 평균`;
+      } else {
+        ltEl.style.display='none';
+      }
+    }
+    // 모두 이상 없으면 올클리어 배지
+    const okEl=document.getElementById('alertAllClear');
+    if(okEl) okEl.style.display=(overdue===0&&idle===0)?'flex':'none';
+  }
 
   // ── 작업 현황 파이프라인 렌더링
   const proc=sd.procTotal||{};
@@ -2261,6 +2321,19 @@ function renderStats(){
     const devMap={};
     const todayMs = today().getTime();
 
+    // 날짜 파싱 헬퍼 (Excel serial / M/D 텍스트 / YYYY/M/D → Date or null)
+    function parseDate(v){
+      if(v==null) return null;
+      if(typeof v==='number' && v>40000) return new Date(Math.round((v-25569)*86400*1000));
+      const s=String(v).trim().toUpperCase();
+      if(s===''||s==='-'||s==='TBD'||s==='TBA'||s==='STOCK') return null;
+      const md=s.match(/^(\d{1,2})\/(\d{1,2})$/);
+      if(md) return new Date(2026,parseInt(md[1])-1,parseInt(md[2]));
+      const ymd=s.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+      if(ymd) return new Date(parseInt(ymd[1]),parseInt(ymd[2])-1,parseInt(ymd[3]));
+      return null;
+    }
+
     // SA.# 분류 (col 7, 0-based)
     function classifySA(v){
       if(v==null||String(v).trim()==='') return 'GD접수대기';
@@ -2292,6 +2365,9 @@ function renderStats(){
     // 전체 집계
     const saTotal={GD접수완료:0,GD접수대기:0,국내작업:0,기타:0};
     const procTotal={YARN:[0,0],KNITTING:[0,0],DYEING:[0,0],FINISHING:[0,0]}; // [done,total]
+    let overdueCount=0;   // Due Date < 오늘 + FINISHING 미완료
+    let idleYarnCount=0;  // 원사 입고 14일+ 경과, 편직 미배정
+    const leadTimeDays=[];// YARN→FINISHING 리드타임 (일) 배열
 
     for(let i=dataStart;i<rows.length;i++){
       const r=rows[i];
@@ -2314,6 +2390,37 @@ function renderStats(){
         procDone[name]=done;
       });
 
+      // ── 마감 초과 (col26=Due Date < 오늘 + FINISHING 미완료)
+      if(r[26]!=null){
+        const dueD=parseDate(r[26]);
+        if(dueD && dueD.getTime()<todayMs && !isDoneByToday(r[25])){
+          overdueCount++;
+        }
+      }
+
+      // ── 원사 방치 + 리드타임 계산 공통 변수
+      const yarnRaw=r[19];
+      const knittingRaw=r[21];
+      const yarnDate=parseDate(yarnRaw);
+      const finDate=parseDate(r[25]);
+
+      // 원사 방치: 원사 입고됨 + 편직 미배정/TBD + 14일 이상 경과
+      const knittingNotStarted=!knittingRaw||['','tbd','tba','-'].includes(String(knittingRaw).trim().toLowerCase());
+      if(knittingNotStarted){
+        if(yarnDate && yarnDate.getTime()<=todayMs){
+          const daysElapsed=Math.floor((todayMs-yarnDate.getTime())/86400000);
+          if(daysElapsed>14) idleYarnCount++;
+        } else if(yarnRaw!=null && String(yarnRaw).trim().toUpperCase()==='STOCK'){
+          idleYarnCount++;
+        }
+      }
+
+      // 리드타임 (YARN→FINISHING 둘 다 실제 날짜인 경우)
+      if(yarnDate && finDate && finDate.getTime()>yarnDate.getTime()){
+        const days=Math.floor((finDate.getTime()-yarnDate.getTime())/86400000);
+        if(days>0 && days<365) leadTimeDays.push(days);
+      }
+
       if(!devMap[dev]) devMap[dev]={total:0,categories:{},sa:{GD접수완료:0,GD접수대기:0,국내작업:0,기타:0},proc:{YARN:[0,0],KNITTING:[0,0],DYEING:[0,0],FINISHING:[0,0]}};
       devMap[dev].total++;
       devMap[dev].categories[cat]=(devMap[dev].categories[cat]||0)+1;
@@ -2328,7 +2435,8 @@ function renderStats(){
     const devs={};
     Object.entries(devMap).sort((a,b)=>b[1].total-a[1].total).forEach(([k,v])=>devs[k]=v);
     const ledgerDate=new Date().toLocaleDateString('ko-KR');
-    return {devs, saTotal, procTotal, ledgerDate};
+    const avgLeadTime=leadTimeDays.length ? Math.round(leadTimeDays.reduce((a,b)=>a+b,0)/leadTimeDays.length) : null;
+    return {devs, saTotal, procTotal, ledgerDate, overdueCount, idleYarnCount, avgLeadTime, leadTimeSampleN:leadTimeDays.length};
   }
 })();
 
