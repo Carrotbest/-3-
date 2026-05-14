@@ -792,7 +792,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
             <div class="dash-sec-name">📊 Sample Count Total</div>
             <div class="dash-sec-source" id="sctUploadDate"></div>
           </div>
-          <button class="dash-upload-btn sct" id="btnSctUpload">↑ 업로드</button>
         </div>
 
         <div class="sct-two-col">
@@ -1016,12 +1015,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         <div class="upload-zone-icon">📋</div>
         <div class="upload-zone-title">샘플 관리 대장.xlsx</div>
         <div class="upload-zone-sub">현황 시트 포함 파일 · Sample Count Total 자동 계산</div>
-      </div>
-      <div class="upload-zone" id="zone1" style="opacity:.55">
-        <input type="file" id="fileCount" accept=".xlsx,.xls">
-        <div class="upload-zone-icon">📈</div>
-        <div class="upload-zone-title">Sample Count Total.xlsx <span style="font-size:.6rem;opacity:.7">(선택)</span></div>
-        <div class="upload-zone-sub">별도 SCT 파일로 덮어쓸 경우에만</div>
       </div>
     </div>
     <div class="upload-actions">
@@ -2121,10 +2114,8 @@ function renderStats(){
 (function(){
   // 모달 열기 (각 섹션 업로드 버튼 + 기존 동기화 버튼)
   function openModal(){ document.getElementById('uploadModal').classList.add('open'); resetModal(); }
-  ['btnLdgUpload','btnSctUpload'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.addEventListener('click', openModal);
-  });
+  const el=document.getElementById('btnLdgUpload');
+  if(el) el.addEventListener('click', openModal);
   document.getElementById('btnUploadCancel').addEventListener('click',()=>{
     document.getElementById('uploadModal').classList.remove('open');
   });
@@ -2133,34 +2124,21 @@ function renderStats(){
       document.getElementById('uploadModal').classList.remove('open');
   });
 
-  let fileCount=null, fileLedger=null;
+  let fileLedger=null;
 
   function resetModal(){
-    fileCount=null; fileLedger=null;
-    document.getElementById('zone1').classList.remove('loaded');
+    fileLedger=null;
     document.getElementById('zone2').classList.remove('loaded');
     document.getElementById('btnUploadOk').disabled=true;
     document.getElementById('uploadProgress').textContent='';
   }
 
-  function checkReady(){
-    document.getElementById('btnUploadOk').disabled=!(fileCount||fileLedger);
-  }
-
-  document.getElementById('fileCount').addEventListener('change',e=>{
-    if(e.target.files[0]){
-      fileCount=e.target.files[0];
-      document.getElementById('zone1').classList.add('loaded');
-      document.getElementById('zone1').querySelector('.upload-zone-sub').textContent='✓ '+fileCount.name;
-      checkReady();
-    }
-  });
   document.getElementById('fileLedger').addEventListener('change',e=>{
     if(e.target.files[0]){
       fileLedger=e.target.files[0];
       document.getElementById('zone2').classList.add('loaded');
       document.getElementById('zone2').querySelector('.upload-zone-sub').textContent='✓ '+fileLedger.name;
-      checkReady();
+      document.getElementById('btnUploadOk').disabled=false;
     }
   });
 
@@ -2176,28 +2154,14 @@ function renderStats(){
       const base = Object.assign({}, oldData, {updatedAt:Date.now()});
       const result = base;
 
-      if(fileCount){
-        prog.textContent='Sample Count 파싱 중...';
-        const buf=await fileCount.arrayBuffer();
-        const wb=XLSX.read(buf,{type:'array'});
-        // SCT 관련 키 덮어쓰기 (구버전 데이터 제거)
-        delete result.categories; delete result.grand; delete result.sctDevs; delete result.uploadDate;
-        Object.assign(result, parseSampleCount(wb));
-      }
       if(fileLedger){
         prog.textContent='샘플 관리 대장 파싱 중...';
         const buf=await fileLedger.arrayBuffer();
         const wb=XLSX.read(buf,{type:'array'});
-        // 대장 관련 키 초기화
         delete result.devs; delete result.saTotal; delete result.procTotal; delete result.ledgerDate;
         delete result.overdueCount; delete result.idleYarnCount; delete result.avgLeadTime; delete result.leadTimeSampleN;
-        const ldgResult=parseSampleLedger(wb);
-        // SCT 파일도 함께 업로드된 경우 → SCT 파일 데이터 우선, 대장 파생 SCT 버림
-        if(fileCount){
-          delete ldgResult.categories; delete ldgResult.grand;
-          delete ldgResult.sctDevs; delete ldgResult.uploadDate; delete ldgResult.sctSource;
-        }
-        Object.assign(result, ldgResult);
+        delete result.categories; delete result.grand; delete result.sctDevs; delete result.uploadDate; delete result.sctSource;
+        Object.assign(result, parseSampleLedger(wb));
       }
 
       prog.textContent='Firebase에 저장 중...';
@@ -2214,103 +2178,6 @@ function renderStats(){
     }
   });
 
-  // ── Sample Count Total 파싱
-  // 실제 파일 구조 (이미지 기준):
-  //   col0: CATEGORY / TOTAL / STYLE TOTAL / OPTION TOTAL (merged)
-  //   col1: sub-label (1팀, Extend 등)
-  //   col2: 합계(option)
-  //   col3~8:  박향근 — GD(S/O), 자체(S/O), 사입(S/O)
-  //   col9~14: 진영은  — GD(S/O), 자체(S/O), 사입(S/O)
-  //   col15~20:변재휘  — GD(S/O), 자체(S/O), 사입(S/O)
-  function parseSampleCount(wb){
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
-    const uploadDate = new Date().toLocaleDateString('ko-KR');
-    const n = (row,i) => Number(row[i])||0;
-
-    // 담당자 이름: row[0] col3/9/15 (헤더 행)
-    // 여러 row를 스캔해서 한국어 이름이 있는 행 찾기
-    let devSlots = [];
-    for(let ri=0; ri<Math.min(rows.length,6); ri++){
-      const r = rows[ri]||[];
-      const candidates = [
-        {col:3,  v:r[3]},
-        {col:9,  v:r[9]},
-        {col:15, v:r[15]},
-      ].filter(({v})=> v && typeof v==='string' && /[가-힣]/.test(v));
-      if(candidates.length>=2){
-        devSlots = candidates.map(({col,v})=>({col, name:String(v).trim()}));
-        break;
-      }
-    }
-    // 담당자명 못 찾으면 기본값
-    if(!devSlots.length) devSlots=[
-      {col:3,  name:'박향근'},
-      {col:9,  name:'진영은'},
-      {col:15, name:'변재휘'},
-    ];
-
-    const catLabels = {
-      'EU MARKET':'euMarket',
-      'SEASON DVLP':'seasonDvlp','SEASON DEV':'seasonDvlp',
-      'CORE UPDATE':'coreUpdate',
-      'PROJECT':'project'
-    };
-    const categories={};
-    let currentCat=null, styleTotals=null, optionTotals=null;
-
-    for(const row of rows){
-      if(!row) continue;
-      const c0 = String(row[0]||'').trim();
-      const c0up = c0.toUpperCase();
-
-      // 카테고리 헤더 감지 (col0)
-      if(catLabels[c0up]){ currentCat=catLabels[c0up]; continue; }
-
-      // 카테고리 TOTAL 행
-      if(c0up==='TOTAL' && currentCat && !categories[currentCat]){
-        const devData={};
-        devSlots.forEach(({col,name})=>{
-          // col+0: GD_S, col+1: GD_O, col+2: 자체_S, col+3: 자체_O, col+4: 사입_S, col+5: 사입_O
-          devData[name]={
-            styles:  n(row,col)+n(row,col+2)+n(row,col+4),
-            options: n(row,col+1)+n(row,col+3)+n(row,col+5)
-          };
-        });
-        // 합계 option: col2, 없으면 담당자 합산
-        const totalVal = n(row,2) || devSlots.reduce((s,{name})=>s+(devData[name].options||0),0);
-        categories[currentCat]={total:totalVal, options:totalVal, devs:devData};
-        if(currentCat==='project') currentCat=null;
-      }
-
-      // STYLE TOTAL / OPTION TOTAL 행 (per-dev 값이 col3/9/15에 merged)
-      if(c0up==='STYLE TOTAL'){
-        styleTotals={grand:0};
-        devSlots.forEach(({col,name})=>{
-          styleTotals[name]=n(row,col);
-          styleTotals.grand+=n(row,col);
-        });
-      }
-      if(c0up==='OPTION TOTAL'){
-        optionTotals={grand:0};
-        devSlots.forEach(({col,name})=>{
-          optionTotals[name]=n(row,col);
-          optionTotals.grand+=n(row,col);
-        });
-      }
-    }
-
-    const grand=(styleTotals||optionTotals)?{
-      styles: styleTotals?.grand||0,
-      options: optionTotals?.grand||0,
-      devs: devSlots.reduce((acc,{name})=>{
-        acc[name]={styles:styleTotals?.[name]||0, options:optionTotals?.[name]||0};
-        return acc;
-      },{})
-    }:null;
-
-    return {uploadDate, categories, grand, sctDevs:devSlots.map(d=>d.name)};
-  }
 
   // ── 샘플 관리 대장 파싱
   function parseSampleLedger(wb){
