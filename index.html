@@ -1009,19 +1009,19 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 <div class="upload-modal" id="uploadModal">
   <div class="upload-box">
     <h3>📊 엑셀 파일 업로드</h3>
-    <p>두 파일을 선택하거나 드래그하세요. 업로드 즉시 대시보드가 업데이트됩니다.</p>
+    <p>샘플 관리 대장만 업로드하면 모든 데이터가 자동 계산됩니다.</p>
     <div class="upload-zones">
-      <div class="upload-zone" id="zone1">
-        <input type="file" id="fileCount" accept=".xlsx,.xls">
-        <div class="upload-zone-icon">📈</div>
-        <div class="upload-zone-title">Sample Count Total.xlsx</div>
-        <div class="upload-zone-sub">카테고리별 집계 파일</div>
-      </div>
       <div class="upload-zone" id="zone2">
         <input type="file" id="fileLedger" accept=".xlsx,.xls">
         <div class="upload-zone-icon">📋</div>
         <div class="upload-zone-title">샘플 관리 대장.xlsx</div>
-        <div class="upload-zone-sub">현황 시트 포함 파일</div>
+        <div class="upload-zone-sub">현황 시트 포함 파일 · Sample Count Total 자동 계산</div>
+      </div>
+      <div class="upload-zone" id="zone1" style="opacity:.55">
+        <input type="file" id="fileCount" accept=".xlsx,.xls">
+        <div class="upload-zone-icon">📈</div>
+        <div class="upload-zone-title">Sample Count Total.xlsx <span style="font-size:.6rem;opacity:.7">(선택)</span></div>
+        <div class="upload-zone-sub">별도 SCT 파일로 덮어쓸 경우에만</div>
       </div>
     </div>
     <div class="upload-actions">
@@ -1345,7 +1345,7 @@ function renderSampleHome(){
   }
   if(sd.uploadDate){
     const el=document.getElementById('sctUploadDate');
-    if(el) el.textContent='기준: '+sd.uploadDate;
+    if(el) el.textContent=(sd.sctSource==='ledger'?'대장 자동계산 · ':'SCT 파일 · ')+'기준: '+sd.uploadDate;
     const el2=document.getElementById('syncLastDate');
     if(el2) el2.textContent='최종 업데이트: '+sd.uploadDate;
   }
@@ -2188,9 +2188,16 @@ function renderStats(){
         prog.textContent='샘플 관리 대장 파싱 중...';
         const buf=await fileLedger.arrayBuffer();
         const wb=XLSX.read(buf,{type:'array'});
-        // 대장 관련 키 덮어쓰기
+        // 대장 관련 키 초기화
         delete result.devs; delete result.saTotal; delete result.procTotal; delete result.ledgerDate;
-        Object.assign(result, parseSampleLedger(wb));
+        delete result.overdueCount; delete result.idleYarnCount; delete result.avgLeadTime; delete result.leadTimeSampleN;
+        const ldgResult=parseSampleLedger(wb);
+        // SCT 파일도 함께 업로드된 경우 → SCT 파일 데이터 우선, 대장 파생 SCT 버림
+        if(fileCount){
+          delete ldgResult.categories; delete ldgResult.grand;
+          delete ldgResult.sctDevs; delete ldgResult.uploadDate; delete ldgResult.sctSource;
+        }
+        Object.assign(result, ldgResult);
       }
 
       prog.textContent='Firebase에 저장 중...';
@@ -2369,6 +2376,14 @@ function renderStats(){
     let idleYarnCount=0;  // 원사 입고 14일+ 경과, 편직 미배정
     const leadTimeDays=[];// YARN→FINISHING 리드타임 (일) 배열
 
+    // SCT 자동 계산용: 카테고리×담당자별 Style(고유 Ref#)/Option(행 수) 집계
+    const SCT_CAT_MAP={
+      'EU MARKET':'euMarket','SEASON DEV':'seasonDvlp','SEASON DVLP':'seasonDvlp',
+      'CORE UPDATE':'coreUpdate','PROJECT':'project'
+    };
+    const devCatTrack={};  // devCatTrack[dev][catKey] = {styleSet:Set, opts:N}
+    const allCatTrack={};  // allCatTrack[catKey] = {styleSet:Set, opts:N}
+
     for(let i=dataStart;i<rows.length;i++){
       const r=rows[i];
       if(!r||r[0]==null) continue;
@@ -2396,6 +2411,19 @@ function renderStats(){
         if(dueD && dueD.getTime()<todayMs && !isDoneByToday(r[25])){
           overdueCount++;
         }
+      }
+
+      // ── SCT 자동 계산: 카테고리×담당자별 Style/Option 집계
+      const origRef=String(r[4]||'').trim(); // col4 = Original Ref#
+      const sctCatKey=SCT_CAT_MAP[cat.toUpperCase()];
+      if(sctCatKey){
+        if(!devCatTrack[dev]) devCatTrack[dev]={};
+        if(!devCatTrack[dev][sctCatKey]) devCatTrack[dev][sctCatKey]={styleSet:new Set(),opts:0};
+        if(origRef) devCatTrack[dev][sctCatKey].styleSet.add(origRef);
+        devCatTrack[dev][sctCatKey].opts++;
+        if(!allCatTrack[sctCatKey]) allCatTrack[sctCatKey]={styleSet:new Set(),opts:0};
+        if(origRef) allCatTrack[sctCatKey].styleSet.add(origRef);
+        allCatTrack[sctCatKey].opts++;
       }
 
       // ── 원사 방치 + 리드타임 계산 공통 변수
@@ -2436,7 +2464,31 @@ function renderStats(){
     Object.entries(devMap).sort((a,b)=>b[1].total-a[1].total).forEach(([k,v])=>devs[k]=v);
     const ledgerDate=new Date().toLocaleDateString('ko-KR');
     const avgLeadTime=leadTimeDays.length ? Math.round(leadTimeDays.reduce((a,b)=>a+b,0)/leadTimeDays.length) : null;
-    return {devs, saTotal, procTotal, ledgerDate, overdueCount, idleYarnCount, avgLeadTime, leadTimeSampleN:leadTimeDays.length};
+
+    // ── SCT 구조 빌드 (대장 기반 자동 계산)
+    const categories={};
+    for(const [ck,t] of Object.entries(allCatTrack)){
+      const cDevs={};
+      for(const [dn,dt] of Object.entries(devCatTrack)){
+        if(dt[ck]) cDevs[dn]={styles:dt[ck].styleSet.size, options:dt[ck].opts};
+      }
+      categories[ck]={total:t.opts, options:t.opts, styles:t.styleSet.size, devs:cDevs};
+    }
+    // Grand total: 담당자별 전체 집계 + 전체 고유 Ref#
+    const grandDevMap={};
+    for(const [dn,dcat] of Object.entries(devCatTrack)){
+      const ss=new Set(); let tot=0;
+      for(const t of Object.values(dcat)){t.styleSet.forEach(s=>ss.add(s)); tot+=t.opts;}
+      grandDevMap[dn]={styles:ss.size, options:tot};
+    }
+    const grandStyleSet=new Set();
+    Object.values(allCatTrack).forEach(t=>t.styleSet.forEach(s=>grandStyleSet.add(s)));
+    const grandOpts=Object.values(allCatTrack).reduce((a,t)=>a+t.opts,0);
+    const grand={styles:grandStyleSet.size, options:grandOpts, devs:grandDevMap};
+    const sctDevs=Object.keys(grandDevMap).sort((a,b)=>grandDevMap[b].options-grandDevMap[a].options);
+
+    return {devs, saTotal, procTotal, ledgerDate, overdueCount, idleYarnCount, avgLeadTime, leadTimeSampleN:leadTimeDays.length,
+      categories, grand, sctDevs, uploadDate:ledgerDate, sctSource:'ledger'};
   }
 })();
 
