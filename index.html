@@ -860,29 +860,30 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 
     <div class="nav-divider"></div>
 
-    <!-- SAMPLE MANAGEMENT -->
-    <div class="nav-group-header">SAMPLE MANAGEMENT</div>
+    <!-- FABRIC R&D -->
+    <div class="nav-group-header">FABRIC R&D</div>
+    <div class="nav-item" data-nav="overview">
+      <span class="nav-icon">📐</span><span class="nav-label">OVERVIEW</span>
+    </div>
     <div class="nav-item" data-nav="rdda">
       <span class="nav-icon">📊</span><span class="nav-label">RDDA ANALYSIS</span>
     </div>
-
-    <div class="nav-divider"></div>
-
-    <!-- R&D PROJECT -->
-    <div class="nav-group-header">R&D PROJECT</div>
     <div class="nav-group-block" data-block="project">
       <div class="nav-item" id="nav-project-toggle" data-nav-toggle="project-sub">
-        <span class="nav-icon">🧪</span><span class="nav-label">PROJECT BOARD</span>
+        <span class="nav-icon">🧪</span><span class="nav-label">PROJECT</span>
         <span class="nav-arrow" id="project-arrow">›</span>
       </div>
       <div class="nav-sub" id="project-sub">
         <div class="nav-item nav-sub-item" data-nav="project-board">
-          <span class="nav-icon">📋</span><span class="nav-label">OVERVIEW</span>
+          <span class="nav-icon">📋</span><span class="nav-label">BOARD</span>
         </div>
         <div class="nav-item nav-sub-item" data-nav="gantt">
           <span class="nav-icon">📅</span><span class="nav-label">GANTT CHART</span>
         </div>
       </div>
+    </div>
+    <div class="nav-item" data-nav="kpi-report">
+      <span class="nav-icon">📋</span><span class="nav-label">KPI REPORT</span>
     </div>
 
     <div class="nav-divider"></div>
@@ -898,29 +899,30 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 
     <div class="nav-divider"></div>
 
-    <!-- OPERATIONS -->
-    <div class="nav-group-header">OPERATIONS</div>
-    <div class="nav-item" data-nav="process-innovation">
-      <span class="nav-icon">⚡</span><span class="nav-label">PROCESS INNOVATION</span>
+    <!-- TREND REPORT -->
+    <div class="nav-group-header">TREND REPORT</div>
+    <div class="nav-item" data-nav="macro-trend">
+      <span class="nav-icon">🌐</span><span class="nav-label">MACRO TREND</span>
     </div>
+    <div class="nav-item" data-nav="fabric-trend">
+      <span class="nav-icon">🧵</span><span class="nav-label">FABRIC TREND</span>
+    </div>
+    <div class="nav-item" data-nav="portfolio">
+      <span class="nav-icon">📁</span><span class="nav-label">PORTFOLIO</span>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <!-- STANDALONE -->
     <div class="nav-item" data-nav="calendar">
       <span class="nav-icon">📅</span><span class="nav-label">CALENDAR</span>
     </div>
-
-    <div class="nav-divider"></div>
-
-    <!-- REPORT -->
-    <div class="nav-group-header">REPORT</div>
-    <div class="nav-item" data-nav="kpi-report">
-      <span class="nav-icon">📋</span><span class="nav-label">KPI REPORT</span>
+    <div class="nav-item" data-nav="process-innovation">
+      <span class="nav-icon">⚡</span><span class="nav-label">PROCESS INNOVATION</span>
     </div>
 
     <div class="nav-divider"></div>
 
-    <!-- SYSTEM -->
-    <div class="nav-section-item" data-nav="statistics">
-      <span class="nav-icon">📈</span><span class="nav-label">STATISTICS</span>
-    </div>
     <div class="nav-section-item" data-nav="setting">
       <span class="nav-icon">⚙</span><span class="nav-label">SETTING</span>
     </div>
@@ -1619,6 +1621,331 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         </div>
       </div>
       <div class="prev-note">📋 업로드된 샘플 관리 대장을 기반으로 주간·월간 보고서가 자동 생성됩니다.<br>PDF 출력 및 팀 공유 링크 기능이 포함될 예정입니다.</div>
+    </div>
+  </div>
+
+  <!-- ── FABRIC R&D OVERVIEW ── -->
+  <div class="screen" id="screen-overview">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">OVERVIEW <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">Fabric R&D 전체 현황 · 시즌별 진행 · 담당자별 과제 분포</div>
+      </div>
+      <!-- season tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+        <div style="font-size:.6rem;font-weight:700;color:#475569;letter-spacing:.1em;margin-right:4px">SEASON</div>
+        <div class="prev-tab">SS25</div><div class="prev-tab">FW25</div>
+        <div class="prev-tab on">SS26</div><div class="prev-tab">FW26</div>
+      </div>
+      <!-- KPIs -->
+      <div class="prev-kpi-row">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">총 개발 옵션</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">진행중</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">지연</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">D-day (컷오프)</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <!-- 2-col row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">카테고리별 진행률 — GD / 국내 / EU</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:30%"></div><div class="prev-skeleton prev-row-line" style="width:20%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:78%;background:linear-gradient(90deg,#0e7490,#06b6d4)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:28%"></div><div class="prev-skeleton prev-row-line" style="width:20%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:55%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:24%"></div><div class="prev-skeleton prev-row-line" style="width:20%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:40%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div></div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">공정 단계별 분포 — 현재 스냅샷</div>
+          <div class="prev-bars" style="height:80px">
+            <div class="prev-bar prev-bar-amber" style="height:90%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:55%"></div>
+            <div class="prev-bar prev-bar-cyan" style="height:35%"></div>
+            <div class="prev-bar" style="height:25%;background:linear-gradient(180deg,rgba(16,185,129,.4),rgba(16,185,129,.1))"></div>
+          </div>
+          <div style="display:flex;justify-content:space-around;margin-top:6px">
+            <span style="font-size:.58rem;color:#475569">원사입고</span>
+            <span style="font-size:.58rem;color:#475569">편직</span>
+            <span style="font-size:.58rem;color:#475569">염색</span>
+            <span style="font-size:.58rem;color:#475569">완료</span>
+          </div>
+        </div>
+      </div>
+      <!-- developer assignment table -->
+      <div class="prev-box" style="margin-bottom:12px">
+        <div class="prev-box-title">담당자별 시즌 과제 현황</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+          <div style="display:grid;grid-template-columns:100px repeat(5,1fr);gap:8px">
+            <div class="prev-skeleton prev-row-line" style="width:70%"></div>
+            <div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div>
+            <div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div>
+            <div class="prev-skeleton prev-row-line"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:100px repeat(5,1fr);gap:8px">
+            <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+            <div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div>
+            <div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div>
+            <div class="prev-skeleton prev-row-line"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:100px repeat(5,1fr);gap:8px">
+            <div class="prev-skeleton prev-row-line" style="width:65%"></div>
+            <div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div>
+            <div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div>
+            <div class="prev-skeleton prev-row-line"></div>
+          </div>
+        </div>
+      </div>
+      <!-- milestone timeline -->
+      <div class="prev-box">
+        <div class="prev-box-title">시즌 마일스톤 타임라인 — 주요 컷오프 일정</div>
+        <div class="prev-timeline" style="margin-top:10px">
+          <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">접수마감</div></div>
+          <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">원사발주</div></div>
+          <div class="prev-tl-step"><div class="prev-tl-dot active"></div><div class="prev-tl-lbl">편직마감</div></div>
+          <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">염색마감</div></div>
+          <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">RDDA제출</div></div>
+          <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">시즌완료</div></div>
+        </div>
+      </div>
+      <div class="prev-note">📐 시즌·카테고리·담당자를 교차 분석하는 FABRIC R&D 통합 현황판입니다.<br>샘플 관리 대장 데이터를 기반으로 자동 집계됩니다.</div>
+    </div>
+  </div>
+
+  <!-- ── MACRO TREND ── -->
+  <div class="screen" id="screen-macro-trend">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">MACRO TREND <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">시즌 방향성 · 글로벌 트렌드 · 컬러 / 소재 / 무드 아카이브</div>
+      </div>
+      <!-- season + year selector -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+        <div style="font-size:.6rem;font-weight:700;color:#475569;letter-spacing:.1em;margin-right:4px">SEASON</div>
+        <div class="prev-tab">SS26</div><div class="prev-tab on">FW26</div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <div class="prev-tab on">OVERVIEW</div>
+          <div class="prev-tab">COLOR</div>
+          <div class="prev-tab">MATERIAL</div>
+          <div class="prev-tab">MOOD</div>
+        </div>
+      </div>
+      <!-- direction cards -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+        <div class="prev-box" style="border-top:2px solid rgba(6,182,212,.4)">
+          <div class="prev-box-title" style="color:#67e8f9">COLOR DIRECTION</div>
+          <div style="display:flex;gap:5px;margin-bottom:10px">
+            <div style="width:24px;height:24px;border-radius:4px;background:rgba(6,182,212,.5)"></div>
+            <div style="width:24px;height:24px;border-radius:4px;background:rgba(100,116,139,.6)"></div>
+            <div style="width:24px;height:24px;border-radius:4px;background:rgba(16,185,129,.4)"></div>
+            <div style="width:24px;height:24px;border-radius:4px;background:rgba(245,158,11,.4)"></div>
+          </div>
+          <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+        </div>
+        <div class="prev-box" style="border-top:2px solid rgba(139,92,246,.4)">
+          <div class="prev-box-title" style="color:#c4b5fd">MATERIAL</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px">
+            <div class="prev-skeleton prev-row-line" style="width:70%"></div>
+            <div class="prev-skeleton prev-row-line" style="width:55%"></div>
+          </div>
+          <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+        </div>
+        <div class="prev-box" style="border-top:2px solid rgba(245,158,11,.4)">
+          <div class="prev-box-title" style="color:#fbbf24">FUNCTION</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px">
+            <div class="prev-skeleton prev-row-line" style="width:65%"></div>
+            <div class="prev-skeleton prev-row-line" style="width:75%"></div>
+          </div>
+          <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+        </div>
+        <div class="prev-box" style="border-top:2px solid rgba(16,185,129,.4)">
+          <div class="prev-box-title" style="color:#34d399">SUSTAINABILITY</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px">
+            <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+            <div class="prev-skeleton prev-row-line" style="width:60%"></div>
+          </div>
+          <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+        </div>
+      </div>
+      <!-- mood board + keywords -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">MOOD BOARD — 이미지 아카이브</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px">
+            <div class="prev-skeleton" style="height:70px;border-radius:6px"></div>
+            <div class="prev-skeleton" style="height:70px;border-radius:6px"></div>
+            <div class="prev-skeleton" style="height:70px;border-radius:6px"></div>
+            <div class="prev-skeleton" style="height:70px;border-radius:6px"></div>
+            <div class="prev-skeleton" style="height:70px;border-radius:6px"></div>
+            <div class="prev-skeleton" style="height:70px;border-radius:6px"></div>
+            <div class="prev-skeleton" style="height:70px;border-radius:6px"></div>
+            <div class="prev-skeleton" style="height:70px;border-radius:6px"></div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">TREND KEYWORDS</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+            <div class="prev-skeleton" style="height:22px;width:65px;border-radius:11px"></div>
+            <div class="prev-skeleton" style="height:22px;width:80px;border-radius:11px"></div>
+            <div class="prev-skeleton" style="height:22px;width:55px;border-radius:11px"></div>
+            <div class="prev-skeleton" style="height:22px;width:72px;border-radius:11px"></div>
+            <div class="prev-skeleton" style="height:22px;width:60px;border-radius:11px"></div>
+            <div class="prev-skeleton" style="height:22px;width:88px;border-radius:11px"></div>
+            <div class="prev-skeleton" style="height:22px;width:50px;border-radius:11px"></div>
+            <div class="prev-skeleton" style="height:22px;width:76px;border-radius:11px"></div>
+          </div>
+          <div class="prev-divider" style="margin-top:14px"></div>
+          <div class="prev-box-title" style="margin-top:10px">REFERENCE SOURCE</div>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-top:6px">
+            <div class="prev-skeleton prev-row-line" style="width:75%"></div>
+            <div class="prev-skeleton prev-row-line" style="width:65%"></div>
+            <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="prev-note">🌐 Première Vision · ITMA · 전시회 리포트 등 외부 트렌드 자료를 시즌별로 아카이브합니다.<br>이미지 업로드 및 키워드 태깅 기능 예정.</div>
+    </div>
+  </div>
+
+  <!-- ── FABRIC TREND ── -->
+  <div class="screen" id="screen-fabric-trend">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">FABRIC TREND <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">소재 · 구성 · 기능성 트렌드 분석 · 경쟁사 동향 · 신기술 트래킹</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div class="prev-tab on">ALL</div>
+        <div class="prev-tab">YARN</div>
+        <div class="prev-tab">CONSTRUCTION</div>
+        <div class="prev-tab">FUNCTION</div>
+        <div class="prev-tab">SUSTAINABILITY</div>
+      </div>
+      <!-- trend cards grid -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
+        <div class="prev-box" style="border-left:3px solid rgba(6,182,212,.5)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div class="prev-proj-tag" style="background:rgba(6,182,212,.12);color:#67e8f9;margin-bottom:0">YARN</div>
+            <div class="prev-skeleton" style="height:9px;width:40px;border-radius:3px"></div>
+          </div>
+          <div class="prev-skeleton prev-row-line" style="width:90%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:75%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:60%"></div>
+        </div>
+        <div class="prev-box" style="border-left:3px solid rgba(139,92,246,.5)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div class="prev-proj-tag" style="background:rgba(139,92,246,.12);color:#c4b5fd;margin-bottom:0">CONSTRUCTION</div>
+            <div class="prev-skeleton" style="height:9px;width:40px;border-radius:3px"></div>
+          </div>
+          <div class="prev-skeleton prev-row-line" style="width:85%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:70%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:55%"></div>
+        </div>
+        <div class="prev-box" style="border-left:3px solid rgba(16,185,129,.5)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div class="prev-proj-tag" style="background:rgba(16,185,129,.12);color:#34d399;margin-bottom:0">SUSTAINABILITY</div>
+            <div class="prev-skeleton" style="height:9px;width:40px;border-radius:3px"></div>
+          </div>
+          <div class="prev-skeleton prev-row-line" style="width:80%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:65%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:70%"></div>
+        </div>
+      </div>
+      <!-- adoption tracking -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">트렌드 채택 현황 — 자사 반영률</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:50%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:72%;background:linear-gradient(90deg,#0e7490,#06b6d4)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:42%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:45%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:55%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:88%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div></div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">시즌별 신소재 도입 트렌드</div>
+          <div class="prev-bars" style="height:80px">
+            <div class="prev-bar prev-bar-cyan" style="height:45%"></div>
+            <div class="prev-bar prev-bar-cyan" style="height:60%"></div>
+            <div class="prev-bar prev-bar-cyan" style="height:55%"></div>
+            <div class="prev-bar prev-bar-cyan" style="height:75%"></div>
+            <div class="prev-bar prev-bar-cyan" style="height:65%"></div>
+            <div class="prev-bar prev-bar-cyan" style="height:85%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="prev-note">🧵 구성·원사·기능성별 소재 트렌드를 기록하고 시즌 반영 현황을 추적합니다.<br>FL No. 연결로 실제 개발 샘플과 트렌드 정보를 매핑합니다.</div>
+    </div>
+  </div>
+
+  <!-- ── PORTFOLIO ── -->
+  <div class="screen" id="screen-portfolio">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">PORTFOLIO <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">완성 패브릭 아카이브 · 시즌 · 카테고리 · 구성별 카탈로그</div>
+      </div>
+      <!-- filter bar -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+        <div style="font-size:.6rem;font-weight:700;color:#475569;letter-spacing:.1em">FILTER</div>
+        <div class="prev-tab on">ALL</div>
+        <div class="prev-tab">SS26</div><div class="prev-tab">FW26</div>
+        <div style="width:1px;height:16px;background:rgba(255,255,255,.1)"></div>
+        <div class="prev-tab">GD</div><div class="prev-tab">국내</div><div class="prev-tab">EU</div>
+        <div style="width:1px;height:16px;background:rgba(255,255,255,.1)"></div>
+        <div class="prev-tab">KNIT</div><div class="prev-tab">WOVEN</div>
+        <div style="margin-left:auto">
+          <div class="prev-tab" style="cursor:default">⊞ 카드뷰</div>
+        </div>
+      </div>
+      <!-- fabric card grid -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div class="prev-box" style="padding:14px">
+          <div class="prev-skeleton" style="height:100px;border-radius:6px;margin-bottom:10px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:60%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:85%;margin-bottom:8px"></div>
+          <div style="display:flex;gap:5px"><div class="prev-proj-tag" style="background:rgba(6,182,212,.12);color:#67e8f9;margin-bottom:0;font-size:.5rem;padding:2px 7px">SS26</div><div class="prev-proj-tag" style="background:rgba(139,92,246,.12);color:#c4b5fd;margin-bottom:0;font-size:.5rem;padding:2px 7px">GD</div></div>
+        </div>
+        <div class="prev-box" style="padding:14px">
+          <div class="prev-skeleton" style="height:100px;border-radius:6px;margin-bottom:10px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:55%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:80%;margin-bottom:8px"></div>
+          <div style="display:flex;gap:5px"><div class="prev-proj-tag" style="background:rgba(245,158,11,.12);color:#fbbf24;margin-bottom:0;font-size:.5rem;padding:2px 7px">FW25</div><div class="prev-proj-tag" style="background:rgba(16,185,129,.12);color:#34d399;margin-bottom:0;font-size:.5rem;padding:2px 7px">국내</div></div>
+        </div>
+        <div class="prev-box" style="padding:14px">
+          <div class="prev-skeleton" style="height:100px;border-radius:6px;margin-bottom:10px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:65%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:75%;margin-bottom:8px"></div>
+          <div style="display:flex;gap:5px"><div class="prev-proj-tag" style="background:rgba(6,182,212,.12);color:#67e8f9;margin-bottom:0;font-size:.5rem;padding:2px 7px">SS26</div><div class="prev-proj-tag" style="background:rgba(239,68,68,.12);color:#fca5a5;margin-bottom:0;font-size:.5rem;padding:2px 7px">EU</div></div>
+        </div>
+        <div class="prev-box" style="padding:14px">
+          <div class="prev-skeleton" style="height:100px;border-radius:6px;margin-bottom:10px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:58%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:82%;margin-bottom:8px"></div>
+          <div style="display:flex;gap:5px"><div class="prev-proj-tag" style="background:rgba(245,158,11,.12);color:#fbbf24;margin-bottom:0;font-size:.5rem;padding:2px 7px">FW26</div><div class="prev-proj-tag" style="background:rgba(139,92,246,.12);color:#c4b5fd;margin-bottom:0;font-size:.5rem;padding:2px 7px">GD</div></div>
+        </div>
+        <div class="prev-box" style="padding:14px">
+          <div class="prev-skeleton" style="height:100px;border-radius:6px;margin-bottom:10px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:62%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:78%;margin-bottom:8px"></div>
+          <div style="display:flex;gap:5px"><div class="prev-proj-tag" style="background:rgba(16,185,129,.12);color:#34d399;margin-bottom:0;font-size:.5rem;padding:2px 7px">SS26</div><div class="prev-proj-tag" style="background:rgba(139,92,246,.12);color:#c4b5fd;margin-bottom:0;font-size:.5rem;padding:2px 7px">GD</div></div>
+        </div>
+        <div class="prev-box" style="padding:14px">
+          <div class="prev-skeleton" style="height:100px;border-radius:6px;margin-bottom:10px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:52%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:88%;margin-bottom:8px"></div>
+          <div style="display:flex;gap:5px"><div class="prev-proj-tag" style="background:rgba(6,182,212,.12);color:#67e8f9;margin-bottom:0;font-size:.5rem;padding:2px 7px">FW25</div><div class="prev-proj-tag" style="background:rgba(239,68,68,.12);color:#fca5a5;margin-bottom:0;font-size:.5rem;padding:2px 7px">EU</div></div>
+        </div>
+        <div class="prev-box" style="padding:14px">
+          <div class="prev-skeleton" style="height:100px;border-radius:6px;margin-bottom:10px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:68%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:72%;margin-bottom:8px"></div>
+          <div style="display:flex;gap:5px"><div class="prev-proj-tag" style="background:rgba(245,158,11,.12);color:#fbbf24;margin-bottom:0;font-size:.5rem;padding:2px 7px">FW26</div><div class="prev-proj-tag" style="background:rgba(16,185,129,.12);color:#34d399;margin-bottom:0;font-size:.5rem;padding:2px 7px">국내</div></div>
+        </div>
+        <div class="prev-box" style="padding:14px;border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
+          <div style="font-size:1.5rem;opacity:.2">＋</div>
+          <div style="font-size:.62rem;color:#374151;font-weight:600">패브릭 등록</div>
+        </div>
+      </div>
+      <div class="prev-note">📁 시즌별 완성 패브릭을 FL No. 기준으로 카탈로그화합니다.<br>이미지·구성·원사·용도 등 스펙 정보와 함께 아카이브됩니다.</div>
     </div>
   </div>
 
