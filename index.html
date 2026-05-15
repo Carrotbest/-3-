@@ -30,59 +30,159 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
   scrollbar-width:none;position:fixed;left:0;top:0;z-index:100;
 }
 .sidebar::-webkit-scrollbar{display:none}
+
+/* ── Logo ── */
 .sidebar-logo{
-  padding:22px 20px 18px;border-bottom:1px solid var(--sidebar-border);
-  flex-shrink:0;
+  padding:20px 18px 17px;border-bottom:1px solid var(--sidebar-border);
+  flex-shrink:0;cursor:pointer;display:flex;align-items:center;gap:11px;
+  transition:background .2s;
 }
-.sidebar-logo .logo-icon{font-size:1.4rem;margin-bottom:6px}
-.sidebar-logo .logo-title{
-  font-size:.78rem;font-weight:800;letter-spacing:.06em;
-  background:linear-gradient(135deg,#c4b5fd,#67e8f9);
+.sidebar-logo:hover{background:rgba(6,182,212,.05)}
+.sidebar-logo svg{display:block;flex-shrink:0}
+.logo-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:.88rem;font-weight:800;letter-spacing:.05em;line-height:1.15;
+  background:linear-gradient(115deg,#f1f5f9 20%,#06b6d4 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  line-height:1.4;
 }
-.sidebar-logo .logo-sub{font-size:.62rem;color:var(--muted);margin-top:3px;letter-spacing:.04em}
-.nav-body{flex:1;padding:10px 0 20px}
+.logo-sub{font-size:.54rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#334155;margin-top:3px}
 
-/* 그룹 헤더 */
-.nav-group-header{
-  padding:14px 20px 4px;
-  font-size:.6rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--muted);
+/* ── Nav body ── */
+.nav-body{flex:1;padding:12px 0 0;display:flex;flex-direction:column}
+
+/* ── HOME standalone ── */
+.nav-home{
+  font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:9px 18px 9px 16px;cursor:pointer;color:var(--muted);
+  border-left:2px solid transparent;
+  transition:color .18s,background .18s,border-color .18s,text-shadow .18s;
+  margin-bottom:8px;user-select:none;
 }
-/* 일반 메뉴 아이템 */
+.nav-home:hover,.nav-home.active{
+  color:#e2e8f0;border-left-color:#e2e8f0;background:rgba(226,232,240,.06);
+  text-shadow:0 0 16px rgba(226,232,240,.45),0 0 36px rgba(226,232,240,.12);
+}
+
+/* ── Section block ── */
+.nav-section{margin-bottom:2px;position:relative}
+
+/* Section label — bigger than items below */
+.nav-section-label{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:.76rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  padding:10px 18px 6px 14px;display:flex;align-items:center;gap:8px;
+  color:var(--sc,var(--muted));cursor:default;user-select:none;
+}
+.nav-section-label::before{
+  content:'';width:3px;height:13px;border-radius:2px;
+  background:var(--sc,var(--muted));flex-shrink:0;opacity:.8;
+}
+.nav-section-label::after{
+  content:'';flex:1;height:1px;margin-left:6px;
+  background:linear-gradient(90deg,var(--sc,var(--muted)),transparent);opacity:.18;
+}
+
+/* Items wrapper with connector rail */
+.nav-items{position:relative;padding-bottom:6px}
+.nav-items::before{
+  content:'';position:absolute;left:15px;top:2px;bottom:10px;width:1px;
+  background:linear-gradient(180deg,var(--sc,rgba(255,255,255,.1)) 0%,transparent 100%);
+  opacity:.15;pointer-events:none;
+}
+
+/* Nav item — smaller than section label */
 .nav-item{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 20px;margin:1px 8px;border-radius:8px;
-  font-size:.78rem;font-weight:500;color:var(--dim);
-  cursor:pointer;transition:background .15s,color .15s;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:.64rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  padding:7px 18px 7px 28px;cursor:pointer;color:var(--muted);
+  border-left:2px solid transparent;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:color .16s,background .16s,border-color .16s,text-shadow .16s;
+  position:relative;user-select:none;
+}
+.nav-item::before{
+  content:'';position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  width:4px;height:4px;border-radius:50%;
+  background:var(--sc,var(--muted));opacity:0;transition:opacity .16s;
+}
+.nav-item:hover::before,.nav-item.active::before{opacity:.5}
+.nav-item:hover{
+  color:var(--sc,var(--muted));
+  background:linear-gradient(90deg,rgba(var(--sc-rgb,100,116,139),.07),transparent);
+  border-left-color:rgba(var(--sc-rgb,100,116,139),.5);
+  text-shadow:0 0 12px var(--sc,var(--muted)),0 0 28px rgba(var(--sc-rgb,100,116,139),.2);
+}
+.nav-item.active{
+  color:var(--sc,var(--muted));
+  background:linear-gradient(90deg,rgba(var(--sc-rgb,100,116,139),.1),transparent);
+  border-left-color:var(--sc,var(--muted));font-weight:600;
+  text-shadow:0 0 10px var(--sc,var(--muted));
+}
+
+/* Arrow */
+.nav-arrow{
+  width:11px;height:11px;opacity:.3;flex-shrink:0;
+  transition:transform .28s cubic-bezier(.4,0,.2,1),opacity .18s;
+}
+.nav-arrow svg{display:block;width:100%;height:100%}
+.nav-item:hover .nav-arrow{opacity:.65}
+.nav-item.is-open .nav-arrow{transform:rotate(90deg);opacity:.75}
+
+/* Sub-menu */
+.nav-sub{
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .25s ease;
+}
+.nav-sub.open{max-height:220px;opacity:1}
+
+/* Sub-item */
+.nav-sub-item{
+  font-size:.6rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  padding:6px 18px 6px 42px;cursor:pointer;color:#334155;
+  border-left:2px solid transparent;position:relative;
+  transition:color .15s,background .15s,border-color .15s,text-shadow .15s;
   user-select:none;
 }
-.nav-item:hover{background:rgba(255,255,255,0.06);color:var(--text)}
-.nav-item.active{background:rgba(139,92,246,0.18);color:#c4b5fd;font-weight:700}
-.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px rgba(139,92,246,0.6))}
-.nav-icon{font-size:.95rem;flex-shrink:0;width:18px;text-align:center}
-.nav-label{flex:1;overflow:hidden;text-overflow:ellipsis}
-.nav-arrow{font-size:.65rem;color:var(--muted);transition:transform .25s;flex-shrink:0}
-.nav-arrow.open{transform:rotate(90deg)}
-
-/* 확장 서브메뉴 */
-.nav-sub{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1)}
-.nav-sub.open{max-height:300px}
-.nav-sub-item{padding:6px 20px 6px 46px;font-size:.74rem}
-.nav-divider{height:1px;background:var(--sidebar-border);margin:8px 16px}
-
-/* ── TOP-LEVEL LABELS (HOME, PROCESS INNOVATION, etc.) ── */
-.nav-section-item{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 20px;margin:1px 8px;border-radius:8px;
-  font-size:.8rem;font-weight:600;color:var(--dim);
-  cursor:pointer;transition:background .15s,color .15s;
-  user-select:none;
+.nav-sub-item::before{
+  content:'—';position:absolute;left:26px;font-size:.42rem;
+  color:var(--sc,var(--muted));opacity:.22;transition:opacity .15s;
 }
-.nav-section-item:hover{background:rgba(255,255,255,0.06);color:var(--text)}
-.nav-section-item.active{background:rgba(139,92,246,0.18);color:#c4b5fd;font-weight:700}
+.nav-sub-item:hover{
+  color:var(--sc,var(--muted));
+  background:rgba(var(--sc-rgb,100,116,139),.05);
+  border-left-color:rgba(var(--sc-rgb,100,116,139),.3);
+  text-shadow:0 0 8px rgba(var(--sc-rgb,100,116,139),.55);
+}
+.nav-sub-item:hover::before{opacity:.6}
+.nav-sub-item.active{color:var(--sc,var(--muted));border-left-color:var(--sc,var(--muted));font-weight:600}
+
+/* Divider */
+.nav-divider{height:1px;background:var(--sidebar-border);margin:6px 14px}
+
+/* Misc zone — CALENDAR / PROCESS INNOVATION / SETTING */
+.nav-misc-zone{
+  margin-top:4px;padding:6px 0 16px;
+  background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.04);
+  position:relative;
+}
+.nav-misc-zone::before{
+  content:'OTHER';display:block;
+  font-size:.46rem;font-weight:700;letter-spacing:.2em;
+  color:#1a2540;padding:6px 18px 2px;text-transform:uppercase;
+}
+.nav-misc-item{
+  font-size:.62rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;
+  padding:7px 18px 7px 20px;cursor:pointer;color:#2d3a4e;
+  border-left:2px solid transparent;user-select:none;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:color .16s,background .16s,border-color .16s;
+}
+.nav-misc-item:hover{color:#64748b;background:rgba(71,85,105,.06);border-left-color:#475569}
+.nav-misc-item.active{color:#64748b;border-left-color:#64748b;background:rgba(100,116,139,.06);font-weight:600}
+
+/* Section color vars */
+.s-fabric{--sc:#06b6d4;--sc-rgb:6,182,212}
+.s-tech  {--sc:#a78bfa;--sc-rgb:167,139,250}
+.s-trend {--sc:#fbbf24;--sc-rgb:251,191,36}
 
 /* ══ MAIN ══ */
 .main{
@@ -846,85 +946,79 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 
 <!-- ══════════ SIDEBAR ══════════ -->
 <aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-icon">🧵</div>
-    <div class="logo-title">PERFORMANCE &<br>SUSTAINABILITY</div>
-    <div class="logo-sub">FABRIC DEVELOPMENT</div>
+
+  <!-- LOGO — click → HOME -->
+  <div class="sidebar-logo" id="sidebarLogo">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+      <rect width="34" height="34" rx="8" fill="rgba(6,182,212,0.09)"/>
+      <line x1="9"  y1="7" x2="9"  y2="27" stroke="rgba(6,182,212,0.3)"  stroke-width="1.3" stroke-linecap="round"/>
+      <line x1="17" y1="6" x2="17" y2="28" stroke="rgba(6,182,212,0.55)" stroke-width="1.3" stroke-linecap="round"/>
+      <line x1="25" y1="7" x2="25" y2="27" stroke="rgba(6,182,212,0.3)"  stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M6 11 Q11 8.5 17 11 Q23 13.5 28 11" stroke="rgba(255,255,255,0.22)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+      <path d="M6 17 Q11 19.5 17 17 Q23 14.5 28 17" stroke="rgba(255,255,255,0.38)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+      <path d="M6 23 Q11 20.5 17 23 Q23 25.5 28 23" stroke="rgba(255,255,255,0.22)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+      <circle cx="17" cy="17" r="2.2" fill="#06b6d4" opacity=".65"/>
+      <circle cx="17" cy="17" r="3.8" fill="none" stroke="rgba(6,182,212,0.25)" stroke-width=".8"/>
+    </svg>
+    <div>
+      <div class="logo-title">FABRIC R&D</div>
+      <div class="logo-sub">Development Studio</div>
+    </div>
   </div>
+
   <nav class="nav-body">
 
     <!-- HOME -->
-    <div class="nav-section-item active" data-nav="home">
-      <span class="nav-icon">🏠</span><span class="nav-label">HOME</span>
-    </div>
+    <div class="nav-home active" data-nav="home">HOME</div>
 
-    <div class="nav-divider"></div>
-
-    <!-- FABRIC R&D -->
-    <div class="nav-group-header">FABRIC R&D</div>
-    <div class="nav-item" data-nav="overview">
-      <span class="nav-icon">📐</span><span class="nav-label">OVERVIEW</span>
-    </div>
-    <div class="nav-item" data-nav="rdda">
-      <span class="nav-icon">📊</span><span class="nav-label">RDDA ANALYSIS</span>
-    </div>
-    <div class="nav-group-block" data-block="project">
-      <div class="nav-item" id="nav-project-toggle" data-nav-toggle="project-sub">
-        <span class="nav-icon">🧪</span><span class="nav-label">PROJECT</span>
-        <span class="nav-arrow" id="project-arrow">›</span>
-      </div>
-      <div class="nav-sub" id="project-sub">
-        <div class="nav-item nav-sub-item" data-nav="project-board">
-          <span class="nav-icon">📋</span><span class="nav-label">BOARD</span>
+    <!-- ── FABRIC R&D ── -->
+    <div class="nav-section s-fabric">
+      <div class="nav-section-label s-fabric">Fabric R&D</div>
+      <div class="nav-items s-fabric">
+        <div class="nav-item s-fabric" data-nav="overview">OVERVIEW</div>
+        <div class="nav-item s-fabric" data-nav="rdda">RDDA ANALYSIS</div>
+        <div class="nav-item s-fabric is-open" id="nav-project-toggle">
+          PROJECT
+          <span class="nav-arrow">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M4 2.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
         </div>
-        <div class="nav-item nav-sub-item" data-nav="gantt">
-          <span class="nav-icon">📅</span><span class="nav-label">GANTT CHART</span>
+        <div class="nav-sub open" id="project-sub">
+          <div class="nav-sub-item s-fabric" data-nav="project-board">BOARD</div>
+          <div class="nav-sub-item s-fabric" data-nav="gantt">GANTT CHART</div>
         </div>
+        <div class="nav-item s-fabric" data-nav="kpi-report">KPI REPORT</div>
       </div>
     </div>
-    <div class="nav-item" data-nav="kpi-report">
-      <span class="nav-icon">📋</span><span class="nav-label">KPI REPORT</span>
+
+    <div class="nav-divider"></div>
+
+    <!-- ── TECHNICAL SERVICES ── -->
+    <div class="nav-section s-tech">
+      <div class="nav-section-label s-tech">Technical Services</div>
+      <div class="nav-items s-tech">
+        <div class="nav-item s-tech" data-nav="fabric-analysis">FABRIC ANALYSIS</div>
+        <div class="nav-item s-tech" data-nav="trouble-shooting">TROUBLE SHOOTING</div>
+      </div>
     </div>
 
     <div class="nav-divider"></div>
 
-    <!-- TECHNICAL SERVICES -->
-    <div class="nav-group-header">TECHNICAL SERVICES</div>
-    <div class="nav-item" data-nav="fabric-analysis">
-      <span class="nav-icon">🔬</span><span class="nav-label">FABRIC ANALYSIS</span>
-    </div>
-    <div class="nav-item" data-nav="trouble-shooting">
-      <span class="nav-icon">🔧</span><span class="nav-label">TROUBLE SHOOTING</span>
-    </div>
-
-    <div class="nav-divider"></div>
-
-    <!-- TREND REPORT -->
-    <div class="nav-group-header">TREND REPORT</div>
-    <div class="nav-item" data-nav="macro-trend">
-      <span class="nav-icon">🌐</span><span class="nav-label">MACRO TREND</span>
-    </div>
-    <div class="nav-item" data-nav="fabric-trend">
-      <span class="nav-icon">🧵</span><span class="nav-label">FABRIC TREND</span>
-    </div>
-    <div class="nav-item" data-nav="portfolio">
-      <span class="nav-icon">📁</span><span class="nav-label">PORTFOLIO</span>
+    <!-- ── TREND REPORT ── -->
+    <div class="nav-section s-trend">
+      <div class="nav-section-label s-trend">Trend Report</div>
+      <div class="nav-items s-trend">
+        <div class="nav-item s-trend" data-nav="macro-trend">MACRO TREND</div>
+        <div class="nav-item s-trend" data-nav="fabric-trend">FABRIC TREND</div>
+        <div class="nav-item s-trend" data-nav="portfolio">PORTFOLIO</div>
+      </div>
     </div>
 
-    <div class="nav-divider"></div>
-
-    <!-- STANDALONE -->
-    <div class="nav-item" data-nav="calendar">
-      <span class="nav-icon">📅</span><span class="nav-label">CALENDAR</span>
-    </div>
-    <div class="nav-item" data-nav="process-innovation">
-      <span class="nav-icon">⚡</span><span class="nav-label">PROCESS INNOVATION</span>
-    </div>
-
-    <div class="nav-divider"></div>
-
-    <div class="nav-section-item" data-nav="setting">
-      <span class="nav-icon">⚙</span><span class="nav-label">SETTING</span>
+    <!-- ── MISC (기타) ── -->
+    <div class="nav-misc-zone">
+      <div class="nav-misc-item" data-nav="calendar">CALENDAR</div>
+      <div class="nav-misc-item" data-nav="process-innovation">PROCESS INNOVATION</div>
+      <div class="nav-misc-item" data-nav="setting">SETTING</div>
     </div>
 
   </nav>
@@ -2159,7 +2253,7 @@ function showScreen(id){
     next.classList.add('active');
     requestAnimationFrame(()=>requestAnimationFrame(()=>next.classList.add('visible')));
   }
-  // 사이드바 active 업데이트
+  // 사이드바 active 업데이트 (nav-home + nav-item + nav-sub-item + nav-misc-item)
   document.querySelectorAll('[data-nav]').forEach(el=>{
     el.classList.toggle('active', el.dataset.nav===id);
   });
@@ -2171,17 +2265,23 @@ function showScreen(id){
   if(id==='setting')  initSetting();
 }
 
-// 사이드바 클릭
+// 사이드바 클릭 (nav-home + nav-item + nav-sub-item + nav-misc-item)
 document.querySelectorAll('[data-nav]').forEach(el=>{
-  el.addEventListener('click',()=>showScreen(el.dataset.nav));
+  el.addEventListener('click', e=>{
+    e.stopPropagation();
+    showScreen(el.dataset.nav);
+  });
 });
-// PROJECT 확장
+// 로고 클릭 → HOME
+document.getElementById('sidebarLogo').addEventListener('click',()=>showScreen('home'));
+
+// PROJECT 토글 (is-open 클래스 + sub open)
 document.getElementById('nav-project-toggle').addEventListener('click',e=>{
   e.stopPropagation();
-  const sub=document.getElementById('project-sub');
-  const arr=document.getElementById('project-arrow');
-  sub.classList.toggle('open');
-  arr.classList.toggle('open');
+  const sub  = document.getElementById('project-sub');
+  const btn  = document.getElementById('nav-project-toggle');
+  const open = sub.classList.toggle('open');
+  btn.classList.toggle('is-open', open);
 });
 
 // ── Firebase 구독
