@@ -747,13 +747,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .hp-rdda-note{font-size:.58rem;color:#475569;margin-top:10px;line-height:1.6}
 
 /* ── HP modal ── */
+#hpModalOverlay{z-index:9000}
 .hp-modal-box{
   background:#0f1520;
   border:1px solid rgba(255,255,255,.12);
   border-radius:18px;
   padding:28px 32px;
   min-width:400px;max-width:560px;width:90%;
-  max-height:80vh;overflow-y:auto;
+  max-height:78vh;overflow-y:auto;
   transform:translateY(18px) scale(.97);
   transition:transform .22s ease;
   position:relative;
@@ -1023,25 +1024,21 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
             <div class="hp-lt-label">이번주 완료</div>
             <div class="hp-lt-val" style="color:#34d399" id="hpLtWeek">—<span class="hp-lt-unit">건</span></div>
             <div class="hp-lt-sub">현황 & 창고보관 시트 FINISH DATE 기준</div>
-            <div class="hp-lt-note">기존 대장 모든 시트에 열 추가 예정</div>
           </div>
           <div class="hp-lt-card" data-lt="1">
             <div class="hp-lt-label">이번달 완료</div>
             <div class="hp-lt-val" style="color:#67e8f9" id="hpLtMonth">—<span class="hp-lt-unit">건</span></div>
             <div class="hp-lt-sub">현황 & 창고보관 시트 FINISH DATE 기준</div>
-            <div class="hp-lt-note">기존 대장 모든 시트에 열 추가 예정</div>
           </div>
-          <div class="hp-lt-card" data-lt="2">
+          <div class="hp-lt-card" data-lt="2" id="hpLtKnitCard">
             <div class="hp-lt-label">편직 리드타임</div>
             <div class="hp-lt-val" style="color:#c4b5fd" id="hpLtKnit">—<span class="hp-lt-unit">일</span></div>
-            <div class="hp-lt-sub">최근 1개월 기준<br>원사입고일 → 편직완료일 평균</div>
-            <div class="hp-lt-note">완료 샘플 기준 산출</div>
+            <div class="hp-lt-sub">현황 전체 기준 · 원사입고일 → 편직완료일</div>
           </div>
-          <div class="hp-lt-card" data-lt="3">
+          <div class="hp-lt-card" data-lt="3" id="hpLtSampleCard">
             <div class="hp-lt-label">샘플 리드타임</div>
             <div class="hp-lt-val" style="color:#fbbf24" id="hpLtSample">—<span class="hp-lt-unit">일</span></div>
-            <div class="hp-lt-sub">최근 1개월 기준<br>원사입고일 → FINISH DATE 평균</div>
-            <div class="hp-lt-note">완료 샘플 기준 산출</div>
+            <div class="hp-lt-sub">FINISH DATE 기재 건 · 원사입고일 → FINISH DATE</div>
           </div>
         </div>
       </div>
@@ -1057,18 +1054,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
       </div>
 
       <!-- HP Modal -->
-      <div class="modal-overlay" id="hpModalOverlay" onclick="if(event.target===this)hpCloseModal()">
-        <div class="hp-modal-box">
-          <div class="hp-modal-hdr">
-            <div>
-              <div class="hp-modal-title" id="hpModalTitle"></div>
-              <div class="hp-modal-subtitle" id="hpModalSubtitle"></div>
-            </div>
-            <div class="hp-modal-close" onclick="hpCloseModal()">✕</div>
-          </div>
-          <div class="hp-modal-body" id="hpModalBody"></div>
-        </div>
-      </div>
 
     </div>
   </div>
@@ -3010,11 +2995,67 @@ function renderHpHome(data){
   const {months, gd, dom, bulk} = data.rdda;
   hpRenderRddaChart(months, gd, dom, bulk);
 
-  // 10. Lead time (placeholder from parsed data)
+  // 10. Lead time
   const lt = data.leadTime;
   if(lt){
     setText('hpLtKnit',   lt.avgKnit!=null   ? lt.avgKnit.toString()   : '—');
     setText('hpLtSample', lt.avgSample!=null  ? lt.avgSample.toString() : '—');
+
+    // ── 편직 리드타임 popup
+    const knitCard = document.getElementById('hpLtKnitCard');
+    if(knitCard){
+      knitCard.onclick = ()=>{
+        const items = lt.knitItems||[];
+        if(!items.length){ hpOpenModal('편직 리드타임','데이터 없음','<div style="color:#475569;font-size:.68rem">유효한 원사입고일 · 편직완료일 데이터가 없습니다.</div>'); return; }
+        const tblRows = items.map((x,idx)=>`<tr>
+          <td style="color:#64748b;padding-right:10px">${idx+1}</td>
+          <td style="font-family:monospace;font-size:.65rem;color:#e2e8f0;padding-right:14px">${x.label}</td>
+          <td style="color:#94a3b8;padding-right:10px">${x.yarnStr}</td>
+          <td style="color:#94a3b8;padding-right:10px">${x.knitStr}</td>
+          <td style="color:#c4b5fd;font-weight:700;text-align:right">${x.days}일</td>
+        </tr>`).join('');
+        hpOpenModal('편직 리드타임',
+          `현황 전체 ${items.length}건 · 평균 ${lt.avgKnit}일 · 원사입고 → 편직완료`,
+          `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.68rem">
+            <thead><tr style="border-bottom:1px solid rgba(255,255,255,.1);color:#475569">
+              <th style="padding-bottom:8px;text-align:left">#</th>
+              <th style="padding-bottom:8px;text-align:left">스타일 / FL#</th>
+              <th style="padding-bottom:8px;text-align:left">원사입고일</th>
+              <th style="padding-bottom:8px;text-align:left">편직완료일</th>
+              <th style="padding-bottom:8px;text-align:right">소요일</th>
+            </tr></thead>
+            <tbody>${tblRows}</tbody>
+          </table></div>`);
+      };
+    }
+
+    // ── 샘플 리드타임 popup
+    const sampleCard = document.getElementById('hpLtSampleCard');
+    if(sampleCard){
+      sampleCard.onclick = ()=>{
+        const items = lt.sampleItems||[];
+        if(!items.length){ hpOpenModal('샘플 리드타임','데이터 없음','<div style="color:#475569;font-size:.68rem">유효한 원사입고일 · FINISH DATE 데이터가 없습니다.</div>'); return; }
+        const tblRows = items.map((x,idx)=>`<tr>
+          <td style="color:#64748b;padding-right:10px">${idx+1}</td>
+          <td style="font-family:monospace;font-size:.65rem;color:#e2e8f0;padding-right:14px">${x.label}</td>
+          <td style="color:#94a3b8;padding-right:10px">${x.yarnStr}</td>
+          <td style="color:#94a3b8;padding-right:10px">${x.finStr}</td>
+          <td style="color:#fbbf24;font-weight:700;text-align:right">${x.days}일</td>
+        </tr>`).join('');
+        hpOpenModal('샘플 리드타임',
+          `FINISH DATE 기재 ${items.length}건 · 평균 ${lt.avgSample}일 · 원사입고 → FINISH DATE`,
+          `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.68rem">
+            <thead><tr style="border-bottom:1px solid rgba(255,255,255,.1);color:#475569">
+              <th style="padding-bottom:8px;text-align:left">#</th>
+              <th style="padding-bottom:8px;text-align:left">스타일 / FL#</th>
+              <th style="padding-bottom:8px;text-align:left">원사입고일</th>
+              <th style="padding-bottom:8px;text-align:left">FINISH DATE</th>
+              <th style="padding-bottom:8px;text-align:right">소요일</th>
+            </tr></thead>
+            <tbody>${tblRows}</tbody>
+          </table></div>`);
+      };
+    }
   }
 
   // rebind proc card clicks
@@ -3090,7 +3131,7 @@ function parseHpData(wb){
   const devCatTrack = {}, allCatTrack = {};
 
   // lead time
-  const knitLeadDays = [], sampleLeadDays = [];
+  const knitLeadItems = [], sampleLeadItems = [];
 
   for(let i=dataStart; i<rows.length; i++){
     const r = rows[i];
@@ -3148,13 +3189,15 @@ function parseHpData(wb){
     const yarnDate2 = hpParseDate(yarnV);
     const knitDate2 = hpParseDate(knitV);
     const finDate2  = hpParseDate(finV);
-    if(yarnDate2 && knitDate2 && kd){
+    const fmtD = dt => dt ? `${dt.getFullYear()%100}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}` : '—';
+    const lbl = flNo || styleNo || ('row'+(i+1));
+    if(yarnDate2 && knitDate2){
       const d = Math.floor((knitDate2.getTime()-yarnDate2.getTime())/86400000);
-      if(d>0 && d<180) knitLeadDays.push(d);
+      if(d>0 && d<180) knitLeadItems.push({label:lbl, yarnStr:fmtD(yarnDate2), knitStr:fmtD(knitDate2), days:d});
     }
-    if(yarnDate2 && finDate2 && fd2){
+    if(yarnDate2 && finDate2){
       const d = Math.floor((finDate2.getTime()-yarnDate2.getTime())/86400000);
-      if(d>0 && d<365) sampleLeadDays.push(d);
+      if(d>0 && d<365) sampleLeadItems.push({label:lbl, yarnStr:fmtD(yarnDate2), finStr:fmtD(finDate2), days:d});
     }
 
     // SCT
@@ -3248,8 +3291,10 @@ function parseHpData(wb){
   });
 
   // ── lead time averages
-  const avgKnit   = knitLeadDays.length   ? Math.round(knitLeadDays.reduce((a,b)=>a+b,0)/knitLeadDays.length)   : null;
-  const avgSample = sampleLeadDays.length ? Math.round(sampleLeadDays.reduce((a,b)=>a+b,0)/sampleLeadDays.length) : null;
+  const avgKnit   = knitLeadItems.length   ? Math.round(knitLeadItems.reduce((s,x)=>s+x.days,0)/knitLeadItems.length)   : null;
+  const avgSample = sampleLeadItems.length ? Math.round(sampleLeadItems.reduce((s,x)=>s+x.days,0)/sampleLeadItems.length) : null;
+  knitLeadItems.sort((a,b)=>b.days-a.days);
+  sampleLeadItems.sort((a,b)=>b.days-a.days);
 
   return {
     total, gdCount, domCount, receiptCount,
@@ -3257,7 +3302,7 @@ function parseHpData(wb){
     devList, cats, grand,
     knitDelays, dyeDelays,
     rdda:{months:monthLabels, gd:rddaGd, dom:rddaDom, bulk:rddaBulk},
-    leadTime:{avgKnit, avgSample}
+    leadTime:{avgKnit, avgSample, knitItems:knitLeadItems, sampleItems:sampleLeadItems}
   };
 }
 
@@ -3295,5 +3340,20 @@ document.getElementById('hpFileInput').addEventListener('change', async(e)=>{
 
 })(); // end IIFE
 </script>
+
+<!-- HP Modal — outside all screen divs so position:fixed anchors to viewport -->
+<div class="modal-overlay" id="hpModalOverlay" onclick="if(event.target===this)hpCloseModal()">
+  <div class="hp-modal-box">
+    <div class="hp-modal-hdr">
+      <div>
+        <div class="hp-modal-title" id="hpModalTitle"></div>
+        <div class="hp-modal-subtitle" id="hpModalSubtitle"></div>
+      </div>
+      <div class="hp-modal-close" onclick="hpCloseModal()">✕</div>
+    </div>
+    <div class="hp-modal-body" id="hpModalBody"></div>
+  </div>
+</div>
+
 </body>
 </html>
