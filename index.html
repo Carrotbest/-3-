@@ -1489,6 +1489,13 @@ async function initFirebase(){
       if(currentScreen==='home') renderSampleHome();
     }
   });
+  // HP Dashboard — real-time sync for all users
+  onSnapshot(doc(db,'sampleData','hpDashboard'),snap=>{
+    if(!snap.exists()) return;
+    if(typeof window.hpApplySharedData === 'function'){
+      window.hpApplySharedData(snap.data());
+    }
+  });
 }
 
 // ══ HOME ══
@@ -3464,7 +3471,7 @@ async function hpSaveToStorage(data, fileName){
 
 // ── file input handler is now inside setupDnd() above
 
-// ── initial render: Firestore realtime → localStorage fallback → empty
+// ── initial render: localStorage fast-load → Firestore real-time updates
 (function initHpCharts(){
 
   function applyData(data, fileName, updatedAt){
@@ -3484,21 +3491,16 @@ async function hpSaveToStorage(data, fileName){
     hpRenderRddaChart(["Jan '26",'Feb','Mar','Apr',"May '26"],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]);
   }
 
-  // 2) Subscribe to Firestore — updates for all users in real-time
-  const fb = window._fbDb;
-  if(!fb) return;
-  try{
-    window._fbOnSnap(window._fbDoc(fb,'sampleData',HP_FS_DOC), snap=>{
-      if(!snap.exists()) return;
-      const d = snap.data();
-      const fileName  = d._fileName  || '공유 데이터';
-      const updatedAt = d._updatedAt || '';
-      // strip meta fields before passing to renderer
-      const clean = Object.assign({}, d);
-      delete clean._fileName; delete clean._updatedAt; delete clean._ts;
-      applyData(clean, fileName, updatedAt);
-    });
-  }catch(e){ console.warn('hp Firestore listener failed', e); }
+  // 2) Expose callback for module-script onSnapshot (Firebase module loads after this IIFE)
+  //    initFirebase() in the module script calls window.hpApplySharedData(snap.data())
+  window.hpApplySharedData = function(d){
+    const fileName  = d._fileName  || '공유 데이터';
+    const updatedAt = d._updatedAt || '';
+    const clean = Object.assign({}, d);
+    delete clean._fileName; delete clean._updatedAt; delete clean._ts;
+    applyData(clean, fileName, updatedAt);
+  };
+
 })();
 
 })(); // end IIFE
