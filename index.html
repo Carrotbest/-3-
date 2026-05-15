@@ -3306,6 +3306,28 @@ function parseHpData(wb){
   };
 }
 
+// ── helpers: persist & restore via localStorage
+const HP_STORE_KEY  = 'hpDashData_v2';
+const HP_META_KEY   = 'hpDashMeta_v2';
+
+function hpSaveToStorage(data, fileName){
+  try{
+    localStorage.setItem(HP_STORE_KEY, JSON.stringify(data));
+    localStorage.setItem(HP_META_KEY, JSON.stringify({
+      fileName,
+      updatedAt: new Date().toLocaleDateString('ko-KR')
+    }));
+  }catch(e){ console.warn('hp save failed', e); }
+}
+
+function hpLoadFromStorage(){
+  try{
+    const raw = localStorage.getItem(HP_STORE_KEY);
+    if(!raw) return null;
+    return {data: JSON.parse(raw), meta: JSON.parse(localStorage.getItem(HP_META_KEY)||'{}')};
+  }catch(e){ return null; }
+}
+
 // ── file input handler
 document.getElementById('hpFileInput').addEventListener('change', async(e)=>{
   const file = e.target.files[0];
@@ -3320,8 +3342,10 @@ document.getElementById('hpFileInput').addEventListener('change', async(e)=>{
       return;
     }
     renderHpHome(hpData);
+    const updatedAt = new Date().toLocaleDateString('ko-KR');
     document.getElementById('hpDataBadge').textContent = '◆ LIVE DATA · '+file.name;
-    document.getElementById('hpUpdateMeta').textContent = 'UPDATED '+new Date().toLocaleDateString('ko-KR');
+    document.getElementById('hpUpdateMeta').textContent = 'UPDATED '+updatedAt;
+    hpSaveToStorage(hpData, file.name);
   }catch(err){
     console.error('hpFileInput error',err);
     document.getElementById('hpDataBadge').textContent = '◆ ERROR · '+err.message;
@@ -3330,11 +3354,19 @@ document.getElementById('hpFileInput').addEventListener('change', async(e)=>{
   e.target.value='';
 });
 
-// ── initial render (empty state charts)
+// ── initial render: restore from localStorage or show empty state
 (function initHpCharts(){
-  // empty SCT donut
+  const saved = hpLoadFromStorage();
+  if(saved && saved.data){
+    hpData = saved.data;
+    renderHpHome(hpData);
+    const m = saved.meta;
+    document.getElementById('hpDataBadge').textContent  = '◆ LIVE DATA · '+(m.fileName||'저장된 데이터');
+    document.getElementById('hpUpdateMeta').textContent = m.updatedAt ? 'UPDATED '+m.updatedAt : '';
+    return;
+  }
+  // no saved data — empty state
   hpRenderSctDonut([0,0,0,0], 0);
-  // empty RDDA with placeholder labels
   hpRenderRddaChart(["Jan '26",'Feb','Mar','Apr',"May '26"],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]);
 })();
 
