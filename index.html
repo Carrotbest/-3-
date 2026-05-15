@@ -2989,6 +2989,7 @@ function renderStats(){
   // ── 드래그 핸들 추가 ──────────────────────────────────
   function addHandle(el) {
     if (el.classList.contains('nav-divider')) return;
+    if (el.classList.contains('nav-home')) return;   // HOME 고정 — 핸들 없음
 
     const h = document.createElement('span');
     h.className = 'drag-handle';
@@ -3035,6 +3036,7 @@ function renderStats(){
 
   function initDnD() {
     Array.from(navBody.children).forEach(el => {
+      if (el.classList.contains('nav-home')) return;   // HOME 고정 — 드래그 불가
       if (el.classList.contains('nav-divider')) {
         el.addEventListener('dragover', e => {
           e.preventDefault(); clearDndState();
@@ -3145,6 +3147,7 @@ function renderStats(){
     layout.forEach(item => {
       const el = keyMap[item.key];
       if (!el) return;
+      if (el.classList.contains('nav-home')) return;  // HOME은 순서 변경 제외
       // 순서 적용 (appendChild = 맨 뒤로 이동 → 순서대로 호출)
       navBody.appendChild(el);
       // 라벨 복원
@@ -3155,11 +3158,17 @@ function renderStats(){
     });
   }
 
+  function pinHome() {
+    const homeEl = navBody.querySelector('.nav-home');
+    if (homeEl && navBody.firstChild !== homeEl) navBody.prepend(homeEl);
+  }
+
   function loadLayout() {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       try { applyLayout(JSON.parse(raw)); } catch(e) {}
     }
+    pinHome();
   }
 
   // ── Firestore 실시간 동기화 ────────────────────────────
@@ -3170,6 +3179,7 @@ function renderStats(){
       // localStorage보다 Firestore를 우선 (다른 기기 편집 반영)
       localStorage.setItem(STORE_KEY, JSON.stringify(layout));
       applyLayout(layout);
+      pinHome();
     });
   }
 
