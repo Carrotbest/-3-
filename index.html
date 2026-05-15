@@ -6,6 +6,9 @@
 <title>Performance &amp; Sustainability Fabric Development</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Bodoni+Moda:ital,opsz,wght@1,6..96,400;1,6..96,500;1,6..96,700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -563,6 +566,224 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .sync-info{font-size:.72rem;color:var(--muted);flex:1;line-height:1.5}
 .sync-date{font-size:.7rem;color:var(--muted);white-space:nowrap}
 
+/* ══════════════════════════════════
+   HOME PREVIEW v3 — CSS
+══════════════════════════════════ */
+/* CSS variables for hp scope (reuse root vars) */
+/* ── HERO ── */
+.hp-hero{margin-bottom:18px;padding:4px 4px 0}
+.hp-hero-title-wrap{position:relative;margin-bottom:16px;text-align:center}
+.hp-hero-kicker{
+  display:flex;align-items:center;justify-content:flex-end;gap:8px;
+  font-family:'Space Grotesk','Inter','Pretendard',system-ui,sans-serif;
+  font-size:.62rem;font-weight:500;letter-spacing:.08em;
+  color:#475569;margin-top:4px
+}
+.hp-hero-kicker::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:#22d3ee;flex-shrink:0
+}
+.hp-hero-kicker .dot{color:#334155;margin:0 1px;font-weight:400}
+.hp-hero-kicker .acc{color:#64748b;letter-spacing:.1em;font-weight:600}
+.hp-hero-title{
+  font-family:'Bodoni Moda',Georgia,serif;
+  font-style:italic;
+  font-size:2.2rem;font-weight:500;letter-spacing:.01em;line-height:1.1;
+  color:#f1f5f9;margin-bottom:10px;white-space:nowrap;
+  background:linear-gradient(135deg,#f8fafc 0%,#c4b5fd 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hp-hero-sub{font-size:.88rem;color:#94a3b8;font-weight:400;margin-bottom:18px;letter-spacing:.01em}
+.hp-hero-sub b{color:#cbd5e1;font-weight:500}
+.hp-preview-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.35);color:#c4b5fd;padding:4px 11px;border-radius:5px;font-size:.6rem;font-weight:600;letter-spacing:.1em;margin-bottom:20px;font-family:'Space Grotesk',sans-serif}
+.hp-hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.hp-hero-meta{font-size:.62rem;color:#64748b;letter-spacing:.04em;font-family:'Space Grotesk',sans-serif;font-weight:500}
+.hp-hero-meta b{color:#94a3b8;font-weight:600}
+.hp-upload-btn{display:inline-flex;align-items:center;padding:5px 13px;border-radius:7px;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.4);color:#c4b5fd;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:background .15s,box-shadow .15s;white-space:nowrap;font-family:'Space Grotesk',sans-serif}
+.hp-upload-btn:hover{background:rgba(139,92,246,.28);box-shadow:0 0 14px rgba(139,92,246,.35)}
+
+/* ── section header ── */
+.hp-sec-hdr{
+  display:flex;align-items:center;gap:12px;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:#cbd5e1;padding:0 0 14px;margin-bottom:14px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+.hp-sec-hdr::before{
+  content:'';width:3px;height:14px;border-radius:2px;
+  background:linear-gradient(180deg,#8b5cf6,#06b6d4)
+}
+.hp-sec-hdr .hp-sec-sub{
+  margin-left:auto;font-size:.62rem;font-weight:400;
+  color:#64748b;letter-spacing:.05em;text-transform:none;font-family:'Inter',sans-serif
+}
+
+/* ── section card ── */
+.hp-sec{
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:16px;
+  padding:20px 22px;margin-bottom:14px;
+  backdrop-filter:blur(8px);
+  position:relative;overflow:hidden;
+}
+.hp-sec::before{
+  content:'';position:absolute;inset:0;border-radius:16px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.025) 0%,transparent 50%);
+}
+
+/* ── status summary ── */
+.hp-status-summary{display:flex;align-items:center;gap:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.hp-ss-total{padding:14px 22px;border-right:1px solid rgba(255,255,255,.12);flex-shrink:0}
+.hp-ss-total-lbl{font-family:'Space Grotesk',sans-serif;font-size:.6rem;color:#64748b;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
+.hp-ss-total-val{
+  font-size:2rem;font-weight:800;line-height:1;
+  background:linear-gradient(135deg,#e9d5ff 0%,#a78bfa 40%,#7c3aed 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 10px rgba(167,139,250,.8)) drop-shadow(0 0 20px rgba(124,58,237,.5));
+}
+.hp-ss-types{display:flex;flex:1;align-items:stretch}
+.hp-ss-type{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px;border-right:1px solid rgba(255,255,255,.12);gap:3px;transition:background .18s,transform .18s;cursor:default}
+.hp-ss-type:last-child{border-right:none}
+.hp-ss-type:hover{background:rgba(255,255,255,.05);transform:translateY(-2px)}
+.hp-ss-type-lbl{font-size:.6rem;font-weight:700;letter-spacing:.05em}
+.hp-ss-type-val{font-size:1.25rem;font-weight:800;line-height:1}
+.hp-ss-type-sub{font-size:.58rem;color:#64748b}
+.hp-ss-receipt{flex:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px;gap:3px}
+.hp-ss-receipt-lbl{font-family:'Space Grotesk',sans-serif;font-size:.6rem;color:#64748b;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.hp-ss-receipt-val{font-size:1.25rem;font-weight:800;color:#e2e8f0;line-height:1}
+.hp-ss-receipt-sub{font-size:.58rem;color:#64748b}
+
+/* ── process cards ── */
+.hp-proc-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.hp-proc-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;cursor:pointer}
+.hp-proc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0}
+.hp-proc-card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.22);box-shadow:0 12px 32px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08)}
+.hp-proc-card:hover .hp-proc-card-done{filter:drop-shadow(0 0 10px currentColor)}
+.hp-proc-card-name{font-family:'Space Grotesk',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.hp-proc-card-nums{display:flex;align-items:baseline;gap:4px;margin-bottom:6px}
+.hp-proc-card-done{font-size:2rem;font-weight:800;line-height:1}
+.hp-proc-card-total{font-size:.78rem;color:#64748b}
+.hp-proc-card-bar-track{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:visible;margin-bottom:6px;position:relative}
+.hp-proc-card-bar-fill{height:100%;border-radius:3px;position:relative;transition:width .6s ease}
+.hp-proc-card-pct{font-size:1rem;font-weight:800}
+
+/* ── workload bars ── */
+.hp-dev-status-wrap{display:flex;gap:20px;align-items:center}
+.hp-dev-bar-area{flex:1;min-width:0}
+.hp-dev-rel-grid{display:grid;grid-template-columns:72px 1fr;gap:4px;align-items:center;row-gap:10px}
+.hp-dev-rel-name{font-size:.72rem;font-weight:700;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.hp-dev-rel-name span{font-size:.6rem;color:#64748b;font-weight:400}
+.hp-dev-rel-track{height:14px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
+.hp-dev-rel-fill{height:100%;display:flex;border-radius:4px;overflow:hidden;transition:width .6s ease}
+.hp-dev-seg{height:100%;flex-shrink:0}
+.hp-dev-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+.hp-leg-item{display:flex;align-items:center;gap:4px;font-size:.6rem;color:#64748b}
+.hp-leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── warning rows ── */
+.hp-warn-rows{display:flex;flex-direction:column;gap:7px}
+.hp-warn-row{display:grid;grid-template-columns:168px 1fr;align-items:center;gap:14px;padding:10px 16px;background:rgba(255,255,255,.06);border-radius:8px;border-left:3px solid;transition:background .15s,transform .15s,box-shadow .15s;cursor:pointer}
+.hp-warn-row:hover{background:rgba(255,255,255,.09);transform:translateX(4px)}
+.hp-warn-title-block{display:flex;flex-direction:column;gap:3px}
+.hp-warn-type{font-family:'Space Grotesk',sans-serif;font-size:.66rem;font-weight:700;letter-spacing:.12em}
+.hp-warn-cnt-inline{font-size:.7rem;font-weight:800}
+.hp-warn-style-list{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.hp-warn-chip{font-size:.62rem;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.06);white-space:nowrap;transition:transform .15s,background .15s}
+.hp-warn-chip:hover{transform:scale(1.1) translateY(-1px);background:rgba(255,255,255,.12)}
+.hp-warn-chip-days{font-size:.58rem;font-weight:700;opacity:.85}
+
+/* ── SCT ── */
+.hp-sct-wrap{display:flex;gap:16px;align-items:flex-start;margin-bottom:18px}
+.hp-sct-table-area{flex:1;min-width:0;overflow-x:auto}
+.hp-sct-tbl{width:100%;border-collapse:collapse;font-size:.63rem;white-space:nowrap}
+.hp-sct-tbl thead tr.hp-sct-dev-row th{padding:6px 10px;text-align:center;font-weight:800;letter-spacing:.05em;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.12)}
+.hp-sct-tbl thead tr.hp-sct-sub-row th{padding:4px 8px;font-size:.55rem;font-weight:700;letter-spacing:.06em;color:#94a3b8;border-bottom:2px solid rgba(255,255,255,.12);text-align:center}
+.hp-sct-tbl tbody td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.07);text-align:center}
+.hp-sct-cat-cell{text-align:left!important;font-weight:700;display:flex;align-items:center;gap:7px}
+.hp-sct-cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hp-sct-total-cell{font-weight:800;font-size:.72rem}
+.hp-sct-grand-row td{background:rgba(255,255,255,.04);font-weight:800;border-top:2px solid rgba(255,255,255,.12)}
+.hp-sct-style{color:#94a3b8}
+.hp-sct-opt{font-weight:700}
+.hp-sct-tbl tbody tr{transition:background .15s;cursor:default}
+.hp-sct-tbl tbody tr:hover td{background:rgba(255,255,255,.04)}
+.hp-sct-donut-area{flex-shrink:0;width:190px}
+.hp-sct-donut-title{font-family:'Space Grotesk',sans-serif;font-size:.62rem;font-weight:700;color:#94a3b8;text-align:center;margin-bottom:8px;letter-spacing:.14em;text-transform:uppercase}
+
+/* ── pipeline ── */
+.hp-pipe-sec-title{font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:600;color:#cbd5e1;margin-bottom:14px;padding:14px 0 8px;border-top:1px solid rgba(255,255,255,.07);letter-spacing:.06em}
+.hp-pipe-sec-title span{color:#64748b;font-weight:400;margin-left:8px;font-size:.62rem}
+.hp-pipe-dev-list{display:flex;flex-direction:column;gap:14px}
+.hp-pipe-dev-row{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:center;transition:background .15s,transform .15s;cursor:pointer;border-radius:8px;padding:4px 6px;margin:-4px -6px}
+.hp-pipe-dev-row:hover{background:rgba(255,255,255,.04);transform:translateX(3px)}
+.hp-pipe-dev-lbl{font-size:.72rem;font-weight:700;color:#e2e8f0;white-space:nowrap}
+.hp-pipe-dev-lbl span{display:block;font-size:.58rem;color:#64748b;font-weight:400;margin-top:1px}
+.hp-pipe-track{display:flex;flex-direction:column;gap:3px}
+.hp-pipe-lbl-row{display:flex}
+.hp-pipe-lbl-seg{font-size:.52rem;font-weight:700;text-align:center;overflow:visible;white-space:nowrap;line-height:1.3}
+.hp-pipe-bar{height:7px;display:flex;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.04)}
+.hp-pipe-b{height:100%;border-right:2px solid rgba(10,13,20,.9);flex-shrink:0;position:relative}
+.hp-pipe-b::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,transparent 60%)}
+.hp-pipe-b:last-child{border-right:none}
+.hp-pipe-leg-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)}
+.hp-pipe-leg-i{display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:600;color:#94a3b8}
+.hp-pipe-leg-sq{width:11px;height:7px;border-radius:2px;flex-shrink:0}
+
+/* ── Lead Time ── */
+.hp-lt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.hp-lt-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 16px;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;cursor:pointer}
+.hp-lt-card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.2);box-shadow:0 10px 28px rgba(0,0,0,.45)}
+.hp-lt-card:hover .hp-lt-val{filter:drop-shadow(0 0 8px currentColor)}
+.hp-lt-label{font-family:'Space Grotesk',sans-serif;font-size:.62rem;font-weight:700;color:#94a3b8;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.hp-lt-val{font-size:1.7rem;font-weight:800;line-height:1}
+.hp-lt-unit{font-size:.7rem;font-weight:400;color:#64748b;margin-left:2px}
+.hp-lt-sub{font-size:.6rem;color:#64748b;margin-top:4px;line-height:1.45}
+.hp-lt-note{font-size:.58rem;color:#64748b;margin-top:3px;border-top:1px solid rgba(255,255,255,.07);padding-top:4px;opacity:.7}
+
+/* ── RDDA ── */
+.hp-rdda-inner{height:260px;position:relative}
+.hp-rdda-note{font-size:.58rem;color:#475569;margin-top:10px;line-height:1.6}
+
+/* ── HP modal ── */
+.hp-modal-box{
+  background:#0f1520;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  padding:28px 32px;
+  min-width:400px;max-width:560px;width:90%;
+  max-height:80vh;overflow-y:auto;
+  transform:translateY(18px) scale(.97);
+  transition:transform .22s ease;
+  position:relative;
+  box-shadow:0 24px 64px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.05);
+}
+.modal-overlay.open .hp-modal-box{transform:translateY(0) scale(1)}
+.hp-modal-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px}
+.hp-modal-title{font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#cbd5e1}
+.hp-modal-subtitle{font-size:.62rem;color:#64748b;margin-top:4px;font-weight:400}
+.hp-modal-close{
+  width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:#64748b;font-size:.85rem;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  transition:background .15s,color .15s;line-height:1;
+}
+.hp-modal-close:hover{background:rgba(255,255,255,.1);color:#e2e8f0}
+.hp-modal-body{font-size:.72rem;color:#94a3b8;line-height:1.7}
+.hp-modal-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.hp-modal-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;text-align:center}
+.hp-modal-stat-val{font-size:1.4rem;font-weight:800;line-height:1;margin-bottom:4px}
+.hp-modal-stat-lbl{font-size:.58rem;color:#64748b;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.hp-modal-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.hp-modal-bar-name{width:52px;font-size:.65rem;font-weight:600;color:#94a3b8;flex-shrink:0}
+.hp-modal-bar-track{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.hp-modal-bar-fill{height:100%;border-radius:3px;transition:width .5s ease .1s}
+.hp-modal-bar-val{width:36px;font-size:.62rem;font-weight:700;text-align:right;flex-shrink:0}
+.hp-modal-divider{border:none;border-top:1px solid rgba(255,255,255,.07);margin:16px 0}
+.hp-modal-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.06);border-radius:5px;padding:3px 9px;font-size:.62rem;font-weight:600;margin:2px}
+.hp-modal-tag{font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+
 </style>
 </head>
 <body>
@@ -654,175 +875,201 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
   <div class="screen active visible" id="screen-home">
     <div class="screen-pad">
 
-      <!-- ─ 오늘 날짜 배지 ─ -->
-      <div class="today-badge-home" style="margin-bottom:14px"><div class="pulse-dot"></div><span id="homeTodayText"></span></div>
-
-      <!-- ─ KPI Row : 작지 현황 ─ -->
-      <div class="home-kpi" id="homeKpiRow">
-        <div class="kpi-card">
-          <div class="kpi-label">TOTAL SAMPLES</div>
-          <div class="kpi-value" id="kpiTotal">—</div>
-          <div class="kpi-sub">샘플 관리 대장 전체</div>
-          <span class="kpi-badge" style="background:rgba(139,92,246,.15);color:#c4b5fd">SS'27 기준</span>
+      <!-- ── HERO ── -->
+      <div class="hp-hero">
+        <div class="hp-hero-top">
+          <div class="hp-preview-badge" id="hpDataBadge">◆ DASHBOARD · 데이터 없음</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="hp-hero-meta" id="hpUpdateMeta">업로드하여 데이터 로드</div>
+            <label for="hpFileInput" class="hp-upload-btn" id="btnHpUpload">↑ 대장 업로드</label>
+            <input type="file" id="hpFileInput" accept=".xlsx,.xls" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+            <!-- Legacy upload button (keeps existing modal wired) -->
+            <button class="dash-upload-btn ldg" id="btnLdgUpload" style="display:none">↑ 업로드</button>
+          </div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-label">GD 접수 대기</div>
-          <div class="kpi-value" id="kpiGdWait" style="color:#f87171">—</div>
-          <div class="kpi-sub" id="kpiGdWaitSub">SA.# 미등록</div>
-          <span class="kpi-badge" style="background:rgba(239,68,68,.15);color:#f87171">접수 전</span>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">GD 접수 완료</div>
-          <div class="kpi-value" id="kpiGdDone" style="color:#22d3ee">—</div>
-          <div class="kpi-sub" id="kpiGdDoneSub">#NNNNN 등록</div>
-          <span class="kpi-badge" style="background:rgba(6,182,212,.15);color:#22d3ee">GD번호 확보</span>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">국내 작업</div>
-          <div class="kpi-value" id="kpiDomestic" style="color:#60a5fa">—</div>
-          <div class="kpi-sub" id="kpiDomesticSub">SA번호 등록</div>
-          <span class="kpi-badge" style="background:rgba(59,130,246,.15);color:#60a5fa">국내 진행</span>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">GD 접수율</div>
-          <div class="kpi-value" id="kpiGdRate" style="color:#34d399">—</div>
-          <div class="kpi-sub" id="kpiGdRateSub">접수완료+국내 / 전체</div>
-          <span class="kpi-badge" style="background:rgba(16,185,129,.15);color:#34d399">국내포함</span>
+        <div class="hp-hero-title-wrap">
+          <h1 class="hp-hero-title">Fabric Development Team Dashboard</h1>
+          <div class="hp-hero-kicker">
+            <span class="acc">통합원단부 3팀</span>
+            <span class="dot">·</span>
+            <span>PERFORMANCE &amp; SUSTAINABILITY</span>
+          </div>
         </div>
       </div>
 
-      <!-- ─ 경고 배너 ─ -->
-      <div class="home-alerts" id="homeAlerts" style="display:none">
-        <div class="home-alert-pill alert-pill-red" id="alertOverdue">
-          <span class="alert-ico">⚠️</span>
-          <div><div class="alert-num" id="alertOverdueNum">0</div><div class="alert-lbl">마감 초과</div></div>
-        </div>
-        <div class="home-alert-pill alert-pill-amber" id="alertIdleYarn">
-          <span class="alert-ico">⏳</span>
-          <div><div class="alert-num" id="alertIdleYarnNum">0</div><div class="alert-lbl">원사 방치 (편직 미배정 14일+)</div></div>
-        </div>
-        <div class="home-alert-pill alert-pill-teal" id="alertLeadTime" style="display:none">
-          <span class="alert-ico">⏱</span>
-          <div><div class="alert-num" id="alertLeadTimeNum">—일</div><div class="alert-lbl">평균 리드타임 (원사→피니싱)</div></div>
-        </div>
-        <div class="home-alert-pill alert-pill-ok" id="alertAllClear" style="display:none">
-          ✅ 마감 초과·원사 방치 없음
-        </div>
-      </div>
+      <!-- ══ 1. TOTAL SAMPLE STATUS ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Sample Overview<span class="hp-sec-sub">전체 진행 현황 · 공정별 완료율</span></div>
 
-      <!-- ─ 작업 현황 Pipeline ─ -->
-      <div class="work-pipeline" id="workPipeline" style="display:none">
-        <div class="work-pipeline-title">🔄 작업 현황 <span>· 오늘 기준 각 공정별 완료 여부 (날짜≤오늘 또는 확정값 / TBD·TBA·빈칸은 미완료)</span></div>
-        <div class="work-pipe-grid">
-          <div class="work-pipe-step" style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25)">
-            <div class="work-pipe-num" style="color:#f59e0b">① YARN</div>
-            <div class="work-pipe-sub">원사 입고</div>
-            <div class="work-pipe-val" style="color:#fbbf24" id="pipeYarnVal">—</div>
-            <div class="work-pipe-total" id="pipeYarnTotal">/ —건</div>
-            <div class="work-pipe-bar"><div id="pipeYarnBar" style="height:100%;background:#f59e0b;border-radius:3px;width:0%"></div></div>
-            <div class="work-pipe-pct" style="color:#fbbf24" id="pipeYarnPct">—%</div>
+        <div class="hp-status-summary">
+          <div class="hp-ss-total">
+            <div class="hp-ss-total-lbl">총 샘플</div>
+            <div class="hp-ss-total-val" id="hpTotalVal">—건</div>
           </div>
-          <div class="work-pipe-arrow">→</div>
-          <div class="work-pipe-step" style="background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.25)">
-            <div class="work-pipe-num" style="color:#a78bfa">② KNITTING</div>
-            <div class="work-pipe-sub">편직 완료</div>
-            <div class="work-pipe-val" style="color:#c4b5fd" id="pipeKnitVal">—</div>
-            <div class="work-pipe-total" id="pipeKnitTotal">/ —건</div>
-            <div class="work-pipe-bar"><div id="pipeKnitBar" style="height:100%;background:#8b5cf6;border-radius:3px;width:0%"></div></div>
-            <div class="work-pipe-pct" style="color:#c4b5fd" id="pipeKnitPct">—%</div>
-          </div>
-          <div class="work-pipe-arrow">→</div>
-          <div class="work-pipe-step" style="background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.25)">
-            <div class="work-pipe-num" style="color:#22d3ee">③ DYEING</div>
-            <div class="work-pipe-sub">염색 완료</div>
-            <div class="work-pipe-val" style="color:#67e8f9" id="pipeDyeVal">—</div>
-            <div class="work-pipe-total" id="pipeDyeTotal">/ —건</div>
-            <div class="work-pipe-bar"><div id="pipeDyeBar" style="height:100%;background:#06b6d4;border-radius:3px;width:0%"></div></div>
-            <div class="work-pipe-pct" style="color:#22d3ee" id="pipeDyePct">—%</div>
-          </div>
-          <div class="work-pipe-arrow">→</div>
-          <div class="work-pipe-step" style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.25)">
-            <div class="work-pipe-num" style="color:#34d399">④ FINISHING</div>
-            <div class="work-pipe-sub">마무리 완료</div>
-            <div class="work-pipe-val" style="color:#6ee7b7" id="pipeFinVal">—</div>
-            <div class="work-pipe-total" id="pipeFinTotal">/ —건</div>
-            <div class="work-pipe-bar"><div id="pipeFinBar" style="height:100%;background:#10b981;border-radius:3px;width:0%"></div></div>
-            <div class="work-pipe-pct" style="color:#34d399" id="pipeFinPct">—%</div>
-          </div>
-        </div>
-        <div class="work-pipe-note" id="workPipeNote"></div>
-      </div>
-
-      <!-- ─ 샘플 관리 대장 섹션 ─ -->
-      <div class="dash-section">
-        <div class="dash-sec-hdr">
-          <div class="dash-sec-title">
-            <div class="dash-sec-name">📋 샘플 관리 대장</div>
-            <div class="dash-sec-source" id="ldgUploadDate">업로드 날짜 미확인</div>
-          </div>
-          <button class="dash-upload-btn ldg" id="btnLdgUpload">↑ 업로드</button>
-        </div>
-
-        <!-- 담당자별 카테고리 stacked bar -->
-        <div class="dev-cat-bar-card" id="devCatBarCard">
-          <div class="dev-cat-bar-title">📊 담당자별 작지 현황</div>
-          <div class="dev-cat-bar-inner">
-            <div class="dev-cat-bar-left">
-              <div class="dev-cat-bar-grid" id="devCatBarGrid">
-                <div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0">샘플 관리 대장을 업로드하면 현황이 표시됩니다.</div>
-              </div>
-              <div class="dev-cat-legend" id="devCatLegend"></div>
+          <div class="hp-ss-types">
+            <div class="hp-ss-type">
+              <div class="hp-ss-type-lbl" style="color:#67e8f9">GD개발</div>
+              <div class="hp-ss-type-val" style="color:#67e8f9" id="hpGdVal">—건</div>
+              <div class="hp-ss-type-sub" id="hpGdPct">—%</div>
             </div>
-            <div class="dev-cat-bar-right">
-              <div id="devTotalDonut" style="position:relative;height:140px"></div>
+            <div class="hp-ss-type">
+              <div class="hp-ss-type-lbl" style="color:#60a5fa">국내개발</div>
+              <div class="hp-ss-type-val" style="color:#60a5fa" id="hpDomVal">—건</div>
+              <div class="hp-ss-type-sub" id="hpDomPct">—%</div>
+            </div>
+            <div class="hp-ss-receipt">
+              <div class="hp-ss-receipt-lbl">접수 현황</div>
+              <div class="hp-ss-receipt-val" id="hpReceiptVal">—건</div>
+              <div class="hp-ss-receipt-sub" id="hpReceiptSub">Style/# 기재</div>
             </div>
           </div>
         </div>
 
-        <!-- 담당자별 카드 -->
-        <div class="dev-grid" id="devGrid">
-          <div class="dev-no-data">샘플 관리 대장을 업로드하면 담당자별 현황이 표시됩니다.</div>
+        <div class="hp-proc-cards" id="hpProcCards">
+          <div class="hp-proc-card" style="--hpc:1" data-proc="0">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#b45309,#f59e0b,#fde68a)"></div>
+            <div class="hp-proc-card-name" style="color:#fbbf24">① YARN IN-FAC</div>
+            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#fbbf24" id="hpYarnDone">—</div><div class="hp-proc-card-total" id="hpYarnTotal">/ —건</div></div>
+            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpYarnBar" style="width:0%;background:linear-gradient(90deg,#b45309,#f59e0b,#fde68a)"></div></div>
+            <div class="hp-proc-card-pct" style="color:#fbbf24" id="hpYarnPct">—%</div>
+          </div>
+          <div class="hp-proc-card" data-proc="1">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)"></div>
+            <div class="hp-proc-card-name" style="color:#c4b5fd">② KNITTING</div>
+            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#c4b5fd" id="hpKnitDone">—</div><div class="hp-proc-card-total" id="hpKnitTotal">/ —건</div></div>
+            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpKnitBar" style="width:0%;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)"></div></div>
+            <div class="hp-proc-card-pct" style="color:#c4b5fd" id="hpKnitPct">—%</div>
+          </div>
+          <div class="hp-proc-card" data-proc="2">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)"></div>
+            <div class="hp-proc-card-name" style="color:#67e8f9">③ DYEING</div>
+            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#67e8f9" id="hpDyeDone">—</div><div class="hp-proc-card-total" id="hpDyeTotal">/ —건</div></div>
+            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpDyeBar" style="width:0%;background:linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)"></div></div>
+            <div class="hp-proc-card-pct" style="color:#67e8f9" id="hpDyePct">—%</div>
+          </div>
+          <div class="hp-proc-card" data-proc="3">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#065f46,#10b981,#6ee7b7)"></div>
+            <div class="hp-proc-card-name" style="color:#6ee7b7">④ FINISHING</div>
+            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#6ee7b7" id="hpFinDone">—</div><div class="hp-proc-card-total" id="hpFinTotal">/ —건</div></div>
+            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpFinBar" style="width:0%;background:linear-gradient(90deg,#065f46,#10b981,#6ee7b7)"></div></div>
+            <div class="hp-proc-card-pct" style="color:#6ee7b7" id="hpFinPct">—%</div>
+          </div>
         </div>
       </div>
 
-      <!-- ─ Sample Count Total 섹션 ─ -->
-      <div class="dash-section">
-        <div class="dash-sec-hdr">
-          <div class="dash-sec-title">
-            <div class="dash-sec-name">📊 Sample Count Total</div>
-            <div class="dash-sec-source" id="sctUploadDate"></div>
+      <!-- ══ 2. 담당자별 작지 현황 ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Workload by Developer<span class="hp-sec-sub">담당자별 작지 분포 · 국내 / GD</span></div>
+        <div class="hp-pipe-dev-list" id="hpDevStatusList"></div>
+      </div>
+
+      <!-- ══ 3. WARNING (SCHEDULE DELAY) ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Schedule Alerts<span class="hp-sec-sub">공정 단계별 지연 발생 건</span></div>
+        <div class="hp-warn-rows" id="hpWarnRows">
+          <div style="color:#64748b;font-size:.76rem;padding:12px 0">데이터를 업로드하면 지연 현황이 표시됩니다.</div>
+        </div>
+      </div>
+
+      <!-- ══ 4. CATEGORY per developer ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Categories &amp; Pipeline<span class="hp-sec-sub">카테고리 분포 · 공정 진행 상태</span></div>
+
+        <div class="hp-sct-wrap">
+          <div class="hp-sct-table-area">
+            <table class="hp-sct-tbl" id="hpSctTable">
+              <thead>
+                <tr class="hp-sct-dev-row" id="hpSctDevRow">
+                  <th style="text-align:left;width:130px">CATEGORY</th>
+                  <th style="color:#64748b;width:52px">합계<br><span style="font-size:.52rem;font-weight:400">OPT</span></th>
+                  <th colspan="2" style="color:#06b6d4;border-left:1px solid rgba(255,255,255,.12)">—</th>
+                  <th colspan="2" style="color:#8b5cf6;border-left:1px solid rgba(255,255,255,.12)">—</th>
+                  <th colspan="2" style="color:#10b981;border-left:1px solid rgba(255,255,255,.12)">—</th>
+                </tr>
+                <tr class="hp-sct-sub-row" id="hpSctSubRow">
+                  <th></th><th></th>
+                  <th style="color:#06b6d4;border-left:1px solid rgba(255,255,255,.12)">STYLE</th><th style="color:#06b6d4">OPTION</th>
+                  <th style="color:#8b5cf6;border-left:1px solid rgba(255,255,255,.12)">STYLE</th><th style="color:#8b5cf6">OPTION</th>
+                  <th style="color:#10b981;border-left:1px solid rgba(255,255,255,.12)">STYLE</th><th style="color:#10b981">OPTION</th>
+                </tr>
+              </thead>
+              <tbody id="hpSctBody">
+                <tr><td colspan="8" style="text-align:center;color:#64748b;font-size:.72rem;padding:20px">데이터를 업로드하면 표시됩니다</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="hp-sct-donut-area">
+            <div class="hp-sct-donut-title">카테고리별 OPTION 비율</div>
+            <div style="position:relative;height:185px"><canvas id="hpSctDonut"></canvas></div>
           </div>
         </div>
 
-        <div class="sct-two-col">
-          <div class="sct-card">
-            <div class="sct-table-wrap">
-              <table class="sct-table">
-                <thead id="sctHead">
-                  <tr>
-                    <th rowspan="2" style="text-align:left;width:140px">CATEGORY</th>
-                    <th rowspan="2" class="col-total">합계<br><small style="font-weight:400;opacity:.7">OPT</small></th>
-                    <th colspan="2" style="color:#94a3b8;background:rgba(255,255,255,.04)">담당자</th>
-                  </tr>
-                  <tr id="sctHeadRow2">
-                    <th style="color:#94a3b8">STY</th><th style="color:#94a3b8">OPT</th>
-                  </tr>
-                </thead>
-                <tbody id="sctBody">
-                  <tr><td colspan="4" class="sct-no-data">엑셀 업로드 후 데이터가 표시됩니다</td></tr>
-                </tbody>
-              </table>
+        <div class="hp-pipe-sec-title">Production Pipeline <span>담당자별 현재 단계 분포</span></div>
+        <div class="hp-pipe-dev-list" id="hpPipeDevList"></div>
+
+        <div class="hp-pipe-leg-row">
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#334155,#64748b)"></div>미접수</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#0e7490,#06b6d4)"></div>편직대기</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div>염색중</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#065f46,#10b981)"></div>등록대기</div>
+        </div>
+      </div>
+
+      <!-- ══ 5. LEAD TIME ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Lead Time<span class="hp-sec-sub">완료 기준 평균 소요일</span></div>
+        <div class="hp-lt-grid">
+          <div class="hp-lt-card" data-lt="0">
+            <div class="hp-lt-label">이번주 완료</div>
+            <div class="hp-lt-val" style="color:#34d399" id="hpLtWeek">—<span class="hp-lt-unit">건</span></div>
+            <div class="hp-lt-sub">현황 & 창고보관 시트 FINISH DATE 기준</div>
+            <div class="hp-lt-note">기존 대장 모든 시트에 열 추가 예정</div>
+          </div>
+          <div class="hp-lt-card" data-lt="1">
+            <div class="hp-lt-label">이번달 완료</div>
+            <div class="hp-lt-val" style="color:#67e8f9" id="hpLtMonth">—<span class="hp-lt-unit">건</span></div>
+            <div class="hp-lt-sub">현황 & 창고보관 시트 FINISH DATE 기준</div>
+            <div class="hp-lt-note">기존 대장 모든 시트에 열 추가 예정</div>
+          </div>
+          <div class="hp-lt-card" data-lt="2">
+            <div class="hp-lt-label">편직 리드타임</div>
+            <div class="hp-lt-val" style="color:#c4b5fd" id="hpLtKnit">—<span class="hp-lt-unit">일</span></div>
+            <div class="hp-lt-sub">최근 1개월 기준<br>원사입고일 → 편직완료일 평균</div>
+            <div class="hp-lt-note">완료 샘플 기준 산출</div>
+          </div>
+          <div class="hp-lt-card" data-lt="3">
+            <div class="hp-lt-label">샘플 리드타임</div>
+            <div class="hp-lt-val" style="color:#fbbf24" id="hpLtSample">—<span class="hp-lt-unit">일</span></div>
+            <div class="hp-lt-sub">최근 1개월 기준<br>원사입고일 → FINISH DATE 평균</div>
+            <div class="hp-lt-note">완료 샘플 기준 산출</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 6. RDDA UPDATE ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Monthly Registration<span class="hp-sec-sub">RDDA · 월별 등록 트렌드</span></div>
+        <div class="hp-rdda-inner"><canvas id="hpRddaChart"></canvas></div>
+        <div class="hp-rdda-note">
+          ※ 월별 샘플 완료(FL) 건수 · 해당월 포함 5개월 기준 · FL# 행의 숫자로 판단<br>
+          ※ FL# 8자리 구조: 앞 4자리 = 등록 년월 / 5번째 자리 = SOURCE (4:BULK원단 · 5:국내개발 · 9:GD개발 · 2:사입원단)
+        </div>
+      </div>
+
+      <!-- HP Modal -->
+      <div class="modal-overlay" id="hpModalOverlay" onclick="if(event.target===this)hpCloseModal()">
+        <div class="hp-modal-box">
+          <div class="hp-modal-hdr">
+            <div>
+              <div class="hp-modal-title" id="hpModalTitle"></div>
+              <div class="hp-modal-subtitle" id="hpModalSubtitle"></div>
             </div>
-            <div class="sct-legend" id="sctLegend"></div>
+            <div class="hp-modal-close" onclick="hpCloseModal()">✕</div>
           </div>
-          <div id="devCatDonut">
-            <div style="text-align:center;color:var(--muted);font-size:.78rem;padding:60px 0">SCT 업로드 시<br>차트 표시</div>
-          </div>
+          <div class="hp-modal-body" id="hpModalBody"></div>
         </div>
       </div>
 
-      <!-- ─ 최종 업데이트 ─ -->
-      <div style="text-align:right;font-size:.66rem;color:var(--muted);margin-top:4px" id="syncLastDate"></div>
     </div>
   </div>
 
@@ -1244,7 +1491,8 @@ async function initFirebase(){
 
 // ══ HOME ══
 function renderHome(){
-  document.getElementById('homeTodayText').textContent='오늘: '+fdF(today());
+  const el = document.getElementById('homeTodayText');
+  if(el) el.textContent='오늘: '+fdF(today());
   renderSampleHome();
 }
 
@@ -2361,7 +2609,691 @@ function renderStats(){
 
 // ── 초기화
 initFirebase();
-document.getElementById('homeTodayText').textContent='오늘: '+fdF(today());
+
+</script>
+
+<!-- ══ HOME PREVIEW v3 ══ -->
+<script>
+(function(){
+
+// ── constants
+const HP_TOOLTIP_CFG = {
+  backgroundColor:'rgba(15,20,30,.95)',
+  borderColor:'rgba(255,255,255,.12)',borderWidth:1,
+  titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+  padding:9,cornerRadius:8
+};
+
+const HP_DEV_COLORS = ['#06b6d4','#8b5cf6','#10b981'];
+const HP_DEV_GRADS  = [
+  'linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)',
+  'linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)',
+  'linear-gradient(90deg,#065f46,#10b981,#6ee7b7)',
+];
+
+const PIPE_STAGES4  = ['미접수','편직대기','염색중','등록대기'];
+const PIPE_COLORS4  = ['#64748b','#06b6d4','#8b5cf6','#10b981'];
+const PIPE_GRADS4   = [
+  'linear-gradient(90deg,#334155,#64748b,#94a3b8)',
+  'linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)',
+  'linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)',
+  'linear-gradient(90deg,#065f46,#10b981,#6ee7b7)',
+];
+const PIPE_GLOW4 = ['rgba(100,116,139,.4)','rgba(6,182,212,.5)','rgba(139,92,246,.5)','rgba(16,185,129,.5)'];
+
+const CAT_DEFS = [
+  {key:'euMarket',   label:'🌐 EU MARKET',   color:'#06b6d4'},
+  {key:'seasonDvlp', label:'🍀 SEASON DEV',  color:'#ec4899'},
+  {key:'coreUpdate', label:'🔷 CORE UPDATE', color:'#3b82f6'},
+  {key:'project',    label:'⚡ PROJECT',      color:'#f59e0b'},
+];
+
+// ── state
+let hpData = null;
+let hpSctDonutChart = null;
+let hpRddaChart = null;
+
+// ── modal helpers
+function hpOpenModal(title, subtitle, bodyHtml){
+  document.getElementById('hpModalTitle').textContent = title;
+  document.getElementById('hpModalSubtitle').textContent = subtitle;
+  document.getElementById('hpModalBody').innerHTML = bodyHtml;
+  document.getElementById('hpModalOverlay').classList.add('open');
+}
+window.hpCloseModal = function(){
+  document.getElementById('hpModalOverlay').classList.remove('open');
+};
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') hpCloseModal(); });
+
+// ── isDone for hp context
+function hpIsDone(v){
+  if(v == null) return false;
+  if(v instanceof Date) return !isNaN(v.getTime());
+  if(typeof v === 'number' && v > 40000) return true; // Excel serial
+  const s = String(v).trim().toUpperCase();
+  if(!s || ['TBD','-','N/A','NONE','FALSE','TBA','ARRANGE'].includes(s)) return false;
+  if(s === 'STOCK' || s === '완료') return true;
+  if(/^\d{1,2}\/\d{1,2}$/.test(s)) return true;
+  if(/\d{4,}/.test(s)) return true;
+  return false;
+}
+
+// ── parse a date value from Excel cell
+function hpParseDate(v){
+  if(v == null) return null;
+  if(v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  if(typeof v === 'number' && v > 40000) return new Date(Math.round((v-25569)*86400*1000));
+  const s = String(v).trim().toUpperCase();
+  if(!s || ['-','TBD','TBA','STOCK','N/A','NONE','FALSE','ARRANGE',''].includes(s)) return null;
+  const md = s.match(/^(\d{1,2})\/(\d{1,2})$/);
+  if(md) return new Date(2026, parseInt(md[1])-1, parseInt(md[2]));
+  const ymd = s.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  if(ymd) return new Date(parseInt(ymd[1]), parseInt(ymd[2])-1, parseInt(ymd[3]));
+  return null;
+}
+
+// ── pipeline stage
+function hpGetPipelineStage(yarnDone, knitDone, dyeDone, finDone){
+  if(finDone) return 3;
+  if(dyeDone) return 3;
+  if(knitDone) return 2;
+  if(yarnDone) return 1;
+  return 0;
+}
+
+// ── parse FL# → {yr, mo, src}
+function hpParseFL(s){
+  const m = String(s).match(/^FL(\d{2})(\d{2})(\d)(\d+)/i);
+  if(!m) return null;
+  const yr = 2000 + parseInt(m[1]);
+  const mo = parseInt(m[2]);
+  const src = m[3]; // '9'=GD개발, '5'=국내개발, '2'/'4'=사입원단
+  return {yr, mo, src};
+}
+
+// ── render workload bars (section 2)
+function hpRenderDevBars(devData){
+  const list = document.getElementById('hpDevStatusList');
+  if(!list) return;
+  list.innerHTML = '';
+  const SEG_COLORS = ['#60a5fa','#06b6d4'];
+  const SEG_GRADS  = ['linear-gradient(90deg,#1d4ed8,#60a5fa,#bae6fd)','linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)'];
+  const SEG_GLOW   = ['rgba(96,165,250,.5)','rgba(6,182,212,.5)'];
+  const SEG_LBLS   = ['국내','GD'];
+  const maxTot = Math.max(...devData.map(d=>d.total), 1);
+  devData.forEach((dev, idx)=>{
+    const relW = +(dev.total / maxTot * 100).toFixed(1);
+    const pcts = dev.counts.map(c => +(c / Math.max(dev.total,1) * 100).toFixed(1));
+    const segs = dev.counts.map((c,i)=>`<div class="hp-pipe-b" style="width:${pcts[i]}%;background:${SEG_GRADS[i]};box-shadow:0 0 8px ${SEG_GLOW[i]}" title="${SEG_LBLS[i]}: ${c}건 (${pcts[i]}%)"></div>`).join('');
+    const lbls = pcts.map((p,i)=>`<div class="hp-pipe-lbl-seg" style="width:${p}%;color:${SEG_COLORS[i]}">${SEG_LBLS[i]} ${dev.counts[i]}건(${p}%)</div>`).join('');
+    list.innerHTML += `<div class="hp-pipe-dev-row" data-dev-idx="${idx}">
+      <div class="hp-pipe-dev-lbl">${dev.name}<span>${dev.total}건</span></div>
+      <div style="width:${relW}%">
+        <div class="hp-pipe-track">
+          <div class="hp-pipe-lbl-row">${lbls}</div>
+          <div class="hp-pipe-bar">${segs}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+// ── render pipeline bars (section 4)
+function hpRenderPipeBars(pipeDevs){
+  const pipeList = document.getElementById('hpPipeDevList');
+  if(!pipeList) return;
+  pipeList.innerHTML = '';
+  const maxTot = Math.max(...pipeDevs.map(d=>d.total), 1);
+  pipeDevs.forEach((dev, idx)=>{
+    const relW = +(dev.total / maxTot * 100).toFixed(1);
+    const pcts = dev.counts.map(c => +(c / Math.max(dev.total,1) * 100).toFixed(1));
+    const segs = dev.counts.map((c,i)=>`<div class="hp-pipe-b" style="width:${pcts[i]}%;background:${PIPE_GRADS4[i]};box-shadow:0 0 8px ${PIPE_GLOW4[i]}" title="${PIPE_STAGES4[i]}: ${c}건 (${pcts[i]}%)"></div>`).join('');
+    const lbls = pcts.map((p,i)=>`<div class="hp-pipe-lbl-seg" style="width:${p}%;color:${PIPE_COLORS4[i]}">${PIPE_STAGES4[i]} ${dev.counts[i]}건</div>`).join('');
+    pipeList.innerHTML += `<div class="hp-pipe-dev-row" data-pipe-idx="${idx}">
+      <div class="hp-pipe-dev-lbl">${dev.name}<span>${dev.total}건</span></div>
+      <div style="width:${relW}%">
+        <div class="hp-pipe-track">
+          <div class="hp-pipe-lbl-row">${lbls}</div>
+          <div class="hp-pipe-bar">${segs}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+// ── render SCT donut chart
+function hpRenderSctDonut(catVals, total){
+  const canvas = document.getElementById('hpSctDonut');
+  if(!canvas) return;
+  if(hpSctDonutChart){ try{hpSctDonutChart.destroy();}catch(e){} hpSctDonutChart=null; }
+  hpSctDonutChart = new Chart(canvas.getContext('2d'),{
+    type:'doughnut',
+    data:{
+      labels: CAT_DEFS.map(c=>c.label),
+      datasets:[{
+        data: catVals,
+        backgroundColor: CAT_DEFS.map(c=>c.color),
+        borderColor:'rgba(10,13,20,1)',
+        borderWidth:3, spacing:2, hoverOffset:8
+      }]
+    },
+    options:{
+      cutout:'70%', responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:9},padding:8,boxWidth:8,boxHeight:8,usePointStyle:true,pointStyle:'circle'}},
+        tooltip:{...HP_TOOLTIP_CFG, callbacks:{label:c=>`${c.label}: ${c.parsed}건 (${total>0?Math.round(c.parsed/total*100):0}%)`}}
+      }
+    }
+  });
+}
+
+// ── render RDDA chart
+function hpRenderRddaChart(months, gd, dom, bulk){
+  const canvas = document.getElementById('hpRddaChart');
+  if(!canvas) return;
+  if(hpRddaChart){ try{hpRddaChart.destroy();}catch(e){} hpRddaChart=null; }
+  const totals = months.map((_,i)=>gd[i]+dom[i]+bulk[i]);
+  const CURR = months.length - 1;
+
+  // Register rddaLabels plugin once
+  if(!Chart.registry.plugins.get('hpRddaLabels')){
+    Chart.register({
+      id:'hpRddaLabels',
+      afterDraw(chart){
+        if(chart.canvas.id !== 'hpRddaChart') return;
+        const {ctx, scales:{y}, data} = chart;
+        // Compute totals live from chart data (avoids stale closure)
+        const liveTotals = (data.datasets[0]?.data||[]).map((_,i)=>
+          data.datasets.reduce((s,ds)=>s+(Number(ds.data[i])||0),0));
+        const CURR_I = data.labels.length - 1;
+        const meta = chart.getDatasetMeta(0);
+        const yBase = y.bottom + 8;
+        ctx.save(); ctx.textAlign='center'; ctx.textBaseline='top';
+        meta.data.forEach((bar,i)=>{
+          const cur = i===CURR_I;
+          if(cur){
+            ctx.shadowColor='#fbbf24'; ctx.shadowBlur=14;
+            ctx.font=`700 11px 'Segoe UI',system-ui,sans-serif`;
+            ctx.fillStyle='#fbbf24';
+            ctx.fillText(data.labels[i], bar.x, yBase);
+            ctx.shadowColor='#fde68a'; ctx.shadowBlur=10;
+            ctx.font=`700 10px 'Segoe UI',system-ui,sans-serif`;
+            ctx.fillStyle='#fde68a';
+            ctx.fillText(liveTotals[i]+'건', bar.x, yBase+15);
+          } else {
+            ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+            ctx.font=`500 11px 'Segoe UI',system-ui,sans-serif`;
+            ctx.fillStyle='#94a3b8';
+            ctx.fillText(data.labels[i], bar.x, yBase);
+            ctx.font=`400 10px 'Segoe UI',system-ui,sans-serif`;
+            ctx.fillStyle='#64748b';
+            ctx.fillText(liveTotals[i]+'건', bar.x, yBase+15);
+          }
+        });
+        ctx.restore();
+      }
+    });
+  }
+
+  const rCtx = canvas.getContext('2d');
+  function rddaGrad(c,top,bot){const g=c.createLinearGradient(0,0,0,220);g.addColorStop(0,bot);g.addColorStop(1,top);return g;}
+
+  hpRddaChart = new Chart(rCtx,{
+    type:'bar',
+    data:{
+      labels: months,
+      datasets:[
+        {label:'GD개발',   data:gd,   backgroundColor:rddaGrad(rCtx,'#c084fc','#5b21b6'), borderSkipped:'bottom'},
+        {label:'국내개발', data:dom,  backgroundColor:rddaGrad(rCtx,'#38bdf8','#0369a1'), borderSkipped:'bottom'},
+        {label:'사입원단', data:bulk, backgroundColor:rddaGrad(rCtx,'#34d399','#065f46'), borderRadius:{topLeft:5,topRight:5}, borderSkipped:'bottom'},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{padding:{bottom:32}},
+      plugins:{
+        legend:{display:true,position:'top',align:'end',
+          labels:{color:'#cbd5e1',font:{size:10,weight:'600'},padding:16,usePointStyle:true,pointStyle:'rectRounded',boxWidth:10,boxHeight:10}},
+        tooltip:{...HP_TOOLTIP_CFG, mode:'index', intersect:false,
+          callbacks:{footer:items=>'총 '+items.reduce((s,i)=>s+i.parsed.y,0)+'건'}}
+      },
+      scales:{
+        x:{stacked:true,grid:{display:false},border:{display:false},ticks:{display:false}},
+        y:{stacked:true,grid:{color:'rgba(255,255,255,.04)',drawTicks:false},border:{display:false},
+          ticks:{color:'#475569',font:{size:10},padding:10,stepSize:20,maxTicksLimit:6},min:0}
+      }
+    }
+  });
+}
+
+// ── main render function
+function renderHpHome(data){
+  if(!data) return;
+
+  // 1. Status summary
+  const setText = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  setText('hpTotalVal', data.total+'건');
+  setText('hpGdVal',    data.gdCount+'건');
+  setText('hpGdPct',    data.total>0 ? (data.gdCount/data.total*100).toFixed(1)+'%' : '—%');
+  setText('hpDomVal',   data.domCount+'건');
+  setText('hpDomPct',   data.total>0 ? (data.domCount/data.total*100).toFixed(1)+'%' : '—%');
+  setText('hpReceiptVal', data.receiptCount+'건');
+  setText('hpReceiptSub', `Style/# 기재 · ${data.total>0?(data.receiptCount/data.total*100).toFixed(1):'0'}%`);
+
+  // 2. Proc cards
+  const procs = [
+    {done:data.yarnDone,   bar:'hpYarnBar', done_id:'hpYarnDone', total_id:'hpYarnTotal', pct_id:'hpYarnPct'},
+    {done:data.knitDone,   bar:'hpKnitBar', done_id:'hpKnitDone', total_id:'hpKnitTotal', pct_id:'hpKnitPct'},
+    {done:data.dyeDone,    bar:'hpDyeBar',  done_id:'hpDyeDone',  total_id:'hpDyeTotal',  pct_id:'hpDyePct'},
+    {done:data.finDone,    bar:'hpFinBar',  done_id:'hpFinDone',  total_id:'hpFinTotal',  pct_id:'hpFinPct'},
+  ];
+  procs.forEach(p=>{
+    const pct = data.total>0 ? (p.done/data.total*100).toFixed(1) : 0;
+    setText(p.done_id, p.done+'');
+    setText(p.total_id, `/ ${data.total}건`);
+    setText(p.pct_id, pct+'%');
+    const bar = document.getElementById(p.bar);
+    if(bar) bar.style.width = pct+'%';
+  });
+
+  // 3. Proc card PROC_DATA for modals
+  window._hpProcData = [
+    {key:'yarn',label:'YARN IN-FAC',color:'#f59e0b',grad:'linear-gradient(90deg,#b45309,#f59e0b,#fde68a)',done:data.yarnDone,total:data.total,sub:'원사 입고 완료된 작지',devs:data.devList.map(d=>({n:d.name,v:d.yarnDone})),note:'원사 입고 기준 · YARN IN-FAC DATE 열 입력 여부'},
+    {key:'knit',label:'KNITTING',   color:'#8b5cf6',grad:'linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)',done:data.knitDone,total:data.total,sub:'편직 완료된 작지',    devs:data.devList.map(d=>({n:d.name,v:d.knitDone})),note:'편직 완료 기준 · KNITTING COMP. DATE 열'},
+    {key:'dye', label:'DYEING',     color:'#06b6d4',grad:'linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)',done:data.dyeDone, total:data.total,sub:'염색 완료된 작지',   devs:data.devList.map(d=>({n:d.name,v:d.dyeDone})),note:'염색 완료 기준 · DYEING COMP. DATE 열'},
+    {key:'fin', label:'FINISHING',  color:'#10b981',grad:'linear-gradient(90deg,#065f46,#10b981,#6ee7b7)',done:data.finDone,  total:data.total,sub:'피니싱 완료된 작지',devs:data.devList.map(d=>({n:d.name,v:d.finDone})),note:'피니싱 완료 기준 · FINISHING DATE 열'},
+  ];
+
+  // 4. Workload bars (dev × GD/국내)
+  const devWorkload = data.devList.map(d=>({name:d.name, total:d.total, counts:[d.domCount,d.gdCount]}));
+  hpRenderDevBars(devWorkload);
+  window._hpDevWorkload = devWorkload;
+
+  // 5. Warning rows
+  const warnRows = document.getElementById('hpWarnRows');
+  if(warnRows){
+    if(!data.knitDelays.length && !data.dyeDelays.length){
+      warnRows.innerHTML='<div style="color:#64748b;font-size:.76rem;padding:12px 0">✅ 지연 건 없음</div>';
+    } else {
+      let html = '';
+      if(data.knitDelays.length){
+        const chips = data.knitDelays.map(x=>`<span class="hp-warn-chip" style="color:#fbbf24">${x.style} <span class="hp-warn-chip-days">(+${x.days}일)</span></span>`).join('');
+        html += `<div class="hp-warn-row" style="border-left-color:#f59e0b" data-warn="0">
+          <div class="hp-warn-title-block">
+            <div class="hp-warn-type" style="color:#fbbf24">KNITTING DELAY</div>
+            <div class="hp-warn-cnt-inline" style="color:#fbbf24">${data.knitDelays.length}건 지연</div>
+          </div>
+          <div class="hp-warn-style-list">${chips}</div>
+        </div>`;
+      }
+      if(data.dyeDelays.length){
+        const chips = data.dyeDelays.map(x=>`<span class="hp-warn-chip" style="color:#c4b5fd">${x.style} <span class="hp-warn-chip-days">(+${x.days}일)</span></span>`).join('');
+        html += `<div class="hp-warn-row" style="border-left-color:#8b5cf6" data-warn="1">
+          <div class="hp-warn-title-block">
+            <div class="hp-warn-type" style="color:#c4b5fd">DYEING DELAY</div>
+            <div class="hp-warn-cnt-inline" style="color:#c4b5fd">${data.dyeDelays.length}건 지연</div>
+          </div>
+          <div class="hp-warn-style-list">${chips}</div>
+        </div>`;
+      }
+      warnRows.innerHTML = html;
+      // re-bind warn click
+      warnRows.querySelectorAll('.hp-warn-row').forEach(row=>{
+        row.addEventListener('click', ()=>{
+          const wi = parseInt(row.dataset.warn);
+          const wData = [
+            {label:'KNITTING DELAY',color:'#fbbf24',sub:'원사 입고 후 22일 초과 · 편직 미완료 건',items:data.knitDelays},
+            {label:'DYEING DELAY',  color:'#c4b5fd',sub:'편직 완료 후 14일 초과 · 염색 미완료 건', items:data.dyeDelays},
+          ][wi];
+          if(!wData) return;
+          const maxD = Math.max(...wData.items.map(x=>x.days),1);
+          const bars = wData.items.map(x=>`<div class="hp-modal-bar-row">
+            <div class="hp-modal-bar-name" style="width:86px;font-family:monospace;font-size:.6rem">${x.style}</div>
+            <div class="hp-modal-bar-track"><div class="hp-modal-bar-fill" style="width:${(x.days/maxD*100).toFixed(1)}%;background:${wData.color};opacity:.7"></div></div>
+            <div class="hp-modal-bar-val" style="color:${wData.color}">+${x.days}일</div>
+          </div>`).join('');
+          hpOpenModal(wData.label, wData.sub,`<div style="margin-bottom:14px"><span class="hp-modal-tag" style="background:rgba(255,255,255,.06);color:${wData.color}">총 ${wData.items.length}건 지연</span></div>${bars}<hr class="hp-modal-divider"><div style="font-size:.58rem;color:#475569">※ 지연 기준일 초과 후 다음 공정 미시작 건</div>`);
+        });
+      });
+    }
+  }
+  window._hpWarnData = [
+    {label:'KNITTING DELAY',color:'#fbbf24',sub:'원사 입고 후 22일 초과 · 편직 미완료 건',items:data.knitDelays},
+    {label:'DYEING DELAY',  color:'#c4b5fd',sub:'편직 완료 후 14일 초과 · 염색 미완료 건', items:data.dyeDelays},
+  ];
+
+  // 6. SCT table
+  const devColors3 = HP_DEV_COLORS;
+  const devNames = data.devList.map(d=>d.name);
+  const sctDevRow = document.getElementById('hpSctDevRow');
+  const sctSubRow = document.getElementById('hpSctSubRow');
+  if(sctDevRow && sctSubRow){
+    // rebuild header
+    sctDevRow.innerHTML=`<th style="text-align:left;width:130px">CATEGORY</th><th style="color:#64748b;width:52px">합계<br><span style="font-size:.52rem;font-weight:400">OPT</span></th>`;
+    sctSubRow.innerHTML='<th></th><th></th>';
+    devNames.forEach((name,i)=>{
+      sctDevRow.innerHTML+=`<th colspan="2" style="color:${devColors3[i]||'#94a3b8'};border-left:1px solid rgba(255,255,255,.12)">${name}</th>`;
+      sctSubRow.innerHTML+=`<th style="color:${devColors3[i]||'#94a3b8'};border-left:1px solid rgba(255,255,255,.12)">STYLE</th><th style="color:${devColors3[i]||'#94a3b8'}">OPTION</th>`;
+    });
+  }
+  const sctBody = document.getElementById('hpSctBody');
+  if(sctBody){
+    sctBody.innerHTML='';
+    CAT_DEFS.forEach(({key,label,color})=>{
+      const c = data.cats[key];
+      if(!c) return;
+      const total2 = c.opts||0;
+      const devCells = devNames.map(name=>{
+        const d=c.devs?.[name]||{};
+        return `<td class="hp-sct-style" style="border-left:1px solid rgba(255,255,255,.12)">${d.styles||0}</td><td class="hp-sct-opt">${d.opts||0}</td>`;
+      }).join('');
+      sctBody.innerHTML+=`<tr><td><div class="hp-sct-cat-cell"><div class="hp-sct-cat-dot" style="background:${color}"></div>${label}</div></td><td class="hp-sct-total-cell" style="color:#e2e8f0">${total2}</td>${devCells}</tr>`;
+    });
+    // grand total row
+    const grandDevCells = devNames.map(name=>{
+      const d=data.grand.devs?.[name]||{};
+      return `<td style="border-left:1px solid rgba(255,255,255,.12);color:#94a3b8">${d.styles||0}</td><td style="font-weight:800;color:${devColors3[devNames.indexOf(name)]||'#94a3b8'}">${d.opts||0}</td>`;
+    }).join('');
+    sctBody.innerHTML+=`<tr class="hp-sct-grand-row"><td style="font-weight:800;font-size:.68rem;letter-spacing:.04em">GRAND TOTAL</td><td class="hp-sct-total-cell" style="color:#c4b5fd;font-size:.78rem">${data.grand.opts||0}</td>${grandDevCells}</tr>`;
+  }
+
+  // 7. SCT donut
+  const catVals = CAT_DEFS.map(({key})=>data.cats[key]?.opts||0);
+  hpRenderSctDonut(catVals, data.grand.opts||0);
+
+  // 8. Pipeline bars
+  const pipeDevs = data.devList.map(d=>({name:d.name, total:d.total, counts:d.pipeStages}));
+  hpRenderPipeBars(pipeDevs);
+  window._hpPipeDevs = pipeDevs;
+
+  // 9. RDDA chart
+  const {months, gd, dom, bulk} = data.rdda;
+  hpRenderRddaChart(months, gd, dom, bulk);
+
+  // 10. Lead time (placeholder from parsed data)
+  const lt = data.leadTime;
+  if(lt){
+    setText('hpLtKnit',   lt.avgKnit!=null   ? lt.avgKnit.toString()   : '—');
+    setText('hpLtSample', lt.avgSample!=null  ? lt.avgSample.toString() : '—');
+  }
+
+  // rebind proc card clicks
+  document.querySelectorAll('.hp-proc-card').forEach((card,i)=>{
+    card.onclick = ()=>{
+      const d = window._hpProcData[i];
+      if(!d) return;
+      const maxV = Math.max(...d.devs.map(x=>x.v), 1);
+      const pct = d.total>0 ? (d.done/d.total*100).toFixed(1) : 0;
+      const bars = d.devs.map(dev=>`<div class="hp-modal-bar-row">
+        <div class="hp-modal-bar-name">${dev.n}</div>
+        <div class="hp-modal-bar-track"><div class="hp-modal-bar-fill" style="width:${(dev.v/maxV*100).toFixed(1)}%;background:${d.grad}"></div></div>
+        <div class="hp-modal-bar-val" style="color:${d.color}">${dev.v}건</div>
+      </div>`).join('');
+      hpOpenModal(d.label, d.sub,`<div class="hp-modal-stat-grid">
+        <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:${d.color}">${d.done}</div><div class="hp-modal-stat-lbl">완료</div></div>
+        <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:#e2e8f0">${d.total-d.done}</div><div class="hp-modal-stat-lbl">미완료</div></div>
+        <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:${d.color}">${pct}%</div><div class="hp-modal-stat-lbl">완료율</div></div>
+      </div><hr class="hp-modal-divider"><div style="font-size:.62rem;font-weight:700;color:#64748b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">담당자별 분포</div>${bars}<hr class="hp-modal-divider"><div style="font-size:.58rem;color:#475569">※ ${d.note}</div>`);
+    };
+  });
+
+  // rebind pipeline clicks
+  const pipeListEl = document.getElementById('hpPipeDevList');
+  if(pipeListEl){
+    pipeListEl.addEventListener('click', e=>{
+      const row = e.target.closest('.hp-pipe-dev-row[data-pipe-idx]');
+      if(!row) return;
+      const idx = parseInt(row.dataset.pipeIdx);
+      if(isNaN(idx)) return;
+      const dev = window._hpPipeDevs[idx];
+      if(!dev) return;
+      const bars = dev.counts.map((c,i)=>`<div class="hp-modal-bar-row">
+        <div class="hp-modal-bar-name" style="width:58px">${PIPE_STAGES4[i]}</div>
+        <div class="hp-modal-bar-track"><div class="hp-modal-bar-fill" style="width:${(c/Math.max(dev.total,1)*100).toFixed(1)}%;background:${PIPE_GRADS4[i]}"></div></div>
+        <div class="hp-modal-bar-val" style="color:${PIPE_COLORS4[i]}">${c}건</div>
+      </div>`).join('');
+      hpOpenModal(`${dev.name} — Pipeline`, `총 ${dev.total}건 진행중`,`<div class="hp-modal-stat-grid" style="grid-template-columns:repeat(4,1fr)">${dev.counts.map((c,i)=>`<div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:${PIPE_COLORS4[i]}">${c}</div><div class="hp-modal-stat-lbl">${PIPE_STAGES4[i]}</div></div>`).join('')}</div><hr class="hp-modal-divider">${bars}`);
+    });
+  }
+}
+
+// ── parse Excel workbook
+function parseHpData(wb){
+  const today = new Date();
+  const todayMs = today.getTime();
+
+  // ── 현황 sheet
+  const sheetName = wb.SheetNames.includes('현황') ? '현황' : wb.SheetNames[0];
+  const ws = wb.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+
+  let headerRow = -1;
+  for(let i=0; i<Math.min(rows.length, 15); i++){
+    if(rows[i] && rows[i][0] === 'No.'){ headerRow=i; break; }
+  }
+  if(headerRow < 0) return null;
+
+  const dataStart = headerRow + 2;
+
+  // accumulators
+  let total=0, gdCount=0, domCount=0, receiptCount=0;
+  let yarnDone=0, knitDone=0, dyeDone=0, finDone=0;
+  const devMap = {};
+
+  const knitDelays = [], dyeDelays = [];
+
+  // SCT
+  const SCT_CAT_MAP = {
+    'EU MARKET':'euMarket', 'SEASON DEV':'seasonDvlp', 'SEASON DVLP':'seasonDvlp',
+    'CORE UPDATE':'coreUpdate', 'PROJECT':'project'
+  };
+  const devCatTrack = {}, allCatTrack = {};
+
+  // lead time
+  const knitLeadDays = [], sampleLeadDays = [];
+
+  for(let i=dataStart; i<rows.length; i++){
+    const r = rows[i];
+    if(!r || r[0]==null || r[0]==='') continue;
+
+    total++;
+
+    const dev      = String(r[6]||'').trim() || '미배정';
+    const styleNo  = String(r[7]||'').trim();
+    const flNo     = String(r[8]||'').trim();
+    const cat      = String(r[3]||'').trim();
+
+    // GD vs 국내 (col18 = YarnMill)
+    const yarnMill = String(r[18]||'').trim();
+    const isGd = yarnMill.toUpperCase().startsWith('GD');
+    if(isGd) gdCount++; else domCount++;
+
+    // receipt (styleNo exists & not empty)
+    if(styleNo) receiptCount++;
+
+    // process done
+    const yarnV = r[19], knitV = r[21], dyeV = r[23], finV = r[25];
+    const yd = hpIsDone(yarnV), kd = hpIsDone(knitV), dd = hpIsDone(dyeV), fd2 = hpIsDone(finV);
+    if(yd) yarnDone++;
+    if(kd) knitDone++;
+    if(dd) dyeDone++;
+    if(fd2) finDone++;
+
+    // pipeline stage
+    const stage = hpGetPipelineStage(yd, kd, dd, fd2);
+
+    // delays
+    if(yd && !kd){
+      const yarnDate = hpParseDate(yarnV);
+      if(yarnDate){
+        const days = Math.floor((todayMs - yarnDate.getTime()) / 86400000);
+        if(days > 22){
+          const label = flNo || styleNo || ('row'+(i+1));
+          knitDelays.push({style:label, days});
+        }
+      }
+    }
+    if(kd && !dd){
+      const knitDate = hpParseDate(knitV);
+      if(knitDate){
+        const days = Math.floor((todayMs - knitDate.getTime()) / 86400000);
+        if(days > 14){
+          const label = flNo || styleNo || ('row'+(i+1));
+          dyeDelays.push({style:label, days});
+        }
+      }
+    }
+
+    // lead times
+    const yarnDate2 = hpParseDate(yarnV);
+    const knitDate2 = hpParseDate(knitV);
+    const finDate2  = hpParseDate(finV);
+    if(yarnDate2 && knitDate2 && kd){
+      const d = Math.floor((knitDate2.getTime()-yarnDate2.getTime())/86400000);
+      if(d>0 && d<180) knitLeadDays.push(d);
+    }
+    if(yarnDate2 && finDate2 && fd2){
+      const d = Math.floor((finDate2.getTime()-yarnDate2.getTime())/86400000);
+      if(d>0 && d<365) sampleLeadDays.push(d);
+    }
+
+    // SCT
+    const origRef = String(r[4]||'').trim();
+    const sctCatKey = SCT_CAT_MAP[cat.toUpperCase()];
+    if(sctCatKey){
+      if(!devCatTrack[dev]) devCatTrack[dev]={};
+      if(!devCatTrack[dev][sctCatKey]) devCatTrack[dev][sctCatKey]={styleSet:new Set(),opts:0};
+      if(origRef) devCatTrack[dev][sctCatKey].styleSet.add(origRef);
+      devCatTrack[dev][sctCatKey].opts++;
+      if(!allCatTrack[sctCatKey]) allCatTrack[sctCatKey]={styleSet:new Set(),opts:0};
+      if(origRef) allCatTrack[sctCatKey].styleSet.add(origRef);
+      allCatTrack[sctCatKey].opts++;
+    }
+
+    // per-dev accumulate
+    if(!devMap[dev]) devMap[dev]={
+      total:0, gdCount:0, domCount:0,
+      yarnDone:0, knitDone:0, dyeDone:0, finDone:0,
+      pipeStages:[0,0,0,0]
+    };
+    devMap[dev].total++;
+    if(isGd) devMap[dev].gdCount++; else devMap[dev].domCount++;
+    if(yd) devMap[dev].yarnDone++;
+    if(kd) devMap[dev].knitDone++;
+    if(dd) devMap[dev].dyeDone++;
+    if(fd2) devMap[dev].finDone++;
+    devMap[dev].pipeStages[stage]++;
+  }
+
+  // ── build devList (sort by total desc, skip 미배정 if present)
+  const devList = Object.entries(devMap)
+    .sort((a,b)=>b[1].total-a[1].total)
+    .map(([name,d])=>({name, ...d}));
+
+  // ── SCT cats
+  const cats = {};
+  for(const [ck,t] of Object.entries(allCatTrack)){
+    const devs2={};
+    for(const [dn,dt] of Object.entries(devCatTrack)){
+      if(dt[ck]) devs2[dn]={styles:dt[ck].styleSet.size, opts:dt[ck].opts};
+    }
+    cats[ck]={opts:t.opts, styles:t.styleSet.size, devs:devs2};
+  }
+  // grand
+  const grandDevMap2={};
+  for(const [dn,dcat] of Object.entries(devCatTrack)){
+    const ss=new Set(); let tot2=0;
+    for(const t of Object.values(dcat)){t.styleSet.forEach(s=>ss.add(s)); tot2+=t.opts;}
+    grandDevMap2[dn]={styles:ss.size, opts:tot2};
+  }
+  const grandOpts2=Object.values(allCatTrack).reduce((a,t)=>a+t.opts,0);
+  const grand={opts:grandOpts2, devs:grandDevMap2};
+
+  // ── RDDA: 창고보관 + 소진완료 sheets
+  const WINDOW_MONTHS = 5;
+  // build 5-month window ending with current month (2026-05)
+  const refDate = new Date(2026, 4, 1); // May 2026
+  const monthWindows = [];
+  for(let m=WINDOW_MONTHS-1; m>=0; m--){
+    const d = new Date(refDate.getFullYear(), refDate.getMonth()-m, 1);
+    monthWindows.push({yr:d.getFullYear(), mo:d.getMonth()+1});
+  }
+  const monthLabels = monthWindows.map((m,i)=>{
+    const abbr=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m.mo-1];
+    return i===0 ? `${abbr} '${String(m.yr).slice(2)}` : (i===WINDOW_MONTHS-1 ? `${abbr} '${String(m.yr).slice(2)}` : abbr);
+  });
+
+  const rddaGd   = monthWindows.map(()=>0);
+  const rddaDom  = monthWindows.map(()=>0);
+  const rddaBulk = monthWindows.map(()=>0);
+
+  ['창고보관','소진완료'].forEach(sn=>{
+    if(!wb.SheetNames.includes(sn)) return;
+    const wsR = wb.Sheets[sn];
+    const rRows = XLSX.utils.sheet_to_json(wsR,{header:1,defval:null,raw:true});
+    rRows.forEach(row=>{
+      if(!row) return;
+      for(let c=0;c<row.length;c++){
+        const v = row[c];
+        if(v==null) continue;
+        const fl = hpParseFL(String(v));
+        if(!fl) continue;
+        const mIdx = monthWindows.findIndex(m=>m.yr===fl.yr && m.mo===fl.mo);
+        if(mIdx<0) continue;
+        if(fl.src==='9') rddaGd[mIdx]++;
+        else if(fl.src==='5') rddaDom[mIdx]++;
+        else if(fl.src==='2'||fl.src==='4') rddaBulk[mIdx]++;
+      }
+    });
+  });
+
+  // ── lead time averages
+  const avgKnit   = knitLeadDays.length   ? Math.round(knitLeadDays.reduce((a,b)=>a+b,0)/knitLeadDays.length)   : null;
+  const avgSample = sampleLeadDays.length ? Math.round(sampleLeadDays.reduce((a,b)=>a+b,0)/sampleLeadDays.length) : null;
+
+  return {
+    total, gdCount, domCount, receiptCount,
+    yarnDone, knitDone, dyeDone, finDone,
+    devList, cats, grand,
+    knitDelays, dyeDelays,
+    rdda:{months:monthLabels, gd:rddaGd, dom:rddaDom, bulk:rddaBulk},
+    leadTime:{avgKnit, avgSample}
+  };
+}
+
+// ── file input handler
+document.getElementById('hpFileInput').addEventListener('change', async(e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    document.getElementById('hpDataBadge').textContent = '◆ PARSING · '+file.name+'…';
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array', cellDates:true});
+    hpData = parseHpData(wb);
+    if(!hpData){
+      document.getElementById('hpDataBadge').textContent = '◆ ERROR · 현황 시트를 찾을 수 없습니다';
+      return;
+    }
+    renderHpHome(hpData);
+    document.getElementById('hpDataBadge').textContent = '◆ LIVE DATA · '+file.name;
+    document.getElementById('hpUpdateMeta').textContent = 'UPDATED '+new Date().toLocaleDateString('ko-KR');
+  }catch(err){
+    console.error('hpFileInput error',err);
+    document.getElementById('hpDataBadge').textContent = '◆ ERROR · '+err.message;
+  }
+  // reset input so same file can be re-uploaded
+  e.target.value='';
+});
+
+// ── initial render (empty state charts)
+(function initHpCharts(){
+  // empty SCT donut
+  hpRenderSctDonut([0,0,0,0], 0);
+  // empty RDDA with placeholder labels
+  hpRenderRddaChart(["Jan '26",'Feb','Mar','Apr',"May '26"],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]);
+})();
+
+})(); // end IIFE
 </script>
 </body>
 </html>
