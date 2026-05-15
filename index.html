@@ -2609,6 +2609,13 @@ function renderStats(){
   }
 })();
 
+// ── Expose Firebase to HP IIFE (non-module script)
+window._fbDb       = db;
+window._fbSetDoc   = setDoc;
+window._fbGetDoc   = getDoc;
+window._fbOnSnap   = onSnapshot;
+window._fbDoc      = doc;
+
 // ── 초기화
 initFirebase();
 
@@ -3418,44 +3425,80 @@ window.hpCloseUploadModal = function(){
   }
 })();
 
-// ── helpers: persist & restore via localStorage
-const HP_STORE_KEY  = 'hpDashData_v2';
-const HP_META_KEY   = 'hpDashMeta_v2';
+// ── helpers: persist & restore
+const HP_STORE_KEY = 'hpDashData_v2';
+const HP_META_KEY  = 'hpDashMeta_v2';
+const HP_FS_DOC    = 'hpDashboard'; // Firestore: sampleData/hpDashboard
 
-function hpSaveToStorage(data, fileName){
+// localStorage fallback (fast initial load / offline)
+function hpSaveLocal(data, fileName){
   try{
     localStorage.setItem(HP_STORE_KEY, JSON.stringify(data));
     localStorage.setItem(HP_META_KEY, JSON.stringify({
-      fileName,
-      updatedAt: new Date().toLocaleDateString('ko-KR')
+      fileName, updatedAt: new Date().toLocaleDateString('ko-KR')
     }));
-  }catch(e){ console.warn('hp save failed', e); }
+  }catch(e){}
 }
-
-function hpLoadFromStorage(){
+function hpLoadLocal(){
   try{
     const raw = localStorage.getItem(HP_STORE_KEY);
     if(!raw) return null;
-    return {data: JSON.parse(raw), meta: JSON.parse(localStorage.getItem(HP_META_KEY)||'{}')};
+    return {data:JSON.parse(raw), meta:JSON.parse(localStorage.getItem(HP_META_KEY)||'{}')};
   }catch(e){ return null; }
+}
+
+// Firestore save (shared across all users)
+async function hpSaveToStorage(data, fileName){
+  hpSaveLocal(data, fileName); // always save locally too
+  const fb = window._fbDb;
+  if(!fb) return;
+  try{
+    const payload = Object.assign({}, data, {
+      _fileName: fileName,
+      _updatedAt: new Date().toLocaleDateString('ko-KR'),
+      _ts: Date.now()
+    });
+    await window._fbSetDoc(window._fbDoc(fb,'sampleData',HP_FS_DOC), payload);
+  }catch(e){ console.warn('hp Firestore save failed', e); }
 }
 
 // ── file input handler is now inside setupDnd() above
 
-// ── initial render: restore from localStorage or show empty state
+// ── initial render: Firestore realtime → localStorage fallback → empty
 (function initHpCharts(){
-  const saved = hpLoadFromStorage();
-  if(saved && saved.data){
-    hpData = saved.data;
-    renderHpHome(hpData);
-    const m = saved.meta;
-    document.getElementById('hpDataBadge').textContent  = '◆ LIVE DATA · '+(m.fileName||'저장된 데이터');
-    document.getElementById('hpUpdateMeta').textContent = m.updatedAt ? 'UPDATED '+m.updatedAt : '';
-    return;
+
+  function applyData(data, fileName, updatedAt){
+    hpData = data;
+    renderHpHome(data);
+    document.getElementById('hpDataBadge').textContent  = '◆ LIVE DATA · '+(fileName||'공유 데이터');
+    document.getElementById('hpUpdateMeta').textContent = updatedAt ? 'UPDATED '+updatedAt : '';
+    hpSaveLocal(data, fileName); // keep local cache in sync
   }
-  // no saved data — empty state
-  hpRenderSctDonut([0,0,0,0], 0);
-  hpRenderRddaChart(["Jan '26",'Feb','Mar','Apr',"May '26"],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]);
+
+  // 1) Show localStorage data immediately (no flicker on reload)
+  const cached = hpLoadLocal();
+  if(cached && cached.data){
+    applyData(cached.data, cached.meta.fileName, cached.meta.updatedAt);
+  } else {
+    hpRenderSctDonut([0,0,0,0], 0);
+    hpRenderRddaChart(["Jan '26",'Feb','Mar','Apr',"May '26"],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]);
+  }
+
+  // 2) Subscribe to Firestore — updates for all users in real-time
+  const fb = window._fbDb;
+  if(!fb) return;
+  try{
+    window._fbOnSnap(window._fbDoc(fb,'sampleData',HP_FS_DOC), snap=>{
+      if(!snap.exists()) return;
+      const d = snap.data();
+      const fileName  = d._fileName  || '공유 데이터';
+      const updatedAt = d._updatedAt || '';
+      // strip meta fields before passing to renderer
+      const clean = Object.assign({}, d);
+      delete clean._fileName; delete clean._updatedAt; delete clean._ts;
+      applyData(clean, fileName, updatedAt);
+    });
+  }catch(e){ console.warn('hp Firestore listener failed', e); }
 })();
 
 })(); // end IIFE
