@@ -53,10 +53,10 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 /* ── HOME standalone ── */
 .nav-home{
   font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  padding:9px 18px 9px 16px;cursor:pointer;color:var(--muted);
-  border-left:2px solid transparent;
+  padding:11px 18px 11px 16px;cursor:pointer;color:var(--muted);
+  border-left:2px solid transparent;border-bottom:1px solid var(--sidebar-border);
   transition:color .18s,background .18s,border-color .18s,text-shadow .18s;
-  margin-bottom:8px;user-select:none;
+  flex-shrink:0;user-select:none;
 }
 .nav-home:hover,.nav-home.active{
   color:#e2e8f0;border-left-color:#e2e8f0;background:rgba(226,232,240,.06);
@@ -947,6 +947,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 <!-- ══════════ SIDEBAR ══════════ -->
 <aside class="sidebar">
 
+  <!-- HOME — 최상단 -->
+  <div class="nav-home active" data-nav="home">HOME</div>
+
   <!-- LOGO — click → HOME -->
   <div class="sidebar-logo" id="sidebarLogo">
     <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
@@ -967,9 +970,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
   </div>
 
   <nav class="nav-body">
-
-    <!-- HOME -->
-    <div class="nav-home active" data-nav="home">HOME</div>
 
     <!-- ── FABRIC R&D ── -->
     <div class="nav-section s-fabric">
