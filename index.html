@@ -803,6 +803,43 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .hp-modal-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.06);border-radius:5px;padding:3px 9px;font-size:.62rem;font-weight:600;margin:2px}
 .hp-modal-tag{font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:4px;text-transform:uppercase}
 
+/* ── Preview page styles ── */
+.preview-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.28);color:#c4b5fd;font-size:.58rem;font-weight:700;letter-spacing:.1em;padding:3px 10px;border-radius:20px;vertical-align:middle;margin-left:10px;position:relative;top:-2px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.prev-skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 2s infinite;border-radius:5px}
+.prev-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.prev-kpi-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.prev-kpi{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px}
+.prev-kpi-lbl{font-size:.58rem;font-weight:700;letter-spacing:.1em;color:#475569;margin-bottom:8px;text-transform:uppercase}
+.prev-kpi-val{height:26px;border-radius:5px;margin-bottom:6px}
+.prev-kpi-sub{height:12px;border-radius:4px;width:55%}
+.prev-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px}
+.prev-box-title{font-size:.66rem;font-weight:700;letter-spacing:.09em;color:#64748b;text-transform:uppercase;margin-bottom:14px}
+.prev-bars{display:flex;align-items:flex-end;gap:6px;height:90px}
+.prev-bar{flex:1;border-radius:4px 4px 0 0;min-height:4px}
+.prev-bar-purple{background:linear-gradient(180deg,rgba(139,92,246,.45),rgba(139,92,246,.12))}
+.prev-bar-slate{background:linear-gradient(180deg,rgba(100,116,139,.35),rgba(100,116,139,.08))}
+.prev-bar-cyan{background:linear-gradient(180deg,rgba(6,182,212,.4),rgba(6,182,212,.1))}
+.prev-bar-amber{background:linear-gradient(180deg,rgba(245,158,11,.4),rgba(245,158,11,.1))}
+.prev-filter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.prev-tab{font-size:.64rem;font-weight:700;letter-spacing:.07em;padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);color:#64748b;cursor:default}
+.prev-tab.on{background:rgba(139,92,246,.2);border-color:rgba(139,92,246,.35);color:#c4b5fd}
+.prev-proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.prev-proj-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px}
+.prev-proj-tag{display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:700;letter-spacing:.08em;padding:3px 9px;border-radius:20px;margin-bottom:12px}
+.prev-prog-bg{height:4px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:12px}
+.prev-prog-fill{height:100%;border-radius:3px}
+.prev-note{text-align:center;margin-top:22px;color:#374151;font-size:.7rem;line-height:1.7}
+.prev-divider{height:1px;background:rgba(255,255,255,.06);margin:4px 0 14px}
+.prev-row-line{height:11px;border-radius:3px;margin-bottom:7px}
+.prev-timeline{display:flex;gap:0;margin:10px 0}
+.prev-tl-step{flex:1;text-align:center;position:relative}
+.prev-tl-step::before{content:'';position:absolute;top:9px;left:0;right:0;height:1px;background:rgba(255,255,255,.1)}
+.prev-tl-dot{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.15);background:var(--bg-card);margin:0 auto 6px;position:relative;z-index:1}
+.prev-tl-dot.done{background:#8b5cf6;border-color:#8b5cf6}
+.prev-tl-dot.active{background:#06b6d4;border-color:#06b6d4;box-shadow:0 0 8px rgba(6,182,212,.5)}
+.prev-tl-lbl{font-size:.56rem;color:#475569;font-weight:600;letter-spacing:.06em}
+
 </style>
 </head>
 <body>
@@ -823,29 +860,29 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 
     <div class="nav-divider"></div>
 
-    <!-- FABRIC DEVELOPMENT -->
-    <div class="nav-group-header">FABRIC DEVELOPMENT</div>
+    <!-- SAMPLE MANAGEMENT -->
+    <div class="nav-group-header">SAMPLE MANAGEMENT</div>
+    <div class="nav-item" data-nav="rdda">
+      <span class="nav-icon">📊</span><span class="nav-label">RDDA ANALYSIS</span>
+    </div>
 
-    <div class="nav-item" data-nav="season">
-      <span class="nav-icon">🌿</span><span class="nav-label">SEASON</span>
-    </div>
-    <div class="nav-item" data-nav="eu-market">
-      <span class="nav-icon">🌍</span><span class="nav-label">EU MARKET</span>
-    </div>
-    <!-- PROJECT (확장 가능) -->
+    <div class="nav-divider"></div>
+
+    <!-- R&D PROJECT -->
+    <div class="nav-group-header">R&D PROJECT</div>
     <div class="nav-group-block" data-block="project">
       <div class="nav-item" id="nav-project-toggle" data-nav-toggle="project-sub">
-        <span class="nav-icon">📁</span><span class="nav-label">PROJECT</span>
+        <span class="nav-icon">🧪</span><span class="nav-label">PROJECT BOARD</span>
         <span class="nav-arrow" id="project-arrow">›</span>
       </div>
       <div class="nav-sub" id="project-sub">
+        <div class="nav-item nav-sub-item" data-nav="project-board">
+          <span class="nav-icon">📋</span><span class="nav-label">OVERVIEW</span>
+        </div>
         <div class="nav-item nav-sub-item" data-nav="gantt">
-          <span class="nav-icon">📊</span><span class="nav-label">GANTT CHART</span>
+          <span class="nav-icon">📅</span><span class="nav-label">GANTT CHART</span>
         </div>
       </div>
-    </div>
-    <div class="nav-item" data-nav="core">
-      <span class="nav-icon">💎</span><span class="nav-label">CORE</span>
     </div>
 
     <div class="nav-divider"></div>
@@ -861,24 +898,28 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 
     <div class="nav-divider"></div>
 
-    <!-- PROCESS INNOVATION -->
-    <div class="nav-section-item" data-nav="process-innovation">
+    <!-- OPERATIONS -->
+    <div class="nav-group-header">OPERATIONS</div>
+    <div class="nav-item" data-nav="process-innovation">
       <span class="nav-icon">⚡</span><span class="nav-label">PROCESS INNOVATION</span>
     </div>
-
-    <div class="nav-divider"></div>
-
-    <!-- MEETING -->
-    <div class="nav-group-header">MEETING</div>
     <div class="nav-item" data-nav="calendar">
-      <span class="nav-icon">📅</span><span class="nav-label">캘린더</span>
+      <span class="nav-icon">📅</span><span class="nav-label">CALENDAR</span>
     </div>
 
     <div class="nav-divider"></div>
 
-    <!-- STATISTICS / SETTING -->
+    <!-- REPORT -->
+    <div class="nav-group-header">REPORT</div>
+    <div class="nav-item" data-nav="kpi-report">
+      <span class="nav-icon">📋</span><span class="nav-label">KPI REPORT</span>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <!-- SYSTEM -->
     <div class="nav-section-item" data-nav="statistics">
-      <span class="nav-icon">📈</span><span class="nav-label">STATISTICS (KPI)</span>
+      <span class="nav-icon">📈</span><span class="nav-label">STATISTICS</span>
     </div>
     <div class="nav-section-item" data-nav="setting">
       <span class="nav-icon">⚙</span><span class="nav-label">SETTING</span>
@@ -1147,36 +1188,136 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
   <!-- ── FABRIC ANALYSIS ── -->
   <div class="screen" id="screen-fabric-analysis">
     <div class="screen-pad">
-      <div class="page-header"><div class="page-title">FABRIC ANALYSIS</div><div class="page-sub">원단 분석 데이터</div></div>
-      <div class="coming-soon">
-        <div class="coming-icon">🔬</div><div class="coming-title">Fabric Analysis</div>
-        <div class="coming-sub">원단 성능 분석 및 테스트 결과를 관리합니다.</div>
-        <div class="coming-badge">🚧 준비 중</div>
+      <div class="page-header">
+        <div class="page-title">FABRIC ANALYSIS <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">원단 물성 테스트 기록 · 항목별 비교 · Pass/Fail 이력 관리</div>
       </div>
+      <div class="prev-kpi-row">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">총 테스트 건</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">Pass</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">Fail</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">재테스트</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">이번달 완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">테스트 항목별 Pass Rate</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:45%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:88%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:55%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:72%;background:linear-gradient(90deg,#0e7490,#06b6d4)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:40%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:60%;background:linear-gradient(90deg,#92400e,#f59e0b)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:50%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:95%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div></div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">FL No. 다중 비교 — Radar Chart</div>
+          <div style="display:flex;align-items:center;justify-content:center;height:120px">
+            <div class="prev-skeleton" style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(6,182,212,.1))"></div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+            <div class="prev-skeleton" style="height:10px;width:50px;border-radius:3px"></div>
+            <div class="prev-skeleton" style="height:10px;width:50px;border-radius:3px"></div>
+            <div class="prev-skeleton" style="height:10px;width:50px;border-radius:3px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="prev-box">
+        <div class="prev-box-title">테스트 이력 테이블 — FL No · 항목 · 결과값 · 기준값 · 판정 · 날짜</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+          <div style="display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr 0.7fr 1fr;gap:8px"><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr 0.7fr 1fr;gap:8px"><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr 0.7fr 1fr;gap:8px"><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div></div>
+        </div>
+      </div>
+      <div class="prev-note">🔬 테스트 결과를 직접 입력하고 FL No. 기준으로 물성 비교 분석이 가능합니다.</div>
     </div>
   </div>
 
   <!-- ── TROUBLE SHOOTING ── -->
   <div class="screen" id="screen-trouble-shooting">
     <div class="screen-pad">
-      <div class="page-header"><div class="page-title">TROUBLE SHOOTING</div><div class="page-sub">불량 및 이슈 관리</div></div>
-      <div class="coming-soon">
-        <div class="coming-icon">🔧</div><div class="coming-title">Trouble Shooting Log</div>
-        <div class="coming-sub">현장 불량 및 기술 이슈를 기록하고 추적합니다.</div>
-        <div class="coming-badge">🚧 준비 중</div>
+      <div class="page-header">
+        <div class="page-title">TROUBLE SHOOTING <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">현장 불량 · 클레임 · 기술 이슈 기록 및 해결 추적</div>
       </div>
+      <div class="prev-kpi-row-3" style="grid-template-columns:repeat(4,1fr)">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">총 이슈</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">처리중</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">해결완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">이번달 재발</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">이슈 유형 분포</div>
+          <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
+            <div class="prev-skeleton" style="width:90px;height:90px;border-radius:50%;flex-shrink:0"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+              <div class="prev-skeleton prev-row-line"></div>
+              <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+              <div class="prev-skeleton prev-row-line" style="width:65%"></div>
+              <div class="prev-skeleton prev-row-line" style="width:75%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">월별 발생 트렌드</div>
+          <div class="prev-bars">
+            <div class="prev-bar prev-bar-amber" style="height:50%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:70%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:40%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:85%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:55%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:65%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="prev-box">
+        <div class="prev-box-title">이슈 타임라인 피드 — 날짜 · 유형 · 담당 · 원인 · 조치 · 상태</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+          <div style="border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:12px;background:rgba(239,68,68,.04)"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><div class="prev-skeleton" style="width:40px;height:10px;border-radius:3px;background:rgba(239,68,68,.25)"></div><div class="prev-skeleton prev-row-line" style="width:60%"></div></div><div class="prev-skeleton prev-row-line" style="width:85%"></div></div>
+          <div style="border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:12px;background:rgba(245,158,11,.04)"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><div class="prev-skeleton" style="width:40px;height:10px;border-radius:3px;background:rgba(245,158,11,.25)"></div><div class="prev-skeleton prev-row-line" style="width:55%"></div></div><div class="prev-skeleton prev-row-line" style="width:75%"></div></div>
+          <div style="border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:12px;background:rgba(16,185,129,.04)"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><div class="prev-skeleton" style="width:40px;height:10px;border-radius:3px;background:rgba(16,185,129,.25)"></div><div class="prev-skeleton prev-row-line" style="width:50%"></div></div><div class="prev-skeleton prev-row-line" style="width:70%"></div></div>
+        </div>
+      </div>
+      <div class="prev-note">🔧 이슈를 웹에서 직접 등록하고 Firestore에 저장됩니다. 심각도별 색상 태그 및 담당자 알림 기능 예정.</div>
     </div>
   </div>
 
   <!-- ── PROCESS INNOVATION ── -->
   <div class="screen" id="screen-process-innovation">
     <div class="screen-pad">
-      <div class="page-header"><div class="page-title">PROCESS INNOVATION</div><div class="page-sub">공정 혁신 과제</div></div>
-      <div class="coming-soon">
-        <div class="coming-icon">⚡</div><div class="coming-title">Process Innovation</div>
-        <div class="coming-sub">공정 개선 및 혁신 과제를 관리하는 페이지입니다.</div>
-        <div class="coming-badge">🚧 준비 중</div>
+      <div class="page-header">
+        <div class="page-title">PROCESS INNOVATION <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">공정 개선 과제 추진 현황 · KPI 달성률 · 팀 기여도</div>
       </div>
+      <div class="prev-kpi-row">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">총 과제</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">진행중</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">KPI 달성률</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">이번달 목표</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <div class="prev-filter-tabs">
+        <div class="prev-tab on">ALL</div>
+        <div class="prev-tab">진행중</div>
+        <div class="prev-tab">완료</div>
+        <div class="prev-tab">검토중</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
+        <div class="prev-proj-card"><div class="prev-proj-tag" style="background:rgba(6,182,212,.12);color:#67e8f9">⚡ LEAD TIME 단축</div><div class="prev-skeleton prev-row-line" style="width:80%;margin-bottom:8px"></div><div class="prev-skeleton prev-row-line" style="width:55%"></div><div class="prev-prog-bg" style="margin-top:14px"><div class="prev-prog-fill" style="width:70%;background:linear-gradient(90deg,#0e7490,#06b6d4)"></div></div></div>
+        <div class="prev-proj-card"><div class="prev-proj-tag" style="background:rgba(16,185,129,.12);color:#34d399">🌱 원사 로스율 감소</div><div class="prev-skeleton prev-row-line" style="width:75%;margin-bottom:8px"></div><div class="prev-skeleton prev-row-line" style="width:50%"></div><div class="prev-prog-bg" style="margin-top:14px"><div class="prev-prog-fill" style="width:45%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div></div>
+        <div class="prev-proj-card" style="border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px"><div style="font-size:1.4rem;opacity:.25">＋</div><div style="font-size:.64rem;color:#374151;font-weight:600">과제 추가</div></div>
+      </div>
+      <div class="prev-box">
+        <div class="prev-box-title">분기별 KPI 달성 현황</div>
+        <div class="prev-bars" style="height:80px">
+          <div class="prev-bar prev-bar-cyan" style="height:60%"></div>
+          <div class="prev-bar prev-bar-cyan" style="height:80%"></div>
+          <div class="prev-bar prev-bar-cyan" style="height:55%"></div>
+          <div class="prev-bar prev-bar-cyan" style="height:90%"></div>
+        </div>
+      </div>
+      <div class="prev-note">⚡ 공정 개선 과제를 웹에서 직접 등록하고 진행률을 실시간으로 팀과 공유합니다.</div>
     </div>
   </div>
 
@@ -1224,6 +1365,260 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         <div class="card-title">작업별 진행률</div>
         <canvas id="statsBarChart" height="80"></canvas>
       </div>
+    </div>
+  </div>
+
+  <!-- ── RDDA ANALYSIS ── -->
+  <div class="screen" id="screen-rdda">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">RDDA ANALYSIS <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">FL No. 기반 월별 등록 실적 · 연간 트렌드 · 담당자별 기여도 분석</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+        <div style="font-size:.64rem;font-weight:700;color:#64748b;letter-spacing:.08em">YEAR</div>
+        <div style="display:flex;gap:6px">
+          <div class="prev-tab">2024</div>
+          <div class="prev-tab on">2025</div>
+          <div class="prev-tab">2026</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <div class="prev-tab on">월별</div>
+          <div class="prev-tab">분기별</div>
+          <div class="prev-tab">누적</div>
+        </div>
+      </div>
+      <div class="prev-kpi-row">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">YTD TOTAL</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">MONTHLY AVG</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">BEST MONTH</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">YoY CHANGE</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">TARGET RATE</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">월별 등록 건수 (Bar) + 누적 (Line) — 전년도 오버레이</div>
+          <div class="prev-bars">
+            <div class="prev-bar prev-bar-purple" style="height:48%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:62%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:40%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:75%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:55%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:88%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:44%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:70%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:58%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:35%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:80%"></div>
+            <div class="prev-bar prev-bar-purple" style="height:65%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+            <div class="prev-skeleton" style="height:9px;width:18px;border-radius:2px"></div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">담당자별 기여도</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:45%"></div><div class="prev-skeleton prev-row-line" style="width:20%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:82%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:40%"></div><div class="prev-skeleton prev-row-line" style="width:20%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:64%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:50%"></div><div class="prev-skeleton prev-row-line" style="width:20%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:50%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:35%"></div><div class="prev-skeleton prev-row-line" style="width:20%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:38%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">FL No. 시리즈 분포</div>
+          <div style="display:flex;gap:14px;align-items:center;margin-top:8px">
+            <div class="prev-skeleton" style="width:88px;height:88px;border-radius:50%;flex-shrink:0"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+              <div class="prev-skeleton prev-row-line"></div>
+              <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+              <div class="prev-skeleton prev-row-line" style="width:70%"></div>
+              <div class="prev-skeleton prev-row-line" style="width:60%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">전년 동기 대비 (YoY)</div>
+          <div class="prev-bars" style="height:80px">
+            <div class="prev-bar prev-bar-slate" style="height:58%"></div><div class="prev-bar prev-bar-purple" style="height:72%"></div>
+            <div class="prev-bar prev-bar-slate" style="height:42%"></div><div class="prev-bar prev-bar-purple" style="height:80%"></div>
+            <div class="prev-bar prev-bar-slate" style="height:50%"></div><div class="prev-bar prev-bar-purple" style="height:88%"></div>
+            <div class="prev-bar prev-bar-slate" style="height:65%"></div><div class="prev-bar prev-bar-purple" style="height:76%"></div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(100,116,139,.4)"></div><span style="font-size:.6rem;color:#475569">전년</span></div>
+            <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(139,92,246,.5)"></div><span style="font-size:.6rem;color:#475569">올해</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="prev-note">📊 HOME 대시보드 RDDA 데이터 + 연간 이력을 기반으로 연도별 비교 분석 기능이 구현됩니다.<br>클로드 채팅에서 작업한 RDDA 분석 로직을 이 페이지로 이식 예정입니다.</div>
+    </div>
+  </div>
+
+  <!-- ── PROJECT BOARD ── -->
+  <div class="screen" id="screen-project-board">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">PROJECT BOARD <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">팀원별 개별 R&D 과제 · 기획 → 실험 → 검증 → 결과 · 카드 클릭 시 상세 페이지</div>
+      </div>
+      <div class="prev-kpi-row" style="grid-template-columns:repeat(4,1fr)">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">총 과제</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">진행중</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">이번 분기 마감</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <div class="prev-filter-tabs">
+        <div class="prev-tab on">ALL</div>
+        <div class="prev-tab">SUSTAINABILITY</div>
+        <div class="prev-tab">PERFORMANCE</div>
+        <div class="prev-tab">PROCESS</div>
+        <div class="prev-tab">JUNIOR DEV</div>
+      </div>
+      <div class="prev-proj-grid">
+        <div class="prev-proj-card">
+          <div class="prev-proj-tag" style="background:rgba(16,185,129,.12);color:#34d399">🌱 SUSTAINABILITY</div>
+          <div class="prev-skeleton prev-row-line" style="width:85%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:55%;margin-bottom:14px"></div>
+          <div class="prev-timeline">
+            <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">기획</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">실험</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot active"></div><div class="prev-tl-lbl">검증</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">완료</div></div>
+          </div>
+          <div class="prev-prog-bg"><div class="prev-prog-fill" style="width:65%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div>
+        </div>
+        <div class="prev-proj-card">
+          <div class="prev-proj-tag" style="background:rgba(6,182,212,.12);color:#67e8f9">⚡ PERFORMANCE</div>
+          <div class="prev-skeleton prev-row-line" style="width:80%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:50%;margin-bottom:14px"></div>
+          <div class="prev-timeline">
+            <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">기획</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot active"></div><div class="prev-tl-lbl">실험</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">검증</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">완료</div></div>
+          </div>
+          <div class="prev-prog-bg"><div class="prev-prog-fill" style="width:30%;background:linear-gradient(90deg,#0e7490,#06b6d4)"></div></div>
+        </div>
+        <div class="prev-proj-card">
+          <div class="prev-proj-tag" style="background:rgba(139,92,246,.12);color:#c4b5fd">🎓 JUNIOR DEV</div>
+          <div class="prev-skeleton prev-row-line" style="width:75%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:60%;margin-bottom:14px"></div>
+          <div class="prev-timeline">
+            <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">기획</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">실험</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">검증</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">완료</div></div>
+          </div>
+          <div class="prev-prog-bg"><div class="prev-prog-fill" style="width:100%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div>
+        </div>
+        <div class="prev-proj-card">
+          <div class="prev-proj-tag" style="background:rgba(245,158,11,.12);color:#fbbf24">🔩 PROCESS</div>
+          <div class="prev-skeleton prev-row-line" style="width:82%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:48%;margin-bottom:14px"></div>
+          <div class="prev-timeline">
+            <div class="prev-tl-step"><div class="prev-tl-dot done"></div><div class="prev-tl-lbl">기획</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot active"></div><div class="prev-tl-lbl">실험</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">검증</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">완료</div></div>
+          </div>
+          <div class="prev-prog-bg"><div class="prev-prog-fill" style="width:42%;background:linear-gradient(90deg,#92400e,#f59e0b)"></div></div>
+        </div>
+        <div class="prev-proj-card">
+          <div class="prev-proj-tag" style="background:rgba(16,185,129,.12);color:#34d399">🌱 SUSTAINABILITY</div>
+          <div class="prev-skeleton prev-row-line" style="width:70%;margin-bottom:6px"></div>
+          <div class="prev-skeleton prev-row-line" style="width:45%;margin-bottom:14px"></div>
+          <div class="prev-timeline">
+            <div class="prev-tl-step"><div class="prev-tl-dot active"></div><div class="prev-tl-lbl">기획</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">실험</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">검증</div></div>
+            <div class="prev-tl-step"><div class="prev-tl-dot"></div><div class="prev-tl-lbl">완료</div></div>
+          </div>
+          <div class="prev-prog-bg"><div class="prev-prog-fill" style="width:10%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div>
+        </div>
+        <div class="prev-proj-card" style="border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;min-height:160px">
+          <div style="font-size:1.6rem;opacity:.2">＋</div>
+          <div style="font-size:.64rem;color:#374151;font-weight:600;letter-spacing:.06em">NEW PROJECT</div>
+        </div>
+      </div>
+      <div class="prev-note">🧪 각 카드 클릭 시 → 프로젝트 상세 페이지 (목적·진행 로그·테스트 결과·간트 차트) 로 이동합니다.<br>Firestore 직접 입력 방식으로 운영됩니다.</div>
+    </div>
+  </div>
+
+  <!-- ── KPI REPORT ── -->
+  <div class="screen" id="screen-kpi-report">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">KPI REPORT <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">샘플 관리 대장 기반 주간 · 월간 업무 현황 자동 생성 리포트</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+        <div style="display:flex;gap:6px">
+          <div class="prev-tab on">WEEKLY</div>
+          <div class="prev-tab">MONTHLY</div>
+          <div class="prev-tab">QUARTERLY</div>
+        </div>
+        <div style="margin-left:auto">
+          <div class="prev-tab" style="cursor:default">🖨 PDF 출력</div>
+        </div>
+      </div>
+      <div class="prev-kpi-row">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">이번 주 완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">지연 건수</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">평균 리드타임</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">RDDA 등록</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">전주 대비</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">주간 완료 현황 — 담당자별</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:40%"></div><div class="prev-skeleton prev-row-line" style="width:15%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:75%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:42%"></div><div class="prev-skeleton prev-row-line" style="width:15%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:55%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:38%"></div><div class="prev-skeleton prev-row-line" style="width:15%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:88%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:45%"></div><div class="prev-skeleton prev-row-line" style="width:15%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:40%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">공정 지연 알림 — Schedule Alerts 요약</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+            <div style="border:1px solid rgba(239,68,68,.2);border-radius:7px;padding:10px;background:rgba(239,68,68,.04)"><div class="prev-skeleton prev-row-line" style="width:70%"></div></div>
+            <div style="border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:10px;background:rgba(245,158,11,.04)"><div class="prev-skeleton prev-row-line" style="width:60%"></div></div>
+            <div style="border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:10px;background:rgba(245,158,11,.04)"><div class="prev-skeleton prev-row-line" style="width:55%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">4주 리드타임 트렌드 (편직 / 전체)</div>
+          <div class="prev-bars" style="height:80px">
+            <div class="prev-bar prev-bar-cyan" style="height:55%"></div><div class="prev-bar prev-bar-purple" style="height:65%"></div>
+            <div class="prev-bar prev-bar-cyan" style="height:48%"></div><div class="prev-bar prev-bar-purple" style="height:72%"></div>
+            <div class="prev-bar prev-bar-cyan" style="height:62%"></div><div class="prev-bar prev-bar-purple" style="height:80%"></div>
+            <div class="prev-bar prev-bar-cyan" style="height:50%"></div><div class="prev-bar prev-bar-purple" style="height:68%"></div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">카테고리별 완료 비율</div>
+          <div style="display:flex;align-items:center;justify-content:center;height:80px">
+            <div class="prev-skeleton" style="width:80px;height:80px;border-radius:50%;background:conic-gradient(rgba(139,92,246,.4) 0% 40%,rgba(6,182,212,.3) 40% 70%,rgba(16,185,129,.25) 70% 85%,rgba(245,158,11,.2) 85% 100%)"></div>
+          </div>
+        </div>
+      </div>
+      <div class="prev-note">📋 업로드된 샘플 관리 대장을 기반으로 주간·월간 보고서가 자동 생성됩니다.<br>PDF 출력 및 팀 공유 링크 기능이 포함될 예정입니다.</div>
     </div>
   </div>
 
