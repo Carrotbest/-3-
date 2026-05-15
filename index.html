@@ -34,10 +34,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 /* ── Logo ── */
 .sidebar-logo{
   padding:20px 18px 17px;border-bottom:1px solid var(--sidebar-border);
-  flex-shrink:0;cursor:pointer;display:flex;align-items:center;gap:11px;
-  transition:background .2s;
+  flex-shrink:0;display:flex;align-items:center;gap:11px;
 }
-.sidebar-logo:hover{background:rgba(6,182,212,.05)}
 .sidebar-logo svg{display:block;flex-shrink:0}
 .logo-title{
   font-family:'Space Grotesk',sans-serif;
@@ -947,10 +945,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 <!-- ══════════ SIDEBAR ══════════ -->
 <aside class="sidebar">
 
-  <!-- HOME — 최상단 -->
-  <div class="nav-home active" data-nav="home">HOME</div>
-
-  <!-- LOGO — click → HOME -->
+  <!-- LOGO -->
   <div class="sidebar-logo" id="sidebarLogo">
     <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
       <rect width="34" height="34" rx="8" fill="rgba(6,182,212,0.09)"/>
@@ -970,6 +965,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
   </div>
 
   <nav class="nav-body">
+
+    <!-- HOME -->
+    <div class="nav-home active" data-nav="home">HOME</div>
 
     <!-- ── FABRIC R&D ── -->
     <div class="nav-section s-fabric">
@@ -2272,9 +2270,6 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     showScreen(el.dataset.nav);
   });
 });
-// 로고 클릭 → HOME
-document.getElementById('sidebarLogo').addEventListener('click',()=>showScreen('home'));
-
 // PROJECT 토글 (is-open 클래스 + sub open)
 document.getElementById('nav-project-toggle').addEventListener('click',e=>{
   e.stopPropagation();
