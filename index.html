@@ -271,27 +271,27 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .gantt-lh-cols{height:38px;display:flex;align-items:center;padding:0 12px;background:linear-gradient(180deg,rgba(139,92,246,.08),rgba(139,92,246,.03))}
 .gantt-lh-cols span{font-size:.57rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:0 4px}
 .lhc-num{width:28px;flex-shrink:0}.lhc-name{flex:1}.lhc-pct{width:52px;flex-shrink:0;text-align:center}.lhc-date{width:118px;flex-shrink:0}.lhc-st{width:60px;flex-shrink:0}
-/* ── SECTION GAP ── */
-.gantt-section-gap{height:10px;background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)}
-.tl-section-gap{height:10px;background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)}
-/* ── GROUP HEADER ── */
-.gantt-group-header{height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;background:rgba(255,255,255,.028);border-bottom:1px solid rgba(255,255,255,.09);position:relative;overflow:hidden}
-.tl-group-row{height:52px;border-bottom:1px solid rgba(255,255,255,.09);position:relative;overflow:hidden}
-.tl-group-stripe{position:absolute;inset:0;opacity:.04}
-.group-top-accent{position:absolute;top:0;left:0;right:0;height:2px;pointer-events:none}
-.group-hd-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4)}
-.group-hd-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow:hidden}
-.group-hd-owner-row{display:flex;align-items:center;gap:6px}
-.group-hd-owner{font-size:.75rem;font-weight:700;color:var(--text)}
-.group-hd-owner-lbl{font-size:.52rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,.07);color:var(--muted)}
-.group-hd-proj{font-size:.62rem;color:var(--muted);cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s,color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ── PROJECT BOX WRAPPERS ── */
+.project-left-box{margin:8px 8px 14px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.016);box-shadow:0 6px 28px rgba(0,0,0,.32)}
+.project-right-box{margin:8px 0 14px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.008)}
+/* ── GROUP HEADER (project-first) ── */
+.gantt-group-header{display:flex;align-items:center;gap:10px;padding:0 14px;height:56px;border-bottom:1px solid rgba(255,255,255,.08);position:relative}
+.tl-group-row{height:56px;border-bottom:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden}
+.tl-group-stripe{position:absolute;inset:0;opacity:.05}
+.group-proj-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.group-hd-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.group-hd-proj{font-size:.88rem;font-weight:800;color:var(--text);cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s,color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;display:inline-block}
 .group-hd-proj:hover{border-bottom-color:rgba(139,92,246,.5);color:#c4b5fd}
-.group-hd-proj-input{font-size:.62rem;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.5);border-radius:4px;color:#c4b5fd;padding:2px 7px;outline:none;width:190px;font-family:inherit}
+.group-hd-proj-input{font-size:.85rem;font-weight:700;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.5);border-radius:5px;color:#c4b5fd;padding:3px 9px;outline:none;width:230px;font-family:inherit}
+.group-hd-owners{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.owner-chip-sm{font-size:.52rem;font-weight:700;padding:1px 7px;border-radius:999px;white-space:nowrap}
 .group-hd-stats{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .group-hd-cnt{font-size:.6rem;color:var(--muted)}
 .group-hd-pct{font-size:.76rem;font-weight:800}
 .group-hd-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;width:56px}
 .group-hd-fill{height:100%;border-radius:2px;transition:width .6s ease}
+/* ── OWNER REMARK chip on task row ── */
+.owner-remark{font-size:.54rem;font-weight:700;padding:1px 7px;border-radius:999px;white-space:nowrap;flex-shrink:0;letter-spacing:.02em}
 /* ── PARENT TASK ROW (LEFT PANEL) ── */
 .gantt-parent-row-left{display:flex;align-items:center;height:54px;padding:0 12px;border-bottom:1px solid rgba(255,255,255,.05);transition:background .15s,box-shadow .15s;position:relative;gap:0}
 .gantt-parent-row-left:hover{background:rgba(255,255,255,.04);box-shadow:inset 3px 0 0 rgba(139,92,246,.55)}
@@ -3184,22 +3184,18 @@ async function toggleSubtask(taskFid,stId){
   try{await updateDoc(doc(db,'tasks',taskFid),{subtasks:newSubs});}
   catch(err){toast('⚠️ 저장 실패: '+err.message,true);}
 }
-function attachProjEdit(el, owner){
+function attachProjEditForProject(el, projName, owners){
   el.addEventListener('click',()=>{
     const inp=document.createElement('input');
     inp.className='group-hd-proj-input';
-    inp.value=cfg.ownerProjects?.[owner]||'';
+    inp.value=projName==='(미설정)'?'':projName;
     inp.placeholder='프로젝트명 입력 후 Enter';
     el.replaceWith(inp);inp.focus();inp.select();
     const save=async()=>{
       const val=inp.value.trim();
-      cfg.ownerProjects={...(cfg.ownerProjects||{}),[owner]:val};
+      owners.forEach(o=>{cfg.ownerProjects={...(cfg.ownerProjects||{}),[o]:val};});
       try{await saveCfg(cfg);}catch(e){}
-      const neo=document.createElement('div');
-      neo.className='group-hd-proj';
-      neo.textContent=val||'프로젝트명을 입력하세요 (클릭)';
-      inp.replaceWith(neo);
-      attachProjEdit(neo,owner);
+      renderGantt();
     };
     inp.addEventListener('blur',save);
     inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderGantt();});
@@ -3210,59 +3206,65 @@ function renderGantt(){
   document.getElementById('ganttProjSub').textContent=`${cfg.projTitle}  ·  ${fdF(psD)} ~ ${fdF(peD)}`;
   _renderGanttPipeline();
 
-  const ownerOrder=[];const ownerMap={};
+  // ── Group tasks by PROJECT (primary) ──
+  const projOrder=[];const projMap={};
   tasks.forEach(t=>{
     const o=t.owner||'미지정';
-    if(!ownerMap[o]){ownerMap[o]=[];ownerOrder.push(o);}
-    ownerMap[o].push(t);
+    const pn=(cfg.ownerProjects?.[o])||'(미설정)';
+    if(!projMap[pn]){projMap[pn]={tasks:[],owners:new Set()};projOrder.push(pn);}
+    projMap[pn].tasks.push(t);
+    projMap[pn].owners.add(o);
   });
 
   const lr=document.getElementById('ganttLeftRows');lr.innerHTML='';
   const trEl=document.getElementById('tlRows');trEl.innerHTML='';
   const tip=document.getElementById('ganttTooltip');
-  let globalIdx=0;
 
-  ownerOrder.forEach((owner,gi)=>{
-    const ownerTasks=ownerMap[owner];
-    const clr=ownerClr(owner!=='미지정'?owner:'');
-    const av=owner.charAt(0).toUpperCase();
-    const projName=cfg.ownerProjects?.[owner]||'';
-    const avgPct=ownerTasks.length?Math.round(ownerTasks.reduce((s,t)=>s+prog(t)*100,0)/ownerTasks.length):0;
-    const doneCount=ownerTasks.filter(t=>isTaskDone(t)).length;
+  projOrder.forEach(projName=>{
+    const {tasks:projTasks,owners}=projMap[projName];
+    const ownerArr=[...owners];
+    // Project color: derive from project name hash
+    const clr=ownerClr(projName!=='(미설정)'?projName:ownerArr[0]||'');
+    const avgPct=projTasks.length?Math.round(projTasks.reduce((s,t)=>s+prog(t)*100,0)/projTasks.length):0;
+    const doneCount=projTasks.filter(t=>isTaskDone(t)).length;
 
-    // Section gap (not first group)
-    if(gi>0){
-      const sg=document.createElement('div');sg.className='gantt-section-gap';lr.appendChild(sg);
-      const stg=document.createElement('div');stg.className='tl-section-gap';trEl.appendChild(stg);
-    }
+    // ── Left project box ──
+    const leftBox=document.createElement('div');leftBox.className='project-left-box';
+    // ── Right project box ──
+    const rightBox=document.createElement('div');rightBox.className='project-right-box';
 
     // ── Left: group header ──
+    const ownerChips=ownerArr.map(o=>`<span class="owner-chip-sm" style="background:${ownerClr(o)}22;color:${ownerClr(o)};border:1px solid ${ownerClr(o)}44">${o}</span>`).join('');
     const gh=document.createElement('div');gh.className='gantt-group-header';
-    gh.innerHTML=`<div class="group-top-accent" style="background:${clr}"></div>
-      <div class="group-hd-av" style="background:${clr}">${av}</div>
+    gh.style.background=`linear-gradient(135deg,${clr}14,${clr}06)`;
+    gh.innerHTML=`
+      <div class="group-proj-icon" style="background:${clr}22;border:1px solid ${clr}44">📋</div>
       <div class="group-hd-info">
-        <div class="group-hd-owner-row">
-          <span class="group-hd-owner">${owner}</span>
-          <span class="group-hd-owner-lbl">OWNER</span>
-        </div>
-        <div class="group-hd-proj">${projName||'프로젝트명을 입력하세요 (클릭)'}</div>
+        <div class="group-hd-proj">${projName}</div>
+        <div class="group-hd-owners">${ownerChips}</div>
       </div>
       <div class="group-hd-stats">
-        <span class="group-hd-cnt">${ownerTasks.length}건 · ${doneCount}완료</span>
+        <span class="group-hd-cnt">${projTasks.length}건 · ${doneCount}완료</span>
         <div><div class="group-hd-bar"><div class="group-hd-fill" style="width:${avgPct}%;background:${clr}"></div></div></div>
         <span class="group-hd-pct" style="color:${clr}">${avgPct}%</span>
       </div>`;
-    attachProjEdit(gh.querySelector('.group-hd-proj'),owner);
-    lr.appendChild(gh);
+    attachProjEditForProject(gh.querySelector('.group-hd-proj'),projName,ownerArr);
+    leftBox.appendChild(gh);
 
-    // ── Right: group row (height-matched) ──
+    // ── Right: group row ──
     const tgr=document.createElement('div');tgr.className='tl-group-row';
+    tgr.style.background=`linear-gradient(135deg,${clr}12,${clr}05)`;
     tgr.innerHTML=`<div class="tl-group-stripe" style="background:linear-gradient(90deg,${clr},transparent)"></div>`;
-    trEl.appendChild(tgr);
+    rightBox.appendChild(tgr);
 
-    // ── Per-task rows ──
-    ownerTasks.forEach(t=>{
-      globalIdx++;
+    // ── Per-task rows (numbered per owner) ──
+    const ownerIdx={};
+    projTasks.forEach(t=>{
+      const owner=t.owner||'미지정';
+      if(!ownerIdx[owner])ownerIdx[owner]=0;
+      ownerIdx[owner]++;
+      const taskNum=ownerIdx[owner];
+      const oClr=ownerClr(owner!=='미지정'?owner:'');
       const done=isTaskDone(t);
       const st=stat(t),ph=PHASES[t.phase]||PHASES['DV'],x=td(t);
       const pAct=prog(t),pPlan=progPlanned(t);
@@ -3273,10 +3275,13 @@ function renderGantt(){
       const leftRow=document.createElement('div');
       leftRow.className='gantt-parent-row-left'+(done?' row-done':'');
       leftRow.innerHTML=`
-        <span class="task-num">${globalIdx}</span>
+        <span class="task-num">${taskNum}</span>
         <div class="task-name-cell">
           <span class="task-name-text${done?' txt-done':''}">${t.name}</span>
-          <span class="phase-badge" style="font-size:.52rem;padding:1px 5px;background:${ph.bg};color:${ph.txt};align-self:flex-start">${ph.name}</span>
+          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+            <span class="phase-badge" style="font-size:.52rem;padding:1px 5px;background:${ph.bg};color:${ph.txt}">${ph.name}</span>
+            <span class="owner-remark" style="background:${oClr}20;color:${oClr};border:1px solid ${oClr}40">${owner}</span>
+          </div>
         </div>
         <div class="task-pct-cell"><span class="task-pct-badge ${pctCls}">${pctAct}%</span></div>
         <span class="task-date-cell">${fd(x.sD)}–${fd(x.eD)}</span>
@@ -3286,7 +3291,7 @@ function renderGantt(){
           <button class="btn-done-row" data-fid="${t.fid}" title="${done?'완료 취소':'완료 처리'}">✓</button>
           <button class="btn-del-row"  data-fid="${t.fid}" title="삭제">🗑</button>
         </div>`;
-      lr.appendChild(leftRow);
+      leftBox.appendChild(leftRow);
 
       // ── RIGHT: parent timeline row ──
       const rightRow=document.createElement('div');
@@ -3321,7 +3326,7 @@ function renderGantt(){
 
       rightRow.appendChild(bar);
       rightRow.appendChild(pipe);
-      trEl.appendChild(rightRow);
+      rightBox.appendChild(rightRow);
 
       // ── Subtask rows ──
       if(Array.isArray(t.subtasks)&&t.subtasks.length){
@@ -3341,7 +3346,7 @@ function renderGantt(){
           const dt=document.createElement('span');dt.className='st-dates';
           dt.textContent=(ssD&&seD)?`${fd(ssD)}–${fd(seD)}`:(ssD?fd(ssD):'');
           sleft.appendChild(chk);sleft.appendChild(nm);sleft.appendChild(dt);
-          lr.appendChild(sleft);
+          leftBox.appendChild(sleft);
 
           // Right subtask row
           const sright=document.createElement('div');sright.className='tl-subtask-row';
@@ -3350,17 +3355,18 @@ function renderGantt(){
             const sw=Math.max((seD-ssD)/MS*PX,4);
             const sbar=document.createElement('div');
             sbar.className='gantt-sub-bar '+(sDone?'gsb-done':'gsb-pending');
-            if(sDone){
-              sbar.style.cssText=`left:${sl}px;width:${sw}px;background:${clr};box-shadow:0 0 6px ${clr}66`;
-            }else{
-              sbar.style.cssText=`left:${sl}px;width:${sw}px;background:rgba(0,0,0,0);border-color:${clr}`;
-            }
+            sbar.style.cssText=sDone
+              ?`left:${sl}px;width:${sw}px;background:${oClr};box-shadow:0 0 6px ${oClr}66`
+              :`left:${sl}px;width:${sw}px;background:transparent;border-color:${oClr}`;
             sright.appendChild(sbar);
           }
-          trEl.appendChild(sright);
+          rightBox.appendChild(sright);
         });
       }
     });
+
+    lr.appendChild(leftBox);
+    trEl.appendChild(rightBox);
   });
 
   // ── Event wiring ──
@@ -3402,31 +3408,32 @@ function renderGantt(){
 function _renderGanttPipeline(){
   const el=document.getElementById('ganttPipeline');
   if(!el||!tasks.length){if(el)el.innerHTML='';return;}
-  const ownerOrder=[];const ownerMap={};
+  // Group by project
+  const projOrder=[];const projMap={};
   tasks.forEach(t=>{
     const o=t.owner||'미지정';
-    if(!ownerMap[o]){ownerMap[o]=[];ownerOrder.push(o);}
-    ownerMap[o].push(t);
+    const pn=(cfg.ownerProjects?.[o])||'(미설정)';
+    if(!projMap[pn]){projMap[pn]=[];projOrder.push(pn);}
+    projMap[pn].push(t);
   });
-  const htmlSegs=ownerOrder.map(owner=>{
-    const ts=ownerMap[owner];
-    const clr=ownerClr(owner!=='미지정'?owner:'');
+  const htmlSegs=projOrder.map(pn=>{
+    const ts=projMap[pn];
+    const clr=ownerClr(pn!=='(미설정)'?pn:ts[0]?.owner||'');
     const avgAct=Math.round(ts.reduce((s,t)=>s+prog(t)*100,0)/ts.length);
     const avgPlan=Math.round(ts.reduce((s,t)=>s+progPlanned(t)*100,0)/ts.length);
     const delta=avgAct-avgPlan;
     const deltaStr=delta>=0?`▲${delta}%`:`▽${Math.abs(delta)}%`;
     const deltaClr=delta>=0?'#6ee7b7':'#fca5a5';
-    const projName=cfg.ownerProjects?.[owner]||owner;
-    return `<div class="pipe-seg" style="background:${clr}1e;border:1px solid ${clr}40" title="${owner} · ${ts.length}건 · ${avgAct}%">
+    return `<div class="pipe-seg" style="background:${clr}1e;border:1px solid ${clr}40" title="${pn} · ${ts.length}건 · ${avgAct}%">
       <div class="pipe-seg-fill" style="width:${avgAct}%;background:${clr}38"></div>
       <div class="pipe-seg-content">
-        <span class="pipe-seg-name" style="color:${clr}">${owner}</span>
+        <span class="pipe-seg-name" style="color:${clr}">${pn}</span>
         <span class="pipe-seg-pct">${avgAct}%</span>
         <span class="pipe-seg-delta" style="color:${deltaClr}">${deltaStr}</span>
       </div>
     </div>`;
   }).join('<div style="width:1px;background:rgba(255,255,255,0.07);flex-shrink:0"></div>');
-  el.innerHTML=`<div class="pipeline-title">담당자별 진행 현황</div><div class="pipeline-track">${htmlSegs}</div>`;
+  el.innerHTML=`<div class="pipeline-title">프로젝트별 진행 현황</div><div class="pipeline-track">${htmlSegs}</div>`;
 }
 function posT(e){
   const t=document.getElementById('ganttTooltip'),tw=t.offsetWidth||200,th=t.offsetHeight||120;
