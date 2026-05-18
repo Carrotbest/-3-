@@ -263,19 +263,45 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 /* ── GANTT (기존) ── */
 .gantt-outer{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 4px 28px rgba(0,0,0,0.35)}
 .gantt-grid{display:flex;min-height:80px}
-.gantt-left{flex-shrink:0;width:478px;border-right:1px solid var(--border);display:flex;flex-direction:column}
-.gantt-left-header{display:grid;grid-template-columns:32px 1fr 98px 76px 76px 70px;height:44px;align-items:center;padding:0 12px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(139,92,246,0.08),rgba(139,92,246,0.03))}
-.gantt-left-header span{font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:0 4px}
-.gantt-task-row{display:grid;grid-template-columns:32px 1fr 98px 76px 76px 70px;height:50px;align-items:center;padding:0 12px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background .15s,box-shadow .15s;position:relative}
+/* ── LEFT PANEL ── */
+.gantt-left{flex-shrink:0;width:540px;border-right:1px solid var(--border);display:flex;flex-direction:column}
+.gantt-left-header{height:68px;display:flex;flex-direction:column;border-bottom:1px solid var(--border)}
+.gantt-lh-top{height:30px;display:flex;align-items:center;padding:0 14px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.05)}
+.gantt-lh-top span{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.gantt-lh-cols{height:38px;display:grid;grid-template-columns:28px 1fr 58px 72px 72px 64px;align-items:center;padding:0 12px;background:linear-gradient(180deg,rgba(139,92,246,.08),rgba(139,92,246,.03))}
+.gantt-lh-cols span{font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:0 4px}
+.gantt-task-row{display:grid;grid-template-columns:28px 1fr 58px 72px 72px 64px;height:62px;align-items:start;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background .15s,box-shadow .15s;position:relative}
 .gantt-task-row:nth-child(odd){background:rgba(255,255,255,0.012)}.gantt-task-row:hover{background:rgba(255,255,255,0.048);box-shadow:inset 3px 0 0 rgba(139,92,246,0.55)}
-.task-num{font-size:.7rem;color:var(--muted);padding:0 4px}
-.task-name-cell{display:flex;flex-direction:column;gap:2px;padding:0 4px;min-width:0}
-.task-name-text{font-size:.76rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.task-date-cell{font-size:.66rem;color:var(--muted);padding:0 4px}
-.status-pill{display:inline-flex;align-items:center;font-size:.6rem;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.task-num{font-size:.68rem;color:var(--muted);padding-top:2px}
+.task-name-cell{display:flex;flex-direction:column;gap:3px;padding:0 4px;min-width:0}
+.task-name-text{font-size:.73rem;font-weight:600;color:var(--text);white-space:normal;word-break:break-word;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35}
+.task-date-cell{font-size:.64rem;color:var(--muted);padding:2px 4px}
+.task-pct-cell{display:flex;align-items:flex-start;justify-content:center;padding-top:1px}
+.task-pct-badge{font-size:.63rem;font-weight:800;padding:2px 5px;border-radius:5px;white-space:nowrap}
+.pct-good{background:rgba(16,185,129,.18);color:#6ee7b7}
+.pct-warn{background:rgba(245,158,11,.18);color:#fcd34d}
+.pct-bad{background:rgba(239,68,68,.18);color:#fca5a5}
+.pct-neu{background:rgba(100,116,139,.15);color:#94a3b8}
+.status-pill{display:inline-flex;align-items:center;font-size:.58rem;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:999px;white-space:nowrap;margin-top:1px}
 .status-done{background:rgba(16,185,129,0.15);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3)}
 .status-inprogress{background:rgba(59,130,246,0.15);color:#93c5fd;border:1px solid rgba(59,130,246,0.3)}
 .status-upcoming{background:rgba(100,116,139,0.15);color:#94a3b8;border:1px solid rgba(100,116,139,0.3)}
+/* ── GROUP HEADER ── */
+.gantt-group-header{height:42px;display:flex;align-items:center;gap:10px;padding:0 14px;background:rgba(255,255,255,.022);border-bottom:1px solid rgba(255,255,255,.07);border-top:1px solid rgba(255,255,255,.04)}
+.tl-group-row{height:42px;border-bottom:1px solid rgba(255,255,255,.07);border-top:1px solid rgba(255,255,255,.04);position:relative;overflow:hidden}
+.tl-group-stripe{position:absolute;inset:0;opacity:.04}
+.group-hd-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;flex-shrink:0;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.group-hd-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}
+.group-hd-owner{font-size:.7rem;font-weight:700;color:var(--text);white-space:nowrap}
+.group-hd-proj{font-size:.6rem;color:var(--muted);cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s,color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.group-hd-proj:hover{border-bottom-color:rgba(139,92,246,.5);color:#c4b5fd}
+.group-hd-proj-input{font-size:.6rem;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.5);border-radius:4px;color:#c4b5fd;padding:1px 6px;outline:none;width:180px;font-family:inherit}
+.group-hd-stats{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.group-hd-cnt{font-size:.6rem;color:var(--muted)}
+.group-hd-pct{font-size:.72rem;font-weight:800}
+.group-hd-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;width:52px}
+.group-hd-fill{height:100%;border-radius:2px;transition:width .6s ease}
+/* ── TIMELINE ── */
 .gantt-right{flex:1;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:rgba(139,92,246,0.4) transparent}
 .gantt-right::-webkit-scrollbar{height:5px}.gantt-right::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.4);border-radius:3px}
 .gantt-timeline{position:relative}
@@ -286,18 +312,22 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .tl-week-cell.today-week{background:rgba(245,158,11,0.07);color:#fbbf24;font-weight:700}
 .tl-week-cell.today-week::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#f59e0b}
 .tl-rows{position:relative}
-.tl-task-row{height:50px;position:relative;border-bottom:1px solid rgba(255,255,255,0.04)}
+.tl-task-row{height:62px;position:relative;border-bottom:1px solid rgba(255,255,255,0.04)}
 .tl-task-row:nth-child(odd){background:rgba(255,255,255,0.012)}
-.gantt-bar-wrap{position:absolute;top:50%;transform:translateY(-50%);height:28px;border-radius:7px;overflow:hidden;cursor:pointer;transition:filter .2s,transform .2s;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
-.gantt-bar-wrap:hover{filter:brightness(1.18);transform:translateY(-50%) scaleY(1.08)}
-.gantt-bar-ghost{position:absolute;inset:0;border-radius:7px;opacity:.2}
-.gantt-bar-progress{position:absolute;top:0;left:0;bottom:0;border-radius:7px;transition:width .4s ease}
-.gantt-bar-label{position:absolute;top:0;left:0;bottom:0;right:42px;display:flex;align-items:center;padding:0 9px;font-size:.62rem;font-weight:700;color:rgba(255,255,255,0.95);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,0.6)}
+/* ── DUAL-TRACK BAR ── */
+.gantt-bar-wrap{position:absolute;top:8px;bottom:8px;border-radius:7px;overflow:visible;cursor:pointer;transition:filter .18s}
+.gantt-bar-wrap:hover{filter:brightness(1.15)}
+.gantt-planned-track{position:absolute;top:0;left:0;right:0;height:46%;border-radius:5px;overflow:hidden;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+.gantt-planned-bg{position:absolute;inset:0;opacity:.15}
+.gantt-planned-label{position:absolute;inset:0;display:flex;align-items:center;padding:0 7px;font-size:.56rem;font-weight:700;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.gantt-actual-track{position:absolute;bottom:0;left:0;right:0;height:46%;border-radius:5px;overflow:hidden;background:rgba(0,0,0,.25)}
+.gantt-actual-fill{position:absolute;top:0;left:0;bottom:0;border-radius:5px;transition:width .5s ease}
+.gantt-actual-pct{position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:.53rem;font-weight:800;color:rgba(255,255,255,.92);pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.9);white-space:nowrap;z-index:2}
 .today-line{position:absolute;top:0;bottom:0;width:2px;background:#f59e0b;z-index:20;pointer-events:none}
 .today-line-label{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#0a0d14;font-size:.55rem;font-weight:800;padding:2px 4px;border-radius:3px;white-space:nowrap}
 .row-actions{display:none;gap:4px;align-items:center;position:absolute;right:6px;top:50%;transform:translateY(-50%)}
 .gantt-task-row:hover .row-actions{display:flex}
-.btn-edit-row,.btn-del-row{width:24px;height:24px;border-radius:5px;border:none;cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.btn-edit-row,.btn-del-row{width:22px;height:22px;border-radius:5px;border:none;cursor:pointer;font-size:.65rem;display:flex;align-items:center;justify-content:center;transition:background .15s}
 .btn-edit-row{background:rgba(59,130,246,0.2);color:#60a5fa}.btn-edit-row:hover{background:rgba(59,130,246,0.4)}
 .btn-del-row{background:rgba(239,68,68,0.2);color:#f87171}.btn-del-row:hover{background:rgba(239,68,68,0.4)}
 .gantt-toolbar{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(139,92,246,0.06),transparent)}
@@ -305,29 +335,17 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .btn-add:hover{opacity:.85;transform:translateY(-1px)}
 .btn-tool{padding:6px 13px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--dim);font-size:.76rem;font-weight:600;transition:background .2s,color .2s}
 .btn-tool:hover{background:rgba(255,255,255,0.12);color:var(--text)}
-
 /* ── GANTT PIPELINE STRIP ── */
 .gantt-pipeline{padding:10px 14px 9px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.012)}
 .pipeline-title{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
-.pipeline-track{display:flex;align-items:stretch;height:44px;border-radius:8px;overflow:hidden;gap:1px}
-.pipe-seg{flex:1;position:relative;overflow:hidden;cursor:default;transition:filter .18s;display:flex;align-items:center;justify-content:center;min-width:52px}
-.pipe-seg:hover{filter:brightness(1.3);z-index:2}
+.pipeline-track{display:flex;align-items:stretch;height:48px;border-radius:8px;overflow:hidden;gap:1px}
+.pipe-seg{flex:1;position:relative;overflow:hidden;cursor:default;transition:filter .18s;display:flex;align-items:center;justify-content:center;min-width:60px}
+.pipe-seg:hover{filter:brightness(1.28);z-index:2}
 .pipe-seg-fill{position:absolute;left:0;top:0;bottom:0;pointer-events:none;transition:width .5s ease}
-.pipe-seg-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0;padding:0 4px}
-.pipe-seg-name{font-size:.5rem;font-weight:700;letter-spacing:.04em;opacity:.85}
-.pipe-seg-pct{font-size:.75rem;font-weight:800;color:#fff;line-height:1.1}
+.pipe-seg-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0;padding:0 6px}
+.pipe-seg-name{font-size:.52rem;font-weight:700;letter-spacing:.03em;opacity:.85;white-space:nowrap}
+.pipe-seg-pct{font-size:.78rem;font-weight:800;color:#fff;line-height:1.1}
 .pipe-seg-delta{font-size:.5rem;font-weight:800;line-height:1.3}
-/* ── GANTT OWNER CHIP ── */
-.owner-chip{display:inline-flex;align-items:center;gap:4px;max-width:92px;overflow:hidden}
-.owner-av{width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;flex-shrink:0;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.35)}
-.owner-nm{font-size:.63rem;font-weight:600;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* ── GANTT BAR ENHANCEMENTS ── */
-.gantt-bar-plan-mark{position:absolute;top:4px;bottom:4px;width:2px;background:rgba(255,255,255,0.75);border-radius:1px;z-index:3;pointer-events:none;box-shadow:0 0 5px rgba(255,255,255,0.4)}
-.gantt-bar-pct{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.58rem;font-weight:800;z-index:4;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.8);white-space:nowrap;line-height:1}
-.pct-on{color:#6ee7b7}.pct-behind{color:#fca5a5}.pct-auto{color:rgba(255,255,255,0.72)}
-/* ── GANTT PROG MICRO BAR ── */
-.task-prog-bar-bg{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.08);overflow:hidden}
-.task-prog-bar-fill{height:100%;border-radius:2px;transition:width .4s ease}
 
 /* ── PHASE BARS ── */
 .phase-badge{font-size:.68rem;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:999px}
@@ -1447,7 +1465,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         <div class="gantt-grid">
           <div class="gantt-left">
             <div class="gantt-left-header">
-              <span>#</span><span>작업명 &amp; 진행률</span><span>담당자</span><span>시작</span><span>종료</span><span>상태</span>
+              <div class="gantt-lh-top"><span>담당자 그룹별 작업 현황</span></div>
+              <div class="gantt-lh-cols"><span>#</span><span>작업명</span><span>진행%</span><span>시작</span><span>종료</span><span>상태</span></div>
             </div>
             <div id="ganttLeftRows"></div>
           </div>
@@ -2643,7 +2662,7 @@ let sampleData=null;
 let devCharts={};
 let sctDonutChart=null;
 let devTotalDonutChart=null;
-let cfg={projTitle:'Performance & Sustainability Fabric Development',projStart:'2026-04-01',projEnd:'2026-07-31',todayOverride:null};
+let cfg={projTitle:'Performance & Sustainability Fabric Development',projStart:'2026-04-01',projEnd:'2026-07-31',todayOverride:null,ownerProjects:{}};
 let tasks=[], events=[], editingFid=null, editingEvFid=null;
 let homeDonutInst=null, statsDonutInst=null, statsBarInst=null;
 let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
@@ -2714,7 +2733,7 @@ document.getElementById('nav-project-toggle').addEventListener('click',e=>{
 async function initFirebase(){
   // config
   onSnapshot(doc(db,'config','project'),snap=>{
-    if(snap.exists()){cfg={...cfg,...snap.data()};}
+    if(snap.exists()){const d=snap.data();cfg={...cfg,...d,ownerProjects:{...(cfg.ownerProjects||{}),...(d.ownerProjects||{})}};}
     renderHome();
   });
   // tasks
@@ -3102,40 +3121,130 @@ function donutCfg(data){return{type:'doughnut',
     animation:{animateRotate:true,duration:1000}}};}
 
 // ══ GANTT ══
+function attachProjEdit(el, owner){
+  el.addEventListener('click',()=>{
+    const inp=document.createElement('input');
+    inp.className='group-hd-proj-input';
+    inp.value=cfg.ownerProjects?.[owner]||'';
+    inp.placeholder='프로젝트명 입력 후 Enter';
+    el.replaceWith(inp);inp.focus();inp.select();
+    const save=async()=>{
+      const val=inp.value.trim();
+      cfg.ownerProjects={...(cfg.ownerProjects||{}),[owner]:val};
+      try{await saveCfg(cfg);}catch(e){}
+      const neo=document.createElement('div');
+      neo.className='group-hd-proj';
+      neo.textContent=val||'프로젝트명을 입력하세요 (클릭)';
+      inp.replaceWith(neo);
+      attachProjEdit(neo,owner);
+    };
+    inp.addEventListener('blur',save);
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderGantt();});
+  });
+}
 function renderGantt(){
   const todayD=today(),psD=ps(),peD=pe();
   document.getElementById('ganttProjSub').textContent=`${cfg.projTitle}  ·  ${fdF(psD)} ~ ${fdF(peD)}`;
   _renderGanttPipeline();
 
-  const lr=document.getElementById('ganttLeftRows');lr.innerHTML='';
-  tasks.forEach((t,idx)=>{
-    const st=stat(t),ph=PHASES[t.phase]||PHASES['DV'],x=td(t);
-    const pAct=prog(t),pPlan=progPlanned(t);
-    const pctAct=Math.round(pAct*100),pctPlan=Math.round(pPlan*100);
-    const hasManual=t.progress!=null&&t.progress!=='';
-    const pctClr=pctAct>=pctPlan?'#6ee7b7':pctAct>=pctPlan*0.8?'#fcd34d':'#fca5a5';
-    const clr=ownerClr(t.owner);
-    const av=(t.owner||'?').charAt(0).toUpperCase();
-    const div=document.createElement('div');div.className='gantt-task-row';
-    div.innerHTML=`<span class="task-num">${idx+1}</span>
-      <div class="task-name-cell">
-        <span class="task-name-text">${t.name}</span>
-        <div style="display:flex;align-items:center;gap:5px;margin-top:2px">
-          <span class="phase-badge" style="font-size:.53rem;padding:1px 5px;background:${ph.bg};color:${ph.txt};flex-shrink:0">${ph.name}</span>
-          <div class="task-prog-bar-bg"><div class="task-prog-bar-fill" style="width:${pctAct}%;background:linear-gradient(90deg,${ph.grad[0]},${ph.grad[1]})"></div></div>
-          <span style="font-size:.57rem;font-weight:800;color:${pctClr};flex-shrink:0">${pctAct}%</span>
-        </div>
-      </div>
-      <div class="owner-chip"><div class="owner-av" style="background:${clr}">${av}</div><span class="owner-nm">${t.owner||'미지정'}</span></div>
-      <span class="task-date-cell">${fd(x.sD)}</span>
-      <span class="task-date-cell">${fd(x.eD)}</span>
-      <span class="status-pill ${st.c}">${st.l}</span>
-      <div class="row-actions">
-        <button class="btn-edit-row" data-fid="${t.fid}">✏</button>
-        <button class="btn-del-row"  data-fid="${t.fid}">🗑</button>
-      </div>`;
-    lr.appendChild(div);
+  // ── Group tasks by owner ──
+  const ownerOrder=[];const ownerMap={};
+  tasks.forEach(t=>{
+    const o=t.owner||'미지정';
+    if(!ownerMap[o]){ownerMap[o]=[];ownerOrder.push(o);}
+    ownerMap[o].push(t);
   });
+
+  const lr=document.getElementById('ganttLeftRows');lr.innerHTML='';
+  const trEl=document.getElementById('tlRows');trEl.innerHTML='';
+  const tip=document.getElementById('ganttTooltip');
+  let globalIdx=0;
+
+  ownerOrder.forEach(owner=>{
+    const ownerTasks=ownerMap[owner];
+    const clr=ownerClr(owner!=='미지정'?owner:'');
+    const av=owner.charAt(0).toUpperCase();
+    const projName=cfg.ownerProjects?.[owner]||'';
+    const avgPct=ownerTasks.length?Math.round(ownerTasks.reduce((s,t)=>s+prog(t)*100,0)/ownerTasks.length):0;
+
+    // ── Left group header ──
+    const gh=document.createElement('div');gh.className='gantt-group-header';
+    gh.innerHTML=`<div class="group-hd-av" style="background:${clr}">${av}</div>
+      <div class="group-hd-info">
+        <div class="group-hd-owner">${owner}</div>
+        <div class="group-hd-proj">${projName||'프로젝트명을 입력하세요 (클릭)'}</div>
+      </div>
+      <div class="group-hd-stats">
+        <span class="group-hd-cnt">${ownerTasks.length}건</span>
+        <div><div class="group-hd-bar"><div class="group-hd-fill" style="width:${avgPct}%;background:${clr}"></div></div></div>
+        <span class="group-hd-pct" style="color:${clr}">${avgPct}%</span>
+      </div>`;
+    attachProjEdit(gh.querySelector('.group-hd-proj'),owner);
+    lr.appendChild(gh);
+
+    // ── Right group row (height-matched) ──
+    const tgr=document.createElement('div');tgr.className='tl-group-row';
+    tgr.innerHTML=`<div class="tl-group-stripe" style="background:linear-gradient(90deg,${clr},transparent)"></div>`;
+    trEl.appendChild(tgr);
+
+    // ── Per-task rows ──
+    ownerTasks.forEach(t=>{
+      globalIdx++;
+      const st=stat(t),ph=PHASES[t.phase]||PHASES['DV'],x=td(t);
+      const pAct=prog(t),pPlan=progPlanned(t);
+      const pctAct=Math.round(pAct*100),pctPlan=Math.round(pPlan*100);
+      const delta=pctAct-pctPlan;
+      const pctCls=pctAct>=pctPlan?'pct-good':pctAct>=pctPlan*0.75?'pct-warn':'pct-bad';
+
+      // left row
+      const div=document.createElement('div');div.className='gantt-task-row';
+      div.innerHTML=`<span class="task-num">${globalIdx}</span>
+        <div class="task-name-cell">
+          <span class="task-name-text">${t.name}</span>
+          <span class="phase-badge" style="font-size:.52rem;padding:1px 5px;background:${ph.bg};color:${ph.txt};align-self:flex-start">${ph.name}</span>
+        </div>
+        <div class="task-pct-cell"><span class="task-pct-badge ${pctCls}">${pctAct}%</span></div>
+        <span class="task-date-cell">${fd(x.sD)}</span>
+        <span class="task-date-cell">${fd(x.eD)}</span>
+        <span class="status-pill ${st.c}">${st.l}</span>
+        <div class="row-actions">
+          <button class="btn-edit-row" data-fid="${t.fid}">✏</button>
+          <button class="btn-del-row"  data-fid="${t.fid}">🗑</button>
+        </div>`;
+      lr.appendChild(div);
+
+      // right timeline row
+      const row=document.createElement('div');row.className='tl-task-row';
+      const left=(x.sD-psD)/MS*PX, width=Math.max((x.eD-x.sD)/MS*PX,6);
+      const grad=`linear-gradient(90deg,${ph.grad[0]},${ph.grad[1]})`;
+      const glow=`0 0 10px 3px ${ph.grad[0]}55,0 0 20px 6px ${ph.grad[0]}22,0 1px 4px rgba(0,0,0,.5)`;
+      const wrap=document.createElement('div');wrap.className='gantt-bar-wrap';
+      wrap.style.cssText=`left:${left}px;width:${width}px;`;
+      wrap.innerHTML=`
+        <div class="gantt-planned-track">
+          <div class="gantt-planned-bg" style="background:${grad}"></div>
+          <div class="gantt-planned-label">${t.name}</div>
+        </div>
+        <div class="gantt-actual-track">
+          <div class="gantt-actual-fill" style="width:${pAct*100}%;background:${grad};box-shadow:${glow}"></div>
+          <div class="gantt-actual-pct">${pctAct}%</div>
+        </div>`;
+      wrap.addEventListener('mouseenter',e=>{
+        document.getElementById('ttTitle').textContent=t.name;
+        document.getElementById('ttOwner').textContent=owner;
+        document.getElementById('ttStart').textContent=fdF(x.sD);
+        document.getElementById('ttEnd').textContent=fdF(x.eD);
+        document.getElementById('ttPhase').textContent=ph.name;
+        document.getElementById('ttPct').textContent=`실제 ${pctAct}%  /  계획 ${pctPlan}%`;
+        document.getElementById('ttBar').style.cssText=`width:${pAct*100}%;background:${grad}`;
+        tip.classList.add('visible');posT(e);
+      });
+      wrap.addEventListener('mousemove',posT);
+      wrap.addEventListener('mouseleave',()=>tip.classList.remove('visible'));
+      row.appendChild(wrap);trEl.appendChild(row);
+    });
+  });
+
   lr.querySelectorAll('.btn-edit-row').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const tk=tasks.find(t=>t.fid===b.dataset.fid);if(tk)openTaskModal(tk);}));
   lr.querySelectorAll('.btn-del-row').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();delTask(b.dataset.fid);}));
 
@@ -3155,71 +3264,38 @@ function renderGantt(){
     const c=document.createElement('div');c.className='tl-week-cell'+(itw?' today-week':'');
     c.style.width=WPX+'px';c.textContent=`${w.getMonth()+1}/${w.getDate()}`;wEl.appendChild(c);});
 
-  const trEl=document.getElementById('tlRows');trEl.innerHTML='';
-  const tip=document.getElementById('ganttTooltip');
-  tasks.forEach(t=>{
-    const x=td(t),row=document.createElement('div');row.className='tl-task-row';
-    const left=(x.sD-psD)/MS*PX,width=(x.eD-x.sD)/MS*PX;
-    const pAct=prog(t),pPlan=progPlanned(t);
-    const hasManual=t.progress!=null&&t.progress!=='';
-    const ph=PHASES[t.phase]||PHASES['DV'],grad=`linear-gradient(90deg,${ph.grad[0]},${ph.grad[1]})`;
-    const delta=Math.round((pAct-pPlan)*100);
-    const pctCls=hasManual?(delta>=0?'pct-on':'pct-behind'):'pct-auto';
-    const wrap=document.createElement('div');wrap.className='gantt-bar-wrap';
-    wrap.style.cssText=`left:${left}px;width:${Math.max(width,6)}px;`;
-    wrap.innerHTML=`<div class="gantt-bar-ghost" style="background:${grad}"></div>
-      <div class="gantt-bar-progress" style="width:${pAct*100}%;background:${grad}"></div>
-      ${hasManual&&width>20?`<div class="gantt-bar-plan-mark" style="left:${Math.min(pPlan*100,97)}%"></div>`:''}
-      <div class="gantt-bar-label">${t.name}</div>
-      <div class="gantt-bar-pct ${pctCls}">${Math.round(pAct*100)}%</div>`;
-    wrap.addEventListener('mouseenter',e=>{
-      document.getElementById('ttTitle').textContent=t.name;
-      document.getElementById('ttOwner').textContent=t.owner||'미지정';
-      document.getElementById('ttStart').textContent=fdF(x.sD);
-      document.getElementById('ttEnd').textContent=fdF(x.eD);
-      document.getElementById('ttPhase').textContent=ph.name;
-      document.getElementById('ttPct').textContent=`실제 ${Math.round(pAct*100)}%  /  계획 ${Math.round(pPlan*100)}%`;
-      document.getElementById('ttBar').style.cssText=`width:${pAct*100}%;background:${grad}`;
-      tip.classList.add('visible');posT(e);
-    });
-    wrap.addEventListener('mousemove',posT);
-    wrap.addEventListener('mouseleave',()=>tip.classList.remove('visible'));
-    row.appendChild(wrap);trEl.appendChild(row);
-  });
   document.getElementById('todayLine').style.left=tx+'px';
   const right=document.getElementById('ganttRight');
   right.scrollLeft=Math.max(0,tx-right.offsetWidth/2);
 }
 function _renderGanttPipeline(){
   const el=document.getElementById('ganttPipeline');
-  if(!el)return;
-  if(!tasks.length){el.innerHTML='';return;}
-  const total=tasks.length||1;
-  const segs=PO.map(k=>{
-    const ph=PHASES[k];
-    const ts=tasks.filter(t=>t.phase===k);
-    const avgAct=ts.length?Math.round(ts.reduce((s,t)=>s+prog(t)*100,0)/ts.length):0;
-    const avgPlan=ts.length?Math.round(ts.reduce((s,t)=>s+progPlanned(t)*100,0)/ts.length):0;
-    return {ph,ts,avgAct,avgPlan,k};
+  if(!el||!tasks.length){if(el)el.innerHTML='';return;}
+  const ownerOrder=[];const ownerMap={};
+  tasks.forEach(t=>{
+    const o=t.owner||'미지정';
+    if(!ownerMap[o]){ownerMap[o]=[];ownerOrder.push(o);}
+    ownerMap[o].push(t);
   });
-  const htmlSegs=segs.map((s,i)=>{
-    const clr=s.ph.grad[0];
-    const hasTasks=s.ts.length>0;
-    const delta=hasTasks?s.avgAct-s.avgPlan:null;
-    const deltaStr=delta==null?'':delta>=0?`▲${delta}%`:` ▽${Math.abs(delta)}%`;
-    const deltaClr=delta==null?'transparent':delta>=0?'#6ee7b7':'#fca5a5';
-    const bg=hasTasks?`${clr}1e`:'rgba(255,255,255,0.025)';
-    const bdr=hasTasks?`${clr}40`:'rgba(255,255,255,0.07)';
-    return `<div class="pipe-seg" style="background:${bg};border:1px solid ${bdr}" title="${s.ph.name}  ${s.ts.length}건${hasTasks?' · 진행'+s.avgAct+'%':''}">
-      <div class="pipe-seg-fill" style="width:${s.avgAct}%;background:${clr}35"></div>
+  const htmlSegs=ownerOrder.map(owner=>{
+    const ts=ownerMap[owner];
+    const clr=ownerClr(owner!=='미지정'?owner:'');
+    const avgAct=Math.round(ts.reduce((s,t)=>s+prog(t)*100,0)/ts.length);
+    const avgPlan=Math.round(ts.reduce((s,t)=>s+progPlanned(t)*100,0)/ts.length);
+    const delta=avgAct-avgPlan;
+    const deltaStr=delta>=0?`▲${delta}%`:`▽${Math.abs(delta)}%`;
+    const deltaClr=delta>=0?'#6ee7b7':'#fca5a5';
+    const projName=cfg.ownerProjects?.[owner]||owner;
+    return `<div class="pipe-seg" style="background:${clr}1e;border:1px solid ${clr}40" title="${owner} · ${ts.length}건 · ${avgAct}%">
+      <div class="pipe-seg-fill" style="width:${avgAct}%;background:${clr}38"></div>
       <div class="pipe-seg-content">
-        <span class="pipe-seg-name" style="color:${hasTasks?s.ph.txt:'var(--muted)'}">${s.ph.name}</span>
-        <span class="pipe-seg-pct" style="color:${hasTasks?'#fff':'var(--muted)'}">${hasTasks?s.avgAct+'%':'—'}</span>
-        ${hasTasks?`<span class="pipe-seg-delta" style="color:${deltaClr}">${deltaStr}</span>`:''}
+        <span class="pipe-seg-name" style="color:${clr}">${owner}</span>
+        <span class="pipe-seg-pct">${avgAct}%</span>
+        <span class="pipe-seg-delta" style="color:${deltaClr}">${deltaStr}</span>
       </div>
     </div>`;
   }).join('<div style="width:1px;background:rgba(255,255,255,0.07);flex-shrink:0"></div>');
-  el.innerHTML=`<div class="pipeline-title">목표 스케줄 대비 진행 현황</div><div class="pipeline-track">${htmlSegs}</div>`;
+  el.innerHTML=`<div class="pipeline-title">담당자별 진행 현황</div><div class="pipeline-track">${htmlSegs}</div>`;
 }
 function posT(e){
   const t=document.getElementById('ganttTooltip'),tw=t.offsetWidth||200,th=t.offsetHeight||120;
