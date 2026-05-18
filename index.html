@@ -1781,7 +1781,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         <div class="rdda-kpi-strip">
           <div class="rdda-kpi" style="--rkc:var(--cb);--rkc-rgb:6,182,212">
             <div class="rdda-kpi-lbl">Customer Meeting</div>
-            <div class="rdda-kpi-val">263<span>건</span></div>
+            <div class="rdda-kpi-val">257<span>건</span></div>
             <div class="rdda-kpi-bar"><div class="rdda-kpi-fill" style="width:100%"></div></div>
             <div class="rdda-kpi-meta">
               <div class="rdda-kpi-note">전사 대비 <strong>21%</strong></div>
@@ -1799,10 +1799,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
           </div>
           <div class="rdda-kpi" style="--rkc:#10b981;--rkc-rgb:16,185,129">
             <div class="rdda-kpi-lbl">픽업율</div>
-            <div class="rdda-kpi-val">17.1<span>%</span></div>
-            <div class="rdda-kpi-bar"><div class="rdda-kpi-fill" style="width:68.4%"></div></div>
+            <div class="rdda-kpi-val">17.5<span>%</span></div>
+            <div class="rdda-kpi-bar"><div class="rdda-kpi-fill" style="width:70%"></div></div>
             <div class="rdda-kpi-meta">
-              <div class="rdda-kpi-note">전사 14.4% 대비 <strong style="color:#10b981">+2.7%p</strong></div>
+              <div class="rdda-kpi-note">전사 14.4% 대비 <strong style="color:#10b981">+3.1%p</strong></div>
             </div>
           </div>
         </div>
@@ -1810,19 +1810,19 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
         <div class="rdda-sl" style="--rsc:var(--cb);color:var(--cb)">제안 &amp; Pickup 분석</div>
         <div class="rdda-g2">
           <div class="rdda-cc">
-            <div class="rdda-cc-ttl" style="--rgc:var(--cb)">제안(Meeting) <span class="rdda-badge" style="color:var(--cb)">263건</span></div>
+            <div class="rdda-cc-ttl" style="--rgc:var(--cb)">제안(Meeting) <span class="rdda-badge" style="color:var(--cb)">257건</span></div>
             <div style="position:relative;height:240px"><canvas id="rdda-bmc"></canvas></div>
           </div>
           <div class="rdda-cc">
             <div class="rdda-cc-ttl" style="--rgc:var(--cb)">Pickup <span class="rdda-badge" style="color:var(--cb)">45건</span></div>
             <div style="position:relative;height:185px"><canvas id="rdda-bpc"></canvas></div>
             <div class="rdda-prate">
-              <div class="rdda-pr-cell"><div class="rdda-pr-n">263</div><div class="rdda-pr-l">Meeting</div></div>
+              <div class="rdda-pr-cell"><div class="rdda-pr-n">257</div><div class="rdda-pr-l">Meeting</div></div>
               <div class="rdda-pr-arr">→</div>
               <div class="rdda-pr-cell"><div class="rdda-pr-n">45</div><div class="rdda-pr-l">Pickup</div></div>
               <div class="rdda-pr-arr">=</div>
               <div class="rdda-pr-rate" style="background:rgba(var(--cb-rgb),.07);border-color:rgba(var(--cb-rgb),.25)">
-                <div class="rn" style="color:var(--cb)">17.1%</div><div class="rl">픽업율</div>
+                <div class="rn" style="color:var(--cb)">17.5%</div><div class="rl">픽업율</div>
               </div>
             </div>
           </div>
@@ -4794,123 +4794,205 @@ async function hpSaveToStorage(data, fileName){
 
 <script>
 /* ══════════════════════════════════════
-   RDDA ANALYSIS — Charts & Logic
+   RDDA ANALYSIS — Charts, Logic & Upload
 ══════════════════════════════════════ */
 let _rddaInited = false;
 let _rddaFile   = null;
+const _rddaCharts = {};
+
+const RDDA_HANSOLL = new Set(['hansoll textile ltd.','hansoll textile ltd']);
+const RDDA_TEAM3   = new Set(['17010','13135','25007','21049','13050']);
+
+/* ── Origin → ISO2 code for flag badges */
+const RDDA_CO_CODE = {China:'cn',Vietnam:'vn',Korea:'kr',Indonesia:'id',India:'in',Thailand:'th'};
+/* ── Origin color palette */
+const RDDA_ORIG_CLR = {China:'#fbbf24',Vietnam:'#34d399',Korea:'#22d3ee',Indonesia:'#818cf8',India:'#f472b6',Thailand:'#fb923c','기타':'#475569'};
+/* ── Construction bar colors */
+const RDDA_CON_CLR = {
+  amber:[{bg:'rgba(245,158,11,.2)',fg:'#f59e0b',gl:'rgba(245,158,11,.5)'},{bg:'rgba(251,191,36,.2)',fg:'#fbbf24',gl:'rgba(251,191,36,.4)'},{bg:'rgba(217,119,6,.2)',fg:'#d97706',gl:'rgba(217,119,6,.4)'},{bg:'rgba(180,83,9,.2)',fg:'#b45309',gl:''},{bg:'rgba(146,64,14,.2)',fg:'#92400e',gl:''}],
+  lime:[{bg:'rgba(163,230,53,.2)',fg:'#84cc16',gl:'rgba(163,230,53,.5)'},{bg:'rgba(132,204,22,.2)',fg:'#65a30d',gl:'rgba(132,204,22,.4)'},{bg:'rgba(101,163,13,.2)',fg:'#65a30d',gl:'rgba(101,163,13,.4)'},{bg:'rgba(77,124,15,.2)',fg:'#4d7c0f',gl:''},{bg:'rgba(54,83,20,.2)',fg:'#365314',gl:''}]
+};
+
+/* ── Default dataset (2026년 4월) ─────────────────── */
+const RDDA_DEFAULT = {
+  period:'2026-04',
+  all:{
+    meetingTotal:1239,pickupTotal:179,pickupRate:14.4,
+    meetingByCustomer:[
+      {name:"A&F",count:288},{name:"Walmart USA",count:259},{name:"Kohl's",count:250},
+      {name:"Target",count:166},{name:"Talbots",count:91},{name:"AEO",count:62},
+      {name:"UNIQLO",count:32},{name:"LOFT",count:29},{name:"KMART AU",count:22},{name:"LANE BRYANT",count:17}
+    ],
+    pickupByCustomer:[
+      {name:"Kohl's",pickupCount:67,meetingCount:250,rate:'26.8%'},{name:"A&F",pickupCount:65,meetingCount:288,rate:'22.6%'},
+      {name:"Target",pickupCount:31,meetingCount:166,rate:'18.7%'},{name:"Walmart USA",pickupCount:10,meetingCount:259,rate:'3.9%'},
+      {name:"KMART AU",pickupCount:3,meetingCount:22,rate:'13.6%'},{name:"기타",pickupCount:3,meetingCount:null,rate:null}
+    ],
+    constructionTop5:[
+      {name:'Single Jersey',count:26,pct:20},{name:'1*1 Rib',count:14,pct:11},
+      {name:'Pointelle',count:12,pct:9},{name:'Thermal',count:10,pct:8},{name:'French Terry',count:5,pct:4}
+    ],
+    origin:[{country:'China',count:65,pct:49},{country:'Vietnam',count:36,pct:27},{country:'Korea',count:27,pct:20},{country:'기타',count:4,pct:3}],
+    bestItems:[
+      {fl:'FL24112051',sup:'SIRIS (GANGLONG) KNITTING CO., LTD',con:'French Terry',yrn:'',yarn:'',co:'China',wid:'61',wgt:'255',prc:'2.66',m:19,p:8,rank:1},
+      {fl:'FL25082384',sup:'CHANGSHU YISHENG TEXTILE CO., LTD.',con:'Mini French Terry',yrn:'90/10 Polyester/Spandex',yarn:'POLY 150D + POLY 100D + SP 40D',co:'China',wid:'61',wgt:'252',prc:'2.04',m:4,p:3,rank:2},
+      {fl:'FL25089032',sup:'Global Dyeing Co., Ltd.',con:'Single Jacquard',yrn:'70/30 Cotton/Polyester',yarn:'CVC 60/40 30S (R/WHITE)+CM 30S YD',co:'Vietnam',wid:'66',wgt:'210',prc:'2.71',m:4,p:3,rank:2},
+      {fl:'FL25122662',sup:'CHANGSHU YISHENG TEXTILE CO., LTD.',con:'Double Mesh',yrn:'100 Polyester',yarn:'PE 100D + 75D + 50D',co:'China',wid:'66',wgt:'170',prc:'1.23',m:4,p:3,rank:2},
+      {fl:'FL25122814',sup:'SUZHOU VOGUE TEXTILE CO LTD.',con:'Single Jacquard',yrn:'98/2 Polyester/Spandex',yarn:"PE 40S/1 + PE 100D/36F + SP/PE CVR 40D/100D",co:'China',wid:'55',wgt:'230',prc:'1.54',m:3,p:3,rank:5},
+      {fl:'FL26032333',sup:'풍림텍스타일',con:'Loop Terry',yrn:'51/49 Cotton/Polyester',yarn:'',co:'Korea',wid:'70',wgt:'215',prc:'3.24',m:3,p:3,rank:5},
+      {fl:'FL24082419',sup:'',con:'Scuba',yrn:'52/43/5 Cotton/Polyester/Spandex',yarn:'50S CVC+50D/48FDTY+20DOP',co:'China',wid:'65',wgt:'260',prc:'3.3',m:2,p:2,rank:7},
+      {fl:'FL24089026',sup:'Global Dyeing Co., Ltd.',con:'Thermal',yrn:'60/40 Cotton/Polyester',yarn:'CVC 60/20 20S',co:'Vietnam',wid:'62',wgt:'250',prc:'2.34',m:3,p:2,rank:8},
+      {fl:'FL24122233',sup:'SIRIS (GANGLONG) KNITTING CO., LTD',con:'Single Jacquard',yrn:'100 Cotton',yarn:'30S',co:'China',wid:'61',wgt:'205',prc:'2.19',m:2,p:2,rank:9},
+      {fl:'FL24122828',sup:'Shaoxing Shangjie Textile Co.,Ltd',con:'Scuba',yrn:'64/28/8 Polyester/Cotton/Spandex',yarn:'50D/DTY48+30DPE+20DSP+60S/1CVC 60/40',co:'China',wid:'65',wgt:'210',prc:'2.35',m:2,p:2,rank:9}
+    ]
+  },
+  team3:{
+    meetingTotal:257,pickupTotal:45,pickupRate:17.5,
+    meetingByCustomer:[
+      {name:"A&F",count:74},{name:"Walmart USA",count:48},{name:"Kohl's",count:40},
+      {name:"AEO",count:32},{name:"Target",count:24},{name:"UNIQLO",count:21},
+      {name:"Talbots",count:7},{name:"KMART AU",count:6}
+    ],
+    pickupByCustomer:[
+      {name:"A&F",pickupCount:22,meetingCount:74,rate:'29.7%'},{name:"Kohl's",pickupCount:16,meetingCount:40,rate:'40.0%'},
+      {name:"Target",pickupCount:5,meetingCount:24,rate:'20.8%'},{name:"Walmart USA",pickupCount:1,meetingCount:48,rate:'2.1%'},
+      {name:"KMART AU",pickupCount:1,meetingCount:6,rate:'16.7%'}
+    ],
+    constructionTop5:[
+      {name:'Single Jersey',count:12,pct:35},{name:'Thermal',count:5,pct:15},
+      {name:'1*1 Rib',count:5,pct:15},{name:'Double Knit',count:2,pct:6},{name:'French Terry',count:1,pct:3}
+    ],
+    origin:[{country:'Vietnam',count:25,pct:74},{country:'Korea',count:6,pct:18},{country:'China',count:3,pct:9}],
+    bestItems:[
+      {fl:'FL25089032',sup:'Global Dyeing Co., Ltd.',con:'Single Jacquard',yrn:'70/30 Cotton/Polyester',yarn:'CVC 60/40 30S (R/WHITE)+CM 30S YD',co:'Vietnam',wid:'66',wgt:'210',prc:'2.71',m:4,p:3,rank:1},
+      {fl:'FL24089026',sup:'Global Dyeing Co., Ltd.',con:'Thermal',yrn:'60/40 Cotton/Polyester',yarn:'CVC 60/20 20S',co:'Vietnam',wid:'62',wgt:'250',prc:'2.34',m:3,p:2,rank:2},
+      {fl:'FL25019021',sup:'',con:'Single Jersey',yrn:'60/40 Cotton/Polyester',yarn:'CVC 60/40 30S/1',co:'Vietnam',wid:'65',wgt:'200',prc:'1.92',m:2,p:2,rank:3},
+      {fl:'FL25109128',sup:'Global Dyeing Co., Ltd.',con:'Single Jersey',yrn:'',yarn:'CM/MO 50/50 40S SIRO COMPACT+SPAN 30D',co:'Vietnam',wid:'65',wgt:'200',prc:'2.92',m:2,p:2,rank:3},
+      {fl:'FL26019002',sup:'Global Dyeing Co., Ltd.',con:'1*1 Rib',yrn:'72/26/2 Cotton/Polyester/Spandex',yarn:"CM 30'S/1 * T/C 65/35 30'S/1 * Span 30D",co:'Vietnam',wid:'55',wgt:'260',prc:'2.2',m:2,p:2,rank:3},
+      {fl:'FL26019003',sup:'Global Dyeing Co., Ltd.',con:'1*1 Rib',yrn:'98/2 Cotton/Spandex',yarn:"CM 30'S/1 YD * Span 30D",co:'Vietnam',wid:'56',wgt:'260',prc:'3.14',m:2,p:2,rank:3},
+      {fl:'FL26019040',sup:'Global Dyeing Co., Ltd.',con:'Single Jersey',yrn:'68/32 Cotton/Polyester',yarn:"CM 8'S/1+T/C(65/35) 8'S/1",co:'Vietnam',wid:'71',wgt:'280',prc:'2.72',m:2,p:2,rank:3},
+      {fl:'FL26019059',sup:'Global Dyeing Co., Ltd.',con:'Single Jersey',yrn:'90/10 Cotton/Polyester',yarn:"CM 30'S//2 * Polyester/CM 65/35 26'S//2",co:'Vietnam',wid:'61',wgt:'250',prc:'2.13',m:4,p:2,rank:8},
+      {fl:'FL26019062',sup:'Global Dyeing Co., Ltd.',con:'Flat Back Rib',yrn:'69/31 Cotton/Polyester',yarn:"T/C 65/35 30'S//2+CM 30S+CM 30S",co:'Vietnam',wid:'62',wgt:'270',prc:'2.5',m:3,p:2,rank:9},
+      {fl:'FL26039011',sup:'Global Dyeing Co., Ltd.',con:'Thermal',yrn:'58/39/3 Cotton/Recycled poly/Spandex',yarn:"CM/Recycled Polyester 60/40 20'S/1 * Spand 30D",co:'Vietnam',wid:'51',wgt:'315',prc:'2.35',m:4,p:2,rank:10}
+    ]
+  }
+};
+
+/* ── Chart tooltip defaults */
+const RDDA_TT = {backgroundColor:'rgba(13,17,26,.96)',borderColor:'rgba(255,255,255,.1)',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:9,cornerRadius:7};
+
+function _rddaRegPlugin() {
+  if (Chart.registry.plugins.get('rddaEndLabels')) return;
+  Chart.register({
+    id:'rddaEndLabels',
+    afterDatasetsDraw(chart) {
+      const rates = chart.config.options._rateLabels;
+      if (!rates) return;
+      const {ctx, scales:{x}} = chart;
+      const data = chart.data.datasets[0].data;
+      ctx.save();
+      ctx.font = '600 9.5px "Inter",sans-serif';
+      ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      data.forEach((val, i) => {
+        if (!rates[i]) return;
+        const meta = chart.getDatasetMeta(0);
+        if (!meta.data[i]) return;
+        ctx.shadowColor = 'rgba(52,211,153,.6)'; ctx.shadowBlur = 6;
+        ctx.fillStyle = 'rgba(52,211,153,.95)';
+        ctx.fillText(rates[i], x.getPixelForValue(val) + 6, meta.data[i].y);
+      });
+      ctx.shadowBlur = 0; ctx.restore();
+    }
+  });
+}
+
+function _rddaGrad(chart, c1, c2) {
+  const {ctx, chartArea} = chart;
+  if (!chartArea) return c2;
+  const g = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+  g.addColorStop(0, c1); g.addColorStop(1, c2);
+  return g;
+}
+
+function _rddaHbar(id, labels, data, dim, bright, rates) {
+  if (_rddaCharts[id]) { _rddaCharts[id].destroy(); delete _rddaCharts[id]; }
+  const opts = {
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    layout:{padding:{right: rates ? 58 : 8}},
+    plugins:{legend:{display:false}, tooltip:{...RDDA_TT, callbacks:{label:c=>' '+c.raw+'건'}}},
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:10}}},
+      y:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}
+    }
+  };
+  if (rates) opts._rateLabels = rates;
+  _rddaCharts[id] = new Chart(id, {
+    type:'bar',
+    data:{labels, datasets:[{data, borderRadius:4, borderSkipped:false,
+      backgroundColor(ctx2){ return _rddaGrad(ctx2.chart, dim, bright); }
+    }]},
+    options: opts
+  });
+  return _rddaCharts[id];
+}
+
+function _rddaDonut(id, labels, data, colors, total) {
+  if (_rddaCharts[id]) { _rddaCharts[id].destroy(); delete _rddaCharts[id]; }
+  _rddaCharts[id] = new Chart(id, {
+    type:'doughnut',
+    data:{labels, datasets:[{data, backgroundColor:colors, borderColor:'#0b0f1a', borderWidth:3, hoverOffset:6}]},
+    options:{cutout:'72%', responsive:true, maintainAspectRatio:true,
+      plugins:{legend:{display:false},
+        tooltip:{...RDDA_TT, callbacks:{label:c=>` ${c.label}: ${c.raw}건 (${Math.round(c.raw/total*100)}%)`}}
+      }
+    }
+  });
+  return _rddaCharts[id];
+}
+
+function _rddaBootCharts(d) {
+  /* Tab A */
+  _rddaHbar('rdda-amc',
+    d.all.meetingByCustomer.map(x=>x.name), d.all.meetingByCustomer.map(x=>x.count),
+    'rgba(192,132,252,.15)','rgba(167,139,250,.95)'
+  );
+  _rddaHbar('rdda-apc',
+    d.all.pickupByCustomer.map(x=>x.name), d.all.pickupByCustomer.map(x=>x.pickupCount),
+    'rgba(52,211,153,.15)','rgba(16,185,129,.9)', d.all.pickupByCustomer.map(x=>x.rate)
+  );
+  const aOrig = d.all.origin;
+  _rddaDonut('rdda-adnt', aOrig.map(x=>x.country), aOrig.map(x=>x.count),
+    aOrig.map(x=>RDDA_ORIG_CLR[x.country]||'#475569'), d.all.pickupTotal);
+
+  /* Tab B — show while initializing, then hide */
+  document.getElementById('rdda-tab-team').style.display = '';
+  _rddaHbar('rdda-bmc',
+    d.team3.meetingByCustomer.map(x=>x.name), d.team3.meetingByCustomer.map(x=>x.count),
+    'rgba(125,211,252,.15)','rgba(56,189,248,.9)'
+  );
+  _rddaHbar('rdda-bpc',
+    d.team3.pickupByCustomer.map(x=>x.name), d.team3.pickupByCustomer.map(x=>x.pickupCount),
+    'rgba(251,113,133,.15)','rgba(244,63,94,.9)', d.team3.pickupByCustomer.map(x=>x.rate)
+  );
+  const bOrig = d.team3.origin;
+  const bOrigCols = ['#34d399','#22d3ee','#fbbf24','#818cf8','#475569'];
+  _rddaDonut('rdda-bdnt', bOrig.map(x=>x.country), bOrig.map(x=>x.count),
+    bOrig.map((_,i)=>bOrigCols[i]||'#475569'), d.team3.pickupTotal);
+  document.getElementById('rdda-tab-team').style.display = 'none';
+  rddaSwitchTab('all');
+}
 
 function renderRdda() {
   if (_rddaInited) return;
   _rddaInited = true;
-
-  const TT = {backgroundColor:'rgba(13,17,26,.96)',borderColor:'rgba(255,255,255,.1)',
-    borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:9,cornerRadius:7};
-
-  /* Custom plugin: pickup rate % at bar end */
-  if (!Chart.registry.plugins.get('rddaEndLabels')) {
-    Chart.register({
-      id: 'rddaEndLabels',
-      afterDatasetsDraw(chart) {
-        const rates = chart.config.options._rateLabels;
-        if (!rates) return;
-        const {ctx, scales:{x}} = chart;
-        const data = chart.data.datasets[0].data;
-        ctx.save();
-        ctx.font = '600 9.5px "Inter", sans-serif';
-        ctx.textBaseline = 'middle';
-        ctx.textAlign = 'left';
-        data.forEach((val, i) => {
-          if (!rates[i]) return;
-          const meta = chart.getDatasetMeta(0);
-          if (!meta.data[i]) return;
-          ctx.shadowColor = 'rgba(52,211,153,.6)';
-          ctx.shadowBlur = 6;
-          ctx.fillStyle = 'rgba(52,211,153,.95)';
-          ctx.fillText(rates[i], x.getPixelForValue(val) + 6, meta.data[i].y);
-        });
-        ctx.shadowBlur = 0;
-        ctx.restore();
-      }
-    });
+  _rddaRegPlugin();
+  _rddaBootCharts(RDDA_DEFAULT);
+  /* Try loading latest from Firestore */
+  if (window._fbGetDoc && window._fbDoc && window._fbDb) {
+    window._fbGetDoc(window._fbDoc(window._fbDb,'rdda_monthly','latest'))
+      .then(snap => { if (snap.exists()) rddaApplyData(snap.data()); })
+      .catch(()=>{});
   }
-
-  function neonGrad(chart, c1, c2) {
-    const {ctx, chartArea} = chart;
-    if (!chartArea) return c2;
-    const g = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
-    g.addColorStop(0, c1); g.addColorStop(1, c2);
-    return g;
-  }
-
-  function hbarNeon(id, labels, data, dim, bright, rates) {
-    const opts = {
-      indexAxis:'y', responsive:true, maintainAspectRatio:false,
-      layout:{padding:{right: rates ? 58 : 8}},
-      plugins:{legend:{display:false}, tooltip:{...TT, callbacks:{label:c=>' '+c.raw+'건'}}},
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:10}}},
-        y:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}
-      }
-    };
-    if (rates) opts._rateLabels = rates;
-    return new Chart(id, {
-      type:'bar',
-      data:{labels, datasets:[{data, borderRadius:4, borderSkipped:false,
-        backgroundColor(ctx2){ return neonGrad(ctx2.chart, dim, bright); }
-      }]},
-      options: opts
-    });
-  }
-
-  function makeDonut(id, labels, data, colors, total) {
-    return new Chart(id, {
-      type:'doughnut',
-      data:{labels, datasets:[{data, backgroundColor:colors, borderColor:'#0b0f1a', borderWidth:3, hoverOffset:6}]},
-      options:{cutout:'72%', responsive:true, maintainAspectRatio:true,
-        plugins:{legend:{display:false},
-          tooltip:{...TT, callbacks:{label:c=>` ${c.label}: ${c.raw}건 (${Math.round(c.raw/total*100)}%)`}}
-        }
-      }
-    });
-  }
-
-  /* Tab A */
-  hbarNeon('rdda-amc',
-    ['A&F','Walmart USA',"Kohl's",'Target','Talbots','AEO','UNIQLO','LOFT','KMART AU','LANE BRYANT'],
-    [288,259,250,166,91,62,32,29,22,17],
-    'rgba(192,132,252,.15)','rgba(167,139,250,.95)'
-  );
-  hbarNeon('rdda-apc',
-    ["Kohl's",'A&F','Target','Walmart USA','KMART AU','기타'],
-    [67,65,31,10,3,3],
-    'rgba(52,211,153,.15)','rgba(16,185,129,.9)',
-    ['26.8%','22.6%','18.7%','3.9%','13.6%',null]
-  );
-  makeDonut('rdda-adnt',
-    ['China','Vietnam','Korea','기타'],[88,52,34,5],
-    ['rgba(251,191,36,.85)','rgba(52,211,153,.85)','rgba(34,211,238,.85)','rgba(71,85,105,.7)'],179
-  );
-
-  /* Tab B — init while visible, then hide */
-  document.getElementById('rdda-tab-team').style.display = '';
-  hbarNeon('rdda-bmc',
-    ['A&F','Walmart USA',"Kohl's",'AEO','Target','UNIQLO','기타','KMART AU'],
-    [74,48,40,32,24,21,18,6],
-    'rgba(125,211,252,.15)','rgba(56,189,248,.9)'
-  );
-  hbarNeon('rdda-bpc',
-    ['A&F',"Kohl's",'Target','Walmart USA','KMART AU'],
-    [22,16,5,1,1],
-    'rgba(251,113,133,.15)','rgba(244,63,94,.9)',
-    ['29.7%','40.0%','20.8%','2.1%','16.7%']
-  );
-  makeDonut('rdda-bdnt',
-    ['Vietnam','Korea','China'],[37,5,3],
-    ['rgba(52,211,153,.85)','rgba(34,211,238,.85)','rgba(251,191,36,.85)'],45
-  );
-  document.getElementById('rdda-tab-team').style.display = 'none';
-
-  rddaSwitchTab('all');
 }
 
 function rddaSwitchTab(t) {
@@ -4935,7 +5017,308 @@ function rddaSwitchTab(t) {
   if (bg2) { bg2.style.background=bg; bg2.style.borderColor=bc; bg2.style.color=c; }
 }
 
-/* Upload modal */
+/* ── DOM helpers ───────────────────────────── */
+function _rddaOriginLegend(origin, total) {
+  return origin.map(({country,count,pct})=>{
+    const c = RDDA_ORIG_CLR[country]||'#475569';
+    return `<div class="rdda-dn-item"><div class="rdda-dn-dot" style="background:${c}"></div><div class="rdda-dn-nm">${country}</div><div class="rdda-dn-v">${count}건</div><div class="rdda-dn-p">${pct}%</div></div>`;
+  }).join('');
+}
+
+function _rddaConBars(top5, scheme) {
+  const cols = RDDA_CON_CLR[scheme] || RDDA_CON_CLR.amber;
+  if (!top5 || !top5.length) return '';
+  const max = top5[0].count;
+  return top5.map(({name,count,pct}, i) => {
+    const c = cols[Math.min(i,cols.length-1)];
+    const w = Math.round(count/max*100);
+    const glow = c.gl ? `box-shadow:0 0 7px ${c.gl};` : '';
+    return `<div class="rdda-mb-r"><div class="rdda-mb-l">${name}</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:${w}%;background:linear-gradient(90deg,${c.bg},${c.fg});${glow}"></div></div><div class="rdda-mb-v">${count}건 <small style="color:var(--muted)">${pct}%</small></div></div>`;
+  }).join('');
+}
+
+function _rddaBestRows(items, extraCol) {
+  if (!items || !items.length) return '';
+  return items.map(item => {
+    const rc = item.rank===1?'rdda-r1':item.rank===2?'rdda-r2':item.rank===3?'rdda-r3':'';
+    const rankCell = (item.rank && item.rank<=3) ? `<span class="rdda-rank ${rc}">${item.rank}</span>` : '';
+    const coCode = RDDA_CO_CODE[item.co]||'';
+    const coCell = coCode ? `<span class="rdda-co rdda-co-${coCode}">${item.co.substring(0,2).toUpperCase()}</span>` : (item.co||'—');
+    const supDisplay = item.sup
+      ? item.sup.replace(/CO\.,?\s*LTD\.?/gi,'').replace(/COMPANY/gi,'').replace(/CO\.\s*,\s*LTD/gi,'').trim().substring(0,18).toUpperCase()
+      : '—';
+    return `<tr>
+      <td class="c">${rankCell}</td>
+      <td><span class="rdda-fl">${item.fl}</span></td>
+      <td><span class="rdda-sup" title="${item.sup||''}">${supDisplay}</span></td>
+      <td${!item.con?' style="color:var(--muted)"':''}>${item.con||'—'}</td>
+      <td>${item.yrn||'—'}</td>
+      <td class="rdda-yarn">${item.yarn||'—'}</td>
+      <td>${coCell}</td>
+      <td class="c">${item.wid?item.wid+'"':'—'}</td>
+      <td class="c">${item.wgt?item.wgt+'g':'—'}</td>
+      <td class="c${item.prc?' rdda-price':''}">${item.prc?'$'+item.prc:'—'}</td>
+      <td class="c"><span class="rdda-mp rdda-mp-m">${item.m}</span></td>
+      <td class="c"><span class="rdda-mp rdda-mp-p">${item.p}</span></td>
+      ${extraCol?'<td></td>':''}
+    </tr>`;
+  }).join('');
+}
+
+/* ── Apply aggregated data to DOM + charts ── */
+function rddaApplyData(d) {
+  const all = d.all, t3 = d.team3;
+  if (!all || !t3) return;
+
+  /* Period label */
+  if (d.period) {
+    const [yr,mo] = d.period.split('-');
+    const lbl = document.getElementById('rddaUpLabel');
+    if (lbl) { lbl.textContent = `${yr}.${mo}`; lbl.style.color='#10b981'; }
+  }
+
+  /* KPI values */
+  const aKV = document.querySelectorAll('#rdda-tab-all .rdda-kpi-val');
+  if (aKV[0]) aKV[0].innerHTML=`${all.meetingTotal.toLocaleString()}<span>건</span>`;
+  if (aKV[1]) aKV[1].innerHTML=`${all.pickupTotal}<span>건</span>`;
+  if (aKV[2]) aKV[2].innerHTML=`${all.pickupRate.toFixed(1)}<span>%</span>`;
+  const bKV = document.querySelectorAll('#rdda-tab-team .rdda-kpi-val');
+  if (bKV[0]) bKV[0].innerHTML=`${t3.meetingTotal.toLocaleString()}<span>건</span>`;
+  if (bKV[1]) bKV[1].innerHTML=`${t3.pickupTotal}<span>건</span>`;
+  if (bKV[2]) bKV[2].innerHTML=`${t3.pickupRate.toFixed(1)}<span>%</span>`;
+
+  /* KPI bars */
+  const aKF = document.querySelectorAll('#rdda-tab-all .rdda-kpi-fill');
+  if (aKF[0]) aKF[0].style.width='100%';
+  if (aKF[1]) aKF[1].style.width=Math.round(all.pickupTotal/all.meetingTotal*100)+'%';
+  if (aKF[2]) aKF[2].style.width=Math.min(Math.round(all.pickupRate*4),100)+'%';
+  const bKF = document.querySelectorAll('#rdda-tab-team .rdda-kpi-fill');
+  if (bKF[0]) bKF[0].style.width='100%';
+  if (bKF[1]) bKF[1].style.width=Math.round(t3.pickupTotal/t3.meetingTotal*100)+'%';
+  if (bKF[2]) bKF[2].style.width=Math.min(Math.round(t3.pickupRate*4),100)+'%';
+
+  /* KPI meta notes */
+  const aKN = document.querySelectorAll('#rdda-tab-all .rdda-kpi-note');
+  if (aKN[1]) aKN[1].innerHTML=`Hansoll 제외 <strong>${all.pickupTotal}건</strong>`;
+  if (aKN[2]) aKN[2].textContent=`Meeting ${all.meetingTotal.toLocaleString()} → Pickup ${all.pickupTotal}`;
+  const bKN = document.querySelectorAll('#rdda-tab-team .rdda-kpi-note');
+  if (bKN[0]) bKN[0].innerHTML=`전사 대비 <strong>${Math.round(t3.meetingTotal/all.meetingTotal*100)}%</strong>`;
+  if (bKN[1]) bKN[1].innerHTML=`전사 ${all.pickupTotal}건 중 <strong>${Math.round(t3.pickupTotal/all.pickupTotal*100)}%</strong>`;
+  if (bKN[2]) {
+    const diff = (t3.pickupRate - all.pickupRate).toFixed(1);
+    const sign = diff >= 0 ? '+' : '';
+    bKN[2].innerHTML=`전사 ${all.pickupRate.toFixed(1)}% 대비 <strong style="color:#10b981">${sign}${diff}%p</strong>`;
+  }
+
+  /* Chart title badges */
+  const aB = document.querySelectorAll('#rdda-tab-all .rdda-badge');
+  if (aB[0]) aB[0].textContent=`${all.meetingTotal.toLocaleString()}건`;
+  if (aB[1]) aB[1].textContent=`${all.pickupTotal}건`;
+  if (aB[2]) aB[2].textContent=`${all.pickupTotal}건`;
+  const bB = document.querySelectorAll('#rdda-tab-team .rdda-badge');
+  if (bB[0]) bB[0].textContent=`${t3.meetingTotal.toLocaleString()}건`;
+  if (bB[1]) bB[1].textContent=`${t3.pickupTotal}건`;
+  if (bB[2]) bB[2].textContent=`${t3.pickupTotal}건`;
+
+  /* Prate section */
+  const aPrN = document.querySelectorAll('#rdda-tab-all .rdda-pr-n');
+  if (aPrN[0]) aPrN[0].textContent=all.meetingTotal.toLocaleString();
+  if (aPrN[1]) aPrN[1].textContent=all.pickupTotal;
+  const aPrR = document.querySelector('#rdda-tab-all .rn');
+  if (aPrR) aPrR.textContent=all.pickupRate.toFixed(1)+'%';
+  const bPrN = document.querySelectorAll('#rdda-tab-team .rdda-pr-n');
+  if (bPrN[0]) bPrN[0].textContent=t3.meetingTotal.toLocaleString();
+  if (bPrN[1]) bPrN[1].textContent=t3.pickupTotal;
+  const bPrR = document.querySelector('#rdda-tab-team .rn');
+  if (bPrR) bPrR.textContent=t3.pickupRate.toFixed(1)+'%';
+
+  /* Donut centers */
+  const aDN = document.querySelector('#rdda-tab-all .rdda-dn-num');
+  if (aDN) aDN.textContent=all.pickupTotal;
+  const bDN = document.querySelector('#rdda-tab-team .rdda-dn-num');
+  if (bDN) bDN.textContent=t3.pickupTotal;
+
+  /* Origin legends */
+  const aLeg = document.querySelector('#rdda-tab-all .rdda-dn-legend');
+  if (aLeg) aLeg.innerHTML=_rddaOriginLegend(all.origin, all.pickupTotal);
+  const bLeg = document.querySelector('#rdda-tab-team .rdda-dn-legend');
+  if (bLeg) bLeg.innerHTML=_rddaOriginLegend(t3.origin, t3.pickupTotal);
+
+  /* Construction bars */
+  const aMB = document.querySelector('#rdda-tab-all .rdda-mbar');
+  if (aMB) aMB.innerHTML=_rddaConBars(all.constructionTop5,'amber');
+  const bMB = document.querySelector('#rdda-tab-team .rdda-mbar');
+  if (bMB) bMB.innerHTML=_rddaConBars(t3.constructionTop5,'lime');
+
+  /* Best items tables */
+  const aTB = document.querySelector('#rdda-tab-all tbody');
+  if (aTB) aTB.innerHTML=_rddaBestRows(all.bestItems, false);
+  const bTB = document.querySelector('#rdda-tab-team tbody');
+  if (bTB) bTB.innerHTML=_rddaBestRows(t3.bestItems, true);
+
+  /* Update charts */
+  function upHbar(id, labels, data, rates) {
+    const ch = _rddaCharts[id];
+    if (!ch) return;
+    ch.data.labels = labels;
+    ch.data.datasets[0].data = data;
+    if (rates !== undefined) ch.options._rateLabels = rates;
+    ch.options.layout.padding.right = (rates && rates.some(r=>r)) ? 58 : 8;
+    ch.update('none');
+  }
+  function upDonut(id, orig, total, colorOrder) {
+    const ch = _rddaCharts[id];
+    if (!ch) return;
+    ch.data.labels = orig.map(x=>x.country);
+    ch.data.datasets[0].data = orig.map(x=>x.count);
+    ch.data.datasets[0].backgroundColor = orig.map((x,i)=>colorOrder[i]||'#475569');
+    ch.options.plugins.tooltip.callbacks.label = c=>` ${c.label}: ${c.raw}건 (${Math.round(c.raw/total*100)}%)`;
+    ch.update('none');
+  }
+
+  upHbar('rdda-amc', all.meetingByCustomer.map(x=>x.name), all.meetingByCustomer.map(x=>x.count), null);
+  upHbar('rdda-apc', all.pickupByCustomer.map(x=>x.name), all.pickupByCustomer.map(x=>x.pickupCount), all.pickupByCustomer.map(x=>x.rate));
+  upDonut('rdda-adnt', all.origin, all.pickupTotal, all.origin.map(x=>RDDA_ORIG_CLR[x.country]||'#475569'));
+
+  /* Tab B charts: show tab momentarily for correct canvas sizing */
+  const tbEl = document.getElementById('rdda-tab-team');
+  const wasHidden = tbEl && tbEl.style.display==='none';
+  if (wasHidden) tbEl.style.display='';
+  upHbar('rdda-bmc', t3.meetingByCustomer.map(x=>x.name), t3.meetingByCustomer.map(x=>x.count), null);
+  upHbar('rdda-bpc', t3.pickupByCustomer.map(x=>x.name), t3.pickupByCustomer.map(x=>x.pickupCount), t3.pickupByCustomer.map(x=>x.rate));
+  const bOrigCols = ['#34d399','#22d3ee','#fbbf24','#818cf8','#475569'];
+  upDonut('rdda-bdnt', t3.origin, t3.pickupTotal, bOrigCols);
+  if (wasHidden) tbEl.style.display='none';
+}
+
+/* ── Excel aggregation logic ───────────────── */
+function _rddaAggregate(mRows, pRows, mIdx, pIdx) {
+  function g(row, idx, col) {
+    const i = idx[col];
+    return (i !== undefined && row[i] != null) ? String(row[i]).trim() : '';
+  }
+
+  const allMCust=new Map(), t3MCust=new Map();
+  const allMFL=new Map(),   t3MFL=new Map();
+  const flDetails=new Map();
+  let allM=0, t3M=0;
+
+  for (const row of mRows) {
+    if (!row || !row.some(v=>v!=null)) continue;
+    const cust = g(row,mIdx,'CustomerName');
+    if (RDDA_HANSOLL.has(cust.toLowerCase())) continue;
+    const code = g(row,mIdx,'MemberCode');
+    const fl   = g(row,mIdx,'FL_NUMBER');
+    allM++;
+    allMCust.set(cust,(allMCust.get(cust)||0)+1);
+    if (fl) allMFL.set(fl,(allMFL.get(fl)||0)+1);
+    if (RDDA_TEAM3.has(code)) {
+      t3M++; t3MCust.set(cust,(t3MCust.get(cust)||0)+1);
+      if (fl) t3MFL.set(fl,(t3MFL.get(fl)||0)+1);
+    }
+    if (fl && !flDetails.has(fl)) {
+      flDetails.set(fl, {
+        sup:g(row,mIdx,'SupplierName'), con:g(row,mIdx,'SubConstructionName'),
+        yrn:g(row,mIdx,'Contents'),    yarn:g(row,mIdx,'YarnDescription'),
+        co:g(row,mIdx,'CountryOfOriginName'), wid:g(row,mIdx,'Width'),
+        wgt:g(row,mIdx,'MeterWeight'),        prc:g(row,mIdx,'YdsPrice')
+      });
+    }
+  }
+
+  const allPCust=new Map(), t3PCust=new Map();
+  const allPFL=new Map(),   t3PFL=new Map();
+  let allP=0, t3P=0;
+
+  for (const row of pRows) {
+    if (!row || !row.some(v=>v!=null)) continue;
+    const cust = g(row,pIdx,'CustomerName');
+    if (RDDA_HANSOLL.has(cust.toLowerCase())) continue;
+    const code = g(row,pIdx,'MemberCode');
+    const fl   = g(row,pIdx,'FL_NUMBER');
+    allP++;
+    allPCust.set(cust,(allPCust.get(cust)||0)+1);
+    if (fl) allPFL.set(fl,(allPFL.get(fl)||0)+1);
+    if (RDDA_TEAM3.has(code)) {
+      t3P++; t3PCust.set(cust,(t3PCust.get(cust)||0)+1);
+      if (fl) t3PFL.set(fl,(t3PFL.get(fl)||0)+1);
+    }
+    if (fl) {
+      const nd = {
+        sup:g(row,pIdx,'SupplierName'), con:g(row,pIdx,'SubConstructionName'),
+        yrn:g(row,pIdx,'Contents'),    yarn:g(row,pIdx,'YarnDescription'),
+        co:g(row,pIdx,'CountryOfOriginName'), wid:g(row,pIdx,'Width'),
+        wgt:g(row,pIdx,'MeterWeight'),        prc:g(row,pIdx,'YdsPrice')
+      };
+      if (!flDetails.has(fl)) { flDetails.set(fl, nd); }
+      else {
+        const d=flDetails.get(fl);
+        for (const k of Object.keys(nd)) { if (!d[k] && nd[k]) d[k]=nd[k]; }
+      }
+    }
+  }
+
+  function buildGroup(mCust, pCust, mFL, pFL, mTotal, pTotal) {
+    /* Meeting by customer TOP 10 */
+    const meetBC = [...mCust.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10)
+      .map(([name,count])=>({name,count}));
+
+    /* Pickup by customer: top 5 + 기타 */
+    const pSorted = [...pCust.entries()].sort((a,b)=>b[1]-a[1]);
+    const pickBC = pSorted.slice(0,5).map(([name,pCnt])=>{
+      const mCnt = mCust.get(name)||0;
+      const rate = mCnt>0 ? (pCnt/mCnt*100).toFixed(1)+'%' : null;
+      return {name, pickupCount:pCnt, meetingCount:mCnt, rate};
+    });
+    const otherP = pSorted.slice(5).reduce((s,[,c])=>s+c,0);
+    if (otherP>0) pickBC.push({name:'기타',pickupCount:otherP,meetingCount:null,rate:null});
+
+    /* Construction TOP5 & origin (by unique pickup FL count) */
+    const conMap=new Map(), origMap=new Map();
+    for (const [fl] of pFL) {
+      const d=flDetails.get(fl); if(!d) continue;
+      if (d.con) conMap.set(d.con,(conMap.get(d.con)||0)+1);
+      if (d.co)  origMap.set(d.co,(origMap.get(d.co)||0)+1);
+    }
+    const pFLTotal = pFL.size;
+    const con5 = [...conMap.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(([name,count])=>({name,count,pct:Math.round(count/pFLTotal*100)}));
+    const origSorted = [...origMap.entries()].sort((a,b)=>b[1]-a[1]);
+    const origTop = origSorted.slice(0,4).map(([country,count])=>({country,count,pct:Math.round(count/pFLTotal*100)}));
+    const origOther = origSorted.slice(4).reduce((s,[,v])=>s+v,0);
+    if (origOther>0) origTop.push({country:'기타',count:origOther,pct:Math.round(origOther/pFLTotal*100)});
+
+    /* Best items TOP10 (pickup desc, meeting desc) */
+    const sorted = [...pFL.entries()].sort((a,b)=>{
+      if (b[1]!==a[1]) return b[1]-a[1];
+      return (mFL.get(b[0])||0)-(mFL.get(a[0])||0);
+    });
+    let rank=0,pos=0,prevKey='';
+    const bestItems = sorted.slice(0,10).map(([fl,pCnt])=>{
+      pos++;
+      const mCnt = mFL.get(fl)||0;
+      const key = `${pCnt}_${mCnt}`;
+      if (key!==prevKey) { rank=pos; prevKey=key; }
+      const d = flDetails.get(fl)||{};
+      return {fl,sup:d.sup||'',con:d.con||'',yrn:d.yrn||'',yarn:d.yarn||'',
+        co:d.co||'',wid:d.wid||'',wgt:d.wgt||'',prc:d.prc||'',m:mCnt,p:pCnt,rank};
+    });
+
+    return {
+      meetingTotal:mTotal, pickupTotal:pTotal,
+      pickupRate:+(pTotal/mTotal*100).toFixed(1),
+      meetingByCustomer:meetBC, pickupByCustomer:pickBC,
+      constructionTop5:con5, origin:origTop, bestItems
+    };
+  }
+
+  return {
+    all:   buildGroup(allMCust,allPCust,allMFL,allPFL,allM,allP),
+    team3: buildGroup(t3MCust,t3PCust,t3MFL,t3PFL,t3M,t3P)
+  };
+}
+
+/* ── Upload modal handlers ─────────────────── */
 function rddaOpenUpload()  { document.getElementById('rddaUploadModal').classList.add('open'); }
 function rddaCloseUpload() { document.getElementById('rddaUploadModal').classList.remove('open'); }
 function rddaModalBg(e)    { if(e.target===document.getElementById('rddaUploadModal')) rddaCloseUpload(); }
@@ -4955,17 +5338,59 @@ function rddaFileSelect(f) {
   document.getElementById('rddaFileSel').classList.add('show');
   document.getElementById('rddaBtnUp').classList.add('ready');
 }
+
 function rddaDoUpload() {
   if (!_rddaFile) return;
-  const label = document.getElementById('rddaPeriodSel').selectedOptions[0].text;
-  rddaCloseUpload();
-  const dot = document.getElementById('rddaUpDot');
-  const lbl = document.getElementById('rddaUpLabel');
-  if (dot) dot.style.display = 'inline-block';
-  if (lbl) { lbl.textContent = label+' 로드됨'; lbl.style.color='#10b981'; }
-  _rddaFile = null;
-  document.getElementById('rddaFileSel').classList.remove('show');
-  document.getElementById('rddaBtnUp').classList.remove('ready');
+  const period = document.getElementById('rddaPeriodSel').value;
+  const label  = document.getElementById('rddaPeriodSel').selectedOptions[0].text;
+  const btn    = document.getElementById('rddaBtnUp');
+  if (btn) { btn.textContent='처리 중…'; btn.disabled=true; }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const mSheetName = wb.SheetNames.find(n=>n.toLowerCase().includes('meeting'));
+      const pSheetName = wb.SheetNames.find(n=>n.toLowerCase().includes('pickup')||n.toLowerCase().includes('pick up'));
+      if (!mSheetName || !pSheetName) {
+        alert('Meeting 또는 Pickup 시트를 찾을 수 없습니다.\n시트명에 "Meeting"과 "Pickup"이 포함되어야 합니다.'); return;
+      }
+      const mRows = XLSX.utils.sheet_to_json(wb.Sheets[mSheetName],{header:1,defval:null});
+      const pRows = XLSX.utils.sheet_to_json(wb.Sheets[pSheetName],{header:1,defval:null});
+
+      /* Build column index maps from header row */
+      const mIdx={}, pIdx={};
+      (mRows[0]||[]).forEach((h,i)=>{ if(h) mIdx[String(h).trim()]=i; });
+      (pRows[0]||[]).forEach((h,i)=>{ if(h) pIdx[String(h).trim()]=i; });
+
+      const result = _rddaAggregate(mRows.slice(1), pRows.slice(1), mIdx, pIdx);
+      result.period = period;
+      result.updatedAt = Date.now();
+
+      /* Save to Firestore */
+      if (window._fbSetDoc && window._fbDoc && window._fbDb) {
+        await window._fbSetDoc(window._fbDoc(window._fbDb,'rdda_monthly',period), result);
+        await window._fbSetDoc(window._fbDoc(window._fbDb,'rdda_monthly','latest'), result);
+      }
+
+      rddaApplyData(result);
+      rddaCloseUpload();
+
+      const dot = document.getElementById('rddaUpDot');
+      const lbl = document.getElementById('rddaUpLabel');
+      if (dot) dot.style.display='inline-block';
+      if (lbl) { lbl.textContent=label+' 로드됨'; lbl.style.color='#10b981'; }
+
+      _rddaFile = null;
+      document.getElementById('rddaFileSel').classList.remove('show');
+    } catch(err) {
+      console.error('RDDA upload error:', err);
+      alert('파일 처리 오류: '+err.message);
+    } finally {
+      if (btn) { btn.textContent='업로드'; btn.disabled=false; btn.classList.remove('ready'); }
+    }
+  };
+  reader.readAsArrayBuffer(_rddaFile);
 }
 </script>
 
