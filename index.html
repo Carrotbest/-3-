@@ -938,6 +938,179 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .prev-tl-dot.active{background:#06b6d4;border-color:#06b6d4;box-shadow:0 0 8px rgba(6,182,212,.5)}
 .prev-tl-lbl{font-size:.56rem;color:#475569;font-weight:600;letter-spacing:.06em}
 
+/* ══════════════════════════════════════
+   RDDA ANALYSIS SCREEN
+══════════════════════════════════════ */
+#screen-rdda{--ca:#60a5fa;--ca-rgb:96,165,250;--cb:#06b6d4;--cb-rgb:6,182,212;
+  --r:12px;--muted2:#94a3b8}
+.rdda-ph{display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.rdda-ph h2{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:#e2e8f0}
+.rdda-ph h2 em{font-style:normal}
+.rdda-sub{font-size:.72rem;color:var(--muted2);margin-top:5px;letter-spacing:.04em}
+.rdda-period{display:inline-block;padding:5px 14px;border-radius:20px;
+  font-size:.72rem;font-weight:700;letter-spacing:.07em;font-family:'Space Grotesk',sans-serif}
+.rdda-updated{font-size:.66rem;color:var(--muted);margin-top:5px;text-align:right}
+/* tab bar */
+.rdda-tab-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.rdda-tab-btn{display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:8px;
+  border:1px solid var(--border);cursor:pointer;font-size:.78rem;font-weight:700;
+  letter-spacing:.04em;background:var(--bg-card);color:var(--muted);
+  transition:all .2s;font-family:'Space Grotesk',sans-serif;outline:none}
+.rdda-tab-btn .rdda-dot{width:8px;height:8px;border-radius:50%;background:var(--rtc);opacity:.35;transition:opacity .2s}
+.rdda-tab-btn.active{color:var(--rtc);border-color:color-mix(in srgb,var(--rtc) 40%,transparent);
+  background:color-mix(in srgb,var(--rtc) 8%,transparent)}
+.rdda-tab-btn.active .rdda-dot{opacity:1}
+.rdda-tab-btn:hover:not(.active){color:#e2e8f0;border-color:rgba(255,255,255,.15)}
+.rdda-tab-all{--rtc:var(--ca)}.rdda-tab-team{--rtc:var(--cb)}
+.rdda-tab-spacer{flex:1}
+.rdda-upload-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;
+  border-radius:8px;border:1px solid var(--border);cursor:pointer;
+  font-size:.74rem;font-weight:600;background:var(--bg-card);color:var(--muted);
+  transition:all .18s;outline:none}
+.rdda-upload-btn:hover{color:#e2e8f0;border-color:rgba(255,255,255,.2)}
+.rdda-upload-btn svg{width:14px;height:14px;flex-shrink:0}
+.rdda-ok-dot{width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0}
+/* KPI strip */
+.rdda-kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.rdda-kpi{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);
+  padding:20px 22px 16px;position:relative}
+.rdda-kpi-lbl{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted2);margin-bottom:9px}
+.rdda-kpi-val{font-family:'Space Grotesk',sans-serif;font-size:2.3rem;font-weight:800;line-height:1;color:#e2e8f0}
+.rdda-kpi-val span{font-size:.9rem;font-weight:500;color:var(--muted2);margin-left:2px}
+.rdda-kpi-bar{margin-top:9px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:visible}
+.rdda-kpi-fill{height:100%;border-radius:2px;
+  background:linear-gradient(90deg,rgba(var(--rkc-rgb,96,165,250),.15),var(--rkc,var(--ca)));
+  box-shadow:0 0 7px var(--rkc,var(--ca)),0 0 16px rgba(var(--rkc-rgb,96,165,250),.4)}
+.rdda-kpi-meta{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:4px}
+.rdda-kpi-note{font-size:.67rem;color:var(--muted2)}
+.rdda-kpi-note strong{color:var(--rkc,var(--ca));font-weight:700}
+.rdda-mom-up{font-size:.67rem;font-weight:700;color:#10b981}
+.rdda-mom-dn{font-size:.67rem;font-weight:700;color:#f43f5e}
+/* section label */
+.rdda-sl{font-family:'Space Grotesk',sans-serif;font-size:.62rem;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:13px;display:flex;align-items:center;gap:8px}
+.rdda-sl::after{content:'';flex:1;height:1px;
+  background:linear-gradient(to right,var(--rsc),transparent);opacity:.4}
+/* 2-col grid */
+.rdda-g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.rdda-cc{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.rdda-cc-ttl{font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted2);margin-bottom:13px;display:flex;align-items:center;justify-content:space-between}
+.rdda-badge{font-size:.66rem;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  padding:2px 8px;border-radius:6px;color:var(--rgc,var(--ca));font-weight:600}
+/* combo card */
+.rdda-combo{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);
+  padding:18px 20px;margin-bottom:22px}
+.rdda-combo-inner{display:grid;grid-template-columns:auto 1px 1fr;gap:0 24px;align-items:start;margin-top:4px}
+.rdda-combo-sep{background:var(--border);align-self:stretch;min-height:110px}
+/* donut */
+.rdda-dn-row{display:flex;align-items:center;gap:16px}
+.rdda-dn-wrap{position:relative;flex-shrink:0}
+.rdda-dn-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;pointer-events:none}
+.rdda-dn-num{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:800;color:#e2e8f0}
+.rdda-dn-lbl{font-size:.52rem;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.rdda-dn-legend{display:flex;flex-direction:column;gap:6px}
+.rdda-dn-item{display:flex;align-items:center;gap:7px;font-size:.7rem}
+.rdda-dn-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+.rdda-dn-nm{color:var(--muted2);flex:1}.rdda-dn-v{font-weight:700;color:#e2e8f0}
+.rdda-dn-p{color:var(--muted);font-size:.61rem;margin-left:2px}
+/* mini bars */
+.rdda-mbar{display:flex;flex-direction:column;gap:6px}
+.rdda-mb-r{display:flex;align-items:center;gap:8px}
+.rdda-mb-l{font-size:.62rem;color:var(--muted2);width:105px;flex-shrink:0;
+  text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rdda-mb-t{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:visible}
+.rdda-mb-f{height:100%;border-radius:3px}
+.rdda-mb-v{font-size:.63rem;font-weight:600;color:#e2e8f0;min-width:42px}
+/* prate */
+.rdda-prate{display:flex;align-items:center;gap:6px;margin-top:10px;
+  padding-top:10px;border-top:1px solid var(--border)}
+.rdda-pr-cell{flex:1;text-align:center}
+.rdda-pr-n{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;color:#e2e8f0}
+.rdda-pr-l{font-size:.57rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+.rdda-pr-arr{color:var(--muted);font-size:.9rem}
+.rdda-pr-rate{padding:4px 13px;border-radius:6px;text-align:center;border:1px solid}
+.rdda-pr-rate .rn{font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700}
+.rdda-pr-rate .rl{font-size:.56rem;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+/* best items table */
+.rdda-scroll{overflow-x:auto}
+.rdda-ht{width:100%;border-collapse:collapse;font-size:.71rem}
+.rdda-ht th{padding:8px 10px;text-align:left;font-size:.59rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+  background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);white-space:nowrap}
+.rdda-ht th.c{text-align:center}
+.rdda-ht td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.rdda-ht td.c{text-align:center}
+.rdda-ht tr:last-child td{border-bottom:none}
+.rdda-ht tr:hover td{background:rgba(255,255,255,.015)}
+.rdda-fl{font-family:'Space Grotesk',sans-serif;font-weight:700;color:#e2e8f0;font-size:.71rem}
+.rdda-rank{display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:6px;font-weight:800;font-size:.72rem;
+  font-family:'Space Grotesk',sans-serif;flex-shrink:0}
+.rdda-r1{background:rgba(251,191,36,.18);color:#fbbf24;border:1px solid rgba(251,191,36,.4)}
+.rdda-r2{background:rgba(148,163,184,.14);color:#94a3b8;border:1px solid rgba(148,163,184,.35)}
+.rdda-r3{background:rgba(205,127,50,.14);color:#cd7f32;border:1px solid rgba(205,127,50,.3)}
+.rdda-eco{display:inline-flex;align-items:center;gap:3px;
+  background:rgba(16,185,129,.11);border:1px solid rgba(16,185,129,.3);
+  color:#10b981;font-size:.57rem;font-weight:800;padding:1px 6px;border-radius:3px}
+.rdda-mp{display:inline-flex;align-items:center;justify-content:center;
+  width:25px;height:20px;border-radius:4px;font-weight:700;font-size:.68rem}
+.rdda-mp-m{background:rgba(148,163,184,.1);color:#94a3b8}
+.rdda-mp-p{background:rgba(16,185,129,.12);color:#10b981}
+.rdda-co{font-size:.62rem;font-weight:700;padding:2px 5px;border-radius:3px}
+.rdda-co-vn{background:rgba(16,185,129,.1);color:#10b981}
+.rdda-co-kr{background:rgba(6,182,212,.1);color:#06b6d4}
+.rdda-co-cn{background:rgba(245,158,11,.1);color:#f59e0b}
+.rdda-price{color:#10b981;font-weight:600}
+.rdda-yarn{font-size:.67rem;color:var(--muted2);white-space:normal;word-break:break-word;min-width:130px;max-width:180px;line-height:1.4}
+.rdda-sup{font-size:.63rem;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;cursor:default}
+.rdda-notice{font-size:.64rem;color:var(--muted);padding:8px 12px;
+  background:rgba(255,255,255,.02);border-radius:6px;border-left:2px solid rgba(255,255,255,.1);margin-top:8px}
+/* upload modal */
+.rdda-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);
+  z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.rdda-modal-ov.open{display:flex}
+.rdda-modal{background:var(--bg-card);border:1px solid rgba(255,255,255,.1);border-radius:16px;
+  width:520px;max-width:calc(100vw - 40px);overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.rdda-modal-head{display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px;border-bottom:1px solid var(--border)}
+.rdda-modal-head h3{font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;color:#e2e8f0}
+.rdda-modal-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.2rem;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.rdda-modal-close:hover{background:rgba(255,255,255,.08);color:#e2e8f0}
+.rdda-modal-body{padding:20px 22px}
+.rdda-period-row{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.rdda-period-lbl{font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.rdda-period-sel{padding:7px 12px;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:7px;color:#e2e8f0;font-size:.75rem;outline:none;cursor:pointer;font-family:inherit}
+.rdda-drop-zone{border:2px dashed rgba(255,255,255,.12);border-radius:12px;
+  padding:36px 24px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02)}
+.rdda-drop-zone:hover,.rdda-drop-zone.dz-over{border-color:var(--ca);background:rgba(96,165,250,.05)}
+.rdda-drop-zone svg{width:36px;height:36px;color:var(--muted);margin-bottom:12px}
+.rdda-drop-zone:hover svg,.rdda-drop-zone.dz-over svg{color:var(--ca)}
+.rdda-drop-zone p{font-size:.8rem;color:var(--muted2);margin-bottom:4px}
+.rdda-drop-sub{font-size:.68rem;color:var(--muted)}
+.rdda-file-sel{display:none;margin-top:14px;padding:12px 14px;
+  background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.25);
+  border-radius:8px;align-items:center;gap:10px}
+.rdda-file-sel.show{display:flex}
+.rdda-fname{font-size:.76rem;font-weight:600;color:#e2e8f0;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rdda-fsize{font-size:.67rem;color:var(--muted2)}
+.rdda-modal-foot{display:flex;gap:10px;justify-content:flex-end;
+  padding:16px 22px;border-top:1px solid var(--border)}
+.rdda-btn-cancel{padding:9px 18px;border-radius:7px;border:1px solid var(--border);
+  background:transparent;color:var(--muted2);font-size:.75rem;font-weight:600;cursor:pointer}
+.rdda-btn-cancel:hover{color:#e2e8f0;border-color:rgba(255,255,255,.2)}
+.rdda-btn-up{padding:9px 22px;border-radius:7px;border:none;background:var(--ca);color:#0b1525;
+  font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;opacity:.45;transition:opacity .15s}
+.rdda-btn-up.ready{opacity:1}
+
 </style>
 </head>
 <body>
@@ -1465,10 +1638,245 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
   <!-- ── RDDA ANALYSIS ── -->
   <div class="screen" id="screen-rdda">
     <div class="screen-pad">
-      <div class="page-header">
-        <div class="page-title">RDDA ANALYSIS <span class="preview-badge">🔜 PREVIEW</span></div>
-        <div class="page-sub">FL No. 기반 월별 등록 실적 · 연간 트렌드 · 담당자별 기여도 분석</div>
+
+      <!-- Page Header -->
+      <header class="rdda-ph">
+        <div>
+          <h2>RDDA <em id="rdda-ph-em" style="color:var(--ca)">Analysis</em></h2>
+          <div class="rdda-sub" id="rdda-ph-sub">통합원단부 전체 · Monthly Performance Report</div>
+        </div>
+        <div>
+          <div class="rdda-period" id="rdda-ph-badge"
+            style="background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:var(--ca)">2026. 04</div>
+          <div class="rdda-updated">작성 기준일 : 2026.05.11</div>
+        </div>
+      </header>
+
+      <!-- Tab Bar -->
+      <div class="rdda-tab-bar">
+        <button class="rdda-tab-btn rdda-tab-all active" onclick="rddaSwitchTab('all')">
+          <span class="rdda-dot"></span>통합원단부 전체
+        </button>
+        <button class="rdda-tab-btn rdda-tab-team" onclick="rddaSwitchTab('team')">
+          <span class="rdda-dot"></span>통합원단부 3팀
+        </button>
+        <div class="rdda-tab-spacer"></div>
+        <button class="rdda-upload-btn" onclick="rddaOpenUpload()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M8 10V3M5 6l3-3 3 3"/><path d="M2.5 12.5h11"/>
+          </svg>
+          Meeting / Pickup 업로드
+          <span class="rdda-ok-dot" id="rddaUpDot" style="display:none"></span>
+          <span id="rddaUpLabel" style="font-size:.67rem;color:var(--muted)">2026.04</span>
+        </button>
       </div>
+
+      <!-- ── TAB A : 통합원단부 전체 ── -->
+      <div id="rdda-tab-all">
+        <div class="rdda-kpi-strip">
+          <div class="rdda-kpi" style="--rkc:var(--ca);--rkc-rgb:96,165,250">
+            <div class="rdda-kpi-lbl">Customer Meeting</div>
+            <div class="rdda-kpi-val">1,239<span>건</span></div>
+            <div class="rdda-kpi-bar"><div class="rdda-kpi-fill" style="width:100%"></div></div>
+            <div class="rdda-kpi-meta">
+              <div class="rdda-kpi-note">vs 3월 <strong>1,066건</strong> <small style="color:var(--muted)">(Hansoll 제외)</small></div>
+              <div class="rdda-mom-up">▲ 173</div>
+            </div>
+          </div>
+          <div class="rdda-kpi" style="--rkc:var(--ca);--rkc-rgb:96,165,250">
+            <div class="rdda-kpi-lbl">Buyer Pickup</div>
+            <div class="rdda-kpi-val">179<span>건</span></div>
+            <div class="rdda-kpi-bar"><div class="rdda-kpi-fill" style="width:44%"></div></div>
+            <div class="rdda-kpi-meta">
+              <div class="rdda-kpi-note">전체 404건 기준 <strong>179건</strong></div>
+            </div>
+          </div>
+          <div class="rdda-kpi" style="--rkc:#10b981;--rkc-rgb:16,185,129">
+            <div class="rdda-kpi-lbl">픽업율</div>
+            <div class="rdda-kpi-val">14.4<span>%</span></div>
+            <div class="rdda-kpi-bar"><div class="rdda-kpi-fill" style="width:57.6%"></div></div>
+            <div class="rdda-kpi-meta">
+              <div class="rdda-kpi-note">Meeting 1,239 → Pickup 179</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rdda-sl" style="--rsc:var(--ca);color:var(--ca)">제안 &amp; Pickup 분석</div>
+        <div class="rdda-g2">
+          <div class="rdda-cc">
+            <div class="rdda-cc-ttl" style="--rgc:var(--ca)">제안(Meeting) <span class="rdda-badge">1,239건</span></div>
+            <div style="position:relative;height:240px"><canvas id="rdda-amc"></canvas></div>
+          </div>
+          <div class="rdda-cc">
+            <div class="rdda-cc-ttl" style="--rgc:var(--ca)">Pickup <span class="rdda-badge">179건</span></div>
+            <div style="position:relative;height:185px"><canvas id="rdda-apc"></canvas></div>
+            <div class="rdda-prate">
+              <div class="rdda-pr-cell"><div class="rdda-pr-n">1,239</div><div class="rdda-pr-l">Meeting</div></div>
+              <div class="rdda-pr-arr">→</div>
+              <div class="rdda-pr-cell"><div class="rdda-pr-n">179</div><div class="rdda-pr-l">Pickup</div></div>
+              <div class="rdda-pr-arr">=</div>
+              <div class="rdda-pr-rate" style="background:rgba(var(--ca-rgb),.07);border-color:rgba(var(--ca-rgb),.25)">
+                <div class="rn" style="color:var(--ca)">14.4%</div><div class="rl">픽업율</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rdda-combo">
+          <div class="rdda-cc-ttl" style="--rgc:var(--ca);margin-bottom:14px">원산지 &amp; Construction 분포 <span class="rdda-badge">179건</span></div>
+          <div class="rdda-combo-inner">
+            <div class="rdda-dn-row">
+              <div class="rdda-dn-wrap" style="width:110px;height:110px">
+                <canvas id="rdda-adnt"></canvas>
+                <div class="rdda-dn-center"><div class="rdda-dn-num">179</div><div class="rdda-dn-lbl">Pickup</div></div>
+              </div>
+              <div class="rdda-dn-legend">
+                <div class="rdda-dn-item"><div class="rdda-dn-dot" style="background:#fbbf24"></div><div class="rdda-dn-nm">China</div><div class="rdda-dn-v">88건</div><div class="rdda-dn-p">49%</div></div>
+                <div class="rdda-dn-item"><div class="rdda-dn-dot" style="background:#34d399"></div><div class="rdda-dn-nm">Vietnam</div><div class="rdda-dn-v">52건</div><div class="rdda-dn-p">29%</div></div>
+                <div class="rdda-dn-item"><div class="rdda-dn-dot" style="background:#22d3ee"></div><div class="rdda-dn-nm">Korea</div><div class="rdda-dn-v">34건</div><div class="rdda-dn-p">19%</div></div>
+                <div class="rdda-dn-item"><div class="rdda-dn-dot" style="background:#475569"></div><div class="rdda-dn-nm">기타</div><div class="rdda-dn-v">5건</div><div class="rdda-dn-p">3%</div></div>
+              </div>
+            </div>
+            <div class="rdda-combo-sep"></div>
+            <div>
+              <div style="font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Construction TOP 5</div>
+              <div class="rdda-mbar">
+                <div class="rdda-mb-r"><div class="rdda-mb-l">Single Jersey</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:100%;background:linear-gradient(90deg,rgba(245,158,11,.2),#f59e0b);box-shadow:0 0 7px rgba(245,158,11,.5)"></div></div><div class="rdda-mb-v">30건 <small style="color:var(--muted)">17%</small></div></div>
+                <div class="rdda-mb-r"><div class="rdda-mb-l">1*1 Rib</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:57%;background:linear-gradient(90deg,rgba(251,191,36,.2),#fbbf24);box-shadow:0 0 7px rgba(251,191,36,.4)"></div></div><div class="rdda-mb-v">17건 <small style="color:var(--muted)">9%</small></div></div>
+                <div class="rdda-mb-r"><div class="rdda-mb-l">Thermal</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:47%;background:linear-gradient(90deg,rgba(217,119,6,.2),#d97706);box-shadow:0 0 7px rgba(217,119,6,.4)"></div></div><div class="rdda-mb-v">14건 <small style="color:var(--muted)">8%</small></div></div>
+                <div class="rdda-mb-r"><div class="rdda-mb-l">French Terry</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:43%;background:linear-gradient(90deg,rgba(180,83,9,.2),#b45309);box-shadow:0 0 7px rgba(180,83,9,.4)"></div></div><div class="rdda-mb-v">13건 <small style="color:var(--muted)">7%</small></div></div>
+                <div class="rdda-mb-r"><div class="rdda-mb-l">Pointelle</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:40%;background:linear-gradient(90deg,rgba(146,64,14,.2),#92400e)"></div></div><div class="rdda-mb-v">12건 <small style="color:var(--muted)">7%</small></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rdda-sl" style="--rsc:var(--ca);color:var(--ca)">Best Items <small style="font-weight:400;opacity:.6;font-size:.85em">Pickup 2회↑ · Meeting 3회↑ · Hansoll 제외</small></div>
+        <div class="rdda-scroll" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r)">
+          <table class="rdda-ht">
+            <thead><tr>
+              <th class="c">#</th><th>FL No.</th><th>Supplier</th><th>Construction</th>
+              <th>Content</th><th>Yarn Description</th>
+              <th>C/O</th><th class="c">Width</th><th class="c">g/m²</th><th class="c">$/yd</th><th class="c">M</th><th class="c">P</th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="c"><span class="rdda-rank rdda-r1">1</span></td><td><span class="rdda-fl">FL24112051</span></td><td><span class="rdda-sup" title="SIRIS (GANGLONG) KNITTING CO., LTD">SIRIS KNITTING</span></td><td style="color:var(--muted)">—</td><td>—</td><td class="rdda-yarn">—</td><td>—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c"><span class="rdda-mp rdda-mp-m">19</span></td><td class="c"><span class="rdda-mp rdda-mp-p">8</span></td></tr>
+              <tr><td class="c"><span class="rdda-rank rdda-r2">2</span></td><td><span class="rdda-fl">FL25082384</span></td><td><span class="rdda-sup" title="CHANGSHU YISHENG TEXTILE CO., LTD.">CHANGSHU YISHENG</span></td><td>Mini French Terry</td><td>90/10 Polyester/Spandex</td><td class="rdda-yarn">POLY 150D + POLY 100D + SP 40D</td><td><span class="rdda-co rdda-co-cn">CN</span></td><td class="c">61"</td><td class="c">252g</td><td class="c rdda-price">$2.04</td><td class="c"><span class="rdda-mp rdda-mp-m">4</span></td><td class="c"><span class="rdda-mp rdda-mp-p">3</span></td></tr>
+              <tr><td class="c"><span class="rdda-rank rdda-r2">2</span></td><td><span class="rdda-fl">FL25089032</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td>Single Jacquard</td><td>70/30 Cotton/Polyester</td><td class="rdda-yarn">CVC 60/40 30S (R/WHITE)+CM 30S YD</td><td><span class="rdda-co rdda-co-vn">VN</span></td><td class="c">66"</td><td class="c">210g</td><td class="c rdda-price">$2.71</td><td class="c"><span class="rdda-mp rdda-mp-m">4</span></td><td class="c"><span class="rdda-mp rdda-mp-p">3</span></td></tr>
+              <tr><td class="c"><span class="rdda-rank rdda-r2">2</span></td><td><span class="rdda-fl">FL25122662</span></td><td><span class="rdda-sup" title="CHANGSHU YISHENG TEXTILE CO., LTD.">CHANGSHU YISHENG</span></td><td>Double Mesh</td><td>100 Polyester</td><td class="rdda-yarn">PE 100D + 75D + 50D</td><td><span class="rdda-co rdda-co-cn">CN</span></td><td class="c">66"</td><td class="c">170g</td><td class="c rdda-price">$1.23</td><td class="c"><span class="rdda-mp rdda-mp-m">4</span></td><td class="c"><span class="rdda-mp rdda-mp-p">3</span></td></tr>
+              <tr><td class="c"><span class="rdda-rank rdda-r3">3</span></td><td><span class="rdda-fl">FL25122814</span></td><td><span class="rdda-sup" title="SUZHOU VOGUE TEXTILE CO LTD.">SUZHOU VOGUE</span></td><td>Single Jacquard</td><td>98/2 Polyester/Spandex</td><td class="rdda-yarn">PE 40S/1 + PE 100D/36F + SP/PE CVR 40D/100D</td><td><span class="rdda-co rdda-co-cn">CN</span></td><td class="c">55"</td><td class="c">230g</td><td class="c rdda-price">$1.54</td><td class="c"><span class="rdda-mp rdda-mp-m">3</span></td><td class="c"><span class="rdda-mp rdda-mp-p">3</span></td></tr>
+              <tr><td class="c"><span class="rdda-rank rdda-r3">3</span></td><td><span class="rdda-fl">FL26032333</span></td><td><span class="rdda-sup" title="주식회사 풍림텍스타일">풍림텍스타일</span></td><td>Loop Terry</td><td>51/49 Cotton/Polyester</td><td class="rdda-yarn">—</td><td><span class="rdda-co rdda-co-kr">KR</span></td><td class="c">70"</td><td class="c">215g</td><td class="c rdda-price">$3.24</td><td class="c"><span class="rdda-mp rdda-mp-m">3</span></td><td class="c"><span class="rdda-mp rdda-mp-p">3</span></td></tr>
+              <tr><td class="c"></td><td><span class="rdda-fl">FL26019054</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td style="color:var(--muted)">—</td><td>—</td><td class="rdda-yarn">—</td><td>—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c"><span class="rdda-mp rdda-mp-m">7</span></td><td class="c"><span class="rdda-mp rdda-mp-p">2</span></td></tr>
+              <tr><td class="c"></td><td><span class="rdda-fl">FL25109096</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td>Flat Back Rib</td><td>77/23 Cotton/Polyester</td><td class="rdda-yarn">CM 20S/1 ISL307 SLUB(1F) + CVC(60/40) 20S/1(1F)</td><td><span class="rdda-co rdda-co-vn">VN</span></td><td class="c">70"</td><td class="c">270g</td><td class="c">—</td><td class="c"><span class="rdda-mp rdda-mp-m">4</span></td><td class="c"><span class="rdda-mp rdda-mp-p">2</span></td></tr>
+              <tr><td class="c"></td><td><span class="rdda-fl">FL26019059</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td>Single Jersey</td><td>90/10 Cotton/Polyester</td><td class="rdda-yarn">CM 30S//2 * Polyester/CM 65/35 26S//2</td><td><span class="rdda-co rdda-co-vn">VN</span></td><td class="c">61"</td><td class="c">250g</td><td class="c rdda-price">$2.13</td><td class="c"><span class="rdda-mp rdda-mp-m">4</span></td><td class="c"><span class="rdda-mp rdda-mp-p">2</span></td></tr>
+              <tr><td class="c"><span class="rdda-eco">♻</span></td><td><span class="rdda-fl">FL26039011</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td>Thermal</td><td>58/39/3 Cotton/Recycled Poly/Spandex</td><td class="rdda-yarn">CM/Recycled PE 60/40 20S/1 * Spand 30D</td><td><span class="rdda-co rdda-co-vn">VN</span></td><td class="c">51"</td><td class="c">315g</td><td class="c rdda-price">$2.35</td><td class="c"><span class="rdda-mp rdda-mp-m">4</span></td><td class="c"><span class="rdda-mp rdda-mp-p">2</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="rdda-notice">※ FL24112051·FL26019054 원단 정보 미등록 — Library 등록 필요 &nbsp;|&nbsp; Hansoll Textile Ltd. 전체 집계 제외</div>
+      </div><!-- /rdda-tab-all -->
+
+      <!-- ── TAB B : 통합원단부 3팀 ── -->
+      <div id="rdda-tab-team" style="display:none">
+        <div class="rdda-kpi-strip">
+          <div class="rdda-kpi" style="--rkc:var(--cb);--rkc-rgb:6,182,212">
+            <div class="rdda-kpi-lbl">Customer Meeting</div>
+            <div class="rdda-kpi-val">263<span>건</span></div>
+            <div class="rdda-kpi-bar"><div class="rdda-kpi-fill" style="width:100%"></div></div>
+            <div class="rdda-kpi-meta">
+              <div class="rdda-kpi-note">전사 대비 <strong>21%</strong></div>
+              <div class="rdda-mom-dn">▼ 17 vs 3월</div>
+            </div>
+          </div>
+          <div class="rdda-kpi" style="--rkc:var(--cb);--rkc-rgb:6,182,212">
+            <div class="rdda-kpi-lbl">Buyer Pickup</div>
+            <div class="rdda-kpi-val">45<span>건</span></div>
+            <div class="rdda-kpi-bar"><div class="rdda-kpi-fill" style="width:25%"></div></div>
+            <div class="rdda-kpi-meta">
+              <div class="rdda-kpi-note">전사 179건 중 <strong>25%</strong></div>
+              <div class="rdda-mom-dn">▼ 4 vs 3월</div>
+            </div>
+          </div>
+          <div class="rdda-kpi" style="--rkc:#10b981;--rkc-rgb:16,185,129">
+            <div class="rdda-kpi-lbl">픽업율</div>
+            <div class="rdda-kpi-val">17.1<span>%</span></div>
+            <div class="rdda-kpi-bar"><div class="rdda-kpi-fill" style="width:68.4%"></div></div>
+            <div class="rdda-kpi-meta">
+              <div class="rdda-kpi-note">전사 14.4% 대비 <strong style="color:#10b981">+2.7%p</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rdda-sl" style="--rsc:var(--cb);color:var(--cb)">제안 &amp; Pickup 분석</div>
+        <div class="rdda-g2">
+          <div class="rdda-cc">
+            <div class="rdda-cc-ttl" style="--rgc:var(--cb)">제안(Meeting) <span class="rdda-badge" style="color:var(--cb)">263건</span></div>
+            <div style="position:relative;height:240px"><canvas id="rdda-bmc"></canvas></div>
+          </div>
+          <div class="rdda-cc">
+            <div class="rdda-cc-ttl" style="--rgc:var(--cb)">Pickup <span class="rdda-badge" style="color:var(--cb)">45건</span></div>
+            <div style="position:relative;height:185px"><canvas id="rdda-bpc"></canvas></div>
+            <div class="rdda-prate">
+              <div class="rdda-pr-cell"><div class="rdda-pr-n">263</div><div class="rdda-pr-l">Meeting</div></div>
+              <div class="rdda-pr-arr">→</div>
+              <div class="rdda-pr-cell"><div class="rdda-pr-n">45</div><div class="rdda-pr-l">Pickup</div></div>
+              <div class="rdda-pr-arr">=</div>
+              <div class="rdda-pr-rate" style="background:rgba(var(--cb-rgb),.07);border-color:rgba(var(--cb-rgb),.25)">
+                <div class="rn" style="color:var(--cb)">17.1%</div><div class="rl">픽업율</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rdda-combo">
+          <div class="rdda-cc-ttl" style="--rgc:var(--cb);margin-bottom:14px">원산지 &amp; Construction 분포 <span class="rdda-badge" style="color:var(--cb)">45건</span></div>
+          <div class="rdda-combo-inner">
+            <div class="rdda-dn-row">
+              <div class="rdda-dn-wrap" style="width:110px;height:110px">
+                <canvas id="rdda-bdnt"></canvas>
+                <div class="rdda-dn-center"><div class="rdda-dn-num">45</div><div class="rdda-dn-lbl">Pickup</div></div>
+              </div>
+              <div class="rdda-dn-legend">
+                <div class="rdda-dn-item"><div class="rdda-dn-dot" style="background:#34d399"></div><div class="rdda-dn-nm">Vietnam</div><div class="rdda-dn-v">37건</div><div class="rdda-dn-p">82%</div></div>
+                <div class="rdda-dn-item"><div class="rdda-dn-dot" style="background:#22d3ee"></div><div class="rdda-dn-nm">Korea</div><div class="rdda-dn-v">5건</div><div class="rdda-dn-p">11%</div></div>
+                <div class="rdda-dn-item"><div class="rdda-dn-dot" style="background:#fbbf24"></div><div class="rdda-dn-nm">China</div><div class="rdda-dn-v">3건</div><div class="rdda-dn-p">7%</div></div>
+              </div>
+            </div>
+            <div class="rdda-combo-sep"></div>
+            <div>
+              <div style="font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Construction TOP 5</div>
+              <div class="rdda-mbar">
+                <div class="rdda-mb-r"><div class="rdda-mb-l">Single Jersey</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:100%;background:linear-gradient(90deg,rgba(163,230,53,.2),#84cc16);box-shadow:0 0 7px rgba(163,230,53,.5)"></div></div><div class="rdda-mb-v">16건 <small style="color:var(--muted)">36%</small></div></div>
+                <div class="rdda-mb-r"><div class="rdda-mb-l">Thermal</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:44%;background:linear-gradient(90deg,rgba(132,204,22,.2),#65a30d);box-shadow:0 0 7px rgba(132,204,22,.4)"></div></div><div class="rdda-mb-v">7건 <small style="color:var(--muted)">16%</small></div></div>
+                <div class="rdda-mb-r"><div class="rdda-mb-l">1*1 Rib</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:44%;background:linear-gradient(90deg,rgba(101,163,13,.2),#65a30d);box-shadow:0 0 7px rgba(101,163,13,.4)"></div></div><div class="rdda-mb-v">7건 <small style="color:var(--muted)">16%</small></div></div>
+                <div class="rdda-mb-r"><div class="rdda-mb-l">Single Jacquard</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:31%;background:linear-gradient(90deg,rgba(77,124,15,.2),#4d7c0f)"></div></div><div class="rdda-mb-v">5건 <small style="color:var(--muted)">11%</small></div></div>
+                <div class="rdda-mb-r"><div class="rdda-mb-l">Double Knit</div><div class="rdda-mb-t"><div class="rdda-mb-f" style="width:13%;background:linear-gradient(90deg,rgba(54,83,20,.2),#365314)"></div></div><div class="rdda-mb-v">2건 <small style="color:var(--muted)">4%</small></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rdda-sl" style="--rsc:var(--cb);color:var(--cb)">Best Items <small style="font-weight:400;opacity:.6;font-size:.85em">Pickup 2회↑ · Meeting 3회↑</small></div>
+        <div class="rdda-scroll" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r)">
+          <table class="rdda-ht">
+            <thead><tr>
+              <th class="c">#</th><th>FL No.</th><th>Supplier</th><th>Construction</th>
+              <th>Content</th><th>Yarn Description</th>
+              <th>C/O</th><th class="c">Width</th><th class="c">g/m²</th><th class="c">$/yd</th><th class="c">M</th><th class="c">P</th><th>비고</th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="c"><span class="rdda-rank rdda-r1">1</span></td><td><span class="rdda-fl">FL25089032</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td>Single Jacquard</td><td>70/30 Cotton/Polyester</td><td class="rdda-yarn">CVC 60/40 30S (R/WHITE)+CM 30S YD</td><td><span class="rdda-co rdda-co-vn">VN</span></td><td class="c">66"</td><td class="c">210g</td><td class="c rdda-price">$2.71</td><td class="c"><span class="rdda-mp rdda-mp-m">3</span></td><td class="c"><span class="rdda-mp rdda-mp-p">3</span></td><td style="font-size:.62rem;color:var(--muted)">3·4월 연속</td></tr>
+              <tr><td class="c"><span class="rdda-rank rdda-r2">2</span></td><td><span class="rdda-fl">FL26039011</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td>Thermal</td><td>58/39/3 Cotton/Recycled Poly/Spandex</td><td class="rdda-yarn">CM/Recycled PE 60/40 20S/1 * Spand 30D</td><td><span class="rdda-co rdda-co-vn">VN</span></td><td class="c">51"</td><td class="c">315g</td><td class="c rdda-price">$2.35</td><td class="c"><span class="rdda-mp rdda-mp-m">4</span></td><td class="c"><span class="rdda-mp rdda-mp-p">2</span></td><td><span class="rdda-eco">♻ ECO</span></td></tr>
+              <tr><td class="c"><span class="rdda-rank rdda-r2">2</span></td><td><span class="rdda-fl">FL26019059</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td>Single Jersey</td><td>90/10 Cotton/Polyester</td><td class="rdda-yarn">CM 30S//2 * Polyester/CM 65/35 26S//2</td><td><span class="rdda-co rdda-co-vn">VN</span></td><td class="c">61"</td><td class="c">250g</td><td class="c rdda-price">$2.13</td><td class="c"><span class="rdda-mp rdda-mp-m">3</span></td><td class="c"><span class="rdda-mp rdda-mp-p">2</span></td><td></td></tr>
+              <tr><td class="c"><span class="rdda-rank rdda-r3">3</span></td><td><span class="rdda-fl">FL24089026</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td>Thermal</td><td>60/40 Cotton/Polyester</td><td class="rdda-yarn">CVC 60/40 20S/1</td><td><span class="rdda-co rdda-co-vn">VN</span></td><td class="c">62"</td><td class="c">250g</td><td class="c rdda-price">$2.34</td><td class="c"><span class="rdda-mp rdda-mp-m">3</span></td><td class="c"><span class="rdda-mp rdda-mp-p">2</span></td><td></td></tr>
+              <tr><td class="c"><span class="rdda-rank rdda-r3">3</span></td><td><span class="rdda-fl">FL26019062</span></td><td><span class="rdda-sup" title="Global Dyeing Co., Ltd.">GLOBAL DYEING</span></td><td>Flat Back Rib</td><td>69/31 Cotton/Polyester</td><td class="rdda-yarn">T/C 65/35 30S//2 + CM 30S + CM 30S</td><td><span class="rdda-co rdda-co-vn">VN</span></td><td class="c">62"</td><td class="c">270g</td><td class="c rdda-price">$2.50</td><td class="c"><span class="rdda-mp rdda-mp-m">3</span></td><td class="c"><span class="rdda-mp rdda-mp-p">2</span></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="rdda-notice">※ Hansoll Textile Ltd. (Pickup 3건) 집계 제외 · 순위 동률 시 동일 순위 부여</div>
+      </div><!-- /rdda-tab-team -->
+
+    </div><!-- /screen-pad -->
       <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
         <div style="font-size:.64rem;font-weight:700;color:#64748b;letter-spacing:.08em">YEAR</div>
         <div style="display:flex;gap:6px">
@@ -1552,16 +1960,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
             <div class="prev-bar prev-bar-slate" style="height:50%"></div><div class="prev-bar prev-bar-purple" style="height:88%"></div>
             <div class="prev-bar prev-bar-slate" style="height:65%"></div><div class="prev-bar prev-bar-purple" style="height:76%"></div>
           </div>
-          <div style="display:flex;gap:12px;margin-top:8px">
-            <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(100,116,139,.4)"></div><span style="font-size:.6rem;color:#475569">전년</span></div>
-            <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(139,92,246,.5)"></div><span style="font-size:.6rem;color:#475569">올해</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="prev-note">📊 HOME 대시보드 RDDA 데이터 + 연간 이력을 기반으로 연도별 비교 분석 기능이 구현됩니다.<br>클로드 채팅에서 작업한 RDDA 분석 로직을 이 페이지로 이식 예정입니다.</div>
-    </div>
-  </div>
-
   <!-- ── PROJECT BOARD ── -->
   <div class="screen" id="screen-project-board">
     <div class="screen-pad">
@@ -2256,11 +2654,12 @@ function showScreen(id){
     el.classList.toggle('active', el.dataset.nav===id);
   });
   // 화면별 초기화
-  if(id==='home')     renderHome();
-  if(id==='gantt')    renderGantt();
-  if(id==='calendar') renderCalendar();
+  if(id==='home')       renderHome();
+  if(id==='rdda')       renderRdda();
+  if(id==='gantt')      renderGantt();
+  if(id==='calendar')   renderCalendar();
   if(id==='statistics') renderStats();
-  if(id==='setting')  initSetting();
+  if(id==='setting')    initSetting();
 }
 
 // 사이드바 클릭 (nav-home + nav-item + nav-sub-item + nav-misc-item)
@@ -4346,6 +4745,229 @@ async function hpSaveToStorage(data, fileName){
     <div class="hp-modal-body" id="hpModalBody"></div>
   </div>
 </div>
+
+<!-- ══ RDDA Upload Modal ══ -->
+<div class="rdda-modal-ov" id="rddaUploadModal" onclick="rddaModalBg(event)">
+  <div class="rdda-modal">
+    <div class="rdda-modal-head">
+      <h3>Meeting / Pickup 엑셀 업로드</h3>
+      <button class="rdda-modal-close" onclick="rddaCloseUpload()">✕</button>
+    </div>
+    <div class="rdda-modal-body">
+      <div class="rdda-period-row">
+        <span class="rdda-period-lbl">대상 월</span>
+        <select class="rdda-period-sel" id="rddaPeriodSel">
+          <option value="2026-04">2026년 4월</option>
+          <option value="2026-03">2026년 3월</option>
+          <option value="2026-02">2026년 2월</option>
+          <option value="2026-01">2026년 1월</option>
+        </select>
+        <span style="font-size:.67rem;color:var(--muted)">Meeting · Pickup 시트 포함 파일</span>
+      </div>
+      <div class="rdda-drop-zone" id="rddaDropZone"
+        ondragover="rddaDragOver(event)" ondragleave="rddaDragLeave(event)" ondrop="rddaDrop(event)"
+        onclick="document.getElementById('rddaFileInput').click()">
+        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M20 26V14M14 20l6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 30h24" stroke-linecap="round"/>
+          <rect x="4" y="4" width="32" height="32" rx="6" stroke-opacity=".3"/>
+        </svg>
+        <p>파일을 여기에 드래그하거나 클릭하여 선택</p>
+        <p class="rdda-drop-sub">.xlsx · .xls 파일 지원 (Meeting + Pickup 시트)</p>
+        <input type="file" id="rddaFileInput" accept=".xlsx,.xls" style="display:none" onchange="rddaFileSelect(this.files[0])">
+      </div>
+      <div class="rdda-file-sel" id="rddaFileSel">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0;color:#10b981">
+          <rect width="18" height="18" rx="4" fill="currentColor" fill-opacity=".15"/>
+          <path d="M5 9l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="rdda-fname" id="rddaFileName">—</span>
+        <span class="rdda-fsize" id="rddaFileSize">—</span>
+      </div>
+    </div>
+    <div class="rdda-modal-foot">
+      <button class="rdda-btn-cancel" onclick="rddaCloseUpload()">취소</button>
+      <button class="rdda-btn-up" id="rddaBtnUp" onclick="rddaDoUpload()">업로드</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   RDDA ANALYSIS — Charts & Logic
+══════════════════════════════════════ */
+let _rddaInited = false;
+let _rddaFile   = null;
+
+function renderRdda() {
+  if (_rddaInited) return;
+  _rddaInited = true;
+
+  const TT = {backgroundColor:'rgba(13,17,26,.96)',borderColor:'rgba(255,255,255,.1)',
+    borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:9,cornerRadius:7};
+
+  /* Custom plugin: pickup rate % at bar end */
+  if (!Chart.registry.plugins.get('rddaEndLabels')) {
+    Chart.register({
+      id: 'rddaEndLabels',
+      afterDatasetsDraw(chart) {
+        const rates = chart.config.options._rateLabels;
+        if (!rates) return;
+        const {ctx, scales:{x}} = chart;
+        const data = chart.data.datasets[0].data;
+        ctx.save();
+        ctx.font = '600 9.5px "Inter", sans-serif';
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        data.forEach((val, i) => {
+          if (!rates[i]) return;
+          const meta = chart.getDatasetMeta(0);
+          if (!meta.data[i]) return;
+          ctx.shadowColor = 'rgba(52,211,153,.6)';
+          ctx.shadowBlur = 6;
+          ctx.fillStyle = 'rgba(52,211,153,.95)';
+          ctx.fillText(rates[i], x.getPixelForValue(val) + 6, meta.data[i].y);
+        });
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+    });
+  }
+
+  function neonGrad(chart, c1, c2) {
+    const {ctx, chartArea} = chart;
+    if (!chartArea) return c2;
+    const g = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+    g.addColorStop(0, c1); g.addColorStop(1, c2);
+    return g;
+  }
+
+  function hbarNeon(id, labels, data, dim, bright, rates) {
+    const opts = {
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      layout:{padding:{right: rates ? 58 : 8}},
+      plugins:{legend:{display:false}, tooltip:{...TT, callbacks:{label:c=>' '+c.raw+'건'}}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:10}}},
+        y:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}
+      }
+    };
+    if (rates) opts._rateLabels = rates;
+    return new Chart(id, {
+      type:'bar',
+      data:{labels, datasets:[{data, borderRadius:4, borderSkipped:false,
+        backgroundColor(ctx2){ return neonGrad(ctx2.chart, dim, bright); }
+      }]},
+      options: opts
+    });
+  }
+
+  function makeDonut(id, labels, data, colors, total) {
+    return new Chart(id, {
+      type:'doughnut',
+      data:{labels, datasets:[{data, backgroundColor:colors, borderColor:'#0b0f1a', borderWidth:3, hoverOffset:6}]},
+      options:{cutout:'72%', responsive:true, maintainAspectRatio:true,
+        plugins:{legend:{display:false},
+          tooltip:{...TT, callbacks:{label:c=>` ${c.label}: ${c.raw}건 (${Math.round(c.raw/total*100)}%)`}}
+        }
+      }
+    });
+  }
+
+  /* Tab A */
+  hbarNeon('rdda-amc',
+    ['A&F','Walmart USA',"Kohl's",'Target','Talbots','AEO','UNIQLO','LOFT','KMART AU','LANE BRYANT'],
+    [288,259,250,166,91,62,32,29,22,17],
+    'rgba(192,132,252,.15)','rgba(167,139,250,.95)'
+  );
+  hbarNeon('rdda-apc',
+    ["Kohl's",'A&F','Target','Walmart USA','KMART AU','기타'],
+    [67,65,31,10,3,3],
+    'rgba(52,211,153,.15)','rgba(16,185,129,.9)',
+    ['26.8%','22.6%','18.7%','3.9%','13.6%',null]
+  );
+  makeDonut('rdda-adnt',
+    ['China','Vietnam','Korea','기타'],[88,52,34,5],
+    ['rgba(251,191,36,.85)','rgba(52,211,153,.85)','rgba(34,211,238,.85)','rgba(71,85,105,.7)'],179
+  );
+
+  /* Tab B — init while visible, then hide */
+  document.getElementById('rdda-tab-team').style.display = '';
+  hbarNeon('rdda-bmc',
+    ['A&F','Walmart USA',"Kohl's",'AEO','Target','UNIQLO','기타','KMART AU'],
+    [74,48,40,32,24,21,18,6],
+    'rgba(125,211,252,.15)','rgba(56,189,248,.9)'
+  );
+  hbarNeon('rdda-bpc',
+    ['A&F',"Kohl's",'Target','Walmart USA','KMART AU'],
+    [22,16,5,1,1],
+    'rgba(251,113,133,.15)','rgba(244,63,94,.9)',
+    ['29.7%','40.0%','20.8%','2.1%','16.7%']
+  );
+  makeDonut('rdda-bdnt',
+    ['Vietnam','Korea','China'],[37,5,3],
+    ['rgba(52,211,153,.85)','rgba(34,211,238,.85)','rgba(251,191,36,.85)'],45
+  );
+  document.getElementById('rdda-tab-team').style.display = 'none';
+
+  rddaSwitchTab('all');
+}
+
+function rddaSwitchTab(t) {
+  const isAll = t === 'all';
+  const tabAll  = document.getElementById('rdda-tab-all');
+  const tabTeam = document.getElementById('rdda-tab-team');
+  if (tabAll)  tabAll.style.display  = isAll ? '' : 'none';
+  if (tabTeam) tabTeam.style.display = isAll ? 'none' : '';
+  document.querySelectorAll('.rdda-tab-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector(isAll ? '.rdda-tab-all' : '.rdda-tab-team');
+  if (activeBtn) activeBtn.classList.add('active');
+  const c  = isAll ? '#60a5fa' : '#06b6d4';
+  const bg = isAll ? 'rgba(96,165,250,.12)'  : 'rgba(6,182,212,.12)';
+  const bc = isAll ? 'rgba(96,165,250,.3)'   : 'rgba(6,182,212,.3)';
+  const em = document.getElementById('rdda-ph-em');
+  const sb = document.getElementById('rdda-ph-sub');
+  const bg2= document.getElementById('rdda-ph-badge');
+  if (em)  em.style.color = c;
+  if (sb)  sb.textContent = isAll
+    ? '통합원단부 전체 · Monthly Performance Report'
+    : '통합원단부 3팀 · Monthly Performance Report';
+  if (bg2) { bg2.style.background=bg; bg2.style.borderColor=bc; bg2.style.color=c; }
+}
+
+/* Upload modal */
+function rddaOpenUpload()  { document.getElementById('rddaUploadModal').classList.add('open'); }
+function rddaCloseUpload() { document.getElementById('rddaUploadModal').classList.remove('open'); }
+function rddaModalBg(e)    { if(e.target===document.getElementById('rddaUploadModal')) rddaCloseUpload(); }
+function rddaDragOver(e)   { e.preventDefault(); document.getElementById('rddaDropZone').classList.add('dz-over'); }
+function rddaDragLeave()   { document.getElementById('rddaDropZone').classList.remove('dz-over'); }
+function rddaDrop(e) {
+  e.preventDefault();
+  document.getElementById('rddaDropZone').classList.remove('dz-over');
+  const f = e.dataTransfer.files[0];
+  if (f) rddaFileSelect(f);
+}
+function rddaFileSelect(f) {
+  if (!f) return;
+  _rddaFile = f;
+  document.getElementById('rddaFileName').textContent = f.name;
+  document.getElementById('rddaFileSize').textContent = (f.size/1024).toFixed(0)+' KB';
+  document.getElementById('rddaFileSel').classList.add('show');
+  document.getElementById('rddaBtnUp').classList.add('ready');
+}
+function rddaDoUpload() {
+  if (!_rddaFile) return;
+  const label = document.getElementById('rddaPeriodSel').selectedOptions[0].text;
+  rddaCloseUpload();
+  const dot = document.getElementById('rddaUpDot');
+  const lbl = document.getElementById('rddaUpLabel');
+  if (dot) dot.style.display = 'inline-block';
+  if (lbl) { lbl.textContent = label+' 로드됨'; lbl.style.color='#10b981'; }
+  _rddaFile = null;
+  document.getElementById('rddaFileSel').classList.remove('show');
+  document.getElementById('rddaBtnUp').classList.remove('ready');
+}
+</script>
 
 </body>
 </html>
