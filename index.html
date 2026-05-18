@@ -2641,6 +2641,7 @@ function toast(msg,err=false){
 // ── 화면 전환
 let currentScreen='home';
 function showScreen(id){
+  if(id===currentScreen) return;
   const prev=document.getElementById('screen-'+currentScreen);
   if(prev){prev.classList.remove('visible');setTimeout(()=>{prev.classList.remove('active');},280);}
   currentScreen=id;
