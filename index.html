@@ -963,6 +963,34 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .hp-rdda-inner{height:260px;position:relative}
 .hp-rdda-note{font-size:.58rem;color:#475569;margin-top:10px;line-height:1.6}
 
+/* ── HOME GANTT WIDGET ── */
+.hp-gantt-widget{margin-bottom:14px}
+.hp-gantt-goto{font-size:.62rem;font-weight:600;color:#8b5cf6;cursor:pointer;margin-left:auto;padding:3px 9px;border-radius:5px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);transition:background .15s;white-space:nowrap}
+.hp-gantt-goto:hover{background:rgba(139,92,246,.22)}
+.hp-gantt-summary{display:flex;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.hp-gs-item{flex:1;padding:10px 14px;display:flex;flex-direction:column;gap:3px;border-right:1px solid rgba(255,255,255,.07)}
+.hp-gs-item:last-child{border-right:none}
+.hp-gs-lbl{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#475569;font-family:'Space Grotesk',sans-serif}
+.hp-gs-val{font-size:1.3rem;font-weight:800;line-height:1}
+.hp-gantt-proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.hp-gpc{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;cursor:pointer;position:relative;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+.hp-gpc:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.18);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.hp-gpc-hdr{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
+.hp-gpc-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0}
+.hp-gpc-info{flex:1;min-width:0}
+.hp-gpc-name{font-size:.75rem;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.hp-gpc-owners{display:flex;gap:3px;flex-wrap:wrap}
+.hp-gpc-pct{font-size:1.35rem;font-weight:800;line-height:1;flex-shrink:0;margin-top:1px}
+.hp-gpc-bar-track{height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-bottom:9px}
+.hp-gpc-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.hp-gpc-footer{display:flex;align-items:center;gap:5px;font-size:.6rem}
+.hp-gpc-tasks{color:#475569;flex:1}
+.hp-gpc-days{font-weight:600;padding:1px 6px;border-radius:999px;font-size:.57rem;white-space:nowrap}
+.hp-gpc-days.days-ok{background:rgba(16,185,129,.12);color:#6ee7b7}
+.hp-gpc-days.days-warn{background:rgba(245,158,11,.12);color:#fcd34d}
+.hp-gpc-days.days-over{background:rgba(239,68,68,.12);color:#fca5a5}
+.hp-gpc-days.days-done{background:rgba(16,185,129,.15);color:#6ee7b7}
+
 /* ── HP modal ── */
 #hpModalOverlay{z-index:9000}
 .hp-modal-box{
@@ -1321,6 +1349,20 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
             <span class="dot">·</span>
             <span>PERFORMANCE &amp; SUSTAINABILITY</span>
           </div>
+        </div>
+      </div>
+
+      <!-- ══ 0. GANTT PROJECT STATUS WIDGET ══ -->
+      <div class="hp-sec hp-gantt-widget">
+        <div class="hp-sec-hdr">Project Status<span class="hp-sec-sub">Gantt 기반 프로젝트 진행 현황</span><span class="hp-gantt-goto" id="hpGanttGoto">→ Gantt 보기</span></div>
+        <div class="hp-gantt-summary">
+          <div class="hp-gs-item"><div class="hp-gs-lbl">전체 과제</div><div class="hp-gs-val" id="hpGsTotalTasks" style="color:#94a3b8">—</div></div>
+          <div class="hp-gs-item"><div class="hp-gs-lbl">완료</div><div class="hp-gs-val" id="hpGsDone" style="color:#10b981">—</div></div>
+          <div class="hp-gs-item"><div class="hp-gs-lbl">진행 중</div><div class="hp-gs-val" id="hpGsInProgress" style="color:#3b82f6">—</div></div>
+          <div class="hp-gs-item"><div class="hp-gs-lbl">전체 진행률</div><div class="hp-gs-val" id="hpGsAvgPct" style="color:#8b5cf6">—</div></div>
+        </div>
+        <div class="hp-gantt-proj-grid" id="hpGanttProjGrid">
+          <div style="color:#475569;font-size:.76rem;grid-column:1/-1;padding:6px 0">Gantt 과제를 추가하면 여기에 표시됩니다.</div>
         </div>
       </div>
 
@@ -2847,11 +2889,83 @@ async function initFirebase(){
 }
 
 // ══ HOME ══
+function renderHomeGanttWidget(){
+  const summaryIds=['hpGsTotalTasks','hpGsDone','hpGsInProgress','hpGsAvgPct'];
+  const grid=document.getElementById('hpGanttProjGrid');
+  if(!grid)return;
+  if(!tasks.length){
+    grid.innerHTML='<div style="color:#475569;font-size:.76rem;grid-column:1/-1;padding:6px 0">Gantt 과제를 추가하면 여기에 표시됩니다.</div>';
+    summaryIds.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
+    return;
+  }
+  // 요약 통계
+  const doneN=tasks.filter(t=>isTaskDone(t)).length;
+  const inProgN=tasks.filter(t=>!isTaskDone(t)&&prog(t)>0).length;
+  const avgPct=Math.round(tasks.reduce((s,t)=>s+prog(t)*100,0)/tasks.length);
+  document.getElementById('hpGsTotalTasks').textContent=tasks.length;
+  document.getElementById('hpGsDone').textContent=doneN;
+  document.getElementById('hpGsInProgress').textContent=inProgN;
+  document.getElementById('hpGsAvgPct').textContent=avgPct+'%';
+
+  // 프로젝트별 그룹핑
+  const projOrder=[];const projMap={};
+  tasks.forEach(t=>{
+    const o=t.owner||'미지정';
+    const pn=(cfg.ownerProjects?.[o])||'(미설정)';
+    if(!projMap[pn]){projMap[pn]={tasks:[],owners:new Set()};projOrder.push(pn);}
+    projMap[pn].tasks.push(t);
+    projMap[pn].owners.add(o);
+  });
+
+  const todayD=today(),peD=pe();
+  grid.innerHTML='';
+  projOrder.forEach(pn=>{
+    const {tasks:pt,owners}=projMap[pn];
+    const ownerArr=[...owners];
+    const clr=ownerClr(pn!=='(미설정)'?pn:ownerArr[0]||'');
+    const doneCount=pt.filter(t=>isTaskDone(t)).length;
+    const pct=pt.length?Math.round(pt.reduce((s,t)=>s+prog(t)*100,0)/pt.length):0;
+    const daysLeft=Math.round((peD-todayD)/MS);
+    let daysCls,daysLabel;
+    if(doneCount===pt.length){daysCls='days-done';daysLabel='완료';}
+    else if(daysLeft<0){daysCls='days-over';daysLabel=`${Math.abs(daysLeft)}일 초과`;}
+    else if(daysLeft<=14){daysCls='days-warn';daysLabel=`${daysLeft}일 남음`;}
+    else{daysCls='days-ok';daysLabel=`${daysLeft}일 남음`;}
+    const behind=pt.filter(t=>{const pA=prog(t),pP=progPlanned(t);return pA<pP*0.75&&!isTaskDone(t);}).length;
+    const statusCls=doneCount===pt.length?'status-done':behind>0?'status-upcoming':'status-inprogress';
+    const statusLabel=doneCount===pt.length?'✓ 완료':behind>0?`⚠ 지연 ${behind}건`:'진행 중';
+    const ownerChips=ownerArr.map(o=>`<span class="owner-remark" style="background:${ownerClr(o)}20;color:${ownerClr(o)};border:1px solid ${ownerClr(o)}40">${o}</span>`).join('');
+    const card=document.createElement('div');
+    card.className='hp-gpc';
+    card.style.borderColor=`${clr}30`;
+    card.innerHTML=`
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,${clr},${clr}55)"></div>
+      <div class="hp-gpc-hdr">
+        <div class="hp-gpc-icon" style="background:${clr}22;border:1px solid ${clr}44">📋</div>
+        <div class="hp-gpc-info">
+          <div class="hp-gpc-name" title="${pn}">${pn}</div>
+          <div class="hp-gpc-owners">${ownerChips}</div>
+        </div>
+        <div class="hp-gpc-pct" style="color:${clr}">${pct}%</div>
+      </div>
+      <div class="hp-gpc-bar-track"><div class="hp-gpc-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${clr},${clr}99)"></div></div>
+      <div class="hp-gpc-footer">
+        <span class="hp-gpc-tasks">${doneCount} / ${pt.length} 완료</span>
+        <span class="hp-gpc-days ${daysCls}">${daysLabel}</span>
+        <span class="hp-gpc-status ${statusCls}">${statusLabel}</span>
+      </div>`;
+    card.addEventListener('click',()=>showScreen('gantt'));
+    grid.appendChild(card);
+  });
+}
 function renderHome(){
   const el = document.getElementById('homeTodayText');
   if(el) el.textContent='오늘: '+fdF(today());
   renderSampleHome();
+  renderHomeGanttWidget();
 }
+// Gantt 버튼 → Gantt 화면 이동
+document.getElementById('hpGanttGoto')?.addEventListener('click',()=>showScreen('gantt'));
 
 function renderSampleHome(){
   if(!sampleData) return;
