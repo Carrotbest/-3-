@@ -338,6 +338,16 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .tl-parent-row{height:54px;position:relative;border-bottom:1px solid rgba(255,255,255,.05)}
 .tl-parent-row.tl-done{background:rgba(16,185,129,.04)}
 .tl-subtask-row{height:32px;position:relative;border-bottom:1px solid rgba(255,255,255,.025);background:rgba(0,0,0,.07)}
+/* ── DELAY / RISK INDICATORS ── */
+.gantt-parent-row-left.row-risk{background:rgba(239,68,68,.05)!important;box-shadow:inset 3px 0 0 rgba(239,68,68,.55)!important}
+.gantt-parent-row-left.row-warn{background:rgba(245,158,11,.04)!important;box-shadow:inset 3px 0 0 rgba(245,158,11,.5)!important}
+.gantt-parent-row-left.row-due{background:rgba(249,115,22,.04)!important;box-shadow:inset 3px 0 0 rgba(249,115,22,.5)!important}
+.risk-badge{position:absolute;left:3px;top:50%;transform:translateY(-50%);font-size:.52rem;font-weight:800;padding:2px 5px;border-radius:4px;pointer-events:none;z-index:2;white-space:nowrap}
+.rb-risk{background:rgba(239,68,68,.18);color:#fca5a5;border:1px solid rgba(239,68,68,.35)}
+.rb-warn{background:rgba(245,158,11,.18);color:#fcd34d;border:1px solid rgba(245,158,11,.35)}
+.rb-due{background:rgba(249,115,22,.18);color:#fdba74;border:1px solid rgba(249,115,22,.35)}
+.tl-parent-row.tl-risk .gantt-parent-bar{box-shadow:0 0 0 1px rgba(239,68,68,.4)}
+.tl-parent-row.tl-warn .gantt-parent-bar{box-shadow:0 0 0 1px rgba(245,158,11,.4)}
 /* ── PARENT BAR + PIPELINE ── */
 .gantt-parent-bar{position:absolute;top:9px;height:26px;border-radius:6px;overflow:hidden;cursor:pointer;transition:filter .18s}
 .gantt-parent-bar:hover{filter:brightness(1.14)}
@@ -1359,6 +1369,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
           <div class="hp-gs-item"><div class="hp-gs-lbl">전체 과제</div><div class="hp-gs-val" id="hpGsTotalTasks" style="color:#94a3b8">—</div></div>
           <div class="hp-gs-item"><div class="hp-gs-lbl">완료</div><div class="hp-gs-val" id="hpGsDone" style="color:#10b981">—</div></div>
           <div class="hp-gs-item"><div class="hp-gs-lbl">진행 중</div><div class="hp-gs-val" id="hpGsInProgress" style="color:#3b82f6">—</div></div>
+          <div class="hp-gs-item"><div class="hp-gs-lbl">지연/위험</div><div class="hp-gs-val" id="hpGsRisk" style="color:#ef4444">—</div></div>
           <div class="hp-gs-item"><div class="hp-gs-lbl">전체 진행률</div><div class="hp-gs-val" id="hpGsAvgPct" style="color:#8b5cf6">—</div></div>
         </div>
         <div class="hp-gantt-proj-grid" id="hpGanttProjGrid">
@@ -2901,10 +2912,13 @@ function renderHomeGanttWidget(){
   // 요약 통계
   const doneN=tasks.filter(t=>isTaskDone(t)).length;
   const inProgN=tasks.filter(t=>!isTaskDone(t)&&prog(t)>0).length;
+  const riskN=tasks.filter(t=>{if(isTaskDone(t))return false;const pP=progPlanned(t),pA=prog(t);return pP>0&&(pP-pA)*100>=10;}).length;
   const avgPct=Math.round(tasks.reduce((s,t)=>s+prog(t)*100,0)/tasks.length);
   document.getElementById('hpGsTotalTasks').textContent=tasks.length;
   document.getElementById('hpGsDone').textContent=doneN;
   document.getElementById('hpGsInProgress').textContent=inProgN;
+  const riskEl=document.getElementById('hpGsRisk');
+  if(riskEl){riskEl.textContent=riskN;riskEl.style.color=riskN>0?'#ef4444':'#10b981';}
   document.getElementById('hpGsAvgPct').textContent=avgPct+'%';
 
   // 프로젝트별 그룹핑
@@ -3419,10 +3433,19 @@ function renderGantt(){
       const pAct=prog(t),pPlan=progPlanned(t);
       const pctAct=Math.round(pAct*100),pctPlan=Math.round(pPlan*100);
       const pctCls=done?'pct-good':pctAct>=pctPlan?'pct-good':pctAct>=pctPlan*0.75?'pct-warn':'pct-bad';
+      // 지연/위험 판정
+      const delta=pctPlan-pctAct;
+      const daysLeft=x.eD&&!isNaN(x.eD)?Math.round((x.eD-todayD)/MS):999;
+      let riskCls='',tlRiskCls='',riskBadge='';
+      if(!done&&pPlan>0){
+        if(delta>=25){riskCls=' row-risk';tlRiskCls=' tl-risk';riskBadge='<span class="risk-badge rb-risk">🔴 지연</span>';}
+        else if(delta>=10){riskCls=' row-warn';tlRiskCls=' tl-warn';riskBadge='<span class="risk-badge rb-warn">🟡 주의</span>';}
+        else if(daysLeft>=0&&daysLeft<=7){riskCls=' row-due';riskBadge=`<span class="risk-badge rb-due">🔔 D-${daysLeft}</span>`;}
+      }
 
       // ── LEFT: parent row ──
       const leftRow=document.createElement('div');
-      leftRow.className='gantt-parent-row-left'+(done?' row-done':'');
+      leftRow.className='gantt-parent-row-left'+(done?' row-done':riskCls);
       leftRow.innerHTML=`
         <span class="task-num">${taskNum}</span>
         <div class="task-name-cell">
@@ -3435,6 +3458,7 @@ function renderGantt(){
         <div class="task-pct-cell"><span class="task-pct-badge ${pctCls}">${pctAct}%</span></div>
         <span class="task-date-cell">${fd(x.sD)}–${fd(x.eD)}</span>
         <div class="task-status-cell"><span class="status-pill ${st.c}">${st.l}</span></div>
+        ${riskBadge}
         <div class="row-actions">
           <button class="btn-edit-row" data-fid="${t.fid}" title="수정">✏</button>
           <button class="btn-done-row" data-fid="${t.fid}" title="${done?'완료 취소':'완료 처리'}">✓</button>
@@ -3444,7 +3468,7 @@ function renderGantt(){
 
       // ── RIGHT: parent timeline row ──
       const rightRow=document.createElement('div');
-      rightRow.className='tl-parent-row'+(done?' tl-done':'');
+      rightRow.className='tl-parent-row'+(done?' tl-done':tlRiskCls);
       const barL=(x.sD-psD)/MS*PX, barW=Math.max((x.eD-x.sD)/MS*PX,6);
       const pipeW=Math.max(pAct*barW,0);
       const grad=`linear-gradient(90deg,${ph.grad[0]},${ph.grad[1]})`;
