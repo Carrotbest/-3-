@@ -1,0 +1,135 @@
+  <!-- ── FABRIC ANALYSIS ── -->
+  <div class="screen" id="screen-fabric-analysis">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">FABRIC ANALYSIS <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">원단 물성 테스트 기록 · 항목별 비교 · Pass/Fail 이력 관리</div>
+      </div>
+      <div class="prev-kpi-row">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">총 테스트 건</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">Pass</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">Fail</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">재테스트</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">이번달 완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">테스트 항목별 Pass Rate</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:45%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:88%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:55%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:72%;background:linear-gradient(90deg,#0e7490,#06b6d4)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:40%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:60%;background:linear-gradient(90deg,#92400e,#f59e0b)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:50%"></div><div class="prev-skeleton prev-row-line" style="width:18%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:95%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div></div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">FL No. 다중 비교 — Radar Chart</div>
+          <div style="display:flex;align-items:center;justify-content:center;height:120px">
+            <div class="prev-skeleton" style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(6,182,212,.1))"></div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+            <div class="prev-skeleton" style="height:10px;width:50px;border-radius:3px"></div>
+            <div class="prev-skeleton" style="height:10px;width:50px;border-radius:3px"></div>
+            <div class="prev-skeleton" style="height:10px;width:50px;border-radius:3px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="prev-box">
+        <div class="prev-box-title">테스트 이력 테이블 — FL No · 항목 · 결과값 · 기준값 · 판정 · 날짜</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+          <div style="display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr 0.7fr 1fr;gap:8px"><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr 0.7fr 1fr;gap:8px"><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr 0.7fr 1fr;gap:8px"><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div><div class="prev-skeleton prev-row-line"></div></div>
+        </div>
+      </div>
+      <div class="prev-note">🔬 테스트 결과를 직접 입력하고 FL No. 기준으로 물성 비교 분석이 가능합니다.</div>
+    </div>
+  </div>
+
+  <!-- ── TROUBLE SHOOTING ── -->
+  <div class="screen" id="screen-trouble-shooting">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">TROUBLE SHOOTING <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">현장 불량 · 클레임 · 기술 이슈 기록 및 해결 추적</div>
+      </div>
+      <div class="prev-kpi-row-3" style="grid-template-columns:repeat(4,1fr)">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">총 이슈</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">처리중</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">해결완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">이번달 재발</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="prev-box">
+          <div class="prev-box-title">이슈 유형 분포</div>
+          <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
+            <div class="prev-skeleton" style="width:90px;height:90px;border-radius:50%;flex-shrink:0"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+              <div class="prev-skeleton prev-row-line"></div>
+              <div class="prev-skeleton prev-row-line" style="width:80%"></div>
+              <div class="prev-skeleton prev-row-line" style="width:65%"></div>
+              <div class="prev-skeleton prev-row-line" style="width:75%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="prev-box">
+          <div class="prev-box-title">월별 발생 트렌드</div>
+          <div class="prev-bars">
+            <div class="prev-bar prev-bar-amber" style="height:50%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:70%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:40%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:85%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:55%"></div>
+            <div class="prev-bar prev-bar-amber" style="height:65%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="prev-box">
+        <div class="prev-box-title">이슈 타임라인 피드 — 날짜 · 유형 · 담당 · 원인 · 조치 · 상태</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+          <div style="border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:12px;background:rgba(239,68,68,.04)"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><div class="prev-skeleton" style="width:40px;height:10px;border-radius:3px;background:rgba(239,68,68,.25)"></div><div class="prev-skeleton prev-row-line" style="width:60%"></div></div><div class="prev-skeleton prev-row-line" style="width:85%"></div></div>
+          <div style="border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:12px;background:rgba(245,158,11,.04)"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><div class="prev-skeleton" style="width:40px;height:10px;border-radius:3px;background:rgba(245,158,11,.25)"></div><div class="prev-skeleton prev-row-line" style="width:55%"></div></div><div class="prev-skeleton prev-row-line" style="width:75%"></div></div>
+          <div style="border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:12px;background:rgba(16,185,129,.04)"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><div class="prev-skeleton" style="width:40px;height:10px;border-radius:3px;background:rgba(16,185,129,.25)"></div><div class="prev-skeleton prev-row-line" style="width:50%"></div></div><div class="prev-skeleton prev-row-line" style="width:70%"></div></div>
+        </div>
+      </div>
+      <div class="prev-note">🔧 이슈를 웹에서 직접 등록하고 Firestore에 저장됩니다. 심각도별 색상 태그 및 담당자 알림 기능 예정.</div>
+    </div>
+  </div>
+
+  <!-- ── PROCESS INNOVATION ── -->
+  <div class="screen" id="screen-process-innovation">
+    <div class="screen-pad">
+      <div class="page-header">
+        <div class="page-title">PROCESS INNOVATION <span class="preview-badge">🔜 PREVIEW</span></div>
+        <div class="page-sub">공정 개선 과제 추진 현황 · KPI 달성률 · 팀 기여도</div>
+      </div>
+      <div class="prev-kpi-row">
+        <div class="prev-kpi"><div class="prev-kpi-lbl">총 과제</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">진행중</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">KPI 달성률</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+        <div class="prev-kpi"><div class="prev-kpi-lbl">이번달 목표</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      </div>
+      <div class="prev-filter-tabs">
+        <div class="prev-tab on">ALL</div>
+        <div class="prev-tab">진행중</div>
+        <div class="prev-tab">완료</div>
+        <div class="prev-tab">검토중</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
+        <div class="prev-proj-card"><div class="prev-proj-tag" style="background:rgba(6,182,212,.12);color:#67e8f9">⚡ LEAD TIME 단축</div><div class="prev-skeleton prev-row-line" style="width:80%;margin-bottom:8px"></div><div class="prev-skeleton prev-row-line" style="width:55%"></div><div class="prev-prog-bg" style="margin-top:14px"><div class="prev-prog-fill" style="width:70%;background:linear-gradient(90deg,#0e7490,#06b6d4)"></div></div></div>
+        <div class="prev-proj-card"><div class="prev-proj-tag" style="background:rgba(16,185,129,.12);color:#34d399">🌱 원사 로스율 감소</div><div class="prev-skeleton prev-row-line" style="width:75%;margin-bottom:8px"></div><div class="prev-skeleton prev-row-line" style="width:50%"></div><div class="prev-prog-bg" style="margin-top:14px"><div class="prev-prog-fill" style="width:45%;background:linear-gradient(90deg,#065f46,#10b981)"></div></div></div>
+        <div class="prev-proj-card" style="border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px"><div style="font-size:1.4rem;opacity:.25">＋</div><div style="font-size:.64rem;color:#374151;font-weight:600">과제 추가</div></div>
+      </div>
+      <div class="prev-box">
+        <div class="prev-box-title">분기별 KPI 달성 현황</div>
+        <div class="prev-bars" style="height:80px">
+          <div class="prev-bar prev-bar-cyan" style="height:60%"></div>
+          <div class="prev-bar prev-bar-cyan" style="height:80%"></div>
+          <div class="prev-bar prev-bar-cyan" style="height:55%"></div>
+          <div class="prev-bar prev-bar-cyan" style="height:90%"></div>
+        </div>
+      </div>
+      <div class="prev-note">⚡ 공정 개선 과제를 웹에서 직접 등록하고 진행률을 실시간으로 팀과 공유합니다.</div>
+    </div>
+  </div>

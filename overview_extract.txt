@@ -1,0 +1,179 @@
+  <div class="screen" id="screen-overview">
+    <div class="screen-pad">
+
+      <!-- ── OVERVIEW HERO ── -->
+      <div class="hp-hero">
+        <div class="hp-hero-top">
+          <div class="hp-preview-badge" id="ovDataBadge">◆ SAMPLE OVERVIEW · 데이터 없음</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="hp-hero-meta" id="ovUpdateMeta"></div>
+            <button class="hp-upload-btn" onclick="hpOpenUploadModal()">↑ 대장 업로드</button>
+          </div>
+        </div>
+        <div class="hp-hero-title-wrap" style="margin-bottom:0">
+          <h1 class="hp-hero-title" style="font-size:1.45rem">Sample Status Overview</h1>
+          <div class="hp-hero-kicker">
+            <span class="acc">샘플 관리 대장 기반</span>
+            <span class="dot">·</span>
+            <span>전체 진행 현황 · 공정별 완료율</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 1. TOTAL SAMPLE STATUS ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Sample Overview<span class="hp-sec-sub">전체 진행 현황 · 공정별 완료율</span></div>
+
+        <div class="hp-status-summary">
+          <div class="hp-ss-total">
+            <div class="hp-ss-total-lbl">총 샘플</div>
+            <div class="hp-ss-total-val" id="hpTotalVal">—건</div>
+          </div>
+          <div class="hp-ss-types">
+            <div class="hp-ss-type">
+              <div class="hp-ss-type-lbl" style="color:#67e8f9">GD개발</div>
+              <div class="hp-ss-type-val" style="color:#67e8f9" id="hpGdVal">—건</div>
+              <div class="hp-ss-type-sub" id="hpGdPct">—%</div>
+            </div>
+            <div class="hp-ss-type">
+              <div class="hp-ss-type-lbl" style="color:#60a5fa">국내개발</div>
+              <div class="hp-ss-type-val" style="color:#60a5fa" id="hpDomVal">—건</div>
+              <div class="hp-ss-type-sub" id="hpDomPct">—%</div>
+            </div>
+            <div class="hp-ss-receipt">
+              <div class="hp-ss-receipt-lbl">접수 현황</div>
+              <div class="hp-ss-receipt-val" id="hpReceiptVal">—건</div>
+              <div class="hp-ss-receipt-sub" id="hpReceiptSub">Style/# 기재</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hp-proc-cards" id="hpProcCards">
+          <div class="hp-proc-card" style="--hpc:1" data-proc="0">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#b45309,#f59e0b,#fde68a)"></div>
+            <div class="hp-proc-card-name" style="color:#fbbf24">① YARN IN-FAC</div>
+            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#fbbf24" id="hpYarnDone">—</div><div class="hp-proc-card-total" id="hpYarnTotal">/ —건</div></div>
+            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpYarnBar" style="width:0%;background:linear-gradient(90deg,#b45309,#f59e0b,#fde68a)"></div></div>
+            <div class="hp-proc-card-pct" style="color:#fbbf24" id="hpYarnPct">—%</div>
+          </div>
+          <div class="hp-proc-card" data-proc="1">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)"></div>
+            <div class="hp-proc-card-name" style="color:#c4b5fd">② KNITTING</div>
+            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#c4b5fd" id="hpKnitDone">—</div><div class="hp-proc-card-total" id="hpKnitTotal">/ —건</div></div>
+            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpKnitBar" style="width:0%;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)"></div></div>
+            <div class="hp-proc-card-pct" style="color:#c4b5fd" id="hpKnitPct">—%</div>
+          </div>
+          <div class="hp-proc-card" data-proc="2">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)"></div>
+            <div class="hp-proc-card-name" style="color:#67e8f9">③ DYEING</div>
+            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#67e8f9" id="hpDyeDone">—</div><div class="hp-proc-card-total" id="hpDyeTotal">/ —건</div></div>
+            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpDyeBar" style="width:0%;background:linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)"></div></div>
+            <div class="hp-proc-card-pct" style="color:#67e8f9" id="hpDyePct">—%</div>
+          </div>
+          <div class="hp-proc-card" data-proc="3">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#065f46,#10b981,#6ee7b7)"></div>
+            <div class="hp-proc-card-name" style="color:#6ee7b7">④ FINISHING</div>
+            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#6ee7b7" id="hpFinDone">—</div><div class="hp-proc-card-total" id="hpFinTotal">/ —건</div></div>
+            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpFinBar" style="width:0%;background:linear-gradient(90deg,#065f46,#10b981,#6ee7b7)"></div></div>
+            <div class="hp-proc-card-pct" style="color:#6ee7b7" id="hpFinPct">—%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 2. 담당자별 작지 현황 ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Workload by Developer<span class="hp-sec-sub">담당자별 작지 분포 · 국내 / GD</span></div>
+        <div class="hp-pipe-dev-list" id="hpDevStatusList"></div>
+      </div>
+
+      <!-- ══ 3. WARNING (SCHEDULE DELAY) ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Schedule Alerts<span class="hp-sec-sub">공정 단계별 지연 발생 건</span></div>
+        <div class="hp-warn-rows" id="hpWarnRows">
+          <div style="color:#64748b;font-size:.76rem;padding:12px 0">데이터를 업로드하면 지연 현황이 표시됩니다.</div>
+        </div>
+      </div>
+
+      <!-- ══ 4. CATEGORY per developer ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Categories &amp; Pipeline<span class="hp-sec-sub">카테고리 분포 · 공정 진행 상태</span></div>
+
+        <div class="hp-sct-wrap">
+          <div class="hp-sct-table-area">
+            <table class="hp-sct-tbl" id="hpSctTable">
+              <thead>
+                <tr class="hp-sct-dev-row" id="hpSctDevRow">
+                  <th style="text-align:left;width:130px">CATEGORY</th>
+                  <th style="color:#64748b;width:52px">합계<br><span style="font-size:.52rem;font-weight:400">OPT</span></th>
+                  <th colspan="2" style="color:#06b6d4;border-left:1px solid rgba(255,255,255,.12)">—</th>
+                  <th colspan="2" style="color:#8b5cf6;border-left:1px solid rgba(255,255,255,.12)">—</th>
+                  <th colspan="2" style="color:#10b981;border-left:1px solid rgba(255,255,255,.12)">—</th>
+                </tr>
+                <tr class="hp-sct-sub-row" id="hpSctSubRow">
+                  <th></th><th></th>
+                  <th style="color:#06b6d4;border-left:1px solid rgba(255,255,255,.12)">STYLE</th><th style="color:#06b6d4">OPTION</th>
+                  <th style="color:#8b5cf6;border-left:1px solid rgba(255,255,255,.12)">STYLE</th><th style="color:#8b5cf6">OPTION</th>
+                  <th style="color:#10b981;border-left:1px solid rgba(255,255,255,.12)">STYLE</th><th style="color:#10b981">OPTION</th>
+                </tr>
+              </thead>
+              <tbody id="hpSctBody">
+                <tr><td colspan="8" style="text-align:center;color:#64748b;font-size:.72rem;padding:20px">데이터를 업로드하면 표시됩니다</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="hp-sct-donut-area">
+            <div class="hp-sct-donut-title">카테고리별 OPTION 비율</div>
+            <div style="position:relative;height:185px"><canvas id="hpSctDonut"></canvas></div>
+          </div>
+        </div>
+
+        <div class="hp-pipe-sec-title">Production Pipeline <span>담당자별 현재 단계 분포</span></div>
+        <div class="hp-pipe-dev-list" id="hpPipeDevList"></div>
+
+        <div class="hp-pipe-leg-row">
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#334155,#64748b)"></div>미접수</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#0e7490,#06b6d4)"></div>편직대기</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div>염색중</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#065f46,#10b981)"></div>등록대기</div>
+        </div>
+      </div>
+
+      <!-- ══ 5. LEAD TIME ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Lead Time<span class="hp-sec-sub">완료 기준 평균 소요일</span></div>
+        <div class="hp-lt-grid">
+          <div class="hp-lt-card" data-lt="0">
+            <div class="hp-lt-label">이번주 완료</div>
+            <div class="hp-lt-val" style="color:#34d399" id="hpLtWeek">—<span class="hp-lt-unit">건</span></div>
+            <div class="hp-lt-sub">현황 & 창고보관 시트 FINISH DATE 기준</div>
+          </div>
+          <div class="hp-lt-card" data-lt="1">
+            <div class="hp-lt-label">이번달 완료</div>
+            <div class="hp-lt-val" style="color:#67e8f9" id="hpLtMonth">—<span class="hp-lt-unit">건</span></div>
+            <div class="hp-lt-sub">현황 & 창고보관 시트 FINISH DATE 기준</div>
+          </div>
+          <div class="hp-lt-card" data-lt="2" id="hpLtKnitCard">
+            <div class="hp-lt-label">편직 리드타임</div>
+            <div class="hp-lt-val" style="color:#c4b5fd" id="hpLtKnit">—<span class="hp-lt-unit">일</span></div>
+            <div class="hp-lt-sub">현황 전체 기준 · 원사입고일 → 편직완료일</div>
+          </div>
+          <div class="hp-lt-card" data-lt="3" id="hpLtSampleCard">
+            <div class="hp-lt-label">샘플 리드타임</div>
+            <div class="hp-lt-val" style="color:#fbbf24" id="hpLtSample">—<span class="hp-lt-unit">일</span></div>
+            <div class="hp-lt-sub">FINISH DATE 기재 건 · 원사입고일 → FINISH DATE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 6. RDDA UPDATE ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Monthly Registration<span class="hp-sec-sub">RDDA · 월별 등록 트렌드</span></div>
+        <div class="hp-rdda-inner"><canvas id="hpRddaChart"></canvas></div>
+        <div class="hp-rdda-note">
+          ※ 월별 샘플 완료(FL) 건수 · 해당월 포함 5개월 기준 · FL# 행의 숫자로 판단<br>
+          ※ FL# 8자리 구조: 앞 4자리 = 등록 년월 / 5번째 자리 = SOURCE (4:BULK원단 · 5:국내개발 · 9:GD개발 · 2:사입원단)
+        </div>
+      </div>
+
+    </div>
+  </div>
