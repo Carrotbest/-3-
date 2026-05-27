@@ -460,6 +460,20 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 /* ── TOOLTIP ── */
 .gantt-tooltip{position:fixed;z-index:9999;pointer-events:none;background:rgba(15,20,30,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;min-width:190px;backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,0.6);opacity:0;transition:opacity .15s;font-size:.74rem}
 .gantt-tooltip.visible{opacity:1}
+/* ── OWNER SUB-GROUP HEADER ── */
+.owner-group-header{display:flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-bottom:1px solid rgba(255,255,255,.06)}
+.owner-hdr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.owner-hdr-name{font-size:.62rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;flex:1}
+.owner-hdr-cnt{font-size:.56rem;color:var(--muted);background:rgba(255,255,255,.06);padding:1px 7px;border-radius:999px}
+.tl-owner-group-row{height:34px;border-bottom:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden}
+.tl-owner-stripe{position:absolute;inset:0}
+/* ── BAR DRAG ── */
+.gantt-parent-bar{cursor:grab}
+.gantt-parent-bar.dragging{cursor:grabbing;opacity:.8;z-index:10}
+.bar-resize-handle{position:absolute;right:0;top:0;bottom:0;width:8px;cursor:ew-resize;z-index:5;border-radius:0 6px 6px 0}
+.bar-resize-handle:hover{background:rgba(255,255,255,.25)}
+/* ── PROJECT FIELD IN MODAL ── */
+.form-group datalist{display:none}
 .tt-title{font-size:.8rem;font-weight:700;color:#e2e8f0;margin-bottom:8px}
 .tt-row{display:flex;justify-content:space-between;gap:14px;margin-bottom:4px}
 .tt-key{color:var(--muted)}.tt-val{color:var(--text);font-weight:600}
@@ -1740,10 +1754,10 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
                 <div class="td-sc-sub">프로젝트 평균</div>
               </div>
             </div>
-            <div class="td-card card-rdda" onclick="showScreen('rdda')">
+            <div class="td-card card-rdda" onclick="showScreen('gantt')">
               <div class="td-card-hdr">
                 <div class="td-card-title">Project Status</div>
-                <span class="td-card-goto violet" id="hpGanttGoto">→ RDDA</span>
+                <span class="td-card-goto violet" id="hpGanttGoto">→ Gantt</span>
               </div>
               <div class="td-proj-row">
                 <div class="td-proj-stat"><div class="td-proj-stat-lbl">완료</div><div class="td-proj-stat-val" id="hpGsDone" style="color:#10b981">—</div></div>
@@ -3506,6 +3520,11 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
     <div class="modal-header"><h3 id="taskModalTitle">작업 추가</h3><button class="modal-close" id="taskModalClose">✕</button></div>
     <form id="taskForm" class="modal-form">
       <div class="form-group"><label>작업명</label><input type="text" id="f-name" required></div>
+      <div class="form-group">
+        <label>프로젝트</label>
+        <input type="text" id="f-project" list="projectDatalist" placeholder="프로젝트명 선택 또는 직접 입력">
+        <datalist id="projectDatalist"></datalist>
+      </div>
       <div class="form-row">
         <div class="form-group"><label>단계</label>
           <select id="f-phase">
@@ -3627,7 +3646,7 @@ let devCharts={};
 let sctDonutChart=null;
 let devTotalDonutChart=null;
 let cfg={projTitle:'Performance & Sustainability Fabric Development',projStart:'2026-04-01',projEnd:'2026-07-31',todayOverride:null,ownerProjects:{}};
-let tasks=[], events=[], editingFid=null, editingEvFid=null;
+let tasks=[], events=[], editingFid=null, editingEvFid=null, ganttDrag=null;
 let homeDonutInst=null, statsDonutInst=null, statsBarInst=null;
 let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
 
@@ -3757,7 +3776,7 @@ function renderHomeGanttWidget(){
   const projOrder=[];const projMap={};
   tasks.forEach(t=>{
     const o=t.owner||'미지정';
-    const pn=(cfg.ownerProjects?.[o])||'(미설정)';
+    const pn=t.projectName||(cfg.ownerProjects?.[o])||'(미설정)';
     if(!projMap[pn]){projMap[pn]={tasks:[],owners:new Set()};projOrder.push(pn);}
     projMap[pn].tasks.push(t);
     projMap[pn].owners.add(o);
@@ -4235,7 +4254,7 @@ function renderGantt(){
   const projOrder=[];const projMap={};
   tasks.forEach(t=>{
     const o=t.owner||'미지정';
-    const pn=(cfg.ownerProjects?.[o])||'(미설정)';
+    const pn=t.projectName||(cfg.ownerProjects?.[o])||'(미설정)';
     if(!projMap[pn]){projMap[pn]={tasks:[],owners:new Set()};projOrder.push(pn);}
     projMap[pn].tasks.push(t);
     projMap[pn].owners.add(o);
@@ -4282,122 +4301,162 @@ function renderGantt(){
     tgr.innerHTML=`<div class="tl-group-stripe" style="background:linear-gradient(90deg,${clr},transparent)"></div>`;
     rightBox.appendChild(tgr);
 
-    // ── Per-task rows (numbered per owner) ──
-    const ownerIdx={};
+    // ── Sub-group by owner (담당별 칼럼) ──
+    const ownerOrder=[];const ownerMap={};
     projTasks.forEach(t=>{
-      const owner=t.owner||'미지정';
-      if(!ownerIdx[owner])ownerIdx[owner]=0;
-      ownerIdx[owner]++;
-      const taskNum=ownerIdx[owner];
+      const o=t.owner||'미지정';
+      if(!ownerMap[o]){ownerMap[o]=[];ownerOrder.push(o);}
+      ownerMap[o].push(t);
+    });
+
+    ownerOrder.forEach(owner=>{
+      const ownerTasks=ownerMap[owner];
       const oClr=ownerClr(owner!=='미지정'?owner:'');
-      const done=isTaskDone(t);
-      const st=stat(t),ph=PHASES[t.phase]||PHASES['DV'],x=td(t);
-      const pAct=prog(t),pPlan=progPlanned(t);
-      const pctAct=Math.round(pAct*100),pctPlan=Math.round(pPlan*100);
-      const pctCls=done?'pct-good':pctAct>=pctPlan?'pct-good':pctAct>=pctPlan*0.75?'pct-warn':'pct-bad';
-      // 지연/위험 판정
-      const delta=pctPlan-pctAct;
-      const daysLeft=x.eD&&!isNaN(x.eD)?Math.round((x.eD-todayD)/MS):999;
-      let riskCls='',tlRiskCls='',riskBadge='';
-      if(!done&&pPlan>0){
-        if(delta>=25){riskCls=' row-risk';tlRiskCls=' tl-risk';riskBadge='<span class="risk-badge rb-risk">🔴 지연</span>';}
-        else if(delta>=10){riskCls=' row-warn';tlRiskCls=' tl-warn';riskBadge='<span class="risk-badge rb-warn">🟡 주의</span>';}
-        else if(daysLeft>=0&&daysLeft<=7){riskCls=' row-due';riskBadge=`<span class="risk-badge rb-due">🔔 D-${daysLeft}</span>`;}
-      }
 
-      // ── LEFT: parent row ──
-      const leftRow=document.createElement('div');
-      leftRow.className='gantt-parent-row-left'+(done?' row-done':riskCls);
-      leftRow.innerHTML=`
-        <span class="task-num">${taskNum}</span>
-        <div class="task-name-cell">
-          <span class="task-name-text${done?' txt-done':''}">${t.name}</span>
-          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
-            <span class="phase-badge" style="font-size:.52rem;padding:1px 5px;background:${ph.bg};color:${ph.txt}">${ph.name}</span>
-            <span class="owner-remark" style="background:${oClr}20;color:${oClr};border:1px solid ${oClr}40">${owner}</span>
+      // ── Left: owner sub-header ──
+      const ownerHdr=document.createElement('div');
+      ownerHdr.className='owner-group-header';
+      ownerHdr.style.cssText=`border-left:3px solid ${oClr};background:${oClr}0d`;
+      ownerHdr.innerHTML=`<span class="owner-hdr-dot" style="background:${oClr}"></span><span class="owner-hdr-name" style="color:${oClr}">${owner}</span><span class="owner-hdr-cnt">${ownerTasks.length}건</span>`;
+      leftBox.appendChild(ownerHdr);
+
+      // ── Right: owner timeline sub-header ──
+      const ownerTlHdr=document.createElement('div');
+      ownerTlHdr.className='tl-owner-group-row';
+      ownerTlHdr.style.cssText=`background:${oClr}08`;
+      ownerTlHdr.innerHTML=`<div class="tl-owner-stripe" style="background:linear-gradient(90deg,${oClr},transparent);opacity:.07;position:absolute;inset:0"></div>`;
+      rightBox.appendChild(ownerTlHdr);
+
+      ownerTasks.forEach((t,idx)=>{
+        const taskNum=idx+1;
+        const done=isTaskDone(t);
+        const st=stat(t),ph=PHASES[t.phase]||PHASES['DV'],x=td(t);
+        const pAct=prog(t),pPlan=progPlanned(t);
+        const pctAct=Math.round(pAct*100),pctPlan=Math.round(pPlan*100);
+        const pctCls=done?'pct-good':pctAct>=pctPlan?'pct-good':pctAct>=pctPlan*0.75?'pct-warn':'pct-bad';
+        // 지연/위험 판정
+        const delta=pctPlan-pctAct;
+        const daysLeft=x.eD&&!isNaN(x.eD)?Math.round((x.eD-todayD)/MS):999;
+        let riskCls='',tlRiskCls='',riskBadge='';
+        if(!done&&pPlan>0){
+          if(delta>=25){riskCls=' row-risk';tlRiskCls=' tl-risk';riskBadge='<span class="risk-badge rb-risk">🔴 지연</span>';}
+          else if(delta>=10){riskCls=' row-warn';tlRiskCls=' tl-warn';riskBadge='<span class="risk-badge rb-warn">🟡 주의</span>';}
+          else if(daysLeft>=0&&daysLeft<=7){riskCls=' row-due';riskBadge=`<span class="risk-badge rb-due">🔔 D-${daysLeft}</span>`;}
+        }
+
+        // ── LEFT: parent row ──
+        const leftRow=document.createElement('div');
+        leftRow.className='gantt-parent-row-left'+(done?' row-done':riskCls);
+        leftRow.innerHTML=`
+          <span class="task-num">${taskNum}</span>
+          <div class="task-name-cell">
+            <span class="task-name-text${done?' txt-done':''}">${t.name}</span>
+            <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+              <span class="phase-badge" style="font-size:.52rem;padding:1px 5px;background:${ph.bg};color:${ph.txt}">${ph.name}</span>
+            </div>
           </div>
-        </div>
-        <div class="task-pct-cell"><span class="task-pct-badge ${pctCls}">${pctAct}%</span></div>
-        <span class="task-date-cell">${fd(x.sD)}–${fd(x.eD)}</span>
-        <div class="task-status-cell"><span class="status-pill ${st.c}">${st.l}</span></div>
-        ${riskBadge}
-        <div class="row-actions">
-          <button class="btn-edit-row" data-fid="${t.fid}" title="수정">✏</button>
-          <button class="btn-done-row" data-fid="${t.fid}" title="${done?'완료 취소':'완료 처리'}">✓</button>
-          <button class="btn-del-row"  data-fid="${t.fid}" title="삭제">🗑</button>
-        </div>`;
-      leftBox.appendChild(leftRow);
+          <div class="task-pct-cell"><span class="task-pct-badge ${pctCls}">${pctAct}%</span></div>
+          <span class="task-date-cell">${fd(x.sD)}–${fd(x.eD)}</span>
+          <div class="task-status-cell"><span class="status-pill ${st.c}">${st.l}</span></div>
+          ${riskBadge}
+          <div class="row-actions">
+            <button class="btn-edit-row" data-fid="${t.fid}" title="수정">✏</button>
+            <button class="btn-done-row" data-fid="${t.fid}" title="${done?'완료 취소':'완료 처리'}">✓</button>
+            <button class="btn-del-row"  data-fid="${t.fid}" title="삭제">🗑</button>
+          </div>`;
+        leftBox.appendChild(leftRow);
 
-      // ── RIGHT: parent timeline row ──
-      const rightRow=document.createElement('div');
-      rightRow.className='tl-parent-row'+(done?' tl-done':tlRiskCls);
-      const barL=(x.sD-psD)/MS*PX, barW=Math.max((x.eD-x.sD)/MS*PX,6);
-      const pipeW=Math.max(pAct*barW,0);
-      const grad=`linear-gradient(90deg,${ph.grad[0]},${ph.grad[1]})`;
-      const glow=`0 0 8px 3px ${ph.grad[0]}55,0 0 16px 5px ${ph.grad[0]}22`;
+        // ── RIGHT: parent timeline row ──
+        const rightRow=document.createElement('div');
+        rightRow.className='tl-parent-row'+(done?' tl-done':tlRiskCls);
+        const barL=(x.sD-psD)/MS*PX, barW=Math.max((x.eD-x.sD)/MS*PX,6);
+        const pipeW=Math.max(pAct*barW,0);
+        const grad=`linear-gradient(90deg,${ph.grad[0]},${ph.grad[1]})`;
+        const glow=`0 0 8px 3px ${ph.grad[0]}55,0 0 16px 5px ${ph.grad[0]}22`;
 
-      const bar=document.createElement('div');
-      bar.className='gantt-parent-bar'+(done?' bar-done':'');
-      bar.style.cssText=`left:${barL}px;width:${barW}px;`;
-      bar.innerHTML=`<div class="gantt-parent-bg" style="background:${grad}"></div>
-        <div class="gantt-parent-label">${t.name}</div>
-        ${done?'<div class="gantt-done-badge">✓ 완료</div>':''}`;
-      bar.addEventListener('mouseenter',e=>{
-        document.getElementById('ttTitle').textContent=t.name;
-        document.getElementById('ttOwner').textContent=owner;
-        document.getElementById('ttStart').textContent=fdF(x.sD);
-        document.getElementById('ttEnd').textContent=fdF(x.eD);
-        document.getElementById('ttPhase').textContent=ph.name;
-        document.getElementById('ttPct').textContent=`실제 ${pctAct}%  /  계획 ${pctPlan}%`;
-        document.getElementById('ttBar').style.cssText=`width:${pAct*100}%;background:${grad}`;
-        tip.classList.add('visible');posT(e);
-      });
-      bar.addEventListener('mousemove',posT);
-      bar.addEventListener('mouseleave',()=>tip.classList.remove('visible'));
-
-      const pipe=document.createElement('div');
-      pipe.className='gantt-pipe'+(done?' pipe-done':'');
-      pipe.style.cssText=`left:${barL}px;width:${pipeW}px;background:${grad};box-shadow:${glow}`;
-
-      rightRow.appendChild(bar);
-      rightRow.appendChild(pipe);
-      rightBox.appendChild(rightRow);
-
-      // ── Subtask rows ──
-      if(Array.isArray(t.subtasks)&&t.subtasks.length){
-        t.subtasks.forEach(sub=>{
-          const sDone=!!sub.done;
-          const ssD=sub.start?new Date(sub.start):null;
-          const seD=sub.end?new Date(sub.end):null;
-
-          // Left subtask row
-          const sleft=document.createElement('div');
-          sleft.className='gantt-subtask-left'+(sDone?' srow-done':'');
-          const chk=document.createElement('div');
-          chk.className='st-check'+(sDone?' checked':'');
-          chk.textContent=sDone?'✓':'';
-          chk.addEventListener('click',()=>toggleSubtask(t.fid,sub.id));
-          const nm=document.createElement('span');nm.className='st-name';nm.textContent=sub.name||'(이름 없음)';
-          const dt=document.createElement('span');dt.className='st-dates';
-          dt.textContent=(ssD&&seD)?`${fd(ssD)}–${fd(seD)}`:(ssD?fd(ssD):'');
-          sleft.appendChild(chk);sleft.appendChild(nm);sleft.appendChild(dt);
-          leftBox.appendChild(sleft);
-
-          // Right subtask row
-          const sright=document.createElement('div');sright.className='tl-subtask-row';
-          if(ssD&&seD&&!isNaN(ssD)&&!isNaN(seD)){
-            const sl=(ssD-psD)/MS*PX;
-            const sw=Math.max((seD-ssD)/MS*PX,4);
-            const sbar=document.createElement('div');
-            sbar.className='gantt-sub-bar '+(sDone?'gsb-done':'gsb-pending');
-            sbar.style.cssText=sDone
-              ?`left:${sl}px;width:${sw}px;background:${oClr};box-shadow:0 0 6px ${oClr}66`
-              :`left:${sl}px;width:${sw}px;background:transparent;border-color:${oClr}`;
-            sright.appendChild(sbar);
-          }
-          rightBox.appendChild(sright);
+        const bar=document.createElement('div');
+        bar.className='gantt-parent-bar'+(done?' bar-done':'');
+        bar.style.cssText=`left:${barL}px;width:${barW}px;`;
+        bar.innerHTML=`<div class="gantt-parent-bg" style="background:${grad}"></div>
+          <div class="gantt-parent-label">${t.name}</div>
+          ${done?'<div class="gantt-done-badge">✓ 완료</div>':''}
+          <div class="bar-resize-handle" title="끌어서 종료일 변경"></div>`;
+        bar.addEventListener('mouseenter',e=>{
+          if(ganttDrag)return;
+          document.getElementById('ttTitle').textContent=t.name;
+          document.getElementById('ttOwner').textContent=owner;
+          document.getElementById('ttStart').textContent=fdF(x.sD);
+          document.getElementById('ttEnd').textContent=fdF(x.eD);
+          document.getElementById('ttPhase').textContent=ph.name;
+          document.getElementById('ttPct').textContent=`실제 ${pctAct}%  /  계획 ${pctPlan}%`;
+          document.getElementById('ttBar').style.cssText=`width:${pAct*100}%;background:${grad}`;
+          tip.classList.add('visible');posT(e);
         });
-      }
+        bar.addEventListener('mousemove',e=>{if(!ganttDrag)posT(e);});
+        bar.addEventListener('mouseleave',()=>tip.classList.remove('visible'));
+
+        // ── Drag to move ──
+        bar.addEventListener('mousedown',e=>{
+          if(e.target.classList.contains('bar-resize-handle'))return;
+          e.preventDefault();tip.classList.remove('visible');
+          const capPsD=ps();
+          ganttDrag={bar,pipe,fid:t.fid,capPsD,origLeft:parseFloat(bar.style.left),origWidth:parseFloat(bar.style.width),startX:e.clientX,mode:'move',pAct};
+          bar.classList.add('dragging');
+          document.body.style.userSelect='none';
+        });
+        // ── Resize handle ──
+        bar.querySelector('.bar-resize-handle').addEventListener('mousedown',e=>{
+          e.stopPropagation();e.preventDefault();tip.classList.remove('visible');
+          const capPsD=ps();
+          ganttDrag={bar,pipe,fid:t.fid,capPsD,origLeft:parseFloat(bar.style.left),origWidth:parseFloat(bar.style.width),startX:e.clientX,mode:'resize',pAct};
+          document.body.style.cursor='ew-resize';
+          document.body.style.userSelect='none';
+        });
+
+        const pipe=document.createElement('div');
+        pipe.className='gantt-pipe'+(done?' pipe-done':'');
+        pipe.style.cssText=`left:${barL}px;width:${pipeW}px;background:${grad};box-shadow:${glow}`;
+
+        rightRow.appendChild(bar);
+        rightRow.appendChild(pipe);
+        rightBox.appendChild(rightRow);
+
+        // ── Subtask rows ──
+        if(Array.isArray(t.subtasks)&&t.subtasks.length){
+          t.subtasks.forEach(sub=>{
+            const sDone=!!sub.done;
+            const ssD=sub.start?new Date(sub.start):null;
+            const seD=sub.end?new Date(sub.end):null;
+
+            // Left subtask row
+            const sleft=document.createElement('div');
+            sleft.className='gantt-subtask-left'+(sDone?' srow-done':'');
+            const chk=document.createElement('div');
+            chk.className='st-check'+(sDone?' checked':'');
+            chk.textContent=sDone?'✓':'';
+            chk.addEventListener('click',()=>toggleSubtask(t.fid,sub.id));
+            const nm=document.createElement('span');nm.className='st-name';nm.textContent=sub.name||'(이름 없음)';
+            const dt=document.createElement('span');dt.className='st-dates';
+            dt.textContent=(ssD&&seD)?`${fd(ssD)}–${fd(seD)}`:(ssD?fd(ssD):'');
+            sleft.appendChild(chk);sleft.appendChild(nm);sleft.appendChild(dt);
+            leftBox.appendChild(sleft);
+
+            // Right subtask row
+            const sright=document.createElement('div');sright.className='tl-subtask-row';
+            if(ssD&&seD&&!isNaN(ssD)&&!isNaN(seD)){
+              const sl=(ssD-psD)/MS*PX;
+              const sw=Math.max((seD-ssD)/MS*PX,4);
+              const sbar=document.createElement('div');
+              sbar.className='gantt-sub-bar '+(sDone?'gsb-done':'gsb-pending');
+              sbar.style.cssText=sDone
+                ?`left:${sl}px;width:${sw}px;background:${oClr};box-shadow:0 0 6px ${oClr}66`
+                :`left:${sl}px;width:${sw}px;background:transparent;border-color:${oClr}`;
+              sright.appendChild(sbar);
+            }
+            rightBox.appendChild(sright);
+          });
+        }
+      });
     });
 
     lr.appendChild(leftBox);
@@ -4447,7 +4506,7 @@ function _renderGanttPipeline(){
   const projOrder=[];const projMap={};
   tasks.forEach(t=>{
     const o=t.owner||'미지정';
-    const pn=(cfg.ownerProjects?.[o])||'(미설정)';
+    const pn=t.projectName||(cfg.ownerProjects?.[o])||'(미설정)';
     if(!projMap[pn]){projMap[pn]=[];projOrder.push(pn);}
     projMap[pn].push(t);
   });
@@ -4483,6 +4542,11 @@ function openTaskModal(task=null){
   editingFid=task?task.fid:null;
   document.getElementById('taskModalTitle').textContent=task?'작업 수정':'작업 추가';
   document.getElementById('f-name').value=task?.name||'';
+  // populate project datalist
+  const dl=document.getElementById('projectDatalist');
+  const existingProjs=[...new Set(tasks.map(t=>t.projectName).filter(Boolean))];
+  dl.innerHTML=existingProjs.map(p=>`<option value="${p.replace(/"/g,'&quot;')}">`).join('');
+  document.getElementById('f-project').value=task?.projectName||'';
   document.getElementById('f-phase').value=task?.phase||'DV';
   document.getElementById('f-owner').value=task?.owner||'';
   document.getElementById('f-start').value=task?.start||'';
@@ -4505,6 +4569,7 @@ document.getElementById('taskForm').addEventListener('submit',async e=>{
   }).filter(s=>s.name);
   const fd2={name:document.getElementById('f-name').value.trim(),phase:document.getElementById('f-phase').value,
     owner:document.getElementById('f-owner').value.trim(),start:document.getElementById('f-start').value,end:document.getElementById('f-end').value,
+    projectName:document.getElementById('f-project').value.trim()||null,
     progress:rawPct!==''?Number(rawPct):null,subtasks};
   if(!fd2.name||!fd2.start||!fd2.end)return;
   if(new Date(fd2.end)<=new Date(fd2.start)){toast('⚠️ 완료일은 시작일 이후여야 합니다',true);return;}
@@ -4520,6 +4585,48 @@ async function delTask(fid){
   try{await deleteDoc(doc(db,'tasks',fid));toast('🗑 삭제되었습니다');}
   catch(err){toast('⚠️ 삭제 실패: '+err.message,true);}
 }
+// ══ GANTT DRAG & DROP ══
+document.addEventListener('mousemove',e=>{
+  if(!ganttDrag)return;
+  const dx=e.clientX-ganttDrag.startX;
+  const {bar,pipe,origLeft,origWidth,mode,pAct}=ganttDrag;
+  if(mode==='move'){
+    const newL=Math.max(0,origLeft+dx);
+    bar.style.left=newL+'px';
+    pipe.style.left=newL+'px';
+  }else{
+    const newW=Math.max(PX,origWidth+dx);
+    bar.style.width=newW+'px';
+    pipe.style.width=Math.max(0,pAct*newW)+'px';
+  }
+});
+document.addEventListener('mouseup',async e=>{
+  if(!ganttDrag)return;
+  const {bar,pipe,fid,capPsD,origLeft,origWidth,startX,mode,pAct}=ganttDrag;
+  ganttDrag=null;
+  bar.classList.remove('dragging');
+  document.body.style.cursor='';
+  document.body.style.userSelect='';
+  const dx=e.clientX-startX;
+  const newLeft=mode==='move'?Math.max(0,origLeft+dx):origLeft;
+  const newWidth=mode==='resize'?Math.max(PX,origWidth+dx):origWidth;
+  const toDate=px=>new Date(capPsD.getTime()+Math.round(px/PX)*MS);
+  const newSt=toDate(newLeft),newEd=toDate(newLeft+newWidth);
+  if(newEd<=newSt){
+    bar.style.left=origLeft+'px';bar.style.width=origWidth+'px';
+    pipe.style.left=origLeft+'px';pipe.style.width=(pAct*origWidth)+'px';
+    return;
+  }
+  const fmt=d=>d.toISOString().slice(0,10);
+  try{
+    await updateDoc(doc(db,'tasks',fid),{start:fmt(newSt),end:fmt(newEd)});
+    toast('✅ 일정 변경됨');
+  }catch(err){
+    bar.style.left=origLeft+'px';bar.style.width=origWidth+'px';
+    pipe.style.left=origLeft+'px';pipe.style.width=(pAct*origWidth)+'px';
+    toast('⚠️ 저장 실패: '+err.message,true);
+  }
+});
 document.getElementById('btnAddTask').addEventListener('click',()=>openTaskModal());
 document.getElementById('taskModalClose').addEventListener('click',closeTaskModal);
 document.getElementById('taskModalCancel').addEventListener('click',closeTaskModal);
