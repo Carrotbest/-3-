@@ -3084,7 +3084,7 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
           <button class="wr-btn-today" onclick="wrGoToday()">이번 주</button>
           <button class="wr-btn-load" onclick="wrLoadHistorical(this)" title="2025~2026 엑셀 기록 전체 불러오기">📥 기록 불러오기</button>
           <button class="wr-btn-save" onclick="wrSave()">💾 저장</button>
-          <button class="wr-btn-print" onclick="window.print()">🖨 프린트</button>
+          <button class="wr-btn-print" onclick="wrPrint()">🖨 프린트</button>
         </div>
       </div>
       <div class="wr-save-status" id="wrSaveStatus"></div>
@@ -4122,6 +4122,122 @@ function _wrBuildArchive(){
     </div>
   `).join('');
 }
+
+function wrPrint(){
+  const members=wrGetMembers();
+  const allRows=[...members,'기타'];
+  const thisRange=wrGetDateRange(_wrCurrentWeek);
+  const nextRange=wrGetDateRange(wrShiftWeek(_wrCurrentWeek,+1));
+  const mon=wrGetMonday(_wrCurrentWeek);
+  const curr=mon.getMonth()+1;
+  const prev=curr===1?12:curr-1;
+  const fut=curr===12?1:curr+1;
+  const g=id=>(document.getElementById(id)||{}).value||'';
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const mgmtRows=`
+    <tr>
+      <td class="td-label">경영보고<br>주요업무</td>
+      <td class="td-past">${esc(g('wrMgmt_prev'))}</td>
+      <td class="td-curr">${esc(g('wrMgmt_curr'))}</td>
+      <td class="td-future">${esc(g('wrMgmt_future'))}</td>
+    </tr>`;
+
+  const workRows=allRows.map(n=>`
+    <tr>
+      <td class="td-label">${esc(n)}</td>
+      <td>${esc(g('wr_'+n+'_금주계획'))}</td>
+      <td>${esc(g('wr_'+n+'_금주결과'))}</td>
+      <td class="td-next-plan">${esc(g('wr_'+n+'_차주계획'))}</td>
+    </tr>`).join('');
+
+  const html=`<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8">
+<title>주간 업무 보고 — ${_wrCurrentWeek}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Malgun Gothic','맑은 고딕',Arial,sans-serif;font-size:8.5pt;color:#000;background:#fff;padding:8mm 10mm}
+@page{size:A4 landscape;margin:8mm 10mm}
+h1{font-size:13pt;font-weight:900;text-align:center;letter-spacing:.05em;margin-bottom:3mm}
+.doc-meta{display:flex;justify-content:space-between;font-size:7.5pt;color:#444;border-bottom:1pt solid #000;padding-bottom:2mm;margin-bottom:3.5mm}
+.sec-hdr{font-size:8pt;font-weight:700;background:#1e293b;color:#fff;padding:2.5pt 7pt;margin-bottom:1.5mm;border-radius:2pt}
+table{width:100%;border-collapse:collapse;margin-bottom:4mm;table-layout:fixed}
+th,td{border:.5pt solid #94a3b8;padding:3pt 5pt;vertical-align:top;font-size:8pt;word-break:break-all;white-space:pre-wrap}
+th{text-align:center;font-weight:700;font-size:7.5pt}
+.th-label{background:#dbeafe;color:#1e3a5f;width:52pt}
+.th-week{background:#bfdbfe;color:#1e3a5f}
+.th-next{background:#bbf7d0;color:#14532d}
+.th-past{background:#f1f5f9;color:#334155}
+.th-curr{background:#ede9fe;color:#3b0764}
+.th-future{background:#fef9c3;color:#713f12}
+.th-sub{background:#f8fafc;color:#475569;font-size:7pt}
+.td-label{background:#f0f9ff;font-weight:700;text-align:center;vertical-align:middle;width:52pt;font-size:8pt}
+.td-next-plan{background:#f0fdf4}
+.note{font-size:6.5pt;color:#64748b;border-top:.5pt solid #ccc;padding-top:2mm;margin-top:1mm;line-height:1.6}
+</style>
+</head><body>
+<h1>주간 업무 보고</h1>
+<div class="doc-meta">
+  <span>통합원단부 3팀</span>
+  <span>${_wrCurrentWeek} &nbsp;|&nbsp; 금주: ${thisRange} &nbsp;·&nbsp; 차주: ${nextRange}</span>
+  <span>작성: 박향근 외</span>
+</div>
+
+<div class="sec-hdr">경영보고</div>
+<table>
+  <colgroup><col style="width:52pt"><col><col><col></colgroup>
+  <thead>
+    <tr>
+      <th class="th-label">항목</th>
+      <th class="th-past">${prev}월 경과</th>
+      <th class="th-curr">${curr}월 계획</th>
+      <th class="th-future">${fut}~${fut+2<=12?fut+2:fut+2-12}월 계획</th>
+    </tr>
+  </thead>
+  <tbody>${mgmtRows}</tbody>
+</table>
+
+<div class="sec-hdr">주간 업무</div>
+<table>
+  <colgroup><col style="width:52pt"><col><col><col></colgroup>
+  <thead>
+    <tr>
+      <th class="th-label" rowspan="2">담당</th>
+      <th colspan="2" class="th-week">금주 (${thisRange})</th>
+      <th class="th-next">차주 (${nextRange})</th>
+    </tr>
+    <tr>
+      <th class="th-sub">계획</th>
+      <th class="th-sub">결과</th>
+      <th class="th-sub">계획</th>
+    </tr>
+  </thead>
+  <tbody>${workRows}</tbody>
+</table>
+
+<div class="note">
+  ** 주업무는 개발 위주 업무(분석 포함)내용 작성 &nbsp;&nbsp;|&nbsp;&nbsp;
+  ** 기타는 내/외부 업무 관련 미팅, 전시회, 세미나, 외근등 작성 &nbsp;&nbsp;|&nbsp;&nbsp;
+  ** 매주 목요일 퇴근 전까지 작성 후 소팀장 보고
+</div>
+</body></html>`;
+
+  const w=window.open('','_blank','width=1100,height=750');
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(),400);
+}
+
+// ── WR 함수 전역 노출 (module scope → window) ──
+window.wrPrevWeek       = wrPrevWeek;
+window.wrNextWeek       = wrNextWeek;
+window.wrGoToday        = wrGoToday;
+window.wrSave           = wrSave;
+window.wrLoadWeek       = wrLoadWeek;
+window.wrLoadHistorical = wrLoadHistorical;
+window.wrPrint          = wrPrint;
+window.renderWeeklyReport = renderWeeklyReport;
 
 function renderOverview(){
   if(typeof window._hpData !== 'undefined' && window._hpData){
