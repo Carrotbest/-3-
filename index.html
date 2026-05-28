@@ -3969,7 +3969,14 @@ const WR_MGMT_DEFAULT = {
 };
 
 function wrGetMembers(){
-  return JSON.parse(localStorage.getItem('wr_members')||'null')||WR_MEMBERS_DEFAULT;
+  const stored=JSON.parse(localStorage.getItem('wr_members')||'null');
+  const base=stored?[...stored]:[...WR_MEMBERS_DEFAULT];
+  // 김지현이 누락된 경우 항상 진영은 뒤에 삽입
+  if(!base.includes('김지현')){
+    const after=base.indexOf('진영은');
+    base.splice(after>=0?after+1:base.length,0,'김지현');
+  }
+  return base;
 }
 
 function wrGetISOWeekKey(date){
@@ -4305,7 +4312,8 @@ function wrPrint(){
   const prev=curr===1?12:curr-1;
   const fut=curr===12?1:curr+1;
   const futEnd=fut+2>12?fut+2-12:fut+2;
-  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  // \n → <br> 변환 제거: white-space:pre-wrap으로 앱 textarea와 동일하게 렌더링
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const gv=(name,field)=>{
     if(_wrLockState[name]) return (_wrRowValues[name]||{})[field]||'';
     return document.getElementById(`wr_${name}_${field}`)?.value||'';
@@ -4417,11 +4425,11 @@ h1{font-size:13pt;font-weight:900;text-align:center;letter-spacing:.06em;
 .doc-meta strong{font-size:8pt;color:#000}
 .sec-hdr{font-size:8pt;font-weight:700;background:#1e293b;color:#fff;
          padding:3pt 8pt;margin-bottom:2mm;letter-spacing:.05em}
-table{width:100%;border-collapse:collapse;margin-bottom:4mm;table-layout:fixed}
-th,td{border:.6pt solid #888;padding:3.5pt 4pt;vertical-align:top;
-      font-size:7.5pt;word-break:break-word;line-height:1.4}
-td br{display:block;margin-bottom:1pt}
-th{text-align:center;font-weight:700;font-size:7pt}
+table{width:100%;border-collapse:collapse;margin-bottom:3.5mm;table-layout:fixed}
+th,td{border:.6pt solid #888;padding:3pt 4pt;vertical-align:top;
+      font-size:8pt;word-break:break-word;line-height:1.62;
+      white-space:pre-wrap}
+th{text-align:center;font-weight:700;font-size:7pt;white-space:normal}
 .th-label{background:#dbeafe;color:#1e3a5f;width:42pt}
 .th-week{background:#bfdbfe;color:#1e3a5f}
 .th-next{background:#bbf7d0;color:#14532d}
