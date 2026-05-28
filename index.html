@@ -4069,9 +4069,8 @@ function _wrRowHTML(name){
   if(locked){
     const vals=_wrRowValues[name]||{금주계획:'',금주결과:'',차주계획:''};
     const sv=v=>{
-      // 연속 빈 줄 최대 1개 압축 후 pre-wrap 렌더링 (프린트와 동일)
       const txt=v
-        ?v.replace(/\n{3,}/g,'\n\n').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        ?v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         :isKita?'—':'(미입력)';
       return `<div class="wr-static-text${v?'':' wr-empty'}">${txt}</div>`;
     };
@@ -4348,10 +4347,8 @@ function wrPrint(){
   const prev=curr===1?12:curr-1;
   const fut=curr===12?1:curr+1;
   const futEnd=fut+2>12?fut+2-12:fut+2;
-  // pre-wrap 렌더링 — 연속 빈 줄은 최대 1개로 압축해 셀 높이 통제
-  const esc=s=>s
-    .replace(/\n{3,}/g,'\n\n')          // 빈 줄 3개+ → 1개로
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // pre-wrap 렌더링 — 앱 화면 그대로 출력
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const gv=(name,field)=>{
     if(_wrLockState[name]) return (_wrRowValues[name]||{})[field]||'';
     return document.getElementById(`wr_${name}_${field}`)?.value||'';
@@ -4402,7 +4399,7 @@ function autoFitFont(startPt, minPt){
 
 // 미리보기 로드 시: 웹 앱과 동일한 시작 포인트(9pt)에서 자동조절
 window.addEventListener('load',function(){
-  autoFitFont(8, 5);
+  autoFitFont(9, 5);
 });
 
 function doPrint(){
@@ -4411,7 +4408,7 @@ function doPrint(){
   ctrl.style.display='none';
   document.body.style.overflow='hidden';
   // 다시 최적 폰트 계산
-  autoFitFont(8, 5);
+  autoFitFont(9, 5);
   setTimeout(function(){
     window.print();
     setTimeout(function(){
@@ -4419,7 +4416,7 @@ function doPrint(){
       wrap.style.transform='';
       document.body.style.overflow='';
       document.body.style.height='';
-      autoFitFont(8, 5); // 미리보기 복원
+      autoFitFont(9, 5); // 미리보기 복원
     },600);
   },300);
 }
@@ -4476,7 +4473,7 @@ html,body{
   #wrap{box-shadow:none;transform-origin:top center}
 }
 /* ── 문서 스타일 (font-size는 JS가 동적 조절 — 여기선 기준값만) ── */
-#wrap{font-size:8pt} /* autoFitFont() 시작값, JS가 덮어씀 */
+#wrap{font-size:9pt} /* autoFitFont() 시작값, JS가 덮어씀 */
 h1{font-size:1.44em;font-weight:900;text-align:center;letter-spacing:.06em;
    margin-bottom:3mm;padding-bottom:2mm;border-bottom:1.5pt solid #000}
 .doc-meta{display:flex;justify-content:space-between;align-items:center;
