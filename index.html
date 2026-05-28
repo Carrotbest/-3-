@@ -4081,8 +4081,7 @@ async function wrLoadHistorical(btn){
   if(!confirm('2025~2026 엑셀 업무 보고 전체 기록을 불러옵니다.\n기존 저장된 데이터는 유지되며, 겹치는 주차는 덮어씁니다.\n계속하시겠습니까?')) return;
   btn.disabled=true; btn.textContent='⏳ 불러오는 중...';
   try{
-    const base=location.origin+location.pathname.replace(/\/[^/]*$/,'/');
-    const res=await fetch(base+'wr_data.json?v='+Date.now());
+    const res=await fetch('./wr_data.json?v='+Date.now());
     if(!res.ok) throw new Error('파일을 찾을 수 없습니다 ('+res.status+')');
     const json=await res.json();
     // store members
