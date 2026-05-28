@@ -6246,60 +6246,119 @@ function parseHpData(wb){
 const SP_DRIVE_ID  = 'b!kNIfZliur0uAMT0n-Tn-GR-HuLsZAvBHgJO-q1vf6Il-7YM4JDIoR5ZcbYJQFNnK';
 const SP_ITEM_ID   = '0152WH4EFVE34TV5SWVBDZU5WGGQ3LOPBU';
 const SP_FILE_NAME = '샘플 관리 대장.xlsx';
+// SharePoint 직접 다운로드 URL (CORS 우회 — 브라우저 SharePoint 세션 사용)
+const SP_DIRECT_URL = 'https://hansoll365.sharepoint.com/_api/v2.0/drives/'
+  + SP_DRIVE_ID + '/items/' + SP_ITEM_ID + '/content';
+const SP_WEB_URL = 'https://hansoll365.sharepoint.com/sites/msteams_4f78c6/'
+  + 'Shared%20Documents/3%ED%8C%80/%EC%83%98%ED%94%8C%20%EA%B4%80%EB%A6%AC%20%EB%8C%80%EC%9E%A5.xlsx';
 
 window.hpSyncFromSharePoint = async function(btnEl){
   const btns = document.querySelectorAll('.sp-sync-btn');
   btns.forEach(b=>{ b.disabled=true; b.textContent='⏳ 불러오는 중…'; });
-  document.getElementById('hpUpdateMeta').textContent = '☁ SharePoint에서 불러오는 중…';
+  const metaEl = document.getElementById('hpUpdateMeta');
+  if(metaEl) metaEl.textContent = '☁ SharePoint에서 불러오는 중…';
+
   try{
-    // ── STEP 1: Graph API로 파일 메타데이터 & 다운로드 URL 획득
-    // @microsoft.graph.downloadUrl 은 익명 SAS URL → 별도 인증 불필요
-    const metaUrl = `https://graph.microsoft.com/v1.0/drives/${SP_DRIVE_ID}/items/${SP_ITEM_ID}?$select=id,name,lastModifiedDateTime,@microsoft.graph.downloadUrl`;
-    let dlUrl, lastMod;
-    try{
-      const metaRes = await fetch(metaUrl, {credentials:'include'});
-      if(!metaRes.ok) throw new Error(`Graph ${metaRes.status}`);
-      const meta = await metaRes.json();
-      dlUrl   = meta['@microsoft.graph.downloadUrl'];
-      lastMod = meta.lastModifiedDateTime
-        ? new Date(meta.lastModifiedDateTime).toLocaleDateString('ko-KR')
-        : new Date().toLocaleDateString('ko-KR');
-    }catch(e){
-      throw new Error('Microsoft 365 로그인 필요 또는 Graph API 접근 불가: '+e.message);
-    }
-    if(!dlUrl) throw new Error('다운로드 URL 없음 — SharePoint 권한을 확인하세요');
-
-    // ── STEP 2: 엑셀 바이너리 다운로드
+    // SharePoint REST API 직접 호출 (Graph API CORS 우회)
+    // 브라우저에 SharePoint 로그인 세션이 있으면 쿠키로 인증됨
     btns.forEach(b=>{ b.textContent='⏳ 파일 다운로드 중…'; });
-    const fileRes = await fetch(dlUrl);
-    if(!fileRes.ok) throw new Error(`파일 다운로드 실패 (${fileRes.status})`);
-    const buf = await fileRes.arrayBuffer();
 
-    // ── STEP 3: 기존 parseHpData 로직으로 파싱 (원본과 동일)
+    const res = await fetch(SP_DIRECT_URL, {
+      credentials: 'include',   // SharePoint 세션 쿠키 자동 전송
+      headers: { 'Accept': 'application/octet-stream' }
+    });
+
+    if(res.status === 401 || res.status === 403){
+      // 로그인 안 된 경우 → SharePoint 로그인 안내
+      throw new Error('LOGIN_REQUIRED');
+    }
+    if(!res.ok) throw new Error(`다운로드 실패 (HTTP ${res.status})`);
+
+    const buf = await res.arrayBuffer();
+    if(buf.byteLength < 1000) throw new Error('파일이 너무 작습니다. 다시 시도해주세요.');
+
+    // 기존 parseHpData 로직으로 파싱 (원본과 완전히 동일)
     btns.forEach(b=>{ b.textContent='⏳ 파싱 중…'; });
     const wb = XLSX.read(buf, {type:'array', cellDates:true});
     hpData = parseHpData(wb);
     if(!hpData) throw new Error('현황 시트를 찾을 수 없습니다');
 
-    // ── STEP 4: 렌더 & 저장
+    // 렌더 & 저장
     renderHpHome(hpData);
-    const updatedAt = new Date().toLocaleDateString('ko-KR');
-    {const _d=document.getElementById('tdBadgeDot');if(_d)_d.classList.add('live');
-     const _t=document.getElementById('tdBadgeText');if(_t)_t.textContent='LIVE · '+SP_FILE_NAME;}
-    document.getElementById('hpUpdateMeta').textContent = 'SharePoint · ' + lastMod + ' 기준';
-    try{ document.getElementById('ovUpdateMeta').textContent = 'SharePoint · '+lastMod+' 기준'; }catch(e){}
+    const now = new Date().toLocaleDateString('ko-KR');
+    const _d = document.getElementById('tdBadgeDot');
+    const _t = document.getElementById('tdBadgeText');
+    if(_d) _d.classList.add('live');
+    if(_t) _t.textContent = 'LIVE · ' + SP_FILE_NAME;
+    if(metaEl) metaEl.textContent = 'SharePoint · ' + now + ' 동기화';
+    try{ document.getElementById('ovUpdateMeta').textContent = 'SharePoint · ' + now + ' 동기화'; }catch(e){}
     hpSaveToStorage(hpData, SP_FILE_NAME);
     btns.forEach(b=>{ b.disabled=false; b.textContent='☁ SharePoint 불러오기'; });
 
   }catch(err){
     console.error('[SP Sync]', err);
-    const msg = err.message || String(err);
-    document.getElementById('hpUpdateMeta').textContent = '⚠ '+msg;
     btns.forEach(b=>{ b.disabled=false; b.textContent='☁ SharePoint 불러오기'; });
-    alert('SharePoint 불러오기 실패\n\n' + msg
-      + '\n\n해결방법: Microsoft 365(office.com)에 로그인한 브라우저에서 다시 시도하세요.');
+
+    if(err.message === 'LOGIN_REQUIRED' || err.message.includes('LOGIN')){
+      // SharePoint 로그인 팝업 띄우기
+      if(metaEl) metaEl.textContent = '⚠ SharePoint 로그인 필요';
+      const go = confirm(
+        'SharePoint 로그인이 필요합니다.\n\n'
+        + '[확인]을 누르면 SharePoint 로그인 페이지가 열립니다.\n'
+        + '로그인 후 이 페이지로 돌아와서 다시 버튼을 눌러주세요.'
+      );
+      if(go) window.open('https://hansoll365.sharepoint.com', '_blank');
+    } else if(err.message.includes('fetch') || err.message.includes('Failed')){
+      // CORS 또는 네트워크 오류 → 팝업 방식 안내
+      if(metaEl) metaEl.textContent = '⚠ 네트워크 오류 — 아래 방법으로 시도';
+      _showSpFallback();
+    } else {
+      if(metaEl) metaEl.textContent = '⚠ ' + err.message;
+      alert('SharePoint 불러오기 실패\n\n' + err.message);
+    }
   }
 };
+
+// 대안: SharePoint에서 파일 직접 열어서 붙여넣기 안내 모달
+function _showSpFallback(){
+  let modal = document.getElementById('spFallbackModal');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'spFallbackModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+    modal.innerHTML = `
+      <div style="background:#111827;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:28px;width:460px;max-width:90vw">
+        <div style="font-size:.9rem;font-weight:700;color:#e2e8f0;margin-bottom:6px">☁ SharePoint 불러오기</div>
+        <div style="font-size:.72rem;color:#64748b;margin-bottom:20px">CORS 정책으로 인해 직접 연동이 제한됩니다. 아래 방법으로 불러올 수 있어요.</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="${SP_WEB_URL}" target="_blank"
+            style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;
+                   background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.3);text-decoration:none;cursor:pointer">
+            <span style="font-size:1.2rem">📂</span>
+            <div>
+              <div style="font-size:.76rem;font-weight:700;color:#67e8f9">SharePoint에서 파일 열기</div>
+              <div style="font-size:.65rem;color:#64748b;margin-top:2px">클릭 → 다운로드 → 아래 업로드 버튼으로 불러오기</div>
+            </div>
+          </a>
+          <button onclick="hpOpenUploadModal();document.getElementById('spFallbackModal').remove()"
+            style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;
+                   background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);cursor:pointer;width:100%;text-align:left">
+            <span style="font-size:1.2rem">⬆️</span>
+            <div>
+              <div style="font-size:.76rem;font-weight:700;color:#c4b5fd">파일 직접 업로드</div>
+              <div style="font-size:.65rem;color:#64748b;margin-top:2px">다운로드한 엑셀 파일을 여기서 업로드</div>
+            </div>
+          </button>
+        </div>
+        <button onclick="this.closest('#spFallbackModal').remove()"
+          style="margin-top:16px;width:100%;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.1);
+                 background:transparent;color:#64748b;font-size:.72rem;cursor:pointer">닫기</button>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+  }
+  modal.style.display='flex';
+}
 // ──────────────────────────────────────────────────────────────────
 
 // ── Upload modal (DnD)
