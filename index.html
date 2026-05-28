@@ -1621,6 +1621,19 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
 .wr-textarea{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e2e8f0;padding:9px 11px;width:100%;resize:vertical;font-size:.76rem;line-height:1.65;font-family:inherit;transition:border-color .2s,background .2s;box-sizing:border-box}
 .wr-textarea:focus{outline:none;border-color:rgba(139,92,246,.5);background:rgba(255,255,255,.06)}
 .wr-textarea::placeholder{color:#475569}
+/* wr-table */
+.wr-table-wrap{overflow-x:auto;margin-top:4px}
+.wr-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.wr-table th{background:rgba(255,255,255,.05);color:#94a3b8;font-size:.65rem;font-weight:700;letter-spacing:.07em;padding:9px 12px;border:1px solid rgba(255,255,255,.09);text-align:center;white-space:nowrap}
+.wr-th-label{text-align:center;background:rgba(139,92,246,.1)!important;color:#c4b5fd!important;width:90px}
+.wr-th-week{background:rgba(6,182,212,.1)!important;color:#67e8f9!important}
+.wr-th-next{background:rgba(16,185,129,.08)!important;color:#6ee7b7!important}
+.wr-th-past{background:rgba(100,116,139,.12)!important;color:#94a3b8!important}
+.wr-th-curr{background:rgba(139,92,246,.1)!important;color:#c4b5fd!important}
+.wr-th-future{background:rgba(245,158,11,.08)!important;color:#fbbf24!important}
+.wr-th-sub{background:rgba(255,255,255,.03)!important;color:#64748b!important;font-size:.6rem}
+.wr-table td{border:1px solid rgba(255,255,255,.07);padding:7px;vertical-align:top}
+.wr-td-label{background:rgba(255,255,255,.03);font-size:.69rem;font-weight:700;color:#e2e8f0;text-align:center;vertical-align:middle;white-space:nowrap}
 .wr-archive-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .wr-archive-chip{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 14px;font-size:.7rem;color:#94a3b8;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:7px}
 .wr-archive-chip span{font-size:.62rem;color:#64748b}
@@ -1642,9 +1655,19 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
   .wr-field-label{color:#475569!important;margin-bottom:2pt}
   .wr-week-tag.this{background:#e0f2fe!important;color:#0369a1!important;border-color:#7dd3fc!important;-webkit-print-color-adjust:exact!important}
   .wr-week-tag.next{background:#dcfce7!important;color:#166534!important;border-color:#86efac!important;-webkit-print-color-adjust:exact!important}
-  .wr-textarea{background:#f8fafc!important;border:0.5pt solid #cbd5e1!important;color:#1e293b!important;font-size:8pt!important;padding:5pt!important;resize:none!important;-webkit-print-color-adjust:exact!important}
+  .wr-textarea{background:#f8fafc!important;border:0.5pt solid #cbd5e1!important;color:#1e293b!important;font-size:7.5pt!important;padding:4pt!important;resize:none!important;-webkit-print-color-adjust:exact!important}
   .hp-sec-hdr{color:#1e293b!important;border-color:#cbd5e1!important}
   .hp-sec-sub{color:#64748b!important}
+  .wr-table{border-collapse:collapse!important;width:100%!important}
+  .wr-table th,.wr-table td{border:0.5pt solid #94a3b8!important;padding:5pt 6pt!important;-webkit-print-color-adjust:exact!important}
+  .wr-th-label{background:#e8edf5!important;color:#1e293b!important}
+  .wr-th-week{background:#e0f2fe!important;color:#0369a1!important}
+  .wr-th-next{background:#dcfce7!important;color:#166534!important}
+  .wr-th-past{background:#f1f5f9!important;color:#475569!important}
+  .wr-th-curr{background:#ede9fe!important;color:#5b21b6!important}
+  .wr-th-future{background:#fef9c3!important;color:#713f12!important}
+  .wr-th-sub{background:#f8fafc!important;color:#64748b!important}
+  .wr-td-label{background:#f8fafc!important;color:#1e293b!important;font-size:8pt!important}
 }
 </style>
 </head>
@@ -3068,25 +3091,53 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
         <div class="wr-print-meta" id="wrPrintDate"></div>
       </div>
 
-      <!-- 부서 목표 -->
+      <!-- 경영보고 -->
       <div class="hp-sec">
-        <div class="hp-sec-hdr">부서 목표<span class="hp-sec-sub">시즌 방향 · 중점 추진 과제</span></div>
-        <div class="wr-goal-grid">
-          <div class="wr-goal-card">
-            <div class="wr-goal-label">3개월 목표</div>
-            <textarea class="wr-textarea" id="wrGoal3m" rows="3" placeholder="3개월 중점 목표를 입력하세요...&#10;(예: Core Fabric Updates, Technical Services 등)"></textarea>
-          </div>
-          <div class="wr-goal-card">
-            <div class="wr-goal-label">당월 목표</div>
-            <textarea class="wr-textarea" id="wrGoalMonth" rows="3" placeholder="이번 달 목표를 입력하세요...&#10;(예: Market Trendy Fabric Developments 등)"></textarea>
-          </div>
+        <div class="hp-sec-hdr">경영보고<span class="hp-sec-sub" id="wrMgmtSub">월별 업무 현황</span></div>
+        <div class="wr-table-wrap">
+          <table class="wr-table">
+            <colgroup><col style="width:90px"><col><col><col></colgroup>
+            <thead>
+              <tr>
+                <th class="wr-th-label">항목</th>
+                <th class="wr-th-past" id="wrMgmtPrevLbl">이전달 경과</th>
+                <th class="wr-th-curr" id="wrMgmtCurrLbl">이번달 계획</th>
+                <th class="wr-th-future" id="wrMgmtFutureLbl">향후 계획</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="wr-td-label">경영보고<br>주요업무</td>
+                <td><textarea class="wr-textarea" id="wrMgmt_prev" rows="5" placeholder="이전달 주요 업무 경과&#10;예) Market Trendy Fabric Developments (S/S)&#10;Technical Services&#10;Core Fabric Updates"></textarea></td>
+                <td><textarea class="wr-textarea" id="wrMgmt_curr" rows="5" placeholder="이번달 계획 업무&#10;예) Market Trendy Fabric Developments (New Season)&#10;Technical Services&#10;Strategic R&amp;D Projects"></textarea></td>
+                <td><textarea class="wr-textarea" id="wrMgmt_future" rows="5" placeholder="향후 계획&#10;예) Seasonal Market Trendy Fabric Developments&#10;Technical Services&#10;Strategic R&amp;D Projects"></textarea></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- 담당자별 주간 업무 -->
+      <!-- 주간 업무 -->
       <div class="hp-sec">
-        <div class="hp-sec-hdr">주간 업무<span class="hp-sec-sub">금주 결과 · 기타 · 차주 계획</span></div>
-        <div class="wr-member-grid" id="wrMemberGrid"></div>
+        <div class="hp-sec-hdr">주간 업무<span class="hp-sec-sub">금주 계획 · 결과 · 차주 계획</span></div>
+        <div class="wr-table-wrap">
+          <table class="wr-table">
+            <colgroup><col style="width:90px"><col><col><col></colgroup>
+            <thead>
+              <tr>
+                <th class="wr-th-label" rowspan="2">담당</th>
+                <th colspan="2" class="wr-th-week" id="wrThisWeekHdr">금주</th>
+                <th class="wr-th-next" id="wrNextWeekHdr">차주</th>
+              </tr>
+              <tr>
+                <th class="wr-th-sub">계획</th>
+                <th class="wr-th-sub">결과</th>
+                <th class="wr-th-sub">계획</th>
+              </tr>
+            </thead>
+            <tbody id="wrMemberRows"></tbody>
+          </table>
+        </div>
       </div>
 
       <!-- 아카이브 -->
@@ -3901,7 +3952,7 @@ let _wrCurrentWeek=null;
 function renderWeeklyReport(){
   if(!_wrCurrentWeek) _wrCurrentWeek=wrGetISOWeekKey(new Date());
   _wrUpdateUI();
-  _wrBuildGrid();
+  _wrBuildRows();
   _wrLoadData();
   _wrBuildArchive();
 }
@@ -3910,48 +3961,71 @@ function _wrUpdateUI(){
   const lbl=document.getElementById('wrWeekLabel');
   const dr=document.getElementById('wrDateRange');
   const pd=document.getElementById('wrPrintDate');
+  const thisRange=wrGetDateRange(_wrCurrentWeek);
+  const nextRange=wrGetDateRange(wrShiftWeek(_wrCurrentWeek,+1));
   if(lbl) lbl.textContent=_wrCurrentWeek;
-  if(dr)  dr.textContent=wrGetDateRange(_wrCurrentWeek);
-  if(pd)  pd.textContent=`${_wrCurrentWeek}  (${wrGetDateRange(_wrCurrentWeek)})`;
+  if(dr)  dr.textContent=thisRange;
+  if(pd)  pd.textContent=`${_wrCurrentWeek} (${thisRange})`;
+  // week table headers
+  const tw=document.getElementById('wrThisWeekHdr');
+  const nw=document.getElementById('wrNextWeekHdr');
+  if(tw) tw.textContent=`금주 (${thisRange})`;
+  if(nw) nw.textContent=`차주 (${nextRange})`;
+  // mgmt section: dynamic month labels
+  const mon=wrGetMonday(_wrCurrentWeek);
+  const curr=mon.getMonth()+1;
+  const prev=curr===1?12:curr-1;
+  const fut=curr+1>12?curr+1-12:curr+1;
+  const el1=document.getElementById('wrMgmtPrevLbl');
+  const el2=document.getElementById('wrMgmtCurrLbl');
+  const el3=document.getElementById('wrMgmtFutureLbl');
+  if(el1) el1.textContent=`${prev}월 경과`;
+  if(el2) el2.textContent=`${curr}월 계획`;
+  if(el3) el3.textContent=`${fut}~${fut+2<=12?fut+2:fut+2-12}월 계획`;
 }
 
-function _wrBuildGrid(){
-  const grid=document.getElementById('wrMemberGrid');
-  if(!grid) return;
+function _wrBuildRows(){
+  const tbody=document.getElementById('wrMemberRows');
+  if(!tbody) return;
   const members=wrGetMembers();
-  grid.innerHTML=members.map(name=>`
-    <div class="wr-member-card">
-      <div class="wr-member-name">${name}</div>
-      <div class="wr-field-group">
-        <div class="wr-field-label"><span class="wr-week-tag this">금주</span> 업무 결과</div>
-        <textarea class="wr-textarea" id="wr_${name}_업무결과" rows="4" placeholder="이번 주 주요 업무 결과&#10;(개발 위주 업무, 분석 포함)"></textarea>
-      </div>
-      <div class="wr-field-group">
-        <div class="wr-field-label"><span class="wr-week-tag this">금주</span> 기타</div>
-        <textarea class="wr-textarea" id="wr_${name}_기타" rows="2" placeholder="미팅, 전시회, 세미나, 외근 등"></textarea>
-      </div>
-      <div class="wr-field-group">
-        <div class="wr-field-label"><span class="wr-week-tag next">차주</span> 계획</div>
-        <textarea class="wr-textarea" id="wr_${name}_차주계획" rows="3" placeholder="다음 주 업무 계획"></textarea>
-      </div>
-    </div>
+  const allRows=[...members,'기타'];
+  tbody.innerHTML=allRows.map(name=>`
+    <tr>
+      <td class="wr-td-label">${name}</td>
+      <td><textarea class="wr-textarea" id="wr_${name}_금주계획" rows="6" placeholder="이번 주 계획&#10;(개발 위주 업무, 분석 포함)"></textarea></td>
+      <td><textarea class="wr-textarea" id="wr_${name}_금주결과" rows="6" placeholder="이번 주 결과"></textarea></td>
+      <td><textarea class="wr-textarea" id="wr_${name}_차주계획" rows="6" placeholder="${name==='기타'?'미팅, 전시회, 세미나, 외근 등':'다음 주 업무 계획'}"></textarea></td>
+    </tr>
   `).join('');
 }
 
 function _wrLoadData(){
   const data=JSON.parse(localStorage.getItem(`wr_${_wrCurrentWeek}`)||'null');
   const members=wrGetMembers();
+  const allRows=[...members,'기타'];
+  const fields=['금주계획','금주결과','차주계획'];
+  const mgmtFields=['wrMgmt_prev','wrMgmt_curr','wrMgmt_future'];
   if(!data){
-    ['wrGoal3m','wrGoalMonth'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    members.forEach(n=>['업무결과','기타','차주계획'].forEach(f=>{const el=document.getElementById(`wr_${n}_${f}`);if(el)el.value='';}));
+    mgmtFields.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    allRows.forEach(n=>fields.forEach(f=>{const el=document.getElementById(`wr_${n}_${f}`);if(el)el.value='';}));
     const s=document.getElementById('wrSaveStatus');if(s)s.textContent='';
     return;
   }
-  const sv=document.getElementById('wrGoal3m');if(sv)sv.value=data.팀목표?.['3개월']||'';
-  const sm=document.getElementById('wrGoalMonth');if(sm)sm.value=data.팀목표?.['당월']||'';
-  members.forEach(n=>{
-    const md=data.members?.[n]||{};
-    ['업무결과','기타','차주계획'].forEach(f=>{const el=document.getElementById(`wr_${n}_${f}`);if(el)el.value=md[f]||'';});
+  // mgmt
+  const mg=data.경영보고||{};
+  [['wrMgmt_prev','이전달경과'],['wrMgmt_curr','이번달계획'],['wrMgmt_future','향후계획']].forEach(([id,k])=>{
+    const el=document.getElementById(id);if(el)el.value=mg[k]||'';
+  });
+  // rows
+  allRows.forEach(n=>{
+    const src=(n==='기타')?(data.기타||{}):(data.members?.[n]||{});
+    // 이전 포맷 호환 (업무결과→금주결과, 기타→기타결과)
+    fields.forEach(f=>{
+      const el=document.getElementById(`wr_${n}_${f}`);
+      if(!el) return;
+      if(f==='금주결과'&&!src['금주결과']&&src['업무결과']) el.value=src['업무결과'];
+      else el.value=src[f]||'';
+    });
   });
   if(data.savedAt){
     const d=new Date(data.savedAt);
@@ -3962,22 +4036,26 @@ function _wrLoadData(){
 
 function wrSave(){
   const members=wrGetMembers();
+  const allRows=[...members,'기타'];
+  const fields=['금주계획','금주결과','차주계획'];
   const memberData={};
   members.forEach(n=>{
-    memberData[n]={
-      '업무결과':document.getElementById(`wr_${n}_업무결과`)?.value||'',
-      '기타':document.getElementById(`wr_${n}_기타`)?.value||'',
-      '차주계획':document.getElementById(`wr_${n}_차주계획`)?.value||''
-    };
+    memberData[n]={};
+    fields.forEach(f=>memberData[n][f]=document.getElementById(`wr_${n}_${f}`)?.value||'');
   });
+  const 기타Data={};
+  fields.forEach(f=>기타Data[f]=document.getElementById(`wr_기타_${f}`)?.value||'');
   const data={
     weekKey:_wrCurrentWeek,
     dateRange:wrGetDateRange(_wrCurrentWeek),
-    members:memberData,
-    팀목표:{
-      '3개월':document.getElementById('wrGoal3m')?.value||'',
-      '당월':document.getElementById('wrGoalMonth')?.value||''
+    nextDateRange:wrGetDateRange(wrShiftWeek(_wrCurrentWeek,+1)),
+    경영보고:{
+      '이전달경과':document.getElementById('wrMgmt_prev')?.value||'',
+      '이번달계획':document.getElementById('wrMgmt_curr')?.value||'',
+      '향후계획':document.getElementById('wrMgmt_future')?.value||''
     },
+    members:memberData,
+    기타:기타Data,
     savedAt:new Date().toISOString()
   };
   localStorage.setItem(`wr_${_wrCurrentWeek}`,JSON.stringify(data));
@@ -3990,10 +4068,10 @@ function wrSave(){
   if(typeof showToast==='function') showToast('주간 보고서 저장 완료 ✓');
 }
 
-function wrPrevWeek(){_wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,-1);_wrUpdateUI();_wrBuildGrid();_wrLoadData();}
-function wrNextWeek(){_wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,+1);_wrUpdateUI();_wrBuildGrid();_wrLoadData();}
-function wrGoToday(){_wrCurrentWeek=wrGetISOWeekKey(new Date());_wrUpdateUI();_wrBuildGrid();_wrLoadData();}
-function wrLoadWeek(wk){_wrCurrentWeek=wk;_wrUpdateUI();_wrBuildGrid();_wrLoadData();_wrBuildArchive();}
+function wrPrevWeek(){_wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,-1);_wrUpdateUI();_wrBuildRows();_wrLoadData();}
+function wrNextWeek(){_wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,+1);_wrUpdateUI();_wrBuildRows();_wrLoadData();}
+function wrGoToday(){_wrCurrentWeek=wrGetISOWeekKey(new Date());_wrUpdateUI();_wrBuildRows();_wrLoadData();}
+function wrLoadWeek(wk){_wrCurrentWeek=wk;_wrUpdateUI();_wrBuildRows();_wrLoadData();_wrBuildArchive();}
 
 function _wrBuildArchive(){
   const chips=document.getElementById('wrArchiveChips');
