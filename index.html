@@ -824,7 +824,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .hp-hero-meta{font-size:.62rem;color:#64748b;letter-spacing:.04em;font-family:'Space Grotesk',sans-serif;font-weight:500}
 .hp-hero-meta b{color:#94a3b8;font-weight:600}
 .hp-upload-btn{display:inline-flex;align-items:center;padding:5px 13px;border-radius:7px;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.4);color:#c4b5fd;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:background .15s,box-shadow .15s;white-space:nowrap;font-family:'Space Grotesk',sans-serif}
-.hp-upload-btn:hover{background:rgba(139,92,246,.28);box-shadow:0 0 14px rgba(139,92,246,.35)}.sp-sync-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:7px;background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.4);color:#67e8f9;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:background .15s,box-shadow .15s;white-space:nowrap;font-family:'Space Grotesk',sans-serif}.sp-sync-btn:hover{background:rgba(6,182,212,.28);box-shadow:0 0 14px rgba(6,182,212,.35)}.sp-sync-btn:disabled{opacity:.5;cursor:not-allowed}
+.hp-upload-btn:hover{background:rgba(139,92,246,.28);box-shadow:0 0 14px rgba(139,92,246,.35)}
 /* ── DnD Upload Modal ── */
 #hpUploadOverlay{z-index:9100}
 .hp-upload-box{background:#0c1119;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:32px 36px;width:90%;max-width:480px;position:relative;box-shadow:0 28px 72px rgba(0,0,0,.75)}
@@ -1591,6 +1591,61 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
 /* TS Import preview table */
 #tsImportThead th { padding:8px 10px; text-align:left; font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:#475569; border-bottom:1px solid rgba(255,255,255,.08); white-space:nowrap; }
 #tsImportTbody td { padding:7px 10px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+/* ══ WEEKLY REPORT ══ */
+.wr-ctrl-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 16px;margin-bottom:8px}
+.wr-week-nav{display:flex;align-items:center;gap:10px}
+.wr-nav-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:#e2e8f0;font-size:1.1rem;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.wr-nav-btn:hover{background:rgba(139,92,246,.2);border-color:rgba(139,92,246,.4)}
+.wr-week-label{font-size:.88rem;font-weight:700;color:#c4b5fd;letter-spacing:.04em}
+.wr-date-range{font-size:.72rem;color:#64748b;padding:2px 8px;background:rgba(255,255,255,.04);border-radius:5px}
+.wr-ctrl-btns{display:flex;gap:8px}
+.wr-btn-today{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:#94a3b8;font-size:.72rem;padding:5px 12px;cursor:pointer;transition:all .15s}
+.wr-btn-today:hover{background:rgba(255,255,255,.09);color:#e2e8f0}
+.wr-btn-save{background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.35);border-radius:7px;color:#c4b5fd;font-size:.72rem;padding:5px 14px;cursor:pointer;font-weight:600;transition:all .15s}
+.wr-btn-save:hover{background:rgba(139,92,246,.28);border-color:rgba(139,92,246,.6)}
+.wr-btn-print{background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);border-radius:7px;color:#67e8f9;font-size:.72rem;padding:5px 14px;cursor:pointer;transition:all .15s}
+.wr-btn-print:hover{background:rgba(6,182,212,.22);border-color:rgba(6,182,212,.55)}
+.wr-save-status{font-size:.68rem;color:#64748b;text-align:right;min-height:16px;margin-bottom:6px}
+.wr-print-header{display:none}
+.wr-goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+.wr-goal-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px}
+.wr-goal-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;color:#94a3b8;text-transform:uppercase;margin-bottom:8px}
+.wr-member-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:4px}
+.wr-member-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.wr-member-name{font-size:.72rem;font-weight:700;letter-spacing:.12em;color:#fff;background:linear-gradient(90deg,rgba(139,92,246,.25),rgba(6,182,212,.15));border:1px solid rgba(139,92,246,.3);border-radius:6px;padding:4px 12px;display:inline-block;margin-bottom:2px}
+.wr-field-group{display:flex;flex-direction:column;gap:5px}
+.wr-field-label{display:flex;align-items:center;gap:6px;font-size:.67rem;font-weight:600;color:#94a3b8;letter-spacing:.04em}
+.wr-week-tag{font-size:.6rem;font-weight:700;border-radius:4px;padding:2px 6px;letter-spacing:.06em}
+.wr-week-tag.this{background:rgba(6,182,212,.15);color:#67e8f9;border:1px solid rgba(6,182,212,.25)}
+.wr-week-tag.next{background:rgba(16,185,129,.12);color:#6ee7b7;border:1px solid rgba(16,185,129,.22)}
+.wr-textarea{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e2e8f0;padding:9px 11px;width:100%;resize:vertical;font-size:.76rem;line-height:1.65;font-family:inherit;transition:border-color .2s,background .2s;box-sizing:border-box}
+.wr-textarea:focus{outline:none;border-color:rgba(139,92,246,.5);background:rgba(255,255,255,.06)}
+.wr-textarea::placeholder{color:#475569}
+.wr-archive-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.wr-archive-chip{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 14px;font-size:.7rem;color:#94a3b8;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:7px}
+.wr-archive-chip span{font-size:.62rem;color:#64748b}
+.wr-archive-chip:hover{background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.35);color:#c4b5fd}
+.wr-archive-chip.active{background:rgba(139,92,246,.18);border-color:rgba(139,92,246,.5);color:#c4b5fd;font-weight:700}
+/* 프린트 전용 */
+@media print{
+  #screen-weekly-report{display:block!important;opacity:1!important;transform:none!important;min-height:0!important}
+  .wr-ctrl-bar,.wr-save-status,.wr-archive-chips,.hp-sec:last-child{display:none!important}
+  .wr-print-header{display:block!important;text-align:center;margin-bottom:12pt;border-bottom:1pt solid #ccc;padding-bottom:8pt}
+  .wr-print-title{font-size:14pt;font-weight:900;color:#1e293b}
+  .wr-print-meta{font-size:9pt;color:#475569;margin-top:3pt}
+  .wr-member-grid{grid-template-columns:repeat(2,1fr)!important;gap:8pt!important}
+  .wr-member-card{border:0.5pt solid #cbd5e1!important;background:#fff!important;padding:10pt!important;gap:7pt!important;border-radius:5pt!important}
+  .wr-member-name{background:#f1f5f9!important;color:#1e293b!important;border:0.5pt solid #94a3b8!important;-webkit-print-color-adjust:exact!important}
+  .wr-goal-grid{grid-template-columns:repeat(2,1fr)!important;gap:8pt!important}
+  .wr-goal-card{border:0.5pt solid #cbd5e1!important;background:#fff!important;padding:8pt!important}
+  .wr-goal-label{color:#475569!important}
+  .wr-field-label{color:#475569!important;margin-bottom:2pt}
+  .wr-week-tag.this{background:#e0f2fe!important;color:#0369a1!important;border-color:#7dd3fc!important;-webkit-print-color-adjust:exact!important}
+  .wr-week-tag.next{background:#dcfce7!important;color:#166534!important;border-color:#86efac!important;-webkit-print-color-adjust:exact!important}
+  .wr-textarea{background:#f8fafc!important;border:0.5pt solid #cbd5e1!important;color:#1e293b!important;font-size:8pt!important;padding:5pt!important;resize:none!important;-webkit-print-color-adjust:exact!important}
+  .hp-sec-hdr{color:#1e293b!important;border-color:#cbd5e1!important}
+  .hp-sec-sub{color:#64748b!important}
+}
 </style>
 </head>
 <body>
@@ -1629,7 +1684,7 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
         <div class="nav-item s-fabric" data-nav="overview">OVERVIEW</div>
         <div class="nav-item s-fabric" data-nav="rdda">RDDA ANALYSIS</div>
         <div class="nav-item s-fabric" data-nav="gantt">PROJECT (GANTT)</div>
-        <div class="nav-item s-fabric" data-nav="kpi-report">KPI REPORT</div>
+        <div class="nav-item s-fabric" data-nav="weekly-report">WEEKLY REPORT</div>
       </div>
     </div>
 
@@ -1848,7 +1903,7 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
           <div class="hp-preview-badge" id="hpDataBadge">◆ DASHBOARD · 데이터 없음</div>
           <div style="display:flex;align-items:center;gap:10px">
             <div class="hp-hero-meta" id="hpUpdateMeta">업로드하여 데이터 로드</div>
-            <button class="sp-sync-btn" id="spSyncBtn1" onclick="hpSyncFromSharePoint(this)">☁ SharePoint 불러오기</button>
+            <button class="hp-upload-btn" onclick="hpOpenUploadModal()">↑ 대장 업로드</button>
             <input type="file" id="hpFileInput" accept=".xlsx,.xls" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
             <button class="dash-upload-btn ldg" id="btnLdgUpload" style="display:none">↑ 업로드</button>
           </div>
@@ -2982,67 +3037,66 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
     </div>
   </div>
 
-  <!-- ── KPI REPORT ── -->
-  <div class="screen" id="screen-kpi-report">
+  <!-- ── WEEKLY REPORT ── -->
+  <div class="screen" id="screen-weekly-report">
     <div class="screen-pad">
+
       <div class="page-header">
-        <div class="page-title">KPI <em>Report</em> <span class="preview-badge">🔜 PREVIEW</span></div>
-        <div class="page-sub">주간 · 월간 업무 현황 자동 리포트</div>
+        <div class="page-title">WEEKLY <em>Report</em></div>
+        <div class="page-sub">통합원단부 3팀 · 주간 업무 보고 · 매주 목요일 12시 작성</div>
       </div>
-      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
-        <div style="display:flex;gap:6px">
-          <div class="prev-tab on">WEEKLY</div>
-          <div class="prev-tab">MONTHLY</div>
-          <div class="prev-tab">QUARTERLY</div>
+
+      <!-- 컨트롤 바 -->
+      <div class="wr-ctrl-bar">
+        <div class="wr-week-nav">
+          <button class="wr-nav-btn" onclick="wrPrevWeek()">‹</button>
+          <div class="wr-week-label" id="wrWeekLabel">—</div>
+          <div class="wr-date-range" id="wrDateRange">—</div>
+          <button class="wr-nav-btn" onclick="wrNextWeek()">›</button>
         </div>
-        <div style="margin-left:auto">
-          <div class="prev-tab" style="cursor:default">🖨 PDF 출력</div>
+        <div class="wr-ctrl-btns">
+          <button class="wr-btn-today" onclick="wrGoToday()">이번 주</button>
+          <button class="wr-btn-save" onclick="wrSave()">💾 저장</button>
+          <button class="wr-btn-print" onclick="window.print()">🖨 프린트</button>
         </div>
       </div>
-      <div class="prev-kpi-row">
-        <div class="prev-kpi"><div class="prev-kpi-lbl">이번 주 완료</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
-        <div class="prev-kpi"><div class="prev-kpi-lbl">지연 건수</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
-        <div class="prev-kpi"><div class="prev-kpi-lbl">평균 리드타임</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
-        <div class="prev-kpi"><div class="prev-kpi-lbl">RDDA 등록</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
-        <div class="prev-kpi"><div class="prev-kpi-lbl">전주 대비</div><div class="prev-kpi-val prev-skeleton"></div><div class="prev-kpi-sub prev-skeleton"></div></div>
+      <div class="wr-save-status" id="wrSaveStatus"></div>
+
+      <!-- 프린트 전용 헤더 -->
+      <div class="wr-print-header">
+        <div class="wr-print-title">주간 업무 보고 — 통합원단부 3팀</div>
+        <div class="wr-print-meta" id="wrPrintDate"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div class="prev-box">
-          <div class="prev-box-title">주간 완료 현황 — 담당자별</div>
-          <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:40%"></div><div class="prev-skeleton prev-row-line" style="width:15%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:75%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:42%"></div><div class="prev-skeleton prev-row-line" style="width:15%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:55%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:38%"></div><div class="prev-skeleton prev-row-line" style="width:15%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:88%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div class="prev-skeleton prev-row-line" style="width:45%"></div><div class="prev-skeleton prev-row-line" style="width:15%"></div></div><div class="prev-prog-bg"><div class="prev-prog-fill" style="width:40%;background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div></div></div>
+
+      <!-- 부서 목표 -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">부서 목표<span class="hp-sec-sub">시즌 방향 · 중점 추진 과제</span></div>
+        <div class="wr-goal-grid">
+          <div class="wr-goal-card">
+            <div class="wr-goal-label">3개월 목표</div>
+            <textarea class="wr-textarea" id="wrGoal3m" rows="3" placeholder="3개월 중점 목표를 입력하세요...&#10;(예: Core Fabric Updates, Technical Services 등)"></textarea>
           </div>
-        </div>
-        <div class="prev-box">
-          <div class="prev-box-title">공정 지연 알림 — Schedule Alerts 요약</div>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
-            <div style="border:1px solid rgba(239,68,68,.2);border-radius:7px;padding:10px;background:rgba(239,68,68,.04)"><div class="prev-skeleton prev-row-line" style="width:70%"></div></div>
-            <div style="border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:10px;background:rgba(245,158,11,.04)"><div class="prev-skeleton prev-row-line" style="width:60%"></div></div>
-            <div style="border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:10px;background:rgba(245,158,11,.04)"><div class="prev-skeleton prev-row-line" style="width:55%"></div></div>
-          </div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
-        <div class="prev-box">
-          <div class="prev-box-title">4주 리드타임 트렌드 (편직 / 전체)</div>
-          <div class="prev-bars" style="height:80px">
-            <div class="prev-bar prev-bar-cyan" style="height:55%"></div><div class="prev-bar prev-bar-purple" style="height:65%"></div>
-            <div class="prev-bar prev-bar-cyan" style="height:48%"></div><div class="prev-bar prev-bar-purple" style="height:72%"></div>
-            <div class="prev-bar prev-bar-cyan" style="height:62%"></div><div class="prev-bar prev-bar-purple" style="height:80%"></div>
-            <div class="prev-bar prev-bar-cyan" style="height:50%"></div><div class="prev-bar prev-bar-purple" style="height:68%"></div>
-          </div>
-        </div>
-        <div class="prev-box">
-          <div class="prev-box-title">카테고리별 완료 비율</div>
-          <div style="display:flex;align-items:center;justify-content:center;height:80px">
-            <div class="prev-skeleton" style="width:80px;height:80px;border-radius:50%;background:conic-gradient(rgba(139,92,246,.4) 0% 40%,rgba(6,182,212,.3) 40% 70%,rgba(16,185,129,.25) 70% 85%,rgba(245,158,11,.2) 85% 100%)"></div>
+          <div class="wr-goal-card">
+            <div class="wr-goal-label">당월 목표</div>
+            <textarea class="wr-textarea" id="wrGoalMonth" rows="3" placeholder="이번 달 목표를 입력하세요...&#10;(예: Market Trendy Fabric Developments 등)"></textarea>
           </div>
         </div>
       </div>
-      <div class="prev-note">📋 업로드된 샘플 관리 대장을 기반으로 주간·월간 보고서가 자동 생성됩니다.<br>PDF 출력 및 팀 공유 링크 기능이 포함될 예정입니다.</div>
+
+      <!-- 담당자별 주간 업무 -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">주간 업무<span class="hp-sec-sub">금주 결과 · 기타 · 차주 계획</span></div>
+        <div class="wr-member-grid" id="wrMemberGrid"></div>
+      </div>
+
+      <!-- 아카이브 -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">보고서 아카이브<span class="hp-sec-sub">저장된 주차별 기록</span></div>
+        <div class="wr-archive-chips" id="wrArchiveChips">
+          <div style="color:#64748b;font-size:.74rem;padding:8px 0">저장된 보고서가 없습니다.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -3058,7 +3112,7 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
           <div class="hp-preview-badge" id="ovDataBadge">◆ DEVELOPMENT STATUS · 데이터 없음</div>
           <div style="display:flex;align-items:center;gap:10px">
             <div class="hp-hero-meta" id="ovUpdateMeta"></div>
-            <button class="sp-sync-btn" id="spSyncBtn2" onclick="hpSyncFromSharePoint(this)">☁ SharePoint 불러오기</button>
+            <button class="hp-upload-btn" onclick="hpOpenUploadModal()">↑ 대장 업로드</button>
           </div>
         </div>
       </div>
@@ -3687,6 +3741,7 @@ window.showScreen = function showScreen(id){
   if(id==='setting')    initSetting();
   if(id==='construction-guide') drInit();
   if(id==='trouble-shooting')   { if(typeof tsInit==='function') tsInit(); }
+  if(id==='weekly-report')      renderWeeklyReport();
 }
 
 // 사이드바 클릭 (nav-home + nav-item + nav-sub-item + nav-misc-item)
@@ -3803,6 +3858,158 @@ function renderHomeGanttWidget(){
     grid.appendChild(card);
   });
 }
+// ══ WEEKLY REPORT ══
+const WR_MEMBERS_DEFAULT = ['박향근','진영은','김지현','변재휘'];
+
+function wrGetMembers(){
+  return JSON.parse(localStorage.getItem('wr_members')||'null')||WR_MEMBERS_DEFAULT;
+}
+
+function wrGetISOWeekKey(date){
+  const d=new Date(date);
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+3-(d.getDay()+6)%7);
+  const w1=new Date(d.getFullYear(),0,4);
+  const wn=1+Math.round(((d-w1)/86400000-3+(w1.getDay()+6)%7)/7);
+  return `${d.getFullYear()}-W${String(wn).padStart(2,'0')}`;
+}
+
+function wrGetMonday(weekKey){
+  const [yr,w]=weekKey.split('-W').map(Number);
+  const jan4=new Date(yr,0,4);
+  const dow=(jan4.getDay()||7);
+  const mon=new Date(jan4);
+  mon.setDate(jan4.getDate()-dow+1+(w-1)*7);
+  return mon;
+}
+
+function wrGetDateRange(weekKey){
+  const mon=wrGetMonday(weekKey);
+  const fri=new Date(mon);fri.setDate(mon.getDate()+4);
+  const f=d=>`${d.getMonth()+1}/${d.getDate()}`;
+  return `${f(mon)}~${f(fri)}`;
+}
+
+function wrShiftWeek(weekKey,delta){
+  const mon=wrGetMonday(weekKey);
+  mon.setDate(mon.getDate()+delta*7);
+  return wrGetISOWeekKey(mon);
+}
+
+let _wrCurrentWeek=null;
+
+function renderWeeklyReport(){
+  if(!_wrCurrentWeek) _wrCurrentWeek=wrGetISOWeekKey(new Date());
+  _wrUpdateUI();
+  _wrBuildGrid();
+  _wrLoadData();
+  _wrBuildArchive();
+}
+
+function _wrUpdateUI(){
+  const lbl=document.getElementById('wrWeekLabel');
+  const dr=document.getElementById('wrDateRange');
+  const pd=document.getElementById('wrPrintDate');
+  if(lbl) lbl.textContent=_wrCurrentWeek;
+  if(dr)  dr.textContent=wrGetDateRange(_wrCurrentWeek);
+  if(pd)  pd.textContent=`${_wrCurrentWeek}  (${wrGetDateRange(_wrCurrentWeek)})`;
+}
+
+function _wrBuildGrid(){
+  const grid=document.getElementById('wrMemberGrid');
+  if(!grid) return;
+  const members=wrGetMembers();
+  grid.innerHTML=members.map(name=>`
+    <div class="wr-member-card">
+      <div class="wr-member-name">${name}</div>
+      <div class="wr-field-group">
+        <div class="wr-field-label"><span class="wr-week-tag this">금주</span> 업무 결과</div>
+        <textarea class="wr-textarea" id="wr_${name}_업무결과" rows="4" placeholder="이번 주 주요 업무 결과&#10;(개발 위주 업무, 분석 포함)"></textarea>
+      </div>
+      <div class="wr-field-group">
+        <div class="wr-field-label"><span class="wr-week-tag this">금주</span> 기타</div>
+        <textarea class="wr-textarea" id="wr_${name}_기타" rows="2" placeholder="미팅, 전시회, 세미나, 외근 등"></textarea>
+      </div>
+      <div class="wr-field-group">
+        <div class="wr-field-label"><span class="wr-week-tag next">차주</span> 계획</div>
+        <textarea class="wr-textarea" id="wr_${name}_차주계획" rows="3" placeholder="다음 주 업무 계획"></textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+function _wrLoadData(){
+  const data=JSON.parse(localStorage.getItem(`wr_${_wrCurrentWeek}`)||'null');
+  const members=wrGetMembers();
+  if(!data){
+    ['wrGoal3m','wrGoalMonth'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    members.forEach(n=>['업무결과','기타','차주계획'].forEach(f=>{const el=document.getElementById(`wr_${n}_${f}`);if(el)el.value='';}));
+    const s=document.getElementById('wrSaveStatus');if(s)s.textContent='';
+    return;
+  }
+  const sv=document.getElementById('wrGoal3m');if(sv)sv.value=data.팀목표?.['3개월']||'';
+  const sm=document.getElementById('wrGoalMonth');if(sm)sm.value=data.팀목표?.['당월']||'';
+  members.forEach(n=>{
+    const md=data.members?.[n]||{};
+    ['업무결과','기타','차주계획'].forEach(f=>{const el=document.getElementById(`wr_${n}_${f}`);if(el)el.value=md[f]||'';});
+  });
+  if(data.savedAt){
+    const d=new Date(data.savedAt);
+    const s=document.getElementById('wrSaveStatus');
+    if(s) s.textContent=`저장됨 · ${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+}
+
+function wrSave(){
+  const members=wrGetMembers();
+  const memberData={};
+  members.forEach(n=>{
+    memberData[n]={
+      '업무결과':document.getElementById(`wr_${n}_업무결과`)?.value||'',
+      '기타':document.getElementById(`wr_${n}_기타`)?.value||'',
+      '차주계획':document.getElementById(`wr_${n}_차주계획`)?.value||''
+    };
+  });
+  const data={
+    weekKey:_wrCurrentWeek,
+    dateRange:wrGetDateRange(_wrCurrentWeek),
+    members:memberData,
+    팀목표:{
+      '3개월':document.getElementById('wrGoal3m')?.value||'',
+      '당월':document.getElementById('wrGoalMonth')?.value||''
+    },
+    savedAt:new Date().toISOString()
+  };
+  localStorage.setItem(`wr_${_wrCurrentWeek}`,JSON.stringify(data));
+  const idx=JSON.parse(localStorage.getItem('wr_index')||'[]');
+  if(!idx.includes(_wrCurrentWeek)){idx.push(_wrCurrentWeek);idx.sort((a,b)=>b.localeCompare(a));localStorage.setItem('wr_index',JSON.stringify(idx));}
+  const now=new Date();
+  const s=document.getElementById('wrSaveStatus');
+  if(s) s.textContent=`저장됨 · ${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  _wrBuildArchive();
+  if(typeof showToast==='function') showToast('주간 보고서 저장 완료 ✓');
+}
+
+function wrPrevWeek(){_wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,-1);_wrUpdateUI();_wrBuildGrid();_wrLoadData();}
+function wrNextWeek(){_wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,+1);_wrUpdateUI();_wrBuildGrid();_wrLoadData();}
+function wrGoToday(){_wrCurrentWeek=wrGetISOWeekKey(new Date());_wrUpdateUI();_wrBuildGrid();_wrLoadData();}
+function wrLoadWeek(wk){_wrCurrentWeek=wk;_wrUpdateUI();_wrBuildGrid();_wrLoadData();_wrBuildArchive();}
+
+function _wrBuildArchive(){
+  const chips=document.getElementById('wrArchiveChips');
+  if(!chips) return;
+  const idx=JSON.parse(localStorage.getItem('wr_index')||'[]');
+  if(idx.length===0){
+    chips.innerHTML='<div style="color:#64748b;font-size:.74rem;padding:8px 0">저장된 보고서가 없습니다.</div>';
+    return;
+  }
+  chips.innerHTML=idx.map(wk=>`
+    <div class="wr-archive-chip${wk===_wrCurrentWeek?' active':''}" onclick="wrLoadWeek('${wk}')">
+      ${wk}<span>${wrGetDateRange(wk)}</span>
+    </div>
+  `).join('');
+}
+
 function renderOverview(){
   if(typeof window._hpData !== 'undefined' && window._hpData){
     renderHpHome(window._hpData);
@@ -6232,126 +6439,6 @@ function parseHpData(wb){
     yearly
   };
 }
-
-
-// ── SharePoint 자동 불러오기 ─────────────────────────────────────
-const SP_DRIVE_ID  = 'b!kNIfZliur0uAMT0n-Tn-GR-HuLsZAvBHgJO-q1vf6Il-7YM4JDIoR5ZcbYJQFNnK';
-const SP_ITEM_ID   = '0152WH4EFVE34TV5SWVBDZU5WGGQ3LOPBU';
-const SP_FILE_NAME = '샘플 관리 대장.xlsx';
-// SharePoint 직접 다운로드 URL (CORS 우회 — 브라우저 SharePoint 세션 사용)
-const SP_DIRECT_URL = 'https://hansoll365.sharepoint.com/_api/v2.0/drives/'
-  + SP_DRIVE_ID + '/items/' + SP_ITEM_ID + '/content';
-const SP_WEB_URL = 'https://hansoll365.sharepoint.com/sites/msteams_4f78c6/'
-  + 'Shared%20Documents/3%ED%8C%80/%EC%83%98%ED%94%8C%20%EA%B4%80%EB%A6%AC%20%EB%8C%80%EC%9E%A5.xlsx';
-
-window.hpSyncFromSharePoint = async function(btnEl){
-  const btns = document.querySelectorAll('.sp-sync-btn');
-  btns.forEach(b=>{ b.disabled=true; b.textContent='⏳ 불러오는 중…'; });
-  const metaEl = document.getElementById('hpUpdateMeta');
-  if(metaEl) metaEl.textContent = '☁ SharePoint에서 불러오는 중…';
-
-  try{
-    // SharePoint REST API 직접 호출 (Graph API CORS 우회)
-    // 브라우저에 SharePoint 로그인 세션이 있으면 쿠키로 인증됨
-    btns.forEach(b=>{ b.textContent='⏳ 파일 다운로드 중…'; });
-
-    const res = await fetch(SP_DIRECT_URL, {
-      credentials: 'include',   // SharePoint 세션 쿠키 자동 전송
-      headers: { 'Accept': 'application/octet-stream' }
-    });
-
-    if(res.status === 401 || res.status === 403){
-      // 로그인 안 된 경우 → SharePoint 로그인 안내
-      throw new Error('LOGIN_REQUIRED');
-    }
-    if(!res.ok) throw new Error(`다운로드 실패 (HTTP ${res.status})`);
-
-    const buf = await res.arrayBuffer();
-    if(buf.byteLength < 1000) throw new Error('파일이 너무 작습니다. 다시 시도해주세요.');
-
-    // 기존 parseHpData 로직으로 파싱 (원본과 완전히 동일)
-    btns.forEach(b=>{ b.textContent='⏳ 파싱 중…'; });
-    const wb = XLSX.read(buf, {type:'array', cellDates:true});
-    hpData = parseHpData(wb);
-    if(!hpData) throw new Error('현황 시트를 찾을 수 없습니다');
-
-    // 렌더 & 저장
-    renderHpHome(hpData);
-    const now = new Date().toLocaleDateString('ko-KR');
-    const _d = document.getElementById('tdBadgeDot');
-    const _t = document.getElementById('tdBadgeText');
-    if(_d) _d.classList.add('live');
-    if(_t) _t.textContent = 'LIVE · ' + SP_FILE_NAME;
-    if(metaEl) metaEl.textContent = 'SharePoint · ' + now + ' 동기화';
-    try{ document.getElementById('ovUpdateMeta').textContent = 'SharePoint · ' + now + ' 동기화'; }catch(e){}
-    hpSaveToStorage(hpData, SP_FILE_NAME);
-    btns.forEach(b=>{ b.disabled=false; b.textContent='☁ SharePoint 불러오기'; });
-
-  }catch(err){
-    console.error('[SP Sync]', err);
-    btns.forEach(b=>{ b.disabled=false; b.textContent='☁ SharePoint 불러오기'; });
-
-    if(err.message === 'LOGIN_REQUIRED' || err.message.includes('LOGIN')){
-      // SharePoint 로그인 팝업 띄우기
-      if(metaEl) metaEl.textContent = '⚠ SharePoint 로그인 필요';
-      const go = confirm(
-        'SharePoint 로그인이 필요합니다.\n\n'
-        + '[확인]을 누르면 SharePoint 로그인 페이지가 열립니다.\n'
-        + '로그인 후 이 페이지로 돌아와서 다시 버튼을 눌러주세요.'
-      );
-      if(go) window.open('https://hansoll365.sharepoint.com', '_blank');
-    } else if(err.message.includes('fetch') || err.message.includes('Failed')){
-      // CORS 또는 네트워크 오류 → 팝업 방식 안내
-      if(metaEl) metaEl.textContent = '⚠ 네트워크 오류 — 아래 방법으로 시도';
-      _showSpFallback();
-    } else {
-      if(metaEl) metaEl.textContent = '⚠ ' + err.message;
-      alert('SharePoint 불러오기 실패\n\n' + err.message);
-    }
-  }
-};
-
-// 대안: SharePoint에서 파일 직접 열어서 붙여넣기 안내 모달
-function _showSpFallback(){
-  let modal = document.getElementById('spFallbackModal');
-  if(!modal){
-    modal = document.createElement('div');
-    modal.id = 'spFallbackModal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
-    modal.innerHTML = `
-      <div style="background:#111827;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:28px;width:460px;max-width:90vw">
-        <div style="font-size:.9rem;font-weight:700;color:#e2e8f0;margin-bottom:6px">☁ SharePoint 불러오기</div>
-        <div style="font-size:.72rem;color:#64748b;margin-bottom:20px">CORS 정책으로 인해 직접 연동이 제한됩니다. 아래 방법으로 불러올 수 있어요.</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <a href="${SP_WEB_URL}" target="_blank"
-            style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;
-                   background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.3);text-decoration:none;cursor:pointer">
-            <span style="font-size:1.2rem">📂</span>
-            <div>
-              <div style="font-size:.76rem;font-weight:700;color:#67e8f9">SharePoint에서 파일 열기</div>
-              <div style="font-size:.65rem;color:#64748b;margin-top:2px">클릭 → 다운로드 → 아래 업로드 버튼으로 불러오기</div>
-            </div>
-          </a>
-          <button onclick="hpOpenUploadModal();document.getElementById('spFallbackModal').remove()"
-            style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;
-                   background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);cursor:pointer;width:100%;text-align:left">
-            <span style="font-size:1.2rem">⬆️</span>
-            <div>
-              <div style="font-size:.76rem;font-weight:700;color:#c4b5fd">파일 직접 업로드</div>
-              <div style="font-size:.65rem;color:#64748b;margin-top:2px">다운로드한 엑셀 파일을 여기서 업로드</div>
-            </div>
-          </button>
-        </div>
-        <button onclick="this.closest('#spFallbackModal').remove()"
-          style="margin-top:16px;width:100%;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.1);
-                 background:transparent;color:#64748b;font-size:.72rem;cursor:pointer">닫기</button>
-      </div>`;
-    document.body.appendChild(modal);
-    modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
-  }
-  modal.style.display='flex';
-}
-// ──────────────────────────────────────────────────────────────────
 
 // ── Upload modal (DnD)
 window.hpOpenUploadModal = function(){
