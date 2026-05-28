@@ -4131,74 +4131,109 @@ function wrPrint(){
   const curr=mon.getMonth()+1;
   const prev=curr===1?12:curr-1;
   const fut=curr===12?1:curr+1;
+  const futEnd=fut+2>12?fut+2-12:fut+2;
   const g=id=>(document.getElementById(id)||{}).value||'';
-  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 
-  const mgmtRows=`
-    <tr>
-      <td class="td-label">경영보고<br>주요업무</td>
-      <td class="td-past">${esc(g('wrMgmt_prev'))}</td>
-      <td class="td-curr">${esc(g('wrMgmt_curr'))}</td>
-      <td class="td-future">${esc(g('wrMgmt_future'))}</td>
-    </tr>`;
+  const mgmtRows=`<tr>
+    <td class="td-label">경영보고<br>주요업무</td>
+    <td class="td-past">${esc(g('wrMgmt_prev'))}</td>
+    <td class="td-curr">${esc(g('wrMgmt_curr'))}</td>
+    <td class="td-future">${esc(g('wrMgmt_future'))}</td>
+  </tr>`;
 
-  const workRows=allRows.map(n=>`
-    <tr>
-      <td class="td-label">${esc(n)}</td>
-      <td>${esc(g('wr_'+n+'_금주계획'))}</td>
-      <td>${esc(g('wr_'+n+'_금주결과'))}</td>
-      <td class="td-next-plan">${esc(g('wr_'+n+'_차주계획'))}</td>
-    </tr>`).join('');
+  const workRows=allRows.map(n=>`<tr>
+    <td class="td-label">${esc(n)}</td>
+    <td>${esc(g('wr_'+n+'_금주계획'))}</td>
+    <td>${esc(g('wr_'+n+'_금주결과'))}</td>
+    <td class="td-next-plan">${esc(g('wr_'+n+'_차주계획'))}</td>
+  </tr>`).join('');
+
+  // A3 landscape 인쇄 가능 영역: 420×297mm, 여백 8mm×10mm → 400×281mm
+  // 자동 스케일: 렌더 후 실제 높이 측정 → zoom 조정 → print
+  const autoFit=`<script>
+window.addEventListener('load',function(){
+  var MARGIN_H=16,MARGIN_W=20; // top+bottom, left+right mm
+  var A3W=420-MARGIN_W, A3H=297-MARGIN_H; // mm
+  var MM=96/25.4;
+  var wrap=document.getElementById('wrap');
+  var actualH=wrap.scrollHeight;
+  var actualW=wrap.scrollWidth;
+  var scaleH=(A3H*MM)/actualH;
+  var scaleW=(A3W*MM)/actualW;
+  var scale=Math.min(scaleH,scaleW,1);
+  if(scale<0.999){
+    wrap.style.transformOrigin='top left';
+    wrap.style.transform='scale('+scale.toFixed(4)+')';
+    // shrink body to prevent scrollbar ghost
+    document.body.style.width=(actualW*scale)+'px';
+    document.body.style.height=(actualH*scale)+'px';
+    document.body.style.overflow='hidden';
+  }
+  setTimeout(function(){window.print();},350);
+});
+<\/script>`;
 
   const html=`<!DOCTYPE html><html lang="ko"><head>
 <meta charset="utf-8">
 <title>주간 업무 보고 — ${_wrCurrentWeek}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Malgun Gothic','맑은 고딕',Arial,sans-serif;font-size:8.5pt;color:#000;background:#fff;padding:8mm 10mm}
-@page{size:A4 landscape;margin:8mm 10mm}
-h1{font-size:13pt;font-weight:900;text-align:center;letter-spacing:.05em;margin-bottom:3mm}
-.doc-meta{display:flex;justify-content:space-between;font-size:7.5pt;color:#444;border-bottom:1pt solid #000;padding-bottom:2mm;margin-bottom:3.5mm}
-.sec-hdr{font-size:8pt;font-weight:700;background:#1e293b;color:#fff;padding:2.5pt 7pt;margin-bottom:1.5mm;border-radius:2pt}
-table{width:100%;border-collapse:collapse;margin-bottom:4mm;table-layout:fixed}
-th,td{border:.5pt solid #94a3b8;padding:3pt 5pt;vertical-align:top;font-size:8pt;word-break:break-all;white-space:pre-wrap}
-th{text-align:center;font-weight:700;font-size:7.5pt}
-.th-label{background:#dbeafe;color:#1e3a5f;width:52pt}
+html,body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#wrap{
+  font-family:'Malgun Gothic','맑은 고딕',Arial,sans-serif;
+  font-size:9pt;color:#000;
+  width:400mm;padding:0;
+  display:inline-block;
+}
+@page{size:A3 landscape;margin:8mm 10mm}
+@media print{html,body{margin:0;padding:0}#wrap{transform-origin:top left}}
+h1{font-size:14pt;font-weight:900;text-align:center;letter-spacing:.06em;margin-bottom:3mm;padding-bottom:2mm;border-bottom:1.5pt solid #000}
+.doc-meta{display:flex;justify-content:space-between;align-items:center;font-size:8pt;color:#444;margin-bottom:4mm}
+.doc-meta strong{font-size:8.5pt;color:#000}
+.sec-hdr{font-size:8.5pt;font-weight:700;background:#1e293b;color:#fff;padding:3pt 8pt;margin-bottom:2mm;letter-spacing:.05em}
+table{width:100%;border-collapse:collapse;margin-bottom:5mm;table-layout:fixed}
+th,td{border:.6pt solid #888;padding:4pt 5pt;vertical-align:top;font-size:8.5pt;word-break:break-word;line-height:1.45}
+td br{display:block;margin-bottom:1pt}
+th{text-align:center;font-weight:700;font-size:8pt}
+.th-label{background:#dbeafe;color:#1e3a5f;width:55pt}
 .th-week{background:#bfdbfe;color:#1e3a5f}
 .th-next{background:#bbf7d0;color:#14532d}
-.th-past{background:#f1f5f9;color:#334155}
+.th-past{background:#e2e8f0;color:#334155}
 .th-curr{background:#ede9fe;color:#3b0764}
 .th-future{background:#fef9c3;color:#713f12}
-.th-sub{background:#f8fafc;color:#475569;font-size:7pt}
-.td-label{background:#f0f9ff;font-weight:700;text-align:center;vertical-align:middle;width:52pt;font-size:8pt}
+.th-sub{background:#f8fafc;color:#475569;font-size:7.5pt;font-weight:600}
+.td-label{background:#eff6ff;font-weight:700;text-align:center;vertical-align:middle;width:55pt;font-size:8.5pt}
+.td-past{background:#fafafa}
+.td-curr{background:#faf5ff}
+.td-future{background:#fffbeb}
 .td-next-plan{background:#f0fdf4}
-.note{font-size:6.5pt;color:#64748b;border-top:.5pt solid #ccc;padding-top:2mm;margin-top:1mm;line-height:1.6}
+.note{font-size:7pt;color:#64748b;border-top:.5pt solid #bbb;padding-top:2.5mm;margin-top:0;line-height:1.7}
 </style>
 </head><body>
-<h1>주간 업무 보고</h1>
+<div id="wrap">
+<h1>주간 업무 보고 — 통합원단부 3팀</h1>
 <div class="doc-meta">
-  <span>통합원단부 3팀</span>
-  <span>${_wrCurrentWeek} &nbsp;|&nbsp; 금주: ${thisRange} &nbsp;·&nbsp; 차주: ${nextRange}</span>
-  <span>작성: 박향근 외</span>
+  <span>작성일 기준: ${_wrCurrentWeek}</span>
+  <strong>금주: ${thisRange} &nbsp;&nbsp;|&nbsp;&nbsp; 차주: ${nextRange}</strong>
+  <span>매주 목요일 퇴근 전 작성</span>
 </div>
 
-<div class="sec-hdr">경영보고</div>
+<div class="sec-hdr">▸ 경영보고</div>
 <table>
-  <colgroup><col style="width:52pt"><col><col><col></colgroup>
-  <thead>
-    <tr>
-      <th class="th-label">항목</th>
-      <th class="th-past">${prev}월 경과</th>
-      <th class="th-curr">${curr}월 계획</th>
-      <th class="th-future">${fut}~${fut+2<=12?fut+2:fut+2-12}월 계획</th>
-    </tr>
-  </thead>
+  <colgroup><col style="width:55pt"><col><col><col></colgroup>
+  <thead><tr>
+    <th class="th-label">항목</th>
+    <th class="th-past">${prev}월 경과</th>
+    <th class="th-curr">${curr}월 계획</th>
+    <th class="th-future">${fut}~${futEnd}월 계획</th>
+  </tr></thead>
   <tbody>${mgmtRows}</tbody>
 </table>
 
-<div class="sec-hdr">주간 업무</div>
+<div class="sec-hdr">▸ 주간 업무</div>
 <table>
-  <colgroup><col style="width:52pt"><col><col><col></colgroup>
+  <colgroup><col style="width:55pt"><col><col><col></colgroup>
   <thead>
     <tr>
       <th class="th-label" rowspan="2">담당</th>
@@ -4215,17 +4250,18 @@ th{text-align:center;font-weight:700;font-size:7.5pt}
 </table>
 
 <div class="note">
-  ** 주업무는 개발 위주 업무(분석 포함)내용 작성 &nbsp;&nbsp;|&nbsp;&nbsp;
-  ** 기타는 내/외부 업무 관련 미팅, 전시회, 세미나, 외근등 작성 &nbsp;&nbsp;|&nbsp;&nbsp;
-  ** 매주 목요일 퇴근 전까지 작성 후 소팀장 보고
+  ※ 주업무 : 개발 위주 업무(분석 포함) 내용 작성 &nbsp;&nbsp;|&nbsp;&nbsp;
+  ※ 기타 : 내·외부 업무 관련 미팅, 전시회, 세미나, 외근 등 작성 &nbsp;&nbsp;|&nbsp;&nbsp;
+  ※ 매주 목요일 퇴근 전까지 작성 후 소팀장 보고
 </div>
+</div>
+${autoFit}
 </body></html>`;
 
-  const w=window.open('','_blank','width=1100,height=750');
+  const w=window.open('','_blank','width=1400,height=900');
   w.document.write(html);
   w.document.close();
   w.focus();
-  setTimeout(()=>w.print(),400);
 }
 
 // ── WR 함수 전역 노출 (module scope → window) ──
