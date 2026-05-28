@@ -1717,7 +1717,7 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
 /* ── 완료된 행 전체 스타일 ── */
 .wr-row-locked>.wr-td-label{background:rgba(16,185,129,.08)!important;border-color:rgba(16,185,129,.2)!important}
 .wr-row-locked>td:not(.wr-td-label){background:rgba(16,185,129,.04)!important;border-color:rgba(16,185,129,.14)!important}
-.wr-static-text{word-break:break-word;font-size:.76rem;line-height:1.65;color:#cbd5e1;padding:4px 2px;min-height:20px}
+.wr-static-text{white-space:pre-wrap;word-break:break-word;font-size:.76rem;line-height:1.65;color:#cbd5e1;padding:4px 2px;min-height:20px}
 .wr-static-text.wr-empty{color:#3d4f66;font-style:italic;font-size:.7rem}
 </style>
 </head>
@@ -4069,8 +4069,9 @@ function _wrRowHTML(name){
   if(locked){
     const vals=_wrRowValues[name]||{금주계획:'',금주결과:'',차주계획:''};
     const sv=v=>{
+      // white-space:pre-wrap 사용 → \n→<br> 변환 없이 textarea와 동일 렌더링
       const txt=v
-        ?v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
+        ?v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         :isKita?'—':'(미입력)';
       return `<div class="wr-static-text${v?'':' wr-empty'}">${txt}</div>`;
     };
@@ -4146,11 +4147,46 @@ function wrCompleteRow(name){
   _wrRowValues[name]=vals;
   _wrLockState[name]=true;
   _wrUpdateRow(name);
+  _wrPersistLock(); // 완료 즉시 localStorage에 반영
 }
 
 function wrEditRow(name){
   _wrLockState[name]=false;
   _wrUpdateRow(name);
+  _wrPersistLock(); // 수정 전환 즉시 localStorage에 반영
+}
+
+// 완료/수정 상태 변경 시 즉시 저장 (명시적 저장 버튼 없이도 유지)
+function _wrPersistLock(){
+  const members=wrGetMembers();
+  const allRows=[...members,'기타'];
+  const fields=['금주계획','금주결과','차주계획'];
+  // 현재 메모리 값으로 member/기타 data 구성
+  const memberData={};
+  members.forEach(n=>{
+    memberData[n]={};
+    fields.forEach(f=>memberData[n][f]=(_wrRowValues[n]||{})[f]||'');
+  });
+  const kitaData={};
+  fields.forEach(f=>kitaData[f]=(_wrRowValues['기타']||{})[f]||'');
+  // 기존 저장 데이터와 병합 (savedAt, 경영보고 등 유지)
+  const existing=JSON.parse(localStorage.getItem(`wr_${_wrCurrentWeek}`)||'{}');
+  const merged=Object.assign({},existing,{
+    weekKey:_wrCurrentWeek,
+    dateRange:wrGetDateRange(_wrCurrentWeek),
+    members:memberData,
+    기타:kitaData,
+    lockState:{..._wrLockState},
+  });
+  // 경영보고는 현재 textarea 값으로 덮어쓰기
+  merged.경영보고={
+    '이전달경과':document.getElementById('wrMgmt_prev')?.value||existing?.경영보고?.이전달경과||'',
+    '이번달계획':document.getElementById('wrMgmt_curr')?.value||existing?.경영보고?.이번달계획||'',
+    '향후계획':document.getElementById('wrMgmt_future')?.value||existing?.경영보고?.향후계획||'',
+  };
+  localStorage.setItem(`wr_${_wrCurrentWeek}`,JSON.stringify(merged));
+  const idx=JSON.parse(localStorage.getItem('wr_index')||'[]');
+  if(!idx.includes(_wrCurrentWeek)){idx.push(_wrCurrentWeek);idx.sort((a,b)=>b.localeCompare(a));localStorage.setItem('wr_index',JSON.stringify(idx));}
 }
 
 function _wrLoadData(){
@@ -4334,27 +4370,46 @@ function wrPrint(){
     <td class="td-next-plan">${esc(gv(n,'차주계획'))}</td>
   </tr>`).join('');
 
-  // 인쇄 스크립트: 스케일 계산 후 브라우저 인쇄 다이얼로그 호출
+  // 인쇄 스크립트: 동적 폰트 크기로 A3 1장 피트 후 인쇄
   const printScript=`<script>
+// A3 세로 인쇄 가능 영역: 297×420mm, 여백 10mm → 277×400mm
+var PW_MM=277, PH_MM=400;
+var MM=96/25.4;
+var TARGET_H=PH_MM*MM; // ≈1512px
+
+// 폰트 크기 자동조절: 시작 크기에서 0.25pt씩 줄여 한 페이지에 맞춤
+function autoFitFont(startPt, minPt){
+  var wrap=document.getElementById('wrap');
+  wrap.style.transform='';
+  var fs=startPt;
+  while(fs>=minPt){
+    wrap.style.fontSize=fs+'pt';
+    if(wrap.scrollHeight<=TARGET_H+4) break;
+    fs=Math.round((fs-0.25)*100)/100;
+  }
+  // 그래도 넘치면 scale fallback
+  if(wrap.scrollHeight>TARGET_H+4){
+    var scale=TARGET_H/wrap.scrollHeight;
+    wrap.style.transformOrigin='top center';
+    wrap.style.transform='scale('+scale.toFixed(4)+')';
+    document.body.style.height=(wrap.scrollHeight*scale)+'px';
+    document.body.style.overflow='hidden';
+  }
+  return fs;
+}
+
+// 미리보기 로드 시: 웹 앱과 동일한 시작 포인트(9pt)에서 자동조절
+window.addEventListener('load',function(){
+  autoFitFont(9, 5.5);
+});
+
 function doPrint(){
   var ctrl=document.getElementById('print-ctrl');
   var wrap=document.getElementById('wrap');
-  // A3 세로 인쇄 가능 영역: 297×420mm, 양측 여백 10mm → 277×400mm
-  var PW=277, PH=400; // mm
-  var MM=96/25.4;
   ctrl.style.display='none';
-  wrap.style.transform='';
-  var actualW=wrap.scrollWidth;
-  var actualH=wrap.scrollHeight;
-  var scaleW=(PW*MM)/actualW;
-  var scaleH=(PH*MM)/actualH;
-  var scale=Math.min(scaleW,scaleH,1);
-  if(scale<0.999){
-    wrap.style.transformOrigin='top center';
-    wrap.style.transform='scale('+scale.toFixed(4)+')';
-    document.body.style.overflow='hidden';
-    document.body.style.height=(actualH*scale)+'px';
-  }
+  document.body.style.overflow='hidden';
+  // 다시 최적 폰트 계산
+  autoFitFont(9, 5.5);
   setTimeout(function(){
     window.print();
     setTimeout(function(){
@@ -4362,8 +4417,9 @@ function doPrint(){
       wrap.style.transform='';
       document.body.style.overflow='';
       document.body.style.height='';
+      autoFitFont(9, 5.5); // 미리보기 복원
     },600);
-  },350);
+  },300);
 }
 <\/script>`;
 
@@ -4417,34 +4473,34 @@ html,body{
   #outer{padding:0;min-height:0;background:none}
   #wrap{box-shadow:none;transform-origin:top center}
 }
-/* ── 문서 스타일 ── */
-h1{font-size:13pt;font-weight:900;text-align:center;letter-spacing:.06em;
+/* ── 문서 스타일 (font-size는 JS가 동적 조절 — 여기선 기준값만) ── */
+#wrap{font-size:9pt} /* autoFitFont() 시작값, JS가 덮어씀 */
+h1{font-size:1.44em;font-weight:900;text-align:center;letter-spacing:.06em;
    margin-bottom:3mm;padding-bottom:2mm;border-bottom:1.5pt solid #000}
 .doc-meta{display:flex;justify-content:space-between;align-items:center;
-          font-size:7.5pt;color:#444;margin-bottom:3.5mm}
-.doc-meta strong{font-size:8pt;color:#000}
-.sec-hdr{font-size:8pt;font-weight:700;background:#1e293b;color:#fff;
-         padding:3pt 8pt;margin-bottom:2mm;letter-spacing:.05em}
-table{width:100%;border-collapse:collapse;margin-bottom:3.5mm;table-layout:fixed}
-th,td{border:.6pt solid #888;padding:3pt 4pt;vertical-align:top;
-      font-size:8pt;word-break:break-word;line-height:1.62;
-      white-space:pre-wrap}
-th{text-align:center;font-weight:700;font-size:7pt;white-space:normal}
+          font-size:.85em;color:#444;margin-bottom:3mm}
+.doc-meta strong{color:#000}
+.sec-hdr{font-size:.9em;font-weight:700;background:#1e293b;color:#fff;
+         padding:2.5pt 7pt;margin-bottom:1.8mm;letter-spacing:.05em}
+table{width:100%;border-collapse:collapse;margin-bottom:3mm;table-layout:fixed}
+th,td{border:.6pt solid #888;padding:2.5pt 3.5pt;vertical-align:top;
+      word-break:break-word;line-height:1.65;white-space:pre-wrap}
+th{text-align:center;font-weight:700;font-size:.88em;white-space:normal;line-height:1.4}
 .th-label{background:#dbeafe;color:#1e3a5f;width:42pt}
 .th-week{background:#bfdbfe;color:#1e3a5f}
 .th-next{background:#bbf7d0;color:#14532d}
 .th-past{background:#e2e8f0;color:#334155}
 .th-curr{background:#ede9fe;color:#3b0764}
 .th-future{background:#fef9c3;color:#713f12}
-.th-sub{background:#f8fafc;color:#475569;font-size:6.5pt;font-weight:600}
+.th-sub{background:#f8fafc;color:#475569;font-size:.82em;font-weight:600}
 .td-label{background:#eff6ff;font-weight:700;text-align:center;
-          vertical-align:middle;width:42pt;font-size:8pt}
+          vertical-align:middle;width:42pt}
 .td-past{background:#fafafa}
 .td-curr{background:#faf5ff}
 .td-future{background:#fffbeb}
 .td-next-plan{background:#f0fdf4}
-.note{font-size:6.5pt;color:#64748b;border-top:.5pt solid #bbb;
-      padding-top:2mm;margin-top:0;line-height:1.6}
+.note{font-size:.8em;color:#64748b;border-top:.5pt solid #bbb;
+      padding-top:1.8mm;margin-top:0;line-height:1.55;white-space:normal}
 </style>
 </head><body>
 <div id="print-ctrl">
