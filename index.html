@@ -1636,7 +1636,7 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
 .wr-th-future{background:rgba(245,158,11,.08)!important;color:#fbbf24!important}
 .wr-th-sub{background:rgba(255,255,255,.03)!important;color:#64748b!important;font-size:.6rem}
 .wr-table td{border:1px solid rgba(255,255,255,.07);padding:7px;vertical-align:top}
-.wr-td-label{background:rgba(255,255,255,.03);font-size:.69rem;font-weight:700;color:#e2e8f0;text-align:center;vertical-align:middle;white-space:nowrap}
+.wr-td-label{background:rgba(255,255,255,.03);font-size:.85rem;font-weight:700;color:#e2e8f0;text-align:center;vertical-align:middle}
 .wr-archive-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .wr-archive-chip{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 14px;font-size:.7rem;color:#94a3b8;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:7px}
 .wr-archive-chip span{font-size:.62rem;color:#64748b}
@@ -1672,6 +1672,17 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
   .wr-th-sub{background:#f8fafc!important;color:#64748b!important}
   .wr-td-label{background:#f8fafc!important;color:#1e293b!important;font-size:8pt!important}
 }
+/* wr 담당 완료/수정 토글 */
+.wr-td-name{font-size:.85rem;font-weight:700;color:#e2e8f0;display:block;margin-bottom:6px;white-space:nowrap}
+.wr-row-btns{display:flex;flex-direction:column;gap:3px;align-items:stretch}
+.wr-btn-done{background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.4);border-radius:5px;color:#6ee7b7;font-size:.58rem;font-weight:700;padding:3px 6px;cursor:pointer;text-align:center;transition:all .15s;width:100%}
+.wr-btn-done:hover{background:rgba(16,185,129,.28);border-color:rgba(16,185,129,.7)}
+.wr-btn-edit-row{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:5px;color:#64748b;font-size:.58rem;padding:3px 6px;cursor:pointer;text-align:center;transition:all .15s;width:100%}
+.wr-btn-edit-row:hover{background:rgba(255,255,255,.08);color:#94a3b8}
+.wr-done-badge{display:block;text-align:center;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);border-radius:4px;color:#6ee7b7;font-size:.58rem;font-weight:700;padding:2px 4px;margin-bottom:2px}
+.wr-row-locked>td:not(.wr-td-label){background:rgba(16,185,129,.03)!important;border-color:rgba(16,185,129,.12)!important}
+.wr-static-text{word-break:break-word;font-size:.76rem;line-height:1.65;color:#cbd5e1;padding:4px 2px;min-height:20px}
+.wr-static-text.wr-empty{color:#3d4f66;font-style:italic;font-size:.7rem}
 </style>
 </head>
 <body>
@@ -3914,7 +3925,12 @@ function renderHomeGanttWidget(){
   });
 }
 // ══ WEEKLY REPORT ══
-const WR_MEMBERS_DEFAULT = ['박향근','진영은','변재휘'];
+const WR_MEMBERS_DEFAULT = ['박향근','진영은','김지현','변재휘'];
+const WR_MGMT_DEFAULT = {
+  '이전달경과':'- Market Trendy Fabric Developments (S/S)\n- Technical Services\n- Core Fabric Updates\n- Textile Academy',
+  '이번달계획':'- Market Trendy Fabric Developments (New Season)\n- Technical Services\n- Strategic R&D Projects\n- Core Fabric Updates',
+  '향후계획':'- Seasonal Market Trendy Fabric Developments (New Season)\n- Technical Services\n- Strategic R&D Projects\n- Core Fabric Updates'
+};
 
 function wrGetMembers(){
   return JSON.parse(localStorage.getItem('wr_members')||'null')||WR_MEMBERS_DEFAULT;
@@ -3938,6 +3954,19 @@ function wrGetMonday(weekKey){
   return mon;
 }
 
+function wrGetThursday(weekKey){
+  const mon=wrGetMonday(weekKey);
+  const thu=new Date(mon);thu.setDate(mon.getDate()+3);return thu;
+}
+
+function wrFormatYMD(d){
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function wrGetSubmitLabel(weekKey){
+  return wrFormatYMD(wrGetThursday(weekKey));
+}
+
 function wrGetDateRange(weekKey){
   const mon=wrGetMonday(weekKey);
   const fri=new Date(mon);fri.setDate(mon.getDate()+4);
@@ -3952,40 +3981,82 @@ function wrShiftWeek(weekKey,delta){
 }
 
 let _wrCurrentWeek=null;
+let _wrLockState={};
+let _wrRowValues={};
 
 function renderWeeklyReport(){
   if(!_wrCurrentWeek) _wrCurrentWeek=wrGetISOWeekKey(new Date());
+  _wrLockState={};_wrRowValues={};
+  _wrLoadData();
   _wrUpdateUI();
   _wrBuildRows();
-  _wrLoadData();
   _wrBuildArchive();
 }
 
 function _wrUpdateUI(){
+  const submitLabel=wrGetSubmitLabel(_wrCurrentWeek);
+  const thisRange=wrGetDateRange(_wrCurrentWeek);
+  const nextRange=wrGetDateRange(wrShiftWeek(_wrCurrentWeek,+1));
   const lbl=document.getElementById('wrWeekLabel');
   const dr=document.getElementById('wrDateRange');
   const pd=document.getElementById('wrPrintDate');
-  const thisRange=wrGetDateRange(_wrCurrentWeek);
-  const nextRange=wrGetDateRange(wrShiftWeek(_wrCurrentWeek,+1));
-  if(lbl) lbl.textContent=_wrCurrentWeek;
+  if(lbl) lbl.textContent=submitLabel;
   if(dr)  dr.textContent=thisRange;
-  if(pd)  pd.textContent=`${_wrCurrentWeek} (${thisRange})`;
-  // week table headers
+  if(pd)  pd.textContent=`${submitLabel} (${thisRange})`;
   const tw=document.getElementById('wrThisWeekHdr');
   const nw=document.getElementById('wrNextWeekHdr');
   if(tw) tw.textContent=`금주 (${thisRange})`;
   if(nw) nw.textContent=`차주 (${nextRange})`;
-  // mgmt section: dynamic month labels
   const mon=wrGetMonday(_wrCurrentWeek);
   const curr=mon.getMonth()+1;
   const prev=curr===1?12:curr-1;
   const fut=curr+1>12?curr+1-12:curr+1;
+  const futEnd=fut+2>12?fut+2-12:fut+2;
   const el1=document.getElementById('wrMgmtPrevLbl');
   const el2=document.getElementById('wrMgmtCurrLbl');
   const el3=document.getElementById('wrMgmtFutureLbl');
   if(el1) el1.textContent=`${prev}월 경과`;
   if(el2) el2.textContent=`${curr}월 계획`;
-  if(el3) el3.textContent=`${fut}~${fut+2<=12?fut+2:fut+2-12}월 계획`;
+  if(el3) el3.textContent=`${fut}~${futEnd}월 계획`;
+}
+
+function _wrRowHTML(name){
+  const locked=!!_wrLockState[name];
+  const isKita=name==='기타';
+  if(locked){
+    const vals=_wrRowValues[name]||{금주계획:'',금주결과:'',차주계획:''};
+    const sv=v=>{
+      const txt=v
+        ?v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
+        :isKita?'—':'(미입력)';
+      return `<div class="wr-static-text${v?'':' wr-empty'}">${txt}</div>`;
+    };
+    return `<tr id="wr-row-${name}" class="wr-row-locked">
+      <td class="wr-td-label">
+        <span class="wr-td-name">${name}</span>
+        <div class="wr-row-btns">
+          <span class="wr-done-badge">✓ 완료</span>
+          <button class="wr-btn-edit-row" onclick="wrEditRow('${name}')">✎ 수정</button>
+        </div>
+      </td>
+      <td>${sv(vals.금주계획)}</td>
+      <td>${sv(vals.금주결과)}</td>
+      <td>${sv(vals.차주계획)}</td>
+    </tr>`;
+  }
+  const planPH=isKita?'미팅, 전시회, 세미나, 외근 등':'이번 주 계획&#10;(개발 위주 업무, 분석 포함)';
+  const nextPH=isKita?'미팅, 전시회, 세미나, 외근 등':'다음 주 업무 계획';
+  return `<tr id="wr-row-${name}">
+    <td class="wr-td-label">
+      <span class="wr-td-name">${name}</span>
+      <div class="wr-row-btns">
+        <button class="wr-btn-done" onclick="wrCompleteRow('${name}')">✓ 완료</button>
+      </div>
+    </td>
+    <td><textarea class="wr-textarea" id="wr_${name}_금주계획" rows="6" placeholder="${planPH}"></textarea></td>
+    <td><textarea class="wr-textarea" id="wr_${name}_금주결과" rows="6" placeholder="이번 주 결과"></textarea></td>
+    <td><textarea class="wr-textarea" id="wr_${name}_차주계획" rows="6" placeholder="${nextPH}"></textarea></td>
+  </tr>`;
 }
 
 function _wrBuildRows(){
@@ -3993,43 +4064,80 @@ function _wrBuildRows(){
   if(!tbody) return;
   const members=wrGetMembers();
   const allRows=[...members,'기타'];
-  tbody.innerHTML=allRows.map(name=>`
-    <tr>
-      <td class="wr-td-label">${name}</td>
-      <td><textarea class="wr-textarea" id="wr_${name}_금주계획" rows="6" placeholder="이번 주 계획&#10;(개발 위주 업무, 분석 포함)"></textarea></td>
-      <td><textarea class="wr-textarea" id="wr_${name}_금주결과" rows="6" placeholder="이번 주 결과"></textarea></td>
-      <td><textarea class="wr-textarea" id="wr_${name}_차주계획" rows="6" placeholder="${name==='기타'?'미팅, 전시회, 세미나, 외근 등':'다음 주 업무 계획'}"></textarea></td>
-    </tr>
-  `).join('');
+  tbody.innerHTML=allRows.map(name=>_wrRowHTML(name)).join('');
+  allRows.forEach(name=>{
+    if(!_wrLockState[name]){
+      const vals=_wrRowValues[name]||{};
+      ['금주계획','금주결과','차주계획'].forEach(f=>{
+        const el=document.getElementById(`wr_${name}_${f}`);
+        if(el) el.value=vals[f]||'';
+      });
+    }
+  });
+}
+
+function _wrUpdateRow(name){
+  const row=document.getElementById(`wr-row-${name}`);
+  if(!row) return;
+  const tmp=document.createElement('tbody');
+  tmp.innerHTML=_wrRowHTML(name);
+  row.replaceWith(tmp.firstElementChild);
+  if(!_wrLockState[name]){
+    const vals=_wrRowValues[name]||{};
+    ['금주계획','금주결과','차주계획'].forEach(f=>{
+      const el=document.getElementById(`wr_${name}_${f}`);
+      if(el) el.value=vals[f]||'';
+    });
+  }
+}
+
+function wrCompleteRow(name){
+  const vals={};
+  ['금주계획','금주결과','차주계획'].forEach(f=>{
+    vals[f]=document.getElementById(`wr_${name}_${f}`)?.value||'';
+  });
+  _wrRowValues[name]=vals;
+  _wrLockState[name]=true;
+  _wrUpdateRow(name);
+}
+
+function wrEditRow(name){
+  _wrLockState[name]=false;
+  _wrUpdateRow(name);
 }
 
 function _wrLoadData(){
   const data=JSON.parse(localStorage.getItem(`wr_${_wrCurrentWeek}`)||'null');
   const members=wrGetMembers();
   const allRows=[...members,'기타'];
-  const fields=['금주계획','금주결과','차주계획'];
-  const mgmtFields=['wrMgmt_prev','wrMgmt_curr','wrMgmt_future'];
+  _wrLockState={};_wrRowValues={};
   if(!data){
-    mgmtFields.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    allRows.forEach(n=>fields.forEach(f=>{const el=document.getElementById(`wr_${n}_${f}`);if(el)el.value='';}));
+    // set default mgmt content for new week
+    const e1=document.getElementById('wrMgmt_prev');
+    const e2=document.getElementById('wrMgmt_curr');
+    const e3=document.getElementById('wrMgmt_future');
+    if(e1) e1.value=WR_MGMT_DEFAULT['이전달경과'];
+    if(e2) e2.value=WR_MGMT_DEFAULT['이번달계획'];
+    if(e3) e3.value=WR_MGMT_DEFAULT['향후계획'];
     const s=document.getElementById('wrSaveStatus');if(s)s.textContent='';
     return;
   }
-  // mgmt
+  // lock state
+  if(data.lockState) Object.assign(_wrLockState, data.lockState);
+  // mgmt (fallback to default if field empty)
   const mg=data.경영보고||{};
   [['wrMgmt_prev','이전달경과'],['wrMgmt_curr','이번달계획'],['wrMgmt_future','향후계획']].forEach(([id,k])=>{
-    const el=document.getElementById(id);if(el)el.value=mg[k]||'';
+    const el=document.getElementById(id);
+    if(el) el.value=mg[k]!==undefined&&mg[k]!==''?mg[k]:WR_MGMT_DEFAULT[k];
   });
-  // rows
+  // row values cache
   allRows.forEach(n=>{
     const src=(n==='기타')?(data.기타||{}):(data.members?.[n]||{});
-    // 이전 포맷 호환 (업무결과→금주결과, 기타→기타결과)
-    fields.forEach(f=>{
-      const el=document.getElementById(`wr_${n}_${f}`);
-      if(!el) return;
-      if(f==='금주결과'&&!src['금주결과']&&src['업무결과']) el.value=src['업무결과'];
-      else el.value=src[f]||'';
-    });
+    _wrRowValues[n]={
+      금주계획: src['금주계획']||'',
+      금주결과: src['금주결과']||src['업무결과']||'',
+      차주계획: src['차주계획']||''
+    };
   });
   if(data.savedAt){
     const d=new Date(data.savedAt);
@@ -4042,13 +4150,23 @@ function wrSave(){
   const members=wrGetMembers();
   const allRows=[...members,'기타'];
   const fields=['금주계획','금주결과','차주계획'];
+  // sync unlocked textarea values into cache
+  allRows.forEach(n=>{
+    if(!_wrLockState[n]){
+      if(!_wrRowValues[n]) _wrRowValues[n]={};
+      fields.forEach(f=>{
+        const val=document.getElementById(`wr_${n}_${f}`)?.value||'';
+        _wrRowValues[n][f]=val;
+      });
+    }
+  });
   const memberData={};
   members.forEach(n=>{
     memberData[n]={};
-    fields.forEach(f=>memberData[n][f]=document.getElementById(`wr_${n}_${f}`)?.value||'');
+    fields.forEach(f=>memberData[n][f]=(_wrRowValues[n]||{})[f]||'');
   });
   const 기타Data={};
-  fields.forEach(f=>기타Data[f]=document.getElementById(`wr_기타_${f}`)?.value||'');
+  fields.forEach(f=>기타Data[f]=(_wrRowValues['기타']||{})[f]||'');
   const data={
     weekKey:_wrCurrentWeek,
     dateRange:wrGetDateRange(_wrCurrentWeek),
@@ -4060,6 +4178,7 @@ function wrSave(){
     },
     members:memberData,
     기타:기타Data,
+    lockState:_wrLockState,
     savedAt:new Date().toISOString()
   };
   localStorage.setItem(`wr_${_wrCurrentWeek}`,JSON.stringify(data));
@@ -4072,10 +4191,26 @@ function wrSave(){
   if(typeof showToast==='function') showToast('주간 보고서 저장 완료 ✓');
 }
 
-function wrPrevWeek(){_wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,-1);_wrUpdateUI();_wrBuildRows();_wrLoadData();}
-function wrNextWeek(){_wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,+1);_wrUpdateUI();_wrBuildRows();_wrLoadData();}
-function wrGoToday(){_wrCurrentWeek=wrGetISOWeekKey(new Date());_wrUpdateUI();_wrBuildRows();_wrLoadData();}
-function wrLoadWeek(wk){_wrCurrentWeek=wk;_wrUpdateUI();_wrBuildRows();_wrLoadData();_wrBuildArchive();}
+function wrPrevWeek(){
+  _wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,-1);
+  _wrLockState={};_wrRowValues={};
+  _wrLoadData();_wrUpdateUI();_wrBuildRows();
+}
+function wrNextWeek(){
+  _wrCurrentWeek=wrShiftWeek(_wrCurrentWeek,+1);
+  _wrLockState={};_wrRowValues={};
+  _wrLoadData();_wrUpdateUI();_wrBuildRows();
+}
+function wrGoToday(){
+  _wrCurrentWeek=wrGetISOWeekKey(new Date());
+  _wrLockState={};_wrRowValues={};
+  _wrLoadData();_wrUpdateUI();_wrBuildRows();
+}
+function wrLoadWeek(wk){
+  _wrCurrentWeek=wk;
+  _wrLockState={};_wrRowValues={};
+  _wrLoadData();_wrUpdateUI();_wrBuildRows();_wrBuildArchive();
+}
 
 async function wrLoadHistorical(btn){
   if(!confirm('2025~2026 엑셀 업무 보고 전체 기록을 불러옵니다.\n기존 저장된 데이터는 유지되며, 겹치는 주차는 덮어씁니다.\n계속하시겠습니까?')) return;
@@ -4084,22 +4219,19 @@ async function wrLoadHistorical(btn){
     const res=await fetch('./wr_data.json?v='+Date.now());
     if(!res.ok) throw new Error('파일을 찾을 수 없습니다 ('+res.status+')');
     const json=await res.json();
-    // store members
     localStorage.setItem('wr_members', JSON.stringify(json.members));
-    // store each week
     let count=0;
     for(const [wk, data] of Object.entries(json.records)){
       localStorage.setItem('wr_'+wk, JSON.stringify(data));
       count++;
     }
-    // merge index
     const existing=JSON.parse(localStorage.getItem('wr_index')||'[]');
     const merged=[...new Set([...json.index,...existing])].sort((a,b)=>b.localeCompare(a));
     localStorage.setItem('wr_index', JSON.stringify(merged));
     btn.textContent='✅ 완료 ('+count+'주)';
     setTimeout(()=>{btn.disabled=false;btn.textContent='📥 기록 불러오기';},3000);
-    _wrBuildArchive();
-    _wrLoadData();
+    _wrLockState={};_wrRowValues={};
+    _wrLoadData();_wrBuildRows();_wrBuildArchive();
     if(typeof showToast==='function') showToast('업무 보고 '+count+'주 기록 불러오기 완료 ✓');
   }catch(e){
     btn.disabled=false; btn.textContent='📥 기록 불러오기';
@@ -4117,7 +4249,7 @@ function _wrBuildArchive(){
   }
   chips.innerHTML=idx.map(wk=>`
     <div class="wr-archive-chip${wk===_wrCurrentWeek?' active':''}" onclick="wrLoadWeek('${wk}')">
-      ${wk}<span>${wrGetDateRange(wk)}</span>
+      ${wrGetSubmitLabel(wk)}<span>${wrGetDateRange(wk)}</span>
     </div>
   `).join('');
 }
@@ -4132,8 +4264,12 @@ function wrPrint(){
   const prev=curr===1?12:curr-1;
   const fut=curr===12?1:curr+1;
   const futEnd=fut+2>12?fut+2-12:fut+2;
-  const g=id=>(document.getElementById(id)||{}).value||'';
   const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  const gv=(name,field)=>{
+    if(_wrLockState[name]) return (_wrRowValues[name]||{})[field]||'';
+    return document.getElementById(`wr_${name}_${field}`)?.value||'';
+  };
+  const g=id=>(document.getElementById(id)||{}).value||'';
 
   const mgmtRows=`<tr>
     <td class="td-label">경영보고<br>주요업무</td>
@@ -4144,9 +4280,9 @@ function wrPrint(){
 
   const workRows=allRows.map(n=>`<tr>
     <td class="td-label">${esc(n)}</td>
-    <td>${esc(g('wr_'+n+'_금주계획'))}</td>
-    <td>${esc(g('wr_'+n+'_금주결과'))}</td>
-    <td class="td-next-plan">${esc(g('wr_'+n+'_차주계획'))}</td>
+    <td>${esc(gv(n,'금주계획'))}</td>
+    <td>${esc(gv(n,'금주결과'))}</td>
+    <td class="td-next-plan">${esc(gv(n,'차주계획'))}</td>
   </tr>`).join('');
 
   // A3 landscape 인쇄 가능 영역: 420×297mm, 여백 8mm×10mm → 400×281mm
@@ -4265,13 +4401,15 @@ ${autoFit}
 }
 
 // ── WR 함수 전역 노출 (module scope → window) ──
-window.wrPrevWeek       = wrPrevWeek;
-window.wrNextWeek       = wrNextWeek;
-window.wrGoToday        = wrGoToday;
-window.wrSave           = wrSave;
-window.wrLoadWeek       = wrLoadWeek;
-window.wrLoadHistorical = wrLoadHistorical;
-window.wrPrint          = wrPrint;
+window.wrPrevWeek         = wrPrevWeek;
+window.wrNextWeek         = wrNextWeek;
+window.wrGoToday          = wrGoToday;
+window.wrSave             = wrSave;
+window.wrLoadWeek         = wrLoadWeek;
+window.wrLoadHistorical   = wrLoadHistorical;
+window.wrPrint            = wrPrint;
+window.wrCompleteRow      = wrCompleteRow;
+window.wrEditRow          = wrEditRow;
 window.renderWeeklyReport = renderWeeklyReport;
 
 function renderOverview(){
