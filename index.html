@@ -843,6 +843,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .hp-upload-processing.show{display:flex}
 .hp-upload-spinner{width:32px;height:32px;border:3px solid rgba(139,92,246,.2);border-top-color:#8b5cf6;border-radius:50%;animation:hp-spin .7s linear infinite}
 @keyframes hp-spin{to{transform:rotate(360deg)}}
+.hp-upload-processing.done .hp-upload-spinner{animation:none;border:3px solid rgba(16,185,129,.25);border-top-color:#10b981;position:relative}
+.hp-upload-processing.done .hp-upload-spinner::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#10b981;font-size:.9rem;font-weight:800}
+.hp-up-elapsed{display:flex;align-items:baseline;gap:5px;font-size:.62rem;color:#64748b}
+.hp-up-elapsed b{font-family:'Space Grotesk',sans-serif;font-size:1.55rem;font-weight:800;color:#a78bfa;font-variant-numeric:tabular-nums;line-height:1;text-shadow:0 0 16px rgba(167,139,250,.45)}
+.hp-up-stages{width:230px;display:flex;flex-direction:column;gap:4px;margin-top:2px}
+.hp-up-stage-row{display:flex;align-items:center;justify-content:space-between;font-size:.62rem;color:#94a3b8;padding:4px 9px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:6px;animation:hp-stage-in .25s ease}
+.hp-up-stage-row .hp-up-stage-ms{font-weight:700;color:#67e8f9;font-variant-numeric:tabular-nums}
+.hp-up-stage-row.slow .hp-up-stage-ms{color:#fbbf24}
+@keyframes hp-stage-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 
 /* ── section header ── */
 .hp-sec-hdr{
@@ -905,6 +914,33 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .hp-ss-receipt-val{font-size:1.25rem;font-weight:800;color:#e2e8f0;line-height:1}
 .hp-ss-receipt-sub{font-size:.58rem;color:#64748b}
 
+/* ── status treemap (총샘플 = GD + 국내, 미등록 중첩) ── */
+.hp-tm-wrap{margin-bottom:10px}
+.hp-tm-cap{font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.12em;color:#64748b;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:baseline;gap:9px}
+.hp-tm-cap b{font-size:1.1rem;font-weight:800;letter-spacing:0;background:linear-gradient(120deg,#f1f5f9 30%,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hp-tm-cap-sub{font-size:.54rem;color:#475569;font-weight:500;letter-spacing:.02em;text-transform:none;margin-left:auto}
+.hp-tm{display:flex;gap:8px;height:152px}
+.hp-tm-tile{position:relative;flex-basis:0;min-width:96px;border-radius:13px;overflow:hidden;padding:15px 17px;display:flex;flex-direction:column;cursor:pointer;border:1px solid rgba(255,255,255,.1);transition:transform .2s cubic-bezier(.22,1,.36,1),box-shadow .2s,border-color .2s}
+.hp-tm-tile::after{content:'';position:absolute;inset:0;border-radius:13px;background:radial-gradient(130% 120% at 100% 0%,rgba(255,255,255,.1),transparent 42%);opacity:0;transition:opacity .2s;pointer-events:none}
+.hp-tm-tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.26);box-shadow:0 14px 34px -10px rgba(0,0,0,.6)}
+.hp-tm-tile:hover::after{opacity:1}
+.hp-tm-gd{background:linear-gradient(150deg,rgba(6,182,212,.26),rgba(6,182,212,.05) 70%)}
+.hp-tm-dom{background:linear-gradient(150deg,rgba(96,165,250,.26),rgba(96,165,250,.05) 70%)}
+.hp-tm-head{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.hp-tm-lbl{font-size:.68rem;font-weight:800;letter-spacing:.04em}
+.hp-tm-gd .hp-tm-lbl{color:#67e8f9}
+.hp-tm-dom .hp-tm-lbl{color:#93c5fd}
+.hp-tm-pct{font-size:.64rem;font-weight:700;color:#cbd5e1;font-variant-numeric:tabular-nums}
+.hp-tm-val{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:800;line-height:1;margin-top:auto;color:#f1f5f9;font-variant-numeric:tabular-nums}
+.hp-tm-gd .hp-tm-val{color:#a5f3fc}
+.hp-tm-dom .hp-tm-val{color:#bfdbfe}
+.hp-tm-sub{position:absolute;left:0;right:0;bottom:0;height:30px;display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:0 16px;background:linear-gradient(180deg,rgba(245,158,11,.28),rgba(239,68,68,.26));border-top:1px solid rgba(245,158,11,.45);cursor:pointer;transition:filter .18s}
+.hp-tm-sub:hover{filter:brightness(1.18)}
+.hp-tm-sub-lbl{font-size:.6rem;font-weight:800;color:#fcd34d;letter-spacing:.03em;white-space:nowrap}
+.hp-tm-sub-meta{display:flex;align-items:baseline;gap:8px;min-width:0;overflow:hidden}
+.hp-tm-sub-meta b{font-size:.66rem;font-weight:800;color:#fde68a;white-space:nowrap}
+.hp-tm-sub-meta i{font-style:normal;font-size:.54rem;color:rgba(253,230,138,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 /* ── process cards ── */
 .hp-proc-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .hp-proc-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;cursor:pointer}
@@ -918,6 +954,20 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .hp-proc-card-bar-track{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:visible;margin-bottom:6px;position:relative}
 .hp-proc-card-bar-fill{height:100%;border-radius:3px;position:relative;transition:width .6s ease}
 .hp-proc-card-pct{font-size:1rem;font-weight:800}
+
+/* ── 공정 게이지(부채꼴 270° 계기판) ── */
+.hp-proc-accent{position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;z-index:1}
+.hp-gauge-host{display:flex;justify-content:center;margin-top:2px}
+.hp-gauge{position:relative;width:152px;height:120px}
+.hp-gauge svg{width:100%;height:100%;display:block;overflow:visible}
+.hp-gauge-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:6.5;stroke-linecap:round}
+.hp-gauge-val{fill:none;stroke-width:6.5;stroke-linecap:round;filter:drop-shadow(0 0 3px var(--gc));transition:stroke-dashoffset 1.3s cubic-bezier(.18,.9,.32,1)}
+.hp-proc-card:hover .hp-gauge-val{filter:drop-shadow(0 0 7px var(--gc))}
+.hp-gauge-tick{stroke:rgba(255,255,255,.16);stroke-width:1.5;stroke-linecap:round}
+.hp-gauge-center{position:absolute;left:0;right:0;top:50%;transform:translateY(-60%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.hp-gauge-count{font-size:2.05rem;font-weight:800;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hp-gauge-total{font-size:.6rem;color:#64748b;margin-top:4px;font-weight:600}
+.hp-gauge-pct{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:1.1rem;font-weight:800;font-variant-numeric:tabular-nums;text-shadow:0 0 12px var(--gc)}
 
 /* ── workload bars ── */
 .hp-dev-status-wrap{display:flex;gap:20px;align-items:center}
@@ -941,32 +991,35 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .hp-warn-block{cursor:pointer;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.04);transition:background .15s}
 .hp-warn-block:hover{background:rgba(255,255,255,.07)}
 .hp-warn-block-hdr{display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(0,0,0,.18);border-bottom:1px solid rgba(255,255,255,.07)}
-.hp-warn-dev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;align-items:start}
-.hp-warn-dev-card{background:rgba(255,255,255,.05);border:1px solid;border-radius:8px;padding:8px 10px}
-.hp-warn-dev-name{font-family:'Space Grotesk',sans-serif;font-size:.64rem;font-weight:700;letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.hp-warn-dev-cnt{font-size:.58rem;background:rgba(255,255,255,.1);border-radius:3px;padding:1px 5px;font-weight:600;color:#94a3b8}
-.hp-warn-chip-list{display:flex;flex-direction:column;gap:3px}
+.hp-warn-dev-grid{display:flex;flex-direction:column;gap:6px;padding:9px 10px}
+.hp-warn-dev-card{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:center;background:rgba(255,255,255,.035);border:1px solid;border-radius:9px;padding:8px 13px}
+.hp-warn-dev-empty{grid-template-columns:118px 1fr;background:transparent;border-color:rgba(255,255,255,.05)!important;opacity:.4;padding:5px 13px}
+.hp-warn-empty-txt{font-size:.58rem;color:#475569}
+.hp-warn-dev-name{font-family:'Space Grotesk',sans-serif;font-size:.66rem;font-weight:700;letter-spacing:.05em;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.hp-warn-dev-cnt{font-size:.56rem;min-width:18px;text-align:center;background:rgba(255,255,255,.1);border-radius:4px;padding:1px 5px;font-weight:700;color:#cbd5e1}
+.hp-warn-chip-list{display:flex;flex-wrap:wrap;gap:5px}
 .hp-warn-title-block{display:flex;flex-direction:column;gap:3px}
 .hp-warn-type{font-family:'Space Grotesk',sans-serif;font-size:.66rem;font-weight:700;letter-spacing:.12em}
 .hp-warn-cnt-inline{font-size:.7rem;font-weight:800;margin-left:auto}
-.hp-warn-style-list{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
-.hp-warn-chip{font-size:.62rem;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.06);white-space:nowrap;transition:transform .15s,background .15s}
-.hp-warn-chip:hover{transform:scale(1.1) translateY(-1px);background:rgba(255,255,255,.12)}
-.hp-warn-chip-days{font-size:.58rem;font-weight:700;opacity:.85}
+.hp-warn-chip{display:inline-flex;align-items:center;gap:5px;font-size:.6rem;font-weight:600;padding:2.5px 8px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 0 0 0 var(--wc);white-space:nowrap;transition:transform .14s ease,background .14s,border-color .14s}
+.hp-warn-chip:hover{transform:translateY(-1px);background:rgba(255,255,255,.1);border-color:color-mix(in srgb,var(--wc) 50%,transparent)}
+.hp-warn-chip-style{color:#cbd5e1;font-variant-numeric:tabular-nums}
+.hp-warn-chip-days{font-size:.58rem;font-weight:800;color:var(--wc);font-variant-numeric:tabular-nums}
 
 /* ── SCT ── */
 .hp-sct-wrap{display:flex;gap:16px;align-items:flex-start;margin-bottom:18px}
 .hp-sct-table-area{flex:1;min-width:0;overflow-x:auto}
-.hp-sct-tbl{width:100%;border-collapse:collapse;font-size:.63rem;white-space:nowrap}
-.hp-sct-tbl thead tr.hp-sct-dev-row th{padding:6px 10px;text-align:center;font-weight:800;letter-spacing:.05em;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.12)}
-.hp-sct-tbl thead tr.hp-sct-sub-row th{padding:4px 8px;font-size:.55rem;font-weight:700;letter-spacing:.06em;color:#94a3b8;border-bottom:2px solid rgba(255,255,255,.12);text-align:center}
-.hp-sct-tbl tbody td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.07);text-align:center}
-.hp-sct-cat-cell{text-align:left!important;font-weight:700;display:flex;align-items:center;gap:7px}
+.hp-sct-tbl{width:100%;border-collapse:collapse;font-size:.7rem;white-space:nowrap}
+.hp-sct-tbl thead tr.hp-sct-dev-row th{padding:9px 10px;text-align:center;font-weight:800;font-size:.72rem;letter-spacing:.05em;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.12)}
+.hp-sct-tbl thead tr.hp-sct-sub-row th{padding:6px 8px;font-size:.61rem;font-weight:700;letter-spacing:.06em;color:#94a3b8;border-bottom:2px solid rgba(255,255,255,.12);text-align:center}
+.hp-sct-tbl tbody td{padding:12px 8px;border-bottom:1px solid rgba(255,255,255,.07);text-align:center}
+.hp-sct-cat-cell{text-align:left!important;font-weight:700;font-size:.72rem;display:flex;align-items:center;gap:7px}
 .hp-sct-cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.hp-sct-total-cell{font-weight:800;font-size:.72rem}
-.hp-sct-grand-row td{background:rgba(255,255,255,.04);font-weight:800;border-top:2px solid rgba(255,255,255,.12)}
-.hp-sct-style{color:#94a3b8}
-.hp-sct-opt{font-weight:700}
+.hp-sct-total-cell{font-weight:800;font-size:.79rem}
+.hp-sct-grand-row td{background:rgba(255,255,255,.04);font-weight:800;border-top:2px solid rgba(255,255,255,.12);padding-top:13px;padding-bottom:13px}
+.hp-sct-style{color:#94a3b8;font-size:.72rem}
+.hp-sct-opt{font-weight:700;font-size:.74rem;color:#e2e8f0}
+.hp-sct-zero{color:#475569;font-weight:400}
 .hp-sct-tbl tbody tr{transition:background .15s;cursor:default}
 .hp-sct-tbl tbody tr:hover td{background:rgba(255,255,255,.04)}
 .hp-sct-donut-area{flex-shrink:0;width:190px}
@@ -1001,6 +1054,44 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .hp-lt-unit{font-size:.7rem;font-weight:400;color:#64748b;margin-left:2px}
 .hp-lt-sub{font-size:.6rem;color:#64748b;margin-top:4px;line-height:1.45}
 .hp-lt-note{font-size:.58rem;color:#64748b;margin-top:3px;border-top:1px solid rgba(255,255,255,.07);padding-top:4px;opacity:.7}
+
+/* ── RESULT LINE (Development Status 3번째 라인) ── */
+.hp-result-line{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+
+/* ── STATUS BY MEMBERS : 멤버별 1열 종대 행 (좌: 작지 도넛 / 우: 공정 가로막대) ── */
+.hp-member-grid{display:flex;flex-direction:column;gap:9px}
+.hp-member-card{display:grid;grid-template-columns:228px 1fr;gap:24px;align-items:center;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.018));border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:15px 22px 15px 24px;cursor:pointer;transition:transform .22s cubic-bezier(.22,1,.36,1),border-color .22s ease,box-shadow .22s ease;position:relative;overflow:hidden}
+.hp-member-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--mc,#64748b),transparent 92%);opacity:.85;box-shadow:0 0 12px -1px var(--mc,#64748b)}
+.hp-member-card::after{content:'';position:absolute;inset:0;border-radius:13px;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--mc,#64748b) 13%,transparent),transparent 45%);opacity:0;transition:opacity .22s ease;pointer-events:none}
+.hp-member-card:hover{transform:translateX(4px);border-color:rgba(255,255,255,.2);box-shadow:0 12px 32px -8px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.05)}
+.hp-member-card:hover::after{opacity:1}
+.hp-member-card.hp-member-standby{opacity:.45;cursor:default}
+.hp-member-card.hp-member-standby:hover{transform:none;box-shadow:none;border-color:rgba(255,255,255,.1)}
+.hp-member-card.hp-member-standby:hover::after{opacity:0}
+.hp-member-left{display:flex;align-items:center;gap:16px;min-width:0;position:relative;z-index:1}
+.hp-member-donut{position:relative;width:78px;height:78px;flex-shrink:0;filter:drop-shadow(0 2px 9px rgba(6,182,212,.22))}
+.hp-member-donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.hp-member-donut-center b{font-size:1.1rem;font-weight:800;color:#f1f5f9;line-height:1;text-shadow:0 0 14px rgba(255,255,255,.18)}
+.hp-member-donut-center small{font-size:.44rem;color:#64748b;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.hp-member-meta{min-width:0}
+.hp-member-name{font-weight:800;font-size:.86rem;color:#e2e8f0;letter-spacing:.01em;white-space:nowrap}
+.hp-member-tot{font-size:.66rem;font-weight:700;color:#94a3b8;margin-left:7px}
+.hp-member-split{display:flex;gap:14px;margin-top:9px;font-size:.62rem}
+.hp-member-split span{display:flex;align-items:center;gap:5px;color:#94a3b8;font-weight:600}
+.hp-member-split b{color:#e2e8f0;font-weight:800}
+.hp-member-right{min-width:0;position:relative;z-index:1}
+.hp-member-pipe-cap{font-size:.5rem;color:#64748b;letter-spacing:.16em;text-transform:uppercase;margin-bottom:9px;font-weight:700}
+.hp-member-pipe-wrap{transition:width .6s cubic-bezier(.22,1,.36,1)}
+.hp-member-pipe-bar{position:relative;display:flex;height:6px;border-radius:5px;overflow:hidden;background:rgba(255,255,255,.045);box-shadow:inset 0 0 0 1px rgba(255,255,255,.035)}
+.hp-member-pipe-bar>div{height:100%;position:relative;transition:width .6s cubic-bezier(.22,1,.36,1)}
+.hp-member-pipe-bar>div+div{box-shadow:inset 1.5px 0 0 rgba(8,11,17,.65)}
+.hp-member-pipe-bar::after{content:'';position:absolute;left:0;right:0;top:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0));pointer-events:none}
+.hp-member-card:hover .hp-member-pipe-bar{box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 0 14px -2px rgba(6,182,212,.4)}
+.hp-member-pipe-lbls{display:flex;margin-top:10px}
+.hp-member-pipe-lbl{font-size:.55rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;letter-spacing:.03em;display:flex;align-items:center;gap:5px}
+.hp-member-pipe-lbl::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;box-shadow:0 0 6px currentColor}
+.hp-member-pipe-lbl b{font-weight:800;color:#e2e8f0}
+.hp-mleg-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
 
 /* ── RDDA ── */
 .hp-rdda-inner{height:260px;position:relative}
@@ -3223,79 +3314,94 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
       <div class="hp-sec">
         <div class="hp-sec-hdr">Development Status<span class="hp-sec-sub">전체 진행 현황 · 공정별 완료율</span></div>
 
-        <div class="hp-status-summary">
-          <div class="hp-ss-total">
-            <div class="hp-ss-total-lbl">총 샘플</div>
-            <div class="hp-ss-total-val" id="hpTotalVal">—건</div>
-          </div>
-          <div class="hp-ss-types">
-            <div class="hp-ss-type">
-              <div class="hp-ss-type-lbl" style="color:#67e8f9">GD개발</div>
-              <div class="hp-ss-type-val" style="color:#67e8f9" id="hpGdVal">—건</div>
-              <div class="hp-ss-type-sub" id="hpGdPct">—%</div>
+        <div class="hp-tm-wrap">
+          <div class="hp-tm-cap">총 샘플 <b id="hpTotalVal">—건</b><span class="hp-tm-cap-sub">전체 작지 = GD개발 + 국내개발 · 영역 크기 = 건수 비율</span></div>
+          <div class="hp-tm" id="hpTreemap">
+            <div class="hp-tm-tile hp-tm-gd" id="hpTmGd">
+              <div class="hp-tm-head"><span class="hp-tm-lbl">GD개발</span><span class="hp-tm-pct" id="hpGdPct">—%</span></div>
+              <div class="hp-tm-val" id="hpGdVal">—건</div>
+              <div class="hp-tm-sub" id="hpTmReceipt">
+                <span class="hp-tm-sub-lbl">미접수</span>
+                <span class="hp-tm-sub-meta"><b id="hpReceiptVal">—건</b><i id="hpReceiptSub">GD · Style# 미기재</i></span>
+              </div>
             </div>
-            <div class="hp-ss-type">
-              <div class="hp-ss-type-lbl" style="color:#60a5fa">국내개발</div>
-              <div class="hp-ss-type-val" style="color:#60a5fa" id="hpDomVal">—건</div>
-              <div class="hp-ss-type-sub" id="hpDomPct">—%</div>
-            </div>
-            <div class="hp-ss-receipt">
-              <div class="hp-ss-receipt-lbl">작지 미등록</div>
-              <div class="hp-ss-receipt-val" id="hpReceiptVal">—건</div>
-              <div class="hp-ss-receipt-sub" id="hpReceiptSub">GD · Style# 미기재</div>
+            <div class="hp-tm-tile hp-tm-dom" id="hpTmDom">
+              <div class="hp-tm-head"><span class="hp-tm-lbl">국내개발</span><span class="hp-tm-pct" id="hpDomPct">—%</span></div>
+              <div class="hp-tm-val" id="hpDomVal">—건</div>
             </div>
           </div>
         </div>
 
         <div class="hp-proc-cards" id="hpProcCards">
-          <div class="hp-proc-card" style="--hpc:1" data-proc="0">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#b45309,#f59e0b,#fde68a)"></div>
+          <div class="hp-proc-card" data-proc="0">
+            <div class="hp-proc-accent" style="background:linear-gradient(90deg,#b45309,#f59e0b,#fde68a)"></div>
             <div class="hp-proc-card-name" style="color:#fbbf24">① YARN IN-FAC</div>
-            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#fbbf24" id="hpYarnDone">—</div><div class="hp-proc-card-total" id="hpYarnTotal">/ —건</div></div>
-            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpYarnBar" style="width:0%;background:linear-gradient(90deg,#b45309,#f59e0b,#fde68a)"></div></div>
-            <div class="hp-proc-card-pct" style="color:#fbbf24" id="hpYarnPct">—%</div>
+            <div class="hp-gauge-host"></div>
           </div>
           <div class="hp-proc-card" data-proc="1">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)"></div>
+            <div class="hp-proc-accent" style="background:linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)"></div>
             <div class="hp-proc-card-name" style="color:#c4b5fd">② KNITTING</div>
-            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#c4b5fd" id="hpKnitDone">—</div><div class="hp-proc-card-total" id="hpKnitTotal">/ —건</div></div>
-            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpKnitBar" style="width:0%;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#ddd6fe)"></div></div>
-            <div class="hp-proc-card-pct" style="color:#c4b5fd" id="hpKnitPct">—%</div>
+            <div class="hp-gauge-host"></div>
           </div>
           <div class="hp-proc-card" data-proc="2">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)"></div>
+            <div class="hp-proc-accent" style="background:linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)"></div>
             <div class="hp-proc-card-name" style="color:#67e8f9">③ DYEING</div>
-            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#67e8f9" id="hpDyeDone">—</div><div class="hp-proc-card-total" id="hpDyeTotal">/ —건</div></div>
-            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpDyeBar" style="width:0%;background:linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)"></div></div>
-            <div class="hp-proc-card-pct" style="color:#67e8f9" id="hpDyePct">—%</div>
+            <div class="hp-gauge-host"></div>
           </div>
           <div class="hp-proc-card" data-proc="3">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;background:linear-gradient(90deg,#065f46,#10b981,#6ee7b7)"></div>
+            <div class="hp-proc-accent" style="background:linear-gradient(90deg,#065f46,#10b981,#6ee7b7)"></div>
             <div class="hp-proc-card-name" style="color:#6ee7b7">④ FINISHING</div>
-            <div class="hp-proc-card-nums"><div class="hp-proc-card-done" style="color:#6ee7b7" id="hpFinDone">—</div><div class="hp-proc-card-total" id="hpFinTotal">/ —건</div></div>
-            <div class="hp-proc-card-bar-track"><div class="hp-proc-card-bar-fill" id="hpFinBar" style="width:0%;background:linear-gradient(90deg,#065f46,#10b981,#6ee7b7)"></div></div>
-            <div class="hp-proc-card-pct" style="color:#6ee7b7" id="hpFinPct">—%</div>
+            <div class="hp-gauge-host"></div>
+          </div>
+        </div>
+
+        <!-- ── 세번째 라인: RESULT (완료 / 리드타임) ── -->
+        <div class="hp-result-line">
+          <div class="hp-lt-card" data-lt="0" id="hpLtWeekCard">
+            <div class="hp-lt-label">이번주 완료</div>
+            <div class="hp-lt-val" style="color:#34d399" id="hpLtWeek">—<span class="hp-lt-unit">건</span></div>
+            <div class="hp-lt-sub">창고보관 시트 FINISH DATE 기준</div>
+          </div>
+          <div class="hp-lt-card" data-lt="1" id="hpLtMonthCard">
+            <div class="hp-lt-label">이번달 완료</div>
+            <div class="hp-lt-val" style="color:#67e8f9" id="hpLtMonth">—<span class="hp-lt-unit">건</span></div>
+            <div class="hp-lt-sub">창고보관 시트 FINISH DATE 기준</div>
+          </div>
+          <div class="hp-lt-card" data-lt="2" id="hpLtKnitCard">
+            <div class="hp-lt-label">편직 리드타임</div>
+            <div class="hp-lt-val" style="color:#c4b5fd" id="hpLtKnit">—<span class="hp-lt-unit">일</span></div>
+            <div class="hp-lt-sub">최근 1개월 완료건 · 원사입고 → 편직완료</div>
+          </div>
+          <div class="hp-lt-card" data-lt="3" id="hpLtSampleCard">
+            <div class="hp-lt-label">샘플 리드타임</div>
+            <div class="hp-lt-val" style="color:#fbbf24" id="hpLtSample">—<span class="hp-lt-unit">일</span></div>
+            <div class="hp-lt-sub">최근 1개월 완료건 · 원사입고 → FINISH DATE</div>
           </div>
         </div>
       </div>
 
-      <!-- ══ 2. 담당자별 작지 현황 ══ -->
+      <!-- ══ 2. STATUS BY MEMBERS + PROCESS ══ -->
       <div class="hp-sec">
-        <div class="hp-sec-hdr">Status by Members<span class="hp-sec-sub">담당자별 작지 분포 · 국내 / GD</span></div>
-        <div class="hp-pipe-dev-list" id="hpDevStatusList"></div>
-      </div>
-
-      <!-- ══ 3. WARNING (SCHEDULE DELAY) ══ -->
-      <div class="hp-sec">
-        <div class="hp-sec-hdr hp-alert-hdr">Schedule Alerts<span class="hp-sec-sub">공정 단계별 지연 발생 건</span></div>
-        <div class="hp-warn-rows" id="hpWarnRows">
-          <div style="color:#64748b;font-size:.76rem;padding:12px 0">데이터를 업로드하면 지연 현황이 표시됩니다.</div>
+        <div class="hp-sec-hdr">Status by Members<span class="hp-sec-sub">담당자별 작지 분포(국내·GD) · 공정 단계 진행</span></div>
+        <div class="hp-member-grid" id="hpMemberGrid">
+          <div style="color:#64748b;font-size:.76rem;padding:12px 0">데이터를 업로드하면 표시됩니다.</div>
+        </div>
+        <div class="hp-pipe-leg-row" style="margin-top:14px">
+          <div style="font-size:.55rem;color:#475569;letter-spacing:.06em;margin-right:2px">도넛</div>
+          <div class="hp-pipe-leg-i"><span class="hp-mleg-dot" style="background:#60a5fa"></span>국내</div>
+          <div class="hp-pipe-leg-i"><span class="hp-mleg-dot" style="background:#06b6d4"></span>GD</div>
+          <div style="width:1px;height:13px;background:rgba(255,255,255,.14);margin:0 8px"></div>
+          <div style="font-size:.55rem;color:#475569;letter-spacing:.06em;margin-right:2px">막대</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#334155,#64748b)"></div>미접수</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#0e7490,#06b6d4)"></div>편직대기</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div>염색중</div>
+          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#065f46,#10b981)"></div>등록대기</div>
         </div>
       </div>
 
-      <!-- ══ 4. CATEGORY per developer ══ -->
+      <!-- ══ 3. CATEGORIES ══ -->
       <div class="hp-sec">
-        <div class="hp-sec-hdr">Categories &amp; Process<span class="hp-sec-sub">카테고리 분포 · 공정 진행 상태</span></div>
+        <div class="hp-sec-hdr">Categories<span class="hp-sec-sub">카테고리 분포 · 담당자별 STYLE / OPTION</span></div>
 
         <div class="hp-sct-wrap">
           <div class="hp-sct-table-area">
@@ -3325,42 +3431,13 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
             <div style="position:relative;height:185px"><canvas id="hpSctDonut"></canvas></div>
           </div>
         </div>
-
-        <div class="hp-pipe-sec-title">Process Status <span>담당자별 현재 단계 분포</span></div>
-        <div class="hp-pipe-dev-list" id="hpPipeDevList"></div>
-
-        <div class="hp-pipe-leg-row">
-          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#334155,#64748b)"></div>미접수</div>
-          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#0e7490,#06b6d4)"></div>편직대기</div>
-          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#5b21b6,#8b5cf6)"></div>염색중</div>
-          <div class="hp-pipe-leg-i"><div class="hp-pipe-leg-sq" style="background:linear-gradient(90deg,#065f46,#10b981)"></div>등록대기</div>
-        </div>
       </div>
 
-      <!-- ══ 5. LEAD TIME ══ -->
+      <!-- ══ 4. SCHEDULE ALERTS (맨 하단) ══ -->
       <div class="hp-sec">
-        <div class="hp-sec-hdr">Result<span class="hp-sec-sub">완료 기준 평균 소요일</span></div>
-        <div class="hp-lt-grid">
-          <div class="hp-lt-card" data-lt="0">
-            <div class="hp-lt-label">이번주 완료</div>
-            <div class="hp-lt-val" style="color:#34d399" id="hpLtWeek">—<span class="hp-lt-unit">건</span></div>
-            <div class="hp-lt-sub">현황 &amp; 창고보관 시트 FINISH DATE 기준</div>
-          </div>
-          <div class="hp-lt-card" data-lt="1">
-            <div class="hp-lt-label">이번달 완료</div>
-            <div class="hp-lt-val" style="color:#67e8f9" id="hpLtMonth">—<span class="hp-lt-unit">건</span></div>
-            <div class="hp-lt-sub">현황 &amp; 창고보관 시트 FINISH DATE 기준</div>
-          </div>
-          <div class="hp-lt-card" data-lt="2" id="hpLtKnitCard">
-            <div class="hp-lt-label">편직 리드타임</div>
-            <div class="hp-lt-val" style="color:#c4b5fd" id="hpLtKnit">—<span class="hp-lt-unit">일</span></div>
-            <div class="hp-lt-sub">현황 전체 기준 · 원사입고일 → 편직완료일</div>
-          </div>
-          <div class="hp-lt-card" data-lt="3" id="hpLtSampleCard">
-            <div class="hp-lt-label">샘플 리드타임</div>
-            <div class="hp-lt-val" style="color:#fbbf24" id="hpLtSample">—<span class="hp-lt-unit">일</span></div>
-            <div class="hp-lt-sub">FINISH DATE 기재 건 · 원사입고일 → FINISH DATE</div>
-          </div>
+        <div class="hp-sec-hdr hp-alert-hdr">Schedule Alerts<span class="hp-sec-sub">공정 단계별 지연 발생 건</span></div>
+        <div class="hp-warn-rows" id="hpWarnRows">
+          <div style="color:#64748b;font-size:.76rem;padding:12px 0">데이터를 업로드하면 지연 현황이 표시됩니다.</div>
         </div>
       </div>
 
@@ -6127,7 +6204,9 @@ initFirebase();
     </div>
     <div class="hp-upload-processing" id="hpUploadProcessing">
       <div class="hp-upload-spinner"></div>
-      <div style="font-size:.72rem;color:#94a3b8" id="hpUploadProcessingText">파싱 중…</div>
+      <div style="font-size:.74rem;color:#e2e8f0;font-weight:600" id="hpUploadProcessingText">파싱 중…</div>
+      <div class="hp-up-elapsed"><b id="hpUploadElapsed">0.0</b><span>초 경과</span></div>
+      <div class="hp-up-stages" id="hpUploadStages"></div>
     </div>
   </div>
 </div>
@@ -6176,6 +6255,7 @@ let hpSctDonutChart = null;
 let hpRddaChart = null;
 let hpYearChart = null;
 let hpYearActiveIdx = 0; // currently selected year index
+let hpMemberCharts = []; // Status by Members 도넛 차트 인스턴스
 
 // ── modal helpers
 function hpOpenModal(title, subtitle, bodyHtml){
@@ -6200,6 +6280,13 @@ function hpIsDone(v){
   if(/^\d{1,2}\/\d{1,2}$/.test(s)) return true;
   if(/\d{4,}/.test(s)) return true;
   return false;
+}
+
+// ── 공정 완료 판정: 입력된 공정 일자가 오늘 이전/당일이면 완료, 미래 날짜·텍스트(TBD/STOCK 등)는 미완료
+function hpProcDone(v, refMs){
+  const d = hpParseDate(v);
+  if(!d) return false;                       // 날짜 아님(텍스트/공백) → 미완료
+  return d.getTime() <= (refMs!=null ? refMs : Date.now());
 }
 
 // ── parse a date value from Excel cell
@@ -6235,77 +6322,133 @@ function hpParseFL(s){
   return {yr, mo, src};
 }
 
-// ── render workload bars (section 2)
-function hpRenderDevBars(devData){
-  const list = document.getElementById('hpDevStatusList');
-  if(!list) return;
-  list.innerHTML = '';
-  const SEG_COLORS = ['#60a5fa','#06b6d4'];
-  const SEG_GRADS  = ['linear-gradient(90deg,#1d4ed8,#60a5fa,#bae6fd)','linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)'];
-  const SEG_GLOW   = ['rgba(96,165,250,.5)','rgba(6,182,212,.5)'];
-  const SEG_LBLS   = ['국내','GD'];
-  const maxTot = Math.max(...devData.map(d=>d.total), 1);
-  devData.forEach((dev, idx)=>{
-    if(dev.total === 0){
-      list.innerHTML += `<div class="hp-pipe-dev-row hp-dev-standby" data-dev-idx="${idx}">
-        <div class="hp-pipe-dev-lbl" style="color:#475569">${dev.name}<span style="color:#374151;font-size:.55rem;letter-spacing:.06em">복귀 예정</span></div>
-        <div style="flex:1;display:flex;align-items:center;padding-left:4px">
-          <div style="height:6px;border-radius:4px;background:rgba(255,255,255,.06);flex:1;position:relative;overflow:hidden">
-            <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(255,255,255,.04) 6px,rgba(255,255,255,.04) 12px)"></div>
-          </div>
-        </div>
-      </div>`;
-      return;
-    }
-    const relW = +(dev.total / maxTot * 100).toFixed(1);
-    const pcts = dev.counts.map(c => +(c / Math.max(dev.total,1) * 100).toFixed(1));
-    const segs = dev.counts.map((c,i)=>`<div class="hp-pipe-b" style="width:${pcts[i]}%;background:${SEG_GRADS[i]};box-shadow:0 0 8px ${SEG_GLOW[i]}" title="${SEG_LBLS[i]}: ${c}건 (${pcts[i]}%)"></div>`).join('');
-    const lbls = pcts.map((p,i)=>`<div class="hp-pipe-lbl-seg" style="width:${p}%;color:${SEG_COLORS[i]}">${SEG_LBLS[i]} ${dev.counts[i]}건(${p}%)</div>`).join('');
-    list.innerHTML += `<div class="hp-pipe-dev-row" data-dev-idx="${idx}">
-      <div class="hp-pipe-dev-lbl">${dev.name}<span>${dev.total}건</span></div>
-      <div style="width:${relW}%">
-        <div class="hp-pipe-track">
-          <div class="hp-pipe-lbl-row">${lbls}</div>
-          <div class="hp-pipe-bar">${segs}</div>
-        </div>
-      </div>
-    </div>`;
-  });
+// ── 시트를 헤더 기준으로 읽어 {rows, dataStart} 반환 (현황=No. / 창고보관=R&D No.)
+function hpSheetRows(wb, sheetName){
+  if(!wb.SheetNames.includes(sheetName)) return null;
+  const ws = wb.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
+  let hr=-1;
+  for(let i=0;i<Math.min(rows.length,15);i++){
+    const c0 = rows[i] && rows[i][0]!=null ? String(rows[i][0]).trim() : '';
+    if(c0==='No.' || c0==='R&D No.'){ hr=i; break; }
+  }
+  if(hr<0) return null;
+  return {rows, dataStart: hr+2};
 }
 
-// ── render pipeline bars (section 4) — 0건 제외, 라벨 겹침 방지
-function hpRenderPipeBars(pipeDevs){
-  const pipeList = document.getElementById('hpPipeDevList');
-  if(!pipeList) return;
-  pipeList.innerHTML = '';
-  if(!pipeDevs.length){ pipeList.innerHTML='<div style="color:#475569;font-size:.72rem;padding:8px 0">데이터를 업로드하면 표시됩니다.</div>'; return; }
-  const maxTot = Math.max(...pipeDevs.map(d=>d.total), 1);
-  pipeDevs.forEach((dev, idx)=>{
-    if(dev.total === 0){
-      pipeList.innerHTML += `<div class="hp-pipe-dev-row hp-dev-standby" data-pipe-idx="${idx}">
-        <div class="hp-pipe-dev-lbl" style="color:#475569">${dev.name}<span style="color:#374151;font-size:.55rem;letter-spacing:.06em">복귀 예정</span></div>
-        <div style="flex:1;display:flex;align-items:center;padding-left:4px">
-          <div style="height:6px;border-radius:4px;background:rgba(255,255,255,.06);flex:1;position:relative;overflow:hidden">
-            <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(255,255,255,.04) 6px,rgba(255,255,255,.04) 12px)"></div>
+// ── render Status by Members : 도넛(국내/GD) + 파이프라인 막대 결합 카드
+const HP_SPLIT_COLORS = ['#60a5fa','#06b6d4']; // [국내, GD]
+function hpRenderMemberCards(devList){
+  const grid = document.getElementById('hpMemberGrid');
+  if(!grid) return;
+  // 이전 도넛 차트 정리
+  hpMemberCharts.forEach(c=>{ try{c.destroy();}catch(e){} });
+  hpMemberCharts = [];
+
+  const shown = devList.filter(d=>d.total>0 || HP_MEMBER_ORDER.includes(d.name));
+  if(!shown.length){ grid.innerHTML='<div style="color:#64748b;font-size:.76rem;padding:12px 0">데이터를 업로드하면 표시됩니다.</div>'; return; }
+  const maxTot = Math.max(...shown.map(d=>d.total), 1);
+
+  grid.innerHTML = shown.map((dev,idx)=>{
+    const accent = HP_DEV_COLORS[HP_MEMBER_ORDER.indexOf(dev.name)] || '#64748b';
+    if(dev.total===0){
+      return `<div class="hp-member-card hp-member-standby" style="--mc:#475569">
+        <div class="hp-member-left">
+          <div class="hp-member-donut"><div class="hp-member-donut-center"><b style="color:#475569">0</b><small>작지</small></div></div>
+          <div class="hp-member-meta"><div class="hp-member-name" style="color:#64748b">${dev.name}<span class="hp-member-tot" style="color:#374151">복귀 예정</span></div><div class="hp-member-split" style="color:#374151;font-size:.6rem">데이터 없음</div></div>
+        </div>
+        <div class="hp-member-right"></div>
+      </div>`;
+    }
+    // 우측 가로막대: 전체 길이는 멤버 작지수 비율(relW), 내부는 단계별 비율
+    // (세그먼트는 width:0 / 수치는 0에서 시작 → 최초 hover 시 채움·카운트업)
+    const relW = +(dev.total/maxTot*100).toFixed(1);
+    const active = dev.pipeStages.map((c,i)=>({c,i,pct:+(c/dev.total*100).toFixed(1)})).filter(s=>s.c>0);
+    const segs = active.map(s=>`<div data-pct="${s.pct}" style="width:0;background:${PIPE_GRADS4[s.i]};box-shadow:0 0 6px ${PIPE_GLOW4[s.i]}" title="${PIPE_STAGES4[s.i]}: ${s.c}건 (${s.pct}%)"></div>`).join('');
+    const lbls = active.map(s=>`<div class="hp-member-pipe-lbl" style="width:${s.pct}%;color:${PIPE_COLORS4[s.i]}" title="${PIPE_STAGES4[s.i]} ${s.c}건">${PIPE_STAGES4[s.i]} <b class="hp-mlbl-n" data-cnt="${s.c}">0</b></div>`).join('');
+    return `<div class="hp-member-card" data-midx="${idx}" style="--mc:${accent}">
+      <div class="hp-member-left">
+        <div class="hp-member-donut"><canvas id="hpMemberDonut${idx}"></canvas><div class="hp-member-donut-center"><b class="hp-mcnt" data-target="${dev.total}">0</b><small>작지</small></div></div>
+        <div class="hp-member-meta">
+          <div class="hp-member-name">${dev.name}<span class="hp-member-tot">${dev.total}건</span></div>
+          <div class="hp-member-split">
+            <span><span class="hp-mleg-dot" style="background:${HP_SPLIT_COLORS[0]}"></span>국내 <b class="hp-mdom" data-target="${dev.domCount}">0</b></span>
+            <span><span class="hp-mleg-dot" style="background:${HP_SPLIT_COLORS[1]}"></span>GD <b class="hp-mgd" data-target="${dev.gdCount}">0</b></span>
           </div>
         </div>
-      </div>`;
-      return;
-    }
-    const relW = +(dev.total / maxTot * 100).toFixed(1);
-    // build only non-zero segments
-    const activeSegs = dev.counts.map((c,i)=>({c,i,pct:+(c/Math.max(dev.total,1)*100).toFixed(1)})).filter(s=>s.c>0);
-    const segs = activeSegs.map(s=>`<div class="hp-pipe-b" style="width:${s.pct}%;background:${PIPE_GRADS4[s.i]};box-shadow:0 0 8px ${PIPE_GLOW4[s.i]}" title="${PIPE_STAGES4[s.i]}: ${s.c}건 (${s.pct}%)"></div>`).join('');
-    const lbls = activeSegs.map(s=>`<div class="hp-pipe-lbl-seg" style="width:${s.pct}%;color:${PIPE_COLORS4[s.i]};min-width:0">${s.pct>=10?PIPE_STAGES4[s.i]+' '+s.c+'건':''}</div>`).join('');
-    pipeList.innerHTML += `<div class="hp-pipe-dev-row" data-pipe-idx="${idx}">
-      <div class="hp-pipe-dev-lbl">${dev.name}<span>${dev.total}건</span></div>
-      <div style="width:${relW}%;min-width:120px">
-        <div class="hp-pipe-track">
-          <div class="hp-pipe-lbl-row">${lbls}</div>
-          <div class="hp-pipe-bar">${segs}</div>
+      </div>
+      <div class="hp-member-right">
+        <div class="hp-member-pipe-cap">PROCESS STATUS</div>
+        <div class="hp-member-pipe-wrap" style="width:${relW}%;min-width:230px">
+          <div class="hp-member-pipe-bar">${segs}</div>
+          <div class="hp-member-pipe-lbls">${lbls}</div>
         </div>
       </div>
     </div>`;
+  }).join('');
+
+  // 도넛 차트 생성 (innerHTML 이후 DOM 존재)
+  shown.forEach((dev,idx)=>{
+    if(dev.total===0) return;
+    const cv = document.getElementById('hpMemberDonut'+idx);
+    if(!cv) return;
+    const ch = new Chart(cv.getContext('2d'),{
+      type:'doughnut',
+      data:{ labels:['국내','GD'], datasets:[{ data:[0,0],   // 비어있는 상태에서 시작 → hover 시 채움
+        backgroundColor:HP_SPLIT_COLORS, borderColor:'rgba(8,11,17,0)', borderWidth:0, spacing:3, borderRadius:6, hoverOffset:6 }] },
+      options:{ cutout:'78%', responsive:true, maintainAspectRatio:false, animation:{animateRotate:true,duration:900},
+        plugins:{ legend:{display:false},
+          tooltip:{...HP_TOOLTIP_CFG, callbacks:{label:c=>`${c.label}: ${c.parsed}건 (${dev.total>0?Math.round(c.parsed/dev.total*100):0}%)`}} } }
+    });
+    hpMemberCharts.push(ch);
+    const cardEl = grid.querySelector('.hp-member-card[data-midx="'+idx+'"]');
+    if(cardEl){ cardEl._mchart = ch; cardEl._mtarget = {dom:dev.domCount, gd:dev.gdCount}; }
+  });
+
+  // 최초 hover 시 1회 채움/카운트업 + 클릭 → 멤버 상세 팝업
+  grid.querySelectorAll('.hp-member-card[data-midx]').forEach(card=>{
+    const devH = shown[parseInt(card.dataset.midx)];
+    if(devH && devH.total>0 && !card._mbound){
+      card._mbound = true;
+      card.dataset.mPlayed = '0';
+      const play = ()=>{
+        if(card.dataset.mPlayed==='1') return;
+        card.dataset.mPlayed = '1';
+        // 도넛 채우기
+        if(card._mchart){ card._mchart.data.datasets[0].data = [card._mtarget.dom, card._mtarget.gd]; card._mchart.update(); }
+        // 막대 세그먼트 차오름
+        card.querySelectorAll('.hp-member-pipe-bar > div[data-pct]').forEach(seg=>{
+          const p = seg.dataset.pct; requestAnimationFrame(()=>{ seg.style.width = p+'%'; });
+        });
+        // 수치 카운트업
+        const cnt=card.querySelector('.hp-mcnt'); if(cnt) hpAnimateNumber(cnt,0,+cnt.dataset.target,1100,0);
+        const dm=card.querySelector('.hp-mdom');  if(dm)  hpAnimateNumber(dm,0,+dm.dataset.target,1100,0);
+        const gd=card.querySelector('.hp-mgd');   if(gd)  hpAnimateNumber(gd,0,+gd.dataset.target,1100,0);
+        card.querySelectorAll('.hp-mlbl-n').forEach(el=> hpAnimateNumber(el,0,+el.dataset.cnt,1100,0));
+      };
+      card.addEventListener('mouseenter', play);
+      card.addEventListener('focus', play);
+    }
+    card.onclick = ()=>{
+      const dev = shown[parseInt(card.dataset.midx)];
+      if(!dev || dev.total===0) return;
+      const accent = HP_DEV_COLORS[HP_MEMBER_ORDER.indexOf(dev.name)] || '#06b6d4';
+      const pipeBars = dev.pipeStages.map((c,i)=>`<div class="hp-modal-bar-row">
+        <div class="hp-modal-bar-name" style="width:58px">${PIPE_STAGES4[i]}</div>
+        <div class="hp-modal-bar-track"><div class="hp-modal-bar-fill" style="width:${(c/Math.max(dev.total,1)*100).toFixed(1)}%;background:${PIPE_GRADS4[i]}"></div></div>
+        <div class="hp-modal-bar-val" style="color:${PIPE_COLORS4[i]}">${c}건</div>
+      </div>`).join('');
+      hpOpenModal(`${dev.name} — Status`, `총 ${dev.total}건 · 국내 ${dev.domCount} · GD ${dev.gdCount}`,
+        `<div class="hp-modal-stat-grid">
+          <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:${HP_SPLIT_COLORS[0]}">${dev.domCount}</div><div class="hp-modal-stat-lbl">국내개발</div></div>
+          <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:${HP_SPLIT_COLORS[1]}">${dev.gdCount}</div><div class="hp-modal-stat-lbl">GD개발</div></div>
+          <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:${accent}">${dev.total}</div><div class="hp-modal-stat-lbl">전체 작지</div></div>
+        </div>
+        <hr class="hp-modal-divider">
+        <div style="font-size:.62rem;font-weight:700;color:#64748b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">공정 단계 분포</div>
+        ${pipeBars}
+        <hr class="hp-modal-divider"><div style="font-size:.58rem;color:#475569">※ 공정 단계 = 입력된 공정 일자(오늘 기준) 기반 현재 진행 위치</div>`);
+    };
   });
 }
 
@@ -6489,6 +6632,80 @@ function hpRenderYearChart(years, stock, used, discard){
   });
 }
 
+// ── 숫자 카운트업 애니메이션 (easeOutCubic)
+function hpAnimateNumber(el, from, to, dur, dec, suffix){
+  if(!el) return;
+  suffix = suffix || '';
+  const start = performance.now();
+  function tick(now){
+    const t = Math.min(1, (now-start)/dur);
+    const e = 1 - Math.pow(1-t, 3);
+    const v = from + (to-from)*e;
+    el.textContent = (dec ? v.toFixed(dec) : Math.round(v)) + suffix;
+    if(t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ── SVG 아크 path (각도 시계방향, y-down)
+function hpArcPath(cx, cy, r, startDeg, endDeg){
+  const pt = deg => [cx + r*Math.cos(deg*Math.PI/180), cy + r*Math.sin(deg*Math.PI/180)];
+  const [x1,y1] = pt(startDeg), [x2,y2] = pt(endDeg);
+  const large = ((endDeg - startDeg) % 360) > 180 ? 1 : 0;
+  return `M${x1.toFixed(2)} ${y1.toFixed(2)} A${r} ${r} 0 ${large} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+}
+
+// ── 공정 게이지(부채꼴 270°) 렌더 + 최초 hover 시 1회 차오름/카운트업
+function hpRenderGauges(gauges){
+  const CX=60, CY=58, R=42, START=135, SWEEP=270, NT=9;
+  gauges.forEach(g=>{
+    const card = document.querySelector('#hpProcCards [data-proc="'+g.proc+'"]');
+    if(!card) return;
+    const host = card.querySelector('.hp-gauge-host');
+    if(!host) return;
+    const pct = g.total>0 ? g.done/g.total : 0;
+    const arc = hpArcPath(CX,CY,R,START,START+SWEEP);
+    let ticks='';
+    for(let i=0;i<NT;i++){
+      const a = (START + SWEEP*i/(NT-1))*Math.PI/180;
+      const ri=R+8, ro=R+12;
+      ticks += `<line class="hp-gauge-tick" x1="${(CX+ri*Math.cos(a)).toFixed(1)}" y1="${(CY+ri*Math.sin(a)).toFixed(1)}" x2="${(CX+ro*Math.cos(a)).toFixed(1)}" y2="${(CY+ro*Math.sin(a)).toFixed(1)}"/>`;
+    }
+    const gid = 'hpGrad-'+g.key;
+    host.innerHTML = `<div class="hp-gauge" style="--gc:${g.color}">
+      <svg viewBox="0 0 120 120">
+        <defs><linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="16" y1="86" x2="104" y2="86">
+          <stop offset="0" stop-color="${g.stops[0]}"/><stop offset=".55" stop-color="${g.stops[1]}"/><stop offset="1" stop-color="${g.stops[2]}"/>
+        </linearGradient></defs>
+        ${ticks}
+        <path class="hp-gauge-track" d="${arc}"/>
+        <path class="hp-gauge-val" d="${arc}" stroke="url(#${gid})"/>
+      </svg>
+      <div class="hp-gauge-center"><b class="hp-gauge-count" style="color:${g.color}">0</b><span class="hp-gauge-total">/ ${g.total}건</span></div>
+      <div class="hp-gauge-pct" style="color:${g.color}">0.0%</div>
+    </div>`;
+    const valEl = host.querySelector('.hp-gauge-val');
+    const L = valEl.getTotalLength();
+    valEl.style.strokeDasharray = L;
+    valEl.style.strokeDashoffset = L; // 비어있는 상태에서 시작
+    card._gauge = { valEl, targetOffset: L*(1-pct), countEl: host.querySelector('.hp-gauge-count'), pctEl: host.querySelector('.hp-gauge-pct'), done: g.done, pct: pct*100 };
+    card.dataset.gaugePlayed = '0';
+    if(!card._gaugeBound){
+      card._gaugeBound = true;
+      const play = ()=>{
+        if(card.dataset.gaugePlayed==='1' || !card._gauge) return;
+        card.dataset.gaugePlayed = '1';
+        const gg = card._gauge;
+        requestAnimationFrame(()=>{ gg.valEl.style.strokeDashoffset = gg.targetOffset; });
+        hpAnimateNumber(gg.countEl, 0, gg.done, 1300, 0);
+        hpAnimateNumber(gg.pctEl, 0, gg.pct, 1300, 1, '%');
+      };
+      card.addEventListener('mouseenter', play);
+      card.addEventListener('focus', play);
+    }
+  });
+}
+
 // ── main render function
 function renderHpHome(data){
   if(!data) return;
@@ -6503,21 +6720,57 @@ function renderHpHome(data){
   setText('hpReceiptVal', data.receiptCount+'건');
   setText('hpReceiptSub', `GD · Style# 미기재 · ${data.gdCount>0?(data.receiptCount/data.gdCount*100).toFixed(1):'0'}%`);
 
-  // 2. Proc cards
-  const procs = [
-    {done:data.yarnDone,   bar:'hpYarnBar', done_id:'hpYarnDone', total_id:'hpYarnTotal', pct_id:'hpYarnPct'},
-    {done:data.knitDone,   bar:'hpKnitBar', done_id:'hpKnitDone', total_id:'hpKnitTotal', pct_id:'hpKnitPct'},
-    {done:data.dyeDone,    bar:'hpDyeBar',  done_id:'hpDyeDone',  total_id:'hpDyeTotal',  pct_id:'hpDyePct'},
-    {done:data.finDone,    bar:'hpFinBar',  done_id:'hpFinDone',  total_id:'hpFinTotal',  pct_id:'hpFinPct'},
-  ];
-  procs.forEach(p=>{
-    const pct = data.total>0 ? (p.done/data.total*100).toFixed(1) : 0;
-    setText(p.done_id, p.done+'');
-    setText(p.total_id, `/ ${data.total}건`);
-    setText(p.pct_id, pct+'%');
-    const bar = document.getElementById(p.bar);
-    if(bar) bar.style.width = pct+'%';
-  });
+  // 1-b. Status summary 클릭 팝업 (총샘플 / GD / 국내 / 작지미등록)
+  const ovScreen = document.getElementById('screen-overview');
+  if(ovScreen){
+    const devRows = (pick,color)=>{
+      const items = data.devList.filter(d=>d.total>0 || HP_MEMBER_ORDER.includes(d.name));
+      const maxV = Math.max(...items.map(pick), 1);
+      return items.map(d=>`<div class="hp-modal-bar-row">
+        <div class="hp-modal-bar-name">${d.name}</div>
+        <div class="hp-modal-bar-track"><div class="hp-modal-bar-fill" style="width:${(pick(d)/maxV*100).toFixed(1)}%;background:${color}"></div></div>
+        <div class="hp-modal-bar-val" style="color:${color}">${pick(d)}건</div>
+      </div>`).join('');
+    };
+    // 트리맵 타일 면적(건수 비례) + 미등록 하위영역 높이
+    const gdTile = document.getElementById('hpTmGd');
+    const domTile = document.getElementById('hpTmDom');
+    if(gdTile)  gdTile.style.flexGrow  = Math.max(data.gdCount, 0.0001);
+    if(domTile) domTile.style.flexGrow = Math.max(data.domCount, 0.0001);
+    const subEl = document.getElementById('hpTmReceipt');
+    if(subEl){
+      if(data.receiptCount>0 && data.gdCount>0){
+        const subH = Math.min(64, Math.max(30, 152*(data.receiptCount/data.gdCount)));
+        subEl.style.display = 'flex';
+        subEl.style.height = subH.toFixed(0)+'px';
+        if(gdTile) gdTile.style.paddingBottom = (subH + 8).toFixed(0)+'px'; // 숫자를 미접수 띠 위로
+      } else {
+        subEl.style.display = 'none';
+        if(gdTile) gdTile.style.paddingBottom = '';
+      }
+    }
+
+    const bind = (sel, fn)=>{ const el=ovScreen.querySelector(sel); if(el){ el.style.cursor='pointer'; el.onclick=fn; } };
+    bind('.hp-tm-cap', ()=>hpOpenModal('총 샘플','전체 작지 분포 · 담당자별',
+      `<div class="hp-modal-stat-grid"><div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:#67e8f9">${data.gdCount}</div><div class="hp-modal-stat-lbl">GD개발</div></div><div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:#60a5fa">${data.domCount}</div><div class="hp-modal-stat-lbl">국내개발</div></div><div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:#c4b5fd">${data.total}</div><div class="hp-modal-stat-lbl">전체</div></div></div><hr class="hp-modal-divider"><div style="font-size:.62rem;font-weight:700;color:#64748b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">담당자별 작지 수</div>${devRows(d=>d.total,'#8b5cf6')}`));
+    bind('#hpTmGd', ()=>hpOpenModal('GD개발',`전체 ${data.total}건 중 ${data.gdCount}건 · 담당자별`,`${devRows(d=>d.gdCount,'#67e8f9')}`));
+    bind('#hpTmDom', ()=>hpOpenModal('국내개발',`전체 ${data.total}건 중 ${data.domCount}건 · 담당자별`,`${devRows(d=>d.domCount,'#60a5fa')}`));
+    const subBind = document.getElementById('hpTmReceipt');
+    if(subBind) subBind.onclick = (e)=>{
+      e.stopPropagation();                          // GD 타일 팝업 막고 미등록 팝업
+      const items = data.receiptItems||[];
+      const list = items.length ? `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.68rem"><thead><tr style="border-bottom:1px solid rgba(255,255,255,.1);color:#475569"><th style="padding-bottom:8px;text-align:left">#</th><th style="padding-bottom:8px;text-align:left">Style/#</th><th style="padding-bottom:8px;text-align:left">담당자</th><th style="padding-bottom:8px;text-align:left">FL.#</th></tr></thead><tbody>${items.map((x,i)=>`<tr><td style="color:#64748b;padding-right:10px">${i+1}</td><td style="font-family:monospace;color:#f59e0b;padding-right:12px">${x.style}</td><td style="color:#e2e8f0;padding-right:12px">${x.dev}</td><td style="color:#94a3b8;font-family:monospace">${x.fl||'—'}</td></tr>`).join('')}</tbody></table></div>` : '<div style="color:#475569;font-size:.68rem">미등록 건이 없습니다.</div>';
+      hpOpenModal('미접수',`GD개발 ${data.gdCount}건 중 ${data.receiptCount}건 · 유효 Style# 미기재`,`${list}<hr class="hp-modal-divider"><div style="font-size:.58rem;color:#475569">※ 5자리 숫자(#00000 · n차 -1/-2/-3 포함)는 접수완료로 간주. SA·텍스트·공백은 미접수</div>`);
+    };
+  }
+
+  // 2. Proc cards — 부채꼴 게이지(최초 hover 시 1회 차오름 + 카운트업)
+  hpRenderGauges([
+    {proc:0, key:'yarn', color:'#fbbf24', stops:['#b45309','#f59e0b','#fde68a'], done:data.yarnDone, total:data.total},
+    {proc:1, key:'knit', color:'#c4b5fd', stops:['#5b21b6','#8b5cf6','#ddd6fe'], done:data.knitDone, total:data.total},
+    {proc:2, key:'dye',  color:'#67e8f9', stops:['#0e7490','#06b6d4','#a5f3fc'], done:data.dyeDone,  total:data.total},
+    {proc:3, key:'fin',  color:'#6ee7b7', stops:['#065f46','#10b981','#6ee7b7'], done:data.finDone,  total:data.total},
+  ]);
 
   // 3. Proc card PROC_DATA for modals
   window._hpProcData = [
@@ -6527,10 +6780,8 @@ function renderHpHome(data){
     {key:'fin', label:'FINISHING',  color:'#10b981',grad:'linear-gradient(90deg,#065f46,#10b981,#6ee7b7)',done:data.finDone,  total:data.total,sub:'피니싱 완료된 작지',devs:data.devList.map(d=>({n:d.name,v:d.finDone})),note:'피니싱 완료 기준 · FINISHING DATE 열'},
   ];
 
-  // 4. Workload bars (dev × GD/국내) — 0건 제외
-  const devWorkload = data.devList.filter(d=>d.total>0 || HP_MEMBER_ORDER.includes(d.name)).map(d=>({name:d.name, total:d.total, counts:[d.domCount,d.gdCount]}));
-  hpRenderDevBars(devWorkload);
-  window._hpDevWorkload = devWorkload;
+  // 4. Status by Members — 도넛(국내/GD) + 파이프라인 결합 카드
+  hpRenderMemberCards(data.devList);
 
   // 5. Warning rows — grouped by dev
   const warnRows = document.getElementById('hpWarnRows');
@@ -6551,17 +6802,17 @@ function renderHpHome(data){
         // always include all HP_MEMBER_ORDER; non-members with delays appended
         const allDevs = [...HP_MEMBER_ORDER, ...Object.keys(byDev).filter(n=>!HP_MEMBER_ORDER.includes(n))];
         const devCards = allDevs.map(n=>{
-          const items = byDev[n] || [];
+          const items = (byDev[n] || []).slice().sort((a,b)=>b.days-a.days); // 지연 큰 순
           if(items.length === 0){
-            // placeholder card for members with no delays
-            return `<div class="hp-warn-dev-card" style="border-color:rgba(255,255,255,.08);opacity:.45">
-              <div class="hp-warn-dev-name" style="color:#475569">${n}<span class="hp-warn-dev-cnt" style="color:#374151">복귀 예정</span></div>
-              <div style="font-size:.58rem;color:#374151;padding:2px 0">지연 없음</div>
+            // 지연 없는 담당자 — 한 줄로 압축
+            return `<div class="hp-warn-dev-card hp-warn-dev-empty">
+              <div class="hp-warn-dev-name" style="color:#475569">${n}</div>
+              <div class="hp-warn-empty-txt">지연 없음</div>
             </div>`;
           }
-          const chips = items.map(x=>`<span class="hp-warn-chip" style="color:${color}">${x.style}<span class="hp-warn-chip-days"> +${x.days}일</span></span>`).join('');
+          const chips = items.map(x=>`<span class="hp-warn-chip" style="--wc:${color}"><span class="hp-warn-chip-style">${x.style}</span><span class="hp-warn-chip-days">+${x.days}일</span></span>`).join('');
           return `<div class="hp-warn-dev-card" style="border-color:${borderColor}">
-            <div class="hp-warn-dev-name" style="color:${color}">${n}<span class="hp-warn-dev-cnt">${items.length}건</span></div>
+            <div class="hp-warn-dev-name" style="color:${color}">${n}<span class="hp-warn-dev-cnt">${items.length}</span></div>
             <div class="hp-warn-chip-list">${chips}</div>
           </div>`;
         }).join('');
@@ -6617,6 +6868,7 @@ function renderHpHome(data){
   }
   const sctBody = document.getElementById('hpSctBody');
   if(sctBody){
+    const zd = v => v ? v : '<span class="hp-sct-zero">–</span>'; // 0은 흐린 대시로
     sctBody.innerHTML='';
     CAT_DEFS.forEach(({key,label,color})=>{
       const c = data.cats[key];
@@ -6624,32 +6876,27 @@ function renderHpHome(data){
       const total2 = c.opts||0;
       const devCells = devNames.map(name=>{
         const d=c.devs?.[name]||{};
-        return `<td class="hp-sct-style" style="border-left:1px solid rgba(255,255,255,.12)">${d.styles||0}</td><td class="hp-sct-opt">${d.opts||0}</td>`;
+        return `<td class="hp-sct-style" style="border-left:1px solid rgba(255,255,255,.12)">${zd(d.styles||0)}</td><td class="hp-sct-opt">${zd(d.opts||0)}</td>`;
       }).join('');
-      sctBody.innerHTML+=`<tr><td><div class="hp-sct-cat-cell">${label}</div></td><td class="hp-sct-total-cell" style="color:#e2e8f0">${total2}</td>${devCells}</tr>`;
+      sctBody.innerHTML+=`<tr><td><div class="hp-sct-cat-cell">${label}</div></td><td class="hp-sct-total-cell" style="color:#e2e8f0">${zd(total2)}</td>${devCells}</tr>`;
     });
     // grand total row
     const grandDevCells = devNames.map(name=>{
       const d=data.grand.devs?.[name]||{};
-      return `<td style="border-left:1px solid rgba(255,255,255,.12);color:#94a3b8">${d.styles||0}</td><td style="font-weight:800;color:${devColors3[devNames.indexOf(name)]||'#94a3b8'}">${d.opts||0}</td>`;
+      return `<td style="border-left:1px solid rgba(255,255,255,.12);color:#94a3b8">${zd(d.styles||0)}</td><td style="font-weight:800;color:${devColors3[devNames.indexOf(name)]||'#94a3b8'}">${zd(d.opts||0)}</td>`;
     }).join('');
-    sctBody.innerHTML+=`<tr class="hp-sct-grand-row"><td style="font-weight:800;font-size:.68rem;letter-spacing:.04em">GRAND TOTAL</td><td class="hp-sct-total-cell" style="color:#c4b5fd;font-size:.78rem">${data.grand.opts||0}</td>${grandDevCells}</tr>`;
+    sctBody.innerHTML+=`<tr class="hp-sct-grand-row"><td style="font-weight:800;font-size:.74rem;letter-spacing:.04em">GRAND TOTAL</td><td class="hp-sct-total-cell" style="color:#c4b5fd;font-size:.84rem">${zd(data.grand.opts||0)}</td>${grandDevCells}</tr>`;
   }
 
   // 7. SCT donut
   const catVals = CAT_DEFS.map(({key})=>data.cats[key]?.opts||0);
   hpRenderSctDonut(catVals, data.grand.opts||0);
 
-  // 8. Pipeline bars
-  const pipeDevs = data.devList.filter(d=>d.total>0 || HP_MEMBER_ORDER.includes(d.name)).map(d=>({name:d.name, total:d.total, counts:d.pipeStages}));
-  hpRenderPipeBars(pipeDevs);
-  window._hpPipeDevs = pipeDevs;
-
   // 9. RDDA chart
   const {months, gd, dom, bulk} = data.rdda;
   hpRenderRddaChart(months, gd, dom, bulk);
 
-  // 10. Lead time
+  // 10. Result line — 완료 카운트 + 리드타임 (창고보관 시트 기반)
   setText('hpLtWeek',  data.weekFinished  != null ? data.weekFinished+'건'  : '—건');
   setText('hpLtMonth', data.monthFinished != null ? data.monthFinished+'건' : '—건');
   const lt = data.leadTime;
@@ -6657,25 +6904,48 @@ function renderHpHome(data){
     setText('hpLtKnit',   lt.avgKnit!=null   ? lt.avgKnit+'일'   : '—일');
     setText('hpLtSample', lt.avgSample!=null  ? lt.avgSample+'일' : '—일');
 
+    // ── 완료 건수 popup (이번주 / 이번달)
+    const finishPopup = (items, title, sub) => {
+      if(!items || !items.length){ hpOpenModal(title,'데이터 없음','<div style="color:#475569;font-size:.68rem">해당 기간 창고보관(FINISH DATE) 완료 건이 없습니다.</div>'); return; }
+      const rows = items.map((x,i)=>`<tr>
+        <td style="color:#64748b;padding-right:10px">${i+1}</td>
+        <td style="font-family:monospace;font-size:.65rem;color:#e2e8f0;padding-right:14px">${x.label}</td>
+        <td style="color:#e2e8f0;padding-right:12px">${x.dev}</td>
+        <td style="color:#34d399;font-weight:700;text-align:right">${x.finStr}</td>
+      </tr>`).join('');
+      hpOpenModal(title, sub,
+        `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.68rem">
+          <thead><tr style="border-bottom:1px solid rgba(255,255,255,.1);color:#475569">
+            <th style="padding-bottom:8px;text-align:left">#</th><th style="padding-bottom:8px;text-align:left">스타일 / FL#</th>
+            <th style="padding-bottom:8px;text-align:left">담당자</th><th style="padding-bottom:8px;text-align:right">FINISH DATE</th>
+          </tr></thead><tbody>${rows}</tbody></table></div>`);
+    };
+    const weekCard = document.getElementById('hpLtWeekCard');
+    if(weekCard) weekCard.onclick = ()=>finishPopup(data.finishWeekItems, '이번주 완료', `창고보관 FINISH DATE 기준 · ${data.weekFinished||0}건`);
+    const monthCard = document.getElementById('hpLtMonthCard');
+    if(monthCard) monthCard.onclick = ()=>finishPopup(data.finishMonthItems, '이번달 완료', `창고보관 FINISH DATE 기준 · ${data.monthFinished||0}건`);
+
     // ── 편직 리드타임 popup
     const knitCard = document.getElementById('hpLtKnitCard');
     if(knitCard){
       knitCard.onclick = ()=>{
         const items = lt.knitItems||[];
-        if(!items.length){ hpOpenModal('편직 리드타임','데이터 없음','<div style="color:#475569;font-size:.68rem">유효한 원사입고일 · 편직완료일 데이터가 없습니다.</div>'); return; }
+        if(!items.length){ hpOpenModal('편직 리드타임','데이터 없음','<div style="color:#475569;font-size:.68rem">최근 1개월 완료건 중 유효한 원사입고일·편직완료일 데이터가 없습니다.</div>'); return; }
         const tblRows = items.map((x,idx)=>`<tr>
           <td style="color:#64748b;padding-right:10px">${idx+1}</td>
           <td style="font-family:monospace;font-size:.65rem;color:#e2e8f0;padding-right:14px">${x.label}</td>
+          <td style="color:#e2e8f0;padding-right:12px">${x.dev||'—'}</td>
           <td style="color:#94a3b8;padding-right:10px">${x.yarnStr}</td>
           <td style="color:#94a3b8;padding-right:10px">${x.knitStr}</td>
           <td style="color:#c4b5fd;font-weight:700;text-align:right">${x.days}일</td>
         </tr>`).join('');
         hpOpenModal('편직 리드타임',
-          `현황 전체 ${items.length}건 · 평균 ${lt.avgKnit}일 · 원사입고 → 편직완료`,
+          `창고보관 · 최근 1개월 완료 ${items.length}건 · 평균 ${lt.avgKnit}일 · 원사입고 → 편직완료`,
           `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.68rem">
             <thead><tr style="border-bottom:1px solid rgba(255,255,255,.1);color:#475569">
               <th style="padding-bottom:8px;text-align:left">#</th>
               <th style="padding-bottom:8px;text-align:left">스타일 / FL#</th>
+              <th style="padding-bottom:8px;text-align:left">담당자</th>
               <th style="padding-bottom:8px;text-align:left">원사입고일</th>
               <th style="padding-bottom:8px;text-align:left">편직완료일</th>
               <th style="padding-bottom:8px;text-align:right">소요일</th>
@@ -6690,20 +6960,22 @@ function renderHpHome(data){
     if(sampleCard){
       sampleCard.onclick = ()=>{
         const items = lt.sampleItems||[];
-        if(!items.length){ hpOpenModal('샘플 리드타임','데이터 없음','<div style="color:#475569;font-size:.68rem">유효한 원사입고일 · FINISH DATE 데이터가 없습니다.</div>'); return; }
+        if(!items.length){ hpOpenModal('샘플 리드타임','데이터 없음','<div style="color:#475569;font-size:.68rem">최근 1개월 완료건 중 유효한 원사입고일·FINISH DATE 데이터가 없습니다.</div>'); return; }
         const tblRows = items.map((x,idx)=>`<tr>
           <td style="color:#64748b;padding-right:10px">${idx+1}</td>
           <td style="font-family:monospace;font-size:.65rem;color:#e2e8f0;padding-right:14px">${x.label}</td>
+          <td style="color:#e2e8f0;padding-right:12px">${x.dev||'—'}</td>
           <td style="color:#94a3b8;padding-right:10px">${x.yarnStr}</td>
           <td style="color:#94a3b8;padding-right:10px">${x.finStr}</td>
           <td style="color:#fbbf24;font-weight:700;text-align:right">${x.days}일</td>
         </tr>`).join('');
         hpOpenModal('샘플 리드타임',
-          `FINISH DATE 기재 ${items.length}건 · 평균 ${lt.avgSample}일 · 원사입고 → FINISH DATE`,
+          `창고보관 · 최근 1개월 완료 ${items.length}건 · 평균 ${lt.avgSample}일 · 원사입고 → FINISH DATE`,
           `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.68rem">
             <thead><tr style="border-bottom:1px solid rgba(255,255,255,.1);color:#475569">
               <th style="padding-bottom:8px;text-align:left">#</th>
               <th style="padding-bottom:8px;text-align:left">스타일 / FL#</th>
+              <th style="padding-bottom:8px;text-align:left">담당자</th>
               <th style="padding-bottom:8px;text-align:left">원사입고일</th>
               <th style="padding-bottom:8px;text-align:left">FINISH DATE</th>
               <th style="padding-bottom:8px;text-align:right">소요일</th>
@@ -6736,25 +7008,7 @@ function renderHpHome(data){
 
   // 11. Yearly cumulative chart
   if(data.yearly && data.yearly.years.length) hpRenderYearSection(data.yearly);
-
-  // rebind pipeline clicks
-  const pipeListEl = document.getElementById('hpPipeDevList');
-  if(pipeListEl){
-    pipeListEl.addEventListener('click', e=>{
-      const row = e.target.closest('.hp-pipe-dev-row[data-pipe-idx]');
-      if(!row) return;
-      const idx = parseInt(row.dataset.pipeIdx);
-      if(isNaN(idx)) return;
-      const dev = window._hpPipeDevs[idx];
-      if(!dev) return;
-      const bars = dev.counts.map((c,i)=>`<div class="hp-modal-bar-row">
-        <div class="hp-modal-bar-name" style="width:58px">${PIPE_STAGES4[i]}</div>
-        <div class="hp-modal-bar-track"><div class="hp-modal-bar-fill" style="width:${(c/Math.max(dev.total,1)*100).toFixed(1)}%;background:${PIPE_GRADS4[i]}"></div></div>
-        <div class="hp-modal-bar-val" style="color:${PIPE_COLORS4[i]}">${c}건</div>
-      </div>`).join('');
-      hpOpenModal(`${dev.name} — Pipeline`, `총 ${dev.total}건 진행중`,`<div class="hp-modal-stat-grid" style="grid-template-columns:repeat(4,1fr)">${dev.counts.map((c,i)=>`<div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:${PIPE_COLORS4[i]}">${c}</div><div class="hp-modal-stat-lbl">${PIPE_STAGES4[i]}</div></div>`).join('')}</div><hr class="hp-modal-divider">${bars}`);
-    });
-  }
+  // (Process Status 클릭 팝업은 Status by Members 멤버 카드로 통합됨)
 }
 
 // ── parse Excel workbook
@@ -6787,6 +7041,8 @@ function parseHpData(wb){
   let yarnDone=0, knitDone=0, dyeDone=0, finDone=0;
   let weekFinished=0, monthFinished=0;
   const devMap = {};
+  const receiptItems = [];   // 작지 미등록 상세 (GD · 유효 Style# 없음)
+  const fmtD = dt => dt ? `${dt.getFullYear()%100}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}` : '—';
 
   const knitDelays = [], dyeDelays = [];
 
@@ -6796,9 +7052,6 @@ function parseHpData(wb){
     'CORE UPDATE':'coreUpdate', 'PROJECT':'project'
   };
   const devCatTrack = {}, allCatTrack = {};
-
-  // lead time
-  const knitLeadItems = [], sampleLeadItems = [];
 
   for(let i=dataStart; i<rows.length; i++){
     const r = rows[i];
@@ -6816,22 +7069,21 @@ function parseHpData(wb){
     const isGd = yarnMill.toUpperCase().startsWith('GD');
     if(isGd) gdCount++; else domCount++;
 
-    // 작지 미등록: GD 개발건 중 유효한 5자리 스타일번호 없는 건
-    if(isGd && !/^#?\d{5}$/.test(styleNo)) receiptCount++;
+    // 작지 미등록: GD 개발건 중 유효 Style#(5자리 숫자, n차 -1/-2/-3 허용, # 유무 무관) 없는 건
+    //  → #00000 / 00000 / 00000-2 등은 접수완료, SA로 시작·텍스트·공백은 미등록
+    const styleRegistered = /^#?\d{5}(-\d+)?/.test(styleNo);
+    if(isGd && !styleRegistered){
+      receiptCount++;
+      receiptItems.push({style: styleNo||'(공백)', dev, fl: flNo});
+    }
 
-    // process done
+    // process done — 입력된 공정 일자(날짜) 기준 오늘 전후로 완료/미완료 판정
     const yarnV = r[19], knitV = r[21], dyeV = r[23], finV = r[25];
-    const yd = hpIsDone(yarnV), kd = hpIsDone(knitV), dd = hpIsDone(dyeV), fd2 = hpIsDone(finV);
+    const yd = hpProcDone(yarnV,todayMs), kd = hpProcDone(knitV,todayMs), dd = hpProcDone(dyeV,todayMs), fd2 = hpProcDone(finV,todayMs);
     if(yd) yarnDone++;
     if(kd) knitDone++;
     if(dd) dyeDone++;
     if(fd2) finDone++;
-
-    // week / month finish count (현황 sheet FINISH DATE)
-    if(fd2){
-      const finDt = hpParseDate(finV);
-      if(finDt){ if(finDt>=weekStart) weekFinished++; if(finDt>=monthStart) monthFinished++; }
-    }
 
     // pipeline stage
     const stage = hpGetPipelineStage(yd, kd, dd, fd2);
@@ -6852,21 +7104,6 @@ function parseHpData(wb){
         const days = Math.floor((todayMs - knitDate.getTime()) / 86400000);
         if(days > 14) dyeDelays.push({style:delayLabel, days, dev});
       }
-    }
-
-    // lead times
-    const yarnDate2 = hpParseDate(yarnV);
-    const knitDate2 = hpParseDate(knitV);
-    const finDate2  = hpParseDate(finV);
-    const fmtD = dt => dt ? `${dt.getFullYear()%100}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}` : '—';
-    const lbl = flNo || styleNo || ('row'+(i+1));
-    if(yarnDate2 && knitDate2){
-      const d = Math.floor((knitDate2.getTime()-yarnDate2.getTime())/86400000);
-      if(d>0 && d<180) knitLeadItems.push({label:lbl, yarnStr:fmtD(yarnDate2), knitStr:fmtD(knitDate2), days:d});
-    }
-    if(yarnDate2 && finDate2){
-      const d = Math.floor((finDate2.getTime()-yarnDate2.getTime())/86400000);
-      if(d>0 && d<365) sampleLeadItems.push({label:lbl, yarnStr:fmtD(yarnDate2), finStr:fmtD(finDate2), days:d});
     }
 
     // SCT
@@ -6960,11 +7197,44 @@ function parseHpData(wb){
     });
   });
 
-  // ── lead time averages
+  // ── 창고보관 시트 기반: 이번주/이번달 완료 카운트 + 최근 1개월 완료건 리드타임
+  //    완료 기준 = 창고보관 FINISH DATE(col25)에 유효 날짜가 있는 행
+  const knitLeadItems = [], sampleLeadItems = [];
+  const finishWeekItems = [], finishMonthItems = [];
+  const oneMonthAgo = new Date(today.getFullYear(), today.getMonth()-1, today.getDate());
+  const cg = hpSheetRows(wb, '창고보관');
+  if(cg){
+    for(let i=cg.dataStart; i<cg.rows.length; i++){
+      const r = cg.rows[i];
+      if(!r || r[0]==null || r[0]==='') continue;
+      const finD = hpParseDate(r[25]);
+      if(!finD) continue;                          // 완료(FINISH DATE) 없는 행 제외
+      const cgLbl = String(r[7]||'').trim() || String(r[8]||'').trim() || ('row'+(i+1));
+      const cgDev = String(r[6]||'').trim() || '미배정';
+      if(finD>=weekStart){  weekFinished++;  finishWeekItems.push({label:cgLbl, dev:cgDev, finStr:fmtD(finD), finMs:finD.getTime()}); }
+      if(finD>=monthStart){ monthFinished++; finishMonthItems.push({label:cgLbl, dev:cgDev, finStr:fmtD(finD), finMs:finD.getTime()}); }
+      if(finD>=oneMonthAgo){                        // 최근 1개월 완료건만 리드타임 집계
+        const yD = hpParseDate(r[19]);
+        const kD = hpParseDate(r[21]);
+        const lbl = cgLbl;
+        const dv  = cgDev;
+        if(yD && kD){
+          const d = Math.floor((kD.getTime()-yD.getTime())/86400000);
+          if(d>0 && d<180) knitLeadItems.push({label:lbl, dev:dv, yarnStr:fmtD(yD), knitStr:fmtD(kD), days:d});
+        }
+        if(yD && finD){
+          const d = Math.floor((finD.getTime()-yD.getTime())/86400000);
+          if(d>0 && d<365) sampleLeadItems.push({label:lbl, dev:dv, yarnStr:fmtD(yD), finStr:fmtD(finD), days:d});
+        }
+      }
+    }
+  }
   const avgKnit   = knitLeadItems.length   ? Math.round(knitLeadItems.reduce((s,x)=>s+x.days,0)/knitLeadItems.length)   : null;
   const avgSample = sampleLeadItems.length ? Math.round(sampleLeadItems.reduce((s,x)=>s+x.days,0)/sampleLeadItems.length) : null;
   knitLeadItems.sort((a,b)=>b.days-a.days);
   sampleLeadItems.sort((a,b)=>b.days-a.days);
+  finishWeekItems.sort((a,b)=>b.finMs-a.finMs);
+  finishMonthItems.sort((a,b)=>b.finMs-a.finMs);
 
   // ── yearly cumulative: 창고보관 / 소진완료 / 폐기 by FL# year
   const yearlyMap = {}; // {year: {stock:N, used:N, discard:N}}
@@ -6993,9 +7263,9 @@ function parseHpData(wb){
   };
 
   return {
-    total, gdCount, domCount, receiptCount,
+    total, gdCount, domCount, receiptCount, receiptItems,
     yarnDone, knitDone, dyeDone, finDone,
-    weekFinished, monthFinished,
+    weekFinished, monthFinished, finishWeekItems, finishMonthItems,
     devList, cats, grand,
     knitDelays, dyeDelays,
     rdda:{months:monthLabels, gd:rddaGd, dom:rddaDom, bulk:rddaBulk},
@@ -7051,24 +7321,61 @@ window.hpCloseUploadModal = function(){
       setTimeout(()=>{ zone.style.display=''; procEl.classList.remove('show'); }, 2200);
       return;
     }
-    // show spinner
+    // 처리 팝업 초기화
     zone.style.display='none';
-    procTx.textContent='파싱 중… '+file.name;
+    procEl.classList.remove('done');
     procEl.classList.add('show');
+    const stagesEl  = document.getElementById('hpUploadStages');
+    const elapsedEl = document.getElementById('hpUploadElapsed');
+    if(stagesEl) stagesEl.innerHTML='';
+    if(elapsedEl) elapsedEl.textContent='0.0';
+    procTx.textContent='⏳ 파일 읽는 중…';
     {const _d=document.getElementById('tdBadgeDot');if(_d)_d.classList.remove('live');const _t=document.getElementById('tdBadgeText');if(_t)_t.textContent='파싱 중…';}
 
+    // 페인트 양보 + 단계 타이밍 도구
+    const t0 = performance.now();
+    let tPrev = t0;
+    const paint = ()=> new Promise(r=> requestAnimationFrame(()=> requestAnimationFrame(r)));
+    const stageDone = (label)=>{
+      const now = performance.now(), dt = now - tPrev; tPrev = now;
+      if(stagesEl) stagesEl.insertAdjacentHTML('beforeend',
+        `<div class="hp-up-stage-row${dt>=800?' slow':''}"><span>✓ ${label}</span><span class="hp-up-stage-ms">${(dt/1000).toFixed(2)}s</span></div>`);
+    };
+    const timer = setInterval(()=>{ if(elapsedEl) elapsedEl.textContent = ((performance.now()-t0)/1000).toFixed(1); }, 100);
+
     try{
+      procTx.textContent='⏳ 파일 읽는 중…'; await paint();
       const buf = await file.arrayBuffer();
-      const wb  = XLSX.read(buf, {type:'array', cellDates:true});
-      hpData    = parseHpData(wb);
+      stageDone('파일 읽기');
+
+      procTx.textContent='📑 시트 파싱 중…'; await paint();
+      const wb = XLSX.read(buf, {type:'array', cellDates:true});
+      stageDone('시트 파싱');
+
+      procTx.textContent='🔍 데이터 분석 중…'; await paint();
+      hpData = parseHpData(wb);
       if(!hpData){ throw new Error('현황 시트를 찾을 수 없습니다'); }
+      stageDone('데이터 분석');
+
+      procTx.textContent='🎨 화면 그리는 중…'; await paint();
       renderHpHome(hpData);
+      stageDone('화면 렌더');
+
+      procTx.textContent='💾 저장 중…'; await paint();
       const updatedAt = new Date().toLocaleDateString('ko-KR');
       {const _d=document.getElementById('tdBadgeDot');if(_d)_d.classList.add('live');const _t=document.getElementById('tdBadgeText');if(_t)_t.textContent='LIVE · '+file.name;}
       document.getElementById('hpUpdateMeta').textContent = 'UPDATED '+updatedAt;
-      hpSaveToStorage(hpData, file.name);
-      hpCloseUploadModal();
+      await Promise.race([ hpSaveToStorage(hpData, file.name), new Promise(r=>setTimeout(r,2500)) ]);
+      stageDone('저장');
+
+      clearInterval(timer);
+      const total = ((performance.now()-t0)/1000).toFixed(2);
+      if(elapsedEl) elapsedEl.textContent = total;
+      procEl.classList.add('done');
+      procTx.textContent='✅ 완료 · '+total+'초';
+      setTimeout(()=>{ procEl.classList.remove('done'); hpCloseUploadModal(); }, 1600);
     }catch(err){
+      clearInterval(timer);
       console.error('upload error', err);
       procTx.textContent='⚠ '+err.message;
       setTimeout(()=>{ zone.style.display=''; procEl.classList.remove('show'); }, 2500);
