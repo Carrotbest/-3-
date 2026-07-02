@@ -869,6 +869,41 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
   margin-left:auto;font-size:.62rem;font-weight:400;
   color:#64748b;letter-spacing:.05em;text-transform:none;font-family:'Inter',sans-serif
 }
+/* ── Category Report (주간보고 집계기준 매뉴얼) ── */
+.hp-ds-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.hp-ds-card{
+  position:relative;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:14px 16px 12px;cursor:pointer;overflow:hidden;
+  transition:transform .18s,border-color .18s,background .18s}
+.hp-ds-card:hover{transform:translateY(-2px);border-color:var(--dsc,#8b5cf6);background:rgba(255,255,255,.05)}
+.hp-ds-accent{position:absolute;top:0;left:0;right:0;height:2px;background:var(--dsc,#8b5cf6);border-radius:12px 12px 0 0}
+.hp-ds-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.hp-ds-name{font-size:.74rem;font-weight:800;letter-spacing:.06em;color:var(--dsc,#e2e8f0)}
+.hp-ds-basis{margin-left:auto;font-size:.55rem;font-weight:600;color:#64748b;letter-spacing:.04em;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:2px 8px;white-space:nowrap}
+.hp-ds-nums{display:flex;align-items:flex-end;gap:14px;margin-bottom:10px}
+.hp-ds-total{font-size:1.7rem;font-weight:800;color:#e2e8f0;line-height:1}
+.hp-ds-total small{font-size:.6rem;font-weight:500;color:#64748b;margin-left:2px}
+.hp-ds-sub{display:flex;gap:12px;padding-bottom:2px}
+.hp-ds-sub b{font-size:.92rem;font-weight:800;display:block;line-height:1.1}
+.hp-ds-sub span{font-size:.55rem;color:#64748b;letter-spacing:.04em}
+.hp-ds-bar{display:flex;height:8px;border-radius:5px;overflow:hidden;background:rgba(255,255,255,.05);margin-bottom:8px}
+.hp-ds-bar>div{height:100%;transition:width .9s cubic-bezier(.18,.9,.32,1)}
+.hp-ds-foot{display:flex;align-items:center;gap:10px;font-size:.58rem;color:#64748b}
+.hp-ds-foot .warn{color:#fbbf24}
+.hp-ds-valid-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hp-ds-chip{
+  display:flex;align-items:center;gap:6px;font-size:.62rem;font-weight:600;color:#94a3b8;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:20px;
+  padding:5px 12px;cursor:pointer;transition:border-color .15s,color .15s}
+.hp-ds-chip:hover{border-color:rgba(255,255,255,.25);color:#e2e8f0}
+.hp-ds-chip.ok{color:#475569;cursor:default}
+.hp-ds-chip.ok:hover{border-color:rgba(255,255,255,.09);color:#475569}
+.hp-ds-chip .n{font-weight:800}
+.hp-ds-chip.bad .n{color:#fbbf24}
+.hp-ds-chip.ok .n{color:#34d399}
+.hp-ds-note{margin-top:10px;font-size:.56rem;color:#475569;line-height:1.6}
+
 /* ── Schedule Alerts neon glow ── */
 .hp-alert-hdr{
   color:#f87171;
@@ -3431,6 +3466,16 @@ body.ts-resizing { cursor:col-resize !important; user-select:none !important; }
             <div style="position:relative;height:185px"><canvas id="hpSctDonut"></canvas></div>
           </div>
         </div>
+      </div>
+
+      <!-- ══ 3.5 DEVELOPMENT STATUS BY CATEGORY (주간보고 집계기준 매뉴얼) ══ -->
+      <div class="hp-sec">
+        <div class="hp-sec-hdr">Category Report<span class="hp-sec-sub">주간보고 집계 기준 · EU MARKET=캠페인 · 그 외=최근 3개월 의뢰분</span></div>
+        <div class="hp-ds-grid" id="hpDsGrid">
+          <div style="color:#64748b;font-size:.76rem;padding:12px 0">대장을 업로드하면 카테고리별 전체 / 진행 / 완료 / Drop 현황이 표시됩니다.</div>
+        </div>
+        <div class="hp-ds-valid-row" id="hpDsValid"></div>
+        <div class="hp-ds-note">※ 전체 = EU MARKET은 작지 급증 시점(캠페인 시작) 이후 · 그 외 카테고리는 Request Date 최근 3개월 (미기재 시 원사입고일 대체) · 완료 = FINISH DATE 기재 또는 창고보관 이동 · Drop = 폐기 시트 이동 건</div>
       </div>
 
       <!-- ══ 4. SCHEDULE ALERTS (맨 하단) ══ -->
@@ -6478,6 +6523,92 @@ function hpRenderSctDonut(catVals, total){
   });
 }
 
+// ── render Category Report (주간보고 집계기준 매뉴얼)
+const DS_COLORS = {'EU MARKET':'#06b6d4','SEASON DVLP':'#8b5cf6','CORE UPDATE':'#10b981','PROJECT':'#f59e0b'};
+const DS_ST_META = {prep:['원사준비','#64748b'],knit:['편직중','#06b6d4'],dye:['염색중','#8b5cf6'],fin:['가공중','#f59e0b'],done:['완료','#34d399'],drop:['DROP','#f87171']};
+function hpRenderDevStatus(ds){
+  const grid = document.getElementById('hpDsGrid');
+  const validEl = document.getElementById('hpDsValid');
+  if(!grid) return;
+  if(!ds || !ds.cards){
+    grid.innerHTML = '<div style="color:#64748b;font-size:.76rem;padding:12px 0">신규 집계 항목입니다 — 대장을 다시 업로드하면 표시됩니다.</div>';
+    if(validEl) validEl.innerHTML = '';
+    return;
+  }
+  grid.innerHTML = ds.cards.map((c,i)=>{
+    const clr = DS_COLORS[c.cat]||'#8b5cf6';
+    const denom = Math.max(c.total,1);
+    const segs = ['done','fin','dye','knit','prep','drop'].filter(k=>c.stages[k]>0).map(k=>
+      `<div style="width:${(c.stages[k]/denom*100).toFixed(1)}%;background:${DS_ST_META[k][1]}" title="${DS_ST_META[k][0]} ${c.stages[k]}건"></div>`).join('');
+    const pct = c.total>0 ? Math.round(c.done/c.total*100) : 0;
+    return `<div class="hp-ds-card" data-ds="${i}" style="--dsc:${clr}">
+      <div class="hp-ds-accent"></div>
+      <div class="hp-ds-head"><span class="hp-ds-name">${c.cat}</span><span class="hp-ds-basis">${c.basis}</span></div>
+      <div class="hp-ds-nums">
+        <div class="hp-ds-total">${c.total}<small>건</small></div>
+        <div class="hp-ds-sub">
+          <div><b style="color:#93c5fd">${c.prog}</b><span>진행</span></div>
+          <div><b style="color:#34d399">${c.done}</b><span>완료 ${pct}%</span></div>
+          <div><b style="color:#f87171">${c.drop}</b><span>Drop</span></div>
+        </div>
+      </div>
+      <div class="hp-ds-bar">${segs||'<div style="width:100%;background:rgba(255,255,255,.04)"></div>'}</div>
+      <div class="hp-ds-foot"><span>STYLE ${c.styles}</span>${c.noDate>0?`<span class="warn">⚠ 날짜 미기재 ${c.noDate}건 별도</span>`:''}</div>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.hp-ds-card').forEach(card=>{
+    card.onclick = ()=>{
+      const c = ds.cards[+card.dataset.ds];
+      const clr = DS_COLORS[c.cat]||'#8b5cf6';
+      const devRows = Object.entries(c.devs).sort((a,b)=>b[1].total-a[1].total).map(([dn,d])=>`<div class="hp-modal-bar-row">
+        <div class="hp-modal-bar-name">${dn}</div>
+        <div class="hp-modal-bar-track"><div class="hp-modal-bar-fill" style="width:${(d.total/Math.max(c.total,1)*100).toFixed(1)}%;background:${clr}"></div></div>
+        <div class="hp-modal-bar-val" style="color:${clr}">${d.total}건 <span style="color:#64748b;font-weight:400;font-size:.58rem">진행${d.prog} · 완료${d.done} · drop${d.drop}</span></div>
+      </div>`).join('') || '<div style="color:#475569;font-size:.68rem">해당 건이 없습니다.</div>';
+      const stRow = ['prep','knit','dye','fin','done','drop'].filter(k=>c.stages[k]>0).map(k=>
+        `<span style="font-size:.62rem;color:${DS_ST_META[k][1]};margin-right:12px">● ${DS_ST_META[k][0]} ${c.stages[k]}건</span>`).join('');
+      hpOpenModal(c.cat, `${c.basis} · 전체 ${c.total}건 · STYLE ${c.styles}`,
+        `<div class="hp-modal-stat-grid">
+          <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:#e2e8f0">${c.total}</div><div class="hp-modal-stat-lbl">전체</div></div>
+          <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:#93c5fd">${c.prog}</div><div class="hp-modal-stat-lbl">진행</div></div>
+          <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:#34d399">${c.done}</div><div class="hp-modal-stat-lbl">완료</div></div>
+          <div class="hp-modal-stat"><div class="hp-modal-stat-val" style="color:#f87171">${c.drop}</div><div class="hp-modal-stat-lbl">Drop</div></div>
+        </div>
+        <div style="margin-top:2px">${stRow}</div>
+        <hr class="hp-modal-divider">
+        <div style="font-size:.62rem;font-weight:700;color:#64748b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">담당자별</div>${devRows}
+        ${c.noDate>0?`<hr class="hp-modal-divider"><div style="font-size:.6rem;color:#fbbf24">⚠ Request Date 미기재로 분모에서 제외된 진행 건 ${c.noDate}건 — 아래 검증 리포트에서 목록 확인</div>`:''}
+        <hr class="hp-modal-divider"><div style="font-size:.58rem;color:#475569">※ ${c.cat==='EU MARKET'?'캠페인 = 작지 발행 급증 월(월 15건↑ & 직전월 3배↑)부터':'Request Date(미기재 시 원사입고일) 기준 최근 3개월'} · Drop = 폐기 시트 이동 건</div>`);
+    };
+  });
+
+  if(validEl){
+    const defs = [
+      ['noDate','Request Date 미기재'],
+      ['future','미래 날짜 (연도 오타 의심)'],
+      ['badCat','카테고리 비표준 표기'],
+      ['dropMark','DROP·HOLD 표기 잔존 (폐기 미이동)'],
+      ['noFinish','창고보관 FINISH DATE 누락'],
+    ];
+    validEl.innerHTML = `<div style="width:100%;font-size:.6rem;font-weight:700;color:#64748b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px">보고 전 검증 리포트 <span style="font-weight:400;text-transform:none;letter-spacing:0">· 매주 목요일 보고 전 담당자 정리</span></div>`
+      + defs.map(([k,lbl])=>{
+        const v = (ds.valid&&ds.valid[k]) || {n:0,items:[]};
+        return `<div class="hp-ds-chip ${v.n>0?'bad':'ok'}" data-dsv="${k}">${v.n>0?'⚠':'✓'} ${lbl} <span class="n">${v.n}</span></div>`;
+      }).join('');
+    validEl.querySelectorAll('.hp-ds-chip.bad').forEach(chip=>{
+      chip.onclick = ()=>{
+        const k = chip.dataset.dsv;
+        const def = defs.find(d=>d[0]===k);
+        const v = ds.valid[k];
+        const rows = v.items.map((x,i)=>`<tr><td style="color:#64748b;padding:3px 10px 3px 0">${i+1}</td><td style="font-family:monospace;color:#fbbf24;padding-right:12px">${x.label}</td><td style="color:#e2e8f0;padding-right:12px">${x.dev}</td><td style="color:#94a3b8">${x.val||''}</td></tr>`).join('');
+        hpOpenModal('검증 리포트 — '+def[1], `${v.n}건${v.n>v.items.length?` (상위 ${v.items.length}건 표시)`:''} · 보고 전 정리 필요`,
+          `<div style="max-height:340px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:.68rem"><thead><tr style="border-bottom:1px solid rgba(255,255,255,.1);color:#475569;text-align:left"><th style="padding-bottom:6px">#</th><th style="padding-bottom:6px">Style / 행</th><th style="padding-bottom:6px">담당</th><th style="padding-bottom:6px">비고</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+      };
+    });
+  }
+}
+
 // ── render RDDA chart
 function hpRenderRddaChart(months, gd, dom, bulk){
   const canvas = document.getElementById('hpRddaChart');
@@ -7008,6 +7139,9 @@ function renderHpHome(data){
 
   // 11. Yearly cumulative chart
   if(data.yearly && data.yearly.years.length) hpRenderYearSection(data.yearly);
+
+  // 12. Category Report (주간보고 집계기준 매뉴얼)
+  hpRenderDevStatus(data.devStatus);
   // (Process Status 클릭 팝업은 Status by Members 멤버 카드로 통합됨)
 }
 
@@ -7262,6 +7396,108 @@ function parseHpData(wb){
     discard:  yearlyYears.map(y=>yearlyMap[y].discard),
   };
 
+  // ── Category Report (주간보고 집계기준 매뉴얼 2026-07)
+  //    EU MARKET = 캠페인형(작지 급증 월부터) · 그 외 = Request Date 최근 3개월 rolling
+  //    상태: drop(폐기 시트) > done(FINISH DATE or 창고보관) > 가공중/염색중/편직중/원사준비
+  const dsCatNorm = c => {
+    const u = String(c||'').trim().toUpperCase();
+    if(!u) return null;
+    if(u.includes('EU')) return 'EU MARKET';
+    if(u.includes('SEASON')) return 'SEASON DVLP';
+    if(u.includes('CORE')) return 'CORE UPDATE';
+    if(u.includes('PROJECT')) return 'PROJECT';
+    return null;
+  };
+  const DS_CATS = ['EU MARKET','SEASON DVLP','CORE UPDATE','PROJECT'];
+  const dsItems = [];
+  const dsValid = {
+    noDate:{n:0,items:[]}, future:{n:0,items:[]}, badCat:{n:0,items:[]},
+    dropMark:{n:0,items:[]}, noFinish:{n:0,items:[]}
+  };
+  const dsVPush = (k,o)=>{ const v=dsValid[k]; v.n++; if(v.items.length<80) v.items.push(o); };
+  const rollMs = new Date(today.getFullYear(), today.getMonth()-3, today.getDate()).getTime();
+
+  const dsScan = (sname, srows, sstart)=>{
+    for(let i=sstart; i<srows.length; i++){
+      const r = srows[i];
+      if(!r || r[0]==null || r[0]==='') continue;
+      const rawCat = String(r[3]||'').trim();
+      const cat = dsCatNorm(rawCat);
+      const dev = String(r[6]||'').trim() || '미배정';
+      const style = String(r[7]||'').trim();
+      const fl = String(r[8]||'').trim();
+      const label = style || fl || (sname+' '+(i+1)+'행');
+      if(sname==='현황' && cat && rawCat.toUpperCase()!==cat) dsVPush('badCat',{label,dev,val:rawCat});
+      if(!cat) continue;
+      const reqD = hpParseDate(r[17]);
+      let anchor = reqD || hpParseDate(r[19]);
+      if(anchor && anchor.getTime() > todayMs + 86400000){
+        if(sname!=='폐기') dsVPush('future',{label,dev,val:fmtD(anchor)});
+        anchor = null;                              // 연도 오타 의심 → 윈도우 제외
+      }
+      if(sname!=='폐기'){
+        const txt = (style+' '+fl+' '+String(r[26]||'')+' '+String(r[27]||'')).toUpperCase();
+        if(/\bDROP\b|\bHOLD\b/.test(txt)) dsVPush('dropMark',{label,dev,val:sname});
+      }
+      let st;
+      if(sname==='폐기') st='drop';
+      else if(sname==='창고보관'){
+        st='done';
+        if(!hpParseDate(r[26]) && anchor && anchor.getTime()>=rollMs) dsVPush('noFinish',{label,dev,val:'주간/월간 완료 통계 누락'});
+      } else {
+        const finD = hpParseDate(r[26]);
+        const yd2=hpProcDone(r[19],todayMs), kd2=hpProcDone(r[21],todayMs), dd2=hpProcDone(r[23],todayMs), fd3=hpProcDone(r[25],todayMs);
+        st = (finD||fd3) ? 'done' : dd2 ? 'fin' : kd2 ? 'dye' : yd2 ? 'knit' : 'prep';
+        if(!anchor) dsVPush('noDate',{label,dev,val:cat});
+      }
+      dsItems.push({cat, dev, label, a:anchor?anchor.getTime():null, st, sheet:sname});
+    }
+  };
+  dsScan('현황', rows, dataStart);
+  const dsCg = hpSheetRows(wb,'창고보관'); if(dsCg) dsScan('창고보관', dsCg.rows, dsCg.dataStart);
+  const dsPg = hpSheetRows(wb,'폐기');     if(dsPg) dsScan('폐기', dsPg.rows, dsPg.dataStart);
+
+  // EU 캠페인 시작 감지: 월 15건 이상 & 직전 달력월 대비 3배 이상 → 가장 최근 급증 월
+  const dsEuMon = {};
+  dsItems.forEach(x=>{
+    if(x.cat==='EU MARKET' && x.a){
+      const d=new Date(x.a); const k=d.getFullYear()*100+(d.getMonth()+1);
+      dsEuMon[k]=(dsEuMon[k]||0)+1;
+    }
+  });
+  const dsPrevKey = k => { const y=Math.floor(k/100), m=k%100; return m===1 ? (y-1)*100+12 : y*100+(m-1); };
+  let campKey = null;
+  Object.keys(dsEuMon).map(Number).sort((a,b)=>a-b).forEach(k=>{
+    if(dsEuMon[k]>=15 && dsEuMon[k] >= (dsEuMon[dsPrevKey(k)]||0)*3) campKey=k;
+  });
+  const campMs = campKey ? new Date(Math.floor(campKey/100), campKey%100-1, 1).getTime() : null;
+
+  const dsCards = DS_CATS.map(cat=>{
+    const isEu = cat==='EU MARKET';
+    const winMs = (isEu && campMs) ? campMs : rollMs;
+    const stCnt = {prep:0,knit:0,dye:0,fin:0,done:0,drop:0};
+    const devs = {}; const styleSet = new Set(); const list = [];
+    dsItems.forEach(x=>{
+      if(x.cat!==cat || !x.a || x.a<winMs) return;
+      stCnt[x.st]++;
+      if(!devs[x.dev]) devs[x.dev]={total:0,prog:0,done:0,drop:0};
+      devs[x.dev].total++;
+      if(x.st==='done') devs[x.dev].done++;
+      else if(x.st==='drop') devs[x.dev].drop++;
+      else devs[x.dev].prog++;
+      const m=String(x.label).match(/#?(\d{5})/); if(m) styleSet.add(m[1]);
+      if(list.length<60) list.push({label:x.label, dev:x.dev, st:x.st});
+    });
+    const total = stCnt.prep+stCnt.knit+stCnt.dye+stCnt.fin+stCnt.done+stCnt.drop;
+    const noDateN = dsItems.filter(x=>x.cat===cat && !x.a && x.sheet==='현황').length;
+    const basis = isEu
+      ? (campKey ? `캠페인 · ${String(Math.floor(campKey/100)).slice(2)}.${String(campKey%100).padStart(2,'0')}~` : '최근 3개월')
+      : '최근 3개월 의뢰분';
+    return {cat, total, styles:styleSet.size, prog:stCnt.prep+stCnt.knit+stCnt.dye+stCnt.fin,
+      done:stCnt.done, drop:stCnt.drop, stages:stCnt, devs, noDate:noDateN, list, basis};
+  });
+  const devStatus = {cards:dsCards, valid:dsValid};
+
   return {
     total, gdCount, domCount, receiptCount, receiptItems,
     yarnDone, knitDone, dyeDone, finDone,
@@ -7270,7 +7506,7 @@ function parseHpData(wb){
     knitDelays, dyeDelays,
     rdda:{months:monthLabels, gd:rddaGd, dom:rddaDom, bulk:rddaBulk},
     leadTime:{avgKnit, avgSample, knitItems:knitLeadItems, sampleItems:sampleLeadItems},
-    yearly
+    yearly, devStatus
   };
 }
 
