@@ -6553,7 +6553,7 @@ function hpRenderDevStatus(ds){
         </div>
       </div>
       <div class="hp-ds-bar">${segs||'<div style="width:100%;background:rgba(255,255,255,.04)"></div>'}</div>
-      <div class="hp-ds-foot"><span>STYLE ${c.styles}</span>${c.noDate>0?`<span class="warn">⚠ 날짜 미기재 ${c.noDate}건 별도</span>`:''}</div>
+      <div class="hp-ds-foot"><span>STYLE ${c.styles}</span>${c.carry>0?`<span class="warn">↺ 이월 진행 ${c.carry}건</span>`:''}${c.noDate>0?`<span class="warn">⚠ 날짜 미기재 ${c.noDate}건</span>`:''}</div>
     </div>`;
   }).join('');
 
@@ -6578,6 +6578,7 @@ function hpRenderDevStatus(ds){
         <div style="margin-top:2px">${stRow}</div>
         <hr class="hp-modal-divider">
         <div style="font-size:.62rem;font-weight:700;color:#64748b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">담당자별</div>${devRows}
+        ${c.carry>0?`<hr class="hp-modal-divider"><div style="font-size:.6rem;color:#fbbf24">↺ 이월 진행 ${c.carry}건 — ${c.cat==='EU MARKET'?'캠페인 시작 이전':'3개월 이전'} 의뢰인데 아직 진행 중 (분모 미포함 · Categories 표에는 포함)</div>`:''}
         ${c.noDate>0?`<hr class="hp-modal-divider"><div style="font-size:.6rem;color:#fbbf24">⚠ Request Date 미기재로 분모에서 제외된 진행 건 ${c.noDate}건 — 아래 검증 리포트에서 목록 확인</div>`:''}
         <hr class="hp-modal-divider"><div style="font-size:.58rem;color:#475569">※ ${c.cat==='EU MARKET'?'캠페인 = 작지 발행 급증 월(월 15건↑ & 직전월 3배↑)부터':'Request Date(미기재 시 원사입고일) 기준 최근 3개월'} · Drop = 폐기 시트 이동 건</div>`);
     };
@@ -7240,9 +7241,12 @@ function parseHpData(wb){
       }
     }
 
-    // SCT
+    // SCT — Category Report와 동일한 정규화(비표준 표기 흡수: EU market SPL, Season DEV 등)
     const origRef = String(r[4]||'').trim();
-    const sctCatKey = SCT_CAT_MAP[cat.toUpperCase()];
+    const catU = cat.toUpperCase();
+    const sctCatKey = SCT_CAT_MAP[catU] ||
+      (catU.includes('EU') ? 'euMarket' : catU.includes('SEASON') ? 'seasonDvlp' :
+       catU.includes('CORE') ? 'coreUpdate' : catU.includes('PROJECT') ? 'project' : undefined);
     if(sctCatKey){
       if(!devCatTrack[dev]) devCatTrack[dev]={};
       if(!devCatTrack[dev][sctCatKey]) devCatTrack[dev][sctCatKey]={styleSet:new Set(),opts:0};
@@ -7445,9 +7449,10 @@ function parseHpData(wb){
         st='done';
         if(!hpParseDate(r[26]) && anchor && anchor.getTime()>=rollMs) dsVPush('noFinish',{label,dev,val:'주간/월간 완료 통계 누락'});
       } else {
+        // 완료 = FINISH DATE 기재 또는 창고보관 이동 (매뉴얼 §3) — 공정일자만 기재된 건은 아직 진행
         const finD = hpParseDate(r[26]);
-        const yd2=hpProcDone(r[19],todayMs), kd2=hpProcDone(r[21],todayMs), dd2=hpProcDone(r[23],todayMs), fd3=hpProcDone(r[25],todayMs);
-        st = (finD||fd3) ? 'done' : dd2 ? 'fin' : kd2 ? 'dye' : yd2 ? 'knit' : 'prep';
+        const yd2=hpProcDone(r[19],todayMs), kd2=hpProcDone(r[21],todayMs), dd2=hpProcDone(r[23],todayMs);
+        st = finD ? 'done' : dd2 ? 'fin' : kd2 ? 'dye' : yd2 ? 'knit' : 'prep';
         if(!anchor) dsVPush('noDate',{label,dev,val:cat});
       }
       dsItems.push({cat, dev, label, a:anchor?anchor.getTime():null, st, sheet:sname});
@@ -7490,11 +7495,13 @@ function parseHpData(wb){
     });
     const total = stCnt.prep+stCnt.knit+stCnt.dye+stCnt.fin+stCnt.done+stCnt.drop;
     const noDateN = dsItems.filter(x=>x.cat===cat && !x.a && x.sheet==='현황').length;
+    // 이월 진행: 윈도우 이전 의뢰인데 아직 현황 시트에 남아 진행 중인 건 (분모 미포함 · 별도 표기)
+    const carryN = dsItems.filter(x=>x.cat===cat && x.a && x.a<winMs && x.sheet==='현황' && x.st!=='done').length;
     const basis = isEu
       ? (campKey ? `캠페인 · ${String(Math.floor(campKey/100)).slice(2)}.${String(campKey%100).padStart(2,'0')}~` : '최근 3개월')
       : '최근 3개월 의뢰분';
     return {cat, total, styles:styleSet.size, prog:stCnt.prep+stCnt.knit+stCnt.dye+stCnt.fin,
-      done:stCnt.done, drop:stCnt.drop, stages:stCnt, devs, noDate:noDateN, list, basis};
+      done:stCnt.done, drop:stCnt.drop, stages:stCnt, devs, noDate:noDateN, carry:carryN, list, basis};
   });
   const devStatus = {cards:dsCards, valid:dsValid};
 
