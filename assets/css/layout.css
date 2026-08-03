@@ -1,0 +1,343 @@
+/* 앱 셸과 화면 단위 레이아웃 */
+.app {
+  display: grid;
+  grid-template-columns: var(--w-side) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.side {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: var(--sp-6) var(--sp-4);
+  background: var(--c-navy);
+  color: var(--c-navy-ink);
+  transition: transform var(--t-base) var(--ease);
+}
+
+.side__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding-inline: var(--sp-2);
+}
+
+.side__mark {
+  display: inline-grid;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: var(--r-sm);
+  background: var(--c-brand);
+  color: var(--c-on-brand);
+  font-weight: var(--fw-black);
+}
+
+.side__names {
+  display: grid;
+  gap: var(--sp-1);
+}
+
+.side__names strong {
+  color: var(--c-navy-ink);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--ls-wide);
+}
+
+.side__names small {
+  color: var(--c-navy-muted);
+  font-size: var(--fs-xs);
+}
+
+.side__nav {
+  display: grid;
+}
+
+.side__label {
+  margin-top: var(--sp-6);
+  padding-inline: var(--sp-3);
+  color: var(--c-navy-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-sm);
+  color: var(--c-navy-ink);
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.nav:hover,
+.nav.is-active {
+  background: var(--c-navy-hover);
+  color: var(--c-navy-ink);
+}
+
+.nav__dot {
+  flex: 0 0 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-full);
+  background: var(--c-navy-muted);
+}
+
+.nav.is-active .nav__dot {
+  background: var(--c-brand-soft);
+}
+
+.nav--sub {
+  padding-left: var(--sp-6);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-normal);
+}
+
+.side__foot {
+  display: grid;
+  gap: var(--sp-1);
+  margin-top: auto;
+  padding: var(--sp-4) var(--sp-2) 0;
+  border-top: 1px solid var(--c-navy-hover);
+  color: var(--c-navy-muted);
+  font-size: var(--fs-xs);
+}
+
+.side__ver {
+  color: var(--c-navy-muted);
+}
+
+.main {
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--h-top);
+  padding-inline: var(--sp-9);
+  border-bottom: 1px solid var(--c-line);
+  background: var(--c-paper);
+}
+
+.crumb {
+  color: var(--c-muted);
+  font-size: var(--fs-sm);
+}
+
+.crumb b {
+  color: var(--c-ink);
+}
+
+.topbar__right,
+.user {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.topbar__menu {
+  display: none;
+}
+
+.user__name {
+  color: var(--c-ink-2);
+  font-size: var(--fs-sm);
+}
+
+.avatar {
+  display: inline-grid;
+  width: var(--sp-9);
+  height: var(--sp-9);
+  place-items: center;
+  border-radius: var(--r-full);
+  background: var(--c-brand-tint);
+  color: var(--c-brand-ink);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+}
+
+.databar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  padding: var(--sp-2) var(--sp-9);
+  background: var(--c-neutral-tint);
+  color: var(--c-neutral);
+}
+
+.databar[data-mode="demo"] {
+  background: var(--c-brand-tint);
+  color: var(--c-brand-ink);
+}
+
+.databar[data-mode="tds"] {
+  background: var(--c-ok-tint);
+  color: var(--c-ok);
+}
+
+.databar[data-mode="loading"] {
+  background: var(--c-neutral-tint);
+  color: var(--c-neutral);
+}
+
+.databar[data-mode="failed"] {
+  background: var(--c-crit-tint);
+  color: var(--c-crit);
+}
+
+.databar__badge {
+  flex: 0 0 auto;
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid currentColor;
+  border-radius: var(--r-full);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+}
+
+.databar__msg {
+  min-width: 0;
+  font-size: var(--fs-xs);
+}
+
+.content {
+  width: 100%;
+  max-width: var(--w-content);
+  margin-inline: auto;
+  padding: var(--sp-8) var(--sp-9) var(--sp-12);
+}
+
+.view-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+}
+
+.view-head__text {
+  min-width: 0;
+}
+
+.view-head__title {
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-tight);
+}
+
+.view-head__sub {
+  margin-top: var(--sp-2);
+  color: var(--c-muted);
+}
+
+.view-head__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--sp-2);
+}
+
+.cols {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.cols--2-1 {
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+}
+
+.cols--1-1 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cols--1-2 {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr);
+}
+
+.stack {
+  display: grid;
+  align-content: start;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  padding-block: var(--sp-12);
+  border: 1px dashed var(--c-line-strong);
+  border-radius: var(--r-lg);
+  color: var(--c-muted);
+  text-align: center;
+}
+
+.view-error {
+  padding: var(--sp-4);
+  border-radius: var(--r-lg);
+  background: var(--c-crit-tint);
+  color: var(--c-crit);
+}
+
+@media (max-width: 980px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--w-side);
+    box-shadow: var(--shadow-2);
+    transform: translateX(-100%);
+  }
+
+  .side.is-open {
+    transform: translateX(0);
+  }
+
+  .topbar__menu {
+    display: inline-grid;
+  }
+
+  .content {
+    padding: var(--sp-6) var(--sp-4) var(--sp-9);
+  }
+
+  .cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar {
+    padding-inline: var(--sp-4);
+  }
+
+  .crumb,
+  .user__name {
+    display: none;
+  }
+
+  .databar {
+    align-items: flex-start;
+    padding-inline: var(--sp-4);
+  }
+
+  .view-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

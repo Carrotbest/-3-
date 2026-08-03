@@ -1,0 +1,82 @@
+/* 기본 리셋 · 타이포그래피 · 공용 유틸리티 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:where(html, body) {
+  margin: 0;
+}
+
+body {
+  min-width: 0;
+  background: var(--c-canvas);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+:where(h1, h2, p) {
+  margin: 0;
+}
+
+:where(img) {
+  max-width: 100%;
+}
+
+:where(a, button, input, select, textarea) {
+  font: inherit;
+}
+
+:where(a) {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-brand);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  padding: var(--sp-2) var(--sp-3);
+  transform: translateY(-100%);
+  border-radius: 0 0 var(--r-sm) 0;
+  background: var(--c-brand);
+  color: var(--c-on-brand);
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.eyebrow {
+  color: var(--c-brand);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.link {
+  color: var(--c-brand-ink);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}

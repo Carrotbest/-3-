@@ -1,0 +1,16 @@
+# Codex 작업 결과 보고 (지시서만 커밋하고 결과는 남기지 않는다)
+docs/codex/*.result.txt
+
+# 로컬 데이터 — 실데이터는 저장소에 절대 올리지 않는다
+*.xlsx
+*.xlsm
+*.xls
+!docs/**/*.xlsx
+
+# OS / 편집기
+Thumbs.db
+desktop.ini
+.DS_Store
+*.lnk
+.vscode/
+.idea/
