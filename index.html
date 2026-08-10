@@ -1,88 +1,18 @@
 <!doctype html>
-<html lang="ko" data-theme="light">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FABRIC R&D · 통합원단부 3팀</title>
-<meta name="description" content="한솔섬유 통합원단부 3팀 업무 플랫폼">
-<link rel="stylesheet" href="./assets/css/tokens.css">
-<link rel="stylesheet" href="./assets/css/base.css">
-<link rel="stylesheet" href="./assets/css/layout.css">
-<link rel="stylesheet" href="./assets/css/components.css">
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-</head>
-<body>
-<a class="skip-link" href="#main">본문으로 건너뛰기</a>
-
-<div class="app">
-  <!-- ── 사이드바 ─────────────────────────── -->
-  <aside class="side" id="side">
-    <div class="side__brand">
-      <span class="side__mark" aria-hidden="true">F</span>
-      <span class="side__names">
-        <strong>FABRIC R&amp;D</strong>
-        <small>통합원단부 3팀</small>
-      </span>
-    </div>
-
-    <nav class="side__nav" aria-label="주요 메뉴">
-      <p class="side__label">WORKSPACE</p>
-      <a class="nav" href="#/home" data-view="home"><span class="nav__dot" aria-hidden="true"></span>HOME</a>
-
-      <p class="side__label">FABRIC R&amp;D</p>
-      <a class="nav" href="#/development" data-view="development"><span class="nav__dot" aria-hidden="true"></span>DEVELOPMENT</a>
-      <a class="nav nav--sub" href="#/development/overview">Overview</a>
-      <a class="nav nav--sub" href="#/development/eu">EU Market</a>
-      <a class="nav nav--sub" href="#/development/season">Season</a>
-      <a class="nav nav--sub" href="#/development/core">Core</a>
-      <a class="nav nav--sub" href="#/development/project">Project</a>
-      <a class="nav" href="#/rdda" data-view="rdda"><span class="nav__dot" aria-hidden="true"></span>RDDA REPORT</a>
-
-      <p class="side__label">TECHNICAL SERVICES</p>
-      <a class="nav" href="#/ts" data-view="ts"><span class="nav__dot" aria-hidden="true"></span>TS 관리</a>
-      <a class="nav" href="#/study" data-view="study"><span class="nav__dot" aria-hidden="true"></span>STUDY 과제</a>
-
-      <p class="side__label">OPERATIONS</p>
-      <a class="nav" href="#/calendar" data-view="calendar"><span class="nav__dot" aria-hidden="true"></span>CALENDAR</a>
-      <a class="nav" href="#/sync" data-view="sync"><span class="nav__dot" aria-hidden="true"></span>동기화 상태</a>
-      <a class="nav" href="#/setting" data-view="setting"><span class="nav__dot" aria-hidden="true"></span>SETTING</a>
-    </nav>
-
-    <div class="side__foot">
-      <span id="side-datasource">예시 데이터로 보는 중</span>
-      <span class="side__ver">내부 업무용 · redesign v2</span>
-    </div>
-  </aside>
-
-  <!-- ── 본문 ─────────────────────────────── -->
-  <div class="main">
-    <header class="topbar">
-      <button class="topbar__menu" id="btn-menu" type="button" aria-label="메뉴 열기" aria-expanded="false">☰</button>
-      <p class="crumb">통합원단부 3팀<span aria-hidden="true"> / </span><b id="crumb">HOME</b></p>
-
-      <div class="topbar__right">
-        <label class="filebtn" for="tds-file">
-          <input type="file" id="tds-file" accept=".xlsx,.xlsm,.xls" hidden>
-          <span>TDS 파일 열기</span>
-        </label>
-        <button class="iconbtn" id="btn-theme" type="button" aria-label="테마 전환">◐</button>
-        <span class="user">
-          <span class="user__name">박향근 · 소팀장</span>
-          <span class="avatar" aria-hidden="true">박향</span>
-        </span>
-      </div>
-    </header>
-
-    <div class="databar" id="databar" data-mode="demo">
-      <span class="databar__badge">예시 데이터</span>
-      <span class="databar__msg">TDS 엑셀을 열면 실제 값으로 바뀝니다. 파일은 이 브라우저 안에서만 읽히며 어디에도 전송되지 않습니다.</span>
-    </div>
-
-    <main class="content" id="main" tabindex="-1"></main>
-  </div>
-</div>
-
-<script type="module" src="./assets/js/main.js"></script>
-</body>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&family=Roboto+Serif:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>FABRIC R&amp;D</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

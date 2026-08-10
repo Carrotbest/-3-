@@ -14,3 +14,14 @@ desktop.ini
 *.lnk
 .vscode/
 .idea/
+
+# React/Vite 로컬 산출물
+node_modules/
+dist/
+.npm-cache/
+
+# Codex 로컬 실행 로그 (프롬프트·전사 기록, 저장소에 남기지 않는다)
+.codex-runs/
+
+# 배포용 zip 산출물
+*.zip

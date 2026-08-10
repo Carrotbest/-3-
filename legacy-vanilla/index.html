@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FABRIC R&amp;D · 통합원단부 3팀</title>
+  <meta name="description" content="한솔섬유 통합원단부 3팀 업무 플랫폼">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/css/tokens.css">
+  <link rel="stylesheet" href="./assets/css/base.css">
+  <link rel="stylesheet" href="./assets/css/layout.css">
+  <link rel="stylesheet" href="./assets/css/components.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <div class="app">
+    <aside class="side" id="side">
+      <div class="side__brand">
+        <span class="side__mark" aria-hidden="true">F</span>
+        <span class="side__names"><strong>FABRIC R&amp;D</strong><small>통합원단부 3팀</small></span>
+      </div>
+      <nav class="side__nav" aria-label="주요 메뉴">
+        <p class="side__label">WORKSPACE</p>
+        <a class="nav" href="#/home" data-view="home"><span class="nav__dot" aria-hidden="true"></span>HOME</a>
+        <p class="side__label">FABRIC R&amp;D</p>
+        <a class="nav" href="#/development" data-view="development"><span class="nav__dot" aria-hidden="true"></span>DEVELOPMENT</a>
+        <a class="nav nav--sub" href="#/development/overview">Overview</a>
+        <a class="nav nav--sub" href="#/development/eu">EU Market</a>
+        <a class="nav nav--sub" href="#/development/season">Season</a>
+        <a class="nav nav--sub" href="#/development/core">Core</a>
+        <a class="nav nav--sub" href="#/development/project">Project</a>
+        <a class="nav" href="#/rdda" data-view="rdda"><span class="nav__dot" aria-hidden="true"></span>RDDA REPORT</a>
+        <p class="side__label">TECHNICAL SERVICES</p>
+        <a class="nav" href="#/ts" data-view="ts"><span class="nav__dot" aria-hidden="true"></span>TS 관리</a>
+        <a class="nav nav--sub" href="#/fabric-analysis" data-view="fabric-analysis">FABRIC ANALYSIS · 2차</a>
+        <a class="nav nav--sub" href="#/construction-guide" data-view="construction-guide">CONSTRUCTION GUIDE · 2차</a>
+        <a class="nav" href="#/study" data-view="study"><span class="nav__dot" aria-hidden="true"></span>TEXTILE ACADEMY · 2차</a>
+        <p class="side__label">OPERATIONS</p>
+        <a class="nav" href="#/calendar" data-view="calendar"><span class="nav__dot" aria-hidden="true"></span>CALENDAR</a>
+        <a class="nav" href="#/sync" data-view="sync"><span class="nav__dot" aria-hidden="true"></span>동기화 상태</a>
+        <a class="nav" href="#/setting" data-view="setting"><span class="nav__dot" aria-hidden="true"></span>SETTING</a>
+        <p class="side__label">TREND REPORT · 3차</p>
+        <a class="nav" href="#/trend-macro" data-view="trend-macro"><span class="nav__dot" aria-hidden="true"></span>MACRO TREND</a>
+        <a class="nav" href="#/trend-fabric" data-view="trend-fabric"><span class="nav__dot" aria-hidden="true"></span>FABRIC TREND</a>
+        <a class="nav" href="#/portfolio" data-view="portfolio"><span class="nav__dot" aria-hidden="true"></span>PORTFOLIO</a>
+        <p class="side__label">PROCESS INNOVATION · 3차</p>
+        <a class="nav" href="#/process-innovation" data-view="process-innovation"><span class="nav__dot" aria-hidden="true"></span>PROCESS INNOVATION</a>
+      </nav>
+      <div class="side__foot"><span id="side-datasource">예시 데이터로 보는 중</span><span class="side__ver">내부 업무용 · redesign v2</span></div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <button class="topbar__menu" id="btn-menu" type="button" aria-label="메뉴 열기" aria-expanded="false">☰</button>
+        <p class="crumb">통합원단부 3팀 <span aria-hidden="true">/</span> <b id="crumb">HOME</b></p>
+        <div class="topbar__right">
+          <label class="filebtn" for="tds-file"><input type="file" id="tds-file" accept=".xlsx,.xlsm,.xls" hidden><span>TDS 파일 열기</span></label>
+          <button class="iconbtn" id="btn-theme" type="button" aria-label="테마 전환">◐</button>
+          <span class="user"><span class="user__name">박향근 · 소팀장</span><span class="avatar" aria-hidden="true">PH</span></span>
+        </div>
+      </header>
+      <div class="databar" id="databar" data-mode="demo"><span class="databar__badge">예시 데이터</span><span class="databar__msg">TDS 파일을 열면 실제 값으로 바뀝니다. 파일은 이 브라우저 안에서만 처리됩니다.</span></div>
+      <main class="content" id="main" tabindex="-1"></main>
+    </div>
+  </div>
+  <script type="module" src="./assets/js/main.js"></script>
+</body>
+</html>

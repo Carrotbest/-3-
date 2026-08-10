@@ -1,0 +1,609 @@
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { useNavigate } from "react-router-dom"
+import {
+  ArrowUpRight, BookOpenCheck, CalendarDays, CheckCircle2, ClipboardList,
+  FlaskConical, Layers3, LoaderCircle, Microscope, RefreshCw, Ruler,
+  Sparkles, TimerReset, TrendingUp, Waves, Wrench,
+} from "lucide-react"
+import { Bar, CartesianGrid, ComposedChart, LabelList, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+
+import { PageHeader } from "@/components/layout/PageHeader"
+import { DataUpload } from "@/components/upload/DataUpload"
+import { NumberTicker } from "@/components/motion/NumberTicker"
+import { Reveal } from "@/components/motion/Reveal"
+import { Tilt3D } from "@/components/motion/Tilt3D"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  homeKpiRecordDetails,
+  homeSectionCards,
+  defaultHomeDateRanges,
+  homeTrendCards,
+  homeWorkSummary,
+  monthlyDevelopmentTrend,
+  RDDA_ARCHIVE_CUTOFF_MONTH,
+  type HomeKpiDetailGroups,
+  type HomeKpiDetailKind,
+  type HomeKpiRanges,
+  type MonthlyDevelopmentDatum,
+} from "@/data/derive"
+import { fmtDate, fmtDateFull } from "@/data/format"
+import { ingestDevelopment, ingestSamples } from "@/data/upload"
+import { hoverLift } from "@/lib/motion"
+import { useAppStore } from "@/store/useAppStore"
+
+function KpiCard({ icon, label, value, rangeLabel, caption, delay = 0, children, onClick, onCalendarClick }: {
+  icon: ReactNode
+  label: string
+  value: number
+  /** 카드 본문에 크게 노출하는 조회 기간. */
+  rangeLabel: string
+  caption: string
+  delay?: number
+  children?: ReactNode
+  onClick: () => void
+  onCalendarClick?: () => void
+}) {
+  return (
+    <Reveal delay={delay}>
+      <Card className={`h-full overflow-hidden ${hoverLift}`}>
+        <CardContent className="flex h-full flex-col p-5">
+          <div className="flex items-start justify-between gap-3">
+            <span className="flex size-9 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]">{icon}</span>
+            <div className="flex items-center gap-2">
+              {onCalendarClick ? (
+                <Button type="button" variant="outline" size="icon" className="size-8" aria-label={`${label} 기간 설정`} onClick={onCalendarClick}>
+                  <CalendarDays className="size-4" />
+                </Button>
+              ) : null}
+              <Badge variant="secondary">DD 전체현황</Badge>
+            </div>
+          </div>
+          <button type="button" aria-haspopup="dialog" onClick={onClick} className="mt-4 w-full cursor-pointer rounded-sm text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+            <p className="mt-5 text-sm font-medium text-[var(--muted-foreground)]">{label}</p>
+            <p className="mt-1 text-4xl font-semibold tracking-tight text-[var(--foreground)]">
+              <NumberTicker value={value} /><span className="ml-1 text-sm font-medium text-[var(--muted-foreground)]">건</span>
+            </p>
+            <p className="mt-2 text-base font-semibold tracking-tight text-[var(--foreground)]">{rangeLabel}</p>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">{caption}</p>
+          </button>
+          {children}
+        </CardContent>
+      </Card>
+    </Reveal>
+  )
+}
+
+function ScheduleCard({ dueSoon, late, onClick }: { dueSoon: number; late: number; onClick: () => void }) {
+  return (
+    <Reveal delay={150}>
+      <button type="button" aria-haspopup="dialog" onClick={onClick} className={`block h-full w-full cursor-pointer rounded-[var(--radius)] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] ${hoverLift}`}>
+        <Card className="h-full overflow-hidden">
+          <CardContent className="flex h-full flex-col p-5">
+            <div className="flex items-start justify-between gap-3">
+              <span className="flex size-9 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><CalendarDays className="size-4" /></span>
+              <Badge variant="secondary">DD 전체현황</Badge>
+            </div>
+            <p className="mt-5 text-sm font-medium text-[var(--muted-foreground)]">스케줄</p>
+            <div className="mt-2 grid grid-cols-2 gap-4">
+              <div className="rounded-[var(--radius)] border-l-[3px] border-[var(--warning)] bg-[var(--warning-soft)] px-3 py-2">
+                <p className="text-xs font-medium text-[var(--warning)]">납기 임박 <span className="font-semibold">D-7</span></p>
+                <p className="mt-1 text-3xl font-semibold tracking-tight text-[var(--warning)]"><NumberTicker value={dueSoon} /><span className="ml-1 text-sm font-medium opacity-80">건</span></p>
+              </div>
+              <div className="rounded-[var(--radius)] border-l-[3px] border-[var(--destructive)] bg-[color-mix(in_oklab,var(--destructive)_10%,transparent)] px-3 py-2">
+                <p className="text-xs font-medium text-[var(--destructive)]">납기 지연 <span className="font-semibold">D+</span></p>
+                <p className="mt-1 text-3xl font-semibold tracking-tight text-[var(--destructive)]"><NumberTicker value={late} /><span className="ml-1 text-sm font-medium opacity-80">건</span></p>
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-[var(--muted-foreground)]">진행 중 · Due Date 기준</p>
+          </CardContent>
+        </Card>
+      </button>
+    </Reveal>
+  )
+}
+
+const KPI_DETAIL_COPY: Record<HomeKpiDetailKind, {
+  title: string
+  description: string
+  dateLabel: string
+  empty: string
+}> = {
+  completed: {
+    title: "완료 상세",
+    description: "DD 전체현황 · Received Date 기준",
+    dateLabel: "완료일",
+    empty: "선택한 기간에 완료된 개발 건이 없습니다.",
+  },
+  new: {
+    title: "접수 상세",
+    description: "DD 전체현황 · Request Date 기준",
+    dateLabel: "접수일",
+    empty: "선택한 기간에 접수된 개발 건이 없습니다.",
+  },
+  schedule: {
+    title: "스케줄 상세",
+    description: "DD 전체현황 · 진행 중 Due Date 기준",
+    dateLabel: "Due Date",
+    empty: "현재 납기가 지연된 개발 건이 없습니다.",
+  },
+}
+
+function KpiDetailSheet({
+  kind,
+  details,
+  ranges,
+  onRangeChange,
+  onOpenChange,
+}: {
+  kind: HomeKpiDetailKind | null
+  details: HomeKpiDetailGroups
+  ranges: HomeKpiRanges
+  onRangeChange: (kind: "completed" | "new", field: "from" | "to", value: string) => void
+  onOpenChange: (open: boolean) => void
+}) {
+  const copy = kind ? KPI_DETAIL_COPY[kind] : null
+  const rows = kind === "schedule" ? [...details.due, ...details.late] : kind ? details[kind] : []
+  const range = kind === "completed" || kind === "new" ? ranges[kind] : null
+
+  return (
+    <Sheet open={kind !== null} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full overflow-y-auto border-[var(--border)] bg-[var(--background)] sm:max-w-3xl">
+        {copy ? (
+          <>
+            <SheetHeader className="border-b border-[var(--border)] p-6 pr-12">
+              <div className="flex flex-wrap items-center gap-2">
+                <SheetTitle className="text-[var(--foreground)]">{copy.title}</SheetTitle>
+                {kind === "schedule" ? (
+                  <>
+                    <Badge className="border-transparent bg-[var(--warning)] text-[var(--warning-foreground)]">납기임박 {details.due.length}건</Badge>
+                    <Badge variant="destructive">납기지연 {details.late.length}건</Badge>
+                  </>
+                ) : <Badge variant="secondary">총 {rows.length}건</Badge>}
+              </div>
+              <SheetDescription className="text-[var(--muted-foreground)]">{copy.description}{range ? ` · ${fmtDateFull(range.from)} ~ ${fmtDateFull(range.to)}` : ""}</SheetDescription>
+            </SheetHeader>
+            {range && (kind === "completed" || kind === "new") ? (
+              <div className="grid gap-3 border-b border-[var(--border)] p-4 sm:grid-cols-2 sm:p-6">
+                <label className="grid gap-1.5 text-xs font-medium text-[var(--muted-foreground)]">시작일
+                  <input type="date" value={range.from} max={range.to} onInput={(event) => onRangeChange(kind, "from", event.currentTarget.value)} className="h-10 rounded-[var(--radius)] border border-[var(--input)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:ring-[3px] focus:ring-[var(--ring)]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-medium text-[var(--muted-foreground)]">종료일
+                  <input type="date" value={range.to} min={range.from} onInput={(event) => onRangeChange(kind, "to", event.currentTarget.value)} className="h-10 rounded-[var(--radius)] border border-[var(--input)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:ring-[3px] focus:ring-[var(--ring)]" />
+                </label>
+              </div>
+            ) : null}
+            {rows.length ? (
+              <div className="p-4 sm:p-6">
+                <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="whitespace-nowrap px-4">개발 담당</TableHead>
+                        <TableHead className="whitespace-nowrap px-4">플래너</TableHead>
+                        <TableHead className="whitespace-nowrap px-4">Style No.</TableHead>
+                        <TableHead className="whitespace-nowrap px-4">{copy.dateLabel}</TableHead>
+                        {kind === "schedule" ? <><TableHead className="whitespace-nowrap px-4">구분</TableHead><TableHead className="whitespace-nowrap px-4 text-right">Schedule</TableHead></> : null}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {rows.map((item) => (
+                        <TableRow key={`${item.record._src.sheet}-${item.record._src.row}`}>
+                          <TableCell className="whitespace-nowrap px-4 font-medium text-[var(--foreground)]">{item.record.owner || "—"}</TableCell>
+                          <TableCell className="whitespace-nowrap px-4 text-[var(--foreground)]">{item.record.planner || "—"}</TableCell>
+                          <TableCell className="whitespace-nowrap px-4 font-mono text-[var(--foreground)]">{item.record.styleNo || "—"}</TableCell>
+                          <TableCell className="whitespace-nowrap px-4 text-[var(--foreground)]">{fmtDateFull(item.date)}</TableCell>
+                          {kind === "schedule" ? <>
+                            <TableCell className="whitespace-nowrap px-4"><Badge className={item.scheduleState === "late" ? "border-transparent bg-[var(--destructive)] text-[var(--destructive-foreground)]" : "border-transparent bg-[var(--warning)] text-[var(--warning-foreground)]"}>{item.scheduleState === "late" ? "납기지연" : "납기임박"}</Badge></TableCell>
+                            <TableCell className={`whitespace-nowrap px-4 text-right font-semibold ${item.scheduleState === "late" ? "text-[var(--destructive)]" : "text-[var(--warning)]"}`}>
+                              {item.dayOffset === null ? "—" : item.scheduleState === "late" ? `D+${Math.abs(item.dayOffset)}` : `D-${item.dayOffset}`}
+                            </TableCell>
+                          </> : null}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            ) : (
+              <div className="flex min-h-52 items-center justify-center p-6 text-center text-sm text-[var(--muted-foreground)]">{copy.empty}</div>
+            )}
+          </>
+        ) : null}
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+const PROCESS_GAUGE: Record<string, string> = {
+  yarn: "bg-[var(--chart-1)]",
+  knitting: "bg-[var(--chart-2)]",
+  dyeing: "bg-[var(--chart-3)]",
+  finishing: "bg-[var(--chart-4)]",
+}
+
+const WORK_CARDS = [
+  { key: "ts", title: "TS 관리", path: "/ts", icon: Wrench },
+  { key: "study", title: "STUDY 과제", path: "/study", icon: BookOpenCheck },
+  { key: "fabric", title: "FABRIC ANALYSIS", path: "/fabric-analysis", icon: Microscope },
+  { key: "calendar", title: "CALENDAR", path: "/calendar", icon: CalendarDays },
+] as const
+
+/** Work report · Quick access 카드의 3D 액센트 색상. */
+const WORK_ACCENT = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"] as const
+
+const QUICK_ACCESS = [
+  { title: "Overview", description: "개발 전체 현황", path: "/development", icon: FlaskConical },
+  { title: "RDDA", description: "미팅·픽업 분석", path: "/rdda", icon: ClipboardList },
+  { title: "CALENDAR", description: "일정과 납기", path: "/calendar", icon: CalendarDays },
+  { title: "FABRIC ANALYSIS", description: "원단 물성 분석", path: "/fabric-analysis", icon: Microscope },
+  { title: "TS 관리", description: "기술지원 업무", path: "/ts", icon: Wrench },
+  { title: "CONSTRUCTION GUIDE", description: "조직 가이드", path: "/construction-guide", icon: Ruler },
+  { title: "MACRO TREND", description: "시장 거시 동향", path: "/trend/macro", icon: TrendingUp },
+  { title: "FABRIC TREND", description: "소재 기술 동향", path: "/trend/fabric", icon: Waves },
+  { title: "PORTFOLIO", description: "개발 포트폴리오", path: "/trend/portfolio", icon: Layers3 },
+] as const
+
+const HOME_KPI_RANGE_STORAGE_KEY = "fabric-rnd-home-kpi-ranges-v1"
+const ISO_DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
+function loadHomeKpiRanges(): HomeKpiRanges {
+  const fallback = defaultHomeDateRanges()
+  if (typeof window === "undefined") return fallback
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(HOME_KPI_RANGE_STORAGE_KEY) ?? "null") as Partial<HomeKpiRanges> | null
+    const read = (kind: "completed" | "new") => {
+      const candidate = stored?.[kind]
+      return candidate && ISO_DAY_PATTERN.test(candidate.from ?? "") && ISO_DAY_PATTERN.test(candidate.to ?? "") && candidate.from! <= candidate.to!
+        ? { from: candidate.from!, to: candidate.to! }
+        : fallback[kind]
+    }
+    return { completed: read("completed"), new: read("new") }
+  } catch {
+    return fallback
+  }
+}
+
+const RDDA_RANGE_OPTIONS = [
+  { months: 6, label: "6개월" },
+  { months: 12, label: "1년" },
+  { months: 24, label: "2년" },
+] as const
+
+const RDDA_MONTHS_STORAGE_KEY = "fabric-rnd-home-rdda-months-v1"
+
+function loadRddaMonths(): number {
+  if (typeof window === "undefined") return 12
+  const stored = Number(window.localStorage.getItem(RDDA_MONTHS_STORAGE_KEY))
+  return RDDA_RANGE_OPTIONS.some((option) => option.months === stored) ? stored : 12
+}
+
+const RDDA_SERIES = [
+  { key: "gd", label: "GD", range: "9천번대", color: "var(--chart-1)" },
+  { key: "domestic", label: "국내", range: "5천번대", color: "var(--chart-2)" },
+  { key: "production", label: "생산", range: "0천번대", color: "var(--chart-3)" },
+  { key: "purchase", label: "사입", range: "2천번대", color: "var(--chart-4)" },
+] as const
+
+function RddaTrendTooltip({ active, payload }: {
+  active?: boolean
+  payload?: ReadonlyArray<{ payload?: MonthlyDevelopmentDatum }>
+}) {
+  const item = payload?.[0]?.payload
+  if (!active || !item) return null
+  return (
+    <div className="min-w-52 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--popover)] p-3 text-[var(--popover-foreground)] shadow-xl">
+      <div className="flex items-center justify-between gap-4 border-b border-[var(--border)] pb-2">
+        <p className="text-sm font-semibold">{item.month.replace("-", ".")}월</p>
+        <Badge variant="secondary">{item.source}</Badge>
+      </div>
+      <div className="mt-2 space-y-1.5">
+        {RDDA_SERIES.map((series) => {
+          const value = item[series.key]
+          return (
+            <div key={series.key} className="flex items-center justify-between gap-5 text-xs">
+              <span className="flex items-center gap-2 text-[var(--muted-foreground)]"><i className="size-2 rounded-full" style={{ background: series.color }} />{series.label}</span>
+              <strong>{value}건 <span className="font-normal text-[var(--muted-foreground)]">({item.total ? Math.round(value / item.total * 100) : 0}%)</span></strong>
+            </div>
+          )
+        })}
+        {item.other ? <div className="flex items-center justify-between gap-5 text-xs text-[var(--muted-foreground)]"><span>기타</span><strong className="text-[var(--foreground)]">{item.other}건</strong></div> : null}
+      </div>
+      <div className="mt-2 flex items-center justify-between border-t border-[var(--border)] pt-2 text-sm"><span className="font-medium">TOTAL</span><strong>{item.total}건</strong></div>
+    </div>
+  )
+}
+
+interface AnimatedRddaBarProps {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  fill?: string
+  index?: number
+  reduceMotion?: boolean
+  active?: boolean
+}
+
+function AnimatedRddaBar({ x = 0, y = 0, width = 0, height = 0, fill = "currentColor", reduceMotion = false, active = false }: AnimatedRddaBarProps) {
+  return <rect x={x} y={y} width={width} height={height} rx={2} fill={fill} style={{ transformBox: "fill-box", transformOrigin: "center bottom", transform: active ? "scaleY(1)" : "scaleY(0)", opacity: active ? 0.9 : 0, transition: reduceMotion ? "none" : "transform 480ms cubic-bezier(.16,.8,.24,1), opacity 180ms ease-out" }} />
+}
+
+function RddaTrendChart({ monthly, reduceMotion }: { monthly: MonthlyDevelopmentDatum[]; reduceMotion: boolean }) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [started, setStarted] = useState(reduceMotion)
+  const [hoveredMonth, setHoveredMonth] = useState<number | null>(null)
+
+  useEffect(() => {
+    const node = rootRef.current
+    if (!node || started) return
+    if (!("IntersectionObserver" in window)) { setStarted(true); return }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      setStarted(true)
+      observer.disconnect()
+    }, { threshold: 0.3 })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [started])
+
+  return (
+    <div ref={rootRef} className="h-[25rem] w-full" role="img" aria-label="FL 번호 기준 월별 RDDA 등록 전체 추이와 GD, 국내, 생산, 사입 비율 차트">
+      {started ? <ResponsiveContainer width="100%" height="100%"><ComposedChart data={monthly} margin={{ top: 28, right: 12, bottom: 0, left: -18 }} barCategoryGap="32%" onMouseMove={(state: unknown) => { const index = (state as { activeTooltipIndex?: number }).activeTooltipIndex; setHoveredMonth(typeof index === "number" ? index : null) }} onMouseLeave={() => setHoveredMonth(null)}>
+        <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 5" />
+        <XAxis dataKey="month" tickFormatter={(value: string) => `${value.slice(2, 4)}.${value.slice(5)}월`} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} interval={monthly.length > 14 ? 1 : 0} />
+        <YAxis allowDecimals={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
+        <Tooltip cursor={{ stroke: "#2563eb", strokeOpacity: 0.25, strokeDasharray: "4 4" }} content={<RddaTrendTooltip />} />
+        {RDDA_SERIES.map((series) => <Bar key={series.key} dataKey={series.key} name={series.label} stackId="production-source" fill={series.color} isAnimationActive={false} shape={(props: unknown) => { const bar = props as AnimatedRddaBarProps; return <AnimatedRddaBar {...bar} active={bar.index === hoveredMonth} reduceMotion={reduceMotion} /> }} />)}
+        <Line type="natural" dataKey="total" name="TOTAL" stroke="#2563eb" strokeWidth={1.75} dot={{ r: 2.5, fill: "var(--background)", stroke: "#2563eb", strokeWidth: 1.5 }} activeDot={{ r: 5, strokeWidth: 2, fill: "var(--background)", stroke: "#2563eb" }} isAnimationActive={!reduceMotion} animationDuration={1950} animationEasing="linear">
+          <LabelList dataKey="total" position="top" offset={10} fill="var(--muted-foreground)" fontSize={10} fontWeight={600} />
+        </Line>
+      </ComposedChart></ResponsiveContainer> : null}
+    </div>
+  )
+}
+
+export function Home() {
+  const navigate = useNavigate()
+  const [kpiDetailKind, setKpiDetailKind] = useState<HomeKpiDetailKind | null>(null)
+  const [kpiRanges, setKpiRanges] = useState<HomeKpiRanges>(loadHomeKpiRanges)
+  const [rddaMonths, setRddaMonths] = useState<number>(loadRddaMonths)
+  const today = useMemo(() => new Date(), [])
+  const records = useAppStore((state) => state.records)
+  const completed = useAppStore((state) => state.completed)
+  const fabricAnalysis = useAppStore((state) => state.fabricAnalysis)
+  const ts = useAppStore((state) => state.ts)
+  const study = useAppStore((state) => state.study)
+  const studyFiles = useAppStore((state) => state.studyFiles)
+  const events = useAppStore((state) => state.events)
+  const trends = useAppStore((state) => state.trends)
+  const sections = useMemo(() => homeSectionCards(records, today, kpiRanges), [records, today, kpiRanges])
+  const kpiDetails = useMemo(() => homeKpiRecordDetails(records, today, kpiRanges), [records, today, kpiRanges])
+  const monthly = useMemo(() => monthlyDevelopmentTrend(records, completed, today, rddaMonths), [records, completed, today, rddaMonths])
+  const monthlyKpis = useMemo(() => monthly.reduce((summary, item) => ({
+    total: summary.total + item.total,
+    gd: summary.gd + item.gd,
+    domestic: summary.domestic + item.domestic,
+    production: summary.production + item.production,
+    purchase: summary.purchase + item.purchase,
+  }), { total: 0, gd: 0, domestic: 0, production: 0, purchase: 0 }), [monthly])
+  const work = useMemo(() => homeWorkSummary(records, ts, study, fabricAnalysis, events), [records, ts, study, fabricAnalysis, events])
+  const news = useMemo(() => homeTrendCards(ts, studyFiles, trends), [ts, studyFiles, trends])
+  const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+
+  useEffect(() => {
+    window.localStorage.setItem(HOME_KPI_RANGE_STORAGE_KEY, JSON.stringify(kpiRanges))
+  }, [kpiRanges])
+
+  useEffect(() => {
+    window.localStorage.setItem(RDDA_MONTHS_STORAGE_KEY, String(rddaMonths))
+  }, [rddaMonths])
+
+  const updateKpiRange = (kind: "completed" | "new", field: "from" | "to", value: string) => {
+    if (!ISO_DAY_PATTERN.test(value)) return
+    setKpiRanges((current) => {
+      const next = { ...current[kind], [field]: value }
+      if (field === "from" && next.from > next.to) next.to = next.from
+      if (field === "to" && next.to < next.from) next.from = next.to
+      return { ...current, [kind]: next }
+    })
+  }
+
+  const rangeLabel = (kind: "completed" | "new") =>
+    `${fmtDateFull(kpiRanges[kind].from)} ~ ${fmtDateFull(kpiRanges[kind].to)}`
+
+  const workCopy = {
+    ts: { headline: `접수 ${work.ts.received} / 완료 ${work.ts.done}`, summary: "이번달 기준" },
+    study: { headline: `${work.study.completionRate}%`, summary: "주간 제출 완료율" },
+    fabric: work.fabric.connected
+      ? { headline: `의뢰 ${work.fabric.request} / 완료 ${work.fabric.complete}`, summary: "직전 7일" }
+      : { headline: "연동 예정", summary: "파일 없음" },
+    calendar: { headline: `오늘 ${work.calendar.today} / 이번주 ${work.calendar.week}`, summary: "예정된 일정" },
+  }
+
+  return (
+    <section className="min-w-0 space-y-8">
+      <PageHeader title="대시보드" subtitle="DD 전체현황을 기준으로 개발 업무와 최신 정보를 확인합니다." actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="home-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><DataUpload kind="home-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} /><Button type="button" variant="outline" onClick={() => navigate("/sync")}><RefreshCw aria-hidden="true" />데이터 상태</Button></div>} />
+
+      <Reveal>
+        <button type="button" onClick={() => navigate("/development")} className={`block w-full cursor-pointer rounded-[var(--radius)] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] ${hoverLift}`}>
+          <Card className="overflow-hidden">
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-9 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><LoaderCircle className="size-4" /></span>
+                  <div>
+                    <p className="text-sm font-medium text-[var(--muted-foreground)]">전체 개발 진행</p>
+                    <p className="text-3xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={sections.progress.total} /><span className="ml-1 text-sm font-medium text-[var(--muted-foreground)]">건</span></p>
+                  </div>
+                </div>
+                <Badge variant="secondary">DD 전체현황</Badge>
+              </div>
+              <div className="mt-6">
+                <div className="mb-2 grid grid-cols-4 gap-2">
+                  {sections.progress.process.map((item) => (
+                    <div key={item.key} className="min-w-0">
+                      <div className="flex items-baseline justify-between gap-1">
+                        <span className="truncate text-xs font-medium text-[var(--foreground)]">{item.label}</span>
+                        <span className="shrink-0 text-xs font-semibold text-[var(--foreground)]">{item.pct}%</span>
+                      </div>
+                      <p className="text-[11px] text-[var(--muted-foreground)]">{item.done}/{item.total}건</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex h-3.5 w-full overflow-hidden rounded-full bg-[var(--muted)]" role="img" aria-label={`공정 누적 도달률 — ${sections.progress.process.map((item) => `${item.label} ${item.done}건 ${item.pct}%`).join(", ")}`}>
+                  {sections.progress.process.map((item, index) => (
+                    <div key={item.key} className={`relative h-full flex-1 ${index > 0 ? "border-l-2 border-[var(--card)]" : ""}`}>
+                      <div className={`h-full ${PROCESS_GAUGE[item.key]} ${reduceMotion ? "" : "transition-[width] duration-700 ease-out"}`} style={{ width: `${item.pct}%` }} />
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">공정 누적 도달률 · DEVELOPMENT OVERVIEW 기준</p>
+              </div>
+            </CardContent>
+          </Card>
+        </button>
+      </Reveal>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <KpiCard icon={<CheckCircle2 className="size-4" />} label="완료" value={sections.lastWeekDone} rangeLabel={rangeLabel("completed")} caption="Received Date 기준" onClick={() => setKpiDetailKind("completed")} onCalendarClick={() => setKpiDetailKind("completed")} />
+        <KpiCard icon={<TimerReset className="size-4" />} label="접수" value={sections.thisWeekNew} rangeLabel={rangeLabel("new")} caption="Request Date 기준" delay={75} onClick={() => setKpiDetailKind("new")} onCalendarClick={() => setKpiDetailKind("new")} />
+        <ScheduleCard dueSoon={sections.scheduleDueSoon} late={sections.scheduleLate} onClick={() => setKpiDetailKind("schedule")} />
+      </div>
+
+      <KpiDetailSheet kind={kpiDetailKind} details={kpiDetails} ranges={kpiRanges} onRangeChange={updateKpiRange} onOpenChange={(open) => { if (!open) setKpiDetailKind(null) }} />
+
+      <Reveal>
+        <Card className="overflow-hidden"><CardContent className="p-5 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div><h2 className="text-base font-semibold text-[var(--foreground)]">RDDA 등록 현황</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">최근 {rddaMonths}개월 · {RDDA_ARCHIVE_CUTOFF_MONTH.replace("-", ".")}까지 전체 시트 FL.#의 YYMM 기준 · 이후 DD 자동 반영 · 동일 FL 1건</p></div>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] p-1" role="group" aria-label="RDDA 조회 기간 선택">
+                {RDDA_RANGE_OPTIONS.map((option) => (
+                  <button
+                    key={option.months}
+                    type="button"
+                    aria-pressed={rddaMonths === option.months}
+                    onClick={() => setRddaMonths(option.months)}
+                    className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${rddaMonths === option.months ? "bg-[var(--background)] text-[var(--foreground)] shadow-sm" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"}`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-3 text-[11px] text-[var(--muted-foreground)]">
+                {RDDA_SERIES.map((series) => <span key={series.key} className="flex items-center gap-1.5"><i className="size-2.5 rounded-full shadow-sm" style={{ background: series.color }} />{series.label} <span className="opacity-70">{series.range}</span></span>)}
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-5">
+            <div className="group rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)]/80 p-3 transition duration-300 hover:-translate-y-1 hover:border-[var(--chart-1)] hover:shadow-md motion-reduce:transition-none">
+              <p className="text-[11px] font-medium text-[var(--muted-foreground)]">{rddaMonths}개월 TOTAL</p><p className="mt-1 text-2xl font-semibold tracking-tight"><NumberTicker value={monthlyKpis.total} /><span className="ml-1 text-xs text-[var(--muted-foreground)]">건</span></p>
+            </div>
+            {RDDA_SERIES.map((series) => (
+              <div key={series.key} className="group rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)]/80 p-3 transition duration-300 hover:-translate-y-1 hover:shadow-md motion-reduce:transition-none" style={{ borderTopColor: series.color, borderTopWidth: 2 }}>
+                <div className="flex items-center justify-between gap-2"><p className="text-[11px] font-medium text-[var(--muted-foreground)]">{series.label}</p><span className="text-[10px] text-[var(--muted-foreground)]">{series.range}</span></div>
+                <p className="mt-1 text-2xl font-semibold tracking-tight"><NumberTicker value={monthlyKpis[series.key]} /><span className="ml-1 text-xs text-[var(--muted-foreground)]">건</span></p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5"><RddaTrendChart key={rddaMonths} monthly={monthly} reduceMotion={reduceMotion} /></div>
+        </CardContent></Card>
+      </Reveal>
+
+      <section aria-labelledby="work-report-title">
+        <div className="mb-4"><h2 id="work-report-title" className="text-base font-semibold text-[var(--foreground)]">Work report</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">연결된 업무 화면의 핵심 현황입니다.</p></div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {WORK_CARDS.map((item, index) => {
+            const Icon = item.icon
+            const copy = workCopy[item.key]
+            const accent = WORK_ACCENT[index % WORK_ACCENT.length]
+            return (
+              <Reveal key={item.key} delay={index * 75}>
+                <Tilt3D max={7} lift={8}>
+                  <button
+                    type="button"
+                    onClick={() => navigate(item.path)}
+                    className="group relative h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+                  >
+                    <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 opacity-80" style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }} />
+                    <span aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-40 motion-reduce:transition-none" style={{ background: accent }} />
+                    <span className="relative flex items-start justify-between [transform:translateZ(30px)]">
+                      <span className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)]" style={{ color: accent }}><Icon className="size-5" /></span>
+                      <ArrowUpRight className="size-4 text-[var(--muted-foreground)] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none" />
+                    </span>
+                    <span className="relative mt-5 block text-sm font-semibold text-[var(--foreground)] [transform:translateZ(22px)]">{item.title}</span>
+                    <span className="relative mt-2 block text-2xl font-semibold tracking-tight text-[var(--foreground)] [transform:translateZ(38px)]">{copy.headline}</span>
+                    <span className="relative mt-2 block text-xs text-[var(--muted-foreground)] [transform:translateZ(16px)]">{copy.summary}</span>
+                  </button>
+                </Tilt3D>
+              </Reveal>
+            )
+          })}
+        </div>
+      </section>
+
+      <section aria-labelledby="trend-issue-title">
+        <div className="mb-4"><h2 id="trend-issue-title" className="text-base font-semibold text-[var(--foreground)]">Trend issue</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">최신 소재·기술·이슈</p></div>
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {news.map((item, index) => (
+            <Reveal key={`${item.href}-${item.title}`} delay={index * 75}>
+              <Tilt3D max={10} lift={12}>
+                <button
+                  type="button"
+                  onClick={() => navigate(item.href.replace(/^#/, ""))}
+                  className="group relative h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+                >
+                  <span aria-hidden="true" className="pointer-events-none absolute inset-x-3 -top-1 h-2 rounded-b-[var(--radius)] border-x border-b border-[var(--border)] bg-[var(--muted)] opacity-70 [transform:translateZ(-18px)]" />
+                  <span aria-hidden="true" className="pointer-events-none absolute inset-x-1.5 -top-0.5 h-2 rounded-b-[var(--radius)] border-x border-b border-[var(--border)] bg-[var(--card)] [transform:translateZ(-8px)]" />
+                  <span className="relative flex aspect-[16/9] items-center justify-center overflow-hidden bg-gradient-to-br from-[var(--chart-3)] via-[var(--chart-2)] to-[var(--chart-1)]">
+                    {item.image
+                      ? <img src={item.image} alt="" className="size-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none" />
+                      : <Sparkles className="size-8 text-[var(--primary-foreground)] opacity-80 transition-transform duration-500 group-hover:scale-125 group-hover:rotate-12 motion-reduce:transition-none" />}
+                    <Badge className="absolute left-3 top-3 [transform:translateZ(45px)]" variant="secondary">{item.tag}</Badge>
+                  </span>
+                  <span className="block p-4 [transform:translateZ(26px)]">
+                    <strong className="line-clamp-2 block text-sm leading-6 text-[var(--foreground)]">{item.title}</strong>
+                    <span className="mt-3 block text-xs text-[var(--muted-foreground)]">{item.date ? `${fmtDate(item.date)} · ` : ""}{item.source}</span>
+                  </span>
+                </button>
+              </Tilt3D>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="quick-access-title">
+        <div className="mb-4"><h2 id="quick-access-title" className="text-base font-semibold text-[var(--foreground)]">Quick access</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">자주 사용하는 업무 화면으로 바로 이동합니다.</p></div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {QUICK_ACCESS.map((item, index) => {
+            const Icon = item.icon
+            const accent = WORK_ACCENT[index % WORK_ACCENT.length]
+            return (
+              <Reveal key={item.path} delay={(index % 4) * 75}>
+                <Tilt3D max={6} lift={6}>
+                  <button
+                    type="button"
+                    onClick={() => navigate(item.path)}
+                    className="group relative flex h-full w-full cursor-pointer items-center gap-4 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+                  >
+                    <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none" style={{ background: accent }} />
+                    <span className="relative flex size-11 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none [transform:translateZ(34px)]" style={{ color: accent }}><Icon className="size-5" /></span>
+                    <span className="relative min-w-0 flex-1 [transform:translateZ(20px)]">
+                      <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{item.title}</span>
+                      <span className="mt-1 block truncate text-xs text-[var(--muted-foreground)]">{item.description}</span>
+                    </span>
+                    <ArrowUpRight className="relative size-4 shrink-0 text-[var(--muted-foreground)] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none [transform:translateZ(28px)]" />
+                  </button>
+                </Tilt3D>
+              </Reveal>
+            )
+          })}
+        </div>
+      </section>
+    </section>
+  )
+}

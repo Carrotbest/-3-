@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fabric R&amp;D 작업 공유 · 0807</title>
+  <style>
+    :root { --ink:#162033; --muted:#64748b; --line:#dbe3ec; --panel:#f7f9fc; --blue:#2563eb; --teal:#0f9f8f; --orange:#ef7454; --gold:#e8b84a; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#eef2f7; color:var(--ink); font-family:"Pretendard","Noto Sans KR",Arial,sans-serif; line-height:1.65; }
+    main { width:min(1100px,calc(100% - 32px)); margin:32px auto; background:#fff; border:1px solid var(--line); border-radius:18px; box-shadow:0 18px 45px rgba(15,23,42,.08); overflow:hidden; }
+    header { padding:42px 46px 34px; background:linear-gradient(135deg,#102a43,#1d4ed8); color:#fff; }
+    header p { margin:8px 0 0; color:#dbeafe; }
+    h1 { margin:0; font-size:30px; letter-spacing:-.03em; }
+    h2 { margin:0 0 16px; font-size:20px; letter-spacing:-.02em; }
+    h3 { margin:0 0 8px; font-size:15px; }
+    section { padding:30px 46px; border-top:1px solid var(--line); }
+    .summary { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    .metric,.card { border:1px solid var(--line); border-radius:12px; background:#fff; padding:16px; }
+    .metric strong { display:block; margin-top:4px; font-size:23px; }
+    .metric span,.muted { color:var(--muted); font-size:13px; }
+    .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+    .card { background:var(--panel); }
+    .pill { display:inline-block; padding:3px 9px; border-radius:999px; background:#dbeafe; color:#1d4ed8; font-size:12px; font-weight:700; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th,td { padding:12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { color:var(--muted); font-size:12px; background:var(--panel); }
+    ul,ol { margin:8px 0 0; padding-left:20px; }
+    code { padding:2px 6px; border-radius:5px; background:#e8eef7; font-family:Consolas,monospace; font-size:12px; }
+    .notice { border-left:4px solid var(--gold); background:#fffaf0; padding:14px 16px; border-radius:8px; }
+    footer { padding:22px 46px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); }
+    @media (max-width:760px) { header,section,footer{padding-left:22px;padding-right:22px}.summary,.grid{grid-template-columns:1fr} }
+    @media print { body{background:#fff} main{width:100%;margin:0;border:0;box-shadow:none} }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="pill">통합원단부 3팀 · MVP 진행 공유</span>
+    <h1>Fabric R&amp;D 업무 플랫폼 작업 공유</h1>
+    <p>2026년 8월 7일 기준 · HOME 대시보드, RDDA 등록 현황, 데이터 업로드 체계 개편</p>
+  </header>
+
+  <section>
+    <h2>이번 작업의 핵심 결과</h2>
+    <div class="summary">
+      <div class="metric"><span>HOME 상세 팝업</span><strong>3종</strong><span>완료 · 신규 · 스케줄</span></div>
+      <div class="metric"><span>RDDA 조회 기간</span><strong>12개월</strong><span>과거 고정 + 신규 자동 반영</span></div>
+      <div class="metric"><span>FL 생산처 분류</span><strong>4종</strong><span>GD · 국내 · 생산 · 사입</span></div>
+      <div class="metric"><span>파일 연결 카드</span><strong>6종</strong><span>SETTING 드래그앤드롭</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>HOME 대시보드 변경</h2>
+    <div class="grid">
+      <article class="card"><h3>완료·신규</h3><p>각 카드에 달력 버튼을 추가했습니다. 사용자가 시작일과 종료일을 직접 설정하면 카드 건수와 상세 목록이 함께 갱신되며, 선택 기간은 해당 브라우저에 저장됩니다.</p></article>
+      <article class="card"><h3>스케줄</h3><p>기존 지연경보를 스케줄로 변경했습니다. 진행 중 개발 건을 납기 임박(D-7 이내)과 납기 지연(D+)으로 나누고 담당자·플래너·Style No.·Due Date를 표시합니다.</p></article>
+      <article class="card"><h3>상세 데이터</h3><p>완료는 Received Date, 신규는 Request Date, 스케줄은 Due Date를 기준으로 상세 팝업을 제공합니다.</p></article>
+      <article class="card"><h3>직접 업로드</h3><p>HOME과 DEVELOPMENT에서 DD 및 샘플관리대장을 바로 업로드할 수 있도록 버튼을 배치했습니다.</p></article>
+    </div>
+  </section>
+
+  <section>
+    <h2>RDDA 등록 현황 기준</h2>
+    <table>
+      <thead><tr><th>구간</th><th>원본</th><th>월 판정</th><th>중복 기준</th></tr></thead>
+      <tbody>
+        <tr><td>2026년 7월까지</td><td>샘플관리대장 전체 시트</td><td>FL.#의 <code>YYMM</code></td><td>동일 FL 1건</td></tr>
+        <tr><td>2026년 8월부터</td><td>DD 전체현황</td><td>Received Date</td><td>동일 FL 1건</td></tr>
+      </tbody>
+    </table>
+    <p><strong>FL 형식 예시:</strong> <code>FL26049011</code> → 2026년 4월 등록, 마지막 네 자리 <code>9011</code> → GD.</p>
+    <div class="grid">
+      <article class="card"><h3 style="color:var(--orange)">GD</h3><p>마지막 네 자리 9천번대</p></article>
+      <article class="card"><h3 style="color:var(--teal)">국내</h3><p>마지막 네 자리 5천번대</p></article>
+      <article class="card"><h3 style="color:#29485b">생산</h3><p>마지막 네 자리 0천번대</p></article>
+      <article class="card"><h3 style="color:#a66d00">사입</h3><p>마지막 네 자리 2천번대</p></article>
+    </div>
+  </section>
+
+  <section>
+    <h2>RDDA 그래프 인터랙션</h2>
+    <ul>
+      <li>12개월 TOTAL은 얇은 파란색 자연 곡선으로 표시됩니다.</li>
+      <li>라인은 해당 영역이 스크롤로 화면에 들어오면 왼쪽에서 오른쪽으로 그려집니다.</li>
+      <li>막대는 기본 상태에서 비어 있으며, 커서를 올린 월만 아래에서부터 채워집니다.</li>
+      <li>다른 월로 이동하면 이전 막대가 비워지고 새 월 막대가 표시되며, 그래프 밖으로 나가면 모두 초기화됩니다.</li>
+      <li>호버 팝업에서 월별 TOTAL과 생산처별 건수·비율을 확인할 수 있습니다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>SETTING 파일 연결 센터</h2>
+    <table>
+      <thead><tr><th>파일</th><th>연결 화면·항목</th></tr></thead>
+      <tbody>
+        <tr><td>Development Dashboard.xlsx</td><td>HOME 완료·신규·스케줄 / DEVELOPMENT 전체 현황</td></tr>
+        <tr><td>샘플 관리 대장.xlsx</td><td>HOME RDDA 등록 현황(7월까지) / DEVELOPMENT 완료 샘플</td></tr>
+        <tr><td>Capability Improvement.xlsx</td><td>STUDY 진행 현황 / HOME 업무 카드</td></tr>
+        <tr><td>Technical survices {연도}.xlsx</td><td>TS 접수·처리 목록 / HOME 업무 카드</td></tr>
+        <tr><td>26년 N월 RDDA.xlsx</td><td>RDDA REPORT Meeting·Pickup·월별 스냅샷</td></tr>
+        <tr><td>원단분석 export 파일</td><td>FABRIC ANALYSIS / HOME 원단분석 업무 카드</td></tr>
+      </tbody>
+    </table>
+    <p>각 파일별 독립 드롭존을 제공하며, 열린 Excel 파일도 탐색기에서 해당 카드로 하나씩 끌어다 놓을 수 있습니다. HOME·DEVELOPMENT·STUDY·TS·RDDA·FABRIC ANALYSIS 화면에서도 직접 업로드할 수 있습니다.</p>
+  </section>
+
+  <section>
+    <h2>데이터 확인 및 다음 단계</h2>
+    <div class="notice"><strong>실데이터 재확인 필요</strong><br />현재 개발 브라우저에서 확인된 샘플 데이터는 예시 캐시였습니다. 샘플관리대장을 새 드롭존에 다시 올린 뒤 SETTING의 ‘샘플관리대장 FL 파싱 확인’에서 전체 FL, FL 2606, FL 2607, 형식 불일치 건수와 인식 시트를 확인해야 합니다.</div>
+    <ol>
+      <li>SETTING에서 실제 샘플관리대장을 다시 드롭합니다.</li>
+      <li>인식된 모든 시트명과 6·7월 FL 건수를 원본과 대조합니다.</li>
+      <li>HOME RDDA 그래프의 월별 TOTAL 및 생산처별 합계를 확인합니다.</li>
+      <li>이상이 있으면 형식 불일치 FL 목록을 기준으로 예외 규칙을 추가합니다.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>검증 상태</h2>
+    <p>TypeScript 검사와 프로덕션 빌드는 정상 통과했습니다. 기능 검증은 실제 샘플관리대장 재업로드 후 최종 수치 대조가 남아 있습니다.</p>
+  </section>
+  <footer>Fabric R&amp;D · 통합원단부 3팀 · 작업 기준일 2026-08-07</footer>
+</main>
+</body>
+</html>
