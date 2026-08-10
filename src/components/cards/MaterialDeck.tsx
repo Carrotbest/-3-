@@ -115,7 +115,13 @@ const deckPosition = (offset: number): string => {
 }
 
 function SourceBadge({ source }: { source: MaterialItem["source"] }) {
-  return <Badge variant="outline">{source === "excel" ? "엑셀" : "직접등록"}</Badge>
+  const labels: Record<MaterialItem["source"], string> = {
+    excel: "엑셀",
+    manual: "직접등록",
+    ts: "TS 엑셀",
+    study: "STUDY 엑셀",
+  }
+  return <Badge variant="outline">{labels[source]}</Badge>
 }
 
 function MaterialCardBody({ item }: { item: MaterialItem }) {
@@ -215,12 +221,23 @@ export function MaterialDetailSheet({ item, onOpenChange, onEdit, onDeleted }: {
               <SheetDescription>{item.date ? fmtDateFull(item.date) : "날짜 미등록"}{item.owner ? ` · ${item.owner}` : ""}</SheetDescription>
             </SheetHeader>
             <div className="space-y-5 p-6">
-              <div><p className="text-xs font-semibold text-[var(--muted-foreground)]">요약</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{item.summary || "요약이 등록되지 않았습니다."}</p></div>
+              {item.detail?.length ? (
+                <dl className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
+                  {item.detail.map((row) => (
+                    <div key={row.label} className="grid gap-1 border-b border-[var(--border)] p-4 last:border-b-0 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-4">
+                      <dt className="text-xs font-semibold text-[var(--muted-foreground)]">{row.label}</dt>
+                      <dd className="whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{row.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : (
+                <div><p className="text-xs font-semibold text-[var(--muted-foreground)]">요약</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{item.summary || "요약이 등록되지 않았습니다."}</p></div>
+              )}
               <div><p className="text-xs font-semibold text-[var(--muted-foreground)]">태그</p><div className="mt-2 flex flex-wrap gap-2">{item.tags.length ? item.tags.map((tag) => <Badge key={tag} variant="outline">{tag}</Badge>) : <span className="text-sm text-[var(--muted-foreground)]">태그 없음</span>}</div></div>
               <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4">
                 {link ? <Button asChild className="w-full"><a href={link} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : <><Button type="button" className="w-full" disabled><ExternalLink aria-hidden="true" />SharePoint에서 열기</Button><p className="mt-2 text-center text-xs text-[var(--muted-foreground)]">링크 미등록</p></>}
               </div>
-              {item.source === "manual" ? <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="outline" onClick={() => onEdit?.(item)}><Pencil aria-hidden="true" />수정</Button><Button type="button" variant="destructive" onClick={() => { void remove() }}><Trash2 aria-hidden="true" />삭제</Button></div> : null}
+              {!item.readOnly && item.source === "manual" ? <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="outline" onClick={() => onEdit?.(item)}><Pencil aria-hidden="true" />수정</Button><Button type="button" variant="destructive" onClick={() => { void remove() }}><Trash2 aria-hidden="true" />삭제</Button></div> : null}
             </div>
           </>
         ) : null}
@@ -312,7 +329,7 @@ export function MaterialSearchList({ items, emptyMessage, onOpen, onAdd }: {
   items: MaterialItem[]
   emptyMessage: string
   onOpen: (item: MaterialItem) => void
-  onAdd: () => void
+  onAdd?: () => void
 }) {
   const [query, setQuery] = useState("")
   const [tag, setTag] = useState("__all__")
@@ -333,7 +350,7 @@ export function MaterialSearchList({ items, emptyMessage, onOpen, onAdd }: {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-semibold text-[var(--foreground)]">자료 검색 목록</h3><p className="mt-1 text-sm text-[var(--muted-foreground)]">총 {items.length.toLocaleString("ko-KR")}건</p></div><Button type="button" onClick={onAdd}><Plus aria-hidden="true" />자료 추가</Button></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-semibold text-[var(--foreground)]">자료 검색 목록</h3><p className="mt-1 text-sm text-[var(--muted-foreground)]">총 {items.length.toLocaleString("ko-KR")}건</p></div>{onAdd ? <Button type="button" onClick={onAdd}><Plus aria-hidden="true" />자료 추가</Button> : null}</div>
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_12rem]">
         <label className="relative block"><span className="sr-only">자료 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" aria-hidden="true" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="제목·태그·요약 검색" className="pl-9" /></label>
         <Select value={sort} onValueChange={setSort}><SelectTrigger aria-label="자료 정렬"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="latest">최신순</SelectItem><SelectItem value="title">제목순</SelectItem></SelectContent></Select>
@@ -354,20 +371,22 @@ function useMaterialSection(kind: MaterialKind) {
   return useMemo(() => materialsOf(kind, excel, manual), [excel, kind, manual])
 }
 
-export function MaterialDeckSection({ kind, title, description, emptyMessage }: { kind: MaterialKind; title: string; description: string; emptyMessage: string }) {
-  const items = useMaterialSection(kind)
+export function MaterialDeckSection({ kind, title, description, emptyMessage, items: providedItems, allowAdd = true }: { kind: MaterialKind; title: string; description: string; emptyMessage: string; items?: MaterialItem[]; allowAdd?: boolean }) {
+  const storedItems = useMaterialSection(kind)
+  const items = providedItems ?? storedItems
   const [selected, setSelected] = useState<MaterialItem | null>(null)
   const [editing, setEditing] = useState<MaterialItem | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const openForm = (item?: MaterialItem) => { setSelected(null); setEditing(item ?? null); setFormOpen(true) }
-  return <Card><CardHeader className="flex-row items-start justify-between gap-3 space-y-0"><div><CardTitle>{title}</CardTitle><p className="mt-1 text-sm text-[var(--muted-foreground)]">{description}</p></div><Button type="button" variant="outline" size="sm" onClick={() => openForm()}><Plus aria-hidden="true" />자료 추가</Button></CardHeader><CardContent><MaterialDeck items={items} emptyMessage={emptyMessage} onOpen={setSelected} onAdd={() => openForm()} /></CardContent><MaterialDetailSheet item={selected} onOpenChange={(open) => { if (!open) setSelected(null) }} onEdit={openForm} /><MaterialFormSheet open={formOpen} defaultKind={kind} item={editing} onOpenChange={setFormOpen} /></Card>
+  return <Card><CardHeader className="flex-row items-start justify-between gap-3 space-y-0"><div><CardTitle>{title}</CardTitle><p className="mt-1 text-sm text-[var(--muted-foreground)]">{description}</p></div>{allowAdd ? <Button type="button" variant="outline" size="sm" onClick={() => openForm()}><Plus aria-hidden="true" />자료 추가</Button> : null}</CardHeader><CardContent><MaterialDeck items={items} emptyMessage={emptyMessage} onOpen={setSelected} onAdd={allowAdd ? () => openForm() : undefined} /></CardContent><MaterialDetailSheet item={selected} onOpenChange={(open) => { if (!open) setSelected(null) }} onEdit={openForm} /><MaterialFormSheet open={formOpen} defaultKind={kind} item={editing} onOpenChange={setFormOpen} /></Card>
 }
 
-export function MaterialSearchSection({ kind, emptyMessage }: { kind: MaterialKind; emptyMessage: string }) {
-  const items = useMaterialSection(kind)
+export function MaterialSearchSection({ kind, emptyMessage, items: providedItems, allowAdd = true }: { kind: MaterialKind; emptyMessage: string; items?: MaterialItem[]; allowAdd?: boolean }) {
+  const storedItems = useMaterialSection(kind)
+  const items = providedItems ?? storedItems
   const [selected, setSelected] = useState<MaterialItem | null>(null)
   const [editing, setEditing] = useState<MaterialItem | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const openForm = (item?: MaterialItem) => { setSelected(null); setEditing(item ?? null); setFormOpen(true) }
-  return <Card><CardContent className="p-6"><MaterialSearchList items={items} emptyMessage={emptyMessage} onOpen={setSelected} onAdd={() => openForm()} /></CardContent><MaterialDetailSheet item={selected} onOpenChange={(open) => { if (!open) setSelected(null) }} onEdit={openForm} /><MaterialFormSheet open={formOpen} defaultKind={kind} item={editing} onOpenChange={setFormOpen} /></Card>
+  return <Card><CardContent className="p-6"><MaterialSearchList items={items} emptyMessage={emptyMessage} onOpen={setSelected} onAdd={allowAdd ? () => openForm() : undefined} /></CardContent><MaterialDetailSheet item={selected} onOpenChange={(open) => { if (!open) setSelected(null) }} onEdit={openForm} /><MaterialFormSheet open={formOpen} defaultKind={kind} item={editing} onOpenChange={setFormOpen} /></Card>
 }

@@ -88,6 +88,11 @@ export interface FabricAnalysisRow {
 
 export type MaterialKind = "TS" | "STUDY" | "MACRO" | "FABRIC" | "PORTFOLIO"
 
+export interface MaterialDetailRow {
+  label: string
+  value: string
+}
+
 export interface MaterialItem {
   id: string
   kind: MaterialKind
@@ -97,7 +102,9 @@ export interface MaterialItem {
   tags: string[]
   link?: string
   owner?: string
-  source: "excel" | "manual"
+  source: "excel" | "manual" | "ts" | "study"
+  detail?: MaterialDetailRow[]
+  readOnly?: boolean
 }
 
 export interface MaterialDiagnostics {

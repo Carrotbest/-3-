@@ -13,6 +13,7 @@ import { Reveal } from "@/components/motion/Reveal"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { materialsOf, studyMaterials } from "@/data/derive"
 import { fmtDate, fmtDateFull } from "@/data/format"
 import { type StudyRecord } from "@/data/schema"
 import { useAppStore } from "@/store/useAppStore"
@@ -25,6 +26,8 @@ const studyRowId = (row: StudyRecord) => `${row.owner}-${row.week}-${row.topic}`
 
 export function Study() {
   const study = useAppStore((state) => state.study)
+  const materialsManual = useAppStore((state) => state.materialsManual)
+  const materialItems = useMemo(() => materialsOf("STUDY", studyMaterials(study), materialsManual), [materialsManual, study])
   const [selectedOwner, setSelectedOwner] = useState<string | null>(null)
 
   const weeks = useMemo(
@@ -52,7 +55,7 @@ export function Study() {
     <section className="min-w-0 space-y-6">
       <PageHeader title="STUDY 과제" subtitle="주차별 학습 과제와 팀원별 진행 상황을 확인합니다." actions={<DataUpload kind="study-workbook" label="현황 파일 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestStudyWorkbook(files[0]) }} />} />
 
-      <MaterialDeckSection kind="STUDY" title="STUDY 자료 덱" description="섬유 교육자료 중 최신 6건입니다." emptyMessage="등록된 STUDY 자료가 없습니다." />
+      <MaterialDeckSection kind="STUDY" title="STUDY 자료 덱" description="섬유 교육자료 중 최신 6건입니다." emptyMessage="SETTING에서 STUDY 엑셀을 업로드하면 교육 과제가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
 
       <Tabs defaultValue="progress" className="min-w-0">
         <TabsList aria-label="STUDY 보기">
@@ -154,7 +157,7 @@ export function Study() {
         </TabsContent>
 
         <TabsContent value="library" className="mt-6">
-          <MaterialSearchSection kind="STUDY" emptyMessage="등록된 STUDY 자료가 없습니다. 자료목록 엑셀을 올리거나 직접 추가하세요." />
+          <MaterialSearchSection kind="STUDY" emptyMessage="SETTING에서 STUDY 엑셀을 업로드하면 교육 과제가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
         </TabsContent>
       </Tabs>
 

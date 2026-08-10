@@ -4,6 +4,7 @@
 import { daysLeft, normalizeSeason, toDate } from "./format"
 import {
   CATEGORIES,
+  httpsMaterialLink,
   MEMBERS,
   type DevRecord,
   type CompletedSample,
@@ -11,6 +12,7 @@ import {
   type FabricAnalysisRow,
   type MaterialItem,
   type MaterialKind,
+  type StudyRecord,
   type StatusKey,
 } from "./schema"
 
@@ -1049,6 +1051,104 @@ export function materialsOf(
   return [...merged.values()]
     .filter((item) => item.kind === kind)
     .sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.title.localeCompare(b.title, "ko-KR"))
+}
+
+type TsMaterialSource = {
+  id: string
+  receivedAt: string
+  subject: string
+  from?: string
+  owner?: string
+  inquiry?: string
+  causes?: string
+  analysis?: string
+  action?: string
+  result?: string
+  productionSite?: string
+  relatedDepartment?: string
+  attn?: string
+}
+
+const cleanMaterialText = (value: string | undefined): string => value?.trim() ?? ""
+
+const materialSummary = (value: string | undefined): string | undefined => {
+  const normalized = cleanMaterialText(value).replace(/\s+/g, " ")
+  if (!normalized) return undefined
+  return normalized.length > 120 ? `${normalized.slice(0, 120).trimEnd()}…` : normalized
+}
+
+const materialDetails = (
+  rows: ReadonlyArray<readonly [label: string, value: string | undefined]>,
+): NonNullable<MaterialItem["detail"]> | undefined => {
+  const detail = rows
+    .map(([label, value]) => ({ label, value: cleanMaterialText(value) }))
+    .filter((row) => Boolean(row.value))
+  return detail.length ? detail : undefined
+}
+
+/** 기존 TS 사고사례 레코드를 읽기 전용 자료 카드로 변환한다. */
+export function tsMaterials(ts: readonly TsMaterialSource[]): MaterialItem[] {
+  return ts.map<MaterialItem>((record) => {
+    const productionSite = cleanMaterialText(record.productionSite)
+    const relatedDepartments = cleanMaterialText(record.relatedDepartment)
+      .split("/")
+      .map((value) => value.trim())
+      .filter(Boolean)
+    const tags = [...new Set([productionSite, ...relatedDepartments].filter(Boolean))]
+
+    return {
+      id: `ts-${record.id}`,
+      kind: "TS",
+      title: record.subject,
+      summary: materialSummary(record.inquiry || record.causes),
+      date: record.receivedAt,
+      tags,
+      owner: cleanMaterialText(record.owner) || cleanMaterialText(record.from) || undefined,
+      source: "ts",
+      detail: materialDetails([
+        ["문의", record.inquiry],
+        ["원인", record.causes],
+        ["분석", record.analysis],
+        ["조치", record.action],
+        ["결과", record.result],
+        ["유관부서", record.relatedDepartment],
+        ["생산처", record.productionSite],
+      ]),
+      readOnly: true,
+    }
+  }).sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.title.localeCompare(b.title, "ko-KR"))
+}
+
+const studyMaterialKey = (record: StudyRecord): string =>
+  [record.owner, record.week, record.topic]
+    .map((value) => String(value).normalize("NFKC").trim().toLocaleLowerCase("ko-KR").replace(/\s+/g, "-"))
+    .filter(Boolean)
+    .join("-")
+
+/** 기존 STUDY 과제를 읽기 전용 자료 카드로 변환한다. */
+export function studyMaterials(study: readonly StudyRecord[]): MaterialItem[] {
+  return study.map<MaterialItem>((record) => {
+    const category = cleanMaterialText(record.category)
+    return {
+      id: `study-${studyMaterialKey(record)}`,
+      kind: "STUDY",
+      title: record.topic,
+      summary: materialSummary(record.selectionReason || record.category),
+      date: record.completedDate || record.confirmedDate || record.dueDate,
+      tags: category ? [category] : [],
+      link: httpsMaterialLink(record.materialFile),
+      owner: cleanMaterialText(record.owner) || undefined,
+      source: "study",
+      detail: materialDetails([
+        ["주차", record.weekLabel || (record.week ? `${record.week}주차` : "")],
+        ["카테고리", record.category],
+        ["상태", record.state],
+        ["선정 사유", record.selectionReason],
+        ["비고", record.reason],
+      ]),
+      readOnly: true,
+    }
+  }).sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.title.localeCompare(b.title, "ko-KR"))
 }
 
 export function countBy(

@@ -209,7 +209,7 @@ export function Setting() {
             { key: "ts", title: "TS 관리", file: "Technical survices {연도}.xlsx", targets: "TS 접수·처리 목록 / HOME 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("ts", files, ingestTs) },
             { key: "rdda", title: "RDDA 리포트", file: "26년 N월 RDDA.xlsx", targets: "RDDA REPORT Meeting·Pickup·월별 스냅샷", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("rdda", files, async (file) => ingestRdda([file])) },
             { key: "fabric", title: "원단분석", file: "원단분석 export 파일", targets: "FABRIC ANALYSIS / HOME 원단분석 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("fabric", files, ingestFabric) },
-            { key: "materials", title: "자료목록", file: "자료목록.xlsx", targets: "TS·STUDY·트렌드 자료 목록 엑셀", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("materials", files, ingestMaterials) },
+            { key: "materials", title: "자료목록", file: "자료목록.xlsx", targets: "트렌드 자료 목록 엑셀 (MACRO·FABRIC·PORTFOLIO). TS·STUDY는 각 화면 엑셀에서 자동 반영됩니다.", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("materials", files, ingestMaterials) },
           ].map((item) => (
             <article key={item.key} className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]">
               <div className="flex items-start gap-3 border-b border-[var(--border)] p-4">

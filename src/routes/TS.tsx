@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { materialsOf, tsMaterials } from "@/data/derive"
 import { fmtDate, fmtNum } from "@/data/format"
 import { ingestTs } from "@/data/upload"
 import { MEMBERS } from "@/data/schema"
@@ -119,6 +120,8 @@ function exportTechnicalServices(rows: readonly TsRecord[]): string {
 
 export function TS() {
   const rows = useAppStore((state) => state.ts)
+  const materialsManual = useAppStore((state) => state.materialsManual)
+  const materialItems = useMemo(() => materialsOf("TS", tsMaterials(rows), materialsManual), [materialsManual, rows])
   const [activeState, setActiveState] = useState("접수")
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState<FormValues>(initialForm)
@@ -235,8 +238,8 @@ export function TS() {
         )}
       />
 
-      <MaterialDeckSection kind="TS" title="TS 자료 덱" description="사고사례와 불량 trouble shoot 자료 중 최신 6건입니다." emptyMessage="등록된 TS 자료가 없습니다." />
-      <MaterialSearchSection kind="TS" emptyMessage="등록된 TS 자료가 없습니다. 자료목록 엑셀을 올리거나 직접 추가하세요." />
+      <MaterialDeckSection kind="TS" title="TS 자료 덱" description="사고사례와 불량 trouble shoot 자료 중 최신 6건입니다." emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
+      <MaterialSearchSection kind="TS" emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
 
       {actionNotice ? (
         <p

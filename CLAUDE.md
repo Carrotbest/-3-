@@ -48,6 +48,15 @@
 - Work report = TS 덱 + STUDY 덱 + FABRIC ANALYSIS 의뢰 보드(3단계) + CALENDAR.
 - Trend issue = 탭 3개(MACRO/FABRIC/PORTFOLIO) + coverflow. 3건 미만이면 그리드 폴백, 0건이면 데모 카드.
 - Quick access = 핀보드. 회전각은 `ROTATION_CLASSES` 인덱스 기반 고정값(`Math.random()` 금지 — 리렌더마다 흔들린다).
+
+### R25 — TS·STUDY 덱을 네이티브 소스로 (R24 이중관리 수정)
+- R24에서 TS·STUDY 덱을 별도 `자료목록.xlsx`(parseMaterials)에서 가져오게 한 것은 이중 관리라 잘못이었다. 수정함.
+- **TS 덱 = `tsMaterials(ts)`** (derive.ts): 기존 TS 엑셀 사고사례에서 카드 생성. 상세=문의/원인/분석/조치/결과. `source:"ts"`, `readOnly:true`, 링크 없음.
+- **STUDY 덱 = `studyMaterials(study)`**: 기존 STUDY 엑셀에서. `materialFile`이 https면 "SharePoint에서 열기" 활성. 상세=주차/카테고리/상태/선정사유.
+- `MaterialItem`에 `detail?: MaterialDetailRow[]`, `readOnly?`, `source:"ts"|"study"` 추가. 상세 시트가 detail을 dl 그리드로 렌더, readOnly면 편집 버튼 숨김.
+- **TS·STUDY 덱의 `자료 추가` 버튼 제거**(원본이 엑셀). Trend issue(MACRO/FABRIC/PORTFOLIO)의 `자료 추가`는 유지.
+- `자료목록.xlsx`(parseMaterials)는 **트렌드 3종 전용**으로 축소. TS/STUDY 행은 불필요.
+- STUDY 파서가 `materialFile`을 고정 컬럼(row[9])에서 읽는 것은 그대로. 그 열에 SharePoint 링크를 넣으면 열기 버튼이 켜진다(코드 변경 아님).
 - **휠 가로채기 규칙**: 덱에 포인터가 있을 때만 가로채고, 첫 장/마지막 장에서는 `preventDefault`를 걸지 않고 return 해 페이지가 정상 스크롤되게 한다(`MaterialDeck.tsx:62-64`). 이걸 없애면 사용자가 덱에 갇힌다.
 - 버튼 라벨은 `SharePoint에서 열기`. 앱이 파일을 직접 내려주지 않으므로 "다운로드"라고 쓰지 않는다. 링크 없으면 비활성.
 

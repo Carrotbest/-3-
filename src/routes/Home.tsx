@@ -30,6 +30,8 @@ import {
   materialsOf,
   monthlyDevelopmentTrend,
   RDDA_ARCHIVE_CUTOFF_MONTH,
+  studyMaterials as deriveStudyMaterials,
+  tsMaterials as deriveTsMaterials,
   type HomeKpiDetailGroups,
   type HomeKpiDetailKind,
   type HomeKpiRanges,
@@ -421,6 +423,7 @@ export function Home() {
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialItem | null>(null)
   const [materialFormKind, setMaterialFormKind] = useState<MaterialKind | null>(null)
   const [editingMaterial, setEditingMaterial] = useState<MaterialItem | null>(null)
+  const [trendKind, setTrendKind] = useState<MaterialKind>("MACRO")
   const sections = useMemo(() => homeSectionCards(records, today, kpiRanges), [records, today, kpiRanges])
   const kpiDetails = useMemo(() => homeKpiRecordDetails(records, today, kpiRanges), [records, today, kpiRanges])
   const monthly = useMemo(() => monthlyDevelopmentTrend(records, completed, today, rddaMonths), [records, completed, today, rddaMonths])
@@ -433,8 +436,8 @@ export function Home() {
   }), { total: 0, gd: 0, domestic: 0, production: 0, purchase: 0 }), [monthly])
   const work = useMemo(() => homeWorkSummary(records, ts, study, fabricAnalysis, events), [records, ts, study, fabricAnalysis, events])
   const news = useMemo(() => homeTrendCards(ts, studyFiles, trends), [ts, studyFiles, trends])
-  const tsMaterials = useMemo(() => materialsOf("TS", materials, materialsManual), [materials, materialsManual])
-  const studyMaterials = useMemo(() => materialsOf("STUDY", materials, materialsManual), [materials, materialsManual])
+  const tsDeckMaterials = useMemo(() => materialsOf("TS", deriveTsMaterials(ts), materialsManual), [materialsManual, ts])
+  const studyDeckMaterials = useMemo(() => materialsOf("STUDY", deriveStudyMaterials(study), materialsManual), [materialsManual, study])
   const trendMaterials = useMemo(() => ({
     MACRO: materialsOf("MACRO", materials, materialsManual),
     FABRIC: materialsOf("FABRIC", materials, materialsManual),
@@ -580,8 +583,8 @@ export function Home() {
         <div className="mb-4"><h2 id="work-report-title" className="text-base font-semibold text-[var(--foreground)]">Work report</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">연결된 업무 화면의 핵심 현황입니다.</p></div>
         <div className="grid gap-4 lg:grid-cols-2">
           {[
-            { kind: "TS" as const, title: "TS 관리", description: "사고사례·불량 trouble shoot", path: "/ts", icon: Wrench, items: tsMaterials, empty: "등록된 TS 자료가 없습니다." },
-            { kind: "STUDY" as const, title: "STUDY 과제", description: "섬유 교육자료", path: "/study", icon: BookOpenCheck, items: studyMaterials, empty: "등록된 STUDY 자료가 없습니다." },
+            { kind: "TS" as const, title: "TS 관리", description: "사고사례·불량 trouble shoot", path: "/ts", icon: Wrench, items: tsDeckMaterials, empty: "SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." },
+            { kind: "STUDY" as const, title: "STUDY 과제", description: "섬유 교육자료", path: "/study", icon: BookOpenCheck, items: studyDeckMaterials, empty: "SETTING에서 STUDY 엑셀을 업로드하면 교육 과제가 카드로 표시됩니다." },
           ].map((deck, index) => {
             const Icon = deck.icon
             return (
@@ -593,7 +596,6 @@ export function Home() {
                         <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><Icon className="size-5" aria-hidden="true" /></span>
                         <div><h3 className="text-sm font-semibold text-[var(--foreground)]">{deck.title}</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">{deck.description}</p></div>
                       </div>
-                      <Button type="button" variant="outline" size="sm" onClick={() => openMaterialForm(deck.kind)}><Plus aria-hidden="true" />자료 추가</Button>
                     </div>
                     <div className="mt-4"><MaterialDeck items={deck.items} emptyMessage={deck.empty} onOpen={setSelectedMaterial} /></div>
                     <div className="mt-4 flex justify-end"><Button type="button" variant="ghost" size="sm" onClick={() => navigate(deck.path)}>전체 보기<ArrowUpRight aria-hidden="true" /></Button></div>
@@ -636,8 +638,8 @@ export function Home() {
       </section>
 
       <section aria-labelledby="trend-issue-title">
-        <div className="mb-4"><h2 id="trend-issue-title" className="text-base font-semibold text-[var(--foreground)]">Trend issue</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">최신 소재·기술·이슈</p></div>
-        <Tabs defaultValue="MACRO" className="min-w-0">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3"><div><h2 id="trend-issue-title" className="text-base font-semibold text-[var(--foreground)]">Trend issue</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">최신 소재·기술·이슈</p></div><Button type="button" variant="outline" size="sm" onClick={() => openMaterialForm(trendKind)}><Plus aria-hidden="true" />자료 추가</Button></div>
+        <Tabs value={trendKind} onValueChange={(value) => setTrendKind(value as MaterialKind)} className="min-w-0">
           <TabsList className="h-auto flex-wrap" aria-label="트렌드 자료 구분">{TREND_TABS.map((tab) => <TabsTrigger key={tab.kind} value={tab.kind}>{tab.label}</TabsTrigger>)}</TabsList>
           {TREND_TABS.map((tab) => {
             const items = trendMaterials[tab.kind]
@@ -655,7 +657,7 @@ export function Home() {
       </section>
 
       <MaterialDetailSheet item={selectedMaterial} onOpenChange={(open) => { if (!open) setSelectedMaterial(null) }} onEdit={(item) => openMaterialForm(item.kind, item)} />
-      <MaterialFormSheet open={materialFormKind !== null} defaultKind={materialFormKind ?? "TS"} item={editingMaterial} onOpenChange={(open) => { if (!open) { setMaterialFormKind(null); setEditingMaterial(null) } }} />
+      <MaterialFormSheet open={materialFormKind !== null} defaultKind={materialFormKind ?? "MACRO"} item={editingMaterial} onOpenChange={(open) => { if (!open) { setMaterialFormKind(null); setEditingMaterial(null) } }} />
     </section>
   )
 }
