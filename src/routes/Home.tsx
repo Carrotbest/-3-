@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom"
 import {
   ArrowUpRight, BookOpenCheck, CalendarDays, CheckCircle2, ClipboardList,
   FlaskConical, Layers3, LoaderCircle, Microscope, RefreshCw, Ruler,
-  Sparkles, TimerReset, TrendingUp, Waves, Wrench,
+  Plus, Sparkles, TimerReset, TrendingUp, Waves, Wrench,
 } from "lucide-react"
 import { Bar, CartesianGrid, ComposedChart, LabelList, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
+import { CoverflowGallery } from "@/components/cards/CoverflowGallery"
+import { MaterialDeck, MaterialDetailSheet, MaterialFormSheet } from "@/components/cards/MaterialDeck"
+import { PinBoard } from "@/components/cards/PinBoard"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { DataUpload } from "@/components/upload/DataUpload"
 import { NumberTicker } from "@/components/motion/NumberTicker"
@@ -17,20 +20,24 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   homeKpiRecordDetails,
   homeSectionCards,
   defaultHomeDateRanges,
   homeTrendCards,
   homeWorkSummary,
+  materialsOf,
   monthlyDevelopmentTrend,
   RDDA_ARCHIVE_CUTOFF_MONTH,
   type HomeKpiDetailGroups,
   type HomeKpiDetailKind,
   type HomeKpiRanges,
   type MonthlyDevelopmentDatum,
+  type TrendCard,
 } from "@/data/derive"
 import { fmtDate, fmtDateFull } from "@/data/format"
+import type { MaterialItem, MaterialKind } from "@/data/schema"
 import { ingestDevelopment, ingestSamples } from "@/data/upload"
 import { hoverLift } from "@/lib/motion"
 import { useAppStore } from "@/store/useAppStore"
@@ -225,15 +232,7 @@ const PROCESS_GAUGE: Record<string, string> = {
   finishing: "bg-[var(--chart-4)]",
 }
 
-const WORK_CARDS = [
-  { key: "ts", title: "TS 관리", path: "/ts", icon: Wrench },
-  { key: "study", title: "STUDY 과제", path: "/study", icon: BookOpenCheck },
-  { key: "fabric", title: "FABRIC ANALYSIS", path: "/fabric-analysis", icon: Microscope },
-  { key: "calendar", title: "CALENDAR", path: "/calendar", icon: CalendarDays },
-] as const
-
-/** Work report · Quick access 카드의 3D 액센트 색상. */
-const WORK_ACCENT = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"] as const
+const CALENDAR_ACCENT = "var(--chart-4)"
 
 const QUICK_ACCESS = [
   { title: "Overview", description: "개발 전체 현황", path: "/development", icon: FlaskConical },
@@ -246,6 +245,43 @@ const QUICK_ACCESS = [
   { title: "FABRIC TREND", description: "소재 기술 동향", path: "/trend/fabric", icon: Waves },
   { title: "PORTFOLIO", description: "개발 포트폴리오", path: "/trend/portfolio", icon: Layers3 },
 ] as const
+
+const TREND_TABS = [
+  { kind: "MACRO", label: "MACRO TREND" },
+  { kind: "FABRIC", label: "FABRIC TREND" },
+  { kind: "PORTFOLIO", label: "PORTFOLIO" },
+] as const satisfies ReadonlyArray<{ kind: MaterialKind; label: string }>
+
+function DemoTrendGrid({ items, onNavigate }: { items: TrendCard[]; onNavigate: (path: string) => void }) {
+  return (
+    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      {items.map((item, index) => (
+        <Reveal key={`${item.href}-${item.title}`} delay={index * 75}>
+          <Tilt3D max={10} lift={12}>
+            <button
+              type="button"
+              onClick={() => onNavigate(item.href.replace(/^#/, ""))}
+              className="group relative h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+            >
+              <span aria-hidden="true" className="pointer-events-none absolute inset-x-3 -top-1 h-2 rounded-b-[var(--radius)] border-x border-b border-[var(--border)] bg-[var(--muted)] opacity-70 [transform:translateZ(-18px)]" />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-x-1.5 -top-0.5 h-2 rounded-b-[var(--radius)] border-x border-b border-[var(--border)] bg-[var(--card)] [transform:translateZ(-8px)]" />
+              <span className="relative flex aspect-[16/9] items-center justify-center overflow-hidden bg-gradient-to-br from-[var(--chart-3)] via-[var(--chart-2)] to-[var(--chart-1)]">
+                {item.image
+                  ? <img src={item.image} alt="" className="size-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none" />
+                  : <Sparkles className="size-8 text-[var(--primary-foreground)] opacity-80 transition-transform duration-500 group-hover:scale-125 group-hover:rotate-12 motion-reduce:transition-none" />}
+                <Badge className="absolute left-3 top-3 [transform:translateZ(45px)]" variant="secondary">{item.tag}</Badge>
+              </span>
+              <span className="block p-4 [transform:translateZ(26px)]">
+                <strong className="line-clamp-2 block text-sm leading-6 text-[var(--foreground)]">{item.title}</strong>
+                <span className="mt-3 block text-xs text-[var(--muted-foreground)]">{item.date ? `${fmtDate(item.date)} · ` : ""}{item.source}</span>
+              </span>
+            </button>
+          </Tilt3D>
+        </Reveal>
+      ))}
+    </div>
+  )
+}
 
 const HOME_KPI_RANGE_STORAGE_KEY = "fabric-rnd-home-kpi-ranges-v1"
 const ISO_DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
@@ -380,6 +416,11 @@ export function Home() {
   const studyFiles = useAppStore((state) => state.studyFiles)
   const events = useAppStore((state) => state.events)
   const trends = useAppStore((state) => state.trends)
+  const materials = useAppStore((state) => state.materials)
+  const materialsManual = useAppStore((state) => state.materialsManual)
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialItem | null>(null)
+  const [materialFormKind, setMaterialFormKind] = useState<MaterialKind | null>(null)
+  const [editingMaterial, setEditingMaterial] = useState<MaterialItem | null>(null)
   const sections = useMemo(() => homeSectionCards(records, today, kpiRanges), [records, today, kpiRanges])
   const kpiDetails = useMemo(() => homeKpiRecordDetails(records, today, kpiRanges), [records, today, kpiRanges])
   const monthly = useMemo(() => monthlyDevelopmentTrend(records, completed, today, rddaMonths), [records, completed, today, rddaMonths])
@@ -392,6 +433,24 @@ export function Home() {
   }), { total: 0, gd: 0, domestic: 0, production: 0, purchase: 0 }), [monthly])
   const work = useMemo(() => homeWorkSummary(records, ts, study, fabricAnalysis, events), [records, ts, study, fabricAnalysis, events])
   const news = useMemo(() => homeTrendCards(ts, studyFiles, trends), [ts, studyFiles, trends])
+  const tsMaterials = useMemo(() => materialsOf("TS", materials, materialsManual), [materials, materialsManual])
+  const studyMaterials = useMemo(() => materialsOf("STUDY", materials, materialsManual), [materials, materialsManual])
+  const trendMaterials = useMemo(() => ({
+    MACRO: materialsOf("MACRO", materials, materialsManual),
+    FABRIC: materialsOf("FABRIC", materials, materialsManual),
+    PORTFOLIO: materialsOf("PORTFOLIO", materials, materialsManual),
+  }), [materials, materialsManual])
+  const fabricStages = useMemo(() => ([
+    { key: "request", label: "의뢰 접수", rows: fabricAnalysis.filter((item) => !item.completeDate && !item.requestDate) },
+    { key: "analysis", label: "분석 중", rows: fabricAnalysis.filter((item) => !item.completeDate && Boolean(item.requestDate)) },
+    { key: "complete", label: "완료", rows: fabricAnalysis.filter((item) => Boolean(item.completeDate)) },
+  ].map((stage) => ({
+    ...stage,
+    rows: [...stage.rows].sort((a, b) =>
+      (b.completeDate || b.requestDate).localeCompare(a.completeDate || a.requestDate)
+      || b.anNo.localeCompare(a.anNo, "ko-KR", { numeric: true }),
+    ),
+  }))), [fabricAnalysis])
   const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
   useEffect(() => {
@@ -415,13 +474,16 @@ export function Home() {
   const rangeLabel = (kind: "completed" | "new") =>
     `${fmtDateFull(kpiRanges[kind].from)} ~ ${fmtDateFull(kpiRanges[kind].to)}`
 
-  const workCopy = {
-    ts: { headline: `접수 ${work.ts.received} / 완료 ${work.ts.done}`, summary: "이번달 기준" },
-    study: { headline: `${work.study.completionRate}%`, summary: "주간 제출 완료율" },
-    fabric: work.fabric.connected
-      ? { headline: `의뢰 ${work.fabric.request} / 완료 ${work.fabric.complete}`, summary: "직전 7일" }
-      : { headline: "연동 예정", summary: "파일 없음" },
-    calendar: { headline: `오늘 ${work.calendar.today} / 이번주 ${work.calendar.week}`, summary: "예정된 일정" },
+  const demoTrendCards = (kind: MaterialKind) => {
+    const tag = kind === "MACRO" ? "MACRO" : kind === "FABRIC" ? "FABRIC" : "PORTFOLIO"
+    const matched = news.filter((item) => item.tag === tag)
+    return matched.length ? matched : news
+  }
+
+  const openMaterialForm = (kind: MaterialKind, item: MaterialItem | null = null) => {
+    setSelectedMaterial(null)
+    setEditingMaterial(item)
+    setMaterialFormKind(kind)
   }
 
   return (
@@ -516,94 +578,84 @@ export function Home() {
 
       <section aria-labelledby="work-report-title">
         <div className="mb-4"><h2 id="work-report-title" className="text-base font-semibold text-[var(--foreground)]">Work report</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">연결된 업무 화면의 핵심 현황입니다.</p></div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {WORK_CARDS.map((item, index) => {
-            const Icon = item.icon
-            const copy = workCopy[item.key]
-            const accent = WORK_ACCENT[index % WORK_ACCENT.length]
+        <div className="grid gap-4 lg:grid-cols-2">
+          {[
+            { kind: "TS" as const, title: "TS 관리", description: "사고사례·불량 trouble shoot", path: "/ts", icon: Wrench, items: tsMaterials, empty: "등록된 TS 자료가 없습니다." },
+            { kind: "STUDY" as const, title: "STUDY 과제", description: "섬유 교육자료", path: "/study", icon: BookOpenCheck, items: studyMaterials, empty: "등록된 STUDY 자료가 없습니다." },
+          ].map((deck, index) => {
+            const Icon = deck.icon
             return (
-              <Reveal key={item.key} delay={index * 75}>
-                <Tilt3D max={7} lift={8}>
-                  <button
-                    type="button"
-                    onClick={() => navigate(item.path)}
-                    className="group relative h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
-                  >
-                    <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 opacity-80" style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }} />
-                    <span aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-40 motion-reduce:transition-none" style={{ background: accent }} />
-                    <span className="relative flex items-start justify-between [transform:translateZ(30px)]">
-                      <span className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)]" style={{ color: accent }}><Icon className="size-5" /></span>
-                      <ArrowUpRight className="size-4 text-[var(--muted-foreground)] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none" />
-                    </span>
-                    <span className="relative mt-5 block text-sm font-semibold text-[var(--foreground)] [transform:translateZ(22px)]">{item.title}</span>
-                    <span className="relative mt-2 block text-2xl font-semibold tracking-tight text-[var(--foreground)] [transform:translateZ(38px)]">{copy.headline}</span>
-                    <span className="relative mt-2 block text-xs text-[var(--muted-foreground)] [transform:translateZ(16px)]">{copy.summary}</span>
-                  </button>
-                </Tilt3D>
+              <Reveal key={deck.kind} delay={index * 75}>
+                <Card className="h-full overflow-hidden">
+                  <CardContent className="flex h-full flex-col p-5 sm:p-6">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><Icon className="size-5" aria-hidden="true" /></span>
+                        <div><h3 className="text-sm font-semibold text-[var(--foreground)]">{deck.title}</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">{deck.description}</p></div>
+                      </div>
+                      <Button type="button" variant="outline" size="sm" onClick={() => openMaterialForm(deck.kind)}><Plus aria-hidden="true" />자료 추가</Button>
+                    </div>
+                    <div className="mt-4"><MaterialDeck items={deck.items} emptyMessage={deck.empty} onOpen={setSelectedMaterial} /></div>
+                    <div className="mt-4 flex justify-end"><Button type="button" variant="ghost" size="sm" onClick={() => navigate(deck.path)}>전체 보기<ArrowUpRight aria-hidden="true" /></Button></div>
+                  </CardContent>
+                </Card>
               </Reveal>
             )
           })}
+          <Reveal delay={150} className="lg:col-span-2">
+            <Card className="overflow-hidden">
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-start gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><Microscope className="size-5" aria-hidden="true" /></span><div><h3 className="text-sm font-semibold text-[var(--foreground)]">FABRIC ANALYSIS</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">분석 의뢰 보드</p></div></div>
+                  <Button type="button" onClick={() => navigate("/fabric-analysis")}><Plus aria-hidden="true" />분석 의뢰하기</Button>
+                </div>
+                <div className="mt-5 grid gap-3 md:grid-cols-3">
+                  {fabricStages.map((stage) => (
+                    <button key={stage.key} type="button" onClick={() => navigate("/fabric-analysis")} className="min-h-36 cursor-pointer rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+                      <span className="flex items-center justify-between gap-3"><strong className="text-sm text-[var(--foreground)]">{stage.label}</strong><Badge variant="secondary">{stage.rows.length.toLocaleString("ko-KR")}건</Badge></span>
+                      {stage.rows.length ? <span className="mt-4 grid gap-2">{stage.rows.slice(0, 3).map((item) => <span key={`${stage.key}-${item.anNo}`} className="block truncate text-xs text-[var(--muted-foreground)]">{[item.anNo, item.item, item.owner].filter(Boolean).join("-")}</span>)}</span> : <span className="mt-8 block text-center text-2xl font-semibold text-[var(--muted-foreground)] opacity-50">0</span>}
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </Reveal>
+          <Reveal delay={225} className="lg:col-span-2">
+            <Tilt3D max={7} lift={8}>
+              <button type="button" onClick={() => navigate("/calendar")} className="group relative h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+                <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 opacity-80" style={{ background: `linear-gradient(90deg, ${CALENDAR_ACCENT}, transparent)` }} />
+                <span aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-40 motion-reduce:transition-none" style={{ background: CALENDAR_ACCENT }} />
+                <span className="relative flex items-start justify-between [transform:translateZ(30px)]"><span className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)]" style={{ color: CALENDAR_ACCENT }}><CalendarDays className="size-5" aria-hidden="true" /></span><ArrowUpRight className="size-4 text-[var(--muted-foreground)] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none" /></span>
+                <span className="relative mt-5 block text-sm font-semibold text-[var(--foreground)] [transform:translateZ(22px)]">CALENDAR</span>
+                <span className="relative mt-2 block text-2xl font-semibold tracking-tight text-[var(--foreground)] [transform:translateZ(38px)]">오늘 {work.calendar.today} / 이번주 {work.calendar.week}</span>
+                <span className="relative mt-2 block text-xs text-[var(--muted-foreground)] [transform:translateZ(16px)]">예정된 일정</span>
+              </button>
+            </Tilt3D>
+          </Reveal>
         </div>
       </section>
 
       <section aria-labelledby="trend-issue-title">
         <div className="mb-4"><h2 id="trend-issue-title" className="text-base font-semibold text-[var(--foreground)]">Trend issue</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">최신 소재·기술·이슈</p></div>
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {news.map((item, index) => (
-            <Reveal key={`${item.href}-${item.title}`} delay={index * 75}>
-              <Tilt3D max={10} lift={12}>
-                <button
-                  type="button"
-                  onClick={() => navigate(item.href.replace(/^#/, ""))}
-                  className="group relative h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
-                >
-                  <span aria-hidden="true" className="pointer-events-none absolute inset-x-3 -top-1 h-2 rounded-b-[var(--radius)] border-x border-b border-[var(--border)] bg-[var(--muted)] opacity-70 [transform:translateZ(-18px)]" />
-                  <span aria-hidden="true" className="pointer-events-none absolute inset-x-1.5 -top-0.5 h-2 rounded-b-[var(--radius)] border-x border-b border-[var(--border)] bg-[var(--card)] [transform:translateZ(-8px)]" />
-                  <span className="relative flex aspect-[16/9] items-center justify-center overflow-hidden bg-gradient-to-br from-[var(--chart-3)] via-[var(--chart-2)] to-[var(--chart-1)]">
-                    {item.image
-                      ? <img src={item.image} alt="" className="size-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none" />
-                      : <Sparkles className="size-8 text-[var(--primary-foreground)] opacity-80 transition-transform duration-500 group-hover:scale-125 group-hover:rotate-12 motion-reduce:transition-none" />}
-                    <Badge className="absolute left-3 top-3 [transform:translateZ(45px)]" variant="secondary">{item.tag}</Badge>
-                  </span>
-                  <span className="block p-4 [transform:translateZ(26px)]">
-                    <strong className="line-clamp-2 block text-sm leading-6 text-[var(--foreground)]">{item.title}</strong>
-                    <span className="mt-3 block text-xs text-[var(--muted-foreground)]">{item.date ? `${fmtDate(item.date)} · ` : ""}{item.source}</span>
-                  </span>
-                </button>
-              </Tilt3D>
-            </Reveal>
-          ))}
-        </div>
+        <Tabs defaultValue="MACRO" className="min-w-0">
+          <TabsList className="h-auto flex-wrap" aria-label="트렌드 자료 구분">{TREND_TABS.map((tab) => <TabsTrigger key={tab.kind} value={tab.kind}>{tab.label}</TabsTrigger>)}</TabsList>
+          {TREND_TABS.map((tab) => {
+            const items = trendMaterials[tab.kind]
+            return <TabsContent key={tab.kind} value={tab.kind} className="mt-5">{items.length
+              ? <CoverflowGallery items={items} emptyMessage={`${tab.label} 자료가 없습니다.`} onOpen={setSelectedMaterial} />
+              : <div className="space-y-4"><p className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--muted)] p-4 text-sm text-[var(--muted-foreground)]">등록된 {tab.label} 자료가 없어 데모 카드를 표시합니다.</p><DemoTrendGrid items={demoTrendCards(tab.kind)} onNavigate={navigate} /></div>}
+            </TabsContent>
+          })}
+        </Tabs>
       </section>
 
       <section aria-labelledby="quick-access-title">
         <div className="mb-4"><h2 id="quick-access-title" className="text-base font-semibold text-[var(--foreground)]">Quick access</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">자주 사용하는 업무 화면으로 바로 이동합니다.</p></div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {QUICK_ACCESS.map((item, index) => {
-            const Icon = item.icon
-            const accent = WORK_ACCENT[index % WORK_ACCENT.length]
-            return (
-              <Reveal key={item.path} delay={(index % 4) * 75}>
-                <Tilt3D max={6} lift={6}>
-                  <button
-                    type="button"
-                    onClick={() => navigate(item.path)}
-                    className="group relative flex h-full w-full cursor-pointer items-center gap-4 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
-                  >
-                    <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none" style={{ background: accent }} />
-                    <span className="relative flex size-11 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none [transform:translateZ(34px)]" style={{ color: accent }}><Icon className="size-5" /></span>
-                    <span className="relative min-w-0 flex-1 [transform:translateZ(20px)]">
-                      <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{item.title}</span>
-                      <span className="mt-1 block truncate text-xs text-[var(--muted-foreground)]">{item.description}</span>
-                    </span>
-                    <ArrowUpRight className="relative size-4 shrink-0 text-[var(--muted-foreground)] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none [transform:translateZ(28px)]" />
-                  </button>
-                </Tilt3D>
-              </Reveal>
-            )
-          })}
-        </div>
+        <PinBoard items={QUICK_ACCESS} onNavigate={navigate} />
       </section>
+
+      <MaterialDetailSheet item={selectedMaterial} onOpenChange={(open) => { if (!open) setSelectedMaterial(null) }} onEdit={(item) => openMaterialForm(item.kind, item)} />
+      <MaterialFormSheet open={materialFormKind !== null} defaultKind={materialFormKind ?? "TS"} item={editingMaterial} onOpenChange={(open) => { if (!open) { setMaterialFormKind(null); setEditingMaterial(null) } }} />
     </section>
   )
 }

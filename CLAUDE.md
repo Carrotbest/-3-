@@ -30,6 +30,57 @@
 
 ### 참고
 - `attentionItems`는 `homeKpiDetails` 내부 전용으로만 남았고 Development에서는 제거했다.
+
+## 2026-08-10 추가 (R23·R24)
+
+### R23 — 공정 보드 재설계
+- 보드 탭의 5열 칸반을 **병목 히트맵 + 담당자 레인**으로 교체했다(`src/components/charts/OwnerLaneBoard.tsx`, `derive.ts`의 `ownerLaneBoard()`).
+- 카드별 5색 진행 인디케이터는 삭제. 열 위치가 이미 진행도라 중복이었다.
+- 같은 스타일의 여러 OPT는 칩 하나로 묶는다. 색은 긴급도(완료/정상/임박 D-7/오늘·지연)에만 쓴다.
+- 히트맵 셀 클릭 → 레인이 해당 담당자·공정으로 좁아진다.
+- 이 화면에는 `Tilt3D`를 쓰지 않는다. "한눈에 파악"이 목적이라 칩마다 틸트를 걸면 산만해진다.
+- 정합성 규칙: 히트맵 공정 합계 = 레인 합계 = `boardRows.length`. 검증 시 이것부터 본다.
+
+### R24 — HOME 하단 3개 섹션 + 자료(Material) 체계
+- **자료 저장소 결정**: 팀즈 폴더 = SharePoint(`hansoll365.sharepoint.com`)이며 이미 로컬 동기화 중. 브라우저는 로컬 경로를 못 읽으므로 **공유 링크**로 연결한다. 별도 서버 구매 불필요.
+- `MaterialItem`(schema) / `parseMaterials`(xlsx-parsers) / `materials`·`materialsManual`(store) 신설. 등록 경로는 **엑셀 목록 + 앱 직접 등록** 둘 다.
+- 신규 컴포넌트: `cards/MaterialDeck.tsx`(3D 덱), `cards/CoverflowGallery.tsx`, `cards/PinBoard.tsx`.
+- Work report = TS 덱 + STUDY 덱 + FABRIC ANALYSIS 의뢰 보드(3단계) + CALENDAR.
+- Trend issue = 탭 3개(MACRO/FABRIC/PORTFOLIO) + coverflow. 3건 미만이면 그리드 폴백, 0건이면 데모 카드.
+- Quick access = 핀보드. 회전각은 `ROTATION_CLASSES` 인덱스 기반 고정값(`Math.random()` 금지 — 리렌더마다 흔들린다).
+- **휠 가로채기 규칙**: 덱에 포인터가 있을 때만 가로채고, 첫 장/마지막 장에서는 `preventDefault`를 걸지 않고 return 해 페이지가 정상 스크롤되게 한다(`MaterialDeck.tsx:62-64`). 이걸 없애면 사용자가 덱에 갇힌다.
+- 버튼 라벨은 `SharePoint에서 열기`. 앱이 파일을 직접 내려주지 않으므로 "다운로드"라고 쓰지 않는다. 링크 없으면 비활성.
+
+## 알려진 데이터 이슈 (2026-08-10 실파일 조사)
+
+원본을 직접 열어 확인한 사실이다. 코드 버그가 아니라 **원본 데이터 기준 문제**이므로 화면에서 억지로 보정하지 말 것.
+
+### RDDA — 파일마다 집계 기준이 다르다 (최우선 과제)
+`전략자료\RDDA 픽업율` 폴더 실측:
+
+| 파일 | Meeting 행수 | 실제 포함 기간 |
+|---|---:|---|
+| 26년 3월 | 1,431 | 2026-03만 |
+| 26년 4월 | 1,604 | 2026-04만 |
+| 26년 5월 | 1,316 | 2026-05만 |
+| **26년 6월** | **7,077** | **2025-12 ~ 2026-05 누적** |
+
+3·4·5월은 "그 달만", 6월만 "누적"이다. 앱이 넷 다 같은 월 스냅샷으로 그려서 6월에 5.4배 수직 상승한다.
+→ 권장 해법: 파일 신뢰를 버리고 **각 행의 `MeetDate`로 월을 재계산**한다. 원본 관리 습관에 의존하면 재발한다.
+→ 추가 주의: Pickup 시트에는 과거 월 미팅 건이 섞인다(미팅 후 나중에 픽업). 월별 픽업율은 분모·분자 기간 정의가 다르다는 점을 명시할 것.
+
+### TS — 파싱은 정상, 발주량이 자유 텍스트
+- `Technical survices 2026.xlsx` [TS] 시트: 헤더 4행, 데이터 5행~, **유효 24건**. 파서는 전부 정상 인식한다.
+- `Order Volume` 24건 중 숫자는 **1건**. 나머지는 `약 40만장 연속 오더`, `135만장`, `Claim 2만불`, URL 등 자유 텍스트 → `numberOrNull()`이 null 처리 → **"발주량 기입률" 지표가 사실상 무의미**. 단위도 장·yds·USD 혼재라 합산 불가.
+- 원본에 **상태 컬럼이 없다**. Result 기입 여부로 완료(20)/처리중(4)을 추정하므로 "접수" 상태는 나오지 않는다.
+- HOME Work report의 TS 수치는 **이번달 기준**이라 대부분 0으로 보인다(월 분포: 1월 4, 3월 3, 7월 9, 8월 3).
+
+### 빈 화면 6개
+사이드바 19개 메뉴 중 6개가 실질적으로 비어 있다.
+- `PlaceholderPage`: CONSTRUCTION GUIDE, MACRO TREND, FABRIC TREND, PORTFOLIO, PROCESS INNOVATION
+- 스텁(15줄): FABRIC ANALYSIS — 목록·차트 없이 안내문만
+- ⚠️ HOME의 Trend issue·Quick access가 이 빈 화면들로 링크된다. 화면이 예뻐질수록 공백이 더 드러난다.
+- MACRO/FABRIC TREND/PORTFOLIO는 R24 Trend issue와 목적이 겹치므로 **자료 목록 기반 화면으로 통합**하면 3개를 한 번에 해결한다.
 - 현재 브랜치/작업트리는 대규모 React 재구축 중이며 변경 파일이 매우 많다. 사용자의 기존 변경을 되돌리거나 `git reset --hard`, `git checkout --`를 실행하지 말 것. 커밋은 사용자가 요청할 때만 한다.
 - 2026-08-07 마지막 빌드는 성공했다. 번들 크기 경고만 있으며 기능 차단 오류는 아니다.
 
