@@ -163,10 +163,19 @@ export interface TsRecord {
   receivedAt: string
   subject: string
   from: string
-  owner: string
+  relatedDepartment: string
+  attn: string
+  advisor: string
+  inquiry: string
+  analysis: string
+  causes: string
+  action: string
+  result: string
+  productionSite: string
+  orderVolume: string
+  attachment?: string
   state: TsState
-  orderQty: number | null
-  unlinkedReason: string | null
+  source?: "excel" | "web"
 }
 
 export function sampleTs(): TsRecord[] {
@@ -180,6 +189,12 @@ export function sampleTs(): TsRecord[] {
     "발수 지속성",
   ] as const
   const froms = ["사업10부 3팀", "Walmart", "Kohl's", "협력사(편직)", "사업7부 1팀"] as const
+  const inquiries = ["발생 조건과 재현 여부 확인 요청", "원단 물성 및 공정 조건 검토 요청", "품질 기준 충족 여부와 개선 방향 문의"] as const
+  const analyses = ["공정 이력과 시험 결과를 비교 검토함", "발생 구간별 조건 차이를 확인함", "유사 사례와 원단 상태를 함께 분석함"] as const
+  const causes = ["공정 조건 편차 가능성", "원단 물성 편차 영향", "작업 조건과 소재 특성의 복합 영향"] as const
+  const actions = ["관련 조건을 조정하고 재시험 진행", "관리 기준을 보완해 후속 생산에 적용", "재현 시험 후 개선 조건을 안내"] as const
+  const results = ["개선 조건 적용 후 결과 확인", "후속 생산 모니터링 진행", "검토 결과와 관리 기준 회신"] as const
+  const productionSites = ["국내", "베트남", ""] as const
   const states = ["접수", "처리중", "완료"] as const
   return Array.from({ length: 16 }, (_, i) => {
     const state = i < 2 ? states[0] : i < 5 ? states[1] : states[2]
@@ -188,10 +203,18 @@ export function sampleTs(): TsRecord[] {
       receivedAt: shift(-(i * 4 + 2)),
       subject: pick(subjects),
       from: pick(froms),
-      owner: pick(MEMBERS).name,
+      relatedDepartment: pick(froms),
+      attn: i % 2 === 0 ? pick(froms) : "",
+      advisor: pick(MEMBERS).name,
+      inquiry: pick(inquiries),
+      analysis: state === "접수" ? "" : pick(analyses),
+      causes: state === "접수" ? "" : pick(causes),
+      action: state === "완료" ? pick(actions) : "",
+      result: state === "완료" ? pick(results) : "",
+      productionSite: pick(productionSites),
+      orderVolume: i % 4 === 0 ? "후속 오더 검토 중" : "",
       state,
-      orderQty: state === "완료" && i % 3 === 0 ? int(500, 4200) : null,
-      unlinkedReason: state === "완료" && i % 3 !== 0 ? "개발 검토 종료" : null,
+      source: "web" as const,
     }
   })
 }

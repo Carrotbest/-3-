@@ -118,7 +118,6 @@ export interface DataAnomaly {
 
 export interface WeeklyTsRow {
   state: string
-  orderQty: number | null
 }
 
 export type DevType = "GD" | "국내"
@@ -201,7 +200,7 @@ export interface MonthlyDevelopmentDatum {
 }
 
 export interface HomeWorkSummary {
-  ts: { received: number; processing: number; done: number; unlinked: number }
+  ts: { received: number; processing: number; done: number }
   study: { missing: number; completionRate: number }
   fabric: { request: number; complete: number; connected: boolean }
   calendar: { today: number; week: number }
@@ -975,14 +974,13 @@ export function monthlyDevelopmentTrend(
 /** HOME 업무 카드용 집계. */
 export function homeWorkSummary(
   records: readonly DevRecord[],
-  ts: ReadonlyArray<{ state: string; orderQty: number | null; receivedAt: string }>,
+  ts: ReadonlyArray<{ state: string; receivedAt: string }>,
   study: ReadonlyArray<{ state: string; dueDate: string }>,
   fabricAnalysis: readonly FabricAnalysisRow[],
   events: ReadonlyArray<{ date: string }>,
   today = new Date(),
 ): HomeWorkSummary {
   const todayKey = localDay(today)
-  const currentMonth = todayKey.slice(0, 7)
   const window = recentWindow(today)
   const weekEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7).getTime()
   const studyDue = study.filter((item) => {
@@ -994,10 +992,9 @@ export function homeWorkSummary(
   const calendarRows = [...events, ...dueDates]
   return {
     ts: {
-      received: ts.filter((item) => item.receivedAt.slice(0, 7) === currentMonth).length,
-      processing: ts.filter((item) => item.state === "접수" || item.state === "처리중").length,
-      done: ts.filter((item) => item.state === "완료" && item.receivedAt.slice(0, 7) === currentMonth).length,
-      unlinked: ts.filter((item) => item.state === "완료" && !item.orderQty).length,
+      received: ts.filter((item) => item.state === "접수").length,
+      processing: ts.filter((item) => item.state === "처리중").length,
+      done: ts.filter((item) => item.state === "완료").length,
     },
     study: { missing: studyDue.length - doneStudy, completionRate: studyDue.length ? Math.round((doneStudy / studyDue.length) * 100) : 0 },
     fabric: {
@@ -1058,13 +1055,15 @@ type TsMaterialSource = {
   receivedAt: string
   subject: string
   from?: string
-  owner?: string
+  advisor?: string
   inquiry?: string
   causes?: string
   analysis?: string
   action?: string
   result?: string
   productionSite?: string
+  orderVolume?: string
+  attachment?: string
   relatedDepartment?: string
   attn?: string
 }
@@ -1103,16 +1102,21 @@ export function tsMaterials(ts: readonly TsMaterialSource[]): MaterialItem[] {
       summary: materialSummary(record.causes),
       date: record.receivedAt,
       tags,
-      owner: cleanMaterialText(record.owner) || undefined,
+      link: httpsMaterialLink(record.attachment),
+      owner: cleanMaterialText(record.advisor) || undefined,
       source: "ts",
       detail: materialDetails([
-        ["문의", record.inquiry],
-        ["원인", record.causes],
-        ["분석", record.analysis],
-        ["조치", record.action],
-        ["결과", record.result],
+        ["요청자", record.from],
         ["유관부서", record.relatedDepartment],
+        ["수신자", record.attn],
+        ["담당", record.advisor],
+        ["의뢰 내용", record.inquiry],
+        ["현황 분석", record.analysis],
+        ["원인", record.causes],
+        ["해결 방안", record.action],
+        ["결과", record.result],
         ["생산처", record.productionSite],
+        ["발주량", record.orderVolume],
       ]),
       readOnly: true,
     }
@@ -1260,10 +1264,10 @@ export function weeklyLines(
 ): [string, string] {
   const summary = kpis(records, today)
   const tsNew = tsRows.filter((row) => row.state === "접수").length
+  const tsProcessing = tsRows.filter((row) => row.state === "처리중").length
   const tsDone = tsRows.filter((row) => row.state === "완료").length
-  const tsQty = tsRows.reduce((sum, row) => sum + (row.orderQty || 0), 0)
   return [
     `· 개발: 진행 ${summary.progress}건 / 완료 ${summary.done}건 / 지연 ${summary.late}건 (납기 임박 ${summary.dueSoon}건)`,
-    `· 기술지원: 접수 ${tsNew}건 / 완료 ${tsDone}건 / 발주 연결 ${tsQty.toLocaleString("ko-KR")} yds`,
+    `· 기술지원: 접수 ${tsNew}건 / 처리중 ${tsProcessing}건 / 완료 ${tsDone}건`,
   ]
 }

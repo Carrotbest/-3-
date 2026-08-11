@@ -866,19 +866,6 @@ export function parseStudy(workbook: XLSX.WorkBook): StudyRecord[] {
   return records
 }
 
-export interface TechnicalServiceDetails {
-  inquiry?: string
-  causes?: string
-  analysis?: string
-  action?: string
-  result?: string
-  productionSite?: string
-  relatedDepartment?: string
-  attn?: string
-}
-
-type TechnicalServiceRecord = TsRecord & TechnicalServiceDetails
-
 function technicalServiceId(value: unknown, receivedAt: unknown): string {
   const original = text(value)
   if (!/^\d+(?:\.0+)?$/.test(original)) return original
@@ -915,7 +902,7 @@ export function parseTechnicalServices(workbook: XLSX.WorkBook): TsRecord[] {
   const idColumn = locate(["# T/S", "#T/S"])
   const dateColumn = locate(["Date", "접수일"])
   const subjectColumn = locate(["Subject"])
-  const ownerColumn = locate(["Advisor", "담당"])
+  const advisorColumn = locate(["Advisor", "담당"])
   if (idColumn === null || subjectColumn === null) {
     throw new Error("'TS' 시트의 필수 헤더('# T/S', 'Subject')가 올바르지 않습니다.")
   }
@@ -933,9 +920,9 @@ export function parseTechnicalServices(workbook: XLSX.WorkBook): TsRecord[] {
   const actionColumn = locate(["Action", "조치"])
   const resultColumn = locate(["Result", "결과"])
   const productionColumn = locate(["생산처", "Production"])
-  const orderQtyColumn = locate(["Order Volume", "Order Qty", "발주량"])
+  const orderVolumeColumn = locate(["Order Volume", "Order Qty", "발주량"])
   const attnColumn = locate(["Attn"])
-  const records: TechnicalServiceRecord[] = []
+  const records: TsRecord[] = []
 
   for (let index = headerRow + 1; index < rows.length; index++) {
     const row = rows[index]
@@ -943,7 +930,6 @@ export function parseTechnicalServices(workbook: XLSX.WorkBook): TsRecord[] {
     if (!rawId || isSubtotal(rawId)) continue
     const receivedValue = dateColumn === null ? "" : row[dateColumn]
     const result = resultColumn === null ? "" : text(row[resultColumn])
-    const orderQty = orderQtyColumn === null ? null : numberOrNull(row[orderQtyColumn])
     const relatedDepartment = relatedColumns.map((column) => text(row[column])).filter(Boolean).join(" / ")
     const from = fromColumn === null ? relatedDepartment : text(row[fromColumn]) || relatedDepartment
     // 원본에는 상태가 없으므로 결과가 작성된 건만 완료, 나머지는 최소 처리중으로 가져온다.
@@ -954,19 +940,18 @@ export function parseTechnicalServices(workbook: XLSX.WorkBook): TsRecord[] {
       receivedAt: isoDate(receivedValue).slice(0, 10),
       from,
       subject: text(row[subjectColumn]),
-      owner: ownerColumn === null ? "" : text(row[ownerColumn]),
-      state,
-      orderQty,
-      // 완료인데 발주량이 없으면 웹에서 사유를 채우도록 빈 값으로 둔다.
-      unlinkedReason: state === "완료" && orderQty === null ? "" : null,
+      relatedDepartment,
+      attn: attnColumn === null ? "" : text(row[attnColumn]),
+      advisor: advisorColumn === null ? "" : text(row[advisorColumn]),
       inquiry: inquiryColumn === null ? "" : text(row[inquiryColumn]),
-      causes: causesColumn === null ? "" : text(row[causesColumn]),
       analysis: analysisColumn === null ? "" : text(row[analysisColumn]),
+      causes: causesColumn === null ? "" : text(row[causesColumn]),
       action: actionColumn === null ? "" : text(row[actionColumn]),
       result,
       productionSite: productionColumn === null ? "" : text(row[productionColumn]),
-      relatedDepartment,
-      attn: attnColumn === null ? "" : text(row[attnColumn]),
+      orderVolume: orderVolumeColumn === null ? "" : text(row[orderVolumeColumn]),
+      state,
+      source: "excel",
     })
   }
 
