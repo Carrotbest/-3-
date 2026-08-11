@@ -24,6 +24,42 @@ export const MATERIAL_KIND_LABELS: Record<MaterialKind, string> = {
 const DECK_LIMIT = 6
 const PAGE_SIZE = 20
 
+export const MATERIAL_CARD_PALETTES = [
+  {
+    background: "bg-[linear-gradient(145deg,#6366f1,#8b5cf6)]",
+    glow: "bg-[#6366f1]",
+    activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(99,102,241,0.4)]",
+  },
+  {
+    background: "bg-[linear-gradient(145deg,#0ea5e9,#22d3ee)]",
+    glow: "bg-[#0ea5e9]",
+    activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(14,165,233,0.4)]",
+  },
+  {
+    background: "bg-[linear-gradient(145deg,#f59e0b,#f43f5e)]",
+    glow: "bg-[#f59e0b]",
+    activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(245,158,11,0.4)]",
+  },
+  {
+    background: "bg-[linear-gradient(145deg,#10b981,#34d399)]",
+    glow: "bg-[#10b981]",
+    activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(16,185,129,0.4)]",
+  },
+  {
+    background: "bg-[linear-gradient(145deg,#8b5cf6,#ec4899)]",
+    glow: "bg-[#8b5cf6]",
+    activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(139,92,246,0.4)]",
+  },
+  {
+    background: "bg-[linear-gradient(145deg,#fb923c,#f43f5e)]",
+    glow: "bg-[#fb923c]",
+    activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(251,146,60,0.4)]",
+  },
+] as const
+
+const INACTIVE_CARD_SHADOW = "shadow-[0_1rem_2rem_-0.75rem_rgba(0,0,0,0.72)]"
+const CARD_VIGNETTE = "bg-[linear-gradient(to_bottom,transparent_42%,rgba(0,0,0,0.34))]"
+
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false)
   useEffect(() => {
@@ -107,36 +143,41 @@ function useDeckControls(itemCount: number) {
 }
 
 const deckPosition = (offset: number): string => {
-  if (offset === 0) return "z-30 opacity-100 [transform:translateX(-50%)_scale(1)_rotateY(0deg)]"
-  if (offset === -1) return "z-20 opacity-75 [transform:translateX(-78%)_scale(.88)_rotateY(12deg)]"
-  if (offset === 1) return "z-20 opacity-75 [transform:translateX(-22%)_scale(.88)_rotateY(-12deg)]"
-  if (offset < -1) return "z-10 opacity-35 [transform:translateX(-94%)_scale(.76)_rotateY(18deg)]"
-  return "z-10 opacity-35 [transform:translateX(-6%)_scale(.76)_rotateY(-18deg)]"
+  if (offset === 0) return "z-30 opacity-100 [filter:none] [transform:translateX(-50%)_translateY(-0.25rem)_scale(1)_rotateY(0deg)]"
+  if (offset === -1) return "z-20 opacity-[.92] [filter:none] [transform:translateX(-112%)_scale(.82)_rotateY(24deg)]"
+  if (offset === 1) return "z-20 opacity-[.92] [filter:none] [transform:translateX(12%)_scale(.82)_rotateY(-24deg)]"
+  if (offset === -2) return "z-10 opacity-50 [filter:blur(1px)] [transform:translateX(-158%)_scale(.66)_rotateY(30deg)]"
+  return "z-10 opacity-50 [filter:blur(1px)] [transform:translateX(58%)_scale(.66)_rotateY(-30deg)]"
 }
 
-function SourceBadge({ source }: { source: MaterialItem["source"] }) {
+const REDUCED_ACTIVE_POSITION = "z-30 opacity-100 [filter:none] [transform:translateX(-50%)_scale(1)]"
+
+type MaterialCardTone = "surface" | "onColor"
+
+function SourceBadge({ source, tone = "surface" }: { source: MaterialItem["source"]; tone?: MaterialCardTone }) {
   const labels: Record<MaterialItem["source"], string> = {
     excel: "엑셀",
     manual: "직접등록",
     ts: "TS 엑셀",
     study: "STUDY 엑셀",
   }
-  return <Badge variant="outline">{labels[source]}</Badge>
+  return <Badge variant="outline" className={tone === "onColor" ? "border-white/25 bg-white/15 text-white hover:bg-white/15" : undefined}>{labels[source]}</Badge>
 }
 
-function MaterialCardBody({ item }: { item: MaterialItem }) {
+function MaterialCardBody({ item, tone = "surface" }: { item: MaterialItem; tone?: MaterialCardTone }) {
+  const onColor = tone === "onColor"
   return (
     <>
       <span className="flex items-start justify-between gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><FileText className="size-5" aria-hidden="true" /></span>
-        <SourceBadge source={item.source} />
+        <span className={`flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] ${onColor ? "bg-white/15 text-white ring-1 ring-inset ring-white/20" : "bg-[var(--muted)] text-[var(--foreground)]"}`}><FileText className="size-5" aria-hidden="true" /></span>
+        <SourceBadge source={item.source} tone={tone} />
       </span>
-      <strong className="mt-5 line-clamp-2 block text-base leading-6 text-[var(--foreground)]">{item.title}</strong>
-      <span className="mt-2 line-clamp-2 block text-sm text-[var(--muted-foreground)]">{item.summary || "요약이 등록되지 않았습니다."}</span>
+      <strong className={`mt-5 line-clamp-2 block text-base leading-6 ${onColor ? "text-white" : "text-[var(--foreground)]"}`}>{item.title}</strong>
+      <span className={`mt-2 line-clamp-2 block text-sm ${onColor ? "text-white/70" : "text-[var(--muted-foreground)]"}`}>{item.summary || "요약이 등록되지 않았습니다."}</span>
       <span className="mt-4 flex flex-wrap gap-1.5">
-        {item.tags.slice(0, 3).map((tag) => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+        {item.tags.slice(0, 3).map((tag) => <Badge key={tag} variant="secondary" className={onColor ? "border border-white/10 bg-white/15 text-white hover:bg-white/15" : undefined}>{tag}</Badge>)}
       </span>
-      <span className="mt-auto block pt-4 text-xs text-[var(--muted-foreground)]">{item.date ? fmtDateFull(item.date) : "날짜 미등록"}{item.owner ? ` · ${item.owner}` : ""}</span>
+      <span className={`mt-auto block pt-4 text-xs ${onColor ? "text-white/70" : "text-[var(--muted-foreground)]"}`}>{item.date ? fmtDateFull(item.date) : "날짜 미등록"}{item.owner ? ` · ${item.owner}` : ""}</span>
     </>
   )
 }
@@ -150,6 +191,7 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
   const deckItems = items.slice(0, DECK_LIMIT)
   const reduced = useReducedMotion()
   const { active, move, rootRef, rootProps } = useDeckControls(deckItems.length)
+  const activePalette = MATERIAL_CARD_PALETTES[active % MATERIAL_CARD_PALETTES.length]
 
   if (!deckItems.length) {
     return (
@@ -167,13 +209,15 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
       aria-roledescription="carousel"
       aria-label="자료 카드 덱"
       tabIndex={0}
-      className="touch-pan-y rounded-[var(--radius)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+      className="touch-pan-y overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,#111114_0%,#0b0b0f_100%)] outline-none focus-visible:ring-[3px] focus-visible:ring-white/60"
       {...rootProps}
     >
-      <div className="relative min-h-72 overflow-hidden [perspective:70rem]">
+      <div className="relative min-h-[21rem] overflow-hidden [perspective:1200px] sm:min-h-[22rem]">
+        <span aria-hidden="true" className={`pointer-events-none absolute left-1/2 top-1/2 h-40 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-30 blur-3xl saturate-50 transition-colors duration-500 motion-reduce:transition-none ${activePalette.glow}`} />
         {deckItems.map((item, index) => {
           const offset = index - active
           if (Math.abs(offset) > 2 || (reduced && offset !== 0)) return null
+          const palette = MATERIAL_CARD_PALETTES[index % MATERIAL_CARD_PALETTES.length]
           return (
             <button
               key={item.id}
@@ -181,17 +225,18 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
               tabIndex={offset === 0 ? 0 : -1}
               aria-hidden={offset !== 0}
               onClick={() => { if (offset === 0) onOpen(item) }}
-              className={`absolute left-1/2 top-3 flex h-64 w-[76%] max-w-lg cursor-pointer flex-col rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 text-left shadow-[var(--shadow-2)] outline-none transition-[transform,opacity] duration-300 focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${deckPosition(offset)}`}
+              className={`absolute left-1/2 top-7 flex aspect-square [width:clamp(190px,44%,260px)] cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/20 p-5 text-left outline-none transition-[transform,opacity,filter] duration-[560ms] [transition-timing-function:cubic-bezier(.22,1,.36,1)] will-change-[transform,opacity,filter] focus-visible:ring-[3px] focus-visible:ring-white/80 motion-reduce:transition-none ${palette.background} ${offset === 0 ? palette.activeShadow : INACTIVE_CARD_SHADOW} ${reduced ? REDUCED_ACTIVE_POSITION : deckPosition(offset)}`}
             >
-              <MaterialCardBody item={item} />
+              <span aria-hidden="true" className={`pointer-events-none absolute inset-0 ${CARD_VIGNETTE}`} />
+              <span className="relative z-10 flex h-full flex-col"><MaterialCardBody item={item} tone="onColor" /></span>
             </button>
           )
         })}
       </div>
-      <div className="flex items-center justify-center gap-3 pt-2">
-        <Button type="button" variant="outline" size="icon" disabled={active === 0} aria-label="이전 자료" onClick={() => move(-1)}><ArrowLeft /></Button>
-        <span className="min-w-20 text-center text-sm font-semibold tabular-nums text-[var(--foreground)]" aria-live="polite">{String(active + 1).padStart(2, "0")} / {String(deckItems.length).padStart(2, "0")}</span>
-        <Button type="button" variant="outline" size="icon" disabled={active === deckItems.length - 1} aria-label="다음 자료" onClick={() => move(1)}><ArrowRight /></Button>
+      <div className="flex items-center justify-center gap-3 px-5 pb-5">
+        <Button type="button" variant="outline" size="icon" disabled={active === 0} aria-label="이전 자료" onClick={() => move(-1)} className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white disabled:border-white/10 disabled:bg-white/5 disabled:text-white/35"><ArrowLeft /></Button>
+        <span className="min-w-20 text-center text-sm font-semibold tabular-nums text-white/85" aria-live="polite">{String(active + 1).padStart(2, "0")} / {String(deckItems.length).padStart(2, "0")}</span>
+        <Button type="button" variant="outline" size="icon" disabled={active === deckItems.length - 1} aria-label="다음 자료" onClick={() => move(1)} className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white disabled:border-white/10 disabled:bg-white/5 disabled:text-white/35"><ArrowRight /></Button>
       </div>
     </div>
   )

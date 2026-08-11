@@ -3,19 +3,37 @@ import { ArrowLeft, ArrowRight, FileText, Plus } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { MATERIAL_CARD_PALETTES } from "@/components/cards/MaterialDeck"
 import { fmtDateFull } from "@/data/format"
 import type { MaterialItem } from "@/data/schema"
 
+const INACTIVE_CARD_SHADOW = "shadow-[0_1rem_2rem_-0.75rem_rgba(0,0,0,0.72)]"
+const CARD_VIGNETTE = "bg-[linear-gradient(to_bottom,transparent_42%,rgba(0,0,0,0.34))]"
+
 const coverPosition = (offset: number): string => {
-  if (offset === 0) return "z-30 opacity-100 [transform:translateX(-50%)_scale(1)_rotateY(0deg)]"
-  if (offset === -1) return "z-20 opacity-70 [transform:translateX(-96%)_scale(.82)_rotateY(42deg)]"
-  if (offset === 1) return "z-20 opacity-70 [transform:translateX(-4%)_scale(.82)_rotateY(-42deg)]"
-  if (offset < -1) return "z-10 opacity-25 [transform:translateX(-120%)_scale(.68)_rotateY(54deg)]"
-  return "z-10 opacity-25 [transform:translateX(20%)_scale(.68)_rotateY(-54deg)]"
+  if (offset === 0) return "z-30 opacity-100 [filter:none] [transform:translateX(-50%)_translateY(-0.25rem)_scale(1)_rotateY(0deg)]"
+  if (offset === -1) return "z-20 opacity-[.92] [filter:none] [transform:translateX(-112%)_scale(.82)_rotateY(24deg)]"
+  if (offset === 1) return "z-20 opacity-[.92] [filter:none] [transform:translateX(12%)_scale(.82)_rotateY(-24deg)]"
+  if (offset === -2) return "z-10 opacity-50 [filter:blur(1px)] [transform:translateX(-158%)_scale(.66)_rotateY(30deg)]"
+  return "z-10 opacity-50 [filter:blur(1px)] [transform:translateX(58%)_scale(.66)_rotateY(-30deg)]"
+}
+
+const REDUCED_ACTIVE_POSITION = "z-30 opacity-100 [filter:none] [transform:translateX(-50%)_scale(1)]"
+
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false)
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const update = () => setReduced(media.matches)
+    update()
+    media.addEventListener("change", update)
+    return () => media.removeEventListener("change", update)
+  }, [])
+  return reduced
 }
 
 function CoverCard({ item }: { item: MaterialItem }) {
-  return <><span className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)]"><FileText className="size-5" aria-hidden="true" /></span><Badge className="absolute right-4 top-4" variant="outline">{item.source === "excel" ? "엑셀" : "직접등록"}</Badge><strong className="mt-5 line-clamp-2 block text-base leading-6 text-[var(--foreground)]">{item.title}</strong><span className="mt-2 line-clamp-3 block text-sm text-[var(--muted-foreground)]">{item.summary || "요약이 등록되지 않았습니다."}</span><span className="mt-auto block pt-4 text-xs text-[var(--muted-foreground)]">{item.date ? fmtDateFull(item.date) : "날짜 미등록"}</span></>
+  return <><span className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-white/15 text-white ring-1 ring-inset ring-white/20"><FileText className="size-5" aria-hidden="true" /></span><Badge className="absolute right-4 top-4 border-white/25 bg-white/15 text-white hover:bg-white/15" variant="outline">{item.source === "excel" ? "엑셀" : "직접등록"}</Badge><strong className="mt-5 line-clamp-2 block text-base leading-6 text-white">{item.title}</strong><span className="mt-2 line-clamp-3 block text-sm text-white/70">{item.summary || "요약이 등록되지 않았습니다."}</span><span className="mt-auto block pt-4 text-xs text-white/70">{item.date ? fmtDateFull(item.date) : "날짜 미등록"}</span></>
 }
 
 export function CoverflowGallery({ items, emptyMessage, onOpen, onAdd }: {
@@ -26,6 +44,7 @@ export function CoverflowGallery({ items, emptyMessage, onOpen, onAdd }: {
 }) {
   const shown = items.slice(0, 6)
   const [active, setActive] = useState(0)
+  const reduced = useReducedMotion()
   const rootRef = useRef<HTMLDivElement>(null)
   const pointerInside = useRef(false)
   const dragStart = useRef<number | null>(null)
@@ -55,7 +74,7 @@ export function CoverflowGallery({ items, emptyMessage, onOpen, onAdd }: {
   if (!shown.length) return <div className="flex min-h-56 flex-col items-center justify-center rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--muted)] p-6 text-center"><p className="text-sm text-[var(--muted-foreground)]">{emptyMessage}</p>{onAdd ? <Button type="button" size="sm" className="mt-4" onClick={onAdd}><Plus aria-hidden="true" />자료 추가</Button> : null}</div>
 
   if (shown.length < 3) {
-    return <div className="grid gap-4 md:grid-cols-2">{shown.map((item) => <button key={item.id} type="button" onClick={() => onOpen(item)} className="relative flex min-h-56 cursor-pointer flex-col rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"><CoverCard item={item} /></button>)}</div>
+    return <div className="grid gap-5 overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,#111114_0%,#0b0b0f_100%)] p-6 md:grid-cols-2">{shown.map((item, index) => { const palette = MATERIAL_CARD_PALETTES[index % MATERIAL_CARD_PALETTES.length]; return <button key={item.id} type="button" onClick={() => onOpen(item)} className={`relative flex aspect-square w-full max-w-[260px] cursor-pointer flex-col justify-self-center overflow-hidden rounded-2xl border border-white/20 p-5 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-white/80 ${palette.background} ${palette.activeShadow}`}><span aria-hidden="true" className={`pointer-events-none absolute inset-0 ${CARD_VIGNETTE}`} /><span className="relative z-10 flex h-full flex-col"><CoverCard item={item} /></span></button> })}</div>
   }
 
   const pointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -70,8 +89,10 @@ export function CoverflowGallery({ items, emptyMessage, onOpen, onAdd }: {
     if (Math.abs(distance) >= 40) move(distance > 0 ? -1 : 1)
   }
 
-  return <div ref={rootRef} role="group" aria-roledescription="carousel" aria-label="트렌드 자료 coverflow" tabIndex={0} onPointerEnter={() => { pointerInside.current = true }} onPointerLeave={() => { pointerInside.current = false; dragStart.current = null }} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { dragStart.current = null }} onKeyDown={(event) => { if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return; const direction = event.key === "ArrowRight" ? 1 : -1; if ((active === 0 && direction < 0) || (active === shown.length - 1 && direction > 0)) return; event.preventDefault(); move(direction as -1 | 1) }} className="touch-pan-y rounded-[var(--radius)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
-    <div className="relative min-h-80 overflow-hidden [perspective:75rem]">{shown.map((item, index) => { const offset = index - active; if (Math.abs(offset) > 2) return null; return <button key={item.id} type="button" tabIndex={offset === 0 ? 0 : -1} aria-hidden={offset !== 0} onClick={() => { if (offset === 0) onOpen(item) }} className={`absolute left-1/2 top-5 flex h-72 w-[62%] max-w-md cursor-pointer flex-col rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 text-left shadow-[var(--shadow-2)] outline-none transition-[transform,opacity] duration-300 focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${coverPosition(offset)}`}><CoverCard item={item} /></button> })}</div>
-    <div className="flex items-center justify-center gap-3"><Button type="button" variant="outline" size="icon" disabled={active === 0} aria-label="이전 트렌드 자료" onClick={() => move(-1)}><ArrowLeft /></Button><span className="min-w-20 text-center text-sm font-semibold tabular-nums" aria-live="polite">{String(active + 1).padStart(2, "0")} / {String(shown.length).padStart(2, "0")}</span><Button type="button" variant="outline" size="icon" disabled={active === shown.length - 1} aria-label="다음 트렌드 자료" onClick={() => move(1)}><ArrowRight /></Button></div>
+  const activePalette = MATERIAL_CARD_PALETTES[active % MATERIAL_CARD_PALETTES.length]
+
+  return <div ref={rootRef} role="group" aria-roledescription="carousel" aria-label="트렌드 자료 coverflow" tabIndex={0} onPointerEnter={() => { pointerInside.current = true }} onPointerLeave={() => { pointerInside.current = false; dragStart.current = null }} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { dragStart.current = null }} onKeyDown={(event) => { if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return; const direction = event.key === "ArrowRight" ? 1 : -1; if ((active === 0 && direction < 0) || (active === shown.length - 1 && direction > 0)) return; event.preventDefault(); move(direction as -1 | 1) }} className="touch-pan-y overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,#111114_0%,#0b0b0f_100%)] outline-none focus-visible:ring-[3px] focus-visible:ring-white/60">
+    <div className="relative min-h-[21rem] overflow-hidden [perspective:1200px] sm:min-h-[22rem]"><span aria-hidden="true" className={`pointer-events-none absolute left-1/2 top-1/2 h-40 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-30 blur-3xl saturate-50 transition-colors duration-500 motion-reduce:transition-none ${activePalette.glow}`} />{shown.map((item, index) => { const offset = index - active; if (Math.abs(offset) > 2 || (reduced && offset !== 0)) return null; const palette = MATERIAL_CARD_PALETTES[index % MATERIAL_CARD_PALETTES.length]; return <button key={item.id} type="button" tabIndex={offset === 0 ? 0 : -1} aria-hidden={offset !== 0} onClick={() => { if (offset === 0) onOpen(item) }} className={`absolute left-1/2 top-7 flex aspect-square [width:clamp(190px,44%,260px)] cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/20 p-5 text-left outline-none transition-[transform,opacity,filter] duration-[560ms] [transition-timing-function:cubic-bezier(.22,1,.36,1)] will-change-[transform,opacity,filter] focus-visible:ring-[3px] focus-visible:ring-white/80 motion-reduce:transition-none ${palette.background} ${offset === 0 ? palette.activeShadow : INACTIVE_CARD_SHADOW} ${reduced ? REDUCED_ACTIVE_POSITION : coverPosition(offset)}`}><span aria-hidden="true" className={`pointer-events-none absolute inset-0 ${CARD_VIGNETTE}`} /><span className="relative z-10 flex h-full flex-col"><CoverCard item={item} /></span></button> })}</div>
+    <div className="flex items-center justify-center gap-3 px-5 pb-5"><Button type="button" variant="outline" size="icon" disabled={active === 0} aria-label="이전 트렌드 자료" onClick={() => move(-1)} className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white disabled:border-white/10 disabled:bg-white/5 disabled:text-white/35"><ArrowLeft /></Button><span className="min-w-20 text-center text-sm font-semibold tabular-nums text-white/85" aria-live="polite">{String(active + 1).padStart(2, "0")} / {String(shown.length).padStart(2, "0")}</span><Button type="button" variant="outline" size="icon" disabled={active === shown.length - 1} aria-label="다음 트렌드 자료" onClick={() => move(1)} className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white disabled:border-white/10 disabled:bg-white/5 disabled:text-white/35"><ArrowRight /></Button></div>
   </div>
 }
