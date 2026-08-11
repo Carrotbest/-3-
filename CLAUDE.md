@@ -58,7 +58,16 @@
 - `자료목록.xlsx`(parseMaterials)는 **트렌드 3종 전용**으로 축소. TS/STUDY 행은 불필요.
 - STUDY 파서가 `materialFile`을 고정 컬럼(row[9])에서 읽는 것은 그대로. 그 열에 SharePoint 링크를 넣으면 열기 버튼이 켜진다(코드 변경 아님).
 - **휠 가로채기 규칙**: 덱에 포인터가 있을 때만 가로채고, 첫 장/마지막 장에서는 `preventDefault`를 걸지 않고 return 해 페이지가 정상 스크롤되게 한다(`MaterialDeck.tsx:62-64`). 이걸 없애면 사용자가 덱에 갇힌다.
-- 버튼 라벨은 `SharePoint에서 열기`. 앱이 파일을 직접 내려주지 않으므로 "다운로드"라고 쓰지 않는다. 링크 없으면 비활성.
+- 버튼 라벨은 `SharePoint에서 열기`. 앱이 파일을 직접 내려주지 않으므로 "다운로드"라고 쓰지 않는다.
+
+### R26 — 자료 덱 비주얼(정사각 coverflow) + R27 — 조정
+`src/components/cards/MaterialDeck.tsx`, `CoverflowGallery.tsx`.
+- 카드: **정사각**(`aspect-square`, 폭 `clamp(190px,44%,260px)`), 좌우 이웃 peek, **카드별 컬러 그라데이션**(`MATERIAL_CARD_PALETTES` 6색, 인덱스 배정 — `Math.random` 금지), 스무스 모션(`560ms cubic-bezier(.22,1,.36,1)`).
+- `MaterialCardBody`에 `tone:"surface"|"onColor"` 분기. 컬러 카드 위(`onColor`)는 흰 텍스트, 상세 시트·검색 목록은 `surface`.
+- 무대 배경: R26에서 검정 → **R27에서 흰색(테마 서페이스 `--card`)으로 되돌림**. 사용자가 흰 배경 선호. 다크 글로우·다크 컨트롤 제거, 카드 컬러/모션은 유지.
+- **화살표 클릭 버그(R27 수정)**: 루트 div의 `onPointerDown`이 `setPointerCapture`를 호출해 화살표 `click`이 루트로 가로채져 안 먹었다. → 이전/다음 버튼에 `onPointerDown={(e)=>e.stopPropagation()}` 추가로 해결(두 컴포넌트 모두). 드래그/휠/키보드는 유지.
+- **TS 매핑(R27)**: `tsMaterials`에서 요약=`Causes`(inquiry 폴백 제거), 담당=`Advisor`(=record.owner, from 폴백 제거), 제목=`Subject`. 예시 데이터는 Causes가 비어 "요약 없음"으로 보임 — 실 TS 엑셀 업로드 시 채워짐.
+- **링크 미등록 UI 제거(R27)**: 링크 없으면 "링크 미등록" 문구·비활성 SharePoint 버튼을 렌더하지 않는다. 상세 버튼은 유지. 상세 시트·검색 목록 모두.
 
 ## 알려진 데이터 이슈 (2026-08-10 실파일 조사)
 
@@ -90,6 +99,22 @@
 - 스텁(15줄): FABRIC ANALYSIS — 목록·차트 없이 안내문만
 - ⚠️ HOME의 Trend issue·Quick access가 이 빈 화면들로 링크된다. 화면이 예뻐질수록 공백이 더 드러난다.
 - MACRO/FABRIC TREND/PORTFOLIO는 R24 Trend issue와 목적이 겹치므로 **자료 목록 기반 화면으로 통합**하면 3개를 한 번에 해결한다.
+
+## 다음 작업 후보 (사용자와 아직 우선순위 미확정 — 시작 전 확인)
+
+1. **RDDA 월 재계산** (최우선). `전략자료\RDDA 픽업율` 폴더 파일마다 집계 기준이 다르다: 3·4·5월 파일은 그 달만(1,300~1,600행), 6월 파일만 6개월 누적(7,077행). 앱이 넷 다 같은 월 스냅샷으로 그려 6월에 5.4배 급등. → 파일 신뢰를 버리고 각 행의 `MeetDate`로 월 재계산하는 게 해법. 아래 "알려진 데이터 이슈" 참조.
+2. **빈 화면 6개 처리**: 만들거나 사이드바에서 숨기거나. 트렌드 3개는 R24 자료 화면과 통합 가능.
+3. **FABRIC ANALYSIS 실화면**: 현재 15줄 스텁. 파서가 5필드(AN#/의뢰일/완료일/항목/담당)만 읽으니 원본 확인 선행 필요.
+4. **TS 발주량 정리**: `Order Volume`이 자유 텍스트(장·yds·USD 혼재)라 지표 무의미. 원본에서 수량·단위 분리가 맞음.
+
+## 코덱스 협업 방식 (현재 워크플로)
+
+- 사용자 지시: 기획·검토는 Claude, 코딩은 Codex, 최종 확인은 다시 Claude.
+- Codex 실행: `codex exec -C "C:\Users\hkpark\Desktop\fabric-rnd" -s workspace-write -o .codex-runs/RNN-last.txt - < .codex-runs/RNN-prompt.txt`. `codex-cli 0.146.0`, 모델 gpt-5.6-sol. `.codex-runs/`는 gitignore.
+- 지시서는 `docs/codex/RNN-*.md`에 작성(현재 R21~R27 존재). Codex에 "그 문서 그대로 구현" + 금지사항 프롬프트로 전달.
+- Claude 검증: `npm run build` + 브라우저(preview `fabric-rnd-vite`, 포트 5175, base `/-3-/`). 콘솔의 `OwnerLaneBoard 500` 에러는 R23 HMR 과도기 stale 로그(무시).
+- 커밋은 사용자 요청 시. 현재까지: `cc605b8`(안전망·src 최초 등록) → `3f50877`(R24) → `ecf35eb`(R25) → `183d460`(R26) → `8696657`(R27). 브랜치 `redesign/v2`, 미푸시.
+
 - 현재 브랜치/작업트리는 대규모 React 재구축 중이며 변경 파일이 매우 많다. 사용자의 기존 변경을 되돌리거나 `git reset --hard`, `git checkout --`를 실행하지 말 것. 커밋은 사용자가 요청할 때만 한다.
 - 2026-08-07 마지막 빌드는 성공했다. 번들 크기 경고만 있으며 기능 차단 오류는 아니다.
 
