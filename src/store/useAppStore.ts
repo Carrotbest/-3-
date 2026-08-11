@@ -11,7 +11,6 @@ import {
   sampleRecords,
   sampleStudy,
   sampleTrends,
-  sampleTs,
   type CalendarEvent,
   type DataMeta,
   type RddaReport,
@@ -68,7 +67,7 @@ export function createInitialAppState(): AppState {
   const records = sampleRecords()
   const completed = sampleCompleted()
   const fabricAnalysis = sampleFabricAnalysis()
-  const ts = sampleTs()
+  const ts: TsRecord[] = []
   const study = sampleStudy()
   const events = sampleEvents()
   const rdda = sampleRdda()
@@ -159,6 +158,13 @@ export function saveTsRecords(records: TsRecord[]): void {
   const sorted = sortTsByDate(records)
   setAppState({ ts: sorted })
   persistTsRecords(sorted)
+}
+
+export async function clearTsRecords(): Promise<void> {
+  const empty: TsRecord[] = []
+  setAppState({ ts: empty })
+  persistTsRecords(empty)
+  await saveCache("ts", empty)
 }
 
 /** 기존 웹 입력을 우선하고, 처음 보는 id만 뒤에 추가한다. */

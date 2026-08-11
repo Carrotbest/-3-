@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
-import { CheckCircle2, ChevronUp, ClipboardList, Download, ExternalLink, LoaderCircle, Plus } from "lucide-react"
+import { CheckCircle2, ChevronUp, ClipboardList, Download, ExternalLink, LoaderCircle, Plus, Trash2 } from "lucide-react"
 import * as XLSX from "xlsx"
 
 import { MaterialDeckSection, MaterialSearchSection } from "@/components/cards/MaterialDeck"
@@ -22,7 +22,7 @@ import { fmtDate } from "@/data/format"
 import { httpsMaterialLink, MEMBERS } from "@/data/schema"
 import { type TsRecord, type TsState } from "@/data/sample"
 import { ingestTs } from "@/data/upload"
-import { loadTsRecords, saveTsRecords, useAppStore } from "@/store/useAppStore"
+import { clearTsRecords, loadTsRecords, saveTsRecords, useAppStore } from "@/store/useAppStore"
 
 const ALL = "전체"
 const TS_STATES: TsState[] = ["접수", "처리중", "완료"]
@@ -164,6 +164,7 @@ export function TS() {
   const [form, setForm] = useState<FormValues>(initialForm)
   const [formErrors, setFormErrors] = useState<FormErrors>({})
   const [exporting, setExporting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null)
 
   useEffect(() => {
@@ -221,6 +222,23 @@ export function TS() {
     }
   }
 
+  const deleteAllRows = async () => {
+    if (!rows.length || !window.confirm("모든 TS 기록을 삭제할까요? 이 작업은 되돌릴 수 없습니다.")) return
+    setDeleting(true)
+    setActionNotice(null)
+    try {
+      await clearTsRecords()
+      setSelectedRow(null)
+      setActiveState(ALL)
+      setSearch("")
+      setActionNotice({ tone: "success", message: "모든 TS 기록을 삭제했습니다." })
+    } catch (error) {
+      setActionNotice({ tone: "error", message: error instanceof Error ? error.message : "TS 기록을 모두 삭제하지 못했습니다." })
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const errors: FormErrors = {}
@@ -274,7 +292,6 @@ export function TS() {
       />
 
       <MaterialDeckSection kind="TS" title="TS 자료 덱" description="사고사례와 불량 trouble shooting 자료 중 최신 6건입니다." emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
-      <MaterialSearchSection kind="TS" emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
 
       {actionNotice ? (
         <p role={actionNotice.tone === "error" ? "alert" : "status"} aria-live="polite" className={`rounded-[var(--radius)] border px-4 py-3 text-sm ${actionNotice.tone === "error" ? "border-[var(--destructive)] text-[var(--destructive)]" : "border-[var(--border)] bg-[var(--muted)] text-[var(--foreground)]"}`}>
@@ -311,11 +328,11 @@ export function TS() {
       </Reveal>
 
       <Reveal delay={75}>
-        <Card>
-          <CardHeader className="flex-row items-center justify-between gap-4 space-y-0">
-            <div className="min-w-0 space-y-1.5"><CardTitle>신규 접수</CardTitle><CardDescription>필수 4개 항목을 입력하고, 의뢰 정보와 처리 내용을 선택해 덧붙입니다.</CardDescription></div>
-            <Button type="button" variant="outline" aria-expanded={formOpen} aria-controls="ts-intake-form" onClick={() => setFormOpen((open) => !open)}>
-              {formOpen ? <ChevronUp aria-hidden="true" /> : <Plus aria-hidden="true" />}{formOpen ? "접기" : "신규 접수"}
+        <Card className="border-[var(--primary)] bg-[var(--accent)]/40 shadow-lg ring-1 ring-[var(--ring)]">
+          <CardHeader className="flex-col items-start justify-between gap-4 space-y-0 sm:flex-row sm:items-center">
+            <div className="min-w-0 space-y-1.5"><CardTitle>신규 접수</CardTitle><CardDescription>엑셀 내용을 여기에 하나씩 입력하세요. 필수 4개 항목과 필요한 처리 내용을 덧붙일 수 있습니다.</CardDescription></div>
+            <Button type="button" variant="default" size="lg" className="shrink-0 shadow-sm transition-[transform,box-shadow] hover:scale-[1.02] hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none" aria-expanded={formOpen} aria-controls="ts-intake-form" onClick={() => setFormOpen((open) => !open)}>
+              {formOpen ? <ChevronUp aria-hidden="true" /> : <Plus aria-hidden="true" />}{formOpen ? "접기" : "+ 신규 접수 입력"}
             </Button>
           </CardHeader>
           {formOpen ? (
@@ -373,7 +390,23 @@ export function TS() {
         <StatCard icon={<CheckCircle2 aria-hidden="true" className="size-4" />} label="완료" value={counts.done} caption="결과 정리 완료" info="결과까지 정리해 처리를 마친 요청입니다." revealDelay={150} />
       </div>
 
-      <SectionCard title="TS 목록" subtitle={`현재 보기 ${filteredRows.length}건`} contentClassName="p-0">
+      <SectionCard
+        title="TS 목록"
+        subtitle={`현재 보기 ${filteredRows.length}건`}
+        actions={(
+          <Button
+            type="button"
+            variant="outline"
+            className="border-[var(--destructive)] text-[var(--destructive)] hover:bg-[var(--destructive)] hover:text-[var(--destructive-foreground)]"
+            disabled={deleting || rows.length === 0}
+            onClick={() => { void deleteAllRows() }}
+          >
+            <Trash2 aria-hidden="true" />
+            {deleting ? "삭제 중" : "전체 삭제"}
+          </Button>
+        )}
+        contentClassName="p-0"
+      >
         <DataTable
           columns={columns}
           rows={filteredRows}
@@ -388,6 +421,8 @@ export function TS() {
           )}
         />
       </SectionCard>
+
+      <MaterialSearchSection kind="TS" emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
 
       <TsDetailSheet record={selectedRow} onOpenChange={(open) => { if (!open) setSelectedRow(null) }} />
     </section>
