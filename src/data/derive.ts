@@ -1100,10 +1100,10 @@ export function tsMaterials(ts: readonly TsMaterialSource[]): MaterialItem[] {
       id: `ts-${record.id}`,
       kind: "TS",
       title: record.subject,
-      summary: materialSummary(record.inquiry || record.causes),
+      summary: materialSummary(record.causes),
       date: record.receivedAt,
       tags,
-      owner: cleanMaterialText(record.owner) || cleanMaterialText(record.from) || undefined,
+      owner: cleanMaterialText(record.owner) || undefined,
       source: "ts",
       detail: materialDetails([
         ["문의", record.inquiry],

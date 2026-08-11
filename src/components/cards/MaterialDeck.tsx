@@ -191,7 +191,6 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
   const deckItems = items.slice(0, DECK_LIMIT)
   const reduced = useReducedMotion()
   const { active, move, rootRef, rootProps } = useDeckControls(deckItems.length)
-  const activePalette = MATERIAL_CARD_PALETTES[active % MATERIAL_CARD_PALETTES.length]
 
   if (!deckItems.length) {
     return (
@@ -209,11 +208,10 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
       aria-roledescription="carousel"
       aria-label="자료 카드 덱"
       tabIndex={0}
-      className="touch-pan-y overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,#111114_0%,#0b0b0f_100%)] outline-none focus-visible:ring-[3px] focus-visible:ring-white/60"
+      className="touch-pan-y overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
       {...rootProps}
     >
       <div className="relative min-h-[21rem] overflow-hidden [perspective:1200px] sm:min-h-[22rem]">
-        <span aria-hidden="true" className={`pointer-events-none absolute left-1/2 top-1/2 h-40 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-30 blur-3xl saturate-50 transition-colors duration-500 motion-reduce:transition-none ${activePalette.glow}`} />
         {deckItems.map((item, index) => {
           const offset = index - active
           if (Math.abs(offset) > 2 || (reduced && offset !== 0)) return null
@@ -234,9 +232,9 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
         })}
       </div>
       <div className="flex items-center justify-center gap-3 px-5 pb-5">
-        <Button type="button" variant="outline" size="icon" disabled={active === 0} aria-label="이전 자료" onClick={() => move(-1)} className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white disabled:border-white/10 disabled:bg-white/5 disabled:text-white/35"><ArrowLeft /></Button>
-        <span className="min-w-20 text-center text-sm font-semibold tabular-nums text-white/85" aria-live="polite">{String(active + 1).padStart(2, "0")} / {String(deckItems.length).padStart(2, "0")}</span>
-        <Button type="button" variant="outline" size="icon" disabled={active === deckItems.length - 1} aria-label="다음 자료" onClick={() => move(1)} className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white disabled:border-white/10 disabled:bg-white/5 disabled:text-white/35"><ArrowRight /></Button>
+        <Button type="button" variant="outline" size="icon" disabled={active === 0} aria-label="이전 자료" onPointerDown={(event) => event.stopPropagation()} onClick={() => move(-1)} className="text-[var(--foreground)]"><ArrowLeft /></Button>
+        <span className="min-w-20 text-center text-sm font-semibold tabular-nums text-[var(--foreground)]" aria-live="polite">{String(active + 1).padStart(2, "0")} / {String(deckItems.length).padStart(2, "0")}</span>
+        <Button type="button" variant="outline" size="icon" disabled={active === deckItems.length - 1} aria-label="다음 자료" onPointerDown={(event) => event.stopPropagation()} onClick={() => move(1)} className="text-[var(--foreground)]"><ArrowRight /></Button>
       </div>
     </div>
   )
@@ -279,9 +277,7 @@ export function MaterialDetailSheet({ item, onOpenChange, onEdit, onDeleted }: {
                 <div><p className="text-xs font-semibold text-[var(--muted-foreground)]">요약</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{item.summary || "요약이 등록되지 않았습니다."}</p></div>
               )}
               <div><p className="text-xs font-semibold text-[var(--muted-foreground)]">태그</p><div className="mt-2 flex flex-wrap gap-2">{item.tags.length ? item.tags.map((tag) => <Badge key={tag} variant="outline">{tag}</Badge>) : <span className="text-sm text-[var(--muted-foreground)]">태그 없음</span>}</div></div>
-              <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4">
-                {link ? <Button asChild className="w-full"><a href={link} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : <><Button type="button" className="w-full" disabled><ExternalLink aria-hidden="true" />SharePoint에서 열기</Button><p className="mt-2 text-center text-xs text-[var(--muted-foreground)]">링크 미등록</p></>}
-              </div>
+              {link ? <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4"><Button asChild className="w-full"><a href={link} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button></div> : null}
               {!item.readOnly && item.source === "manual" ? <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="outline" onClick={() => onEdit?.(item)}><Pencil aria-hidden="true" />수정</Button><Button type="button" variant="destructive" onClick={() => { void remove() }}><Trash2 aria-hidden="true" />삭제</Button></div> : null}
             </div>
           </>
@@ -403,7 +399,7 @@ export function MaterialSearchList({ items, emptyMessage, onOpen, onAdd }: {
       {tags.length ? <div className="flex flex-wrap gap-2" aria-label="태그 필터"><Button type="button" size="sm" variant={tag === "__all__" ? "secondary" : "outline"} onClick={() => setTag("__all__")}>전체</Button>{tags.map((value) => <Button key={value} type="button" size="sm" variant={tag === value ? "secondary" : "outline"} onClick={() => setTag(value)}>{value}</Button>)}</div> : null}
       {shown.length ? <div className="grid gap-3 lg:grid-cols-2">{shown.map((item) => {
         const link = httpsMaterialLink(item.link)
-        return <Card key={item.id} className="h-full"><CardHeader className="pb-3"><div className="flex items-start justify-between gap-3"><CardTitle className="line-clamp-2 leading-6">{item.title}</CardTitle><SourceBadge source={item.source} /></div><p className="text-xs text-[var(--muted-foreground)]">{item.date ? fmtDateFull(item.date) : "날짜 미등록"}{item.owner ? ` · ${item.owner}` : ""}</p></CardHeader><CardContent><p className="line-clamp-2 min-h-10 text-sm text-[var(--muted-foreground)]">{item.summary || "요약이 등록되지 않았습니다."}</p><div className="mt-3 flex flex-wrap gap-1.5">{item.tags.slice(0, 5).map((value) => <Badge key={value} variant="secondary">{value}</Badge>)}</div><div className="mt-5 flex flex-wrap items-center justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => onOpen(item)}>상세</Button>{link ? <Button asChild size="sm"><a href={link} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : <><span className="text-xs text-[var(--muted-foreground)]">링크 미등록</span><Button type="button" size="sm" disabled>SharePoint에서 열기</Button></>}</div></CardContent></Card>
+        return <Card key={item.id} className="h-full"><CardHeader className="pb-3"><div className="flex items-start justify-between gap-3"><CardTitle className="line-clamp-2 leading-6">{item.title}</CardTitle><SourceBadge source={item.source} /></div><p className="text-xs text-[var(--muted-foreground)]">{item.date ? fmtDateFull(item.date) : "날짜 미등록"}{item.owner ? ` · ${item.owner}` : ""}</p></CardHeader><CardContent><p className="line-clamp-2 min-h-10 text-sm text-[var(--muted-foreground)]">{item.summary || "요약이 등록되지 않았습니다."}</p><div className="mt-3 flex flex-wrap gap-1.5">{item.tags.slice(0, 5).map((value) => <Badge key={value} variant="secondary">{value}</Badge>)}</div><div className="mt-5 flex flex-wrap items-center justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => onOpen(item)}>상세</Button>{link ? <Button asChild size="sm"><a href={link} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : null}</div></CardContent></Card>
       })}</div> : <div className="flex min-h-32 items-center justify-center rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--muted)] p-6 text-center text-sm text-[var(--muted-foreground)]">{items.length ? "검색 조건에 맞는 자료가 없습니다." : emptyMessage}</div>}
       {pageCount > 1 ? <div className="flex items-center justify-center gap-3"><Button type="button" variant="outline" size="sm" disabled={safePage === 1} onClick={() => setPage((current) => Math.max(1, current - 1))}>이전</Button><span className="text-sm tabular-nums text-[var(--muted-foreground)]">{safePage} / {pageCount}</span><Button type="button" variant="outline" size="sm" disabled={safePage === pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))}>다음</Button></div> : null}
     </div>
