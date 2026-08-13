@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react"
+import { Fragment, useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
@@ -12,6 +12,7 @@ interface AppSidebarProps {
   collapsed: boolean
   mobileOpen: boolean
   onMobileClose: () => void
+  onToggleCollapsed: () => void
 }
 
 interface SidebarLinkProps {
@@ -29,7 +30,6 @@ function SidebarLink({ item, collapsed, onNavigate }: SidebarLinkProps) {
       className={({ isActive }) =>
         cn(
           "group relative flex h-9 items-center gap-3 overflow-hidden rounded-[var(--radius)] px-3 text-sm font-medium text-[var(--sidebar-foreground)] outline-none transition-colors duration-[var(--t-fast)] before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:origin-center before:scale-y-50 before:rounded-full before:bg-[var(--chart-1)] before:opacity-0 before:transition-[transform,opacity] before:duration-[var(--t-fast)] hover:bg-[color-mix(in_srgb,var(--sidebar-accent)_60%,transparent)] hover:text-[var(--sidebar-accent-foreground)] focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)] motion-reduce:transition-none motion-reduce:before:transition-none",
-          collapsed && "justify-center px-0",
           isActive && "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)] before:scale-y-100 before:opacity-100",
         )
       }
@@ -38,7 +38,14 @@ function SidebarLink({ item, collapsed, onNavigate }: SidebarLinkProps) {
         aria-hidden="true"
         className="size-4 shrink-0 transition-transform duration-[var(--t-fast)] group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
       />
-      <span className={cn("truncate", collapsed && "sr-only")}>{item.label}</span>
+      <span
+        className={cn(
+          "truncate transition-opacity duration-500 [transition-timing-function:cubic-bezier(0.83,0,0.17,1)] motion-reduce:transition-none",
+          collapsed ? "opacity-0" : "opacity-100",
+        )}
+      >
+        {item.label}
+      </span>
     </NavLink>
   )
 
@@ -52,14 +59,27 @@ function SidebarLink({ item, collapsed, onNavigate }: SidebarLinkProps) {
   )
 }
 
-export function AppSidebar({ collapsed, mobileOpen, onMobileClose }: AppSidebarProps) {
+export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleCollapsed }: AppSidebarProps) {
   const location = useLocation()
   const developmentActive = location.pathname.startsWith("/development")
-  const [developmentOpen, setDevelopmentOpen] = useState(developmentActive)
+  // DEVELOPMENT 하위 메뉴는 항상 접힌 상태로 시작한다. 셰브론을 눌러야 열리고,
+  // 하위 항목을 고르거나 사이드바에서 커서가 벗어나면 자동으로 다시 닫힌다.
+  const [developmentOpen, setDevelopmentOpen] = useState(false)
+  // 데스크톱에서 접힌(비고정) 레일이 포인터/키보드 포커스가 안으로 들어오면 살짝 펼쳐졌다
+  // 벗어나면 다시 부드럽게 닫힌다. 핀 고정 상태나 모바일에서는 항상 완전히 펼침.
+  const [revealed, setRevealed] = useState(false)
 
-  useEffect(() => {
-    if (developmentActive) setDevelopmentOpen(true)
-  }, [developmentActive])
+  const expanded = !collapsed || revealed || mobileOpen
+  const showCollapsed = !expanded
+  const overlay = collapsed && revealed // 콘텐츠 위에 떠서 펼쳐짐(레이아웃 밀림 없음)
+  const closeReveal = () => {
+    setRevealed(false)
+    setDevelopmentOpen(false) // 커서가 벗어나면 하위 메뉴도 함께 접는다
+  }
+  const handleNavigate = () => {
+    onMobileClose()
+    closeReveal()
+  }
 
   return (
     <TooltipProvider delayDuration={150}>
@@ -75,51 +95,70 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose }: AppSidebarP
       <aside
         id="app-sidebar"
         aria-label="주 메뉴"
+        onMouseEnter={() => setRevealed(true)}
+        onMouseLeave={closeReveal}
+        onFocusCapture={() => setRevealed(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeReveal()
+        }}
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--sidebar-foreground)] transition-[width,transform] duration-200 motion-reduce:transition-none lg:translate-x-0",
-          collapsed && "lg:w-20",
+          "fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--sidebar-foreground)] transition-[width,transform,box-shadow] duration-500 [transition-timing-function:cubic-bezier(0.83,0,0.17,1)] motion-reduce:transition-none lg:translate-x-0",
+          showCollapsed && "lg:w-20",
+          overlay && "lg:shadow-[0_1.25rem_3rem_-1rem_rgba(0,0,0,0.45)]",
           mobileOpen && "translate-x-0",
         )}
       >
-        <div className={cn("flex h-16 items-center gap-3 px-5", collapsed && "lg:justify-center lg:px-0")}>
+        <div className="relative flex h-16 items-center gap-3 px-5">
           <Avatar className="size-9">
             <AvatarFallback className="bg-linear-to-br from-[var(--chart-1)] to-[var(--chart-2)] font-semibold text-[var(--sidebar-primary-foreground)]">
               F
             </AvatarFallback>
           </Avatar>
-          <div className={cn("min-w-0", collapsed && "lg:sr-only")}>
+          <div
+            className={cn(
+              "min-w-0 transition-opacity duration-500 [transition-timing-function:cubic-bezier(0.83,0,0.17,1)] motion-reduce:transition-none",
+              showCollapsed ? "opacity-0" : "opacity-100",
+            )}
+          >
             <p className="truncate text-sm font-semibold text-[var(--sidebar-accent-foreground)]">FABRIC R&amp;D</p>
             <p className="truncate text-xs text-[var(--muted-foreground)]">통합원단부 3팀</p>
           </div>
+          <button
+            type="button"
+            aria-label={collapsed ? "사이드바 고정" : "사이드바 자동 숨김"}
+            title={collapsed ? "사이드바 고정" : "사이드바 자동 숨김"}
+            onClick={onToggleCollapsed}
+            className={cn(
+              "absolute top-1/2 hidden size-8 -translate-y-1/2 items-center justify-center rounded-[var(--radius)] text-sm outline-none transition-[background-color,opacity] duration-[var(--t-fast)] hover:bg-[color-mix(in_srgb,var(--sidebar-accent)_60%,transparent)] focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)] motion-reduce:transition-none lg:flex",
+              showCollapsed ? "right-1 opacity-0" : "right-2 opacity-100",
+            )}
+          >
+            <span aria-hidden="true">{collapsed ? "📌" : "◀️"}</span>
+          </button>
         </div>
 
         <Separator className="bg-[var(--sidebar-border)]" />
 
-        <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-5">
-          {navigationGroups.map((group) => (
-            <section key={group.label} aria-labelledby={`nav-${group.label.replaceAll(" ", "-")}`}>
-              <h2
-                id={`nav-${group.label.replaceAll(" ", "-")}`}
-                className={cn(
-                  "mb-2 px-3 text-[10px] font-medium uppercase tracking-[0.14em] text-[color-mix(in_srgb,var(--muted-foreground)_70%,transparent)]",
-                  collapsed && "lg:sr-only",
-                )}
-              >
-                {group.label}
-              </h2>
+        <nav className="flex-1 overflow-y-auto px-3 py-5">
+          {navigationGroups.map((group, groupIndex) => (
+            <section
+              key={group.label}
+              aria-label={group.label}
+              className={cn(groupIndex > 0 && "mt-4 border-t border-[var(--sidebar-border)] pt-4")}
+            >
               <div className="space-y-1">
                 {group.items.map((item) => {
                   if (!item.children) {
-                    return <SidebarLink key={item.path} item={item} collapsed={collapsed} onNavigate={onMobileClose} />
+                    return <SidebarLink key={item.path} item={item} collapsed={showCollapsed} onNavigate={handleNavigate} />
                   }
 
                   return (
                     <Fragment key={item.path}>
                       <div className="flex items-center gap-1">
                         <div className="min-w-0 flex-1">
-                          <SidebarLink item={item} collapsed={collapsed} onNavigate={onMobileClose} />
+                          <SidebarLink item={item} collapsed={showCollapsed} onNavigate={handleNavigate} />
                         </div>
-                        {!collapsed ? (
+                        {!showCollapsed ? (
                           <button
                             type="button"
                             aria-label="DEVELOPMENT 하위 메뉴"
@@ -140,7 +179,7 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose }: AppSidebarP
                           </button>
                         ) : null}
                       </div>
-                      {!collapsed ? (
+                      {!showCollapsed ? (
                         <div
                           aria-hidden={!developmentOpen}
                           className={cn(
@@ -155,7 +194,7 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose }: AppSidebarP
                                   key={child.path}
                                   to={child.path}
                                   end={child.path === "/development"}
-                                  onClick={onMobileClose}
+                                  onClick={handleNavigate}
                                   tabIndex={developmentOpen ? undefined : -1}
                                   className={({ isActive }) =>
                                     cn(
@@ -181,11 +220,16 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose }: AppSidebarP
 
         <div className="p-3">
           <Separator className="mb-3 bg-[var(--sidebar-border)]" />
-          <div className={cn("flex items-center gap-3 rounded-[var(--radius)] p-2", collapsed && "lg:justify-center")}>
+          <div className="flex items-center gap-3 rounded-[var(--radius)] p-2">
             <Avatar className="size-8">
               <AvatarFallback className="text-xs font-semibold">F</AvatarFallback>
             </Avatar>
-            <div className={cn("min-w-0", collapsed && "lg:sr-only")}>
+            <div
+              className={cn(
+                "min-w-0 transition-opacity duration-500 [transition-timing-function:cubic-bezier(0.83,0,0.17,1)] motion-reduce:transition-none",
+                showCollapsed ? "opacity-0" : "opacity-100",
+              )}
+            >
               <p className="truncate text-sm font-medium">FABRIC R&amp;D</p>
               <p className="truncate text-xs text-[var(--muted-foreground)]">통합원단부 3팀</p>
             </div>

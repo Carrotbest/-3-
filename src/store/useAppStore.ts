@@ -1,7 +1,8 @@
 import { create } from "zustand"
 
 import { saveCache } from "../data/cache"
-import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type FabricAnalysisRow, type MaterialDiagnostics, type MaterialItem, type StudyRecord } from "../data/schema"
+import { recalculateDevelopmentRecords } from "../data/dd-workflow"
+import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type StudyRecord } from "../data/schema"
 import {
   sampleCompleted,
   sampleEvents,
@@ -52,6 +53,8 @@ export interface AppState {
   materials: MaterialItem[]
   materialsManual: MaterialItem[]
   materialDiagnostics: MaterialDiagnostics
+  fabricOverrides: FabricLedgerOverride[]
+  fabricEvents: FabricLedgerEvent[]
   trends: TrendItem[]
   filters: AppFilters
   theme: Theme
@@ -97,6 +100,8 @@ export function createInitialAppState(): AppState {
       unknownKind: 0,
       missingLink: 0,
     },
+    fabricOverrides: [],
+    fabricEvents: [],
     trends,
     filters: {},
     theme: "light",
@@ -131,6 +136,19 @@ export function setIngestState(patch: Partial<IngestState>): void {
   useAppStore.setState((state) => ({
     ingest: { ...state.ingest, ...patch },
   }))
+}
+
+export function addTeamEvent(event: CalendarEvent): void {
+  const id = event.id ?? globalThis.crypto?.randomUUID?.() ?? String(Date.now())
+  const next = [...useAppStore.getState().events, { ...event, id }]
+  setAppState({ events: next })
+  void saveCache("events", next)
+}
+
+export function deleteTeamEvent(id: string): void {
+  const next = useAppStore.getState().events.filter((event) => event.id !== id)
+  setAppState({ events: next })
+  void saveCache("events", next)
 }
 
 function persistTsRecords(records: readonly TsRecord[]): void {
@@ -201,4 +219,72 @@ export async function deleteManualMaterial(id: string): Promise<void> {
   const next = useAppStore.getState().materialsManual.filter((material) => material.id !== id)
   setAppState({ materialsManual: next })
   await saveCache("materialsManual", next)
+}
+
+const recordIdentity = (record: DevRecord): string => `${record._src.sheet}::${record._src.row}`
+
+/** DD의 공통 업무 항목을 로컬 원장에 신규 등록하거나 수정한다. */
+export async function saveDevelopmentRecord(record: DevRecord, previousIdentity?: string): Promise<void> {
+  const current = useAppStore.getState().records
+  const identity = previousIdentity ?? recordIdentity(record)
+  const exists = current.some((item) => recordIdentity(item) === identity)
+  const next = recalculateDevelopmentRecords(exists
+    ? current.map((item) => recordIdentity(item) === identity ? record : item)
+    : [record, ...current])
+  setAppState({ records: next })
+  await saveCache("records", next)
+}
+
+export interface ApplyFabricActionInput {
+  fabricKey: string
+  action: FabricLedgerAction
+  fromStatus: FabricLedgerStatus
+  toStatus: FabricLedgerStatus
+  actor?: string
+  note?: string
+  storageNo?: string
+  recordIdentity?: string
+}
+
+/** 상태 변경과 변경 이력을 함께 저장한다. 원본 엑셀은 수정하지 않는다. */
+export async function applyFabricAction(input: ApplyFabricActionInput): Promise<void> {
+  const state = useAppStore.getState()
+  const occurredAt = new Date().toISOString()
+  const actor = input.actor?.trim() || "관리자"
+  const previous = state.fabricOverrides.find((item) => item.key === input.fabricKey)
+  const override: FabricLedgerOverride = {
+    key: input.fabricKey,
+    status: input.toStatus,
+    storageNo: input.storageNo?.trim() || previous?.storageNo,
+    note: input.note?.trim() || previous?.note,
+    updatedAt: occurredAt,
+    updatedBy: actor,
+  }
+  const event: FabricLedgerEvent = {
+    id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    fabricKey: input.fabricKey,
+    action: input.action,
+    fromStatus: input.fromStatus,
+    toStatus: input.toStatus,
+    occurredAt,
+    actor,
+    note: input.note?.trim() || "",
+    storageNo: input.storageNo?.trim() || previous?.storageNo,
+  }
+  const fabricOverrides = [override, ...state.fabricOverrides.filter((item) => item.key !== input.fabricKey)]
+  const fabricEvents = [event, ...state.fabricEvents]
+
+  let records = state.records
+  if (input.action === "COMPLETE" && input.recordIdentity) {
+    records = records.map((record) => recordIdentity(record) === input.recordIdentity
+      ? { ...record, devStatus: "완료", stage: "완료", receivedDate: record.receivedDate || occurredAt.slice(0, 10) }
+      : record)
+  }
+
+  setAppState({ fabricOverrides, fabricEvents, records })
+  await Promise.all([
+    saveCache("fabricOverrides", fabricOverrides),
+    saveCache("fabricEvents", fabricEvents),
+    records === state.records ? Promise.resolve() : saveCache("records", records),
+  ])
 }

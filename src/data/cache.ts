@@ -3,7 +3,7 @@ import type { AppState } from "../store/useAppStore"
 const DB_NAME = "fabric-rnd-cache"
 const DB_VERSION = 1
 const STORE_NAME = "parsed"
-export const CACHE_KEYS = ["records", "completed", "meta", "study", "studyFiles", "rdda", "fabricAnalysis", "ts", "orgMembers", "materials", "materialsManual", "materialDiagnostics"] as const
+export const CACHE_KEYS = ["records", "completed", "meta", "study", "studyFiles", "events", "rdda", "fabricAnalysis", "ts", "orgMembers", "materials", "materialsManual", "materialDiagnostics", "fabricOverrides", "fabricEvents"] as const
 export type CacheKey = (typeof CACHE_KEYS)[number]
 
 function openDatabase(): Promise<IDBDatabase> {

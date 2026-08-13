@@ -57,14 +57,12 @@ import {
   kpis,
   processFunnel,
   receiptStatus,
-  scheduleAlerts,
   sampleLeadTimeline,
   statusOf,
   subpageCardStats,
   type CategoryOverviewDatum,
   type CategoryStyleRow,
   type CompletedLibraryItem,
-  type HomeKpiDetailRow,
   type OwnerProcessKey,
 } from "@/data/derive"
 import { fmtDate, fmtDateFull, fmtNum, toDate } from "@/data/format"
@@ -80,10 +78,12 @@ import {
 import { useAppStore } from "@/store/useAppStore"
 import { ingestDevelopment, ingestSamples } from "@/data/upload"
 import { hoverLift } from "@/lib/motion"
+import { DevelopmentMasterSheet } from "@/routes/DevelopmentMasterSheet"
 
 const ALL = "__all__"
 const SUB_CATEGORY: Record<string, string | null> = {
   overview: null,
+  workspace: null,
   eu: "EU MARKET",
   season: "SEASON",
   core: "CORE",
@@ -302,6 +302,7 @@ function MiniSplitDonut({ gd, dom, gdPct, owner }: MiniSplitDonutProps) {
 }
 
 function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
+  const completed = useAppStore((state) => state.completed)
   // DD 주간요약과 동일하게 오버뷰는 "진행중(Status=진행중)"만 집계한다(완료·HOLD 제외).
   const active = useMemo(() => records.filter(isInProgress), [records])
   const split = useMemo(() => devTypeSplit(active), [active])
@@ -310,10 +311,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
   const funnel = useMemo(() => processFunnel(active), [active])
   const owners = useMemo(() => byOwnerDetailed(active), [active])
   const categories = useMemo(() => categoryOverview(active), [active])
-  // HOME 스케줄 카드와 동일 기준(진행 중 · 납기임박 D-7 · 납기지연 D+).
-  const schedule = useMemo(() => scheduleAlerts(records), [records])
   const [categoryDetail, setCategoryDetail] = useState<CategoryOverviewDatum | null>(null)
-  const [alertDetail, setAlertDetail] = useState<HomeKpiDetailRow | null>(null)
   const categoryStyles = useMemo(
     () => (categoryDetail ? categoryStyleList(active, categoryDetail.key) : []),
     [active, categoryDetail],
@@ -456,53 +454,9 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         </div>
       </SectionCard>
 
-      <SectionCard
-        title="Schedule Alerts"
-        subtitle="HOME 스케줄과 동일 기준 — 납기지연(D+) · 납기임박(D-7 이내). 항목을 클릭하면 스타일 상세를 확인합니다."
-        contentClassName="p-0"
-      >
-        <div className="flex flex-wrap gap-2 border-b border-[var(--border)] px-5 py-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_oklab,var(--destructive)_12%,transparent)] px-3 py-1 text-xs font-semibold text-[var(--destructive)]">납기지연 {schedule.late.length}건</span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--warning-soft)] px-3 py-1 text-xs font-semibold text-[var(--warning)]">납기임박 {schedule.due.length}건</span>
-        </div>
-        {schedule.all.length ? (
-          <div className="divide-y divide-[var(--border)]">
-            {schedule.all.slice(0, 10).map((item) => {
-              const late = item.scheduleState === "late"
-              const dayLabel = item.dayOffset === null ? "—" : late ? `D+${Math.abs(item.dayOffset)}` : item.dayOffset === 0 ? "오늘 마감" : `D-${item.dayOffset}`
-              return (
-                <button
-                  key={rowId(item.record)}
-                  type="button"
-                  aria-haspopup="dialog"
-                  onClick={() => setAlertDetail(item)}
-                  className="grid w-full gap-3 px-5 py-4 text-left outline-none transition-colors hover:bg-[var(--muted)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none sm:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_auto] sm:items-center"
-                >
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-2">
-                      <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${late ? "bg-[var(--destructive)]" : "bg-[var(--warning)]"}`} />
-                      <span className="truncate text-sm font-semibold text-[var(--foreground)]">{item.record.styleNo} · {item.record.opt}</span>
-                    </span>
-                    <span className="mt-1 block text-xs text-[var(--muted-foreground)]">납기 {fmtDate(item.record.dueDate)}</span>
-                  </span>
-                  <span className="text-sm text-[var(--foreground)]"><span className="mr-2 text-xs text-[var(--muted-foreground)]">담당</span>{item.record.owner || "미지정"}</span>
-                  <span className="text-sm text-[var(--foreground)]"><span className="mr-2 text-xs text-[var(--muted-foreground)]">공정</span>{item.record.stage || "—"}</span>
-                  <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${late ? "bg-[color-mix(in_oklab,var(--destructive)_12%,transparent)] text-[var(--destructive)]" : "bg-[var(--warning-soft)] text-[var(--warning)]"}`}>{dayLabel}</span>
-                </button>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center px-5 py-12 text-center">
-            <CheckCircle2 aria-hidden="true" className="size-8 text-[var(--chart-2)]" />
-            <p className="mt-3 text-sm font-medium text-[var(--foreground)]">확인할 일정 알림이 없습니다.</p>
-            <p className="mt-1 text-xs text-[var(--muted-foreground)]">현재 납기 임박 또는 지연 건이 없습니다.</p>
-          </div>
-        )}
-      </SectionCard>
+      <CompletedSampleLibrary records={records} samples={completed} />
 
       <CategoryStyleSheet category={categoryDetail} styles={categoryStyles} onOpenChange={(open) => { if (!open) setCategoryDetail(null) }} />
-      <ScheduleAlertSheet alert={alertDetail} onOpenChange={(open) => { if (!open) setAlertDetail(null) }} />
     </section>
   )
 }
@@ -560,67 +514,6 @@ function CategoryStyleSheet({
             ) : (
               <div className="flex min-h-52 items-center justify-center p-6 text-center text-sm text-[var(--muted-foreground)]">해당 카테고리의 진행중 스타일이 없습니다.</div>
             )}
-          </>
-        ) : null}
-      </SheetContent>
-    </Sheet>
-  )
-}
-
-/** Schedule Alerts 클릭 시 해당 스타일의 개발 상세(조직·염색·컬러·중량 등) 팝업. */
-function ScheduleAlertSheet({
-  alert,
-  onOpenChange,
-}: {
-  alert: HomeKpiDetailRow | null
-  onOpenChange: (open: boolean) => void
-}) {
-  const record = alert?.record ?? null
-  const late = alert?.scheduleState === "late"
-  const dayLabel = alert?.dayOffset == null ? "—" : late ? `D+${Math.abs(alert.dayOffset)}` : alert.dayOffset === 0 ? "오늘 마감" : `D-${alert.dayOffset}`
-  const detailPairs: Array<[string, string]> = record ? [
-    ["조직", record.construction || "—"],
-    ["염색", record.dyeing || "—"],
-    ["컬러", record.color || "—"],
-    ["중량", record.weight === "" ? "—" : `${record.weight} g/m²`],
-    ["공정 단계", record.stage || "—"],
-    ["담당", record.owner || "미지정"],
-    ["Planner", record.planner || "—"],
-    ["Buyer", record.buyer || "—"],
-    ["GD#", record.gdNo || "—"],
-    ["SA#", record.saNo || "—"],
-  ] : []
-
-  return (
-    <Sheet open={alert !== null} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto border-[var(--border)] bg-[var(--background)] sm:max-w-xl">
-        {record ? (
-          <>
-            <SheetHeader className="border-b border-[var(--border)] p-6 pr-12">
-              <div className="flex flex-wrap items-center gap-2">
-                <SheetTitle className="text-[var(--foreground)]">{record.styleNo} · {record.opt}</SheetTitle>
-                <Badge className={late ? "border-transparent bg-[var(--destructive)] text-[var(--destructive-foreground)]" : "border-transparent bg-[var(--warning)] text-[var(--warning-foreground)]"}>{late ? "납기지연" : "납기임박"} {dayLabel}</Badge>
-              </div>
-              <SheetDescription className="text-[var(--muted-foreground)]">납기 {fmtDateFull(record.dueDate)} · {record.season} · {record.category}</SheetDescription>
-            </SheetHeader>
-            <dl className="grid gap-x-6 gap-y-5 p-6 sm:grid-cols-2">
-              {detailPairs.map(([label, value]) => (
-                <div key={label}>
-                  <dt className="text-xs font-medium text-[var(--muted-foreground)]">{label}</dt>
-                  <dd className="mt-1 break-words text-sm text-[var(--foreground)]">{value}</dd>
-                </div>
-              ))}
-              {record.note ? (
-                <div className="sm:col-span-2">
-                  <dt className="text-xs font-medium text-[var(--muted-foreground)]">비고</dt>
-                  <dd className="mt-1 break-words text-sm text-[var(--foreground)]">{record.note}</dd>
-                </div>
-              ) : null}
-            </dl>
-            <div className="mx-6 mb-6 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4">
-              <p className="text-xs font-medium text-[var(--muted-foreground)]">원본 위치</p>
-              <p className="mt-1 text-sm text-[var(--foreground)]">{record._src.sheet} · {record._src.row}행</p>
-            </div>
           </>
         ) : null}
       </SheetContent>
@@ -1010,13 +903,27 @@ export function Development() {
   const records = useAppStore((state) => state.records)
   const overview = !sub || sub === "overview"
 
-  return overview ? <DevelopmentOverview records={records} /> : <DevelopmentList />
+  if (overview) return <DevelopmentOverview records={records} />
+  if (sub === "workspace") return <DevelopmentMasterPage />
+  return <DevelopmentList />
+}
+
+function DevelopmentMasterPage() {
+  return (
+    <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 px-4 pt-4 sm:px-6 lg:px-8">
+      <PageHeader
+        title="DD MASTER"
+        subtitle="Development Dashboard 64열을 기준으로 접수·수정·완료와 샘플대장 연결을 관리합니다."
+        actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="development-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><DataUpload kind="development-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} /></div>}
+      />
+      <DevelopmentMasterSheet />
+    </section>
+  )
 }
 
 function DevelopmentList() {
   const { sub } = useParams<{ sub?: string }>()
   const records = useAppStore((state) => state.records)
-  const completed = useAppStore((state) => state.completed)
   const [view, setView] = useState("list")
   const [search, setSearch] = useState("")
   const [season, setSeason] = useState(ALL)
@@ -1150,7 +1057,6 @@ function DevelopmentList() {
           <TabsTrigger value="list">목록</TabsTrigger>
           <TabsTrigger value="board">보드</TabsTrigger>
           <TabsTrigger value="timeline">타임라인</TabsTrigger>
-          <TabsTrigger value="completed">완료 샘플</TabsTrigger>
         </TabsList>
         <TabsContent value="list" className="mt-6">
           <SectionCard
@@ -1180,9 +1086,6 @@ function DevelopmentList() {
             <div className="border-b border-[var(--border)] p-4">{toolbar}</div>
             <LeadTimeGantt rows={timeline.rows} minDate={timeline.minDate} maxDate={timeline.maxDate} todayPct={timeline.todayPct} today={today} onSelect={setSelectedRecord} />
           </SectionCard>
-        </TabsContent>
-        <TabsContent value="completed" className="mt-6">
-          <CompletedSampleLibrary records={records} samples={completed} />
         </TabsContent>
       </Tabs>
 

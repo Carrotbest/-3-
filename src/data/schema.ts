@@ -8,6 +8,8 @@ export interface DevRecordSource {
 
 /** DD 원본의 확장 기술데이터. 값이 없으면 필드 자체를 생략한다. */
 export interface DevTechnical {
+  /** DD 64열 중 개발 DETAIL 원본 식별값. 상단 요약 필드와 별도로 원문을 보존한다. */
+  development?: { developer?: string; co?: string; developmentNo?: string }
   // 공정 작업처 (DD 공정 SCHEDULE 그룹의 Mill 컬럼)
   mills?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
   // 공정별 완료일 (기존 processReached 판정에 쓰는 Status 원본값)
@@ -16,10 +18,19 @@ export interface DevTechnical {
   yarnDetail?: string
   arrangeNo?: string
   finishing?: string[]
+  /** Finishing A~D의 빈 칸 위치까지 유지하기 위한 원본 슬롯. */
+  finishingSlots?: { a?: string; b?: string; c?: string; d?: string }
   optionProgress?: string
   review?: string
   // ORIGINAL 분석
-  original?: { brand?: string; contents?: string; yarn?: string; comments?: string }
+  original?: {
+    brand?: string
+    contents?: string
+    construction?: string
+    weight?: number | null
+    yarn?: string
+    comments?: string
+  }
   // 실측 물성
   actual?: {
     width?: number | null
@@ -141,6 +152,8 @@ export function httpsMaterialLink(value: string | undefined): string | undefined
 }
 
 export interface CompletedSample {
+  /** 샘플관리대장 창고보관·소진완료·폐기 시트의 4자리 R&D No. */
+  storageNo?: string
   styleNo: string
   flNo: string
   season: string
@@ -167,6 +180,34 @@ export interface CompletedSample {
   completedAt: string
   requestDate?: string
   sourceSheet?: string
+}
+
+/** DD와 샘플관리대장을 하나의 업무 흐름으로 보여주기 위한 원단 상태. */
+export type FabricLedgerStatus = "DEVELOPING" | "READY" | "WAREHOUSE" | "EXHAUSTED" | "DISPOSED"
+
+export type FabricLedgerAction = "COMPLETE" | "RECEIVE" | "EXHAUST" | "DISPOSE" | "RESTORE" | "NOTE"
+
+/** 원본 엑셀은 그대로 두고 웹에서 변경한 운영 상태만 덧씌운다. */
+export interface FabricLedgerOverride {
+  key: string
+  status: FabricLedgerStatus
+  storageNo?: string
+  note?: string
+  updatedAt: string
+  updatedBy: string
+}
+
+/** 모든 업무 처리는 이전/변경 상태를 남기는 추가형 이력으로 저장한다. */
+export interface FabricLedgerEvent {
+  id: string
+  fabricKey: string
+  action: FabricLedgerAction
+  fromStatus: FabricLedgerStatus
+  toStatus: FabricLedgerStatus
+  occurredAt: string
+  actor: string
+  note: string
+  storageNo?: string
 }
 
 export type StudyState = "완료" | "진행" | "계획" | "미진행"

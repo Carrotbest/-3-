@@ -129,37 +129,46 @@ export function Rdda() {
         />
       </div>
 
-      <AreaCard
-        title="월별 YTD 스냅샷 추이"
-        subtitle="월별 파일은 합산하지 않고 각 파일 총계만 비교합니다."
-        data={snapshotData}
-        series={[{ dataKey: "meeting", label: "Meeting" }, { dataKey: "pickup", label: "Pickup" }]}
-        revealDelay={0}
-      />
-
-      <div className="grid min-w-0 gap-4 xl:grid-cols-2">
-        <BarCard
-          title={`${scopeLabel} 고객별 Pickup`}
-          subtitle="Pickup 건수 내림차순 · CustomerName 기준"
-          data={customerData}
-          series={[{ dataKey: "meeting", label: "Meeting" }, { dataKey: "pickup", label: "Pickup" }]}
-          horizontal
-          revealDelay={75}
-        />
-        <DonutCard
-          title={`${scopeLabel} 원산지 분포`}
-          subtitle="Meeting 시트 CountryOfOrigin 기준"
-          data={perspective.origin}
-          revealDelay={125}
-        />
+      <div className="grid min-w-0 gap-4 xl:grid-cols-12">
+        <div className="min-w-0 xl:col-span-8">
+          <AreaCard
+            title="월별 YTD 스냅샷 추이"
+            subtitle="월별 파일은 합산하지 않고 각 파일 총계만 비교합니다."
+            data={snapshotData}
+            series={[{ dataKey: "meeting", label: "Meeting" }, { dataKey: "pickup", label: "Pickup" }]}
+            revealDelay={0}
+          />
+        </div>
+        <div className="min-w-0 xl:col-span-4">
+          <DonutCard
+            title={`${scopeLabel} 원산지 분포`}
+            subtitle="Meeting 시트 CountryOfOrigin 기준"
+            data={perspective.origin}
+            revealDelay={125}
+          />
+        </div>
       </div>
 
-      <SectionCard title={`${scopeLabel} Best Items`} subtitle="Pickup 2건 이상 · Meeting 3건 이상 · Pickup 동률 동일 순위" contentClassName="p-0" revealDelay={175}>
-        <DataTable columns={columns} rows={perspective.bestItems} getRowId={(row) => row.flNo} pageSize={10} emptyMessage="조건을 충족한 Best Items가 없습니다." />
-        <p className="px-4 pb-4 text-xs text-[var(--muted-foreground)]">
-          협력사 컬럼은 합계 대조를 통과한 팀 내부 화면에서만 생성합니다.
-        </p>
-      </SectionCard>
+      <div className="grid min-w-0 gap-4 xl:grid-cols-12">
+        <div className="min-w-0 xl:col-span-8">
+          <SectionCard title={`${scopeLabel} Best Items`} subtitle="Pickup 2건 이상 · Meeting 3건 이상 · Pickup 동률 동일 순위" contentClassName="p-0" revealDelay={175}>
+            <DataTable columns={columns} rows={perspective.bestItems} getRowId={(row) => row.flNo} pageSize={10} emptyMessage="조건을 충족한 Best Items가 없습니다." />
+            <p className="px-4 pb-4 text-xs text-[var(--muted-foreground)]">
+              협력사 컬럼은 합계 대조를 통과한 팀 내부 화면에서만 생성합니다.
+            </p>
+          </SectionCard>
+        </div>
+        <div className="min-w-0 xl:col-span-4">
+          <BarCard
+            title={`${scopeLabel} 고객별 Pickup`}
+            subtitle="Pickup 건수 내림차순 · CustomerName 기준"
+            data={customerData}
+            series={[{ dataKey: "meeting", label: "Meeting" }, { dataKey: "pickup", label: "Pickup" }]}
+            horizontal
+            revealDelay={75}
+          />
+        </div>
+      </div>
 
       <p className="text-xs text-[var(--muted-foreground)]">
         {rdda.source === "folder"

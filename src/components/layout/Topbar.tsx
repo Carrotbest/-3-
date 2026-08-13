@@ -1,29 +1,19 @@
-import { useEffect, useRef } from "react"
-import { Menu, Moon, Search, Sun } from "lucide-react"
+import { Menu } from "lucide-react"
+import { useLocation } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { routeDefinitions } from "@/routes/route-config"
 
 interface TopbarProps {
-  dark: boolean
   onToggleSidebar: () => void
-  onToggleTheme: () => void
 }
 
-export function Topbar({ dark, onToggleSidebar, onToggleTheme }: TopbarProps) {
-  const searchRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    const handleShortcut = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault()
-        searchRef.current?.focus()
-      }
-    }
-
-    window.addEventListener("keydown", handleShortcut)
-    return () => window.removeEventListener("keydown", handleShortcut)
-  }, [])
+export function Topbar({ onToggleSidebar }: TopbarProps) {
+  const { pathname } = useLocation()
+  const currentRoute = routeDefinitions.find((definition) => definition.path === pathname)
+    ?? [...routeDefinitions]
+      .sort((left, right) => right.path.length - left.path.length)
+      .find((definition) => pathname.startsWith(definition.path))
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-[var(--border)] bg-[color-mix(in_srgb,var(--background)_94%,transparent)] px-4 backdrop-blur-sm sm:px-6">
@@ -31,41 +21,25 @@ export function Topbar({ dark, onToggleSidebar, onToggleTheme }: TopbarProps) {
         type="button"
         variant="ghost"
         size="icon"
-        aria-label="사이드바 전환"
+        aria-label="메뉴 열기"
         aria-controls="app-sidebar"
         onClick={onToggleSidebar}
+        className="lg:hidden"
       >
         <Menu aria-hidden="true" />
       </Button>
 
-      <div className="group relative max-w-md flex-1">
-        <Search
-          aria-hidden="true"
-          className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)] transition-colors duration-[var(--t-fast)] group-focus-within:text-[var(--foreground)] motion-reduce:transition-none"
-        />
-        <Input
-          ref={searchRef}
-          type="search"
-          aria-label="검색"
-          aria-keyshortcuts="Meta+K Control+K"
-          placeholder="검색"
-          className="bg-[var(--muted)] pl-9 pr-14 transition-[background-color,box-shadow] duration-[var(--t-fast)] focus-visible:bg-[var(--background)] motion-reduce:transition-none"
-        />
-        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded-[var(--radius-xs)] border border-[var(--border)] bg-[var(--background)] px-1.5 py-0.5 font-mono text-xs text-[var(--muted-foreground)]">
-          ⌘K
-        </kbd>
+      <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
+        <h1 className="shrink-0 whitespace-nowrap text-2xl font-semibold tracking-tight text-[var(--foreground)]">
+          {currentRoute?.title ?? ""}
+        </h1>
+        {currentRoute?.subtitle ? (
+          <>
+            <span aria-hidden="true" className="h-6 w-px shrink-0 bg-[var(--border)]" />
+            <p className="min-w-0 truncate text-xs text-[var(--muted-foreground)]">{currentRoute.subtitle}</p>
+          </>
+        ) : null}
       </div>
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={dark ? "라이트 테마로 전환" : "다크 테마로 전환"}
-        aria-pressed={dark}
-        onClick={onToggleTheme}
-      >
-        {dark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
-      </Button>
     </header>
   )
 }

@@ -43,7 +43,7 @@ export function StatCard({ icon, label, value, caption, info, tone = "default", 
   )
 
   const content = (
-    <CardContent className="p-5">
+    <CardContent className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-[var(--muted-foreground)]">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]">
@@ -72,11 +72,11 @@ export function StatCard({ icon, label, value, caption, info, tone = "default", 
           </TooltipProvider>
         ) : null}
       </div>
-      <p className={cn("mt-5 text-3xl font-semibold tracking-tight", tone === "destructive" ? "text-[var(--destructive)]" : tone === "warning" ? "text-[var(--warning)]" : "text-[var(--foreground)]")}>
+      <p className={cn("mt-3 text-2xl font-semibold tracking-tight tabular-nums", tone === "destructive" ? "text-[var(--destructive)]" : tone === "warning" ? "text-[var(--warning)]" : "text-[var(--foreground)]")}>
         {typeof value === "number" ? <NumberTicker value={value} decimals={decimals} suffix={suffix} /> : value}
       </p>
       <p className="mt-1 text-xs text-[var(--muted-foreground)]">{caption}</p>
-      {visual ? <div className="mt-5 border-t border-[var(--border)] pt-4">{visual}</div> : null}
+      {visual ? <div className="mt-3 border-t border-[var(--border)] pt-3">{visual}</div> : null}
     </CardContent>
   )
 

@@ -6,7 +6,25 @@
 @import "tw-animate-css";
 
 html {
-  font-size: 15px;
+  /* 정보 밀도 상향(Command Deck): 기준 15→14px로 전 화면 약 7% 조밀하게. */
+  font-size: 14px;
+}
+
+/* 데이터성 수치는 자릿수 정렬(tabular)로 표·KPI 가독성 확보. */
+table,
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 공정 게이지: 화면 진입 시 0 → 목표 폭으로 부드럽게 채워짐(휴지 상태는 항상 목표값). */
+@keyframes gaugeGrow {
+  from { width: 0; }
+}
+
+/* DD 마스터 에디터: 커스텀 달력 버튼으로 대체하므로 브라우저 기본 달력 아이콘은 숨기되 클릭영역은 유지 */
+input.dd-date::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
 }
 
 @theme inline {

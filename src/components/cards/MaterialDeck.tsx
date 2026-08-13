@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from "react"
 import { ArrowLeft, ArrowRight, ExternalLink, FileText, Pencil, Plus, Search, Trash2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -72,52 +72,203 @@ function useReducedMotion(): boolean {
   return reduced
 }
 
-function useDeckControls(itemCount: number) {
+// --- Continuous coverflow motion -------------------------------------------
+// The deck no longer snaps between whole indices. `posRef` holds a *fractional*
+// card position that the pointer drags 1:1, the wheel nudges in fine steps, and
+// a flick carries with inertia. Everything is painted straight to the DOM on a
+// rAF loop, so the cards glide instead of stepping. `active` (the rounded centre)
+// is kept only for the page counter, arrow-disabled state and tap-to-open.
+
+// Geometry, tuned so that at whole offsets the deck matches the previous look:
+// neighbour ≈ 0.62·width across / scale .82 / 24°, second card compressed in,
+// blurred and half-faded. Non-integer offsets interpolate smoothly between.
+const CARD_PITCH = 0.62 // sideways travel per card, as a fraction of card width
+const PITCH_FALLOFF = 0.8 // < 1 so far cards pack in rather than fan out forever
+const SCALE_STEP = 0.18
+const SCALE_FALLOFF = 0.92
+const ROTATE = 24
+const ROTATE_FALLOFF = 0.32
+const ROTATE_CAP = 46
+const WHEEL_PER_CARD = 280 // larger = finer wheel; a notch moves ~0.35 of a card
+const WHEEL_SETTLE_MS = 140 // after the wheel goes quiet, ease onto the nearest card
+
+function cardTransform(distance: number, width: number): string {
+  const abs = Math.abs(distance)
+  const dir = Math.sign(distance)
+  const tx = dir * width * CARD_PITCH * Math.pow(abs, PITCH_FALLOFF)
+  const ty = -4 * Math.max(0, 1 - abs) // the centre card lifts a touch
+  const scale = Math.max(0.5, 1 - SCALE_STEP * Math.pow(abs, SCALE_FALLOFF))
+  const tilt = Math.min(ROTATE * Math.pow(abs, ROTATE_FALLOFF), ROTATE_CAP) * -dir
+  return `translateX(calc(-50% + ${tx.toFixed(2)}px)) translateY(${ty.toFixed(2)}px) scale(${scale.toFixed(3)}) rotateY(${tilt.toFixed(2)}deg)`
+}
+
+export function useCoverflowMotion(itemCount: number, reduced: boolean) {
   const rootRef = useRef<HTMLDivElement>(null)
+  const cardRefs = useRef<(HTMLElement | null)[]>([])
+  const posRef = useRef(0) // fractional centre — the single source of truth
+  const targetRef = useRef(0) // where the current settle is headed
+  const widthRef = useRef(0)
+  const rafRef = useRef<number | null>(null)
+  const wheelIdle = useRef<number | null>(null)
   const pointerInside = useRef(false)
-  const dragStart = useRef<number | null>(null)
-  const wheelLockUntil = useRef(0)
+  const movedRef = useRef(false) // did the last press turn into a drag?
+  const dragRef = useRef<{ id: number; x: number; pos: number; v: number; t: number } | null>(null)
   const [active, setActive] = useState(0)
 
+  const clamp = useCallback(
+    (pos: number) => Math.max(0, Math.min(Math.max(0, itemCount - 1), pos)),
+    [itemCount],
+  )
+
+  // Paint transforms straight to the DOM — sixty state updates a second would
+  // re-render every card for numbers React never needs to see.
+  const paint = useCallback(() => {
+    const width = widthRef.current
+    if (!width) return
+    const pos = posRef.current
+    cardRefs.current.forEach((card, index) => {
+      if (!card) return
+      const distance = index - pos
+      const abs = Math.abs(distance)
+      card.style.transform = cardTransform(distance, width)
+      const opacity = abs <= 1 ? 1 - 0.08 * abs : Math.max(0, 0.92 - 0.46 * (abs - 1))
+      card.style.opacity = opacity.toFixed(3)
+      const blur = Math.min(1.2, Math.max(0, (abs - 1.2) * 1.2))
+      card.style.filter = blur > 0.01 ? `blur(${blur.toFixed(2)}px)` : "none"
+      card.style.zIndex = String(100 - Math.round(abs * 10))
+      card.style.pointerEvents = abs < 2.2 ? "auto" : "none"
+      card.style.visibility = abs > 3 ? "hidden" : "visible"
+    })
+  }, [])
+
+  const settle = useCallback(
+    (target: number) => {
+      const goal = clamp(target)
+      targetRef.current = goal
+      setActive(Math.round(goal))
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = null
+      }
+      if (reduced) {
+        posRef.current = goal
+        paint()
+        return
+      }
+      const step = () => {
+        const remaining = targetRef.current - posRef.current
+        if (Math.abs(remaining) < 0.0006) {
+          posRef.current = targetRef.current
+          paint()
+          rafRef.current = null
+          return
+        }
+        // Exponential ease-out — the tail is what makes it feel unhurried.
+        posRef.current += remaining * 0.18
+        paint()
+        rafRef.current = requestAnimationFrame(step)
+      }
+      rafRef.current = requestAnimationFrame(step)
+    },
+    [clamp, paint, reduced],
+  )
+
+  const move = useCallback(
+    (direction: -1 | 1) => settle(Math.round(targetRef.current) + direction),
+    [settle],
+  )
+  const goTo = useCallback((index: number) => settle(index), [settle])
+
+  // Keep the centre in range if the deck shrinks under us.
   useEffect(() => {
-    setActive((current) => Math.min(current, Math.max(0, itemCount - 1)))
-  }, [itemCount])
+    posRef.current = clamp(posRef.current)
+    targetRef.current = clamp(targetRef.current)
+    setActive(Math.round(posRef.current))
+    paint()
+  }, [clamp, itemCount, paint])
 
-  const move = (direction: -1 | 1) => {
-    setActive((current) => Math.max(0, Math.min(itemCount - 1, current + direction)))
-  }
+  // Card width drives pitch and depth, so it is the only thing worth measuring —
+  // and only when the box actually changes size.
+  useEffect(() => {
+    const frame = rootRef.current
+    if (!frame) return
+    const measure = () => {
+      const card = cardRefs.current.find(Boolean)
+      if (!card) return
+      widthRef.current = card.offsetWidth
+      paint()
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(frame)
+    return () => observer.disconnect()
+  }, [paint])
 
+  // Fine, continuous wheel: accumulate into the target and re-aim the settle,
+  // then snap gently onto the nearest card once the wheel goes quiet.
   useEffect(() => {
     const node = rootRef.current
     if (!node || itemCount < 2) return
     const onWheel = (event: WheelEvent) => {
       if (!pointerInside.current) return
       const delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX
-      const direction = Math.sign(delta)
-      if (!direction) return
-      const atStart = active === 0 && direction < 0
-      const atEnd = active === itemCount - 1 && direction > 0
-      if (atStart || atEnd) return
+      if (!delta) return
+      const atStart = targetRef.current <= 0.001 && delta < 0
+      const atEnd = targetRef.current >= itemCount - 1 - 0.001 && delta > 0
+      if (atStart || atEnd) return // let the page scroll past the ends
       event.preventDefault()
-      const now = performance.now()
-      if (now < wheelLockUntil.current) return
-      wheelLockUntil.current = now + 220
-      move(direction > 0 ? 1 : -1)
+      settle(targetRef.current + delta / WHEEL_PER_CARD)
+      if (wheelIdle.current !== null) window.clearTimeout(wheelIdle.current)
+      wheelIdle.current = window.setTimeout(() => {
+        settle(Math.round(targetRef.current))
+      }, WHEEL_SETTLE_MS)
     }
     node.addEventListener("wheel", onWheel, { passive: false })
     return () => node.removeEventListener("wheel", onWheel)
-  }, [active, itemCount])
+  }, [itemCount, settle])
+
+  useEffect(
+    () => () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
+      if (wheelIdle.current !== null) window.clearTimeout(wheelIdle.current)
+    },
+    [],
+  )
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return
-    dragStart.current = event.clientX
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
     event.currentTarget.setPointerCapture(event.pointerId)
+    movedRef.current = false
+    targetRef.current = posRef.current
+    dragRef.current = { id: event.pointerId, x: event.clientX, pos: posRef.current, v: 0, t: performance.now() }
   }
-  const onPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragStart.current === null) return
-    const distance = event.clientX - dragStart.current
-    dragStart.current = null
-    if (Math.abs(distance) >= 40) move(distance > 0 ? -1 : 1)
+  const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current
+    if (!drag || drag.id !== event.pointerId) return
+    const pitch = widthRef.current * CARD_PITCH
+    if (!pitch) return
+    const dx = event.clientX - drag.x
+    if (Math.abs(dx) > 4) movedRef.current = true
+    const now = performance.now()
+    const previous = posRef.current
+    posRef.current = clamp(drag.pos - dx / pitch) // cards track the finger 1:1
+    drag.v = ((posRef.current - previous) / Math.max(now - drag.t, 1)) * 1000 // cards/sec
+    drag.t = now
+    const index = Math.round(clamp(posRef.current))
+    if (index !== active) setActive(index)
+    paint()
+  }
+  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current
+    if (!drag || drag.id !== event.pointerId) return
+    dragRef.current = null
+    // Let a flick carry, but never more than two cards.
+    const carried = Math.max(-2, Math.min(2, drag.v * 0.14))
+    settle(Math.round(posRef.current + carried))
   }
   const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
@@ -130,27 +281,23 @@ function useDeckControls(itemCount: number) {
   return {
     active,
     move,
+    goTo,
     rootRef,
+    setCardRef: (index: number) => (node: HTMLElement | null) => {
+      cardRefs.current[index] = node
+    },
+    wasDragged: () => movedRef.current,
     rootProps: {
       onPointerEnter: () => { pointerInside.current = true },
-      onPointerLeave: () => { pointerInside.current = false; dragStart.current = null },
+      onPointerLeave: () => { pointerInside.current = false },
       onPointerDown,
-      onPointerUp,
-      onPointerCancel: () => { dragStart.current = null },
+      onPointerMove,
+      onPointerUp: endDrag,
+      onPointerCancel: endDrag,
       onKeyDown,
     },
   }
 }
-
-const deckPosition = (offset: number): string => {
-  if (offset === 0) return "z-30 opacity-100 [filter:none] [transform:translateX(-50%)_translateY(-0.25rem)_scale(1)_rotateY(0deg)]"
-  if (offset === -1) return "z-20 opacity-[.92] [filter:none] [transform:translateX(-112%)_scale(.82)_rotateY(24deg)]"
-  if (offset === 1) return "z-20 opacity-[.92] [filter:none] [transform:translateX(12%)_scale(.82)_rotateY(-24deg)]"
-  if (offset === -2) return "z-10 opacity-50 [filter:blur(1px)] [transform:translateX(-158%)_scale(.66)_rotateY(30deg)]"
-  return "z-10 opacity-50 [filter:blur(1px)] [transform:translateX(58%)_scale(.66)_rotateY(-30deg)]"
-}
-
-const REDUCED_ACTIVE_POSITION = "z-30 opacity-100 [filter:none] [transform:translateX(-50%)_scale(1)]"
 
 type MaterialCardTone = "surface" | "onColor"
 
@@ -190,7 +337,7 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
 }) {
   const deckItems = items.slice(0, DECK_LIMIT)
   const reduced = useReducedMotion()
-  const { active, move, rootRef, rootProps } = useDeckControls(deckItems.length)
+  const { active, move, goTo, rootRef, setCardRef, wasDragged, rootProps } = useCoverflowMotion(deckItems.length, reduced)
 
   if (!deckItems.length) {
     return (
@@ -211,19 +358,20 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
       className="touch-pan-y overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
       {...rootProps}
     >
-      <div className="relative min-h-[21rem] overflow-hidden [perspective:1200px] sm:min-h-[22rem]">
+      <div className="relative min-h-[21rem] cursor-grab overflow-hidden [perspective:1200px] active:cursor-grabbing sm:min-h-[22rem]">
         {deckItems.map((item, index) => {
-          const offset = index - active
-          if (Math.abs(offset) > 2 || (reduced && offset !== 0)) return null
           const palette = MATERIAL_CARD_PALETTES[index % MATERIAL_CARD_PALETTES.length]
+          const isActive = index === active
           return (
             <button
               key={item.id}
+              ref={setCardRef(index)}
               type="button"
-              tabIndex={offset === 0 ? 0 : -1}
-              aria-hidden={offset !== 0}
-              onClick={() => { if (offset === 0) onOpen(item) }}
-              className={`absolute left-1/2 top-7 flex aspect-square [width:clamp(190px,44%,260px)] cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/20 p-5 text-left outline-none transition-[transform,opacity,filter] duration-[560ms] [transition-timing-function:cubic-bezier(.22,1,.36,1)] will-change-[transform,opacity,filter] focus-visible:ring-[3px] focus-visible:ring-white/80 motion-reduce:transition-none ${palette.background} ${offset === 0 ? palette.activeShadow : INACTIVE_CARD_SHADOW} ${reduced ? REDUCED_ACTIVE_POSITION : deckPosition(offset)}`}
+              tabIndex={isActive ? 0 : -1}
+              aria-hidden={!isActive}
+              onClick={() => { if (wasDragged()) return; if (isActive) onOpen(item); else goTo(index) }}
+              style={{ opacity: 0 }}
+              className={`absolute left-1/2 top-7 flex aspect-square [width:clamp(190px,44%,260px)] cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/20 p-5 text-left outline-none transition-shadow duration-300 will-change-transform focus-visible:ring-[3px] focus-visible:ring-white/80 ${palette.background} ${isActive ? palette.activeShadow : INACTIVE_CARD_SHADOW}`}
             >
               <span aria-hidden="true" className={`pointer-events-none absolute inset-0 ${CARD_VIGNETTE}`} />
               <span className="relative z-10 flex h-full flex-col"><MaterialCardBody item={item} tone="onColor" /></span>

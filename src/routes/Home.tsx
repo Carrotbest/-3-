@@ -2,14 +2,16 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   ArrowUpRight, BookOpenCheck, CalendarDays, CheckCircle2, ClipboardList,
-  FlaskConical, Layers3, LoaderCircle, Microscope, RefreshCw, Ruler,
+  FlaskConical, Layers3, LoaderCircle, Microscope, RefreshCw,
   Plus, Sparkles, TimerReset, TrendingUp, Waves, Wrench,
 } from "lucide-react"
 import { Bar, CartesianGrid, ComposedChart, LabelList, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 import { CoverflowGallery } from "@/components/cards/CoverflowGallery"
 import { MaterialDeck, MaterialDetailSheet, MaterialFormSheet } from "@/components/cards/MaterialDeck"
-import { PinBoard } from "@/components/cards/PinBoard"
+import type { PinBoardItem } from "@/components/cards/PinBoard"
+import { OwnerLaneBoard } from "@/components/charts/OwnerLaneBoard"
+import { TeamSchedule } from "@/components/dashboard/TeamSchedule"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { DataUpload } from "@/components/upload/DataUpload"
 import { NumberTicker } from "@/components/motion/NumberTicker"
@@ -111,6 +113,49 @@ function ScheduleCard({ dueSoon, late, onClick }: { dueSoon: number; late: numbe
           </CardContent>
         </Card>
       </button>
+    </Reveal>
+  )
+}
+
+const QUICK_ACCESS_ACCENTS = [
+  "from-[#5B6CFF] to-[#8B5CF6]",
+  "from-[#8B5CF6] to-[#EC4899]",
+  "from-[#0EA5E9] to-[#22D3EE]",
+  "from-[#34D399] to-[#10B981]",
+  "from-[#F59E0B] to-[#F97316]",
+  "from-[#6366F1] to-[#3B82F6]",
+  "from-[#14B8A6] to-[#0EA5E9]",
+  "from-[#A855F7] to-[#6366F1]",
+] as const
+
+function QuickAccessGrid({ items, onNavigate }: { items: readonly PinBoardItem[]; onNavigate: (path: string) => void }) {
+  return (
+    <Reveal delay={120}>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((item, index) => {
+            const Icon = item.icon
+            const accent = QUICK_ACCESS_ACCENTS[index % QUICK_ACCESS_ACCENTS.length]
+            return (
+              <button
+                key={item.path}
+                type="button"
+                onClick={() => onNavigate(item.path)}
+                className="group relative flex min-h-[6.5rem] items-center gap-3 overflow-hidden rounded-[10px] border border-white/70 bg-white/55 px-3 text-left shadow-[0_1px_2px_rgba(16,24,64,0.05),0_12px_24px_-14px_rgba(76,91,212,0.4)] outline-none backdrop-blur-md transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_2px_6px_rgba(16,24,64,0.07),0_18px_34px_-12px_rgba(76,91,212,0.55)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transform-none motion-reduce:transition-none"
+              >
+                <span aria-hidden="true" className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/90" />
+                <span aria-hidden="true" className={`pointer-events-none absolute -right-5 -top-7 size-16 rounded-full bg-gradient-to-br ${accent} opacity-[0.14] blur-xl transition-opacity duration-300 group-hover:opacity-40 motion-reduce:transition-none`} />
+                <span className={`relative flex size-9 shrink-0 items-center justify-center rounded-[8px] bg-gradient-to-br ${accent} text-white shadow-[0_5px_12px_-3px_rgba(76,91,212,0.6)]`}>
+                  <Icon className="size-4" aria-hidden="true" />
+                </span>
+                <span className="relative min-w-0 flex-1">
+                  <strong className="block truncate text-[13px] font-semibold text-[var(--foreground)]">{item.title}</strong>
+                  <span className="block truncate text-[11px] text-[var(--muted-foreground)]">{item.description}</span>
+                </span>
+                <ArrowUpRight aria-hidden="true" className="relative size-4 shrink-0 text-[var(--muted-foreground)] transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:text-[var(--foreground)] motion-reduce:transition-none" />
+              </button>
+            )
+          })}
+      </div>
     </Reveal>
   )
 }
@@ -227,11 +272,50 @@ function KpiDetailSheet({
   )
 }
 
-const PROCESS_GAUGE: Record<string, string> = {
-  yarn: "bg-[var(--chart-1)]",
-  knitting: "bg-[var(--chart-2)]",
-  dyeing: "bg-[var(--chart-3)]",
-  finishing: "bg-[var(--chart-4)]",
+const PROCESS_LABEL_EN: Record<string, string> = {
+  yarn: "yarn in-fac",
+  knitting: "knitting",
+  dyeing: "dyeing",
+  finishing: "finishing",
+}
+
+const PROCESS_GRADIENT: Record<string, string> = {
+  yarn: "from-[#F6B29B] to-[#B83E24]",
+  knitting: "from-[#6FCEC3] to-[#14655B]",
+  dyeing: "from-[#6E93A2] to-[#122C36]",
+  finishing: "from-[#F5DFA6] to-[#BE8D1F]",
+}
+
+function ProcessFunnel({ process, reduceMotion }: {
+  process: readonly { key: string; label: string; pct: number; done: number; total: number }[]
+  reduceMotion: boolean
+}) {
+  return (
+    <div className="mt-6">
+      <div className="mb-2 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+        {process.map((item) => (
+          <div key={item.key} className="min-w-0">
+            <div className="flex items-baseline gap-1.5">
+              <span className="truncate text-[13px] font-medium text-[var(--foreground)]">{PROCESS_LABEL_EN[item.key] ?? item.label}</span>
+              <span className="shrink-0 text-[13px] font-semibold text-[var(--foreground)]"><NumberTicker value={item.pct} decimals={Number.isInteger(item.pct) ? 0 : 1} suffix="%" duration={1000} /></span>
+            </div>
+            <p className="text-[11px] tabular-nums text-[var(--muted-foreground)]">{item.done}/{item.total}건</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex h-3.5 w-full gap-1.5" role="img" aria-label={`공정 누적 도달률 — ${process.map((item) => `${PROCESS_LABEL_EN[item.key] ?? item.label} ${item.done}건 ${item.pct}%`).join(", ")}`}>
+        {process.map((item, index) => (
+          <div key={item.key} className="relative h-full flex-1 overflow-hidden rounded-full bg-[var(--muted)]">
+            <div
+              className={`h-full rounded-full bg-gradient-to-r ${PROCESS_GRADIENT[item.key] ?? ""}`}
+              style={{ width: `${item.pct}%`, animation: reduceMotion ? undefined : `gaugeGrow 1000ms cubic-bezier(.22,.61,.36,1) ${index * 80}ms backwards` }}
+            />
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">공정 누적 도달률 · DEVELOPMENT OVERVIEW 기준</p>
+    </div>
+  )
 }
 
 const CALENDAR_ACCENT = "var(--chart-4)"
@@ -242,7 +326,6 @@ const QUICK_ACCESS = [
   { title: "CALENDAR", description: "일정과 납기", path: "/calendar", icon: CalendarDays },
   { title: "FABRIC ANALYSIS", description: "원단 물성 분석", path: "/fabric-analysis", icon: Microscope },
   { title: "TS 관리", description: "기술지원 업무", path: "/ts", icon: Wrench },
-  { title: "CONSTRUCTION GUIDE", description: "조직 가이드", path: "/construction-guide", icon: Ruler },
   { title: "MACRO TREND", description: "시장 거시 동향", path: "/trend/macro", icon: TrendingUp },
   { title: "FABRIC TREND", description: "소재 기술 동향", path: "/trend/fabric", icon: Waves },
   { title: "PORTFOLIO", description: "개발 포트폴리오", path: "/trend/portfolio", icon: Layers3 },
@@ -490,7 +573,7 @@ export function Home() {
   }
 
   return (
-    <section className="min-w-0 space-y-8">
+    <section className="min-w-0 space-y-6">
       <PageHeader title="대시보드" subtitle="DD 전체현황을 기준으로 개발 업무와 최신 정보를 확인합니다." actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="home-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><DataUpload kind="home-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} /><Button type="button" variant="outline" onClick={() => navigate("/sync")}><RefreshCw aria-hidden="true" />데이터 상태</Button></div>} />
 
       <Reveal>
@@ -507,32 +590,14 @@ export function Home() {
                 </div>
                 <Badge variant="secondary">DD 전체현황</Badge>
               </div>
-              <div className="mt-6">
-                <div className="mb-2 grid grid-cols-4 gap-2">
-                  {sections.progress.process.map((item) => (
-                    <div key={item.key} className="min-w-0">
-                      <div className="flex items-baseline justify-between gap-1">
-                        <span className="truncate text-xs font-medium text-[var(--foreground)]">{item.label}</span>
-                        <span className="shrink-0 text-xs font-semibold text-[var(--foreground)]">{item.pct}%</span>
-                      </div>
-                      <p className="text-[11px] text-[var(--muted-foreground)]">{item.done}/{item.total}건</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex h-3.5 w-full overflow-hidden rounded-full bg-[var(--muted)]" role="img" aria-label={`공정 누적 도달률 — ${sections.progress.process.map((item) => `${item.label} ${item.done}건 ${item.pct}%`).join(", ")}`}>
-                  {sections.progress.process.map((item, index) => (
-                    <div key={item.key} className={`relative h-full flex-1 ${index > 0 ? "border-l-2 border-[var(--card)]" : ""}`}>
-                      <div className={`h-full ${PROCESS_GAUGE[item.key]} ${reduceMotion ? "" : "transition-[width] duration-700 ease-out"}`} style={{ width: `${item.pct}%` }} />
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">공정 누적 도달률 · DEVELOPMENT OVERVIEW 기준</p>
-              </div>
+              <ProcessFunnel process={sections.progress.process} reduceMotion={reduceMotion} />
             </CardContent>
           </Card>
         </button>
       </Reveal>
 
+      <div className="grid gap-4 xl:grid-cols-12">
+        <div className="flex flex-col gap-4 xl:col-span-8">
       <div className="grid gap-4 sm:grid-cols-3">
         <KpiCard icon={<CheckCircle2 className="size-4" />} label="완료" value={sections.lastWeekDone} rangeLabel={rangeLabel("completed")} caption="Received Date 기준" onClick={() => setKpiDetailKind("completed")} onCalendarClick={() => setKpiDetailKind("completed")} />
         <KpiCard icon={<TimerReset className="size-4" />} label="접수" value={sections.thisWeekNew} rangeLabel={rangeLabel("new")} caption="Request Date 기준" delay={75} onClick={() => setKpiDetailKind("new")} onCalendarClick={() => setKpiDetailKind("new")} />
@@ -578,6 +643,16 @@ export function Home() {
           <div className="mt-5"><RddaTrendChart key={rddaMonths} monthly={monthly} reduceMotion={reduceMotion} /></div>
         </CardContent></Card>
       </Reveal>
+        </div>
+        <aside className="xl:col-span-4">
+          <TeamSchedule />
+        </aside>
+      </div>
+
+      <section aria-labelledby="owner-board-title">
+        <div className="mb-4"><h2 id="owner-board-title" className="text-base font-semibold text-[var(--foreground)]">담당자별 진행 현황</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">담당자·공정 단계별 진행 중 스타일 분포와 병목입니다. 셀을 누르면 상세 레인이 좁아집니다.</p></div>
+        <Card className="overflow-hidden"><OwnerLaneBoard rows={records} onSelect={() => navigate("/development")} /></Card>
+      </section>
 
       <section aria-labelledby="work-report-title">
         <div className="mb-4"><h2 id="work-report-title" className="text-base font-semibold text-[var(--foreground)]">Work report</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">연결된 업무 화면의 핵심 현황입니다.</p></div>
@@ -604,7 +679,7 @@ export function Home() {
               </Reveal>
             )
           })}
-          <Reveal delay={150} className="lg:col-span-2">
+          <Reveal delay={150} className="lg:col-span-1">
             <Card className="overflow-hidden">
               <CardContent className="p-5 sm:p-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -622,7 +697,7 @@ export function Home() {
               </CardContent>
             </Card>
           </Reveal>
-          <Reveal delay={225} className="lg:col-span-2">
+          <Reveal delay={225} className="lg:col-span-1">
             <Tilt3D max={7} lift={8}>
               <button type="button" onClick={() => navigate("/calendar")} className="group relative h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
                 <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 opacity-80" style={{ background: `linear-gradient(90deg, ${CALENDAR_ACCENT}, transparent)` }} />
@@ -653,7 +728,7 @@ export function Home() {
 
       <section aria-labelledby="quick-access-title">
         <div className="mb-4"><h2 id="quick-access-title" className="text-base font-semibold text-[var(--foreground)]">Quick access</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">자주 사용하는 업무 화면으로 바로 이동합니다.</p></div>
-        <PinBoard items={QUICK_ACCESS} onNavigate={navigate} />
+        <QuickAccessGrid items={QUICK_ACCESS} onNavigate={navigate} />
       </section>
 
       <MaterialDetailSheet item={selectedMaterial} onOpenChange={(open) => { if (!open) setSelectedMaterial(null) }} onEdit={(item) => openMaterialForm(item.kind, item)} />

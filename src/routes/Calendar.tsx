@@ -16,7 +16,7 @@ import { hoverLift } from "@/lib/motion"
 
 const ALL = "__all__"
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"]
-type CalendarType = "meeting" | "due" | "external" | "leave"
+type CalendarType = "meeting" | "due" | "external" | "leave" | "trip"
 interface CombinedEvent { date: string; type: CalendarType; title: string; time?: string; place?: string; owner?: string }
 
 const TYPE_META: Record<CalendarType, { label: string; dot: string; chip: string }> = {
@@ -24,6 +24,7 @@ const TYPE_META: Record<CalendarType, { label: string; dot: string; chip: string
   due: { label: "납기", dot: "bg-[var(--chart-3)]", chip: "border-[var(--chart-3)] text-[var(--foreground)]" },
   external: { label: "외부", dot: "bg-[var(--chart-1)]", chip: "border-[var(--chart-1)] text-[var(--foreground)]" },
   leave: { label: "휴가", dot: "bg-[var(--muted-foreground)]", chip: "border-[var(--border)] text-[var(--muted-foreground)]" },
+  trip: { label: "출장", dot: "bg-[var(--chart-3)]", chip: "border-[var(--chart-3)] text-[var(--foreground)]" },
 }
 
 const pad = (value: number) => String(value).padStart(2, "0")

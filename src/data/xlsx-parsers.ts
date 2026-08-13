@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx"
 
 import { normalizeSeason, toDate } from "./format"
+import { recalculateDevelopmentRecords } from "./dd-workflow"
 import type {
   RddaDistribution,
   RddaPerspective,
@@ -42,6 +43,7 @@ const DEV_DEFAULT_COLUMNS = {
   originalWeight: 13,
   origYarn: 14,
   origComments: 15,
+  developer: 16,
   constructionSecondary: 21,
   targetWeight: 22,
   color: 23,
@@ -94,6 +96,7 @@ const DEV_DEFAULT_COLUMNS = {
 } as const
 
 const SAMPLE_DEFAULT_COLUMNS = {
+  storageNo: 0,
   season: 1,
   buyer: 2,
   category: 3,
@@ -422,6 +425,7 @@ function devColumns(sheet: XLSX.WorkSheet, headerRow: number): ColumnMap<typeof 
     originalWeight,
     origYarn,
     origComments,
+    developer,
     constructionSecondary,
     targetWeight,
     color,
@@ -513,8 +517,21 @@ function technicalOf(
   const original = withDefinedFields({
     brand: optionalText(row[columns.origBrand]),
     contents: optionalText(row[columns.origContents]),
+    construction: optionalText(row[columns.constructionPrimary]),
+    weight: optionalNumber(row[columns.originalWeight]),
     yarn: optionalText(row[columns.origYarn]),
     comments: optionalText(row[columns.origComments]),
+  })
+  const development = withDefinedFields({
+    developer: optionalText(row[columns.developer]),
+    co: optionalText(row[columns.co]),
+    developmentNo: optionalText(row[columns.developmentNo]),
+  })
+  const finishingSlots = withDefinedFields({
+    a: optionalText(row[columns.finishingA]),
+    b: optionalText(row[columns.finishingB]),
+    c: optionalText(row[columns.finishingC]),
+    d: optionalText(row[columns.finishingD]),
   })
   const actual = withDefinedFields({
     width: optionalNumber(row[columns.actualWidth]),
@@ -550,11 +567,13 @@ function technicalOf(
   })
 
   return withDefinedFields({
+    development,
     mills,
     processDates,
     yarnDetail: optionalText(row[columns.yarnDetail]),
     arrangeNo: optionalText(row[columns.arrangeNo]),
     finishing: finishing.length ? finishing : undefined,
+    finishingSlots,
     optionProgress: optionalText(row[columns.optionProgress]),
     review: optionalText(row[columns.review]),
     original,
@@ -626,7 +645,7 @@ export function parseDevelopment(workbook: XLSX.WorkBook, today = new Date()): D
   if (!records.length) {
     throw new Error("'전체현황' 시트에서 Style No.가 있는 개발 건을 찾지 못했습니다.")
   }
-  return records
+  return recalculateDevelopmentRecords(records, today)
 }
 
 function sampleColumns(sheet: XLSX.WorkSheet, headerRow: number): ColumnMap<typeof SAMPLE_DEFAULT_COLUMNS> {
@@ -637,6 +656,7 @@ function sampleColumns(sheet: XLSX.WorkSheet, headerRow: number): ColumnMap<type
   const locate = (aliases: readonly string[], fallback: number): number =>
     columnWith(headers, aliases) ?? fallback
   return {
+    storageNo: locate(["r&d no.", "r&d no", "no."], SAMPLE_DEFAULT_COLUMNS.storageNo),
     season: locate(["season", "시즌"], SAMPLE_DEFAULT_COLUMNS.season),
     buyer: locate(["buyer division", "buyer"], SAMPLE_DEFAULT_COLUMNS.buyer),
     category: locate(["category", "카테고리"], SAMPLE_DEFAULT_COLUMNS.category),
@@ -672,6 +692,7 @@ function parseSampleSheet(workbook: XLSX.WorkBook, wanted: string, detectedHeade
     const styleNo = text(row[columns.styleNo])
     if (!styleNo || isSubtotal(styleNo)) continue
     samples.push({
+      storageNo: text(row[columns.storageNo]),
       styleNo,
       flNo: text(row[columns.flNo]),
       season: normalizeSeason(row[columns.season]).value,

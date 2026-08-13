@@ -384,12 +384,15 @@ export function TS() {
         </Card>
       </Reveal>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 xl:grid-cols-12">
+        <aside className="xl:col-span-4 xl:order-2">
+        <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
         <StatCard icon={<ClipboardList aria-hidden="true" className="size-4" />} label="접수" value={counts.received} caption="신규 확인 필요" info="현재 접수 상태인 요청입니다." revealDelay={0} />
         <StatCard icon={<LoaderCircle aria-hidden="true" className="size-4" />} label="처리중" value={counts.processing} caption="분석·해결 진행 중" info="현황 분석이나 해결 방안을 진행 중인 요청입니다." revealDelay={75} />
         <StatCard icon={<CheckCircle2 aria-hidden="true" className="size-4" />} label="완료" value={counts.done} caption="결과 정리 완료" info="결과까지 정리해 처리를 마친 요청입니다." revealDelay={150} />
-      </div>
-
+        </div>
+        </aside>
+        <div className="min-w-0 xl:col-span-8 xl:order-1">
       <SectionCard
         title="TS 목록"
         subtitle={`현재 보기 ${filteredRows.length}건`}
@@ -421,6 +424,8 @@ export function TS() {
           )}
         />
       </SectionCard>
+        </div>
+      </div>
 
       <MaterialSearchSection kind="TS" emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
 

@@ -262,23 +262,27 @@ export function sampleStudy(): StudyRecord[] {
   return rows
 }
 
-export type EventType = "meeting" | "due" | "external"
+export type EventType = "meeting" | "due" | "external" | "leave" | "trip"
 
 export interface CalendarEvent {
+  id?: string
   date: string
   type: EventType
   title: string
   time?: string
   place?: string
+  owner?: string
 }
 
 export function sampleEvents(): CalendarEvent[] {
   return [
-    { date: shift(0), type: "meeting", title: "팀 주간 점검 미팅", time: "10:00", place: "회의실 A" },
+    { id: "demo-team-meeting-weekly", date: shift(0), type: "meeting", title: "팀 주간 점검 미팅", time: "10:00", place: "회의실 A", owner: MEMBERS[0].name },
     { date: shift(0), type: "due", title: "GD26-1042 납기" },
-    { date: shift(1), type: "external", title: "EU Sample Review", time: "15:00" },
+    { id: "demo-team-external-review", date: shift(1), type: "external", title: "EU Sample Review", time: "15:00", owner: MEMBERS[1].name },
+    { id: "demo-team-leave", date: shift(2), type: "leave", title: "연차", owner: MEMBERS[2].name },
     { date: shift(3), type: "due", title: "GD26-1057 납기" },
-    { date: shift(8), type: "meeting", title: "R&D 미팅", time: "14:00" },
+    { id: "demo-team-trip", date: shift(5), type: "trip", title: "협력사 출장", time: "09:00", place: "데모 협력사", owner: MEMBERS[3].name },
+    { id: "demo-team-meeting-rnd", date: shift(8), type: "meeting", title: "R&D 미팅", time: "14:00", owner: MEMBERS[0].name },
     { date: shift(9), type: "due", title: "EU-026 납기" },
   ]
 }
