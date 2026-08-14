@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
   Boxes,
   CheckCircle2,
@@ -12,8 +12,10 @@ import {
   TimerReset,
   TriangleAlert,
   Workflow,
+  type LucideIcon,
 } from "lucide-react"
 import { useParams } from "react-router-dom"
+import { CartesianGrid, LabelList, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 import { RadialKpi, type RadialKpiTone } from "@/components/charts/RadialKpi"
 import { LeadTimeGantt } from "@/components/charts/LeadTimeGantt"
@@ -55,6 +57,7 @@ import {
   devTypeSplit,
   isInProgress,
   kpis,
+  ownerMonthlyFlTrend,
   processFunnel,
   receiptStatus,
   sampleLeadTimeline,
@@ -63,9 +66,12 @@ import {
   type CategoryOverviewDatum,
   type CategoryStyleRow,
   type CompletedLibraryItem,
+  type OwnerDetailedDatum,
+  type OwnerProcessDatum,
   type OwnerProcessKey,
 } from "@/data/derive"
 import { fmtDate, fmtDateFull, fmtNum, toDate } from "@/data/format"
+import { dayToneText, holidayName } from "@/data/holidays"
 import {
   DEFAULT_COLUMNS,
   FIELDS,
@@ -78,6 +84,7 @@ import {
 import { useAppStore } from "@/store/useAppStore"
 import { ingestDevelopment, ingestSamples } from "@/data/upload"
 import { hoverLift } from "@/lib/motion"
+import { useInView } from "@/lib/useInView"
 import { DevelopmentMasterSheet } from "@/routes/DevelopmentMasterSheet"
 
 const ALL = "__all__"
@@ -91,6 +98,9 @@ const SUB_CATEGORY: Record<string, string | null> = {
 }
 
 const RADIAL_TONES: RadialKpiTone[] = ["one", "two", "three", "four"]
+const GAUGE_MS = 1500
+const EASE_INOUT = "cubic-bezier(0.65, 0, 0.35, 1)"
+const GAUGE_BAR = "duration-[1500ms] [transition-timing-function:cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none"
 const PROCESS_STYLE: Record<OwnerProcessKey, { gradient: string; glow: string; dot: string }> = {
   unreceived: { gradient: "linear-gradient(90deg,#334155,#64748b,#94a3b8)", glow: "rgba(100,116,139,.4)", dot: "#64748b" },
   knitting: { gradient: "linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)", glow: "rgba(6,182,212,.5)", dot: "#06b6d4" },
@@ -119,10 +129,15 @@ const FIVE_STAGE_CLASS = [
   "bg-[var(--chart-2)]",
 ]
 
-function useAnimatedPercent(target: number): number {
+function useAnimatedPercent(target: number, active: boolean): number {
   const [value, setValue] = useState(0)
 
   useEffect(() => {
+    if (!active) {
+      setValue(0)
+      return
+    }
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setValue(target)
       return
@@ -130,7 +145,7 @@ function useAnimatedPercent(target: number): number {
     setValue(0)
     const frame = window.requestAnimationFrame(() => setValue(target))
     return () => window.cancelAnimationFrame(frame)
-  }, [target])
+  }, [active, target])
 
   return value
 }
@@ -142,17 +157,39 @@ interface AnimatedBarProps {
 }
 
 function AnimatedBar({ pct, className, label }: AnimatedBarProps) {
-  const animatedPct = useAnimatedPercent(pct)
+  const { ref, inView } = useInView<HTMLDivElement>({ once: true })
+  const animatedPct = useAnimatedPercent(pct, inView)
   return (
-    <div
-      className={`h-full rounded-full transition-[width] duration-700 ease-out motion-reduce:transition-none ${className}`}
-      style={{ width: `${animatedPct}%` }}
-      role="progressbar"
-      aria-label={label}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={pct}
-    />
+    <div ref={ref} className="h-full w-full">
+      <div
+        className={`h-full rounded-full transition-[width] ${GAUGE_BAR} ${className}`}
+        style={{ width: `${animatedPct}%` }}
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+      />
+    </div>
+  )
+}
+
+/** 그라데이션 채움 애니메이션 바(style 기반). */
+function AccentGradientBar({ pct, from, to, label }: { pct: number; from: string; to: string; label: string }) {
+  const { ref, inView } = useInView<HTMLDivElement>({ once: true })
+  const animatedPct = useAnimatedPercent(pct, inView)
+  return (
+    <div ref={ref} className="h-full w-full">
+      <div
+        className={`h-full rounded-full transition-[width] ${GAUGE_BAR}`}
+        style={{ width: `${animatedPct}%`, background: `linear-gradient(90deg, ${from}, ${to})` }}
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+      />
+    </div>
   )
 }
 
@@ -171,16 +208,17 @@ interface ProcessSegmentProps {
   owner: string
   total: number
   segment: ProcessStatusProps["process"][number]
+  started: boolean
   active: boolean
   onActivate: () => void
   onDeactivate: () => void
 }
 
-function ProcessSegment({ owner, total, segment, active, onActivate, onDeactivate }: ProcessSegmentProps) {
-  const animatedPct = useAnimatedPercent(segment.pct)
+function ProcessSegment({ owner, total, segment, started, active, onActivate, onDeactivate }: ProcessSegmentProps) {
+  const animatedPct = useAnimatedPercent(segment.pct, started)
   return (
     <div
-      className="group relative h-full min-w-0 first:rounded-l-full last:rounded-r-full outline-none transition-[width,filter,box-shadow] duration-700 ease-out hover:z-10 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none"
+      className={`group relative h-full min-w-0 first:rounded-l-full last:rounded-r-full outline-none transition-[width,filter,box-shadow] ${GAUGE_BAR} hover:z-10 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]`}
       style={{
         width: `${animatedPct}%`,
         background: PROCESS_STYLE[segment.key].gradient,
@@ -210,15 +248,14 @@ function ProcessSegment({ owner, total, segment, active, onActivate, onDeactivat
 
 function ProcessStatus({ owner, total, process }: ProcessStatusProps) {
   const [active, setActive] = useState<OwnerProcessKey | null>(null)
-  const [countCycle, setCountCycle] = useState(0)
+  const { ref, inView } = useInView<HTMLDivElement>({ once: true })
 
   const activate = (key: OwnerProcessKey) => {
     setActive(key)
-    setCountCycle((cycle) => cycle + 1)
   }
 
   return (
-    <div className="min-w-0">
+    <div ref={ref} className="min-w-0">
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted-foreground)]">Process status</p>
         <p className="shrink-0 text-xs text-[var(--muted-foreground)]">총 <strong className="font-semibold text-[var(--foreground)]">{total}</strong>건</p>
@@ -230,6 +267,7 @@ function ProcessStatus({ owner, total, process }: ProcessStatusProps) {
             owner={owner}
             total={total}
             segment={segment}
+            started={inView}
             active={active === segment.key}
             onActivate={() => activate(segment.key)}
             onDeactivate={() => setActive(null)}
@@ -257,7 +295,7 @@ function ProcessStatus({ owner, total, process }: ProcessStatusProps) {
                 <span className="truncate text-xs text-[var(--muted-foreground)]">{segment.label}</span>
               </span>
               <span className="mt-1 flex items-baseline gap-1">
-                <strong className="text-lg font-semibold tabular-nums leading-none text-[var(--foreground)]"><NumberTicker key={`${segment.key}-${isActive ? countCycle : 0}`} value={segment.count} /></strong>
+                <strong className="text-lg font-semibold tabular-nums leading-none text-[var(--foreground)]"><NumberTicker value={segment.count} duration={GAUGE_MS} startOnView /></strong>
                 <span className="text-[10px] text-[var(--muted-foreground)]">건 · {segment.pct}%</span>
               </span>
             </button>
@@ -268,36 +306,151 @@ function ProcessStatus({ owner, total, process }: ProcessStatusProps) {
   )
 }
 
-interface MiniSplitDonutProps {
-  gd: number
-  dom: number
-  gdPct: number
-  owner: string
+/* ============================================================
+ * Overview 전용 비주얼 프리미티브 — 쿨톤 액센트 · 모션 강화
+ * 전역 --chart 토큰은 유지하고 이 페이지 한정 액센트만 별도 정의한다.
+ * ========================================================== */
+
+type AccentKey = "slate" | "teal" | "violet" | "emerald" | "amber"
+
+const ACCENT: Record<AccentKey, { from: string; to: string; glow: string; soft: string; fg: string }> = {
+  slate: { from: "#475569", to: "#94a3b8", glow: "rgba(100,116,139,.30)", soft: "rgba(100,116,139,.12)", fg: "#64748b" },
+  teal: { from: "#0e7490", to: "#22d3ee", glow: "rgba(6,182,212,.32)", soft: "rgba(6,182,212,.12)", fg: "#0891b2" },
+  violet: { from: "#6d28d9", to: "#a78bfa", glow: "rgba(139,92,246,.32)", soft: "rgba(139,92,246,.12)", fg: "#7c3aed" },
+  emerald: { from: "#047857", to: "#34d399", glow: "rgba(16,185,129,.32)", soft: "rgba(16,185,129,.12)", fg: "#059669" },
+  amber: { from: "#b45309", to: "#fbbf24", glow: "rgba(245,158,11,.32)", soft: "rgba(245,158,11,.12)", fg: "#d97706" },
 }
 
-function MiniSplitDonut({ gd, dom, gdPct, owner }: MiniSplitDonutProps) {
-  const hasWork = gd + dom > 0
+const OWNER_ACCENTS: AccentKey[] = ["teal", "violet", "emerald", "amber", "slate"]
+
+/** 히어로 밴드용 통일 KPI 타일 — 액센트 그라데이션 아이콘칩·상단 라인·부드러운 글로우·틸트. */
+function AccentKpiTile({
+  accent,
+  icon: Icon,
+  label,
+  badge,
+  footnote,
+  children,
+}: {
+  accent: AccentKey
+  icon: LucideIcon
+  label: ReactNode
+  badge?: ReactNode
+  footnote?: ReactNode
+  children: ReactNode
+}) {
   return (
-    <div className="flex items-center gap-3" role="img" aria-label={`${owner} GD ${gd}건, 국내 ${dom}건`}>
-      <svg aria-hidden="true" viewBox="0 0 44 44" className="size-12 -rotate-90 shrink-0">
-        <circle cx="22" cy="22" r="17" pathLength="100" fill="none" strokeWidth="6" className={hasWork ? "stroke-[var(--chart-4)]" : "stroke-[var(--muted)]"} />
-        <circle
-          cx="22"
-          cy="22"
-          r="17"
-          pathLength="100"
-          fill="none"
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray={`${gdPct} ${100 - gdPct}`}
-          className="stroke-[var(--chart-2)]"
-        />
-      </svg>
-      <div className="space-y-1 text-xs">
-        <p className="flex items-center gap-1.5 text-[var(--muted-foreground)]"><span className="size-2 rounded-full bg-[var(--chart-2)]" />GD <strong className="font-semibold text-[var(--foreground)]"><NumberTicker value={gd} duration={700} /></strong></p>
-        <p className="flex items-center gap-1.5 text-[var(--muted-foreground)]"><span className="size-2 rounded-full bg-[var(--chart-4)]" />국내 <strong className="font-semibold text-[var(--foreground)]"><NumberTicker value={dom} duration={700} /></strong></p>
+    <Tilt3D max={5} lift={6} glare={false} className="h-full">
+      <Card className="group relative h-full overflow-hidden">
+        <CardContent className="relative flex h-full flex-col p-5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]">
+              <Icon aria-hidden="true" className="size-5" />
+            </span>
+            {badge ?? null}
+          </div>
+          <p className="mt-5 text-sm font-medium text-[var(--muted-foreground)]">{label}</p>
+          <div className="mt-2">{children}</div>
+          {footnote ? <p className="mt-auto pt-3 text-xs text-[var(--muted-foreground)]">{footnote}</p> : null}
+        </CardContent>
+      </Card>
+    </Tilt3D>
+  )
+}
+
+function DevelopmentTypeSplitBar({ gdPct, domPct }: { gdPct: number; domPct: number }) {
+  const { ref, inView } = useInView<HTMLDivElement>({ once: true })
+
+  return (
+    <div ref={ref} className="mt-3 flex h-2.5 w-full overflow-hidden rounded-full bg-[var(--muted)]" role="img" aria-label={`GD ${gdPct}%, 국내 ${domPct}%`}>
+      <div className={`h-full bg-[var(--chart-2)] transition-[width] ${GAUGE_BAR}`} style={{ width: `${inView ? gdPct : 0}%` }} />
+      <div className={`h-full bg-[var(--chart-4)] transition-[width] ${GAUGE_BAR}`} style={{ width: `${inView ? domPct : 0}%` }} />
+    </div>
+  )
+}
+
+/** 담당자 합산 공정 분포 미니 스택바(히어로 4번째 타일). */
+function TeamProcessBar({ process, total }: { process: OwnerProcessDatum[]; total: number }) {
+  const segments = process.filter((s) => s.count > 0)
+  const { ref, inView } = useInView<HTMLDivElement>({ once: true })
+  return (
+    <div ref={ref}>
+      <p className="flex items-baseline gap-1">
+        <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={total} duration={GAUGE_MS} startOnView /></span>
+        <span className="text-sm font-medium text-[var(--muted-foreground)]">건</span>
+      </p>
+      <div className="mt-3 flex h-2.5 w-full overflow-hidden rounded-full bg-[var(--muted)]" role="img" aria-label="담당자 합산 공정 분포">
+        {segments.map((s) => (
+          <div key={s.key} className={`h-full transition-[width] ${GAUGE_BAR}`} style={{ width: `${inView ? s.pct : 0}%`, background: PROCESS_STYLE[s.key].gradient }} />
+        ))}
+        {total === 0 ? <span className="flex w-full items-center justify-center text-[10px] text-[var(--muted-foreground)]">데이터 없음</span> : null}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+        {process.map((s) => (
+          <span key={s.key} className="flex items-center gap-1 text-[11px] text-[var(--muted-foreground)]">
+            <span aria-hidden="true" className="size-1.5 rounded-full" style={{ backgroundColor: PROCESS_STYLE[s.key].dot }} />{s.label} <strong className="font-semibold text-[var(--foreground)]">{s.count}</strong>
+          </span>
+        ))}
       </div>
     </div>
+  )
+}
+
+/** 담당자 카드 — 랭크·워크로드 바·슬림 GD/국내 바·공정 스택바를 한 카드에 조밀하게. */
+function OwnerMonthlyChart({ data, stroke, owner }: { data: { month: string; count: number }[]; stroke: string; owner: string }) {
+  const { ref, inView: started } = useInView<HTMLDivElement>({ once: true, threshold: 0.3 })
+  const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  const hasData = data.some((item) => item.count > 0)
+  if (!hasData) return <div ref={ref} className="flex h-40 items-center justify-center text-xs text-[var(--muted-foreground)]">데이터 없음</div>
+
+  return (
+    <div ref={ref} className="h-40 w-full" role="img" aria-label={`${owner} 최근 월별 FL 등록 ${data.map((item) => `${item.month} ${item.count}건`).join(", ")}`}>
+      {started ? (
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ top: 16, right: 8, bottom: 0, left: -12 }}>
+            <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 5" />
+            <XAxis dataKey="month" tickFormatter={(value: string) => `${value.slice(2, 4)}.${value.slice(5)}월`} tick={{ fill: "var(--muted-foreground)", fontSize: 9 }} axisLine={false} tickLine={false} interval={data.length > 5 ? 1 : 0} />
+            <YAxis allowDecimals={false} width={26} tick={{ fill: "var(--muted-foreground)", fontSize: 9 }} axisLine={false} tickLine={false} />
+            <Tooltip cursor={{ stroke: "var(--chart-2)", strokeOpacity: 0.25, strokeDasharray: "4 4" }} contentStyle={{ backgroundColor: "var(--popover)", border: "1px solid var(--border)", borderRadius: "var(--radius)", color: "var(--popover-foreground)", fontSize: 10 }} />
+            <Line type="natural" dataKey="count" name="FL 등록" stroke={stroke} strokeWidth={1.75} dot={{ r: 2, fill: "var(--background)", stroke, strokeWidth: 1.5 }} activeDot={{ r: 4, fill: "var(--background)", stroke, strokeWidth: 2 }} isAnimationActive={!reduceMotion} animationDuration={1950} animationEasing="linear">
+              {data.length <= 6 ? <LabelList dataKey="count" position="top" offset={8} fill="var(--muted-foreground)" fontSize={9} fontWeight={600} /> : null}
+            </Line>
+          </LineChart>
+        </ResponsiveContainer>
+      ) : null}
+    </div>
+  )
+}
+
+function OwnerCard({ owner, rank, trend }: { owner: OwnerDetailedDatum; rank: number; trend: { month: string; count: number }[] }) {
+  const a = ACCENT[OWNER_ACCENTS[(rank - 1) % OWNER_ACCENTS.length]]
+  return (
+    <article className={`group relative overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 ${hoverLift}`}>
+      <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: `radial-gradient(120% 80% at 0% 0%, ${a.soft}, transparent 55%)` }} />
+      <div className="relative">
+        <div className="flex items-center gap-3">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ background: `linear-gradient(135deg, ${a.from}, ${a.to})`, boxShadow: `0 6px 16px ${a.glow}` }}>{owner.name.slice(0, 1)}</span>
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-sm font-semibold text-[var(--foreground)]">{owner.name}</h3>
+            <p className="text-xs text-[var(--muted-foreground)]">{owner.role}</p>
+          </div>
+          <p className="flex items-baseline gap-1 text-right">
+            <span className="text-2xl font-semibold leading-none tracking-tight text-[var(--foreground)]"><NumberTicker value={owner.total} duration={GAUGE_MS} startOnView /></span>
+            <span className="text-xs font-medium text-[var(--muted-foreground)]">건</span>
+          </p>
+        </div>
+
+        <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">GD {owner.gd} · 국내 {owner.dom}</p>
+
+        <div className="mt-4">
+          <OwnerMonthlyChart data={trend} stroke={a.fg} owner={owner.name} />
+        </div>
+
+        <div className="mt-5">
+          <ProcessStatus owner={owner.name} total={owner.total} process={owner.process} />
+        </div>
+      </div>
+    </article>
   )
 }
 
@@ -310,6 +463,16 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
   const receipt = useMemo(() => receiptStatus(active), [active])
   const funnel = useMemo(() => processFunnel(active), [active])
   const owners = useMemo(() => byOwnerDetailed(active), [active])
+  const ownerTrends = useMemo(() => ownerMonthlyFlTrend(records, completed), [completed, records])
+  const teamProcess = useMemo(() => {
+    const order: OwnerProcessKey[] = ["unreceived", "knitting", "dyeing", "registration"]
+    const label: Record<OwnerProcessKey, string> = { unreceived: "미접수", knitting: "편직대기", dyeing: "염색중", registration: "등록대기" }
+    const counts: Record<OwnerProcessKey, number> = { unreceived: 0, knitting: 0, dyeing: 0, registration: 0 }
+    for (const o of owners) for (const s of o.process) counts[s.key] += s.count
+    const total = order.reduce((sum, k) => sum + counts[k], 0)
+    const process: OwnerProcessDatum[] = order.map((k) => ({ key: k, label: label[k], count: counts[k], pct: total > 0 ? Math.round((counts[k] / total) * 100) : 0 }))
+    return { process, total }
+  }, [owners])
   const categories = useMemo(() => categoryOverview(active), [active])
   const [categoryDetail, setCategoryDetail] = useState<CategoryOverviewDatum | null>(null)
   const categoryStyles = useMemo(
@@ -325,63 +488,54 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="development-dd-overview" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><DataUpload kind="development-samples-overview" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} /></div>}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-12">
-        <Reveal className="xl:col-span-2" delay={0}>
-        <Card className="h-full overflow-hidden">
-          <CardContent className="flex h-full flex-col justify-between p-5">
-            <div className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]">
-              <Boxes aria-hidden="true" className="size-5" />
-            </div>
-            <div className="mt-8">
-              <p className="text-sm font-medium text-[var(--muted-foreground)]">총 개발 (진행중)</p>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={activeTotal} duration={700} /></p>
-              <p className="mt-1 text-xs text-[var(--muted-foreground)]">진행중 반영 데이터 기준</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Reveal delay={0}>
+          <AccentKpiTile accent="slate" icon={Boxes} label="총 개발 (진행중)" footnote="진행중 반영 데이터 기준">
+            <p className="text-4xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={activeTotal} duration={GAUGE_MS} startOnView /><span className="ml-1 text-base font-medium text-[var(--muted-foreground)]">건</span></p>
+          </AccentKpiTile>
         </Reveal>
 
-        <Reveal className="xl:col-span-6" delay={75}>
-        <Card className="h-full overflow-hidden">
-          <CardContent className="flex h-full flex-col p-5">
-            <div className="flex items-start justify-between gap-4">
-              <p className="text-sm font-medium text-[var(--muted-foreground)]">개발 유형 (GD · 국내, 진행중)</p>
-              <span className="rounded-full bg-[var(--muted)] px-3 py-1 text-xs font-medium text-[var(--muted-foreground)]">총 <NumberTicker value={split.total} duration={700} />건</span>
-            </div>
-            <div className="mt-4 flex flex-wrap items-end gap-x-10 gap-y-2">
+        <Reveal delay={75}>
+          <AccentKpiTile
+            accent="teal"
+            icon={Shapes}
+            label="개발 유형 · GD / 국내"
+            badge={<span className="rounded-full bg-[var(--muted)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted-foreground)]">총 <NumberTicker value={split.total} duration={GAUGE_MS} startOnView />건</span>}
+            footnote="진행중 개발 중 GD·국내 비중"
+          >
+            <div className="flex items-end gap-6">
               <div>
-                <p className="flex items-center gap-1.5 text-sm font-medium text-[var(--muted-foreground)]"><span className="size-2 rounded-full bg-[var(--chart-2)]" aria-hidden="true" />GD개발</p>
-                <p className="mt-1 text-3xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={split.gd} duration={700} /><span className="ml-1 text-sm font-medium text-[var(--muted-foreground)]">건 · <NumberTicker value={split.gdPct} duration={700} suffix="%" /></span></p>
+                <p className="flex items-center gap-1.5 text-xs font-medium text-[var(--muted-foreground)]"><span aria-hidden="true" className="size-2 rounded-full bg-[var(--chart-2)]" />GD</p>
+                <p className="mt-0.5 text-2xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={split.gd} duration={GAUGE_MS} startOnView /><span className="ml-1 text-xs font-medium text-[var(--muted-foreground)]">{split.gdPct}%</span></p>
               </div>
               <div>
-                <p className="flex items-center gap-1.5 text-sm font-medium text-[var(--muted-foreground)]"><span className="size-2 rounded-full bg-[var(--chart-4)]" aria-hidden="true" />국내개발</p>
-                <p className="mt-1 text-3xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={split.dom} duration={700} /><span className="ml-1 text-sm font-medium text-[var(--muted-foreground)]">건 · <NumberTicker value={split.domPct} duration={700} suffix="%" /></span></p>
+                <p className="flex items-center gap-1.5 text-xs font-medium text-[var(--muted-foreground)]"><span aria-hidden="true" className="size-2 rounded-full bg-[var(--chart-4)]" />국내</p>
+                <p className="mt-0.5 text-2xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={split.dom} duration={GAUGE_MS} startOnView /><span className="ml-1 text-xs font-medium text-[var(--muted-foreground)]">{split.domPct}%</span></p>
               </div>
             </div>
-            <div className="mt-auto pt-5">
-              <div className="flex h-3 w-full overflow-hidden rounded-full bg-[var(--muted)]" role="img" aria-label={`GD ${split.gd}건 ${split.gdPct}%, 국내 ${split.dom}건 ${split.domPct}%`}>
-                <div className="h-full bg-[var(--chart-2)] transition-[width] duration-700 ease-out motion-reduce:transition-none" style={{ width: `${split.gdPct}%` }} />
-                <div className="h-full bg-[var(--chart-4)] transition-[width] duration-700 ease-out motion-reduce:transition-none" style={{ width: `${split.domPct}%` }} />
-              </div>
-              <p className="mt-3 text-xs text-[var(--muted-foreground)]">진행중 개발 중 GD·국내 비중</p>
-            </div>
-          </CardContent>
-        </Card>
+            <DevelopmentTypeSplitBar gdPct={split.gdPct} domPct={split.domPct} />
+          </AccentKpiTile>
         </Reveal>
 
-        <Reveal className="xl:col-span-4" delay={150}>
-        <Card className="h-full overflow-hidden">
-          <CardContent className="flex h-full flex-col justify-between p-5">
-            <div className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--chart-1)]">
-              <CheckCircle2 aria-hidden="true" className="size-5" />
-            </div>
-            <div className="mt-8">
-              <p className="text-sm font-medium text-[var(--muted-foreground)]">접수현황 <span className="text-[var(--chart-2)]">GD</span></p>
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={receipt.received} duration={700} /><span className="mx-1 text-base text-[var(--muted-foreground)]">/</span><NumberTicker value={receipt.total} duration={700} /></p>
-              <p className="mt-1 text-xs text-[var(--muted-foreground)]">GD개발 진행중 · GD# 기입 <NumberTicker value={receipt.receivedPct} duration={700} suffix="%" /> · 미기입 <NumberTicker value={receipt.missing} duration={700} suffix="건" /></p>
-            </div>
-          </CardContent>
-        </Card>
+        <Reveal delay={150}>
+          <AccentKpiTile
+            accent="emerald"
+            icon={CheckCircle2}
+            label={<>접수현황 <span className="text-[var(--chart-2)]">GD</span></>}
+            footnote={<>GD# 기입 <NumberTicker value={receipt.receivedPct} duration={GAUGE_MS} suffix="%" startOnView /> · 미기입 <NumberTicker value={receipt.missing} duration={GAUGE_MS} suffix="건" startOnView /></>}
+          >
+            <p className="flex items-baseline">
+              <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={receipt.received} duration={GAUGE_MS} startOnView /></span>
+              <span className="mx-1.5 text-xl text-[var(--muted-foreground)]">/</span>
+              <span className="text-xl font-medium text-[var(--muted-foreground)]"><NumberTicker value={receipt.total} duration={GAUGE_MS} startOnView /></span>
+            </p>
+          </AccentKpiTile>
+        </Reveal>
+
+        <Reveal delay={225}>
+          <AccentKpiTile accent="violet" icon={Workflow} label="전체 공정 분포" footnote="담당자 합산 · 현재 단계 기준">
+            <TeamProcessBar process={teamProcess.process} total={teamProcess.total} />
+          </AccentKpiTile>
         </Reveal>
       </div>
 
@@ -400,55 +554,48 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="담당자별 현황" subtitle="개발 건수와 국내/GD 구성, 현재 공정 분포입니다." contentClassName="space-y-3">
-        {owners.map((owner, index) => (
-          <Reveal key={owner.id} delay={index * 75}>
-          <article className={`grid gap-5 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,2.4fr)] lg:items-center ${hoverLift}`}>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--muted)] text-sm font-semibold text-[var(--foreground)]">{owner.name.slice(0, 1)}</div>
-                <div className="min-w-0">
-                  <h3 className="truncate text-sm font-semibold text-[var(--foreground)]">{owner.name}</h3>
-                  <p className="text-xs text-[var(--muted-foreground)]">{owner.role}</p>
-                </div>
-              </div>
-              <p className="mt-4 text-2xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={owner.total} /><span className="ml-1 text-xs font-medium text-[var(--muted-foreground)]">건</span></p>
-            </div>
-
-            <MiniSplitDonut gd={owner.gd} dom={owner.dom} gdPct={owner.gdPct} owner={owner.name} />
-
-            <ProcessStatus owner={owner.name} total={owner.total} process={owner.process} />
-          </article>
-          </Reveal>
-        ))}
-      </SectionCard>
-
       <SectionCard title="Categories" subtitle="카테고리별 샘플 건수와 OPT 분포입니다. 카드를 클릭하면 대표 스타일을 확인할 수 있습니다.">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {categories.map((item, index) => (
+          {categories.map((item, index) => {
+            const a = ACCENT[OWNER_ACCENTS[index % OWNER_ACCENTS.length]]
+            return (
             <Reveal key={item.key} delay={index * 75}>
             <button
               type="button"
               aria-haspopup="dialog"
               onClick={() => setCategoryDetail(item)}
-              className={`h-full w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] ${hoverLift}`}
+              className={`group relative h-full w-full overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] ${hoverLift}`}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex size-9 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]">
-                  {index % 2 === 0 ? <Layers3 aria-hidden="true" className="size-4" /> : <ClipboardList aria-hidden="true" className="size-4" />}
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: `radial-gradient(120% 90% at 100% 0%, ${a.soft}, transparent 60%)` }} />
+              <div className="relative">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex size-9 items-center justify-center rounded-[var(--radius)] text-white" style={{ background: `linear-gradient(135deg, ${a.from}, ${a.to})`, boxShadow: `0 5px 14px ${a.glow}` }}>
+                    {index % 2 === 0 ? <Layers3 aria-hidden="true" className="size-4" /> : <ClipboardList aria-hidden="true" className="size-4" />}
+                  </span>
+                  <span className="text-xs font-semibold" style={{ color: a.fg }}><NumberTicker value={item.pct} suffix="%" startOnView /></span>
                 </div>
-                <span className="text-xs font-semibold text-[var(--muted-foreground)]"><NumberTicker value={item.pct} suffix="%" /></span>
+                <h3 className="mt-5 text-sm font-semibold text-[var(--foreground)]">{item.label}</h3>
+                <div className="mt-3 flex items-end justify-between gap-4">
+                  <p className="text-3xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={item.count} startOnView /><span className="ml-1 text-xs font-medium text-[var(--muted-foreground)]">건</span></p>
+                  <p className="text-xs text-[var(--muted-foreground)]">OPT <strong className="font-semibold text-[var(--foreground)]"><NumberTicker value={item.options} startOnView /></strong></p>
+                </div>
+                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[var(--muted)]">
+                  <AccentGradientBar pct={item.pct} from={a.from} to={a.to} label={`${item.label} 비율 ${item.pct}%`} />
+                </div>
+                <p className="mt-3 text-[11px] font-medium text-[var(--muted-foreground)]">대표 스타일 보기 →</p>
               </div>
-              <h3 className="mt-5 text-sm font-semibold text-[var(--foreground)]">{item.label}</h3>
-              <div className="mt-3 flex items-end justify-between gap-4">
-                <p className="text-3xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={item.count} /><span className="ml-1 text-xs font-medium text-[var(--muted-foreground)]">건</span></p>
-                <p className="text-xs text-[var(--muted-foreground)]">OPT <strong className="font-semibold text-[var(--foreground)]"><NumberTicker value={item.options} /></strong></p>
-              </div>
-              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[var(--muted)]">
-                <AnimatedBar pct={item.pct} className={CATEGORY_BAR_CLASS[index % CATEGORY_BAR_CLASS.length]} label={`${item.label} 비율 ${item.pct}%`} />
-              </div>
-              <p className="mt-3 text-[11px] font-medium text-[var(--muted-foreground)]">대표 스타일 보기 →</p>
             </button>
+            </Reveal>
+            )
+          })}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="담당자별 현황" subtitle="개발 건수, GD·국내 구성, 월별 FL 등록 추이와 현재 공정 분포입니다.">
+        <div className="grid gap-4 xl:grid-cols-2">
+          {owners.map((owner, index) => (
+            <Reveal key={owner.id} delay={index * 75}>
+              <OwnerCard owner={owner} rank={index + 1} trend={ownerTrends[owner.name] ?? []} />
             </Reveal>
           ))}
         </div>
@@ -687,7 +834,7 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
     return Array.from({ length: 42 }, (_, index) => {
       const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + index)
       const key = normalizedDateKey(date)
-      return { key, day: date.getDate(), inMonth: date.getMonth() === monthNumber - 1, items: byDate.get(key) ?? [] }
+      return { key, date, day: date.getDate(), inMonth: date.getMonth() === monthNumber - 1, items: byDate.get(key) ?? [] }
     })
   }, [calendarMonth, filteredItems])
 
@@ -732,18 +879,22 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
           <Button type="button" variant="outline" size="icon" onClick={() => setCalendarMonth((month) => shiftMonth(month || latestMonth, 1))} aria-label="다음 달"><ChevronRight aria-hidden="true" /></Button>
         </div>
         <div className="grid grid-cols-7 border-b border-[var(--border)] bg-[var(--muted)]/50 text-center text-xs font-medium text-[var(--muted-foreground)]">
-          {['월', '화', '수', '목', '금', '토', '일'].map((day) => <span key={day} className="py-2">{day}</span>)}
+          {['월', '화', '수', '목', '금', '토', '일'].map((day, index) => <span key={day} className={`py-2 ${index === 5 ? "text-sky-500 dark:text-sky-400" : index === 6 ? "text-rose-500 dark:text-rose-400" : ""}`}>{day}</span>)}
         </div>
         <div className="grid grid-cols-7">
           {calendarDays.map((day) => (
-            <div key={day.key} className={`min-h-28 border-b border-r border-[var(--border)] p-1.5 last:border-r-0 ${day.inMonth ? "bg-[var(--card)]" : "bg-[var(--muted)]/35 text-[var(--muted-foreground)]"}`}>
-              <span className="block px-1 text-xs font-medium">{day.day}</span>
+            <div key={day.key} className={`min-h-28 border-b border-r border-[var(--border)] p-1.5 last:border-r-0 ${day.inMonth ? "bg-[var(--card)]" : "bg-[var(--muted)]/35 text-[var(--muted-foreground)] opacity-50"}`}>
+              <span className={`block px-1 text-xs font-medium ${dayToneText(day.date)}`}>{day.day}</span>
+              {holidayName(day.key) ? <span className="block truncate px-1 text-[10px] text-[var(--muted-foreground)]">{holidayName(day.key)}</span> : null}
               <div className="mt-1 grid gap-1">
                 {day.items.slice(0, 3).map((item) => (
                   <Tilt3D key={item.key} max={5} lift={4} glare={false}>
-                    <button type="button" onClick={() => setSelectedItem(item)} className="flex w-full items-center gap-1 rounded-[calc(var(--radius)-2px)] border border-[var(--border)] bg-[var(--background)] px-1.5 py-1 text-left shadow-sm outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+                    <button type="button" onClick={() => setSelectedItem(item)} className="flex w-full items-start gap-1 rounded-[calc(var(--radius)-2px)] border border-[var(--border)] bg-[var(--background)] px-1.5 py-1 text-left shadow-sm outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
                       <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${item.source === "DD" ? "bg-[var(--chart-1)]" : "bg-[var(--chart-4)]"}`} />
-                      <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[var(--foreground)]">{item.styleNo || item.flNo}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-xs font-semibold text-[var(--foreground)]">{item.styleNo || item.flNo}</span>
+                        <span className="block truncate text-[10px] text-[var(--muted-foreground)]">담당 · {item.owner || "미지정"}</span>
+                      </span>
                       <span className="text-xs text-[var(--muted-foreground)]">{item.source}</span>
                     </button>
                   </Tilt3D>
@@ -910,12 +1061,7 @@ export function Development() {
 
 function DevelopmentMasterPage() {
   return (
-    <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 px-4 pt-4 sm:px-6 lg:px-8">
-      <PageHeader
-        title="DD MASTER"
-        subtitle="Development Dashboard 64열을 기준으로 접수·수정·완료와 샘플대장 연결을 관리합니다."
-        actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="development-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><DataUpload kind="development-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} /></div>}
-      />
+    <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 px-4 pt-2 sm:px-6 lg:px-8">
       <DevelopmentMasterSheet />
     </section>
   )

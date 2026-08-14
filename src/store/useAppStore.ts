@@ -2,6 +2,7 @@ import { create } from "zustand"
 
 import { saveCache } from "../data/cache"
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
+import { isFabricBalanceExhausted } from "../data/fabric-ledger"
 import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type StudyRecord } from "../data/schema"
 import {
   sampleCompleted,
@@ -243,6 +244,11 @@ export interface ApplyFabricActionInput {
   actor?: string
   note?: string
   storageNo?: string
+  yds?: number
+  qty?: number
+  to?: string
+  reason?: string
+  date?: string
   recordIdentity?: string
 }
 
@@ -252,10 +258,37 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
   const occurredAt = new Date().toISOString()
   const actor = input.actor?.trim() || "관리자"
   const previous = state.fabricOverrides.find((item) => item.key === input.fabricKey)
+  const yds = input.yds === undefined
+    ? previous?.yds
+    : Number.isFinite(input.yds) && input.yds >= 0 ? input.yds : undefined
+  if (input.yds !== undefined && yds === undefined) throw new Error("보유 재고는 0 이상의 숫자여야 합니다.")
+
+  const qty = input.qty === undefined
+    ? undefined
+    : Number.isFinite(input.qty) && input.qty > 0 ? input.qty : undefined
+  if (input.action === "OUTBOUND" && qty === undefined) throw new Error("출고 수량은 0보다 커야 합니다.")
+  const recipient = input.to?.trim()
+  if (input.action === "OUTBOUND" && !recipient) throw new Error("출고 수령자를 입력해야 합니다.")
+
+  const previousOutboundTotal = state.fabricEvents.reduce((sum, event) =>
+    event.fabricKey === input.fabricKey && event.action === "OUTBOUND" && typeof event.qty === "number" && Number.isFinite(event.qty) && event.qty > 0
+      ? sum + event.qty
+      : sum, 0)
+  const outboundTotal = previousOutboundTotal + (input.action === "OUTBOUND" ? qty ?? 0 : 0)
+  const shouldAutoExhaust = input.action === "OUTBOUND" || (input.yds !== undefined && input.action !== "RESTORE" && input.action !== "DISPOSE")
+  const resolvedToStatus = shouldAutoExhaust && isFabricBalanceExhausted(yds, outboundTotal)
+    ? "EXHAUSTED"
+    : input.action === "OUTBOUND"
+      ? previous?.status ?? input.fromStatus
+      : input.toStatus
+  const selectedDate = input.date?.trim()
+  const selectedDateValue = selectedDate && /^\d{4}-\d{2}-\d{2}$/.test(selectedDate) ? new Date(`${selectedDate}T12:00:00`) : null
+  const eventOccurredAt = selectedDateValue && !Number.isNaN(selectedDateValue.getTime()) ? selectedDateValue.toISOString() : occurredAt
   const override: FabricLedgerOverride = {
     key: input.fabricKey,
-    status: input.toStatus,
+    status: resolvedToStatus,
     storageNo: input.storageNo?.trim() || previous?.storageNo,
+    yds,
     note: input.note?.trim() || previous?.note,
     updatedAt: occurredAt,
     updatedBy: actor,
@@ -265,11 +298,14 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
     fabricKey: input.fabricKey,
     action: input.action,
     fromStatus: input.fromStatus,
-    toStatus: input.toStatus,
-    occurredAt,
+    toStatus: resolvedToStatus,
+    occurredAt: eventOccurredAt,
     actor,
     note: input.note?.trim() || "",
     storageNo: input.storageNo?.trim() || previous?.storageNo,
+    qty,
+    to: recipient,
+    reason: input.reason?.trim() || undefined,
   }
   const fabricOverrides = [override, ...state.fabricOverrides.filter((item) => item.key !== input.fabricKey)]
   const fabricEvents = [event, ...state.fabricEvents]

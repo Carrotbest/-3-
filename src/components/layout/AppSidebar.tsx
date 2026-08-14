@@ -19,18 +19,19 @@ interface SidebarLinkProps {
   item: NavigationItem
   collapsed: boolean
   onNavigate: () => void
+  active?: boolean
 }
 
-function SidebarLink({ item, collapsed, onNavigate }: SidebarLinkProps) {
+function SidebarLink({ item, collapsed, onNavigate, active = false }: SidebarLinkProps) {
   const link = (
     <NavLink
       to={item.path}
-      end={item.path === "/"}
+      end={item.path === "/" || item.path === "/development"}
       onClick={onNavigate}
       className={({ isActive }) =>
         cn(
           "group relative flex h-9 items-center gap-3 overflow-hidden rounded-[var(--radius)] px-3 text-sm font-medium text-[var(--sidebar-foreground)] outline-none transition-colors duration-[var(--t-fast)] before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:origin-center before:scale-y-50 before:rounded-full before:bg-[var(--chart-1)] before:opacity-0 before:transition-[transform,opacity] before:duration-[var(--t-fast)] hover:bg-[color-mix(in_srgb,var(--sidebar-accent)_60%,transparent)] hover:text-[var(--sidebar-accent-foreground)] focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)] motion-reduce:transition-none motion-reduce:before:transition-none",
-          isActive && "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)] before:scale-y-100 before:opacity-100",
+          (isActive || active) && "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)] before:scale-y-100 before:opacity-100",
         )
       }
     >
@@ -61,20 +62,15 @@ function SidebarLink({ item, collapsed, onNavigate }: SidebarLinkProps) {
 
 export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleCollapsed }: AppSidebarProps) {
   const location = useLocation()
-  const developmentActive = location.pathname.startsWith("/development")
-  // DEVELOPMENT 하위 메뉴는 항상 접힌 상태로 시작한다. 셰브론을 눌러야 열리고,
-  // 하위 항목을 고르거나 사이드바에서 커서가 벗어나면 자동으로 다시 닫힌다.
-  const [developmentOpen, setDevelopmentOpen] = useState(false)
-  // 데스크톱에서 접힌(비고정) 레일이 포인터/키보드 포커스가 안으로 들어오면 살짝 펼쳐졌다
-  // 벗어나면 다시 부드럽게 닫힌다. 핀 고정 상태나 모바일에서는 항상 완전히 펼침.
+  const [openMap, setOpenMap] = useState<Record<string, boolean>>({})
   const [revealed, setRevealed] = useState(false)
 
   const expanded = !collapsed || revealed || mobileOpen
   const showCollapsed = !expanded
-  const overlay = collapsed && revealed // 콘텐츠 위에 떠서 펼쳐짐(레이아웃 밀림 없음)
+  const overlay = collapsed && revealed
   const closeReveal = () => {
     setRevealed(false)
-    setDevelopmentOpen(false) // 커서가 벗어나면 하위 메뉴도 함께 접는다
+    setOpenMap({})
   }
   const handleNavigate = () => {
     onMobileClose()
@@ -152,28 +148,31 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
                     return <SidebarLink key={item.path} item={item} collapsed={showCollapsed} onNavigate={handleNavigate} />
                   }
 
+                  const isParentActive = location.pathname === item.path || item.children.some((child) => location.pathname === child.path)
+                  const isOpen = openMap[item.path] ?? isParentActive
+
                   return (
                     <Fragment key={item.path}>
                       <div className="flex items-center gap-1">
                         <div className="min-w-0 flex-1">
-                          <SidebarLink item={item} collapsed={showCollapsed} onNavigate={handleNavigate} />
+                          <SidebarLink item={item} collapsed={showCollapsed} onNavigate={handleNavigate} active={isParentActive} />
                         </div>
                         {!showCollapsed ? (
                           <button
                             type="button"
-                            aria-label="DEVELOPMENT 하위 메뉴"
-                            aria-expanded={developmentOpen}
-                            onClick={() => setDevelopmentOpen((current) => !current)}
+                            aria-label={`${item.label} 하위 메뉴`}
+                            aria-expanded={isOpen}
+                            onClick={() => setOpenMap((current) => ({ ...current, [item.path]: !isOpen }))}
                             className={cn(
                               "flex size-9 shrink-0 items-center justify-center rounded-[var(--radius)] text-[var(--muted-foreground)] outline-none transition-colors duration-[var(--t-fast)] hover:bg-[color-mix(in_srgb,var(--sidebar-accent)_60%,transparent)] focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)] motion-reduce:transition-none",
-                              developmentActive && "text-[var(--sidebar-accent-foreground)]",
+                              isParentActive && "text-[var(--sidebar-accent-foreground)]",
                             )}
                           >
                             <ChevronDown
                               aria-hidden="true"
                               className={cn(
                                 "size-4 transition-transform duration-[var(--t-fast)] motion-reduce:transition-none",
-                                developmentOpen && "rotate-180",
+                                isOpen && "rotate-180",
                               )}
                             />
                           </button>
@@ -181,10 +180,10 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
                       </div>
                       {!showCollapsed ? (
                         <div
-                          aria-hidden={!developmentOpen}
+                          aria-hidden={!isOpen}
                           className={cn(
                             "grid transition-[grid-template-rows,opacity] duration-[var(--t-fast)] motion-reduce:transition-none",
-                            developmentOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+                            isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
                           )}
                         >
                           <div className="overflow-hidden">
@@ -193,9 +192,9 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
                                 <NavLink
                                   key={child.path}
                                   to={child.path}
-                                  end={child.path === "/development"}
+                                  end
                                   onClick={handleNavigate}
-                                  tabIndex={developmentOpen ? undefined : -1}
+                                  tabIndex={isOpen ? undefined : -1}
                                   className={({ isActive }) =>
                                     cn(
                                       "relative block rounded-[var(--radius)] px-3 py-2 text-sm text-[var(--muted-foreground)] outline-none transition-colors duration-[var(--t-fast)] before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-[var(--chart-1)] before:opacity-0 before:transition-opacity before:duration-[var(--t-fast)] hover:bg-[color-mix(in_srgb,var(--sidebar-accent)_60%,transparent)] hover:text-[var(--sidebar-accent-foreground)] focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)] motion-reduce:transition-none motion-reduce:before:transition-none",

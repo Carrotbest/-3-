@@ -1,9 +1,16 @@
 import type {
   CompletedSample,
   DevRecord,
+  FabricLedgerEvent,
   FabricLedgerOverride,
   FabricLedgerStatus,
 } from "./schema"
+
+export interface FabricLedgerOutbound {
+  to: string
+  qty: number
+  date: string
+}
 
 export interface FabricLedgerItem {
   key: string
@@ -27,6 +34,10 @@ export interface FabricLedgerItem {
   updatedAt: string
   updatedBy: string
   note: string
+  yds: number | null
+  outbound: FabricLedgerOutbound[]
+  outboundTotal: number
+  balance: number | null
   record: DevRecord | null
   sample: CompletedSample | null
 }
@@ -40,6 +51,14 @@ export const FABRIC_STATUS_META: Record<FabricLedgerStatus, { label: string; des
 }
 
 const normalized = (value: string): string => value.normalize("NFKC").replace(/\s+/g, "").toUpperCase()
+
+const validYds = (value: number | undefined): number | null =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null
+
+/** 보유 재고가 입력된 항목만 잔량 0 이하를 자동 소진으로 판정한다. */
+export function isFabricBalanceExhausted(yds: number | null | undefined, outboundTotal: number): boolean {
+  return yds !== null && yds !== undefined && Number.isFinite(yds) && yds - outboundTotal <= 0
+}
 
 export function fabricLedgerKey(flNo: string, styleNo: string, fallback = ""): string {
   const fl = normalized(flNo)
@@ -104,6 +123,10 @@ function emptyFromRecord(record: DevRecord): FabricLedgerItem {
     updatedAt: "",
     updatedBy: "",
     note: record.note,
+    yds: null,
+    outbound: [],
+    outboundTotal: 0,
+    balance: null,
     record,
     sample: null,
   }
@@ -132,6 +155,10 @@ function emptyFromSample(sample: CompletedSample, index: number): FabricLedgerIt
     updatedAt: "",
     updatedBy: "",
     note: sample.process.remark,
+    yds: null,
+    outbound: [],
+    outboundTotal: 0,
+    balance: null,
     record: null,
     sample,
   }
@@ -164,6 +191,7 @@ export function buildFabricLedger(
   records: readonly DevRecord[],
   samples: readonly CompletedSample[],
   overrides: readonly FabricLedgerOverride[],
+  fabricEvents: readonly FabricLedgerEvent[] = [],
 ): FabricLedgerItem[] {
   const items = new Map<string, FabricLedgerItem>()
   const styleIndex = new Map<string, string>()
@@ -186,9 +214,21 @@ export function buildFabricLedger(
   })
 
   const overrideMap = new Map(overrides.map((item) => [item.key, item]))
+  const outboundMap = new Map<string, FabricLedgerOutbound[]>()
+  fabricEvents.forEach((event) => {
+    if (event.action !== "OUTBOUND" || typeof event.qty !== "number" || !Number.isFinite(event.qty) || event.qty <= 0) return
+    const current = outboundMap.get(event.fabricKey) ?? []
+    current.push({ to: event.to?.trim() || "미입력", qty: event.qty, date: event.occurredAt })
+    outboundMap.set(event.fabricKey, current)
+  })
+
   return [...items.values()].map((item) => {
     const override = overrideMap.get(item.key)
-    return override ? {
+    const yds = validYds(override?.yds)
+    const outbound = (outboundMap.get(item.key) ?? []).sort((left, right) => right.date.localeCompare(left.date))
+    const outboundTotal = outbound.reduce((sum, event) => sum + event.qty, 0)
+    const balance = yds === null ? null : yds - outboundTotal
+    const merged = override ? {
       ...item,
       status: override.status,
       storageNo: override.storageNo ?? item.storageNo,
@@ -196,6 +236,7 @@ export function buildFabricLedger(
       updatedAt: override.updatedAt,
       updatedBy: override.updatedBy,
     } : item
+    return { ...merged, yds, outbound, outboundTotal, balance }
   }).sort((left, right) =>
     statusRank[left.status] - statusRank[right.status]
     || (right.updatedAt || right.completedAt || right.requestDate).localeCompare(left.updatedAt || left.completedAt || left.requestDate)

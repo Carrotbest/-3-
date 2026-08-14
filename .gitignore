@@ -25,3 +25,6 @@ dist/
 
 # 배포용 zip 산출물
 *.zip
+
+# Vite 로컬 캐시
+.vite/

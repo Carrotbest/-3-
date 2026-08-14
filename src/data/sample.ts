@@ -267,6 +267,7 @@ export type EventType = "meeting" | "due" | "external" | "leave" | "trip"
 export interface CalendarEvent {
   id?: string
   date: string
+  endDate?: string
   type: EventType
   title: string
   time?: string
@@ -284,6 +285,8 @@ export function sampleEvents(): CalendarEvent[] {
     { id: "demo-team-trip", date: shift(5), type: "trip", title: "협력사 출장", time: "09:00", place: "데모 협력사", owner: MEMBERS[3].name },
     { id: "demo-team-meeting-rnd", date: shift(8), type: "meeting", title: "R&D 미팅", time: "14:00", owner: MEMBERS[0].name },
     { date: shift(9), type: "due", title: "EU-026 납기" },
+    { id: "demo-team-trip-range", date: shift(12), endDate: shift(14), type: "trip", title: "협력사 출장", time: "09:00", place: "데모 협력사", owner: MEMBERS[1].name },
+    { id: "demo-team-leave-range", date: shift(16), endDate: shift(17), type: "leave", title: "연차", owner: MEMBERS[2].name },
   ]
 }
 

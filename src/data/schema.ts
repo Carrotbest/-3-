@@ -185,13 +185,14 @@ export interface CompletedSample {
 /** DD와 샘플관리대장을 하나의 업무 흐름으로 보여주기 위한 원단 상태. */
 export type FabricLedgerStatus = "DEVELOPING" | "READY" | "WAREHOUSE" | "EXHAUSTED" | "DISPOSED"
 
-export type FabricLedgerAction = "COMPLETE" | "RECEIVE" | "EXHAUST" | "DISPOSE" | "RESTORE" | "NOTE"
+export type FabricLedgerAction = "COMPLETE" | "RECEIVE" | "OUTBOUND" | "EXHAUST" | "DISPOSE" | "RESTORE" | "NOTE"
 
 /** 원본 엑셀은 그대로 두고 웹에서 변경한 운영 상태만 덧씌운다. */
 export interface FabricLedgerOverride {
   key: string
   status: FabricLedgerStatus
   storageNo?: string
+  yds?: number
   note?: string
   updatedAt: string
   updatedBy: string
@@ -208,6 +209,9 @@ export interface FabricLedgerEvent {
   actor: string
   note: string
   storageNo?: string
+  qty?: number
+  to?: string
+  reason?: string
 }
 
 export type StudyState = "완료" | "진행" | "계획" | "미진행"

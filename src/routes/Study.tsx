@@ -53,7 +53,7 @@ export function Study() {
 
   return (
     <section className="min-w-0 space-y-6">
-      <PageHeader title="STUDY 과제" subtitle="주차별 학습 과제와 팀원별 진행 상황을 확인합니다." actions={<DataUpload kind="study-workbook" label="현황 파일 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestStudyWorkbook(files[0]) }} />} />
+      <PageHeader title="FABRIC STUDY" subtitle="주차별 학습 과제와 팀원별 진행 상황을 확인합니다." actions={<DataUpload kind="study-workbook" label="현황 파일 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestStudyWorkbook(files[0]) }} />} />
 
       <MaterialDeckSection kind="STUDY" title="STUDY 자료 덱" description="섬유 교육자료 중 최신 6건입니다." emptyMessage="SETTING에서 STUDY 엑셀을 업로드하면 교육 과제가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
 

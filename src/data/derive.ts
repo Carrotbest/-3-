@@ -971,7 +971,48 @@ export function monthlyDevelopmentTrend(
   })
 }
 
-/** HOME 업무 카드용 집계. */
+/** 담당자별 RDDA 등록 현황. 홈 RDDA 등록 추이와 같은 소스를 담당자별로 분해한다. */
+export function ownerMonthlyFlTrend(
+  records: readonly DevRecord[],
+  samples: readonly CompletedSample[],
+  today = new Date(),
+  monthCount = 12,
+): Record<string, { month: string; count: number }[]> {
+  const span = Math.max(1, Math.round(monthCount))
+  const months = Array.from({ length: span }, (_, index) => {
+    const date = new Date(today.getFullYear(), today.getMonth() - (span - 1) + index, 1)
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
+  })
+  const owners = MEMBERS.map((member) => member.name)
+  const dd = new Map<string, Map<string, number>>(owners.map((owner) => [owner, new Map()]))
+  const archive = new Map<string, Map<string, number>>(owners.map((owner) => [owner, new Map()]))
+  const increment = (source: Map<string, Map<string, number>>, owner: string, month: string) => {
+    const counts = source.get(owner)
+    if (!counts) return
+    counts.set(month, (counts.get(month) ?? 0) + 1)
+  }
+
+  const uniqueDd = new Map(records.filter((record) => record.flNo).map((record) => [record.flNo.replace(/\s+/g, "").toUpperCase(), record]))
+  uniqueDd.forEach((record) => {
+    const month = record.receivedDate?.slice(0, 7)
+    if (month && month > RDDA_ARCHIVE_CUTOFF_MONTH) increment(dd, record.owner, month)
+  })
+
+  const uniqueSamples = new Map(samples.filter((sample) => sample.flNo).map((sample) => [sample.flNo.replace(/\s+/g, "").toUpperCase(), sample]))
+  uniqueSamples.forEach((sample) => {
+    const month = rddaMonthFromFlNo(sample.flNo)
+    if (month && month <= RDDA_ARCHIVE_CUTOFF_MONTH) increment(archive, sample.owner, month)
+  })
+
+  return Object.fromEntries(owners.map((owner) => [
+    owner,
+    months.map((month) => ({
+      month,
+      count: (month <= RDDA_ARCHIVE_CUTOFF_MONTH ? archive : dd).get(owner)?.get(month) ?? 0,
+    })),
+  ]))
+}
+
 export function homeWorkSummary(
   records: readonly DevRecord[],
   ts: ReadonlyArray<{ state: string; receivedAt: string }>,

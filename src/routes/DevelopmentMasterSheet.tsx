@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
-import { CalendarDays, ChevronDown, ChevronRight, Columns3, Loader2, Maximize2, Paperclip, Plus, RotateCcw, Save, Search, TableProperties, TriangleAlert, X } from "lucide-react"
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Columns3, Loader2, Maximize2, Paperclip, Plus, RotateCcw, Save, Search, TriangleAlert, X } from "lucide-react"
+import { Popover } from "radix-ui"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -7,9 +8,12 @@ import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, Dia
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DataUpload } from "@/components/upload/DataUpload"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddStatusStyle, ddWarnings } from "@/data/dd-workflow"
-import { fmtDateFull } from "@/data/format"
+import { fmtDateFull, toDate } from "@/data/format"
+import { dayToneText, holidayName } from "@/data/holidays"
+import { ingestDevelopment, ingestSamples } from "@/data/upload"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
 import { MEMBERS, type DevRecord, type DevTechnical } from "@/data/schema"
 import { saveDevelopmentRecord, useAppStore } from "@/store/useAppStore"
@@ -320,11 +324,104 @@ function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string):
   return { ...record, tech }
 }
 
-/** 날짜 입력 + 달력 버튼. 버튼 클릭 시 네이티브 데이트피커를 연다(브라우저 기본 아이콘은 CSS로 숨김). */
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"]
+
+/** YYYY-MM-DD는 UTC 문자열로 다시 해석하지 않고, 로컬 달력 날짜로 유지한다. */
+function localDate(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim())
+  if (match) {
+    const [, year, month, day] = match
+    const date = new Date(Number(year), Number(month) - 1, Number(day))
+    return date.getFullYear() === Number(year) && date.getMonth() === Number(month) - 1 && date.getDate() === Number(day) ? date : null
+  }
+  const parsed = toDate(value)
+  return parsed ? new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()) : null
+}
+
+function dateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+}
+
+function monthStart(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1)
+}
+
+interface DatePickerPopoverProps {
+  value: string
+  disabled?: boolean
+  invalid?: boolean
+  onChange: (raw: string) => void
+  onCancel?: () => void
+  initialOpen?: boolean
+  triggerClassName?: string
+}
+
+/** 포털로 렌더링하는 로컬 기준 월간 달력. 그리드 스크롤 컨테이너에 잘리지 않는다. */
+function DatePickerPopover({ value, disabled = false, invalid = false, onChange, onCancel, initialOpen = false, triggerClassName = "" }: DatePickerPopoverProps) {
+  const [open, setOpen] = useState(initialOpen)
+  const [month, setMonth] = useState(() => monthStart(localDate(value) ?? new Date()))
+  const committedRef = useRef(false)
+  const selected = localDate(value)
+  const selectedKey = selected ? dateKey(selected) : ""
+  const today = new Date()
+  const todayKey = dateKey(today)
+  const firstDay = new Date(month.getFullYear(), month.getMonth(), 1)
+  const cells = Array.from({ length: Math.ceil((firstDay.getDay() + new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate()) / 7) * 7 }, (_, index) => {
+    const day = index - firstDay.getDay() + 1
+    return day > 0 && day <= new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate()
+      ? new Date(month.getFullYear(), month.getMonth(), day)
+      : null
+  })
+
+  useEffect(() => {
+    if (open) setMonth(monthStart(localDate(value) ?? new Date()))
+  }, [open, value])
+
+  const changeOpen = (next: boolean) => {
+    if (next) committedRef.current = false
+    setOpen(next)
+    if (!next && !committedRef.current) onCancel?.()
+  }
+  const commit = (next: string) => {
+    committedRef.current = true
+    onChange(next)
+    setOpen(false)
+  }
+  const previousMonth = () => setMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))
+  const nextMonth = () => setMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))
+
+  return <Popover.Root open={open} onOpenChange={changeOpen}>
+    <Popover.Trigger asChild>
+      <button type="button" disabled={disabled} aria-invalid={invalid} aria-label={value ? `날짜 선택: ${value}` : "날짜 선택"} className={`flex min-w-0 items-center gap-1.5 text-left disabled:cursor-not-allowed disabled:opacity-40 ${triggerClassName}`}>
+        <span className="min-w-0 flex-1 truncate">{value || "날짜 선택"}</span>
+        <CalendarDays aria-hidden="true" className="size-4 shrink-0 text-[var(--muted-foreground)]" />
+      </button>
+    </Popover.Trigger>
+    <Popover.Portal>
+      <Popover.Content side="bottom" align="start" sideOffset={6} collisionPadding={8} className="z-[70] w-64 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-2 shadow-lg outline-none">
+        <div className="mb-1 flex items-center justify-between gap-1">
+          <button type="button" aria-label="이전 달" onClick={previousMonth} className="inline-flex size-7 items-center justify-center rounded text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"><ChevronLeft className="size-4" /></button>
+          <p className="text-xs font-semibold tabular-nums text-[var(--foreground)]">{month.getFullYear()}.{String(month.getMonth() + 1).padStart(2, "0")}</p>
+          <button type="button" aria-label="다음 달" onClick={nextMonth} className="inline-flex size-7 items-center justify-center rounded text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"><ChevronRight className="size-4" /></button>
+        </div>
+        <div className="grid grid-cols-7 gap-y-0.5 text-center text-xs">
+          {WEEKDAYS.map((day, index) => <span key={day} className={`flex size-7 items-center justify-center ${index === 0 ? "text-rose-500 dark:text-rose-400" : index === 6 ? "text-sky-500 dark:text-sky-400" : "text-[var(--muted-foreground)]"}`}>{day}</span>)}
+          {cells.map((date, index) => date
+            ? <button key={dateKey(date)} type="button" title={holidayName(dateKey(date)) || undefined} aria-label={`${dateKey(date)}${holidayName(dateKey(date)) ? `, ${holidayName(dateKey(date))}` : ""}`} aria-pressed={dateKey(date) === selectedKey} onClick={() => commit(dateKey(date))} className={`inline-flex size-7 items-center justify-center rounded text-xs transition-colors hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${dateKey(date) === selectedKey ? "bg-[var(--primary)] font-semibold text-[var(--primary-foreground)]" : dateKey(date) === todayKey ? "font-semibold text-[var(--primary)]" : dayToneText(date)}`}>{date.getDate()}</button>
+            : <span key={`blank-${index}`} aria-hidden="true" className="size-7" />)}
+        </div>
+        <div className="mt-2 flex items-center justify-between border-t border-[var(--border)] pt-2">
+          <button type="button" onClick={() => commit(todayKey)} className="rounded px-2 py-1 text-xs text-[var(--primary)] transition-colors hover:bg-[var(--muted)]">오늘</button>
+          <button type="button" onClick={() => commit("")} className="rounded px-2 py-1 text-xs text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]">지우기</button>
+        </div>
+      </Popover.Content>
+    </Popover.Portal>
+  </Popover.Root>
+}
+
+/** 모달 날짜 필드도 동일한 포털 캘린더로 표시한다. */
 function DateInput({ value, disabled, invalid, onChange }: { value: string; disabled?: boolean; invalid?: boolean; onChange: (raw: string) => void }) {
-  const ref = useRef<HTMLInputElement>(null)
-  const openPicker = () => { const el = ref.current; if (!el) return; try { (el as HTMLInputElement & { showPicker?: () => void }).showPicker?.() } catch { el.focus() } }
-  return <div className="relative"><Input ref={ref} type="date" value={value} disabled={disabled} aria-invalid={invalid} onChange={(event) => onChange(event.target.value)} className={`dd-date pr-9 text-sm ${invalid ? "ring-1 ring-[var(--destructive)]" : ""}`} /><button type="button" onClick={openPicker} disabled={disabled} aria-label="달력 열기" className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-1.5 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] disabled:opacity-40"><CalendarDays className="size-4" /></button></div>
+  return <DatePickerPopover value={value} disabled={disabled} invalid={invalid} onChange={onChange} triggerClassName={`h-9 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${invalid ? "ring-1 ring-[var(--destructive)]" : ""}`} />
 }
 
 function EditorField({ column, draft, onChange, optionsById, requiredIds }: { column: MasterColumn; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; requiredIds?: ReadonlySet<string> }) {
@@ -373,7 +470,7 @@ function InlineEditor({ record, column, options, onCommit, onCancel }: { record:
   const cls = "h-8 w-full rounded-none border-0 bg-[var(--card)] px-1.5 text-xs text-[var(--foreground)] outline-none ring-2 ring-inset ring-[var(--ring)]"
   const opts = options && options.length ? options : undefined
   if (column.date) {
-    return <input autoFocus type="date" defaultValue={value} className={`dd-date ${cls}`} onBlur={(event) => onCommit(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); else if (event.key === "Escape") onCancel() }} />
+    return <DatePickerPopover value={value} initialOpen onChange={onCommit} onCancel={onCancel} triggerClassName={cls} />
   }
   if (opts && !column.suggest) {
     return <select autoFocus defaultValue={value} className={cls} onChange={(event) => onCommit(event.target.value)} onBlur={onCancel} onKeyDown={(event) => { if (event.key === "Escape") onCancel() }}>
@@ -387,14 +484,16 @@ function InlineEditor({ record, column, options, onCommit, onCancel }: { record:
 }
 
 /** 데이터 셀. 더블클릭 시 인라인 편집(고정값은 음영·수정 불가). */
-function GridCell({ record, column, width, ledger, active, options, onEdit, onCommit, onCancel }: { record: DevRecord; column: MasterColumn; width: number; ledger: FabricLedgerItem | null; active: boolean; options?: readonly string[]; onEdit: () => void; onCommit: (raw: string) => void; onCancel: () => void }) {
+function GridCell({ record, column, width, ledger, active, highlighted, selected, options, onSelect, onEdit, onCommit, onCancel }: { record: DevRecord; column: MasterColumn; width: number; ledger: FabricLedgerItem | null; active: boolean; highlighted: boolean; selected: boolean; options?: readonly string[]; onSelect: () => void; onEdit: () => void; onCommit: (raw: string) => void; onCancel: () => void }) {
   const fixed = isFixedColumn(column)
   const align = `${alignOf(column) === "center" ? "text-center" : "text-left"} ${column.number ? "tabular-nums" : ""}`
+  const highlight = highlighted ? "bg-[color-mix(in_srgb,var(--primary)_6%,transparent)]" : ""
+  const selectionRing = selected ? "ring-2 ring-inset ring-[var(--ring)]" : ""
   if (active && !fixed) {
-    return <td className={`h-8 border-b border-r border-[var(--border)] p-0 ${align}`} style={{ width, minWidth: width }}><InlineEditor record={record} column={column} options={options} onCommit={onCommit} onCancel={onCancel} /></td>
+    return <td onClick={onSelect} className={`h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${selectionRing}`} style={{ width, minWidth: width }}><InlineEditor record={record} column={column} options={options} onCommit={onCommit} onCancel={onCancel} /></td>
   }
   const content = column.render ? column.render(record, ledger) : column.date ? dateText(column.value(record, ledger)) : text(column.value(record, ledger))
-  return <td title={typeof content === "string" ? content : undefined} onDoubleClick={fixed ? undefined : onEdit} className={`h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${fixed ? "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)] text-[var(--muted-foreground)]" : "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]"}`} style={{ width, minWidth: width }}>{content}</td>
+  return <td title={typeof content === "string" ? content : undefined} onClick={onSelect} onDoubleClick={fixed ? undefined : onEdit} className={`h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${selectionRing} ${fixed ? `${highlight ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]"}`} style={{ width, minWidth: width }}>{content}</td>
 }
 
 function EditorGroup({ label, color, columns, draft, onChange, optionsById, layout, requiredIds }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; layout?: "schedule" | "data"; requiredIds?: ReadonlySet<string> }) {
@@ -452,15 +551,21 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [attachError, setAttachError] = useState<string | null>(null)
   const [attaching, setAttaching] = useState(false)
   const [editCell, setEditCell] = useState<{ row: string; col: string } | null>(null)
+  const [selected, setSelected] = useState<{ row: string; col: string } | null>(null)
   const [colWidths, setColWidths] = useState<Record<string, number>>(loadColumnWidths)
   const zajiInputRef = useRef<HTMLInputElement>(null)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
 
   useEffect(() => () => resizeCleanupRef.current?.(), [])
+  useEffect(() => {
+    const clearSelected = (event: KeyboardEvent) => { if (event.key === "Escape") setSelected(null) }
+    window.addEventListener("keydown", clearSelected)
+    return () => window.removeEventListener("keydown", clearSelected)
+  }, [])
 
   const scoped = useMemo(() => categoryScope ? records.filter((row) => row.category === categoryScope) : records, [categoryScope, records])
   const ownerOptions = useMemo(() => [...new Set(scoped.map((row) => row.owner).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko-KR")), [scoped])
-  const statusOptions = useMemo(() => [...new Set(scoped.map((row) => row.devStatus || row.stage).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko-KR")), [scoped])
+  const statusOptions = useMemo(() => [...new Set([...DD_STATUS_OPTIONS, ...scoped.map((row) => row.devStatus || row.stage).filter(Boolean)])], [scoped])
   const allColumns = useMemo(() => [...PINNED_COLUMNS, ...GROUPS.flatMap((group) => group.columns)], [])
   const optionsById = useMemo<Record<string, readonly string[]>>(() => {
     const memberNames = MEMBERS.map((member) => member.name)
@@ -480,6 +585,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     }
   }, [records])
   const visibleGroups = GROUPS.filter((group) => openGroups[group.key])
+  const displayedColumns = [...PINNED_COLUMNS, ...visibleGroups.flatMap((group) => group.columns)]
   const editingLedger = editing ? ledgerByRecord.get(recordIdentity(editing)) ?? null : null
 
   const filtered = useMemo(() => {
@@ -597,9 +703,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (next !== record) await saveDevelopmentRecord(next, recordIdentity(record))
   }
 
-  return <div className="flex min-h-0 flex-1 flex-col gap-3 -mx-4 sm:-mx-6 lg:-mx-8">
-    <div className="flex flex-col gap-3 px-4 sm:px-6 lg:px-8 xl:flex-row xl:items-center">
-      <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><TableProperties className="size-5 text-[var(--chart-1)]" /><h2 className="font-semibold">DD MASTER SHEET</h2><Badge variant="outline" className="font-normal">살아있는 현황판</Badge></div><p className="mt-1 text-sm text-[var(--muted-foreground)]">셀을 <strong className="font-semibold">더블클릭</strong>해 즉시 수정(선택형·날짜·수기)하고, Status는 색 블럭으로 바꿉니다. 담당 칸의 <span className="inline-flex"><Maximize2 className="inline size-3.5" /></span> 아이콘으로 전체 항목을 편집합니다.</p></div>
+  return <div className="flex min-h-0 flex-1 flex-col gap-2 -mx-4 sm:-mx-6 lg:-mx-8">
+    <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-wrap items-center gap-2" aria-label="DD 열 그룹 표시">
+        {GROUPS.map((group) => <button type="button" key={group.key} aria-pressed={openGroups[group.key]} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: !current[group.key] }))} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-normal transition-colors ${openGroups[group.key] ? "border-transparent text-white" : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)]"}`} style={openGroups[group.key] ? { backgroundColor: group.color } : undefined}>{openGroups[group.key] ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}{group.label}<span className="opacity-75">{group.columns.length}</span></button>)}
+      </div>
       <div className="flex flex-wrap items-center gap-1.5">
         <Button type="button" size="sm" onClick={openNew}><Plus className="size-4" />신규 작지 접수</Button>
         <span className="mx-0.5 h-5 w-px bg-[var(--border)]" />
@@ -610,20 +718,20 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       </div>
     </div>
 
-    <div className="flex flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8" aria-label="DD 열 그룹 표시">
-      {GROUPS.map((group) => <button type="button" key={group.key} aria-pressed={openGroups[group.key]} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: !current[group.key] }))} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-normal transition-colors ${openGroups[group.key] ? "border-transparent text-white" : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)]"}`} style={openGroups[group.key] ? { backgroundColor: group.color } : undefined}>{openGroups[group.key] ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}{group.label}<span className="opacity-75">{group.columns.length}</span></button>)}
-      <span className="ml-auto flex flex-wrap items-center gap-2 text-[11px] text-[var(--muted-foreground)]">
-        {(statusOptions.length ? statusOptions : [...DD_STATUS_OPTIONS]).map((option) => { const style = ddStatusStyle(option); return <span key={option} className="inline-flex items-center gap-1"><span className={`size-2 rounded-full ${style.dot}`} />{style.label}</span> })}
-      </span>
-    </div>
-
     <div className="flex min-h-0 flex-1 flex-col border-y border-[var(--border)] bg-[var(--card)]">
-      <div className="flex flex-col gap-2 border-b border-[var(--border)] p-3 xl:flex-row xl:items-center">
-        <label className="relative block min-w-0 flex-1 xl:max-w-md"><span className="sr-only">DD 전체 열 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="64개 전체 열에서 검색" className="pl-9" /></label>
-        <Select value={owner} onValueChange={setOwner}><SelectTrigger className="w-full xl:w-36"><SelectValue placeholder="담당" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 담당</SelectItem>{ownerOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
-        <Select value={status} onValueChange={setStatus}><SelectTrigger className="w-full xl:w-36"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
+      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] p-2">
+        <label className="relative block min-w-0 flex-1 basis-full md:basis-auto md:max-w-md"><span className="sr-only">DD 전체 열 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="64개 전체 열에서 검색" className="pl-9" /></label>
+        <Select value={owner} onValueChange={setOwner}><SelectTrigger className="w-full md:w-36"><SelectValue placeholder="담당" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 담당</SelectItem>{ownerOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
+        <Select value={status} onValueChange={setStatus}><SelectTrigger className="w-full md:w-36"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
         <Button type="button" variant="outline" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL) }}><RotateCcw className="size-4" />초기화</Button>
-        <p className="ml-auto whitespace-nowrap text-sm text-[var(--muted-foreground)]">{filtered.length.toLocaleString("ko-KR")} / {scoped.length.toLocaleString("ko-KR")}행</p>
+        <div className="ml-auto flex flex-wrap items-center gap-2 text-xs text-[var(--muted-foreground)]">
+          <p>{filtered.length.toLocaleString("ko-KR")} / {scoped.length.toLocaleString("ko-KR")}행</p>
+          <span className="flex flex-wrap items-center gap-2 whitespace-nowrap">{statusOptions.map((option) => { const style = ddStatusStyle(option); return <span key={option} className="inline-flex items-center gap-1"><span className={`size-2 rounded-full ${style.dot}`} />{style.label}</span> })}</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <DataUpload kind="development-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} />
+            <DataUpload kind="development-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} />
+          </div>
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto">
@@ -637,8 +745,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               {visibleGroups.filter((group) => group.columns.some((column) => column.sub)).flatMap((group) => subRuns(group.columns).map((run, index) => <th key={`${group.key}-sub-${index}`} colSpan={run.span} className="border-b border-r border-[var(--border)] px-2 text-center text-[10px] font-semibold" style={{ color: run.label ? group.color : "transparent", background: `color-mix(in srgb, ${group.color} ${run.label ? 18 : 12}%, var(--card))` }}>{run.label || "·"}</th>))}
             </tr>
             <tr className="h-8">
-              {PINNED_COLUMNS.map((column, index) => <th key={column.id} className="sticky z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] px-2 text-xs font-normal text-[var(--muted-foreground)]" style={{ width: column.width, minWidth: column.width, left: PINNED_COLUMNS.slice(0, index).reduce((sum, item) => sum + item.width, 0) }}>{column.label}</th>)}
-              {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column); return <th key={`${group.key}-${column.id}`} className={`relative border-b border-r border-[var(--border)] bg-[var(--muted)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${alignOf(column) === "center" ? "text-center" : "text-left"}`} style={{ width, minWidth: width }}>{column.label}<span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
+              {PINNED_COLUMNS.map((column, index) => <th key={column.id} className={`sticky z-40 border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${selected?.col === column.id ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${column.id === "owner" ? "text-center" : "text-left"}`} style={{ width: column.width, minWidth: column.width, left: PINNED_COLUMNS.slice(0, index).reduce((sum, item) => sum + item.width, 0) }}>{column.label}</th>)}
+              {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column); return <th key={`${group.key}-${column.id}`} className={`relative border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${selected?.col === column.id ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${alignOf(column) === "center" ? "text-center" : "text-left"}`} style={{ width, minWidth: width }}>{column.label}<span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
             </tr>
           </thead>
           <tbody>
@@ -648,13 +756,21 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               const rowStyle = ddStatusStyle(record.devStatus || record.stage)
               const rowId = recordIdentity(record)
               const isActive = (colId: string) => editCell?.row === rowId && editCell?.col === colId
-              return <tr key={rowId} className="group bg-[var(--card)] transition-colors hover:bg-[var(--accent)]">
+              const rowSelected = selected?.row === rowId
+              const selectCell = (colId: string) => setSelected({ row: rowId, col: colId })
+              return <tr key={rowId} onClick={(event) => {
+                const cell = (event.target as HTMLElement).closest("td")
+                const column = cell instanceof HTMLTableCellElement ? displayedColumns[cell.cellIndex] : undefined
+                if (column) selectCell(column.id)
+              }} className="group bg-[var(--card)] transition-colors hover:bg-[var(--accent)]">
                 {PINNED_COLUMNS.map((column, index) => {
                   const left = PINNED_COLUMNS.slice(0, index).reduce((sum, item) => sum + item.width, 0)
-                  const stickyBase = `sticky z-20 h-8 border-b border-r border-[var(--border)] bg-inherit ${index === 0 ? `border-l-4 ${rowStyle.row}` : ""}`
-                  if (column.id === "status") return <td key={column.id} className={`${stickyBase} px-1.5`} style={{ width: column.width, minWidth: column.width, left }}><StatusChip record={record} /></td>
+                  const highlighted = rowSelected || selected?.col === column.id
+                  const cellSelected = rowSelected && selected?.col === column.id
+                  const stickyBase = `sticky z-20 h-8 border-b border-r border-[var(--border)] ${highlighted ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--card))]" : "bg-[var(--card)] group-hover:bg-[var(--accent)]"} ${cellSelected ? "ring-2 ring-inset ring-[var(--ring)]" : ""} ${column.id === "owner" ? "text-center [&>div]:relative [&>div]:justify-center [&>div>button]:absolute [&>div>button]:right-1" : ""} ${index === 0 ? `border-l-4 ${rowStyle.row}` : ""}`
+                  if (column.id === "status") return <td key={column.id} onClick={() => selectCell(column.id)} className={`${stickyBase} px-1.5`} style={{ width: column.width, minWidth: column.width, left }}><StatusChip record={record} /></td>
                   const active = isActive(column.id)
-                  if (active) return <td key={column.id} className={`${stickyBase} p-0`} style={{ width: column.width, minWidth: column.width, left }}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} onCommit={(raw) => void commitCell(record, column, raw)} onCancel={() => setEditCell(null)} /></td>
+                  if (active) return <td key={column.id} onClick={() => selectCell(column.id)} className={`${stickyBase} p-0`} style={{ width: column.width, minWidth: column.width, left }}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} onCommit={(raw) => void commitCell(record, column, raw)} onCancel={() => setEditCell(null)} /></td>
                   return <td key={column.id} onDoubleClick={() => setEditCell({ row: rowId, col: column.id })} className={`${stickyBase} max-w-0 cursor-cell px-2 text-xs font-normal ${column.mono ? "font-mono" : ""}`} style={{ width: column.width, minWidth: column.width, left }}>
                     {column.id === "owner"
                       ? <div className="flex items-center justify-between gap-1"><span className="truncate">{text(record.owner)}</span><button type="button" title="전체 항목 수정" onClick={(event) => { event.stopPropagation(); openEditor(record) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:opacity-100"><Maximize2 className="size-3.5" /></button></div>
@@ -663,7 +779,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                         : <span className="truncate">{text(column.value(record, linked))}</span>}
                   </td>
                 })}
-                {visibleGroups.flatMap((group) => group.columns.map((column) => <GridCell key={`${group.key}-${column.id}`} record={record} column={column} width={widthOf(column)} ledger={linked} active={isActive(column.id)} options={optionsById[column.id] ?? column.options} onEdit={() => setEditCell({ row: rowId, col: column.id })} onCommit={(raw) => void commitCell(record, column, raw)} onCancel={() => setEditCell(null)} />))}
+                {visibleGroups.flatMap((group) => group.columns.map((column) => <GridCell key={`${group.key}-${column.id}`} record={record} column={column} width={widthOf(column)} ledger={linked} active={isActive(column.id)} highlighted={rowSelected || selected?.col === column.id} selected={rowSelected && selected?.col === column.id} options={optionsById[column.id] ?? column.options} onSelect={() => selectCell(column.id)} onEdit={() => setEditCell({ row: rowId, col: column.id })} onCommit={(raw) => void commitCell(record, column, raw)} onCancel={() => setEditCell(null)} />))}
               </tr>
             })}
           </tbody>
