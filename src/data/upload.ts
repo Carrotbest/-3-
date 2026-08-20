@@ -2,11 +2,12 @@ import * as XLSX from "xlsx"
 
 import type { DataMeta, HistoryState, RddaSnapshot } from "./sample"
 import type { CompletedSample, DevRecord } from "./schema"
+import { parseChemicalPortfolio } from "./chemical"
 import { reconcile, type ReconcileResult } from "./reconcile"
 import { loadTds } from "./tds-loader"
 import { isExcludedDevelopment, parseDevelopment, parseFabricAnalysis, parseMaterials, parseRdda, parseRddaSnapshot, parseSamples, parseStudy, parseTechnicalServices } from "./xlsx-parsers"
 import { saveCache } from "./cache"
-import { mergeTsRecords, setAppState, setIngestState, useAppStore, type OrgMember } from "../store/useAppStore"
+import { mergeTsRecords, setAppState, setChemicalPortfolio, setIngestState, useAppStore, type OrgMember } from "../store/useAppStore"
 
 export interface UploadResult {
   records: DevRecord[]
@@ -150,6 +151,17 @@ export async function ingestMaterials(file: File): Promise<void> {
       saveCache("materials", materials),
       saveCache("materialDiagnostics", materialDiagnostics),
     ])
+  })
+}
+
+export async function ingestChemical(file: File): Promise<void> {
+  return run("chemical", file.name, async () => {
+    const workbook = await workbookOf(file)
+    setIngestState({ step: "parsing" })
+    const chemical = parseChemicalPortfolio(workbook)
+    setIngestState({ step: "validating" })
+    setChemicalPortfolio(chemical)
+    await saveCache("chemical", chemical)
   })
 }
 

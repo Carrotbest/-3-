@@ -25,30 +25,30 @@ interface CellSelection {
 }
 
 const URGENCY_DOT: Record<LaneUrgency, string> = {
-  normal: "bg-[var(--chart-1)]",
-  soon: "bg-[var(--warning)]",
-  danger: "bg-[var(--destructive)]",
-  done: "bg-[var(--chart-2)]",
+  normal: "bg-[var(--status-normal)]",
+  soon: "bg-[var(--status-soon)]",
+  danger: "bg-[var(--status-danger)]",
+  done: "bg-[var(--status-done)]",
 }
 
 const NORMAL_DENSITY = [
-  "bg-[color-mix(in_oklab,var(--chart-1)_7%,var(--card))]",
-  "bg-[color-mix(in_oklab,var(--chart-1)_13%,var(--card))]",
-  "bg-[color-mix(in_oklab,var(--chart-1)_20%,var(--card))]",
-  "bg-[color-mix(in_oklab,var(--chart-1)_28%,var(--card))]",
+  "bg-[color-mix(in_oklab,var(--status-normal)_7%,var(--card))]",
+  "bg-[color-mix(in_oklab,var(--status-normal)_13%,var(--card))]",
+  "bg-[color-mix(in_oklab,var(--status-normal)_20%,var(--card))]",
+  "bg-[color-mix(in_oklab,var(--status-normal)_28%,var(--card))]",
 ]
 
 const DONE_DENSITY = [
-  "bg-[color-mix(in_oklab,var(--chart-2)_7%,var(--card))]",
-  "bg-[color-mix(in_oklab,var(--chart-2)_13%,var(--card))]",
-  "bg-[color-mix(in_oklab,var(--chart-2)_20%,var(--card))]",
-  "bg-[color-mix(in_oklab,var(--chart-2)_28%,var(--card))]",
+  "bg-[color-mix(in_oklab,var(--status-done)_7%,var(--card))]",
+  "bg-[color-mix(in_oklab,var(--status-done)_13%,var(--card))]",
+  "bg-[color-mix(in_oklab,var(--status-done)_20%,var(--card))]",
+  "bg-[color-mix(in_oklab,var(--status-done)_28%,var(--card))]",
 ]
 
 function densityClass(cell: LaneCell, maxCell: number): string {
   if (!cell.count) return ""
-  if (cell.urgency === "danger") return "bg-[color-mix(in_oklab,var(--destructive)_18%,var(--card))]"
-  if (cell.urgency === "soon") return "bg-[color-mix(in_oklab,var(--warning)_20%,var(--card))]"
+  if (cell.urgency === "danger") return "bg-[color-mix(in_oklab,var(--status-danger)_18%,var(--card))]"
+  if (cell.urgency === "soon") return "bg-[color-mix(in_oklab,var(--status-soon)_22%,var(--card))]"
   const level = Math.min(3, Math.max(0, Math.ceil((cell.count / Math.max(1, maxCell)) * 4) - 1))
   return (cell.urgency === "done" ? DONE_DENSITY : NORMAL_DENSITY)[level]
 }

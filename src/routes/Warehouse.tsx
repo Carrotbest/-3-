@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from "react"
-import { ArchiveRestore, GripVertical, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
+import { ArchiveRestore, GripVertical, Info, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { DataUpload } from "@/components/upload/DataUpload"
@@ -151,10 +151,13 @@ function DetailValue({ label, children }: { label: string; children: ReactNode }
 }
 
 /** 컴팩트 KPI 타일. 표 높이를 뺏지 않도록 고정 높이로 유지한다. */
-function KpiTile({ label, children, footer }: { label: string; children: ReactNode; footer?: ReactNode }) {
+function KpiTile({ label, children, footer, basis }: { label: string; children: ReactNode; footer?: ReactNode; basis?: string }) {
   return (
     <div className="flex min-w-0 flex-col justify-between rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-2">
-      <p className="truncate text-[11px] font-medium text-[var(--muted-foreground)]">{label}</p>
+      <p className="flex min-w-0 items-center gap-1 text-[11px] font-medium text-[var(--muted-foreground)]">
+        <span className="truncate">{label}</span>
+        {basis ? <span title={basis} aria-label={`${label} 집계 기준`} className="shrink-0"><Info aria-hidden="true" className="size-3" /></span> : null}
+      </p>
       <div className="mt-0.5 min-w-0">{children}</div>
       <div className="mt-1 min-h-4 min-w-0">{footer}</div>
     </div>
@@ -491,7 +494,11 @@ export function Warehouse() {
 
   return <section className="flex h-[calc(100dvh-7rem)] min-h-0 min-w-0 flex-col gap-2 overflow-hidden">
     <div className="grid shrink-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-      <KpiTile label="상태 분포" footer={<StatusMixBar counts={counts} total={totalCount} onPick={changeTab} />}>
+      <KpiTile
+        label="상태 분포"
+        basis="완료 샘플(DD 완료 + 샘플관리대장)을 FL 우선·Style 보조로 병합한 건수입니다. 입고대기·창고보관·소진·폐기 네 상태의 합이며, 개발 진행중 건은 포함하지 않습니다."
+        footer={<StatusMixBar counts={counts} total={totalCount} onPick={changeTab} />}
+      >
         <p className="flex items-baseline gap-1">
           <span className="text-2xl font-semibold tracking-tight tabular-nums"><NumberTicker value={totalCount} duration={GAUGE_MS} startOnView /></span>
           <span className="text-xs text-[var(--muted-foreground)]">건 전체</span>
@@ -500,6 +507,7 @@ export function Warehouse() {
 
       <KpiTile
         label="창고 재고 (yds)"
+        basis="입고 등록 시 직접 입력한 보유 수량 기준입니다. DD·샘플관리대장에는 수량 항목이 없어, 입고 처리 전에는 0으로 표시됩니다."
         footer={<div className="flex items-center gap-2"><KpiBar pct={kpi.usedPct} className={TAB_ACCENT.WAREHOUSE.bar} /><span className="shrink-0 text-[10px] tabular-nums text-[var(--muted-foreground)]">소진 {Math.round(kpi.usedPct)}%</span></div>}
       >
         <p className="flex items-baseline gap-1">
@@ -510,6 +518,7 @@ export function Warehouse() {
 
       <KpiTile
         label="출고 누계 (yds)"
+        basis="출고 처리한 수량의 누계입니다. 폐기·소진 처리분은 포함하지 않습니다."
         footer={<p className="truncate text-[10px] text-[var(--muted-foreground)]">출고 <strong className="tabular-nums text-[var(--foreground)]">{kpi.outboundCount.toLocaleString("ko-KR")}</strong>건{kpi.missingStock ? ` · 재고 미기입 ${kpi.missingStock}건` : ""}</p>}
       >
         <p className="flex items-baseline gap-1">
@@ -520,6 +529,7 @@ export function Warehouse() {
 
       <KpiTile
         label="입고 대기"
+        basis="DD Status가 완료이거나 Received Date가 있는 건이 자동으로 넘어옵니다. 선택 입고하면 R&D No.가 채번되어 창고보관으로 바뀝니다."
         footer={<div className="flex items-center gap-2"><KpiBar pct={totalCount ? (counts.READY / totalCount) * 100 : 0} className={TAB_ACCENT.READY.bar} /><span className="shrink-0 text-[10px] tabular-nums text-[var(--muted-foreground)]">다음 {kpi.nextNo}</span></div>}
       >
         <p className="flex items-baseline gap-1">

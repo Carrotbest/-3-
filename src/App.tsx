@@ -18,10 +18,11 @@ import { Sync } from "@/routes/Sync"
 import { TS } from "@/routes/TS"
 import { FabricAnalysis } from "@/routes/FabricAnalysis"
 import { Warehouse } from "@/routes/Warehouse"
+import { Portfolio } from "@/routes/Portfolio"
 import { setAppState } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
-const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/warehouse", "/calendar", "/sync", "/setting"])
+const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio"])
 
 function AppLayout() {
   // 사이드바는 기본 접힘(아이콘 레일). 확장은 hover/focus 오버레이 또는 핀 고정으로.
@@ -79,6 +80,7 @@ function AppLayout() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/sync" element={<Sync />} />
             <Route path="/setting" element={<Setting />} />
+            <Route path="/trend/portfolio" element={<Portfolio />} />
             {routeDefinitions.filter((route) => !IMPLEMENTED_ROUTES.has(route.path) && !route.path.startsWith("/development")).map((route) => (
               <Route
                 key={route.path}

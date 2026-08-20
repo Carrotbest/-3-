@@ -1,11 +1,13 @@
 import { create } from "zustand"
 
 import { saveCache } from "../data/cache"
+import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } from "../data/chemical"
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
 import { isFabricBalanceExhausted } from "../data/fabric-ledger"
 import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type StudyRecord } from "../data/schema"
 import {
   sampleCompleted,
+  sampleChemicalPortfolio,
   sampleEvents,
   sampleFabricAnalysis,
   sampleMeta,
@@ -57,6 +59,9 @@ export interface AppState {
   fabricOverrides: FabricLedgerOverride[]
   fabricEvents: FabricLedgerEvent[]
   trends: TrendItem[]
+  chemical: ChemicalPortfolio | null
+  chemicalManual: ChemicalItem[]
+  chemicalLinks: Record<string, string>
   filters: AppFilters
   theme: Theme
   sensitiveUnlocked: boolean
@@ -76,6 +81,7 @@ export function createInitialAppState(): AppState {
   const events = sampleEvents()
   const rdda = sampleRdda()
   const trends = sampleTrends()
+  const chemical = sampleChemicalPortfolio()
   const meta = sampleMeta()
   const orgMembers = MEMBERS.map((member, rank) => ({
     name: member.name,
@@ -104,6 +110,9 @@ export function createInitialAppState(): AppState {
     fabricOverrides: [],
     fabricEvents: [],
     trends,
+    chemical,
+    chemicalManual: [],
+    chemicalLinks: {},
     filters: {},
     theme: "light",
     sensitiveUnlocked: sensitiveFrom(meta),
@@ -117,8 +126,15 @@ export const useAppStore = create<AppState>(() => createInitialAppState())
 export function setAppState(patch: AppStatePatch): void {
   useAppStore.setState((state) => {
     const meta = patch.meta ?? state.meta
+    const chemicalManual = patch.chemicalManual ?? state.chemicalManual
+    const shouldMergeChemical = Object.prototype.hasOwnProperty.call(patch, "chemical")
+      || Object.prototype.hasOwnProperty.call(patch, "chemicalManual")
+    const chemical = shouldMergeChemical
+      ? mergeChemicalPortfolio(patch.chemical ?? state.chemical, chemicalManual)
+      : state.chemical
     return {
       ...patch,
+      ...(shouldMergeChemical ? { chemical, chemicalManual } : {}),
       sensitiveUnlocked: sensitiveFrom(meta),
     }
   })
@@ -137,6 +153,21 @@ export function setIngestState(patch: Partial<IngestState>): void {
   useAppStore.setState((state) => ({
     ingest: { ...state.ingest, ...patch },
   }))
+}
+
+export function setChemicalPortfolio(chemical: ChemicalPortfolio): void {
+  setAppState({ chemical })
+}
+
+export async function saveChemicalLinks(patch: Record<string, string>): Promise<void> {
+  const next = { ...useAppStore.getState().chemicalLinks }
+  Object.entries(patch).forEach(([key, value]) => {
+    const trimmed = value.trim()
+    if (trimmed) next[key] = trimmed
+    else delete next[key]
+  })
+  setAppState({ chemicalLinks: next })
+  await saveCache("chemicalLinks", next)
 }
 
 export function addTeamEvent(event: CalendarEvent): void {

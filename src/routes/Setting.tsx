@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { checkStyleNo, fmtDateFull, fmtTime, normalizeSeason } from "@/data/format"
 import { clearCache } from "@/data/cache"
-import { ingestDevelopment, ingestFabric, ingestMaterials, ingestRdda, ingestSamples, ingestStudyWorkbook, ingestTs } from "@/data/upload"
+import { ingestChemical, ingestDevelopment, ingestFabric, ingestMaterials, ingestRdda, ingestSamples, ingestStudyWorkbook, ingestTs } from "@/data/upload"
 import { rddaMonthFromFlNo } from "@/data/derive"
 import { CATEGORIES, MEMBERS } from "@/data/schema"
 import { createInitialAppState, useAppStore } from "@/store/useAppStore"
@@ -83,6 +83,7 @@ export function Setting() {
   const completed = useAppStore((state) => state.completed)
   const orgMembers = useAppStore((state) => state.orgMembers)
   const materialDiagnostics = useAppStore((state) => state.materialDiagnostics)
+  const chemical = useAppStore((state) => state.chemical)
   const [saved, setSaved] = useState<SettingsState>(loadSettings)
   const [draft, setDraft] = useState<SettingsState>(() => cloneSettings(saved))
   const [selectedGroup, setSelectedGroup] = useState("construction")
@@ -210,11 +211,12 @@ export function Setting() {
             { key: "rdda", title: "RDDA 리포트", file: "26년 N월 RDDA.xlsx", targets: "RDDA REPORT Meeting·Pickup·월별 스냅샷", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("rdda", files, async (file) => ingestRdda([file])) },
             { key: "fabric", title: "원단분석", file: "원단분석 export 파일", targets: "FABRIC ANALYSIS / HOME 원단분석 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("fabric", files, ingestFabric) },
             { key: "materials", title: "자료목록", file: "자료목록.xlsx", targets: "트렌드 자료 목록 엑셀 (MACRO·FABRIC·PORTFOLIO). TS·STUDY는 각 화면 엑셀에서 자동 반영됩니다.", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("materials", files, ingestMaterials) },
+            { key: "chemical", title: "기능성 개발 List", file: "Chemical 개발 List.xlsx", targets: "PORTFOLIO / HOME 포트폴리오 카드", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("chemical", files, ingestChemical) },
           ].map((item) => (
             <article key={item.key} className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]">
               <div className="flex items-start gap-3 border-b border-[var(--border)] p-4">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><Database className="size-4" /></span>
-                <div className="min-w-0 flex-1"><h3 className="text-sm font-semibold text-[var(--foreground)]">{item.title}</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">파일: {item.file}</p><p className="mt-2 text-xs font-medium text-[var(--foreground)]">연결: {item.targets}</p>{recentUploads[item.key] ? <p className="mt-2 truncate text-[11px] text-[var(--chart-2)]">최근 선택: {recentUploads[item.key]}</p> : null}{item.key === "materials" ? <div className="mt-3 space-y-1 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3 text-xs text-[var(--muted-foreground)]" aria-live="polite"><p><strong className="text-[var(--foreground)]">인식</strong> {materialDiagnostics.recognized.toLocaleString("ko-KR")}건</p><p>TS {materialDiagnostics.byKind.TS.toLocaleString("ko-KR")} · STUDY {materialDiagnostics.byKind.STUDY.toLocaleString("ko-KR")} · MACRO {materialDiagnostics.byKind.MACRO.toLocaleString("ko-KR")} · FABRIC {materialDiagnostics.byKind.FABRIC.toLocaleString("ko-KR")} · PORTFOLIO {materialDiagnostics.byKind.PORTFOLIO.toLocaleString("ko-KR")}</p><p>구분 불명 {materialDiagnostics.unknownKind.toLocaleString("ko-KR")}건 · 링크 없음 {materialDiagnostics.missingLink.toLocaleString("ko-KR")}건</p></div> : null}</div>
+                <div className="min-w-0 flex-1"><h3 className="text-sm font-semibold text-[var(--foreground)]">{item.title}</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">파일: {item.file}</p><p className="mt-2 text-xs font-medium text-[var(--foreground)]">연결: {item.targets}</p>{item.key === "chemical" ? <p className="mt-2 text-xs text-[var(--muted-foreground)]">초기 이관은 엑셀로 진행하고, 이후 신규 건은 PORTFOLIO 화면에서 직접 등록합니다.</p> : null}{recentUploads[item.key] ? <p className="mt-2 truncate text-[11px] text-[var(--chart-2)]">최근 선택: {recentUploads[item.key]}</p> : null}{item.key === "materials" ? <div className="mt-3 space-y-1 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3 text-xs text-[var(--muted-foreground)]" aria-live="polite"><p><strong className="text-[var(--foreground)]">인식</strong> {materialDiagnostics.recognized.toLocaleString("ko-KR")}건</p><p>TS {materialDiagnostics.byKind.TS.toLocaleString("ko-KR")} · STUDY {materialDiagnostics.byKind.STUDY.toLocaleString("ko-KR")} · MACRO {materialDiagnostics.byKind.MACRO.toLocaleString("ko-KR")} · FABRIC {materialDiagnostics.byKind.FABRIC.toLocaleString("ko-KR")} · PORTFOLIO {materialDiagnostics.byKind.PORTFOLIO.toLocaleString("ko-KR")}</p><p>구분 불명 {materialDiagnostics.unknownKind.toLocaleString("ko-KR")}건 · 링크 없음 {materialDiagnostics.missingLink.toLocaleString("ko-KR")}건</p></div> : null}{item.key === "chemical" && chemical ? <div className="mt-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3 text-xs text-[var(--muted-foreground)]" aria-live="polite"><strong className="text-[var(--foreground)]">인식</strong> 카테고리 {chemical.totals.categories.toLocaleString("ko-KR")} · 항목 {chemical.totals.items.toLocaleString("ko-KR")} · FL {chemical.totals.fl.toLocaleString("ko-KR")} · PASS {chemical.totals.pass.toLocaleString("ko-KR")}</div> : null}</div>
               </div>
               <div className="p-3"><DataUpload kind={item.key} label={`${item.title} 파일 놓기`} accept={item.accept} onFiles={item.onFiles} /></div>
             </article>

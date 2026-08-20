@@ -34,6 +34,8 @@
 - 빈 화면: CONSTRUCTION GUIDE(제거 확정)·트렌드 3종·FABRIC ANALYSIS(존치 미정).
 
 ## 구현 결정·주의
+- **데모 번호는 실제 채번 규칙과 다르다(의도된 현상태)**: `sample.ts`의 FL은 `FL-26xxx`(숫자 5자리)라 `derive.ts`의 `rddaMonthFromFlNo`(8자리 요구)를 통과하지 못한다. 그래서 데모에서는 HOME RDDA 등록 현황·GD# 기입률이 0으로 나온다. 2026-08-18에 실제 규칙(FL+YY+MM+4자리)을 따르도록 바꿔봤으나 **RDDA 등록 수치가 실제와 맞지 않아 사용자 요청으로 원복**함. 다시 손대려면 RDDA 집계 기준부터 확정할 것.
+- **화면 검증 시 주의**: `NumberTicker`·`RadialKpi`는 초기값 0에서 `requestAnimationFrame`으로만 올라간다. 탭이 비활성(`visibilityState: hidden`)이면 rAF가 안 돌아 **모든 KPI가 0으로 보인다**. 실값은 두 컴포넌트의 `aria-label`에서 읽을 것(0을 버그로 오인하기 쉬움).
 - 날짜 파싱은 `XLSX.SSF.format("yyyy-mm-dd", value)`(하루 밀림 방지). zaji.ts는 `cellDates:true` Date 직접.
 - 샘플관리대장 파싱=IndexedDB `completed`. 새 필드(sourceSheet, R&D No.) 반영하려면 재업로드 필요.
 - RDDA 등록: ~2026-07 샘플관리대장 FL.# YYMM, 2026-08~ DD Received Date, 동일 FL 1건. FL 형식 `FL+YY+MM+4자리`, 생산처=끝 4자리 첫 숫자(9 GD·5 국내·0 생산·2 사입).
@@ -62,6 +64,6 @@
 - ~~C(전역 레이아웃): 검색줄·출처줄 제거, 제목 상단바 이동, 사이드바 이모지 토글+메뉴 목적재편 → `docs/codex/R32-global-layout-sidebar.md`~~ **완료(빌드·UI 검증)**.
 - ~~D(DD 마스터): Developer 삭제·Request Date 정렬·열너비 드래그·가운데정렬·Balance % → `docs/codex/R33-dd-master-columns.md`~~ **완료(빌드·UI 검증)**.
 - ~~R34(Home): Quick access 하단 3열 글래스 그리드 이동 + 상단 우측 레일에 팀 일정 캘린더(미팅·연차·외근·출장, IndexedDB `events` 영속) 신설 → `docs/codex/R34-quickaccess-bottom-team-calendar.md`~~ **완료(Codex 구현, tsc·vite build·UI 검증)**. 참고: 실시간 팀 공유는 향후 Firebase 필요, 현재 로컬 저장.
-- A-2: DD 완료→창고 입고대기 연결 검증.
+- ~~A-2: DD 완료→창고 입고대기 연결 검증~~ **완료(브라우저 검증)**. DD 완료 31건이 창고 입고대기 31건으로 자동 연결됨. 재구현 불필요.
 - B(잔여): 자료 라이브러리 OneDrive 링크 목록화, TS 상세 화면.
 - 데이터: RDDA 월 재계산·KPI 대조, RDDA REPORT 파싱.

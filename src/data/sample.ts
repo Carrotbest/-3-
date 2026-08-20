@@ -3,6 +3,7 @@
    시드 고정이라 새로고침해도 값이 바뀌지 않는다. */
 
 import type { DataAnomaly } from "./derive"
+import type { ChemicalCategory, ChemicalItem, ChemicalPortfolio } from "./chemical"
 import type { ReconcileCheck } from "./reconcile"
 import { CATEGORIES, MEMBERS, type CompletedSample, type DevRecord, type FabricAnalysisRow } from "./schema"
 
@@ -154,6 +155,100 @@ export function sampleTrends(): TrendItem[] {
     { title: "경량 스트레치 조직 개발 방향", tag: "KNITTING", date: "2026-07-22", image: "", source: "R&D 데모" },
     { title: "재생 원사 추적성 표준 동향", tag: "MATERIAL", date: "2026-07-16", image: "", source: "R&D 데모" },
   ]
+}
+
+function demoChemicalItem(
+  id: string,
+  category: string,
+  state: ChemicalItem["state"],
+  chemical: string,
+  description: string,
+  fabrication: string,
+  flNos: string[],
+  passNotes: string[] = [],
+): ChemicalItem {
+  return {
+    id: `chemical-demo-${id}`,
+    category,
+    state,
+    chemical,
+    market: "익명 데모 비교 자료",
+    description,
+    fabrication,
+    flNos,
+    passNotes,
+    passCount: passNotes.length,
+  }
+}
+
+/** 실제 업체·브랜드·FL을 포함하지 않는 PORTFOLIO 화면용 익명 데모. */
+export function sampleChemicalPortfolio(): ChemicalPortfolio {
+  const categories: ChemicalCategory[] = [
+    {
+      name: "Cooling (냉감)",
+      labelEn: "Cooling",
+      labelKo: "냉감",
+      strategy: "피부 접촉이 많은 여름용 경량 원단의 열감 완화를 목표로 합니다.",
+      items: [
+        demoChemicalItem("cooling-a", "Cooling (냉감)", "개발완료", "데모 약제 A", "접촉 냉감과 세탁 후 성능을 비교한 데모 항목입니다.", "경량 싱글 저지\n스트레치 인터록", ["FL99010001", "FL99010002"], ["(데모 TEST PASS)"]),
+        demoChemicalItem("cooling-b", "Cooling (냉감)", "개발중", "데모 약제 B", "수분 확산과 냉감의 균형을 확인하고 있습니다.", "흡한속건 저지", ["FL99010003"]),
+      ],
+    },
+    {
+      name: "Antibacterial / Deodorizing (항균 · 항취)",
+      labelEn: "Antibacterial / Deodorizing",
+      labelKo: "항균 · 항취",
+      strategy: "운동과 일상 착용에서 냄새 관리가 필요한 베이스 레이어를 우선 검토합니다.",
+      items: [
+        demoChemicalItem("antibacterial-a", "Antibacterial / Deodorizing (항균 · 항취)", "개발완료", "데모 가공 A", "반복 세탁 후 항균 성능을 확인한 데모 항목입니다.", "코튼 혼방 저지\n폴리에스터 메시", ["FL99020001", "FL99020002"], ["(데모 항균 PASS)"]),
+        demoChemicalItem("antibacterial-b", "Antibacterial / Deodorizing (항균 · 항취)", "미착수", "데모 가공 B", "다양한 혼용률에서의 적용 가능성을 검토할 예정입니다.", "재생 폴리에스터 저지", ["FL99020003"]),
+      ],
+    },
+    {
+      name: "Thermal (보온)",
+      labelEn: "Thermal",
+      labelKo: "보온",
+      strategy: "가벼운 중량으로 공기층을 확보하는 겨울용 원단 구성을 개발합니다.",
+      items: [
+        demoChemicalItem("thermal-a", "Thermal (보온)", "개발완료", "데모 소재 A", "기모 구조와 보온 지표를 비교한 데모 항목입니다.", "마이크로 플리스\n브러시드 인터록", ["FL99030001", "FL99030002"], ["(데모 TEST PASS)"]),
+      ],
+    },
+    {
+      name: "Moisture Management (땀 관리)",
+      labelEn: "Moisture Management",
+      labelKo: "땀 관리",
+      strategy: "활동량이 높은 제품의 흡수·확산·건조 균형을 중심으로 평가합니다.",
+      items: [
+        demoChemicalItem("moisture-a", "Moisture Management (땀 관리)", "개발완료", "데모 약제 C", "수분 확산 면적과 건조 시간을 비교했습니다.", "액티브 메시", ["FL99040001"]),
+        demoChemicalItem("moisture-b", "Moisture Management (땀 관리)", "개발중", "데모 구조 A", "이중 조직을 활용한 수분 이동을 검토하고 있습니다.", "더블 니트", ["FL99040002"]),
+      ],
+    },
+    {
+      name: "Water Repellency (발수)",
+      labelEn: "Water Repellency",
+      labelKo: "발수",
+      strategy: "생활 방수와 촉감의 균형을 갖춘 외층용 원단을 목표로 합니다.",
+      items: [
+        demoChemicalItem("repellency-a", "Water Repellency (발수)", "Drop", "데모 가공 C", "촉감 기준을 충족하지 못해 비교 이력만 유지합니다.", "경량 우븐", ["FL99050001"]),
+      ],
+    },
+  ]
+  const items = categories.flatMap((category) => category.items)
+  const uniqueFlNos = new Set(items.flatMap((item) => item.flNos))
+  return {
+    categories,
+    items,
+    totals: {
+      categories: categories.length,
+      items: items.length,
+      done: items.filter((item) => item.state === "개발완료").length,
+      ongoing: items.filter((item) => item.state === "개발중").length,
+      notStarted: items.filter((item) => item.state === "미착수").length,
+      dropped: items.filter((item) => item.state === "Drop").length,
+      fl: uniqueFlNos.size,
+      pass: items.reduce((total, item) => total + item.passCount, 0),
+    },
+  }
 }
 
 export type TsState = "접수" | "처리중" | "완료"

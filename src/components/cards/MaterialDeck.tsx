@@ -21,44 +21,55 @@ export const MATERIAL_KIND_LABELS: Record<MaterialKind, string> = {
   PORTFOLIO: "PORTFOLIO",
 }
 
-const DECK_LIMIT = 6
 const PAGE_SIZE = 20
 
 export const MATERIAL_CARD_PALETTES = [
   {
+    from: "#6366f1",
+    to: "#8b5cf6",
     background: "bg-[linear-gradient(145deg,#6366f1,#8b5cf6)]",
     glow: "bg-[#6366f1]",
     activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(99,102,241,0.4)]",
   },
   {
+    from: "#0ea5e9",
+    to: "#22d3ee",
     background: "bg-[linear-gradient(145deg,#0ea5e9,#22d3ee)]",
     glow: "bg-[#0ea5e9]",
     activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(14,165,233,0.4)]",
   },
   {
+    from: "#f59e0b",
+    to: "#f43f5e",
     background: "bg-[linear-gradient(145deg,#f59e0b,#f43f5e)]",
     glow: "bg-[#f59e0b]",
     activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(245,158,11,0.4)]",
   },
   {
+    from: "#10b981",
+    to: "#34d399",
     background: "bg-[linear-gradient(145deg,#10b981,#34d399)]",
     glow: "bg-[#10b981]",
     activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(16,185,129,0.4)]",
   },
   {
+    from: "#8b5cf6",
+    to: "#ec4899",
     background: "bg-[linear-gradient(145deg,#8b5cf6,#ec4899)]",
     glow: "bg-[#8b5cf6]",
     activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(139,92,246,0.4)]",
   },
   {
+    from: "#fb923c",
+    to: "#f43f5e",
     background: "bg-[linear-gradient(145deg,#fb923c,#f43f5e)]",
     glow: "bg-[#fb923c]",
     activeShadow: "shadow-[0_1.5rem_3rem_-0.5rem_rgba(251,146,60,0.4)]",
   },
 ] as const
 
-const INACTIVE_CARD_SHADOW = "shadow-[0_1rem_2rem_-0.75rem_rgba(0,0,0,0.72)]"
-const CARD_VIGNETTE = "bg-[linear-gradient(to_bottom,transparent_42%,rgba(0,0,0,0.34))]"
+const INACTIVE_CARD_SHADOW = "shadow-sm"
+const MATERIAL_DECK_VISIBLE_CARDS = 9
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false)
@@ -72,34 +83,38 @@ function useReducedMotion(): boolean {
   return reduced
 }
 
-// --- Continuous coverflow motion -------------------------------------------
-// The deck no longer snaps between whole indices. `posRef` holds a *fractional*
-// card position that the pointer drags 1:1, the wheel nudges in fine steps, and
-// a flick carries with inertia. Everything is painted straight to the DOM on a
-// rAF loop, so the cards glide instead of stepping. `active` (the rounded centre)
-// is kept only for the page counter, arrow-disabled state and tap-to-open.
+const COVERFLOW_SPACING_FALLOFF = 0.55
+const COVERFLOW_SCALE_STEP = 0.08
+const MATERIAL_DECK_SPREAD = 0.65
+const MATERIAL_DECK_ROTATE_MAX = 52
+const MATERIAL_DECK_DEPTH_STEP = 120
+const HOME_DECK_ROTATE_MAX = 38
+const HOME_DECK_DEPTH_STEP = 80
+const DEAD_ZONE = 0.12
+const MIN_V = 1.8
+const MAX_V = 13
+const VELOCITY_LERP = 0.18
+const MAX_FRAME_SECONDS = 0.05
+const STOP_VELOCITY = 0.025
 
-// Geometry, tuned so that at whole offsets the deck matches the previous look:
-// neighbour ≈ 0.62·width across / scale .82 / 24°, second card compressed in,
-// blurred and half-faded. Non-integer offsets interpolate smoothly between.
-const CARD_PITCH = 0.62 // sideways travel per card, as a fraction of card width
-const PITCH_FALLOFF = 0.8 // < 1 so far cards pack in rather than fan out forever
-const SCALE_STEP = 0.18
-const SCALE_FALLOFF = 0.92
-const ROTATE = 24
-const ROTATE_FALLOFF = 0.32
-const ROTATE_CAP = 46
-const WHEEL_PER_CARD = 280 // larger = finer wheel; a notch moves ~0.35 of a card
-const WHEEL_SETTLE_MS = 140 // after the wheel goes quiet, ease onto the nearest card
-
-function cardTransform(distance: number, width: number): string {
+function cardTransform(distance: number, cardWidth: number, stageWidth: number, visibleCards: number): string {
   const abs = Math.abs(distance)
   const dir = Math.sign(distance)
-  const tx = dir * width * CARD_PITCH * Math.pow(abs, PITCH_FALLOFF)
-  const ty = -4 * Math.max(0, 1 - abs) // the centre card lifts a touch
-  const scale = Math.max(0.5, 1 - SCALE_STEP * Math.pow(abs, SCALE_FALLOFF))
-  const tilt = Math.min(ROTATE * Math.pow(abs, ROTATE_FALLOFF), ROTATE_CAP) * -dir
-  return `translateX(calc(-50% + ${tx.toFixed(2)}px)) translateY(${ty.toFixed(2)}px) scale(${scale.toFixed(3)}) rotateY(${tilt.toFixed(2)}deg)`
+  const radius = Math.max(1, (visibleCards - 1) / 2)
+  const cappedAbs = Math.min(abs, radius)
+  const depthDistance = Math.min(cappedAbs, 4)
+  const isHomeDeck = visibleCards === 5
+  const spacing = (1 - Math.exp(-cappedAbs * COVERFLOW_SPACING_FALLOFF))
+    / (1 - Math.exp(-radius * COVERFLOW_SPACING_FALLOFF))
+  const scale = 1 - depthDistance * COVERFLOW_SCALE_STEP
+  const rotateMax = isHomeDeck ? HOME_DECK_ROTATE_MAX : MATERIAL_DECK_ROTATE_MAX
+  const tilt = Math.min(cappedAbs * rotateMax, rotateMax) * -dir
+  const translateZ = -depthDistance * (isHomeDeck ? HOME_DECK_DEPTH_STEP : MATERIAL_DECK_DEPTH_STEP)
+  const projectedHalfWidth = cardWidth * scale * Math.max(0.2, Math.cos(Math.abs(tilt) * Math.PI / 180)) / 2
+  const edgeTravel = Math.max(cardWidth * 0.72, stageWidth / 2 - projectedHalfWidth)
+  const spread = isHomeDeck ? 1 : MATERIAL_DECK_SPREAD
+  const tx = dir * edgeTravel * spacing * spread
+  return `translateX(calc(-50% + ${tx.toFixed(2)}px)) translateZ(${translateZ.toFixed(2)}px) rotateY(${tilt.toFixed(2)}deg) scale(${scale.toFixed(3)})`
 }
 
 export function useCoverflowMotion(itemCount: number, reduced: boolean) {
@@ -108,11 +123,12 @@ export function useCoverflowMotion(itemCount: number, reduced: boolean) {
   const posRef = useRef(0) // fractional centre — the single source of truth
   const targetRef = useRef(0) // where the current settle is headed
   const widthRef = useRef(0)
-  const rafRef = useRef<number | null>(null)
-  const wheelIdle = useRef<number | null>(null)
-  const pointerInside = useRef(false)
-  const movedRef = useRef(false) // did the last press turn into a drag?
-  const dragRef = useRef<{ id: number; x: number; pos: number; v: number; t: number } | null>(null)
+  const settleRafRef = useRef<number | null>(null)
+  const autoRafRef = useRef<number | null>(null)
+  const targetVelocityRef = useRef(0)
+  const velocityRef = useRef(0)
+  const lastFrameRef = useRef<number | null>(null)
+  const activeRef = useRef(0)
   const [active, setActive] = useState(0)
 
   const clamp = useCallback(
@@ -120,35 +136,50 @@ export function useCoverflowMotion(itemCount: number, reduced: boolean) {
     [itemCount],
   )
 
-  // Paint transforms straight to the DOM — sixty state updates a second would
-  // re-render every card for numbers React never needs to see.
   const paint = useCallback(() => {
-    const width = widthRef.current
-    if (!width) return
+    const cardWidth = widthRef.current
+    const stage = rootRef.current
+    if (!cardWidth || !stage) return
+    const visibleCards = Number(stage.dataset.coverflowVisible) || MATERIAL_DECK_VISIBLE_CARDS
+    const visibleRadius = Math.max(1, (visibleCards - 1) / 2)
+    const stageWidth = stage.clientWidth
     const pos = posRef.current
     cardRefs.current.forEach((card, index) => {
       if (!card) return
       const distance = index - pos
       const abs = Math.abs(distance)
-      card.style.transform = cardTransform(distance, width)
-      const opacity = abs <= 1 ? 1 - 0.08 * abs : Math.max(0, 0.92 - 0.46 * (abs - 1))
+      if (abs >= visibleRadius + 0.5) {
+        if (card.style.visibility !== "hidden") {
+          card.style.visibility = "hidden"
+          card.style.pointerEvents = "none"
+          card.style.opacity = "0"
+        }
+        return
+      }
+      card.style.transform = cardTransform(distance, cardWidth, stageWidth, visibleCards)
+      const opacity = 1 - 0.4 * Math.min(1, abs)
       card.style.opacity = opacity.toFixed(3)
-      const blur = Math.min(1.2, Math.max(0, (abs - 1.2) * 1.2))
-      card.style.filter = blur > 0.01 ? `blur(${blur.toFixed(2)}px)` : "none"
+      card.style.filter = "none"
       card.style.zIndex = String(100 - Math.round(abs * 10))
-      card.style.pointerEvents = abs < 2.2 ? "auto" : "none"
-      card.style.visibility = abs > 3 ? "hidden" : "visible"
+      card.style.pointerEvents = "auto"
+      card.style.visibility = "visible"
     })
+  }, [])
+
+  const updateActive = useCallback((index: number) => {
+    if (index === activeRef.current) return
+    activeRef.current = index
+    setActive(index)
   }, [])
 
   const settle = useCallback(
     (target: number) => {
       const goal = clamp(target)
       targetRef.current = goal
-      setActive(Math.round(goal))
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current)
-        rafRef.current = null
+      updateActive(Math.round(goal))
+      if (settleRafRef.current !== null) {
+        cancelAnimationFrame(settleRafRef.current)
+        settleRafRef.current = null
       }
       if (reduced) {
         posRef.current = goal
@@ -160,35 +191,94 @@ export function useCoverflowMotion(itemCount: number, reduced: boolean) {
         if (Math.abs(remaining) < 0.0006) {
           posRef.current = targetRef.current
           paint()
-          rafRef.current = null
+          settleRafRef.current = null
           return
         }
-        // Exponential ease-out — the tail is what makes it feel unhurried.
         posRef.current += remaining * 0.18
         paint()
-        rafRef.current = requestAnimationFrame(step)
+        settleRafRef.current = requestAnimationFrame(step)
       }
-      rafRef.current = requestAnimationFrame(step)
+      settleRafRef.current = requestAnimationFrame(step)
     },
-    [clamp, paint, reduced],
+    [clamp, paint, reduced, updateActive],
   )
 
-  const move = useCallback(
-    (direction: -1 | 1) => settle(Math.round(targetRef.current) + direction),
-    [settle],
-  )
-  const goTo = useCallback((index: number) => settle(index), [settle])
+  const cancelAuto = useCallback(() => {
+    if (autoRafRef.current !== null) {
+      cancelAnimationFrame(autoRafRef.current)
+      autoRafRef.current = null
+    }
+    targetVelocityRef.current = 0
+    velocityRef.current = 0
+    lastFrameRef.current = null
+  }, [])
 
-  // Keep the centre in range if the deck shrinks under us.
+  const stopAuto = useCallback(() => {
+    if (autoRafRef.current !== null) {
+      targetVelocityRef.current = 0
+      return
+    }
+    cancelAuto()
+  }, [cancelAuto])
+
+  const startContinuous = useCallback((targetVelocity: number) => {
+    targetVelocityRef.current = targetVelocity
+    if (settleRafRef.current !== null) {
+      cancelAnimationFrame(settleRafRef.current)
+      settleRafRef.current = null
+    }
+    targetRef.current = posRef.current
+    if (autoRafRef.current !== null) return
+
+    const step = (timestamp: number) => {
+      const previous = lastFrameRef.current
+      const dt = previous === null ? 0 : Math.min(MAX_FRAME_SECONDS, Math.max(0, (timestamp - previous) / 1000))
+      lastFrameRef.current = timestamp
+      const targetVelocityNow = targetVelocityRef.current
+      velocityRef.current += (targetVelocityNow - velocityRef.current) * VELOCITY_LERP
+
+      const previousPos = posRef.current
+      posRef.current = clamp(previousPos + velocityRef.current * dt)
+      // dt가 0인 첫 프레임은 위치가 그대로인 게 정상이다. 이때를 경계 도달로 오판하면
+      // 루프가 첫 프레임에 스스로 종료돼 자동 넘김이 아예 동작하지 않는다.
+      const hitBoundary = dt > 0 && posRef.current === previousPos && Math.abs(velocityRef.current) > STOP_VELOCITY
+      if (hitBoundary) {
+        targetVelocityRef.current = 0
+        velocityRef.current = 0
+      }
+
+      paint()
+      updateActive(Math.round(posRef.current))
+
+      if (targetVelocityRef.current === 0 && Math.abs(velocityRef.current) < STOP_VELOCITY) {
+        velocityRef.current = 0
+        lastFrameRef.current = null
+        autoRafRef.current = null
+        settle(Math.round(posRef.current))
+        return
+      }
+      autoRafRef.current = requestAnimationFrame(step)
+    }
+    autoRafRef.current = requestAnimationFrame(step)
+  }, [clamp, paint, settle, updateActive])
+
+  const move = useCallback((direction: -1 | 1) => {
+    cancelAuto()
+    settle(Math.round(posRef.current) + direction)
+  }, [cancelAuto, settle])
+  const goTo = useCallback((index: number) => {
+    cancelAuto()
+    settle(index)
+  }, [cancelAuto, settle])
+
   useEffect(() => {
     posRef.current = clamp(posRef.current)
     targetRef.current = clamp(targetRef.current)
-    setActive(Math.round(posRef.current))
+    cancelAuto()
+    updateActive(Math.round(posRef.current))
     paint()
-  }, [clamp, itemCount, paint])
+  }, [cancelAuto, clamp, itemCount, paint, updateActive])
 
-  // Card width drives pitch and depth, so it is the only thing worth measuring —
-  // and only when the box actually changes size.
   useEffect(() => {
     const frame = rootRef.current
     if (!frame) return
@@ -204,71 +294,38 @@ export function useCoverflowMotion(itemCount: number, reduced: boolean) {
     return () => observer.disconnect()
   }, [paint])
 
-  // Fine, continuous wheel: accumulate into the target and re-aim the settle,
-  // then snap gently onto the nearest card once the wheel goes quiet.
-  useEffect(() => {
-    const node = rootRef.current
-    if (!node || itemCount < 2) return
-    const onWheel = (event: WheelEvent) => {
-      if (!pointerInside.current) return
-      const delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX
-      if (!delta) return
-      const atStart = targetRef.current <= 0.001 && delta < 0
-      const atEnd = targetRef.current >= itemCount - 1 - 0.001 && delta > 0
-      if (atStart || atEnd) return // let the page scroll past the ends
-      event.preventDefault()
-      settle(targetRef.current + delta / WHEEL_PER_CARD)
-      if (wheelIdle.current !== null) window.clearTimeout(wheelIdle.current)
-      wheelIdle.current = window.setTimeout(() => {
-        settle(Math.round(targetRef.current))
-      }, WHEEL_SETTLE_MS)
-    }
-    node.addEventListener("wheel", onWheel, { passive: false })
-    return () => node.removeEventListener("wheel", onWheel)
-  }, [itemCount, settle])
-
   useEffect(
     () => () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
-      if (wheelIdle.current !== null) window.clearTimeout(wheelIdle.current)
+      if (settleRafRef.current !== null) cancelAnimationFrame(settleRafRef.current)
+      cancelAuto()
     },
-    [],
+    [cancelAuto],
   )
 
-  const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current)
-      rafRef.current = null
-    }
-    event.currentTarget.setPointerCapture(event.pointerId)
-    movedRef.current = false
-    targetRef.current = posRef.current
-    dragRef.current = { id: event.pointerId, x: event.clientX, pos: posRef.current, v: 0, t: performance.now() }
-  }
+  useEffect(() => {
+    if (!reduced) return
+    cancelAuto()
+    settle(Math.round(posRef.current))
+  }, [cancelAuto, reduced, settle])
+
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current
-    if (!drag || drag.id !== event.pointerId) return
-    const pitch = widthRef.current * CARD_PITCH
-    if (!pitch) return
-    const dx = event.clientX - drag.x
-    if (Math.abs(dx) > 4) movedRef.current = true
-    const now = performance.now()
-    const previous = posRef.current
-    posRef.current = clamp(drag.pos - dx / pitch) // cards track the finger 1:1
-    drag.v = ((posRef.current - previous) / Math.max(now - drag.t, 1)) * 1000 // cards/sec
-    drag.t = now
-    const index = Math.round(clamp(posRef.current))
-    if (index !== active) setActive(index)
-    paint()
-  }
-  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current
-    if (!drag || drag.id !== event.pointerId) return
-    dragRef.current = null
-    // Let a flick carry, but never more than two cards.
-    const carried = Math.max(-2, Math.min(2, drag.v * 0.14))
-    settle(Math.round(posRef.current + carried))
+    if (event.pointerType !== "mouse") return
+    if (reduced) {
+      stopAuto()
+      return
+    }
+    const rect = event.currentTarget.getBoundingClientRect()
+    if (!rect.width) return
+    const x = (event.clientX - rect.left) / rect.width
+    if (x < 0 || x > 1) return
+    const d = (x - 0.5) * 2
+    if (Math.abs(d) < DEAD_ZONE) {
+      stopAuto()
+      return
+    }
+    const speedProgress = Math.min(1, (Math.abs(d) - DEAD_ZONE) / (1 - DEAD_ZONE))
+    const targetVelocity = Math.sign(d) * (MIN_V + (MAX_V - MIN_V) * speedProgress * speedProgress)
+    startContinuous(targetVelocity)
   }
   const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
@@ -286,14 +343,10 @@ export function useCoverflowMotion(itemCount: number, reduced: boolean) {
     setCardRef: (index: number) => (node: HTMLElement | null) => {
       cardRefs.current[index] = node
     },
-    wasDragged: () => movedRef.current,
+    wasDragged: () => false,
     rootProps: {
-      onPointerEnter: () => { pointerInside.current = true },
-      onPointerLeave: () => { pointerInside.current = false },
-      onPointerDown,
       onPointerMove,
-      onPointerUp: endDrag,
-      onPointerCancel: endDrag,
+      onPointerLeave: stopAuto,
       onKeyDown,
     },
   }
@@ -311,33 +364,15 @@ function SourceBadge({ source, tone = "surface" }: { source: MaterialItem["sourc
   return <Badge variant="outline" className={tone === "onColor" ? "border-white/25 bg-white/15 text-white hover:bg-white/15" : undefined}>{labels[source]}</Badge>
 }
 
-function MaterialCardBody({ item, tone = "surface" }: { item: MaterialItem; tone?: MaterialCardTone }) {
-  const onColor = tone === "onColor"
-  return (
-    <>
-      <span className="flex items-start justify-between gap-3">
-        <span className={`flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] ${onColor ? "bg-white/15 text-white ring-1 ring-inset ring-white/20" : "bg-[var(--muted)] text-[var(--foreground)]"}`}><FileText className="size-5" aria-hidden="true" /></span>
-        <SourceBadge source={item.source} tone={tone} />
-      </span>
-      <strong className={`mt-5 line-clamp-2 block text-base leading-6 ${onColor ? "text-white" : "text-[var(--foreground)]"}`}>{item.title}</strong>
-      <span className={`mt-2 line-clamp-2 block text-sm ${onColor ? "text-white/70" : "text-[var(--muted-foreground)]"}`}>{item.summary || "요약이 등록되지 않았습니다."}</span>
-      <span className="mt-4 flex flex-wrap gap-1.5">
-        {item.tags.slice(0, 3).map((tag) => <Badge key={tag} variant="secondary" className={onColor ? "border border-white/10 bg-white/15 text-white hover:bg-white/15" : undefined}>{tag}</Badge>)}
-      </span>
-      <span className={`mt-auto block pt-4 text-xs ${onColor ? "text-white/70" : "text-[var(--muted-foreground)]"}`}>{item.date ? fmtDateFull(item.date) : "날짜 미등록"}{item.owner ? ` · ${item.owner}` : ""}</span>
-    </>
-  )
-}
-
 export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
   items: MaterialItem[]
   emptyMessage: string
   onOpen: (item: MaterialItem) => void
   onAdd?: () => void
 }) {
-  const deckItems = items.slice(0, DECK_LIMIT)
+  const deckItems = items
   const reduced = useReducedMotion()
-  const { active, move, goTo, rootRef, setCardRef, wasDragged, rootProps } = useCoverflowMotion(deckItems.length, reduced)
+  const { active, move, goTo, rootRef, setCardRef, rootProps } = useCoverflowMotion(deckItems.length, reduced)
 
   if (!deckItems.length) {
     return (
@@ -348,41 +383,97 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
     )
   }
 
+  const activeItem = deckItems[active] ?? deckItems[0]
+  const dotWindowStart = Math.max(0, Math.min(active - 5, deckItems.length - 12))
+  const dotItems = deckItems.slice(dotWindowStart, dotWindowStart + 12)
+
   return (
     <div
       ref={rootRef}
-      role="group"
+      role="region"
       aria-roledescription="carousel"
       aria-label="자료 카드 덱"
       tabIndex={0}
-      className="touch-pan-y overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
-      {...rootProps}
+      data-coverflow-visible={MATERIAL_DECK_VISIBLE_CARDS}
+      onPointerMove={rootProps.onPointerMove}
+      onKeyDown={rootProps.onKeyDown}
+      onPointerLeave={rootProps.onPointerLeave}
+      className="group/deck relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
     >
-      <div className="relative min-h-[21rem] cursor-grab overflow-hidden [perspective:1200px] active:cursor-grabbing sm:min-h-[22rem]">
-        {deckItems.map((item, index) => {
-          const palette = MATERIAL_CARD_PALETTES[index % MATERIAL_CARD_PALETTES.length]
-          const isActive = index === active
-          return (
-            <button
-              key={item.id}
-              ref={setCardRef(index)}
-              type="button"
-              tabIndex={isActive ? 0 : -1}
-              aria-hidden={!isActive}
-              onClick={() => { if (wasDragged()) return; if (isActive) onOpen(item); else goTo(index) }}
-              style={{ opacity: 0 }}
-              className={`absolute left-1/2 top-7 flex aspect-square [width:clamp(190px,44%,260px)] cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/20 p-5 text-left outline-none transition-shadow duration-300 will-change-transform focus-visible:ring-[3px] focus-visible:ring-white/80 ${palette.background} ${isActive ? palette.activeShadow : INACTIVE_CARD_SHADOW}`}
-            >
-              <span aria-hidden="true" className={`pointer-events-none absolute inset-0 ${CARD_VIGNETTE}`} />
-              <span className="relative z-10 flex h-full flex-col"><MaterialCardBody item={item} tone="onColor" /></span>
-            </button>
-          )
-        })}
+      <div
+        className="relative min-h-[21rem] touch-pan-y rounded-t-2xl [perspective:720px] [perspective-origin:50%_45%] [transform-style:preserve-3d]"
+      >
+        <div className="relative z-20 h-[6.5rem] overflow-hidden px-4 pb-2 pt-3 sm:px-5" aria-live="polite">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">{MATERIAL_KIND_LABELS[activeItem.kind]}</Badge>
+            <SourceBadge source={activeItem.source} />
+          </div>
+          <button
+            type="button"
+            onClick={() => { goTo(active); onOpen(activeItem) }}
+            className="mt-1.5 block max-w-full cursor-pointer text-left outline-none focus-visible:rounded-[var(--radius)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+          >
+            <strong className="line-clamp-1 block text-base font-semibold leading-5 tracking-tight text-[var(--foreground)]">{activeItem.title}</strong>
+            <span className="mt-0.5 line-clamp-1 block text-xs leading-4 text-[var(--muted-foreground)]">{activeItem.summary || "요약이 등록되지 않았습니다."}</span>
+          </button>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[var(--muted-foreground)]">
+            <span>{activeItem.date ? fmtDateFull(activeItem.date) : "날짜 미등록"}{activeItem.owner ? ` · ${activeItem.owner}` : ""}</span>
+            {activeItem.tags.slice(0, 2).map((tag) => <span key={tag} className="rounded-full bg-[var(--muted)] px-2 py-0.5">#{tag}</span>)}
+          </div>
+        </div>
+
+        <div className="absolute inset-x-0 top-[6.5rem] h-[12.5rem] [transform-style:preserve-3d]">
+          {deckItems.map((item, index) => {
+            const palette = MATERIAL_CARD_PALETTES[index % MATERIAL_CARD_PALETTES.length]
+            const isActive = index === active
+            return (
+              <button
+                key={item.id}
+                ref={setCardRef(index)}
+                type="button"
+                tabIndex={isActive ? 0 : -1}
+                aria-hidden={!isActive}
+                onClick={() => { goTo(index); onOpen(item) }}
+                className={`absolute left-1/2 top-2 flex h-44 [width:clamp(230px,25%,340px)] cursor-pointer flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-left text-[var(--foreground)] opacity-0 outline-none transition-shadow duration-300 [backface-visibility:hidden] [transform-style:preserve-3d] will-change-transform focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${isActive ? palette.activeShadow : INACTIVE_CARD_SHADOW}`}
+              >
+                <span aria-hidden="true" className={`pointer-events-none absolute inset-x-0 top-0 h-1 ${palette.background}`} />
+                <span aria-hidden="true" className={`pointer-events-none absolute inset-0 z-20 bg-[var(--foreground)] transition-opacity duration-300 motion-reduce:transition-none ${isActive ? "opacity-0" : "opacity-[0.06]"}`} />
+                <span className="relative z-10 flex h-full flex-col">
+                  <span className="flex items-start justify-between gap-3">
+                    <span className={`flex size-8 shrink-0 items-center justify-center rounded-[var(--radius)] text-white ${palette.glow}`}><FileText className="size-4" aria-hidden="true" /></span>
+                    <span className="font-mono text-[10px] font-semibold tabular-nums text-[var(--muted-foreground)]">{String(index + 1).padStart(2, "0")}</span>
+                  </span>
+                  <strong className="mt-2 line-clamp-1 text-sm leading-5 text-[var(--foreground)]">{item.title}</strong>
+                  <span className="mt-1 line-clamp-2 text-xs leading-4 text-[var(--muted-foreground)]">{item.summary || "요약이 등록되지 않았습니다."}</span>
+                  <span className="mt-auto text-[10px] text-[var(--muted-foreground)]">{item.date ? fmtDateFull(item.date) : "날짜 미등록"}</span>
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
-      <div className="flex items-center justify-center gap-3 px-5 pb-5">
-        <Button type="button" variant="outline" size="icon" disabled={active === 0} aria-label="이전 자료" onPointerDown={(event) => event.stopPropagation()} onClick={() => move(-1)} className="text-[var(--foreground)]"><ArrowLeft /></Button>
-        <span className="min-w-20 text-center text-sm font-semibold tabular-nums text-[var(--foreground)]" aria-live="polite">{String(active + 1).padStart(2, "0")} / {String(deckItems.length).padStart(2, "0")}</span>
-        <Button type="button" variant="outline" size="icon" disabled={active === deckItems.length - 1} aria-label="다음 자료" onPointerDown={(event) => event.stopPropagation()} onClick={() => move(1)} className="text-[var(--foreground)]"><ArrowRight /></Button>
+
+      <div className="relative z-20 flex items-center justify-center gap-3 border-t border-[var(--border)]/70 px-4 py-3">
+        <Button type="button" variant="outline" size="icon" disabled={active === 0} aria-label="이전 자료" onClick={() => move(-1)} className="text-[var(--foreground)]"><ArrowLeft /></Button>
+        <div role="tablist" aria-label="자료 카드 선택" className="flex min-w-0 max-w-56 items-center justify-center gap-1.5 overflow-hidden">
+          {dotItems.map((item, visibleIndex) => {
+            const index = dotWindowStart + visibleIndex
+            const isActive = index === active
+            const palette = MATERIAL_CARD_PALETTES[index % MATERIAL_CARD_PALETTES.length]
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                aria-label={`${index + 1}번째 자료: ${item.title}`}
+                onClick={() => goTo(index)}
+                className={`h-2 rounded-full outline-none transition-[width,background-color] duration-300 focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${isActive ? `w-6 ${palette.background}` : "w-2 bg-[var(--muted-foreground)]/30 hover:bg-[var(--muted-foreground)]/50"}`}
+              />
+            )
+          })}
+        </div>
+        <Button type="button" variant="outline" size="icon" disabled={active === deckItems.length - 1} aria-label="다음 자료" onClick={() => move(1)} className="text-[var(--foreground)]"><ArrowRight /></Button>
       </div>
     </div>
   )

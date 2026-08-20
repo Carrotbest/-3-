@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  Info,
   Layers3,
   RotateCcw,
   Search,
@@ -15,8 +16,15 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useParams } from "react-router-dom"
-import { CartesianGrid, LabelList, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
+// recharts 의 Tooltip 과 이름이 겹쳐 UI 툴팁은 별칭으로 가져온다.
+import {
+  Tooltip as UiTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { RadialKpi, type RadialKpiTone } from "@/components/charts/RadialKpi"
 import { LeadTimeGantt } from "@/components/charts/LeadTimeGantt"
 import { OwnerLaneBoard } from "@/components/charts/OwnerLaneBoard"
@@ -98,9 +106,10 @@ const SUB_CATEGORY: Record<string, string | null> = {
 }
 
 const RADIAL_TONES: RadialKpiTone[] = ["one", "two", "three", "four"]
-const GAUGE_MS = 1500
+const CHART_MOTION_MS = 1950
+const GAUGE_MS = CHART_MOTION_MS
 const EASE_INOUT = "cubic-bezier(0.65, 0, 0.35, 1)"
-const GAUGE_BAR = "duration-[1500ms] [transition-timing-function:cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none"
+const GAUGE_BAR = "duration-[1950ms] [transition-timing-function:linear] motion-reduce:transition-none"
 const PROCESS_STYLE: Record<OwnerProcessKey, { gradient: string; glow: string; dot: string }> = {
   unreceived: { gradient: "linear-gradient(90deg,#334155,#64748b,#94a3b8)", glow: "rgba(100,116,139,.4)", dot: "#64748b" },
   knitting: { gradient: "linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)", glow: "rgba(6,182,212,.5)", dot: "#06b6d4" },
@@ -196,6 +205,7 @@ function AccentGradientBar({ pct, from, to, label }: { pct: number; from: string
 interface ProcessStatusProps {
   owner: string
   total: number
+  started: boolean
   process: ReadonlyArray<{
     key: OwnerProcessKey
     label: string
@@ -246,16 +256,15 @@ function ProcessSegment({ owner, total, segment, started, active, onActivate, on
   )
 }
 
-function ProcessStatus({ owner, total, process }: ProcessStatusProps) {
+function ProcessStatus({ owner, total, process, started }: ProcessStatusProps) {
   const [active, setActive] = useState<OwnerProcessKey | null>(null)
-  const { ref, inView } = useInView<HTMLDivElement>({ once: true })
 
   const activate = (key: OwnerProcessKey) => {
     setActive(key)
   }
 
   return (
-    <div ref={ref} className="min-w-0">
+    <div className="min-w-0">
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted-foreground)]">Process status</p>
         <p className="shrink-0 text-xs text-[var(--muted-foreground)]">총 <strong className="font-semibold text-[var(--foreground)]">{total}</strong>건</p>
@@ -267,7 +276,7 @@ function ProcessStatus({ owner, total, process }: ProcessStatusProps) {
             owner={owner}
             total={total}
             segment={segment}
-            started={inView}
+            started={started}
             active={active === segment.key}
             onActivate={() => activate(segment.key)}
             onDeactivate={() => setActive(null)}
@@ -322,6 +331,29 @@ const ACCENT: Record<AccentKey, { from: string; to: string; glow: string; soft: 
 }
 
 const OWNER_ACCENTS: AccentKey[] = ["teal", "violet", "emerald", "amber", "slate"]
+const OWNER_RANGE_OPTIONS = [
+  { months: 6, label: "6개월" },
+  { months: 12, label: "1년" },
+  { months: 24, label: "2년" },
+] as const
+const OWNER_MONTHS_STORAGE_KEY = "fabric-rnd-home-rdda-months-v1"
+
+function loadOwnerMonths(): number {
+  if (typeof window === "undefined") return 12
+  const stored = Number(window.localStorage.getItem(OWNER_MONTHS_STORAGE_KEY))
+  return OWNER_RANGE_OPTIONS.some((option) => option.months === stored) ? stored : 12
+}
+
+function integerAxis(data: ReadonlyArray<{ count: number }>): { max: number; ticks: number[] } {
+  const dataMax = Math.max(0, ...data.map((item) => item.count))
+  if (dataMax <= 4) return { max: Math.max(1, dataMax), ticks: Array.from({ length: Math.max(1, dataMax) + 1 }, (_, index) => index) }
+  const rawStep = dataMax / 4
+  const magnitude = 10 ** Math.floor(Math.log10(rawStep))
+  const normalized = rawStep / magnitude
+  const step = (normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10) * magnitude
+  const max = Math.ceil(dataMax / step) * step
+  return { max, ticks: Array.from({ length: Math.round(max / step) + 1 }, (_, index) => index * step) }
+}
 
 /** 히어로 밴드용 통일 KPI 타일 — 액센트 그라데이션 아이콘칩·상단 라인·부드러운 글로우·틸트. */
 function AccentKpiTile({
@@ -330,6 +362,8 @@ function AccentKpiTile({
   label,
   badge,
   footnote,
+  /** 집계 기준(모집단·제외 조건). 화면마다 건수가 달라 보이는 이유를 여기서 밝힌다. */
+  basis,
   children,
 }: {
   accent: AccentKey
@@ -337,6 +371,7 @@ function AccentKpiTile({
   label: ReactNode
   badge?: ReactNode
   footnote?: ReactNode
+  basis?: string
   children: ReactNode
 }) {
   return (
@@ -347,7 +382,25 @@ function AccentKpiTile({
             <span className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]">
               <Icon aria-hidden="true" className="size-5" />
             </span>
-            {badge ?? null}
+            <span className="flex items-center gap-2">
+              {badge ?? null}
+              {basis ? (
+                <TooltipProvider delayDuration={200}>
+                  <UiTooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="rounded-full text-[var(--muted-foreground)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+                        aria-label="집계 기준 설명"
+                      >
+                        <Info aria-hidden="true" className="size-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-64">{basis}</TooltipContent>
+                  </UiTooltip>
+                </TooltipProvider>
+              ) : null}
+            </span>
           </div>
           <p className="mt-5 text-sm font-medium text-[var(--muted-foreground)]">{label}</p>
           <div className="mt-2">{children}</div>
@@ -397,26 +450,44 @@ function TeamProcessBar({ process, total }: { process: OwnerProcessDatum[]; tota
 }
 
 /** 담당자 카드 — 랭크·워크로드 바·슬림 GD/국내 바·공정 스택바를 한 카드에 조밀하게. */
-function OwnerMonthlyChart({ data, stroke, owner }: { data: { month: string; count: number }[]; stroke: string; owner: string }) {
-  const { ref, inView: started } = useInView<HTMLDivElement>({ once: true, threshold: 0.3 })
+function OwnerYAxisLegend({ ticks }: { ticks: number[] }) {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute bottom-[34px] left-0 top-4 z-10 flex w-7 flex-col justify-between pr-1 text-right text-[9px] leading-none text-[var(--muted-foreground)]">
+      {[...ticks].reverse().map((tick) => <span key={tick}>{tick.toLocaleString("ko-KR")}</span>)}
+    </div>
+  )
+}
+
+function OwnerMonthlyChart({ data, stroke, owner, gradientId, started }: { data: { month: string; count: number }[]; stroke: string; owner: string; gradientId: string; started: boolean }) {
   const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   const hasData = data.some((item) => item.count > 0)
-  if (!hasData) return <div ref={ref} className="flex h-40 items-center justify-center text-xs text-[var(--muted-foreground)]">데이터 없음</div>
+  const axis = integerAxis(data)
+  if (!hasData) return <div className="flex h-40 items-center justify-center text-xs text-[var(--muted-foreground)]">데이터 없음</div>
 
   return (
-    <div ref={ref} className="h-40 w-full" role="img" aria-label={`${owner} 최근 월별 FL 등록 ${data.map((item) => `${item.month} ${item.count}건`).join(", ")}`}>
+    <div className="relative h-40 w-full" role="img" aria-label={`${owner} 최근 월별 FL 등록 ${data.map((item) => `${item.month} ${item.count}건`).join(", ")}`}>
+      <OwnerYAxisLegend ticks={axis.ticks} />
       {started ? (
+        <div className="absolute inset-0 pl-7">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 16, right: 8, bottom: 0, left: -12 }}>
+          <AreaChart data={data} margin={{ top: 16, right: 8, bottom: 4, left: 0 }}>
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={stroke} stopOpacity={0.24} />
+                <stop offset="55%" stopColor={stroke} stopOpacity={0.09} />
+                <stop offset="100%" stopColor={stroke} stopOpacity={0.01} />
+              </linearGradient>
+            </defs>
             <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 5" />
             <XAxis dataKey="month" tickFormatter={(value: string) => `${value.slice(2, 4)}.${value.slice(5)}월`} tick={{ fill: "var(--muted-foreground)", fontSize: 9 }} axisLine={false} tickLine={false} interval={data.length > 5 ? 1 : 0} />
-            <YAxis allowDecimals={false} width={26} tick={{ fill: "var(--muted-foreground)", fontSize: 9 }} axisLine={false} tickLine={false} />
+            <YAxis hide allowDecimals={false} domain={[0, axis.max]} ticks={axis.ticks} interval={0} width={0} />
             <Tooltip cursor={{ stroke: "var(--chart-2)", strokeOpacity: 0.25, strokeDasharray: "4 4" }} contentStyle={{ backgroundColor: "var(--popover)", border: "1px solid var(--border)", borderRadius: "var(--radius)", color: "var(--popover-foreground)", fontSize: 10 }} />
-            <Line type="natural" dataKey="count" name="FL 등록" stroke={stroke} strokeWidth={1.75} dot={{ r: 2, fill: "var(--background)", stroke, strokeWidth: 1.5 }} activeDot={{ r: 4, fill: "var(--background)", stroke, strokeWidth: 2 }} isAnimationActive={!reduceMotion} animationDuration={1950} animationEasing="linear">
+            <Area type="monotoneX" dataKey="count" name="FL 등록" stroke={stroke} strokeWidth={1.75} fill={`url(#${gradientId})`} fillOpacity={1} dot={{ r: 2, fill: "var(--background)", stroke, strokeWidth: 1.5 }} activeDot={{ r: 4, fill: "var(--background)", stroke, strokeWidth: 2 }} isAnimationActive={!reduceMotion} animationDuration={CHART_MOTION_MS} animationEasing="linear">
               {data.length <= 6 ? <LabelList dataKey="count" position="top" offset={8} fill="var(--muted-foreground)" fontSize={9} fontWeight={600} /> : null}
-            </Line>
-          </LineChart>
+            </Area>
+          </AreaChart>
         </ResponsiveContainer>
+        </div>
       ) : null}
     </div>
   )
@@ -424,8 +495,9 @@ function OwnerMonthlyChart({ data, stroke, owner }: { data: { month: string; cou
 
 function OwnerCard({ owner, rank, trend }: { owner: OwnerDetailedDatum; rank: number; trend: { month: string; count: number }[] }) {
   const a = ACCENT[OWNER_ACCENTS[(rank - 1) % OWNER_ACCENTS.length]]
+  const { ref, inView: started } = useInView<HTMLElement>({ once: true, threshold: 0.25 })
   return (
-    <article className={`group relative overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 ${hoverLift}`}>
+    <article ref={ref} className={`group relative overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 ${hoverLift}`}>
       <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: `radial-gradient(120% 80% at 0% 0%, ${a.soft}, transparent 55%)` }} />
       <div className="relative">
         <div className="flex items-center gap-3">
@@ -443,11 +515,11 @@ function OwnerCard({ owner, rank, trend }: { owner: OwnerDetailedDatum; rank: nu
         <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">GD {owner.gd} · 국내 {owner.dom}</p>
 
         <div className="mt-4">
-          <OwnerMonthlyChart data={trend} stroke={a.fg} owner={owner.name} />
+          <OwnerMonthlyChart data={trend} stroke={a.fg} owner={owner.name} gradientId={`owner-area-${rank}`} started={started} />
         </div>
 
         <div className="mt-5">
-          <ProcessStatus owner={owner.name} total={owner.total} process={owner.process} />
+          <ProcessStatus owner={owner.name} total={owner.total} process={owner.process} started={started} />
         </div>
       </div>
     </article>
@@ -456,14 +528,21 @@ function OwnerCard({ owner, rank, trend }: { owner: OwnerDetailedDatum; rank: nu
 
 function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
   const completed = useAppStore((state) => state.completed)
+  const [ownerMonths, setOwnerMonths] = useState(loadOwnerMonths)
+  const today = useMemo(() => new Date(), [])
   // DD 주간요약과 동일하게 오버뷰는 "진행중(Status=진행중)"만 집계한다(완료·HOLD 제외).
   const active = useMemo(() => records.filter(isInProgress), [records])
   const split = useMemo(() => devTypeSplit(active), [active])
   const activeTotal = active.length
+  // 상단 KPI는 진행중만, DD MASTER는 전체 행을 보여준다. 두 숫자가 왜 다른지 화면에서 바로 읽히게 한다.
+  const totalRecords = records.length
   const receipt = useMemo(() => receiptStatus(active), [active])
   const funnel = useMemo(() => processFunnel(active), [active])
   const owners = useMemo(() => byOwnerDetailed(active), [active])
-  const ownerTrends = useMemo(() => ownerMonthlyFlTrend(records, completed), [completed, records])
+  const ownerTrends = useMemo(() => ownerMonthlyFlTrend(records, completed, today, ownerMonths), [completed, ownerMonths, records, today])
+  useEffect(() => {
+    window.localStorage.setItem(OWNER_MONTHS_STORAGE_KEY, String(ownerMonths))
+  }, [ownerMonths])
   const teamProcess = useMemo(() => {
     const order: OwnerProcessKey[] = ["unreceived", "knitting", "dyeing", "registration"]
     const label: Record<OwnerProcessKey, string> = { unreceived: "미접수", knitting: "편직대기", dyeing: "염색중", registration: "등록대기" }
@@ -490,7 +569,13 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Reveal delay={0}>
-          <AccentKpiTile accent="slate" icon={Boxes} label="총 개발 (진행중)" footnote="진행중 반영 데이터 기준">
+          <AccentKpiTile
+            accent="slate"
+            icon={Boxes}
+            label="총 개발 (진행중)"
+            footnote={`전체 ${totalRecords.toLocaleString("ko-KR")}건 중 진행중`}
+            basis="DD의 Status가 '진행중'인 건만 집계합니다. 완료·HOLD·DROP·REJECT는 빠지므로 DD MASTER의 전체 행수보다 적습니다."
+          >
             <p className="text-4xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={activeTotal} duration={GAUGE_MS} startOnView /><span className="ml-1 text-base font-medium text-[var(--muted-foreground)]">건</span></p>
           </AccentKpiTile>
         </Reveal>
@@ -501,7 +586,8 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
             icon={Shapes}
             label="개발 유형 · GD / 국내"
             badge={<span className="rounded-full bg-[var(--muted)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted-foreground)]">총 <NumberTicker value={split.total} duration={GAUGE_MS} startOnView />건</span>}
-            footnote="진행중 개발 중 GD·국내 비중"
+            footnote={`진행중 ${activeTotal.toLocaleString("ko-KR")}건의 GD·국내 비중`}
+            basis="진행중 건을 DD의 Co 컬럼(GD/국내)으로 나눈 비중입니다. Co 값이 없으면 GD# 유무로 판정합니다."
           >
             <div className="flex items-end gap-6">
               <div>
@@ -523,6 +609,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
             icon={CheckCircle2}
             label={<>접수현황 <span className="text-[var(--chart-2)]">GD</span></>}
             footnote={<>GD# 기입 <NumberTicker value={receipt.receivedPct} duration={GAUGE_MS} suffix="%" startOnView /> · 미기입 <NumberTicker value={receipt.missing} duration={GAUGE_MS} suffix="건" startOnView /></>}
+            basis="진행중 GD 건만 대상입니다(국내 개발 제외). GD#가 5자리 개발번호 형식으로 기재되면 접수 완료로 봅니다."
           >
             <p className="flex items-baseline">
               <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={receipt.received} duration={GAUGE_MS} startOnView /></span>
@@ -533,13 +620,19 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         </Reveal>
 
         <Reveal delay={225}>
-          <AccentKpiTile accent="violet" icon={Workflow} label="전체 공정 분포" footnote="담당자 합산 · 현재 단계 기준">
+          <AccentKpiTile
+            accent="violet"
+            icon={Workflow}
+            label="전체 공정 분포"
+            footnote={`진행중 ${activeTotal.toLocaleString("ko-KR")}건 · 담당자 합산 현재 단계`}
+            basis="진행중 건을 현재 단계로만 분류합니다. 한 건은 한 단계에만 들어가므로 네 구간의 합은 진행중 건수와 같습니다."
+          >
             <TeamProcessBar process={teamProcess.process} total={teamProcess.total} />
           </AccentKpiTile>
         </Reveal>
       </div>
 
-      <SectionCard title="4공정 KPI" subtitle="현재 단계 기준 누적 공정 도달률입니다." contentClassName="pt-2">
+      <SectionCard title="4공정 KPI" subtitle={`진행중 ${activeTotal.toLocaleString("ko-KR")}건 기준 · 현재 단계까지 도달한 누적 비율입니다.`} contentClassName="pt-2">
         <div className="grid gap-8 py-3 sm:grid-cols-2 xl:grid-cols-4">
           {funnel.map((item, index) => (
             <RadialKpi
@@ -554,7 +647,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Categories" subtitle="카테고리별 샘플 건수와 OPT 분포입니다. 카드를 클릭하면 대표 스타일을 확인할 수 있습니다.">
+      <SectionCard title="Categories" subtitle={`진행중 ${activeTotal.toLocaleString("ko-KR")}건의 카테고리별 건수와 OPT 분포입니다. 카드를 클릭하면 대표 스타일을 확인할 수 있습니다.`}>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {categories.map((item, index) => {
             const a = ACCENT[OWNER_ACCENTS[index % OWNER_ACCENTS.length]]
@@ -591,7 +684,25 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="담당자별 현황" subtitle="개발 건수, GD·국내 구성, 월별 FL 등록 추이와 현재 공정 분포입니다.">
+      <SectionCard
+        title="담당자별 현황"
+        subtitle={`진행중 ${activeTotal.toLocaleString("ko-KR")}건의 현재 현황 · 월별 FL 등록은 홈과 동일한 기준으로 최근 ${ownerMonths}개월을 집계합니다.`}
+        actions={(
+          <div className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] p-1" role="group" aria-label="담당자별 현황 조회 기간 선택">
+            {OWNER_RANGE_OPTIONS.map((option) => (
+              <button
+                key={option.months}
+                type="button"
+                aria-pressed={ownerMonths === option.months}
+                onClick={() => setOwnerMonths(option.months)}
+                className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${ownerMonths === option.months ? "bg-[var(--background)] text-[var(--foreground)] shadow-sm" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"}`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
+      >
         <div className="grid gap-4 xl:grid-cols-2">
           {owners.map((owner, index) => (
             <Reveal key={owner.id} delay={index * 75}>

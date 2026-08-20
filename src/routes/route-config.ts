@@ -52,7 +52,7 @@ export const routeDefinitions: RouteDefinition[] = [
   { path: "/setting", title: "SETTING", subtitle: "업무 플랫폼 설정을 관리합니다." },
   { path: "/trend/macro", title: "MACRO TREND", subtitle: "거시 트렌드 화면을 준비하고 있습니다." },
   { path: "/trend/fabric", title: "FABRIC TREND", subtitle: "원단 트렌드 화면을 준비하고 있습니다." },
-  { path: "/trend/portfolio", title: "PORTFOLIO", subtitle: "포트폴리오 화면을 준비하고 있습니다." },
+  { path: "/trend/portfolio", title: "PORTFOLIO", subtitle: "팀이 개발한 기능성 원단 자산입니다." },
   { path: "/process-innovation", title: "PROCESS INNOVATION", subtitle: "프로세스 혁신 화면을 준비하고 있습니다." },
 ]
 

@@ -41,6 +41,7 @@ import {
   type TrendCard,
 } from "@/data/derive"
 import { fmtDate, fmtDateFull } from "@/data/format"
+import type { ChemicalPortfolio } from "@/data/chemical"
 import type { MaterialItem, MaterialKind } from "@/data/schema"
 import { ingestDevelopment, ingestSamples } from "@/data/upload"
 import { hoverLift } from "@/lib/motion"
@@ -313,7 +314,9 @@ function ProcessFunnel({ process, reduceMotion }: {
           </div>
         ))}
       </div>
-      <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">공정 누적 도달률 · DEVELOPMENT OVERVIEW 기준</p>
+      <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
+        진행중 {(process[0]?.total ?? 0).toLocaleString("ko-KR")}건 기준 · 현재 단계까지 도달한 누적 비율입니다 (DEVELOPMENT 4공정 KPI와 동일 기준).
+      </p>
     </div>
   )
 }
@@ -332,10 +335,51 @@ const QUICK_ACCESS = [
 ] as const
 
 const TREND_TABS = [
+  { kind: "PORTFOLIO", label: "PORTFOLIO" },
   { kind: "MACRO", label: "MACRO TREND" },
   { kind: "FABRIC", label: "FABRIC TREND" },
-  { kind: "PORTFOLIO", label: "PORTFOLIO" },
 ] as const satisfies ReadonlyArray<{ kind: MaterialKind; label: string }>
+
+function PortfolioPreview({ portfolio, onNavigate }: { portfolio: ChemicalPortfolio | null; onNavigate: (path: string) => void }) {
+  if (!portfolio) {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--muted)] p-5">
+        <p className="text-sm text-[var(--muted-foreground)]">SETTING에서 기능성 개발 List를 업로드하면 포트폴리오가 표시됩니다.</p>
+        <Button type="button" variant="outline" onClick={() => onNavigate("/setting")}>SETTING 열기</Button>
+      </div>
+    )
+  }
+
+  const miniKpis = [
+    { label: "보유 기능", value: portfolio.totals.categories, suffix: "개" },
+    { label: "개발 완료", value: portfolio.totals.done, suffix: "건" },
+    { label: "검증 통과", value: portfolio.totals.pass, suffix: "건" },
+  ]
+  const isDemo = portfolio.items.length > 0 && portfolio.items.every((item) => item.id.startsWith("chemical-demo-"))
+  return (
+    <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div><p className="text-sm font-semibold text-[var(--foreground)]">기능성 개발 자산</p><p className="mt-1 text-xs text-[var(--muted-foreground)]">{isDemo ? "익명 데모 데이터" : "업로드한 Chemical 개발 List 기준"}</p></div>
+        <Button type="button" variant="outline" size="sm" onClick={() => onNavigate("/trend/portfolio")}>전체 보기<ArrowUpRight /></Button>
+      </div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        {miniKpis.map((kpi) => (
+          <div key={kpi.label} className="rounded-[var(--radius)] bg-[var(--muted)] p-4">
+            <p className="text-xs font-medium text-[var(--muted-foreground)]">{kpi.label}</p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={kpi.value} suffix={kpi.suffix} startOnView /></p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 flex gap-2 overflow-x-auto pb-2" aria-label="기능성 포트폴리오 카테고리">
+        {portfolio.categories.map((category) => (
+          <button key={category.name} type="button" onClick={() => onNavigate(`/trend/portfolio?category=${encodeURIComponent(category.name)}`)} className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm font-medium text-[var(--foreground)] outline-none transition-colors hover:bg-[var(--accent)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none">
+            {category.labelKo || category.labelEn}<Badge variant="secondary">{category.items.length}</Badge>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 function DemoTrendGrid({ items, onNavigate }: { items: TrendCard[]; onNavigate: (path: string) => void }) {
   return (
@@ -503,10 +547,11 @@ export function Home() {
   const trends = useAppStore((state) => state.trends)
   const materials = useAppStore((state) => state.materials)
   const materialsManual = useAppStore((state) => state.materialsManual)
+  const chemical = useAppStore((state) => state.chemical)
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialItem | null>(null)
   const [materialFormKind, setMaterialFormKind] = useState<MaterialKind | null>(null)
   const [editingMaterial, setEditingMaterial] = useState<MaterialItem | null>(null)
-  const [trendKind, setTrendKind] = useState<MaterialKind>("MACRO")
+  const [trendKind, setTrendKind] = useState<MaterialKind>("PORTFOLIO")
   const sections = useMemo(() => homeSectionCards(records, today, kpiRanges), [records, today, kpiRanges])
   const kpiDetails = useMemo(() => homeKpiRecordDetails(records, today, kpiRanges), [records, today, kpiRanges])
   const monthly = useMemo(() => monthlyDevelopmentTrend(records, completed, today, rddaMonths), [records, completed, today, rddaMonths])
@@ -713,10 +758,11 @@ export function Home() {
       </section>
 
       <section aria-labelledby="trend-issue-title">
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-3"><div><h2 id="trend-issue-title" className="text-base font-semibold text-[var(--foreground)]">Trend issue</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">최신 소재·기술·이슈</p></div><Button type="button" variant="outline" size="sm" onClick={() => openMaterialForm(trendKind)}><Plus aria-hidden="true" />자료 추가</Button></div>
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3"><div><h2 id="trend-issue-title" className="text-base font-semibold text-[var(--foreground)]">기능성 포트폴리오</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">팀이 개발한 기능성 원단 자산 · 트렌드 자료</p></div>{trendKind !== "PORTFOLIO" ? <Button type="button" variant="outline" size="sm" onClick={() => openMaterialForm(trendKind)}><Plus aria-hidden="true" />자료 추가</Button> : null}</div>
         <Tabs value={trendKind} onValueChange={(value) => setTrendKind(value as MaterialKind)} className="min-w-0">
           <TabsList className="h-auto flex-wrap" aria-label="트렌드 자료 구분">{TREND_TABS.map((tab) => <TabsTrigger key={tab.kind} value={tab.kind}>{tab.label}</TabsTrigger>)}</TabsList>
           {TREND_TABS.map((tab) => {
+            if (tab.kind === "PORTFOLIO") return <TabsContent key={tab.kind} value={tab.kind} className="mt-5"><PortfolioPreview portfolio={chemical} onNavigate={navigate} /></TabsContent>
             const items = trendMaterials[tab.kind]
             return <TabsContent key={tab.kind} value={tab.kind} className="mt-5">{items.length
               ? <CoverflowGallery items={items} emptyMessage={`${tab.label} 자료가 없습니다.`} onOpen={setSelectedMaterial} />
