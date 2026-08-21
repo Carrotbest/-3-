@@ -4,7 +4,7 @@ import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-d
 import { AppSidebar } from "@/components/layout/AppSidebar"
 import { Topbar } from "@/components/layout/Topbar"
 import { ParsingOverlay } from "@/components/upload/ParsingOverlay"
-import { LoginGate } from "@/components/auth/LoginGate"
+import { LoginGate } from "@/components/auth/AuthExperience"
 import { useAuthStore } from "@/data/auth"
 import { loadAllCache, saveCacheLocal } from "@/data/cache"
 import { startStateSync, stopStateSync } from "@/data/firestore-sync"

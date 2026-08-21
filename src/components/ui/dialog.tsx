@@ -63,7 +63,7 @@ const DialogContent = React.forwardRef<
       {showCloseButton && (
         <DialogPrimitive.Close className="absolute right-3 top-3 rounded-sm p-1 text-[var(--muted-foreground)] opacity-80 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]">
           <XIcon className="size-4" />
-          <span className="sr-only">닫기</span>
+          <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       )}
     </DialogPrimitive.Content>

@@ -226,3 +226,89 @@ input.dd-date::-webkit-calendar-picker-indicator {
 @keyframes progress { from { width: 0%; } to { width: 100%; } }
 @keyframes fade-in { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
 @keyframes shine { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } to { background-position: 0% 0%; } }
+
+/* Landing choreography: the real workspace assembles over roughly three seconds. */
+@keyframes landing-intro-reveal {
+  0% { opacity: 0; transform: translate3d(0, 22px, 0); filter: blur(8px); }
+  45% { opacity: 1; }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+
+@keyframes landing-intro-line {
+  0% { opacity: 0; transform: translate3d(0, 115%, 0) rotateX(-32deg); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0); }
+}
+
+@keyframes landing-intro-scene {
+  0% { opacity: 0; transform: translate3d(48px, 24px, 0) scale(.88) rotateY(-12deg); filter: blur(12px); }
+  60% { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1) rotateY(0); filter: blur(0); }
+}
+
+@keyframes landing-intro-progress {
+  0% { transform: scaleX(0); opacity: 1; }
+  82% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+@keyframes landing-intro-status {
+  0%, 8% { opacity: 0; transform: translate3d(-50%, -6px, 0); }
+  18%, 72% { opacity: 1; transform: translate3d(-50%, 0, 0); }
+  100% { opacity: 0; transform: translate3d(-50%, -4px, 0); }
+}
+
+.landing-intro-reveal {
+  opacity: 0;
+  animation: landing-intro-reveal .78s cubic-bezier(.2,.75,.2,1) forwards;
+  animation-delay: var(--intro-delay, 0ms);
+}
+
+.landing-intro-line-wrap {
+  display: block;
+  overflow: hidden;
+  perspective: 600px;
+}
+
+.landing-intro-line {
+  display: block;
+  opacity: 0;
+  transform-origin: 50% 100%;
+  animation: landing-intro-line .92s cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay: var(--intro-delay, 0ms);
+}
+
+.landing-intro-scene {
+  opacity: 0;
+  transform-origin: 60% 50%;
+  animation: landing-intro-scene 1.55s cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay: 720ms;
+}
+
+.landing-intro-progress {
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: landing-intro-progress 3s cubic-bezier(.2,.7,.2,1) forwards;
+}
+
+.landing-intro-status {
+  opacity: 0;
+  animation: landing-intro-status 3s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-intro-reveal,
+  .landing-intro-line,
+  .landing-intro-scene,
+  .landing-intro-progress,
+  .landing-intro-status {
+    animation: none;
+    filter: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .landing-intro-progress,
+  .landing-intro-status {
+    display: none;
+  }
+}

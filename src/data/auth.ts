@@ -96,23 +96,23 @@ export function currentUserIsOwner(): boolean {
 function friendlyAuthError(code: string): string {
   switch (code) {
     case "auth/invalid-email":
-      return "이메일 형식이 올바르지 않습니다."
+      return "Enter a valid email address."
     case "auth/user-disabled":
-      return "사용 중지된 계정입니다."
+      return "This account has been disabled."
     case "auth/user-not-found":
     case "auth/wrong-password":
     case "auth/invalid-credential":
-      return "이메일 또는 비밀번호가 올바르지 않습니다."
+      return "The email or password is incorrect."
     case "auth/email-already-in-use":
-      return "이미 가입된 이메일입니다. 로그인해주세요."
+      return "This email is already registered. Try signing in instead."
     case "auth/weak-password":
-      return "비밀번호는 6자 이상이어야 합니다."
+      return "Your password must be at least 6 characters."
     case "auth/too-many-requests":
-      return "시도가 많아 잠시 후 다시 시도해주세요."
+      return "Too many attempts. Please try again in a moment."
     case "auth/network-request-failed":
-      return "네트워크 연결을 확인해주세요."
+      return "Check your network connection and try again."
     default:
-      return "요청에 실패했습니다. 다시 시도해주세요."
+      return "We could not complete the request. Please try again."
   }
 }
 
