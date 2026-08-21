@@ -4,7 +4,9 @@ import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-d
 import { AppSidebar } from "@/components/layout/AppSidebar"
 import { Topbar } from "@/components/layout/Topbar"
 import { ParsingOverlay } from "@/components/upload/ParsingOverlay"
-import { loadAllCache, saveCache } from "@/data/cache"
+import { LoginGate } from "@/components/auth/LoginGate"
+import { loadAllCache, saveCacheLocal } from "@/data/cache"
+import { startStateSync, stopStateSync } from "@/data/firestore-sync"
 import { loadEmbeddedAppData, markEmbeddedAppDataApplied } from "@/data/embedded-workbooks"
 import { cn } from "@/lib/utils"
 import { Development } from "@/routes/Development"
@@ -41,10 +43,11 @@ function AppLayout() {
       if (embedded) {
         const next = { ...cached, ...embedded.patch }
         setAppState(next)
+        // 데모/내장 데이터는 로컬 캐시에만 저장한다(Firestore로 올리지 않음).
         await Promise.allSettled([
-          saveCache("records", embedded.patch.records),
-          saveCache("completed", embedded.patch.completed),
-          saveCache("meta", embedded.patch.meta),
+          saveCacheLocal("records", embedded.patch.records),
+          saveCacheLocal("completed", embedded.patch.completed),
+          saveCacheLocal("meta", embedded.patch.meta),
         ])
         markEmbeddedAppDataApplied(embedded.signature)
         return
@@ -52,6 +55,13 @@ function AppLayout() {
       if (Object.keys(cached).length) setAppState(cached)
     })()
     return () => { current = false }
+  }, [])
+
+  // 로그인 상태에서만 렌더되므로, 마운트 시 Firestore 실시간 동기화를 시작한다.
+  // 중앙 데이터가 도착하면 데모/로컬 대신 실데이터가 화면에 반영된다.
+  useEffect(() => {
+    void startStateSync()
+    return () => { stopStateSync() }
   }, [])
 
   const handleSidebarToggle = () => setMobileSidebarOpen((current) => !current)
@@ -99,8 +109,10 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <HashRouter>
-      <AppLayout />
-    </HashRouter>
+    <LoginGate>
+      <HashRouter>
+        <AppLayout />
+      </HashRouter>
+    </LoginGate>
   )
 }

@@ -137,9 +137,19 @@ export function useCoverflowMotion(itemCount: number, reduced: boolean) {
   )
 
   const paint = useCallback(() => {
-    const cardWidth = widthRef.current
     const stage = rootRef.current
-    if (!cardWidth || !stage) return
+    if (!stage) return
+    // 초기 렌더·탭 비활성·뷰 밖 등으로 폭 측정이 아직 0이면, 페인트 시점에 지연 측정해 자가복구한다.
+    // (측정이 한 번도 안 잡히면 카드가 opacity-0인 채 스테이지가 비어 보인다.)
+    let cardWidth = widthRef.current
+    if (!cardWidth) {
+      const measured = cardRefs.current.find(Boolean)?.offsetWidth ?? 0
+      if (measured) {
+        widthRef.current = measured
+        cardWidth = measured
+      }
+    }
+    if (!cardWidth) return
     const visibleCards = Number(stage.dataset.coverflowVisible) || MATERIAL_DECK_VISIBLE_CARDS
     const visibleRadius = Math.max(1, (visibleCards - 1) / 2)
     const stageWidth = stage.clientWidth
@@ -285,13 +295,25 @@ export function useCoverflowMotion(itemCount: number, reduced: boolean) {
     const measure = () => {
       const card = cardRefs.current.find(Boolean)
       if (!card) return
-      widthRef.current = card.offsetWidth
+      // offsetWidth가 0인 순간(레이아웃 미확정)에는 기존 폭을 덮어쓰지 않는다.
+      if (card.offsetWidth) widthRef.current = card.offsetWidth
       paint()
     }
     measure()
+    // 첫 측정이 0으로 잡히는 레이스를 대비해 다음 프레임·짧은 지연에 한 번 더 측정한다.
+    const raf = requestAnimationFrame(measure)
+    const timer = window.setTimeout(measure, 80)
+    // 탭이 비활성 상태로 로드된 뒤 다시 보일 때 재측정·재페인트한다.
+    const onVisible = () => { if (document.visibilityState === "visible") measure() }
+    document.addEventListener("visibilitychange", onVisible)
     const observer = new ResizeObserver(measure)
     observer.observe(frame)
-    return () => observer.disconnect()
+    return () => {
+      cancelAnimationFrame(raf)
+      window.clearTimeout(timer)
+      document.removeEventListener("visibilitychange", onVisible)
+      observer.disconnect()
+    }
   }, [paint])
 
   useEffect(

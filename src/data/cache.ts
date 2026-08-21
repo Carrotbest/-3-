@@ -27,8 +27,18 @@ export function transactionDone(transaction: IDBTransaction): Promise<void> {
   })
 }
 
-/** 파싱 결과는 이 PC의 브라우저 IndexedDB에만 저장되며 git이나 서버로 전송되지 않는다. */
-export async function saveCache<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
+/**
+ * Firestore 실시간 동기화 훅. firestore-sync.ts가 로그인 후 등록한다.
+ * 미등록(비로그인/오프라인) 상태에서는 IndexedDB 저장만 이뤄진다.
+ */
+let firestorePush: (<K extends CacheKey>(key: K, value: AppState[K]) => void) | null = null
+
+export function setFirestorePush(fn: (<K extends CacheKey>(key: K, value: AppState[K]) => void) | null): void {
+  firestorePush = fn
+}
+
+/** IndexedDB(이 PC 브라우저)에만 저장한다. Firestore로는 전송하지 않는다. */
+export async function saveCacheLocal<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
   const database = await openCacheDatabase()
   try {
     const transaction = database.transaction(STORE_NAME, "readwrite")
@@ -37,6 +47,16 @@ export async function saveCache<K extends CacheKey>(key: K, value: AppState[K]):
   } finally {
     database.close()
   }
+}
+
+/**
+ * 사용자의 실제 데이터 변경 저장 경로. 로컬(IndexedDB)에 저장한 뒤,
+ * 소유자로 로그인했다면 Firestore 중앙 DB로도 반영(fire-and-forget)한다.
+ * 데모/내장 데이터 시딩은 saveCacheLocal을 써서 Firestore로 올라가지 않게 한다.
+ */
+export async function saveCache<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
+  await saveCacheLocal(key, value)
+  firestorePush?.(key, value)
 }
 
 export async function loadCache<K extends CacheKey>(key: K): Promise<AppState[K] | undefined> {

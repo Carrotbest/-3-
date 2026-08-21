@@ -1,0 +1,145 @@
+import { create } from "zustand"
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  updatePassword,
+  updateProfile,
+  type User,
+} from "firebase/auth"
+import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore"
+
+import { auth, db } from "./firebase"
+import { OWNER_EMAIL } from "./app-config"
+
+export type AuthStatus = "loading" | "signed-out" | "signed-in"
+/** 소유자는 항상 approved. 그 외는 users/{uid}.status를 따른다(문서 없으면 pending). */
+export type ApprovalState = "unknown" | "pending" | "approved" | "rejected"
+
+interface AuthState {
+  status: AuthStatus
+  user: User | null
+  isOwner: boolean
+  approval: ApprovalState
+  error: string | null
+}
+
+export const useAuthStore = create<AuthState>(() => ({
+  status: "loading",
+  user: null,
+  isOwner: false,
+  approval: "unknown",
+  error: null,
+}))
+
+const ownerEmail = OWNER_EMAIL.trim().toLowerCase()
+const isOwnerUser = (user: User | null): boolean =>
+  !!user?.email && user.email.trim().toLowerCase() === ownerEmail
+
+/** 앱 시작 시 한 번 호출해 로그인 + 승인 상태를 구독한다. */
+export function initAuth(): void {
+  let approvalUnsub: (() => void) | null = null
+
+  onAuthStateChanged(auth, (user) => {
+    approvalUnsub?.()
+    approvalUnsub = null
+
+    if (!user) {
+      useAuthStore.setState({ status: "signed-out", user: null, isOwner: false, approval: "unknown", error: null })
+      return
+    }
+
+    const owner = isOwnerUser(user)
+    useAuthStore.setState({
+      status: "signed-in",
+      user,
+      isOwner: owner,
+      approval: owner ? "approved" : "unknown",
+      error: null,
+    })
+
+    if (owner) return
+    // 팀원: 자신의 승인 상태 문서를 실시간 구독한다.
+    approvalUnsub = onSnapshot(
+      doc(db, "users", user.uid),
+      (snap) => {
+        const status = snap.exists() ? (snap.data().status as string) : "pending"
+        const approval: ApprovalState = status === "approved" ? "approved" : status === "rejected" ? "rejected" : "pending"
+        useAuthStore.setState({ approval })
+      },
+      () => useAuthStore.setState({ approval: "pending" }),
+    )
+  })
+}
+
+/** 로그인한 사용자가 소유자(편집 권한)인지 여부. UI 게이팅에 사용. */
+export function currentUserIsOwner(): boolean {
+  return isOwnerUser(auth.currentUser)
+}
+
+function friendlyAuthError(code: string): string {
+  switch (code) {
+    case "auth/invalid-email":
+      return "이메일 형식이 올바르지 않습니다."
+    case "auth/user-disabled":
+      return "사용 중지된 계정입니다."
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+    case "auth/invalid-credential":
+      return "이메일 또는 비밀번호가 올바르지 않습니다."
+    case "auth/email-already-in-use":
+      return "이미 가입된 이메일입니다. 로그인해주세요."
+    case "auth/weak-password":
+      return "비밀번호는 6자 이상이어야 합니다."
+    case "auth/too-many-requests":
+      return "시도가 많아 잠시 후 다시 시도해주세요."
+    case "auth/network-request-failed":
+      return "네트워크 연결을 확인해주세요."
+    default:
+      return "요청에 실패했습니다. 다시 시도해주세요."
+  }
+}
+
+export async function signIn(email: string, password: string): Promise<void> {
+  useAuthStore.setState({ error: null })
+  try {
+    await signInWithEmailAndPassword(auth, email.trim(), password)
+  } catch (error) {
+    const message = friendlyAuthError((error as { code?: string }).code ?? "")
+    useAuthStore.setState({ error: message })
+    throw new Error(message)
+  }
+}
+
+/** 방문자 자율 가입. 계정을 만들고 승인 대기(users/{uid}.status='pending') 문서를 남긴다. */
+export async function signUp(email: string, password: string, name: string): Promise<void> {
+  useAuthStore.setState({ error: null })
+  try {
+    const credential = await createUserWithEmailAndPassword(auth, email.trim(), password)
+    const displayName = name.trim()
+    if (displayName) {
+      try { await updateProfile(credential.user, { displayName }) } catch { /* 표시 이름 실패는 무시 */ }
+    }
+    await setDoc(doc(db, "users", credential.user.uid), {
+      email: (credential.user.email ?? email.trim()).toLowerCase(),
+      name: displayName || null,
+      status: "pending",
+      requestedAt: serverTimestamp(),
+    })
+  } catch (error) {
+    const message = friendlyAuthError((error as { code?: string }).code ?? "")
+    useAuthStore.setState({ error: message })
+    throw new Error(message)
+  }
+}
+
+export async function signOutUser(): Promise<void> {
+  await signOut(auth)
+}
+
+/** 로그인한 사용자가 자신의 비밀번호를 변경한다. */
+export async function changeOwnPassword(newPassword: string): Promise<void> {
+  if (!auth.currentUser) throw new Error("로그인이 필요합니다.")
+  await updatePassword(auth.currentUser, newPassword)
+}

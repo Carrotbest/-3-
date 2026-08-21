@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// Fabric R&D 데이터 접근 규칙
+// - 가입: 방문자가 자기 계정으로 users/{uid} 문서를 status='pending'으로 생성(가입 신청)
+// - 승인: 소유자(OWNER_EMAIL)만 status를 approved/rejected로 변경
+// - 데이터 읽기: 소유자 또는 승인된(approved) 사용자
+// - 데이터 쓰기: 소유자만
+// 소유자를 바꾸려면 아래 이메일과 src/data/app-config.ts의 OWNER_EMAIL을 함께 수정한다.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() == 'hkpark@hansoll.com';
+    }
+    function isApproved() {
+      return isOwner()
+        || (exists(/databases/$(database)/documents/users/$(request.auth.uid))
+            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved');
+    }
+
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isOwner());
+      allow create: if isSignedIn()
+                    && request.auth.uid == uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.email.lower() == request.auth.token.email.lower();
+      allow update, delete: if isOwner();
+    }
+
+    match /state/{docId} {
+      allow read: if isApproved();
+      allow write: if isOwner();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

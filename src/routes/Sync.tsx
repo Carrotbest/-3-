@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { CalendarClock, CheckCircle2, Database, ListChecks } from "lucide-react"
 
 import { SectionCard } from "@/components/dashboard/SectionCard"
@@ -14,6 +14,9 @@ import { fmtDateFull, fmtNum, fmtTime, toDate } from "@/data/format"
 import { type ReconcileCheck } from "@/data/reconcile"
 import { type DataMeta } from "@/data/sample"
 import { useAppStore } from "@/store/useAppStore"
+import { useAuthStore } from "@/data/auth"
+import { pushAllToFirestore } from "@/data/firestore-sync"
+import { approveUser, listenPendingUsers, rejectUser, type PendingUser } from "@/data/users-admin"
 import { hoverLift } from "@/lib/motion"
 
 const SPARK = [1, 1, 2, 2, 3, 4, 4]
@@ -44,6 +47,41 @@ export function Sync() {
   const meta = useAppStore((state) => state.meta)
   const sensitiveUnlocked = useAppStore((state) => state.sensitiveUnlocked)
   const [rollbackMessage, setRollbackMessage] = useState("")
+  const user = useAuthStore((state) => state.user)
+  const isOwner = useAuthStore((state) => state.isOwner)
+  const [pushing, setPushing] = useState(false)
+  const [pushMessage, setPushMessage] = useState("")
+  const handlePushAll = async () => {
+    if (pushing) return
+    if (!window.confirm("현재 화면의 모든 데이터를 중앙 서버에 올려 팀 전체에 공유하시겠습니까?")) return
+    setPushing(true)
+    setPushMessage("올리는 중…")
+    try {
+      const { pushed } = await pushAllToFirestore()
+      setPushMessage(`중앙 서버에 반영했습니다 · ${pushed}개 항목. 팀원 화면에 실시간으로 동기화됩니다.`)
+    } catch (error) {
+      setPushMessage((error as Error)?.message ?? "올리기에 실패했습니다.")
+    } finally {
+      setPushing(false)
+    }
+  }
+
+  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([])
+  const [busyUid, setBusyUid] = useState<string | null>(null)
+  useEffect(() => {
+    if (!isOwner) return
+    const unsub = listenPendingUsers(setPendingUsers)
+    return () => unsub()
+  }, [isOwner])
+  const handleApprove = async (uid: string) => {
+    setBusyUid(uid)
+    try { await approveUser(uid) } catch { /* 실시간 목록에서 자동 갱신 */ } finally { setBusyUid(null) }
+  }
+  const handleReject = async (uid: string) => {
+    if (!window.confirm("이 가입 신청을 거부하시겠습니까?")) return
+    setBusyUid(uid)
+    try { await rejectUser(uid) } catch { /* 실시간 목록에서 자동 갱신 */ } finally { setBusyUid(null) }
+  }
   const current = useMemo(() => snapshot(meta), [meta])
   const days = elapsedDays(current.appliedAt)
   const passedCount = meta.checks.filter((item) => item.ok).length
@@ -65,6 +103,69 @@ export function Sync() {
   return (
     <section className="min-w-0 space-y-6">
       <PageHeader title="데이터 상태" subtitle="현재 데이터 출처, 대조 결과와 브라우저 캐시 상태를 보여줍니다." />
+
+      {user ? (
+        <Reveal>
+          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <Database aria-hidden="true" className="size-4 text-[var(--muted-foreground)]" />
+                  <h2 className="text-base font-semibold text-[var(--foreground)]">팀 실시간 공유</h2>
+                  <Badge variant={isOwner ? "outline" : "secondary"}>{isOwner ? "편집 권한" : "읽기 전용"}</Badge>
+                </div>
+                <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                  {isOwner
+                    ? `로그인 계정 ${user.email} · 업로드·편집 내용이 중앙 서버에 저장되어 팀원 화면에 실시간 반영됩니다.`
+                    : `로그인 계정 ${user.email} · 소유자가 올린 데이터를 실시간으로 함께 봅니다(편집은 소유자만).`}
+                </p>
+              </div>
+              {isOwner ? (
+                <Button type="button" onClick={handlePushAll} disabled={pushing}>
+                  {pushing ? "올리는 중…" : "현재 데이터를 중앙에 올리기"}
+                </Button>
+              ) : null}
+            </div>
+            {pushMessage ? (
+              <p aria-live="polite" className="mt-3 text-sm text-[var(--foreground)]">{pushMessage}</p>
+            ) : null}
+          </div>
+        </Reveal>
+      ) : null}
+
+      {isOwner ? (
+        <Reveal>
+          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-semibold text-[var(--foreground)]">가입 신청 승인</h2>
+              <Badge variant={pendingUsers.length ? "destructive" : "secondary"}>{pendingUsers.length}건 대기</Badge>
+            </div>
+            <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+              방문자가 직접 가입 신청하면 여기에 표시됩니다. 승인해야 데이터를 볼 수 있습니다.
+            </p>
+            {pendingUsers.length ? (
+              <ul className="mt-4 space-y-2">
+                {pendingUsers.map((pending) => (
+                  <li key={pending.uid} className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-[var(--foreground)]">{pending.name || pending.email}</p>
+                      <p className="truncate text-xs text-[var(--muted-foreground)]">
+                        {pending.email}{pending.requestedAt ? ` · ${dateTime(pending.requestedAt)}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      <Button type="button" size="sm" disabled={busyUid === pending.uid} onClick={() => { void handleApprove(pending.uid) }}>승인</Button>
+                      <Button type="button" size="sm" variant="outline" disabled={busyUid === pending.uid} onClick={() => { void handleReject(pending.uid) }}>거부</Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm text-[var(--muted-foreground)]">대기 중인 가입 신청이 없습니다.</p>
+            )}
+          </div>
+        </Reveal>
+      ) : null}
 
       <Reveal>
       <div className={`rounded-[var(--radius)] border p-5 ${hoverLift} ${isDemo ? "border-[var(--border)] bg-[var(--muted)]" : meta.passed ? "border-[var(--chart-2)] bg-[color-mix(in_oklab,var(--chart-2)_10%,var(--background))]" : "border-[var(--destructive)] bg-[color-mix(in_oklab,var(--destructive)_10%,var(--background))]"}`} aria-label="현재 데이터 상태">
