@@ -302,7 +302,7 @@ export function processFunnel(records: readonly DevRecord[]): ProcessFunnelDatum
     { key: "yarn", label: "원사", minimum: 0 },
     { key: "knitting", label: "편직", minimum: 1 },
     { key: "dyeing", label: "염색", minimum: 2 },
-    { key: "finishing", label: "피니쉬", minimum: 3 },
+    { key: "finishing", label: "가공", minimum: 3 },
   ]
   return definitions.map((definition) => {
     const done = records.filter((record) => {
@@ -1077,6 +1077,17 @@ export function homeTrendCards(
   ]
 }
 
+/** 날짜 표기가 달라도 실제 날짜를 기준으로 최신 자료가 먼저 오게 정렬한다. 날짜가 없으면 뒤로 보낸다. */
+export function sortMaterialsNewest(items: readonly MaterialItem[]): MaterialItem[] {
+  return [...items].sort((a, b) => {
+    const aTime = toDate(a.date)?.getTime() ?? Number.NEGATIVE_INFINITY
+    const bTime = toDate(b.date)?.getTime() ?? Number.NEGATIVE_INFINITY
+    return bTime - aTime
+      || a.title.localeCompare(b.title, "ko-KR", { numeric: true })
+      || a.id.localeCompare(b.id, "ko-KR", { numeric: true })
+  })
+}
+
 /** 엑셀 자료를 우선해 수동 등록 자료와 합치고 최신순·제목순으로 정렬한다. */
 export function materialsOf(
   kind: MaterialKind,
@@ -1086,9 +1097,7 @@ export function materialsOf(
   const merged = new Map<string, MaterialItem>()
   manualItems.forEach((item) => merged.set(item.id, item))
   excelItems.forEach((item) => merged.set(item.id, item))
-  return [...merged.values()]
-    .filter((item) => item.kind === kind)
-    .sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.title.localeCompare(b.title, "ko-KR"))
+  return sortMaterialsNewest([...merged.values()].filter((item) => item.kind === kind))
 }
 
 type TsMaterialSource = {
@@ -1161,7 +1170,7 @@ export function tsMaterials(ts: readonly TsMaterialSource[]): MaterialItem[] {
       ]),
       readOnly: true,
     }
-  }).sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.title.localeCompare(b.title, "ko-KR"))
+  })
 }
 
 const studyMaterialKey = (record: StudyRecord): string =>
@@ -1193,7 +1202,7 @@ export function studyMaterials(study: readonly StudyRecord[]): MaterialItem[] {
       ]),
       readOnly: true,
     }
-  }).sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.title.localeCompare(b.title, "ko-KR"))
+  })
 }
 
 export function countBy(

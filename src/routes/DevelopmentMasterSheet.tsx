@@ -734,7 +734,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div data-route-scroll-root className="min-h-0 flex-1 overflow-auto">
         <table className="border-separate border-spacing-0 text-left">
           <thead className="sticky top-0 z-30 bg-[var(--card)] shadow-sm">
             <tr className="h-6">

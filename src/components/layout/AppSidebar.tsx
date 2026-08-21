@@ -5,6 +5,8 @@ import { NavLink, useLocation } from "react-router-dom"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useAuthStore } from "@/data/auth"
+import { canAccessScreenPath } from "@/data/screen-permissions"
 import { cn } from "@/lib/utils"
 import { navigationGroups, type NavigationItem } from "@/routes/route-config"
 
@@ -62,8 +64,16 @@ function SidebarLink({ item, collapsed, onNavigate, active = false }: SidebarLin
 
 export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleCollapsed }: AppSidebarProps) {
   const location = useLocation()
+  const isOwner = useAuthStore((state) => state.isOwner)
+  const screenPermissions = useAuthStore((state) => state.screenPermissions)
   const [openMap, setOpenMap] = useState<Record<string, boolean>>({})
   const [revealed, setRevealed] = useState(false)
+  const visibleNavigationGroups = navigationGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => isOwner || canAccessScreenPath(item.path, screenPermissions)),
+    }))
+    .filter((group) => group.items.length > 0)
 
   const expanded = !collapsed || revealed || mobileOpen
   const showCollapsed = !expanded
@@ -136,7 +146,7 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
         <Separator className="bg-[var(--sidebar-border)]" />
 
         <nav className="flex-1 overflow-y-auto px-3 py-5">
-          {navigationGroups.map((group, groupIndex) => (
+          {visibleNavigationGroups.map((group, groupIndex) => (
             <section
               key={group.label}
               aria-label={group.label}

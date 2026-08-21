@@ -4,11 +4,12 @@ import { ArrowLeft, ArrowRight, ExternalLink, FileText, Pencil, Plus, Search, Tr
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { materialsOf } from "@/data/derive"
+import { materialsOf, sortMaterialsNewest } from "@/data/derive"
 import { fmtDateFull } from "@/data/format"
 import { httpsMaterialLink, MATERIAL_KINDS, type MaterialItem, type MaterialKind } from "@/data/schema"
 import { deleteManualMaterial, saveManualMaterial, useAppStore } from "@/store/useAppStore"
@@ -392,9 +393,14 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
   onOpen: (item: MaterialItem) => void
   onAdd?: () => void
 }) {
-  const deckItems = items
+  const deckItems = useMemo(() => sortMaterialsNewest(items), [items])
   const reduced = useReducedMotion()
   const { active, move, goTo, rootRef, setCardRef, rootProps } = useCoverflowMotion(deckItems.length, reduced)
+  const newestItemId = deckItems[0]?.id
+
+  useEffect(() => {
+    if (newestItemId) goTo(0)
+  }, [goTo, newestItemId])
 
   if (!deckItems.length) {
     return (
@@ -515,16 +521,16 @@ export function MaterialDetailSheet({ item, onOpenChange, onEdit, onDeleted }: {
     onDeleted?.()
   }
   return (
-    <Sheet open={Boolean(item)} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto border-[var(--border)] bg-[var(--background)] sm:max-w-xl">
+    <Dialog open={Boolean(item)} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl">
         {item ? (
           <>
-            <SheetHeader className="border-b border-[var(--border)] p-6 pr-12">
+            <DialogHeader>
               <div className="flex flex-wrap items-center gap-2"><Badge variant="secondary">{MATERIAL_KIND_LABELS[item.kind]}</Badge><SourceBadge source={item.source} /></div>
-              <SheetTitle className="pt-2 text-[var(--foreground)]">{item.title}</SheetTitle>
-              <SheetDescription>{item.date ? fmtDateFull(item.date) : "날짜 미등록"}{item.owner ? ` · ${item.owner}` : ""}</SheetDescription>
-            </SheetHeader>
-            <div className="space-y-5 p-6">
+              <DialogTitle className="pt-2">{item.title}</DialogTitle>
+              <DialogDescription>{item.date ? fmtDateFull(item.date) : "날짜 미등록"}{item.owner ? ` · ${item.owner}` : ""}</DialogDescription>
+            </DialogHeader>
+            <DialogBody className="space-y-5">
               {item.detail?.length ? (
                 <dl className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
                   {item.detail.map((row) => (
@@ -540,11 +546,11 @@ export function MaterialDetailSheet({ item, onOpenChange, onEdit, onDeleted }: {
               <div><p className="text-xs font-semibold text-[var(--muted-foreground)]">태그</p><div className="mt-2 flex flex-wrap gap-2">{item.tags.length ? item.tags.map((tag) => <Badge key={tag} variant="outline">{tag}</Badge>) : <span className="text-sm text-[var(--muted-foreground)]">태그 없음</span>}</div></div>
               {link ? <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4"><Button asChild className="w-full"><a href={link} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button></div> : null}
               {!item.readOnly && item.source === "manual" ? <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="outline" onClick={() => onEdit?.(item)}><Pencil aria-hidden="true" />수정</Button><Button type="button" variant="destructive" onClick={() => { void remove() }}><Trash2 aria-hidden="true" />삭제</Button></div> : null}
-            </div>
+            </DialogBody>
           </>
         ) : null}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
 

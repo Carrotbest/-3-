@@ -6,6 +6,7 @@ import { MaterialDeckSection, MaterialSearchSection } from "@/components/cards/M
 import { SectionCard } from "@/components/dashboard/SectionCard"
 import { StatCard } from "@/components/dashboard/StatCard"
 import { DataTable, type DataTableColumn } from "@/components/data-table/DataTable"
+import { RecordListDialog } from "@/components/data-table/RecordListDialog"
 import { StatusBadge } from "@/components/data-table/StatusBadge"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Reveal } from "@/components/motion/Reveal"
@@ -15,7 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { materialsOf, tsMaterials } from "@/data/derive"
 import { fmtDate } from "@/data/format"
@@ -119,19 +120,19 @@ function DetailRows({ rows }: { rows: ReadonlyArray<readonly [string, string]> }
   )
 }
 
-function TsDetailSheet({ record, onOpenChange }: { record: TsRecord | null; onOpenChange: (open: boolean) => void }) {
+function TsDetailDialog({ record, onOpenChange }: { record: TsRecord | null; onOpenChange: (open: boolean) => void }) {
   const attachment = httpsMaterialLink(record?.attachment)
   return (
-    <Sheet open={Boolean(record)} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto border-[var(--border)] bg-[var(--background)] sm:max-w-2xl">
+    <Dialog open={Boolean(record)} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl">
         {record ? (
           <>
-            <SheetHeader className="border-b border-[var(--border)] p-6 pr-12">
+            <DialogHeader>
               <div className="flex flex-wrap items-center gap-2"><StatusBadge status={record.state} /><span className="text-xs font-medium text-[var(--muted-foreground)]">{record.id}</span></div>
-              <SheetTitle className="pt-2 text-[var(--foreground)]">{record.subject}</SheetTitle>
-              <SheetDescription>접수일 {fmtDate(record.receivedAt)}</SheetDescription>
-            </SheetHeader>
-            <div className="space-y-6 p-6">
+              <DialogTitle className="pt-2">{record.subject}</DialogTitle>
+              <DialogDescription>접수일 {fmtDate(record.receivedAt)}</DialogDescription>
+            </DialogHeader>
+            <DialogBody className="space-y-6">
               <section aria-labelledby="ts-detail-people">
                 <h3 id="ts-detail-people" className="mb-3 text-sm font-semibold text-[var(--foreground)]">의뢰 주체</h3>
                 <DetailRows rows={[["요청자 From", record.from], ["유관부서", record.relatedDepartment], ["수신자 Attn", record.attn], ["담당 Advisor", record.advisor]]} />
@@ -145,11 +146,11 @@ function TsDetailSheet({ record, onOpenChange }: { record: TsRecord | null; onOp
                 <DetailRows rows={[["상태", record.state], ["생산처", record.productionSite], ["발주량", record.orderVolume]]} />
               </section>
               {attachment ? <Button asChild className="w-full"><a href={attachment} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : null}
-            </div>
+            </DialogBody>
           </>
         ) : null}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -160,6 +161,7 @@ export function TS() {
   const [activeState, setActiveState] = useState(ALL)
   const [search, setSearch] = useState("")
   const [selectedRow, setSelectedRow] = useState<TsRecord | null>(null)
+  const [selectedState, setSelectedState] = useState<TsState | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState<FormValues>(initialForm)
   const [formErrors, setFormErrors] = useState<FormErrors>({})
@@ -201,6 +203,11 @@ export function TS() {
     { id: "state", header: "상태", accessor: (row) => row.state, cell: (row) => <StatusBadge status={row.state} /> },
     { id: "orderVolume", header: "발주량", accessor: (row) => row.orderVolume, cell: (row) => row.orderVolume || "—" },
   ]
+
+  const openStatePopup = (state: TsState) => {
+    setActiveState(state)
+    setSelectedState(state)
+  }
 
   const setField = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
     setForm((current) => ({ ...current, [key]: value }))
@@ -312,7 +319,7 @@ export function TS() {
                   const active = activeState === step.state
                   return (
                     <li key={step.state} className="relative flex min-w-0 items-center">
-                      <button type="button" aria-current={active ? "step" : undefined} onClick={() => setActiveState(step.state)} className={`relative z-10 flex w-full items-center gap-3 rounded-[var(--radius)] border p-3 text-left outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${active ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--accent)]"}`}>
+                      <button type="button" aria-current={active ? "step" : undefined} aria-haspopup="dialog" onClick={() => openStatePopup(step.state)} className={`relative z-10 flex w-full items-center gap-3 rounded-[var(--radius)] border p-3 text-left outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${active ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--accent)]"}`}>
                         <span className={`flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${active ? "border-[var(--primary-foreground)]" : "border-[var(--border)] bg-[var(--muted)]"}`}>{index + 1}</span>
                         <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{step.state}</span><span className={`block truncate text-xs ${active ? "text-[var(--primary-foreground)]" : "text-[var(--muted-foreground)]"}`}>{step.caption}</span></span>
                         <span className={`inline-flex shrink-0 items-center rounded-[calc(var(--radius)-2px)] border px-2.5 py-0.5 text-xs font-semibold ${active ? "border-transparent bg-[var(--secondary)] text-[var(--secondary-foreground)]" : "border-[var(--border)] text-[var(--foreground)]"}`}>{step.count}건</span>
@@ -387,9 +394,9 @@ export function TS() {
       <div className="grid gap-4 xl:grid-cols-12">
         <aside className="xl:col-span-4 xl:order-2">
         <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-        <StatCard icon={<ClipboardList aria-hidden="true" className="size-4" />} label="접수" value={counts.received} caption="신규 확인 필요" info="현재 접수 상태인 요청입니다." revealDelay={0} />
-        <StatCard icon={<LoaderCircle aria-hidden="true" className="size-4" />} label="처리중" value={counts.processing} caption="분석·해결 진행 중" info="현황 분석이나 해결 방안을 진행 중인 요청입니다." revealDelay={75} />
-        <StatCard icon={<CheckCircle2 aria-hidden="true" className="size-4" />} label="완료" value={counts.done} caption="결과 정리 완료" info="결과까지 정리해 처리를 마친 요청입니다." revealDelay={150} />
+        <StatCard icon={<ClipboardList aria-hidden="true" className="size-4" />} label="접수" value={counts.received} caption="신규 확인 필요" info="클릭하면 현재 접수 상태인 요청을 확인합니다." revealDelay={0} onClick={() => openStatePopup("접수")} />
+        <StatCard icon={<LoaderCircle aria-hidden="true" className="size-4" />} label="처리중" value={counts.processing} caption="분석·해결 진행 중" info="클릭하면 처리중 요청을 확인합니다." revealDelay={75} onClick={() => openStatePopup("처리중")} />
+        <StatCard icon={<CheckCircle2 aria-hidden="true" className="size-4" />} label="완료" value={counts.done} caption="결과 정리 완료" info="클릭하면 완료 요청을 확인합니다." revealDelay={150} onClick={() => openStatePopup("완료")} />
         </div>
         </aside>
         <div className="min-w-0 xl:col-span-8 xl:order-1">
@@ -429,7 +436,8 @@ export function TS() {
 
       <MaterialSearchSection kind="TS" emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
 
-      <TsDetailSheet record={selectedRow} onOpenChange={(open) => { if (!open) setSelectedRow(null) }} />
+      <RecordListDialog open={Boolean(selectedState)} title={`${selectedState ?? "TS"} TS 목록`} description={`${selectedState ? rows.filter((row) => row.state === selectedState).length : 0}건 · 행을 선택하면 상세 내용을 확인할 수 있습니다.`} rows={selectedState ? rows.filter((row) => row.state === selectedState) : []} columns={columns} getRowId={(row) => row.id} onOpenChange={(open) => { if (!open) setSelectedState(null) }} onRowClick={(row) => { setSelectedState(null); setSelectedRow(row) }} />
+      <TsDetailDialog record={selectedRow} onOpenChange={(open) => { if (!open) setSelectedRow(null) }} />
     </section>
   )
 }

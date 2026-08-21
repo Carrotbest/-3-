@@ -34,10 +34,11 @@ export interface DataTableColumn<T> {
 
 interface DataTableProps<T> {
   columns: DataTableColumn<T>[]
-  rows: T[]
+  rows: readonly T[]
   getRowId: (row: T) => string
   enableSelection?: boolean
   pageSize?: number
+  paginate?: boolean
   toolbar?: ReactNode
   emptyMessage?: string
   onRowClick?: (row: T) => void
@@ -57,6 +58,7 @@ export function DataTable<T>({
   getRowId,
   enableSelection = false,
   pageSize = 10,
+  paginate = true,
   toolbar,
   emptyMessage = "표시할 데이터가 없습니다.",
   onRowClick,
@@ -82,7 +84,7 @@ export function DataTable<T>({
 
   const pageCount = Math.max(1, Math.ceil(sortedRows.length / rowsPerPage))
   const safePage = Math.min(currentPage, pageCount)
-  const pageRows = sortedRows.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage)
+  const pageRows = paginate ? sortedRows.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage) : sortedRows
   const pageIds = pageRows.map(getRowId)
   const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id))
   const somePageSelected = pageIds.some((id) => selected.has(id))
@@ -138,7 +140,7 @@ export function DataTable<T>({
                   <Checkbox
                     checked={allPageSelected ? true : somePageSelected ? "indeterminate" : false}
                     onCheckedChange={togglePage}
-                    aria-label="현재 페이지 전체 선택"
+                    aria-label={paginate ? "현재 페이지 전체 선택" : "전체 목록 선택"}
                   />
                 </TableHead>
               ) : null}
@@ -214,7 +216,7 @@ export function DataTable<T>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex flex-col gap-3 border-t border-[var(--border)] p-4 text-sm text-[var(--muted-foreground)] sm:flex-row sm:items-center sm:justify-between">
+      {paginate ? <div className="flex flex-col gap-3 border-t border-[var(--border)] p-4 text-sm text-[var(--muted-foreground)] sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <span className="whitespace-nowrap">Rows per page</span>
           <Select value={String(rowsPerPage)} onValueChange={(value) => setRowsPerPage(Number(value))}>
@@ -249,7 +251,7 @@ export function DataTable<T>({
             <ChevronRight aria-hidden="true" />
           </Button>
         </div>
-      </div>
+      </div> : null}
     </div>
   )
 }

@@ -9,9 +9,10 @@ interface RadialKpiProps {
   total: number
   pct: number
   tone: RadialKpiTone
+  onClick: () => void
 }
 
-/** 쿨톤 진행 그라데이션(원사→피니쉬 흐름). [시작, 끝] */
+/** 쿨톤 진행 그라데이션(원사→가공 흐름). [시작, 끝] */
 const TONE_GRADIENT: Record<RadialKpiTone, { from: string; to: string }> = {
   one: { from: "#0e7490", to: "#22d3ee" },
   two: { from: "#6d28d9", to: "#a78bfa" },
@@ -54,8 +55,8 @@ function useAnimatedValue(dependency: number, active: boolean): number {
   return value
 }
 
-export function RadialKpi({ label, done, total, pct, tone }: RadialKpiProps) {
-  const { ref, inView } = useInView<HTMLDivElement>({ once: true })
+export function RadialKpi({ label, done, total, pct, tone, onClick }: RadialKpiProps) {
+  const { ref, inView } = useInView<HTMLButtonElement>({ once: true })
   const progress = useAnimatedValue(pct, inView)
   const animatedPct = pct * progress
   const animatedDone = Math.round(done * progress)
@@ -64,10 +65,12 @@ export function RadialKpi({ label, done, total, pct, tone }: RadialKpiProps) {
   const gradientId = `radial-kpi-${tone}`
 
   return (
-    <div
+    <button
+      type="button"
       ref={ref}
-      className="group flex flex-col items-center text-center"
-      role="img"
+      onClick={onClick}
+      aria-haspopup="dialog"
+      className="group flex w-full cursor-pointer flex-col items-center rounded-[var(--radius)] p-3 text-center outline-none transition-[transform,background-color,box-shadow] hover:-translate-y-0.5 hover:bg-[var(--accent)] hover:shadow-md focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transform-none motion-reduce:transition-none"
       aria-label={`${label} 공정 도달률 ${pct.toLocaleString("ko-KR")}% · ${done}/${total}건`}
     >
       <div className="relative size-40">
@@ -111,6 +114,6 @@ export function RadialKpi({ label, done, total, pct, tone }: RadialKpiProps) {
       </div>
       <p className="mt-3 text-base font-semibold text-[var(--foreground)]">{label}</p>
       <p className="mt-1 text-xs text-[var(--muted-foreground)]">공정 도달 기준</p>
-    </div>
+    </button>
   )
 }

@@ -531,7 +531,7 @@ export function Portfolio() {
   }
 
   return (
-    <section className="flex h-[calc(100dvh-6rem)] min-h-0 min-w-0 flex-col gap-4 overflow-hidden sm:h-[calc(100dvh-6.5rem)] lg:h-[calc(100dvh-7rem)]">
+    <section className="flex h-[calc(200dvh-12rem)] min-h-0 min-w-0 flex-col gap-4 overflow-hidden sm:h-[calc(200dvh-13rem)] lg:h-[calc(200dvh-14rem)]">
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">PORTFOLIO</p>
@@ -545,9 +545,9 @@ export function Portfolio() {
 
       <SplitPane
         orientation="horizontal"
-        storageKey="portfolio-split-main"
-        defaultRatio={35}
-        min={20}
+        storageKey="portfolio-split-main-v2"
+        defaultRatio={18}
+        min={12}
         max={65}
         ariaLabel="상단 현황과 기능 카테고리 높이 조절"
         className="min-h-0 flex-1"

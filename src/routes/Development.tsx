@@ -31,6 +31,7 @@ import { OwnerLaneBoard } from "@/components/charts/OwnerLaneBoard"
 import { SectionCard } from "@/components/dashboard/SectionCard"
 import { StatCard } from "@/components/dashboard/StatCard"
 import { DataTable, type DataTableColumn } from "@/components/data-table/DataTable"
+import { RecordListDialog } from "@/components/data-table/RecordListDialog"
 import { StatusBadge } from "@/components/data-table/StatusBadge"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { DataUpload } from "@/components/upload/DataUpload"
@@ -48,13 +49,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -77,6 +72,7 @@ import {
   type OwnerDetailedDatum,
   type OwnerProcessDatum,
   type OwnerProcessKey,
+  type ProcessFunnelKey,
 } from "@/data/derive"
 import { fmtDate, fmtDateFull, fmtNum, toDate } from "@/data/format"
 import { dayToneText, holidayName } from "@/data/holidays"
@@ -364,6 +360,7 @@ function AccentKpiTile({
   footnote,
   /** 집계 기준(모집단·제외 조건). 화면마다 건수가 달라 보이는 이유를 여기서 밝힌다. */
   basis,
+  onClick,
   children,
 }: {
   accent: AccentKey
@@ -372,11 +369,19 @@ function AccentKpiTile({
   badge?: ReactNode
   footnote?: ReactNode
   basis?: string
+  onClick: () => void
   children: ReactNode
 }) {
   return (
     <Tilt3D max={5} lift={6} glare={false} className="h-full">
-      <Card className="group relative h-full overflow-hidden">
+      <Card
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        onClick={onClick}
+        onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onClick() } }}
+        className="group relative h-full cursor-pointer overflow-hidden outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+      >
         <CardContent className="relative flex h-full flex-col p-5">
           <div className="flex items-center justify-between gap-3">
             <span className="flex size-10 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]">
@@ -390,6 +395,8 @@ function AccentKpiTile({
                     <TooltipTrigger asChild>
                       <button
                         type="button"
+                        onClick={(event) => event.stopPropagation()}
+                        onKeyDown={(event) => event.stopPropagation()}
                         className="rounded-full text-[var(--muted-foreground)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
                         aria-label="집계 기준 설명"
                       >
@@ -493,11 +500,11 @@ function OwnerMonthlyChart({ data, stroke, owner, gradientId, started }: { data:
   )
 }
 
-function OwnerCard({ owner, rank, trend }: { owner: OwnerDetailedDatum; rank: number; trend: { month: string; count: number }[] }) {
+function OwnerCard({ owner, rank, trend, onClick }: { owner: OwnerDetailedDatum; rank: number; trend: { month: string; count: number }[]; onClick: () => void }) {
   const a = ACCENT[OWNER_ACCENTS[(rank - 1) % OWNER_ACCENTS.length]]
   const { ref, inView: started } = useInView<HTMLElement>({ once: true, threshold: 0.25 })
   return (
-    <article ref={ref} className={`group relative overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 ${hoverLift}`}>
+    <article ref={ref} role="button" tabIndex={0} aria-haspopup="dialog" onClick={onClick} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onClick() } }} className={`group relative cursor-pointer overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] ${hoverLift}`}>
       <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: `radial-gradient(120% 80% at 0% 0%, ${a.soft}, transparent 55%)` }} />
       <div className="relative">
         <div className="flex items-center gap-3">
@@ -524,6 +531,29 @@ function OwnerCard({ owner, rank, trend }: { owner: OwnerDetailedDatum; rank: nu
       </div>
     </article>
   )
+}
+
+type DevelopmentListPopup = { title: string; description: string; rows: DevRecord[] }
+
+function recordsAtProcess(records: readonly DevRecord[], key: ProcessFunnelKey): DevRecord[] {
+  const stageOrder = ["원사", "편직", "염색", "가공", "시험", "완료"]
+  const minimum: Record<ProcessFunnelKey, number> = { yarn: 0, knitting: 1, dyeing: 2, finishing: 3 }
+  return records.filter((record) => record.processReached?.[key] ?? stageOrder.indexOf(record.stage) >= minimum[key])
+}
+
+function developmentListColumns(today: Date): DataTableColumn<DevRecord>[] {
+  return [
+    { id: "styleNo", header: "Style No.", accessor: (row) => row.styleNo, cell: (row) => row.styleNo || "—" },
+    { id: "opt", header: "OPT", accessor: (row) => row.opt, cell: (row) => row.opt || "—" },
+    { id: "buyer", header: "Buyer", accessor: (row) => row.buyer, cell: (row) => row.buyer || "—" },
+    { id: "season", header: "시즌", accessor: (row) => row.season, cell: (row) => row.season || "—" },
+    { id: "devType", header: "유형", accessor: (row) => row.devType ?? (row.gdNo ? "GD" : "국내"), cell: (row) => row.devType ?? (row.gdNo ? "GD" : "국내") },
+    { id: "gdNo", header: "GD#", accessor: (row) => row.gdNo, cell: (row) => row.gdNo || "미기입" },
+    { id: "owner", header: "담당", accessor: (row) => row.owner, cell: (row) => row.owner || "미지정" },
+    { id: "stage", header: "현재 공정", accessor: (row) => row.stage, cell: (row) => row.stage || "—" },
+    { id: "status", header: "상태", accessor: (row) => STATUS[statusOf(row, today)].label, cell: (row) => <StatusBadge status={STATUS[statusOf(row, today)].label} /> },
+    { id: "dueDate", header: "납기", accessor: (row) => row.dueDate, cell: (row) => fmtDate(row.dueDate) },
+  ]
 }
 
 function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
@@ -554,6 +584,9 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
   }, [owners])
   const categories = useMemo(() => categoryOverview(active), [active])
   const [categoryDetail, setCategoryDetail] = useState<CategoryOverviewDatum | null>(null)
+  const [listPopup, setListPopup] = useState<DevelopmentListPopup | null>(null)
+  const [selectedRecord, setSelectedRecord] = useState<DevRecord | null>(null)
+  const popupColumns = useMemo(() => developmentListColumns(today), [today])
   const categoryStyles = useMemo(
     () => (categoryDetail ? categoryStyleList(active, categoryDetail.key) : []),
     [active, categoryDetail],
@@ -575,6 +608,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
             label="총 개발 (진행중)"
             footnote={`전체 ${totalRecords.toLocaleString("ko-KR")}건 중 진행중`}
             basis="DD의 Status가 '진행중'인 건만 집계합니다. 완료·HOLD·DROP·REJECT는 빠지므로 DD MASTER의 전체 행수보다 적습니다."
+            onClick={() => setListPopup({ title: "총 개발 · 진행중", description: `전체 ${totalRecords.toLocaleString("ko-KR")}건 중 진행중 ${active.length.toLocaleString("ko-KR")}건`, rows: [...active] })}
           >
             <p className="text-4xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={activeTotal} duration={GAUGE_MS} startOnView /><span className="ml-1 text-base font-medium text-[var(--muted-foreground)]">건</span></p>
           </AccentKpiTile>
@@ -588,6 +622,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
             badge={<span className="rounded-full bg-[var(--muted)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted-foreground)]">총 <NumberTicker value={split.total} duration={GAUGE_MS} startOnView />건</span>}
             footnote={`진행중 ${activeTotal.toLocaleString("ko-KR")}건의 GD·국내 비중`}
             basis="진행중 건을 DD의 Co 컬럼(GD/국내)으로 나눈 비중입니다. Co 값이 없으면 GD# 유무로 판정합니다."
+            onClick={() => setListPopup({ title: "개발 유형 · GD / 국내", description: `진행중 ${active.length.toLocaleString("ko-KR")}건 · 목록에서 유형과 스타일을 확인합니다.`, rows: [...active] })}
           >
             <div className="flex items-end gap-6">
               <div>
@@ -610,6 +645,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
             label={<>접수현황 <span className="text-[var(--chart-2)]">GD</span></>}
             footnote={<>GD# 기입 <NumberTicker value={receipt.receivedPct} duration={GAUGE_MS} suffix="%" startOnView /> · 미기입 <NumberTicker value={receipt.missing} duration={GAUGE_MS} suffix="건" startOnView /></>}
             basis="진행중 GD 건만 대상입니다(국내 개발 제외). GD#가 5자리 개발번호 형식으로 기재되면 접수 완료로 봅니다."
+            onClick={() => setListPopup({ title: "GD 접수현황", description: `진행중 GD 개발 ${receipt.total.toLocaleString("ko-KR")}건 · GD# 기입 여부를 확인합니다.`, rows: active.filter((row) => row.devType === "GD" || (!row.devType && Boolean(row.gdNo))) })}
           >
             <p className="flex items-baseline">
               <span className="text-4xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={receipt.received} duration={GAUGE_MS} startOnView /></span>
@@ -626,6 +662,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
             label="전체 공정 분포"
             footnote={`진행중 ${activeTotal.toLocaleString("ko-KR")}건 · 담당자 합산 현재 단계`}
             basis="진행중 건을 현재 단계로만 분류합니다. 한 건은 한 단계에만 들어가므로 네 구간의 합은 진행중 건수와 같습니다."
+            onClick={() => setListPopup({ title: "전체 공정 분포", description: `진행중 ${active.length.toLocaleString("ko-KR")}건의 현재 공정 목록`, rows: [...active] })}
           >
             <TeamProcessBar process={teamProcess.process} total={teamProcess.total} />
           </AccentKpiTile>
@@ -642,6 +679,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
               total={item.total}
               pct={item.pct}
               tone={RADIAL_TONES[index]}
+              onClick={() => setListPopup({ title: `${item.label} 공정 도달 목록`, description: `진행중 ${item.total.toLocaleString("ko-KR")}건 중 ${item.done.toLocaleString("ko-KR")}건 도달`, rows: recordsAtProcess(active, item.key) })}
             />
           ))}
         </div>
@@ -706,7 +744,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         <div className="grid gap-4 xl:grid-cols-2">
           {owners.map((owner, index) => (
             <Reveal key={owner.id} delay={index * 75}>
-              <OwnerCard owner={owner} rank={index + 1} trend={ownerTrends[owner.name] ?? []} />
+              <OwnerCard owner={owner} rank={index + 1} trend={ownerTrends[owner.name] ?? []} onClick={() => setListPopup({ title: `${owner.name} 개발 목록`, description: `진행중 ${owner.total.toLocaleString("ko-KR")}건`, rows: active.filter((row) => row.owner === owner.name) })} />
             </Reveal>
           ))}
         </div>
@@ -714,13 +752,15 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
 
       <CompletedSampleLibrary records={records} samples={completed} />
 
-      <CategoryStyleSheet category={categoryDetail} styles={categoryStyles} onOpenChange={(open) => { if (!open) setCategoryDetail(null) }} />
+      <CategoryStyleDialog category={categoryDetail} styles={categoryStyles} onOpenChange={(open) => { if (!open) setCategoryDetail(null) }} />
+      <RecordListDialog open={Boolean(listPopup)} title={listPopup?.title ?? "개발 목록"} description={listPopup?.description} rows={listPopup?.rows ?? []} columns={popupColumns} getRowId={rowId} onOpenChange={(open) => { if (!open) setListPopup(null) }} onRowClick={(row) => { setListPopup(null); setSelectedRecord(row) }} />
+      <DevelopmentDetailDialog record={selectedRecord} onOpenChange={(open) => { if (!open) setSelectedRecord(null) }} />
     </section>
   )
 }
 
 /** 카테고리 카드 클릭 시 대표 스타일 목록(담당자 포함) 팝업. */
-function CategoryStyleSheet({
+function CategoryStyleDialog({
   category,
   styles,
   onOpenChange,
@@ -730,20 +770,20 @@ function CategoryStyleSheet({
   onOpenChange: (open: boolean) => void
 }) {
   return (
-    <Sheet open={category !== null} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto border-[var(--border)] bg-[var(--background)] sm:max-w-2xl">
+    <Dialog open={category !== null} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl">
         {category ? (
           <>
-            <SheetHeader className="border-b border-[var(--border)] p-6 pr-12">
+            <DialogHeader>
               <div className="flex flex-wrap items-center gap-2">
-                <SheetTitle className="text-[var(--foreground)]">{category.label} 대표 스타일</SheetTitle>
+                <DialogTitle>{category.label} 대표 스타일</DialogTitle>
                 <Badge variant="secondary">{styles.length}개 스타일</Badge>
                 <Badge variant="outline">{category.count}건 · OPT {category.options}</Badge>
               </div>
-              <SheetDescription className="text-[var(--muted-foreground)]">진행중 개발 기준 · 동일 Style No.는 OPT 수를 합쳐 표시합니다.</SheetDescription>
-            </SheetHeader>
+              <DialogDescription>진행중 개발 기준 · 동일 Style No.는 OPT 수를 합쳐 표시합니다.</DialogDescription>
+            </DialogHeader>
             {styles.length ? (
-              <div className="p-4 sm:p-6">
+              <DialogBody>
                 <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]">
                   <Table>
                     <TableHeader>
@@ -768,14 +808,14 @@ function CategoryStyleSheet({
                     </TableBody>
                   </Table>
                 </div>
-              </div>
+              </DialogBody>
             ) : (
               <div className="flex min-h-52 items-center justify-center p-6 text-center text-sm text-[var(--muted-foreground)]">해당 카테고리의 진행중 스타일이 없습니다.</div>
             )}
           </>
         ) : null}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -1021,7 +1061,7 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
         <DataTable columns={columns} rows={filteredItems} getRowId={completedLibraryRowId} pageSize={20} toolbar={toolbar} onRowClick={setSelectedItem} emptyMessage="조건에 맞는 완료 샘플이 없습니다." />
       </SectionCard>
 
-      <DevelopmentDetailSheet libraryItem={selectedItem} onOpenChange={(open) => { if (!open) setSelectedItem(null) }} />
+      <DevelopmentDetailDialog libraryItem={selectedItem} onOpenChange={(open) => { if (!open) setSelectedItem(null) }} />
     </div>
   )
 }
@@ -1043,7 +1083,7 @@ function DetailPairs({ pairs }: { pairs: Array<[string, unknown, string?]> }) {
   )
 }
 
-function DevelopmentDetailSheet({ record = null, libraryItem = null, onOpenChange }: { record?: DevRecord | null; libraryItem?: CompletedLibraryItem | null; onOpenChange: (open: boolean) => void }) {
+function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChange }: { record?: DevRecord | null; libraryItem?: CompletedLibraryItem | null; onOpenChange: (open: boolean) => void }) {
   const resolvedRecord = libraryItem?.record ?? record
   const sample = libraryItem?.sample ?? null
   const tech = resolvedRecord?.tech
@@ -1068,29 +1108,31 @@ function DevelopmentDetailSheet({ record = null, libraryItem = null, onOpenChang
   const tabCount = 1 + Number(processVisible) + Number(physicalVisible) + Number(fabricVisible) + Number(historyVisible)
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto border-[var(--border)] bg-[var(--background)] sm:max-w-3xl">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="h-[92vh] max-h-[60rem] max-w-5xl">
         {open ? (
           <>
-            <SheetHeader className="border-b border-[var(--border)] p-6 pr-12">
+            <DialogHeader>
               <div className="flex flex-wrap items-center gap-2">
-                <SheetTitle className="text-[var(--foreground)]">{title}{resolvedRecord?.opt ? ` · ${resolvedRecord.opt}` : ""}</SheetTitle>
+                <DialogTitle>{title}{resolvedRecord?.opt ? ` · ${resolvedRecord.opt}` : ""}</DialogTitle>
                 {resolvedRecord ? <StatusBadge status={STATUS[statusOf(resolvedRecord)].label} /> : null}
                 {libraryItem ? <Badge variant={libraryItem.source === "DD" ? "default" : "outline"}>{libraryItem.source === "DD" ? "DD · 기술데이터" : "대장 아카이브 · DD 미연결"}</Badge> : null}
               </div>
-              <SheetDescription className="text-[var(--muted-foreground)]">{libraryItem ? `${libraryItem.flNo || "FL 미기재"} · 완료 ${fmtDateFull(libraryItem.completedAt)}` : "개발 항목과 공정·물성·이력 기술데이터입니다."}</SheetDescription>
-            </SheetHeader>
+              <DialogDescription>{libraryItem ? `${libraryItem.flNo || "FL 미기재"} · 완료 ${fmtDateFull(libraryItem.completedAt)}` : "개발 항목과 공정·물성·이력 기술데이터입니다."}</DialogDescription>
+            </DialogHeader>
 
-            <Tabs key={detailKey} defaultValue="overview" className="min-w-0 p-6">
-              <TabsList className="flex h-auto w-full justify-start overflow-x-auto" aria-label={`개발 상세 ${tabCount}개 탭`}>
-                <TabsTrigger value="overview">개요</TabsTrigger>
-                {processVisible ? <TabsTrigger value="process">공정</TabsTrigger> : null}
-                {physicalVisible ? <TabsTrigger value="physical">물성</TabsTrigger> : null}
-                {fabricVisible ? <TabsTrigger value="fabric">편직·원단</TabsTrigger> : null}
-                {historyVisible ? <TabsTrigger value="history">이력</TabsTrigger> : null}
-              </TabsList>
+            <Tabs key={detailKey} defaultValue="overview" className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+              <div className="shrink-0 border-b border-[var(--border)] bg-[var(--card)] px-6 py-4">
+                <TabsList className="flex h-auto w-full justify-start overflow-x-auto" aria-label={`개발 상세 ${tabCount}개 탭`}>
+                  <TabsTrigger value="overview">개요</TabsTrigger>
+                  {processVisible ? <TabsTrigger value="process">공정</TabsTrigger> : null}
+                  {physicalVisible ? <TabsTrigger value="physical">물성</TabsTrigger> : null}
+                  {fabricVisible ? <TabsTrigger value="fabric">편직·원단</TabsTrigger> : null}
+                  {historyVisible ? <TabsTrigger value="history">이력</TabsTrigger> : null}
+                </TabsList>
+              </div>
 
-              <TabsContent value="overview" className="mt-6">
+              <TabsContent value="overview" className="mt-0 min-h-0 flex-1 overflow-y-scroll px-6 py-6 [scrollbar-gutter:stable]">
                 {resolvedRecord ? (
                   <>
                     <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
@@ -1112,7 +1154,7 @@ function DevelopmentDetailSheet({ record = null, libraryItem = null, onOpenChang
               </TabsContent>
 
               {processVisible ? (
-                <TabsContent value="process" className="mt-6 space-y-5">
+                <TabsContent value="process" className="mt-0 min-h-0 flex-1 space-y-5 overflow-y-scroll px-6 py-6 [scrollbar-gutter:stable]">
                   {tech && ddProcessTechnical ? (
                     <div className="rounded-[var(--radius)] border border-[var(--border)]">
                       {[
@@ -1134,7 +1176,7 @@ function DevelopmentDetailSheet({ record = null, libraryItem = null, onOpenChang
               ) : null}
 
               {physicalVisible ? (
-                <TabsContent value="physical" className="mt-6 space-y-5">
+                <TabsContent value="physical" className="mt-0 min-h-0 flex-1 space-y-5 overflow-y-scroll px-6 py-6 [scrollbar-gutter:stable]">
                   {tech?.actual ? <DetailPairs pairs={[["Actual Width", tech.actual.width, " cm"], ["Actual Weight", tech.actual.weight, " g/m²"], ["Balance", tech.actual.balance], ["축률 L", tech.actual.shrinkageLength, " %"], ["축률 W", tech.actual.shrinkageWidth, " %"]]} /> : null}
                   {sample && !tech?.actual ? <DetailPairs pairs={[["폭", sample.inhouse.widthCm, " cm"], ["중량", sample.inhouse.weightGsm, " g/m²"], ["축률", typeof sample.inhouse.shrinkagePct === "number" ? sample.inhouse.shrinkagePct : `장 ${detailValue(sample.inhouse.shrinkagePct.length)} % · 폭 ${detailValue(sample.inhouse.shrinkagePct.width)} %`]]} /> : null}
                   {tech?.stageData ? (
@@ -1145,18 +1187,18 @@ function DevelopmentDetailSheet({ record = null, libraryItem = null, onOpenChang
               ) : null}
 
               {fabricVisible ? (
-                <TabsContent value="fabric" className="mt-6 space-y-6">
+                <TabsContent value="fabric" className="mt-0 min-h-0 flex-1 space-y-6 overflow-y-scroll px-6 py-6 [scrollbar-gutter:stable]">
                   {tech?.knitSpec ? <div><h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">편직 사양</h3><DetailPairs pairs={[["Inch", tech.knitSpec.inch], ["Gauge", tech.knitSpec.gauge], ["Needles", tech.knitSpec.needles], ["Loop F", tech.knitSpec.loopF], ["Loop T", tech.knitSpec.loopT], ["Loop B", tech.knitSpec.loopB]]} /></div> : null}
                   {tech?.original ? <div className="border-t border-[var(--border)] pt-6"><h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">ORIGINAL 분석</h3><DetailPairs pairs={[["Brand", tech.original.brand], ["Contents", tech.original.contents], ["Yarn", tech.original.yarn], ["Org./Target Weight", resolvedRecord?.weight, " g/m²"], ["Comments", tech.original.comments]]} /></div> : null}
                 </TabsContent>
               ) : null}
 
-              {historyVisible ? <TabsContent value="history" className="mt-6"><DetailPairs pairs={[["Pass/Fail", tech?.passFail], ["Fail 사유", tech?.failReason], ["Style History", tech?.styleHistory], ["Review", tech?.review], ["Arrange#", tech?.arrangeNo], ["옵션 완료", tech?.optionProgress]]} /></TabsContent> : null}
+              {historyVisible ? <TabsContent value="history" className="mt-0 min-h-0 flex-1 overflow-y-scroll px-6 py-6 [scrollbar-gutter:stable]"><DetailPairs pairs={[["Pass/Fail", tech?.passFail], ["Fail 사유", tech?.failReason], ["Style History", tech?.styleHistory], ["Review", tech?.review], ["Arrange#", tech?.arrangeNo], ["옵션 완료", tech?.optionProgress]]} /></TabsContent> : null}
             </Tabs>
           </>
         ) : null}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -1190,6 +1232,7 @@ function DevelopmentList() {
   const [stage, setStage] = useState(ALL)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [selectedRecord, setSelectedRecord] = useState<DevRecord | null>(null)
+  const [listPopup, setListPopup] = useState<DevelopmentListPopup | null>(null)
   const today = useMemo(() => new Date(), [])
 
   const routeCategory = SUB_CATEGORY[sub ?? "overview"] ?? null
@@ -1259,6 +1302,12 @@ function DevelopmentList() {
     setStatusFilter("all")
   }
 
+  const openStatusPopup = (filter: StatusFilter, title: string) => {
+    const popupRows = filter === "all" ? scopedFiltered : scopedFiltered.filter((row) => statusOf(row, today) === filter)
+    setStatusFilter(filter)
+    setListPopup({ title, description: `현재 검색·선택 필터 기준 ${popupRows.length.toLocaleString("ko-KR")}건`, rows: popupRows })
+  }
+
   const toolbar = (
     <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
       <label className="relative block min-w-0 flex-1 xl:max-w-sm">
@@ -1294,18 +1343,10 @@ function DevelopmentList() {
 
       {view !== "completed" ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <Tilt3D max={9} lift={10}>
-            <StatCard icon={<Shapes aria-hidden="true" className="size-4" />} label="전체" value={summary.total} caption="현재 검색·선택 필터 기준" info="상태 필터 적용 전 전체 건수입니다." revealDelay={0} pressed={statusFilter === "all"} onClick={() => setStatusFilter("all")} visual={<CategoryMiniVisual items={cardStats.categoryMix} />} />
-          </Tilt3D>
-          <Tilt3D max={9} lift={10}>
-            <StatCard icon={<Workflow aria-hidden="true" className="size-4" />} label="진행" value={summary.progress} caption="완료 전 개발 건" info="카드를 다시 누르면 전체 보기로 돌아갑니다." revealDelay={75} pressed={statusFilter === "progress"} onClick={() => setStatusFilter((current) => current === "progress" ? "all" : "progress")} visual={<ProcessMiniVisual items={cardStats.processMix} />} />
-          </Tilt3D>
-          <Tilt3D max={9} lift={10}>
-            <StatCard icon={<TimerReset aria-hidden="true" className="size-4" />} label="임박" value={summary.dueSoon} caption="납기까지 3일 이내" info="D-7 일정 분포와 임박 상태 건을 함께 확인합니다." tone="warning" revealDelay={150} pressed={statusFilter === "due"} onClick={() => setStatusFilter((current) => current === "due" ? "all" : "due")} visual={<BucketMiniVisual items={cardStats.dueBuckets} tone="warning" />} />
-          </Tilt3D>
-          <Tilt3D max={9} lift={10}>
-            <StatCard icon={<TriangleAlert aria-hidden="true" className="size-4" />} label="지연" value={summary.late} caption="납기일 경과" info="지연 일수 구간별 건수입니다." tone="destructive" revealDelay={200} pressed={statusFilter === "late"} onClick={() => setStatusFilter((current) => current === "late" ? "all" : "late")} visual={<BucketMiniVisual items={cardStats.lateBuckets} tone="destructive" />} />
-          </Tilt3D>
+          <StatCard icon={<Shapes aria-hidden="true" className="size-4" />} label="전체" value={summary.total} caption="현재 검색·선택 필터 기준" info="상태 필터 적용 전 전체 건수입니다." revealDelay={0} pressed={statusFilter === "all"} onClick={() => openStatusPopup("all", "전체 개발 목록")} visual={<CategoryMiniVisual items={cardStats.categoryMix} />} />
+          <StatCard icon={<Workflow aria-hidden="true" className="size-4" />} label="진행" value={summary.progress} caption="완료 전 개발 건" info="클릭하면 진행중 목록을 확인합니다." revealDelay={75} pressed={statusFilter === "progress"} onClick={() => openStatusPopup("progress", "진행 개발 목록")} visual={<ProcessMiniVisual items={cardStats.processMix} />} />
+          <StatCard icon={<TimerReset aria-hidden="true" className="size-4" />} label="임박" value={summary.dueSoon} caption="납기까지 3일 이내" info="D-7 일정 분포와 임박 상태 건을 함께 확인합니다." tone="warning" revealDelay={150} pressed={statusFilter === "due"} onClick={() => openStatusPopup("due", "납기 임박 개발 목록")} visual={<BucketMiniVisual items={cardStats.dueBuckets} tone="warning" />} />
+          <StatCard icon={<TriangleAlert aria-hidden="true" className="size-4" />} label="지연" value={summary.late} caption="납기일 경과" info="지연 일수 구간별 건수입니다." tone="destructive" revealDelay={200} pressed={statusFilter === "late"} onClick={() => openStatusPopup("late", "지연 개발 목록")} visual={<BucketMiniVisual items={cardStats.lateBuckets} tone="destructive" />} />
         </div>
       ) : null}
 
@@ -1346,7 +1387,8 @@ function DevelopmentList() {
         </TabsContent>
       </Tabs>
 
-      <DevelopmentDetailSheet record={selectedRecord} onOpenChange={(open) => { if (!open) setSelectedRecord(null) }} />
+      <RecordListDialog open={Boolean(listPopup)} title={listPopup?.title ?? "개발 목록"} description={listPopup?.description} rows={listPopup?.rows ?? []} columns={columns} getRowId={rowId} onOpenChange={(open) => { if (!open) setListPopup(null) }} onRowClick={(row) => { setListPopup(null); setSelectedRecord(row) }} />
+      <DevelopmentDetailDialog record={selectedRecord} onOpenChange={(open) => { if (!open) setSelectedRecord(null) }} />
     </section>
   )
 }

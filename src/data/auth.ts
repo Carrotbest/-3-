@@ -12,6 +12,7 @@ import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore"
 
 import { auth, db } from "./firebase"
 import { OWNER_EMAIL } from "./app-config"
+import { createScreenPermissions, normalizeScreenPermissions, type ScreenPermissions } from "./screen-permissions"
 
 export type AuthStatus = "loading" | "signed-out" | "signed-in"
 /** 소유자는 항상 approved. 그 외는 users/{uid}.status를 따른다(문서 없으면 pending). */
@@ -22,6 +23,7 @@ interface AuthState {
   user: User | null
   isOwner: boolean
   approval: ApprovalState
+  screenPermissions: ScreenPermissions
   error: string | null
 }
 
@@ -30,6 +32,7 @@ export const useAuthStore = create<AuthState>(() => ({
   user: null,
   isOwner: false,
   approval: "unknown",
+  screenPermissions: createScreenPermissions(false),
   error: null,
 }))
 
@@ -46,7 +49,14 @@ export function initAuth(): void {
     approvalUnsub = null
 
     if (!user) {
-      useAuthStore.setState({ status: "signed-out", user: null, isOwner: false, approval: "unknown", error: null })
+      useAuthStore.setState({
+        status: "signed-out",
+        user: null,
+        isOwner: false,
+        approval: "unknown",
+        screenPermissions: createScreenPermissions(false),
+        error: null,
+      })
       return
     }
 
@@ -56,6 +66,7 @@ export function initAuth(): void {
       user,
       isOwner: owner,
       approval: owner ? "approved" : "unknown",
+      screenPermissions: createScreenPermissions(owner),
       error: null,
     })
 
@@ -64,9 +75,13 @@ export function initAuth(): void {
     approvalUnsub = onSnapshot(
       doc(db, "users", user.uid),
       (snap) => {
-        const status = snap.exists() ? (snap.data().status as string) : "pending"
+        const data = snap.exists() ? snap.data() : null
+        const status = data ? (data.status as string) : "pending"
         const approval: ApprovalState = status === "approved" ? "approved" : status === "rejected" ? "rejected" : "pending"
-        useAuthStore.setState({ approval })
+        useAuthStore.setState({
+          approval,
+          screenPermissions: normalizeScreenPermissions(data?.screenPermissions),
+        })
       },
       () => useAuthStore.setState({ approval: "pending" }),
     )
@@ -125,6 +140,7 @@ export async function signUp(email: string, password: string, name: string): Pro
       email: (credential.user.email ?? email.trim()).toLowerCase(),
       name: displayName || null,
       status: "pending",
+      screenPermissions: createScreenPermissions(true),
       requestedAt: serverTimestamp(),
     })
   } catch (error) {

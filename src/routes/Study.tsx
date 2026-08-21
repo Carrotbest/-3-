@@ -5,13 +5,14 @@ import { BarCard } from "@/components/charts/BarCard"
 import { MaterialDeckSection, MaterialSearchSection } from "@/components/cards/MaterialDeck"
 import { SectionCard } from "@/components/dashboard/SectionCard"
 import { DataUpload } from "@/components/upload/DataUpload"
-import { DataTable, type DataTableColumn } from "@/components/data-table/DataTable"
+import { type DataTableColumn } from "@/components/data-table/DataTable"
+import { RecordListDialog } from "@/components/data-table/RecordListDialog"
 import { StatusBadge } from "@/components/data-table/StatusBadge"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Reveal } from "@/components/motion/Reveal"
 import { Badge } from "@/components/ui/badge"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { materialsOf, studyMaterials } from "@/data/derive"
 import { fmtDate, fmtDateFull } from "@/data/format"
@@ -24,11 +25,41 @@ const RECENT_WEEK_COUNT = 6
 
 const studyRowId = (row: StudyRecord) => `${row.owner}-${row.week}-${row.topic}`
 
+function StudyDetailDialog({ row, onOpenChange }: { row: StudyRecord | null; onOpenChange: (open: boolean) => void }) {
+  return (
+    <Dialog open={Boolean(row)} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        {row ? (
+          <>
+            <DialogHeader>
+              <div className="flex flex-wrap items-center gap-2"><StatusBadge status={row.state} /><Badge variant="outline">{row.week}주차</Badge></div>
+              <DialogTitle className="pt-2">{row.topic}</DialogTitle>
+              <DialogDescription>{row.owner} · 마감 {fmtDateFull(row.dueDate)}</DialogDescription>
+            </DialogHeader>
+            <DialogBody>
+              <dl className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
+                {[["담당자", row.owner], ["분류", row.category], ["주차", `${row.week}주차${row.weekLabel ? ` · ${row.weekLabel}` : ""}`], ["상태", row.state], ["마감일", fmtDateFull(row.dueDate)], ["미진행 사유", row.reason?.trim() || "—"]].map(([label, value]) => (
+                  <div key={label} className="grid gap-1 border-b border-[var(--border)] p-4 last:border-b-0 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-4">
+                    <dt className="text-xs font-semibold text-[var(--muted-foreground)]">{label}</dt>
+                    <dd className="whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </DialogBody>
+          </>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function Study() {
   const study = useAppStore((state) => state.study)
   const materialsManual = useAppStore((state) => state.materialsManual)
   const materialItems = useMemo(() => materialsOf("STUDY", studyMaterials(study), materialsManual), [materialsManual, study])
   const [selectedOwner, setSelectedOwner] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedRow, setSelectedRow] = useState<StudyRecord | null>(null)
 
   const weeks = useMemo(
     () => [...new Set(study.map((row) => row.week))].sort((a, b) => a - b).slice(-RECENT_WEEK_COUNT),
@@ -42,6 +73,7 @@ export function Study() {
   const categoryStats = categories.map((label) => ({ label, count: study.filter((row) => row.category === label).length }))
   const stalled = study.filter((row) => row.state === "미진행")
   const ownerRows = study.filter((row) => row.owner === selectedOwner).sort((a, b) => b.week - a.week)
+  const categoryRows = study.filter((row) => row.category === selectedCategory).sort((a, b) => b.week - a.week)
 
   const ownerColumns: DataTableColumn<StudyRecord>[] = [
     { id: "week", header: "주차", accessor: (row) => row.week, cell: (row) => `${row.week}주차` },
@@ -65,7 +97,7 @@ export function Study() {
 
         <TabsContent value="progress" className="mt-6 space-y-6">
           <Reveal>
-          <div className={`flex items-start gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4 ${hoverLift}`} role="status">
+          <div className="flex items-start gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4" role="status">
             <AlertTriangle aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-[var(--chart-3)]" />
             <div>
               <p className="font-semibold text-[var(--foreground)]">이번 주 목요일 마감</p>
@@ -115,11 +147,11 @@ export function Study() {
                         return (
                           <td key={week} className={`border-l p-3 align-top ${isCurrent ? "border-[var(--chart-1)] bg-[var(--accent)]" : "border-[var(--border)]"}`}>
                             {row ? (
-                              <div className={`h-full min-h-24 rounded-[var(--radius)] border p-3 ${row.state === "미진행" ? "border-[var(--destructive)] bg-[color-mix(in_oklab,var(--destructive)_8%,var(--card))]" : "border-[var(--border)] bg-[var(--card)]"}`}>
+                              <button type="button" aria-haspopup="dialog" onClick={() => setSelectedRow(row)} className={`h-full min-h-24 w-full rounded-[var(--radius)] border p-3 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] ${hoverLift} ${row.state === "미진행" ? "border-[var(--destructive)] bg-[color-mix(in_oklab,var(--destructive)_8%,var(--card))]" : "border-[var(--border)] bg-[var(--card)]"}`}>
                                 <StatusBadge status={row.state} />
                                 <p className="mt-2 line-clamp-2 break-words text-sm font-medium text-[var(--foreground)]" title={row.topic}>{row.topic}</p>
                                 <p className="mt-2 text-xs text-[var(--muted-foreground)]">마감 {fmtDate(row.dueDate)}</p>
-                              </div>
+                              </button>
                             ) : (
                               <div className="min-h-24 rounded-[var(--radius)] border border-[var(--destructive)] bg-[color-mix(in_oklab,var(--destructive)_8%,var(--card))] p-3">
                                 <Badge variant="destructive">미제출</Badge>
@@ -137,18 +169,18 @@ export function Study() {
           </SectionCard>
 
           <div className="grid min-w-0 gap-4 xl:grid-cols-2">
-            <BarCard title="분류별 누적" subtitle="전체 STUDY 과제 기준" data={categoryStats} series={[{ dataKey: "count", label: "과제" }]} revealDelay={0} />
+            <BarCard title="분류별 누적" subtitle="막대를 클릭하면 분류별 과제 목록을 확인합니다." data={categoryStats} series={[{ dataKey: "count", label: "과제" }]} revealDelay={0} onItemClick={setSelectedCategory} />
             <SectionCard title="미진행 목록" subtitle={<NumberTicker value={stalled.length} suffix="건" />} revealDelay={75}>
               {stalled.length ? (
                 <div className="divide-y divide-[var(--border)]">
                   {stalled.map((row) => (
-                    <div key={studyRowId(row)} className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                    <button type="button" aria-haspopup="dialog" onClick={() => setSelectedRow(row)} key={studyRowId(row)} className={`flex w-full items-start justify-between gap-4 rounded-[var(--radius)] px-2 py-3 text-left outline-none first:pt-0 last:pb-0 focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] ${hoverLift}`}>
                       <div className="min-w-0">
                         <p className="break-words text-sm font-medium text-[var(--foreground)]">{row.topic}</p>
                         <p className="mt-1 text-xs text-[var(--muted-foreground)]">{row.owner} · {row.week}주차 · {row.reason?.trim() || "사유 미기재"}</p>
                       </div>
                       <StatusBadge status={row.state} />
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">미진행 과제가 없습니다.</p>}
@@ -161,17 +193,9 @@ export function Study() {
         </TabsContent>
       </Tabs>
 
-      <Sheet open={Boolean(selectedOwner)} onOpenChange={(open) => { if (!open) setSelectedOwner(null) }}>
-        <SheetContent className="w-full overflow-y-auto border-[var(--border)] bg-[var(--background)] sm:max-w-2xl">
-          <SheetHeader className="border-b border-[var(--border)] p-6 pr-12">
-            <SheetTitle>{selectedOwner} 과제 상세</SheetTitle>
-            <SheetDescription>전체 <NumberTicker value={ownerRows.length} suffix="건" /></SheetDescription>
-          </SheetHeader>
-          <div className="p-6">
-            <DataTable columns={ownerColumns} rows={ownerRows} getRowId={studyRowId} pageSize={10} emptyMessage="과제가 없습니다." />
-          </div>
-        </SheetContent>
-      </Sheet>
+      <RecordListDialog open={Boolean(selectedOwner)} title={`${selectedOwner ?? "팀원"} 과제 목록`} description={`전체 ${ownerRows.length.toLocaleString("ko-KR")}건 · 행을 선택하면 상세 내용을 확인합니다.`} rows={ownerRows} columns={ownerColumns} getRowId={studyRowId} onOpenChange={(open) => { if (!open) setSelectedOwner(null) }} onRowClick={(row) => { setSelectedOwner(null); setSelectedRow(row) }} emptyMessage="과제가 없습니다." />
+      <RecordListDialog open={Boolean(selectedCategory)} title={`${selectedCategory ?? "분류"} 과제 목록`} description={`전체 ${categoryRows.length.toLocaleString("ko-KR")}건 · 행을 선택하면 상세 내용을 확인합니다.`} rows={categoryRows} columns={ownerColumns} getRowId={studyRowId} onOpenChange={(open) => { if (!open) setSelectedCategory(null) }} onRowClick={(row) => { setSelectedCategory(null); setSelectedRow(row) }} emptyMessage="과제가 없습니다." />
+      <StudyDetailDialog row={selectedRow} onOpenChange={(open) => { if (!open) setSelectedRow(null) }} />
     </section>
   )
 }
