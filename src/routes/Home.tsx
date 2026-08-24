@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/layout/PageHeader"
 import { DataUpload } from "@/components/upload/DataUpload"
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Reveal } from "@/components/motion/Reveal"
+import { Magnetic } from "@/components/motion/Magnetic"
 import { Tilt3D } from "@/components/motion/Tilt3D"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -50,7 +51,8 @@ import { hoverLift } from "@/lib/motion"
 import { useAppStore } from "@/store/useAppStore"
 
 const HOME_GLASS_SURFACE = "rounded-[12px] border-white/70 bg-white/55 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_18px_42px_-22px_rgba(15,23,42,0.16)] backdrop-blur-md"
-const HOME_GLASS_HOVER = "transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-white hover:shadow-[0_3px_8px_rgba(15,23,42,0.06),0_24px_48px_-18px_rgba(15,23,42,0.2)] motion-reduce:transform-none motion-reduce:transition-none"
+const HOME_GLASS_STATIC = "[--hover-lift:0px] hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_18px_42px_-22px_rgba(15,23,42,0.16)]"
+const HOME_GLASS_HOVER = "transition-[box-shadow,border-color] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:border-white hover:shadow-[0_3px_8px_rgba(15,23,42,0.06),0_24px_48px_-18px_rgba(15,23,42,0.2)] motion-reduce:transition-none"
 
 function KpiCard({ icon, label, value, rangeLabel, caption, accent, delay = 0, children, onClick, onCalendarClick }: {
   icon: ReactNode
@@ -67,6 +69,7 @@ function KpiCard({ icon, label, value, rangeLabel, caption, accent, delay = 0, c
 }) {
   return (
     <Reveal delay={delay}>
+      <Magnetic strength={8} lift={7} tilt={2}>
       <Card className={`group relative h-full overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`}>
         <span aria-hidden="true" className="pointer-events-none absolute inset-x-4 top-0 h-px bg-white/95" />
         <span aria-hidden="true" className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full opacity-[0.12] blur-2xl transition-[opacity,transform] duration-500 group-hover:scale-125 group-hover:opacity-30 motion-reduce:transition-none" style={{ background: accent }} />
@@ -93,6 +96,7 @@ function KpiCard({ icon, label, value, rangeLabel, caption, accent, delay = 0, c
           {children}
         </CardContent>
       </Card>
+      </Magnetic>
     </Reveal>
   )
 }
@@ -101,6 +105,7 @@ function ScheduleCard({ dueSoon, late, onClick }: { dueSoon: number; late: numbe
   return (
     <Reveal delay={150}>
       <button type="button" aria-haspopup="dialog" onClick={onClick} className="group block h-full w-full cursor-pointer rounded-[12px] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+        <Magnetic strength={8} lift={7} tilt={2}>
         <Card className={`relative h-full overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`}>
           <span aria-hidden="true" className="pointer-events-none absolute inset-x-4 top-0 h-px bg-white/95" />
           <span aria-hidden="true" className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full bg-[var(--warning)] opacity-10 blur-2xl transition-[opacity,transform] duration-500 group-hover:scale-125 group-hover:opacity-25 motion-reduce:transition-none" />
@@ -126,6 +131,7 @@ function ScheduleCard({ dueSoon, late, onClick }: { dueSoon: number; late: numbe
             <p className="mt-2 text-xs text-[var(--muted-foreground)]">진행 중 · Due Date 기준</p>
           </CardContent>
         </Card>
+        </Magnetic>
       </button>
     </Reveal>
   )
@@ -150,11 +156,11 @@ function QuickAccessGrid({ items, onNavigate }: { items: readonly PinBoardItem[]
             const Icon = item.icon
             const accent = QUICK_ACCESS_ACCENTS[index % QUICK_ACCESS_ACCENTS.length]
             return (
+              <Magnetic key={item.path} strength={9} lift={6} tilt={3}>
               <button
-                key={item.path}
                 type="button"
                 onClick={() => onNavigate(item.path)}
-                className="group relative flex min-h-[6.5rem] items-center gap-3 overflow-hidden rounded-[10px] border border-white/70 bg-white/55 px-3 text-left shadow-[0_1px_2px_rgba(16,24,64,0.05),0_12px_24px_-14px_rgba(76,91,212,0.4)] outline-none backdrop-blur-md transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_2px_6px_rgba(16,24,64,0.07),0_18px_34px_-12px_rgba(76,91,212,0.55)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transform-none motion-reduce:transition-none"
+                className="group relative flex min-h-[6.5rem] h-full w-full items-center gap-3 overflow-hidden rounded-[10px] border border-white/70 bg-white/55 px-3 text-left shadow-[0_1px_2px_rgba(16,24,64,0.05),0_12px_24px_-14px_rgba(76,91,212,0.4)] outline-none backdrop-blur-md transition-[box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:shadow-[0_2px_6px_rgba(16,24,64,0.07),0_18px_34px_-12px_rgba(76,91,212,0.55)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none"
               >
                 <span aria-hidden="true" className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/90" />
                 <span aria-hidden="true" className={`pointer-events-none absolute -right-5 -top-7 size-16 rounded-full bg-gradient-to-br ${accent} opacity-[0.14] blur-xl transition-opacity duration-300 group-hover:opacity-40 motion-reduce:transition-none`} />
@@ -165,8 +171,9 @@ function QuickAccessGrid({ items, onNavigate }: { items: readonly PinBoardItem[]
                   <strong className="block truncate text-[13px] font-semibold text-[var(--foreground)]">{item.title}</strong>
                   <span className="block truncate text-[11px] text-[var(--muted-foreground)]">{item.description}</span>
                 </span>
-                <ArrowUpRight aria-hidden="true" className="relative size-4 shrink-0 text-[var(--muted-foreground)] transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:text-[var(--foreground)] motion-reduce:transition-none" />
+                <ArrowUpRight aria-hidden="true" className="relative size-4 shrink-0 text-[var(--muted-foreground)] transition-transform duration-[var(--t-lift)] ease-[var(--e-soft)] group-hover:-translate-y-0.5 group-hover:text-[var(--foreground)] motion-reduce:transition-none" />
               </button>
+              </Magnetic>
             )
           })}
       </div>
@@ -309,7 +316,8 @@ function ProcessFunnel({ process, reduceMotion }: {
       <span aria-hidden="true" className="pointer-events-none absolute left-[8%] right-[8%] top-1/2 hidden h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent sm:block" />
       <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-4">
         {process.map((item, index) => (
-          <div key={item.key} className="group relative min-w-0 overflow-hidden rounded-[11px] border border-white/75 bg-white/58 p-3.5 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)] backdrop-blur transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_16px_30px_-18px_rgba(15,23,42,0.24)] motion-reduce:transform-none motion-reduce:transition-none">
+          <Magnetic key={item.key} strength={9} lift={7} tilt={3}>
+          <div className="group relative h-full min-w-0 overflow-hidden rounded-[11px] border border-white/75 bg-white/58 p-3.5 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)] backdrop-blur transition-[box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:shadow-[0_16px_30px_-18px_rgba(15,23,42,0.24)] motion-reduce:transition-none">
             <span aria-hidden="true" className={`absolute -right-5 -top-6 size-16 rounded-full bg-gradient-to-br ${PROCESS_GRADIENT[item.key] ?? ""} opacity-[0.13] blur-xl transition-opacity duration-300 group-hover:opacity-30`} />
             <div className="relative flex items-start justify-between gap-2">
               <div className="min-w-0"><p className="truncate text-[13px] font-semibold text-[var(--foreground)]">{PROCESS_LABEL_EN[item.key] ?? item.label}</p><p className="mt-0.5 text-[11px] tabular-nums text-[var(--muted-foreground)]">{item.done}/{item.total}건</p></div>
@@ -320,6 +328,7 @@ function ProcessFunnel({ process, reduceMotion }: {
               <div className={`h-full rounded-full bg-gradient-to-r ${PROCESS_GRADIENT[item.key] ?? ""}`} style={{ width: `${item.pct}%`, animation: reduceMotion ? undefined : `gaugeGrow 1000ms cubic-bezier(.22,.61,.36,1) ${index * 80}ms backwards` }} />
             </div>
           </div>
+          </Magnetic>
         ))}
       </div>
     </div>
@@ -880,7 +889,7 @@ export function Home() {
 
       <Reveal>
         <button type="button" onClick={() => navigate("/development")} className="group block w-full cursor-pointer rounded-[12px] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
-          <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`}>
+          <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}>
             <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/95" />
             <svg aria-hidden="true" viewBox="0 0 260 120" className="pointer-events-none absolute right-0 top-0 h-full w-72 opacity-[0.16] transition-transform duration-700 group-hover:translate-x-2 group-hover:scale-105 motion-reduce:transition-none">
               <path d="M12 96C56 28 91 114 138 52s72 20 114-28" fill="none" stroke="var(--gradient-1)" strokeWidth="2" />
@@ -915,7 +924,7 @@ export function Home() {
       <KpiDetailSheet kind={kpiDetailKind} details={kpiDetails} ranges={kpiRanges} onRangeChange={updateKpiRange} onOpenChange={(open) => { if (!open) setKpiDetailKind(null) }} />
 
       <Reveal>
-        <Card className={`group relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`}>
+        <Card className={`group relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}>
           <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/95" />
           <CardContent className="relative p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -940,17 +949,21 @@ export function Home() {
             </div>
           </div>
           <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-5">
-            <div className="group/item relative overflow-hidden rounded-[10px] border border-white/75 bg-white/60 p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.2)] backdrop-blur transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.26)] motion-reduce:transform-none motion-reduce:transition-none">
+            <Magnetic strength={8} lift={6} tilt={3}>
+            <div className="group/item relative h-full overflow-hidden rounded-[10px] border border-white/75 bg-white/60 p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.2)] backdrop-blur transition-[box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.26)] motion-reduce:transition-none">
               <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-3)]" />
               <p className="text-[11px] font-medium text-[var(--muted-foreground)]">{rddaMonths}개월 TOTAL</p><p className="mt-1 text-2xl font-semibold tracking-tight"><NumberTicker value={monthlyKpis.total} /><span className="ml-1 text-xs text-[var(--muted-foreground)]">건</span></p>
             </div>
+            </Magnetic>
             {RDDA_SERIES.map((series) => (
-              <div key={series.key} className="group/item relative overflow-hidden rounded-[10px] border border-white/75 bg-white/60 p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.18)] backdrop-blur transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.24)] motion-reduce:transform-none motion-reduce:transition-none">
+              <Magnetic key={series.key} strength={8} lift={6} tilt={3}>
+              <div className="group/item relative h-full overflow-hidden rounded-[10px] border border-white/75 bg-white/60 p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.18)] backdrop-blur transition-[box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.24)] motion-reduce:transition-none">
                 <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 rounded-full" style={{ background: series.color }} />
                 <span aria-hidden="true" className="absolute -right-4 -top-5 size-12 rounded-full opacity-10 blur-xl transition-opacity duration-300 group-hover/item:opacity-25" style={{ background: series.color }} />
                 <div className="flex items-center justify-between gap-2"><p className="text-[11px] font-medium text-[var(--muted-foreground)]">{series.label}</p><span className="text-[10px] text-[var(--muted-foreground)]">{series.range}</span></div>
                 <p className="mt-1 text-2xl font-semibold tracking-tight"><NumberTicker value={monthlyKpis[series.key]} /><span className="ml-1 text-xs text-[var(--muted-foreground)]">건</span></p>
               </div>
+              </Magnetic>
             ))}
           </div>
           <div className="mt-5 rounded-[12px] border border-white/75 bg-white/48 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur"><RddaTrendChart key={rddaMonths} monthly={monthly} reduceMotion={reduceMotion} /></div>
@@ -964,7 +977,7 @@ export function Home() {
 
       <section aria-labelledby="owner-board-title">
         <div className="mb-4 flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--gradient-3)] to-[var(--gradient-1)] text-white shadow-[0_7px_18px_-6px_rgba(76,91,212,0.65)]"><ClipboardList className="size-4" aria-hidden="true" /></span><div><h2 id="owner-board-title" className="text-base font-semibold text-[var(--foreground)]">담당자별 진행 현황</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">담당자·공정 단계별 진행 중 스타일 분포입니다.</p></div></div>
-        <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`}><OwnerLaneBoard rows={records} onSelect={() => navigate("/development")} /></Card>
+        <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}><OwnerLaneBoard rows={records} onSelect={() => navigate("/development")} /></Card>
       </section>
 
       <section aria-labelledby="work-report-title">
@@ -977,7 +990,7 @@ export function Home() {
             const Icon = deck.icon
             return (
               <Reveal key={deck.kind} delay={index * 75}>
-                <Card className="h-full overflow-hidden">
+                <Card className="h-full overflow-hidden [--hover-lift:0px] hover:shadow-sm">
                   <CardContent className="flex h-full flex-col p-5 sm:p-6">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex min-w-0 items-start gap-3">
@@ -993,7 +1006,7 @@ export function Home() {
             )
           })}
           <Reveal delay={150} className="lg:col-span-1">
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden [--hover-lift:0px] hover:shadow-sm">
               <CardContent className="p-5 sm:p-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex items-start gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><Microscope className="size-5" aria-hidden="true" /></span><div><h3 className="text-sm font-semibold text-[var(--foreground)]">FABRIC ANALYSIS</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">분석 의뢰 보드</p></div></div>
@@ -1001,10 +1014,12 @@ export function Home() {
                 </div>
                 <div className="mt-5 grid gap-3 md:grid-cols-3">
                   {fabricStages.map((stage) => (
-                    <button key={stage.key} type="button" onClick={() => navigate("/fabric-analysis")} className="min-h-36 cursor-pointer rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+                    <Magnetic key={stage.key} strength={9} lift={6} tilt={3}>
+                    <button type="button" onClick={() => navigate("/fabric-analysis")} className="min-h-36 h-full w-full cursor-pointer rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4 text-left outline-none transition-[box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:shadow-[var(--shadow-2)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none">
                       <span className="flex items-center justify-between gap-3"><strong className="text-sm text-[var(--foreground)]">{stage.label}</strong><Badge variant="secondary">{stage.rows.length.toLocaleString("ko-KR")}건</Badge></span>
                       {stage.rows.length ? <span className="mt-4 grid gap-2">{stage.rows.slice(0, 3).map((item) => <span key={`${stage.key}-${item.anNo}`} className="block truncate text-xs text-[var(--muted-foreground)]">{[item.anNo, item.item, item.owner].filter(Boolean).join("-")}</span>)}</span> : <span className="mt-8 block text-center text-2xl font-semibold text-[var(--muted-foreground)] opacity-50">0</span>}
                     </button>
+                    </Magnetic>
                   ))}
                 </div>
               </CardContent>

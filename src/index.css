@@ -51,6 +51,10 @@ input.dd-date::-webkit-calendar-picker-indicator {
 
 :root {
   --t-fast: 160ms;
+  /* 카드 hover 가 올라오는 높이·시간·감속 곡선. Magnetic 래퍼 안에서는 --hover-lift 가 0 이 된다. */
+  --hover-lift: -0.125rem;
+  --t-lift: 420ms;
+  --e-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --shadow-2: 0 0.625rem 1.5rem color-mix(in oklab, var(--foreground) 10%, transparent);
   --background: hsl(0 0% 100%);
   --foreground: hsl(0 0% 3.9%);

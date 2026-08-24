@@ -3,6 +3,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Plus, X } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Magnetic } from "@/components/motion/Magnetic"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -167,7 +168,7 @@ export function TeamSchedule() {
   }
 
   return (
-    <Card className="group relative flex h-full flex-col overflow-hidden rounded-[12px] border-white/70 bg-white/55 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_18px_42px_-22px_rgba(15,23,42,0.16)] backdrop-blur-md transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-white hover:shadow-[0_3px_8px_rgba(15,23,42,0.06),0_24px_48px_-18px_rgba(15,23,42,0.2)] motion-reduce:transform-none motion-reduce:transition-none">
+    <Card className="group relative flex h-full flex-col overflow-hidden rounded-[12px] border-white/70 bg-white/55 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_18px_42px_-22px_rgba(15,23,42,0.16)] backdrop-blur-md [--hover-lift:0px] hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_18px_42px_-22px_rgba(15,23,42,0.16)]">
       <span aria-hidden="true" className="pointer-events-none absolute inset-x-4 top-0 h-px bg-white/95" />
       <div className="relative flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
@@ -243,7 +244,8 @@ export function TeamSchedule() {
           {selectedEvents.length ? (
             <ul className="grid gap-2">
               {selectedEvents.map((item, index) => (
-                <li key={item.id ?? `${item.date}-${item.title}-${index}`} className="flex items-start gap-2 rounded-[10px] border border-white/80 bg-white/58 p-2.5 shadow-[0_7px_18px_-18px_rgba(15,23,42,0.16)] backdrop-blur transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_22px_-16px_rgba(15,23,42,0.22)] motion-reduce:transform-none motion-reduce:transition-none">
+                <li key={item.id ?? `${item.date}-${item.title}-${index}`} className="min-w-0">
+                  <Magnetic strength={7} lift={5} tilt={2} className="flex items-start gap-2 rounded-[10px] border border-white/80 bg-white/58 p-2.5 shadow-[0_7px_18px_-18px_rgba(15,23,42,0.16)] backdrop-blur transition-[box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:shadow-[0_12px_22px_-16px_rgba(15,23,42,0.22)] motion-reduce:transition-none">
                   <span aria-hidden="true" className={`mt-1.5 size-2 shrink-0 rounded-full ${CATEGORY_META[item.type].dot}`} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -255,6 +257,7 @@ export function TeamSchedule() {
                     {item.time || item.place ? <p className="mt-1 truncate text-[11px] text-[var(--muted-foreground)]">{[item.time, item.place].filter(Boolean).join(" · ")}</p> : null}
                   </div>
                   {item.id ? <Button type="button" variant="ghost" size="icon" className="size-7 shrink-0" aria-label={`${item.title} 일정 삭제`} onClick={() => deleteTeamEvent(item.id!)}><X aria-hidden="true" /></Button> : null}
+                  </Magnetic>
                 </li>
               ))}
             </ul>
