@@ -42,8 +42,8 @@ function ScreenAccessDenied() {
 }
 
 function AppLayout() {
-  // 사이드바는 기본 접힘(아이콘 레일). 확장은 hover/focus 오버레이 또는 핀 고정으로.
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
+  // 첫 랜딩에서는 사이드바를 펼친 상태로 시작하고, 이후 사용자가 직접 접을 수 있다.
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const location = useLocation()
   const { pathname } = location
