@@ -19,6 +19,7 @@ import { Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader, Dia
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { initAuth, signIn, signOutUser, signUp, useAuthStore } from "@/data/auth"
+import { CAPTURE } from "@/data/capture"
 
 type Mode = "login" | "signup"
 
@@ -217,8 +218,9 @@ export function LoginGate({ children }: { children: ReactNode }) {
   const isOwner = useAuthStore((state) => state.isOwner)
   const approval = useAuthStore((state) => state.approval)
 
-  useEffect(() => { initAuth() }, [])
+  useEffect(() => { if (!CAPTURE) initAuth() }, [])
 
+  if (CAPTURE) return <>{children}</>
   if (status === "loading") return <LoadingScreen />
   if (status === "signed-out") return <AuthScreen />
   if (isOwner || approval === "approved") return <>{children}</>

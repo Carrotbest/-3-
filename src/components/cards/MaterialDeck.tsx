@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from "react"
-import { ArrowLeft, ArrowRight, ExternalLink, FileText, Pencil, Plus, Search, Trash2 } from "lucide-react"
+import { ArrowLeft, ArrowRight, ExternalLink, FileText, Pencil, Plus, Search, Trash2, X } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -98,7 +98,7 @@ const VELOCITY_LERP = 0.18
 const MAX_FRAME_SECONDS = 0.05
 const STOP_VELOCITY = 0.025
 
-function cardTransform(distance: number, cardWidth: number, stageWidth: number, visibleCards: number): string {
+function cardTransform(distance: number, cardWidth: number, stageWidth: number, visibleCards: number, deepPerspective = false): string {
   const abs = Math.abs(distance)
   const dir = Math.sign(distance)
   const radius = Math.max(1, (visibleCards - 1) / 2)
@@ -110,10 +110,11 @@ function cardTransform(distance: number, cardWidth: number, stageWidth: number, 
   const scale = 1 - depthDistance * COVERFLOW_SCALE_STEP
   const rotateMax = isHomeDeck ? HOME_DECK_ROTATE_MAX : MATERIAL_DECK_ROTATE_MAX
   const tilt = Math.min(cappedAbs * rotateMax, rotateMax) * -dir
-  const translateZ = -depthDistance * (isHomeDeck ? HOME_DECK_DEPTH_STEP : MATERIAL_DECK_DEPTH_STEP)
+  const depthStep = (isHomeDeck ? HOME_DECK_DEPTH_STEP : MATERIAL_DECK_DEPTH_STEP) * (deepPerspective ? 1.2 : 1)
+  const translateZ = -depthDistance * depthStep
   const projectedHalfWidth = cardWidth * scale * Math.max(0.2, Math.cos(Math.abs(tilt) * Math.PI / 180)) / 2
-  const edgeTravel = Math.max(cardWidth * 0.72, stageWidth / 2 - projectedHalfWidth)
-  const spread = isHomeDeck ? 1 : MATERIAL_DECK_SPREAD
+  const edgeTravel = Math.max(deepPerspective ? cardWidth * 0.9 : cardWidth * 0.72, stageWidth / 2 - projectedHalfWidth)
+  const spread = isHomeDeck ? 1 : (deepPerspective ? 0.95 : MATERIAL_DECK_SPREAD)
   const tx = dir * edgeTravel * spacing * spread
   return `translateX(calc(-50% + ${tx.toFixed(2)}px)) translateZ(${translateZ.toFixed(2)}px) rotateY(${tilt.toFixed(2)}deg) scale(${scale.toFixed(3)})`
 }
@@ -167,7 +168,7 @@ export function useCoverflowMotion(itemCount: number, reduced: boolean) {
         }
         return
       }
-      card.style.transform = cardTransform(distance, cardWidth, stageWidth, visibleCards)
+      card.style.transform = cardTransform(distance, cardWidth, stageWidth, visibleCards, stage.dataset.coverflowDeep === "true")
       const opacity = 1 - 0.4 * Math.min(1, abs)
       card.style.opacity = opacity.toFixed(3)
       card.style.filter = "none"
@@ -387,20 +388,40 @@ function SourceBadge({ source, tone = "surface" }: { source: MaterialItem["sourc
   return <Badge variant="outline" className={tone === "onColor" ? "border-white/25 bg-white/15 text-white hover:bg-white/15" : undefined}>{labels[source]}</Badge>
 }
 
-export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
+interface MaterialDeckProps {
   items: MaterialItem[]
   emptyMessage: string
   onOpen: (item: MaterialItem) => void
   onAdd?: () => void
-}) {
+  visibleCards?: number
+  hideBadges?: boolean
+  expandInline?: boolean
+  deepPerspective?: boolean
+}
+
+export function MaterialDeck({
+  items,
+  emptyMessage,
+  onOpen,
+  onAdd,
+  visibleCards = MATERIAL_DECK_VISIBLE_CARDS,
+  hideBadges = false,
+  expandInline = false,
+  deepPerspective = false,
+}: MaterialDeckProps) {
   const deckItems = useMemo(() => sortMaterialsNewest(items), [items])
   const reduced = useReducedMotion()
   const { active, move, goTo, rootRef, setCardRef, rootProps } = useCoverflowMotion(deckItems.length, reduced)
   const newestItemId = deckItems[0]?.id
+  const [expandedItemId, setExpandedItemId] = useState<string | null>(null)
 
   useEffect(() => {
     if (newestItemId) goTo(0)
   }, [goTo, newestItemId])
+
+  useEffect(() => {
+    setExpandedItemId(null)
+  }, [active])
 
   if (!deckItems.length) {
     return (
@@ -412,42 +433,58 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
   }
 
   const activeItem = deckItems[active] ?? deckItems[0]
+  const expandedItem = expandInline && expandedItemId === activeItem.id ? activeItem : null
   const dotWindowStart = Math.max(0, Math.min(active - 5, deckItems.length - 12))
   const dotItems = deckItems.slice(dotWindowStart, dotWindowStart + 12)
+  const openItem = (item: MaterialItem, index: number) => {
+    goTo(index)
+    if (!expandInline) {
+      onOpen(item)
+      return
+    }
+    if (index !== active) {
+      setExpandedItemId(null)
+      return
+    }
+    setExpandedItemId((current) => current === item.id ? null : item.id)
+  }
 
   return (
-    <div
-      ref={rootRef}
+    <div className="relative">
+      <div
+        ref={rootRef}
       role="region"
       aria-roledescription="carousel"
       aria-label="자료 카드 덱"
       tabIndex={0}
-      data-coverflow-visible={MATERIAL_DECK_VISIBLE_CARDS}
+      data-coverflow-visible={visibleCards}
+      data-coverflow-deep={deepPerspective}
       onPointerMove={rootProps.onPointerMove}
       onKeyDown={rootProps.onKeyDown}
       onPointerLeave={rootProps.onPointerLeave}
       className="group/deck relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
     >
       <div
-        className="relative min-h-[21rem] touch-pan-y rounded-t-2xl [perspective:720px] [perspective-origin:50%_45%] [transform-style:preserve-3d]"
+        className={`relative min-h-[21rem] touch-pan-y rounded-t-2xl [perspective-origin:50%_45%] [transform-style:preserve-3d] ${deepPerspective ? "[perspective:560px]" : "[perspective:720px]"}`}
       >
         <div className="relative z-20 h-[6.5rem] overflow-hidden px-4 pb-2 pt-3 sm:px-5" aria-live="polite">
-          <div className="flex flex-wrap items-center gap-2">
+          {!hideBadges ? <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{MATERIAL_KIND_LABELS[activeItem.kind]}</Badge>
             <SourceBadge source={activeItem.source} />
-          </div>
+          </div> : null}
           <button
             type="button"
-            onClick={() => { goTo(active); onOpen(activeItem) }}
-            className="mt-1.5 block max-w-full cursor-pointer text-left outline-none focus-visible:rounded-[var(--radius)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+            aria-expanded={expandInline ? Boolean(expandedItem) : undefined}
+            onClick={() => openItem(activeItem, active)}
+            className={`${hideBadges ? "mt-3" : "mt-1.5"} block max-w-full cursor-pointer text-left outline-none focus-visible:rounded-[var(--radius)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]`}
           >
             <strong className="line-clamp-1 block text-base font-semibold leading-5 tracking-tight text-[var(--foreground)]">{activeItem.title}</strong>
-            <span className="mt-0.5 line-clamp-1 block text-xs leading-4 text-[var(--muted-foreground)]">{activeItem.summary || "요약이 등록되지 않았습니다."}</span>
+            {!hideBadges ? <span className="mt-0.5 line-clamp-1 block text-xs leading-4 text-[var(--muted-foreground)]">{activeItem.summary || "요약이 등록되지 않았습니다."}</span> : null}
           </button>
-          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[var(--muted-foreground)]">
+          {!hideBadges ? <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[var(--muted-foreground)]">
             <span>{activeItem.date ? fmtDateFull(activeItem.date) : "날짜 미등록"}{activeItem.owner ? ` · ${activeItem.owner}` : ""}</span>
             {activeItem.tags.slice(0, 2).map((tag) => <span key={tag} className="rounded-full bg-[var(--muted)] px-2 py-0.5">#{tag}</span>)}
-          </div>
+          </div> : null}
         </div>
 
         <div className="absolute inset-x-0 top-[6.5rem] h-[12.5rem] [transform-style:preserve-3d]">
@@ -461,12 +498,20 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
                 type="button"
                 tabIndex={isActive ? 0 : -1}
                 aria-hidden={!isActive}
-                onClick={() => { goTo(index); onOpen(item) }}
+                aria-expanded={expandInline && isActive ? expandedItemId === item.id : undefined}
+                onClick={() => openItem(item, index)}
                 className={`absolute left-1/2 top-2 flex h-44 [width:clamp(230px,25%,340px)] cursor-pointer flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-left text-[var(--foreground)] opacity-0 outline-none transition-shadow duration-300 [backface-visibility:hidden] [transform-style:preserve-3d] will-change-transform focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${isActive ? palette.activeShadow : INACTIVE_CARD_SHADOW}`}
               >
                 <span aria-hidden="true" className={`pointer-events-none absolute inset-x-0 top-0 h-1 ${palette.background}`} />
                 <span aria-hidden="true" className={`pointer-events-none absolute inset-0 z-20 bg-[var(--foreground)] transition-opacity duration-300 motion-reduce:transition-none ${isActive ? "opacity-0" : "opacity-[0.06]"}`} />
-                <span className="relative z-10 flex h-full flex-col">
+                {hideBadges ? (
+                  <span className="relative z-10 flex h-full flex-col">
+                    <span className="text-xs font-medium text-[var(--muted-foreground)]">{item.date ? fmtDateFull(item.date) : "날짜 미등록"}</span>
+                    <strong className="mt-3 line-clamp-2 text-base leading-6 text-[var(--foreground)]">{item.title}</strong>
+                    <span className="mt-auto line-clamp-2 border-t border-[var(--border)] pt-2 text-xs leading-4 text-[var(--muted-foreground)]">{item.summary || "의뢰 내용이 등록되지 않았습니다."}</span>
+                  </span>
+                ) : (
+                  <span className="relative z-10 flex h-full flex-col">
                   <span className="flex items-start justify-between gap-3">
                     <span className={`flex size-8 shrink-0 items-center justify-center rounded-[var(--radius)] text-white ${palette.glow}`}><FileText className="size-4" aria-hidden="true" /></span>
                     <span className="font-mono text-[10px] font-semibold tabular-nums text-[var(--muted-foreground)]">{String(index + 1).padStart(2, "0")}</span>
@@ -474,7 +519,8 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
                   <strong className="mt-2 line-clamp-1 text-sm leading-5 text-[var(--foreground)]">{item.title}</strong>
                   <span className="mt-1 line-clamp-2 text-xs leading-4 text-[var(--muted-foreground)]">{item.summary || "요약이 등록되지 않았습니다."}</span>
                   <span className="mt-auto text-[10px] text-[var(--muted-foreground)]">{item.date ? fmtDateFull(item.date) : "날짜 미등록"}</span>
-                </span>
+                  </span>
+                )}
               </button>
             )
           })}
@@ -503,6 +549,33 @@ export function MaterialDeck({ items, emptyMessage, onOpen, onAdd }: {
         </div>
         <Button type="button" variant="outline" size="icon" disabled={active === deckItems.length - 1} aria-label="다음 자료" onClick={() => move(1)} className="text-[var(--foreground)]"><ArrowRight /></Button>
       </div>
+      </div>
+
+      {expandInline && expandedItem ? (
+        <div
+          className="absolute left-1/2 top-[7rem] z-50 w-[clamp(230px,25%,340px)] -translate-x-1/2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_1.5rem_3rem_-0.5rem_rgba(16,24,64,0.35)] transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs text-[var(--muted-foreground)]">{expandedItem.date ? fmtDateFull(expandedItem.date) : "날짜 미등록"}</p>
+              <strong className="mt-1 block text-base leading-6 text-[var(--foreground)]">{expandedItem.title}</strong>
+            </div>
+            <Button type="button" variant="ghost" size="icon" aria-label="상세 접기" onClick={() => setExpandedItemId(null)}><X aria-hidden="true" /></Button>
+          </div>
+          <div className="mt-3 max-h-[22rem] overflow-y-auto">
+            {expandedItem.detail?.length ? (
+              <dl className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
+                {expandedItem.detail.map((row) => (
+                  <div key={row.label} className="grid gap-1 border-b border-[var(--border)] p-3 last:border-b-0">
+                    <dt className="text-[11px] font-semibold text-[var(--muted-foreground)]">{row.label}</dt>
+                    <dd className="whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : <p className="whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{expandedItem.summary || "상세 내용이 등록되지 않았습니다."}</p>}
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -534,7 +607,7 @@ export function MaterialDetailSheet({ item, onOpenChange, onEdit, onDeleted }: {
               {item.detail?.length ? (
                 <dl className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
                   {item.detail.map((row) => (
-                    <div key={row.label} className="grid gap-1 border-b border-[var(--border)] p-4 last:border-b-0 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-4">
+                    <div key={row.label} className="grid gap-1 border-b border-[var(--border)] p-4 last:border-b-0 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-4">
                       <dt className="text-xs font-semibold text-[var(--muted-foreground)]">{row.label}</dt>
                       <dd className="whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{row.value}</dd>
                     </div>
@@ -679,14 +752,14 @@ function useMaterialSection(kind: MaterialKind) {
   return useMemo(() => materialsOf(kind, excel, manual), [excel, kind, manual])
 }
 
-export function MaterialDeckSection({ kind, title, description, emptyMessage, items: providedItems, allowAdd = true }: { kind: MaterialKind; title: string; description: string; emptyMessage: string; items?: MaterialItem[]; allowAdd?: boolean }) {
+export function MaterialDeckSection({ kind, title, description, emptyMessage, items: providedItems, allowAdd = true, visibleCards, hideBadges, expandInline, deepPerspective }: { kind: MaterialKind; title: string; description: string; emptyMessage: string; items?: MaterialItem[]; allowAdd?: boolean; visibleCards?: number; hideBadges?: boolean; expandInline?: boolean; deepPerspective?: boolean }) {
   const storedItems = useMaterialSection(kind)
   const items = providedItems ?? storedItems
   const [selected, setSelected] = useState<MaterialItem | null>(null)
   const [editing, setEditing] = useState<MaterialItem | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const openForm = (item?: MaterialItem) => { setSelected(null); setEditing(item ?? null); setFormOpen(true) }
-  return <Card><CardHeader className="flex-row items-start justify-between gap-3 space-y-0"><div><CardTitle>{title}</CardTitle><p className="mt-1 text-sm text-[var(--muted-foreground)]">{description}</p></div>{allowAdd ? <Button type="button" variant="outline" size="sm" onClick={() => openForm()}><Plus aria-hidden="true" />자료 추가</Button> : null}</CardHeader><CardContent><MaterialDeck items={items} emptyMessage={emptyMessage} onOpen={setSelected} onAdd={allowAdd ? () => openForm() : undefined} /></CardContent><MaterialDetailSheet item={selected} onOpenChange={(open) => { if (!open) setSelected(null) }} onEdit={openForm} /><MaterialFormSheet open={formOpen} defaultKind={kind} item={editing} onOpenChange={setFormOpen} /></Card>
+  return <Card><CardHeader className="flex-row items-start justify-between gap-3 space-y-0"><div><CardTitle>{title}</CardTitle><p className="mt-1 text-sm text-[var(--muted-foreground)]">{description}</p></div>{allowAdd ? <Button type="button" variant="outline" size="sm" onClick={() => openForm()}><Plus aria-hidden="true" />자료 추가</Button> : null}</CardHeader><CardContent><MaterialDeck items={items} emptyMessage={emptyMessage} onOpen={setSelected} onAdd={allowAdd ? () => openForm() : undefined} visibleCards={visibleCards} hideBadges={hideBadges} expandInline={expandInline} deepPerspective={deepPerspective} /></CardContent>{expandInline ? null : <MaterialDetailSheet item={selected} onOpenChange={(open) => { if (!open) setSelected(null) }} onEdit={openForm} />}<MaterialFormSheet open={formOpen} defaultKind={kind} item={editing} onOpenChange={setFormOpen} /></Card>
 }
 
 export function MaterialSearchSection({ kind, emptyMessage, items: providedItems, allowAdd = true }: { kind: MaterialKind; emptyMessage: string; items?: MaterialItem[]; allowAdd?: boolean }) {

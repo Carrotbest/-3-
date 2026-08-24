@@ -251,7 +251,7 @@ export function sampleChemicalPortfolio(): ChemicalPortfolio {
   }
 }
 
-export type TsState = "접수" | "처리중" | "완료"
+export type TsState = "등록" | "처리중" | "완료"
 
 export interface TsRecord {
   id: string
@@ -290,7 +290,7 @@ export function sampleTs(): TsRecord[] {
   const actions = ["관련 조건을 조정하고 재시험 진행", "관리 기준을 보완해 후속 생산에 적용", "재현 시험 후 개선 조건을 안내"] as const
   const results = ["개선 조건 적용 후 결과 확인", "후속 생산 모니터링 진행", "검토 결과와 관리 기준 회신"] as const
   const productionSites = ["국내", "베트남", ""] as const
-  const states = ["접수", "처리중", "완료"] as const
+  const states = ["등록", "처리중", "완료"] as const
   return Array.from({ length: 16 }, (_, i) => {
     const state = i < 2 ? states[0] : i < 5 ? states[1] : states[2]
     return {
@@ -302,8 +302,8 @@ export function sampleTs(): TsRecord[] {
       attn: i % 2 === 0 ? pick(froms) : "",
       advisor: pick(MEMBERS).name,
       inquiry: pick(inquiries),
-      analysis: state === "접수" ? "" : pick(analyses),
-      causes: state === "접수" ? "" : pick(causes),
+      analysis: state === "등록" ? "" : pick(analyses),
+      causes: state === "등록" ? "" : pick(causes),
       action: state === "완료" ? pick(actions) : "",
       result: state === "완료" ? pick(results) : "",
       productionSite: pick(productionSites),

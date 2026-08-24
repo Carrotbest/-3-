@@ -61,6 +61,7 @@ async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promis
 }
 
 const CACHE_KEY_SET = new Set<string>(CACHE_KEYS)
+const SKIP_SYNC_KEYS = new Set<string>(["ts"]) // TS는 로컬(localStorage)+seed로 관리, 아직 팀 공유 대상 아님
 
 /** 스냅샷 전체에서 각 키의 값을 재조립해 store와 로컬 캐시에 반영한다. */
 function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }[]): void {
@@ -86,6 +87,7 @@ function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }
 
   metas.forEach((n, key) => {
     if (!CACHE_KEY_SET.has(key)) return
+    if (SKIP_SYNC_KEYS.has(key)) return
     lastChunkCount.set(key, n)
     const parts = chunks.get(key)
     if (!parts || parts.size < n) return // 아직 일부 청크 미수신 — 다음 스냅샷을 기다린다.

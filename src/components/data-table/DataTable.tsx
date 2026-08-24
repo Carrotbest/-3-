@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react"
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -42,6 +42,23 @@ interface DataTableProps<T> {
   toolbar?: ReactNode
   emptyMessage?: string
   onRowClick?: (row: T) => void
+  /** 헤더 경계를 드래그해 각 열 너비를 수동 조절한다. */
+  resizableColumns?: boolean
+  /** 열 너비를 localStorage에 저장/복원할 때 쓰는 키(resizableColumns와 함께 사용). */
+  storageKey?: string
+  fillToPageSize?: boolean
+}
+
+const MIN_COLUMN_WIDTH = 56
+
+function loadColumnWidths(enabled: boolean, storageKey?: string): Record<string, number> {
+  if (!enabled || !storageKey || typeof window === "undefined") return {}
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(`datatable-widths:${storageKey}`) ?? "{}") as unknown
+    return stored && typeof stored === "object" ? stored as Record<string, number> : {}
+  } catch {
+    return {}
+  }
 }
 
 function compareValues(left: unknown, right: unknown): number {
@@ -62,8 +79,59 @@ export function DataTable<T>({
   toolbar,
   emptyMessage = "표시할 데이터가 없습니다.",
   onRowClick,
+  resizableColumns = false,
+  storageKey,
+  fillToPageSize = false,
 }: DataTableProps<T>) {
   const [sort, setSort] = useState<{ id: string; direction: SortDirection } | null>(null)
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => loadColumnWidths(resizableColumns, storageKey))
+  const headerCellRefs = useRef<Record<string, HTMLTableCellElement | null>>({})
+  const measuredRef = useRef(false)
+
+  // 저장된 너비가 없는 열은 첫 렌더의 실제 콘텐츠 너비로 1회 시드한다(초기 모습 유지 후 고정).
+  useLayoutEffect(() => {
+    if (!resizableColumns || measuredRef.current) return
+    const seeded: Record<string, number> = {}
+    let need = false
+    columns.forEach((column) => {
+      if (columnWidths[column.id] == null) {
+        const el = headerCellRefs.current[column.id]
+        if (el) { seeded[column.id] = Math.round(el.getBoundingClientRect().width); need = true }
+      }
+    })
+    if (need) setColumnWidths((current) => ({ ...seeded, ...current }))
+    measuredRef.current = true
+  }, [resizableColumns, columns, columnWidths])
+
+  useEffect(() => {
+    if (!resizableColumns || !storageKey) return
+    try { window.localStorage.setItem(`datatable-widths:${storageKey}`, JSON.stringify(columnWidths)) } catch { /* noop */ }
+  }, [columnWidths, resizableColumns, storageKey])
+
+  const startResize = (event: ReactPointerEvent<HTMLSpanElement>, columnId: string) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const startX = event.clientX
+    const el = headerCellRefs.current[columnId]
+    const startWidth = columnWidths[columnId] ?? (el ? el.getBoundingClientRect().width : 160)
+    const onMove = (moveEvent: PointerEvent) => {
+      const next = Math.max(MIN_COLUMN_WIDTH, Math.round(startWidth + (moveEvent.clientX - startX)))
+      setColumnWidths((current) => ({ ...current, [columnId]: next }))
+    }
+    const onUp = () => {
+      document.removeEventListener("pointermove", onMove)
+      document.removeEventListener("pointerup", onUp)
+      document.body.style.userSelect = ""
+    }
+    document.body.style.userSelect = "none"
+    document.addEventListener("pointermove", onMove)
+    document.addEventListener("pointerup", onUp)
+  }
+
+  const fixedLayout = resizableColumns && columns.every((column) => columnWidths[column.id] != null)
+  const totalWidth = fixedLayout
+    ? columns.reduce((sum, column) => sum + (columnWidths[column.id] ?? 0), 0) + (enableSelection ? 40 : 0)
+    : undefined
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(pageSize)
@@ -85,6 +153,7 @@ export function DataTable<T>({
   const pageCount = Math.max(1, Math.ceil(sortedRows.length / rowsPerPage))
   const safePage = Math.min(currentPage, pageCount)
   const pageRows = paginate ? sortedRows.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage) : sortedRows
+  const fillerCount = paginate && fillToPageSize ? Math.max(0, rowsPerPage - pageRows.length) : 0
   const pageIds = pageRows.map(getRowId)
   const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id))
   const somePageSelected = pageIds.some((id) => selected.has(id))
@@ -132,7 +201,15 @@ export function DataTable<T>({
     <div className="min-w-0">
       {toolbar ? <div className="border-b border-[var(--border)] p-4">{toolbar}</div> : null}
       <div className="max-w-full overflow-x-auto">
-        <Table className="min-w-max">
+        <Table className={cn("min-w-max", fixedLayout && "table-fixed")} style={totalWidth ? { width: totalWidth } : undefined}>
+          {resizableColumns ? (
+            <colgroup>
+              {enableSelection ? <col style={{ width: 40 }} /> : null}
+              {columns.map((column) => (
+                <col key={column.id} style={columnWidths[column.id] != null ? { width: columnWidths[column.id] } : undefined} />
+              ))}
+            </colgroup>
+          ) : null}
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               {enableSelection ? (
@@ -150,23 +227,34 @@ export function DataTable<T>({
                 return (
                   <TableHead
                     key={column.id}
-                    className={cn("whitespace-nowrap px-3", column.headerClassName)}
+                    ref={resizableColumns ? (el) => { headerCellRefs.current[column.id] = el } : undefined}
+                    className={cn("whitespace-nowrap px-3", resizableColumns && "relative overflow-hidden text-ellipsis", column.headerClassName)}
                     aria-sort={active ? (sort.direction === "asc" ? "ascending" : "descending") : "none"}
                   >
                     {sortable ? (
                       <button
                         type="button"
                         onClick={() => toggleSort(column)}
-                        className="inline-flex items-center gap-1 rounded-[calc(var(--radius)-2px)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+                        className="inline-flex max-w-full items-center gap-1 truncate rounded-[calc(var(--radius)-2px)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
                       >
                         {column.header}
                         {active ? (
-                          sort.direction === "asc" ? <ArrowUp aria-hidden="true" className="size-3.5" /> : <ArrowDown aria-hidden="true" className="size-3.5" />
+                          sort.direction === "asc" ? <ArrowUp aria-hidden="true" className="size-3.5 shrink-0" /> : <ArrowDown aria-hidden="true" className="size-3.5 shrink-0" />
                         ) : (
-                          <ArrowUpDown aria-hidden="true" className="size-3.5 opacity-50" />
+                          <ArrowUpDown aria-hidden="true" className="size-3.5 shrink-0 opacity-50" />
                         )}
                       </button>
                     ) : column.header}
+                    {resizableColumns ? (
+                      <span
+                        role="separator"
+                        aria-orientation="vertical"
+                        aria-label={`${typeof column.header === "string" ? column.header : "열"} 너비 조절`}
+                        onPointerDown={(event) => startResize(event, column.id)}
+                        onClick={(event) => event.stopPropagation()}
+                        className="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-transparent transition-colors hover:bg-[var(--ring)]/50"
+                      />
+                    ) : null}
                   </TableHead>
                 )
               })}
@@ -200,19 +288,27 @@ export function DataTable<T>({
                     </TableCell>
                   ) : null}
                   {columns.map((column) => (
-                    <TableCell key={column.id} className={cn("whitespace-nowrap px-3", column.className)}>
+                    <TableCell key={column.id} className={cn("whitespace-nowrap px-3", resizableColumns && "overflow-hidden text-ellipsis", column.className)}>
                       {column.cell ? column.cell(row) : String(column.accessor?.(row) ?? "—")}
                     </TableCell>
                   ))}
                 </TableRow>
               )
-            }) : (
+            }) : fillToPageSize ? null : (
               <TableRow>
                 <TableCell colSpan={columns.length + (enableSelection ? 1 : 0)} className="h-32 text-center text-[var(--muted-foreground)]">
                   {emptyMessage}
                 </TableCell>
               </TableRow>
             )}
+            {fillerCount > 0 ? Array.from({ length: fillerCount }).map((_, index) => (
+              <TableRow key={`__filler-${index}`} aria-hidden="true" className="pointer-events-none">
+                {enableSelection ? <TableCell className="px-3">{"\u00a0"}</TableCell> : null}
+                {columns.map((column) => (
+                  <TableCell key={column.id} className={cn("whitespace-nowrap px-3", resizableColumns && "overflow-hidden text-ellipsis", column.className)}>{"\u00a0"}</TableCell>
+                ))}
+              </TableRow>
+            )) : null}
           </TableBody>
         </Table>
       </div>

@@ -15,6 +15,7 @@ import {
   type StudyRecord,
   type StatusKey,
 } from "./schema"
+import type { TsRecord } from "./sample"
 
 export interface KpiSummary {
   total: number
@@ -971,6 +972,46 @@ export function monthlyDevelopmentTrend(
   })
 }
 
+export interface MonthlyTsDatum {
+  month: string
+  total: number
+  registered: number
+  processing: number
+  done: number
+  latest: boolean
+}
+
+/** 월별 TS 접수(receivedAt) 건수를 상태(등록/처리중/완료)별로 집계한다. 홈 RDDA 추이와 동일한 월 스팬 규칙. */
+export function monthlyTsTrend(
+  ts: readonly TsRecord[],
+  today = new Date(),
+  monthCount = 12,
+): MonthlyTsDatum[] {
+  const span = Math.max(1, Math.round(monthCount))
+  const months = Array.from({ length: span }, (_, index) => {
+    const date = new Date(today.getFullYear(), today.getMonth() - (span - 1) + index, 1)
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
+  })
+  const buckets = new Map<string, { registered: number; processing: number; done: number }>()
+  ts.forEach((record) => {
+    const month = (record.receivedAt || "").slice(0, 7)
+    if (!month) return
+    const bucket = buckets.get(month) ?? { registered: 0, processing: 0, done: 0 }
+    if (record.state === "완료") bucket.done += 1
+    else if (record.state === "처리중") bucket.processing += 1
+    else bucket.registered += 1
+    buckets.set(month, bucket)
+  })
+  const latestPopulated = [...months].reverse().find((month) => {
+    const value = buckets.get(month)
+    return value ? value.registered + value.processing + value.done > 0 : false
+  })
+  return months.map((month) => {
+    const value = buckets.get(month) ?? { registered: 0, processing: 0, done: 0 }
+    return { month, ...value, total: value.registered + value.processing + value.done, latest: month === latestPopulated }
+  })
+}
+
 /** 담당자별 RDDA 등록 현황. 홈 RDDA 등록 추이와 같은 소스를 담당자별로 분해한다. */
 export function ownerMonthlyFlTrend(
   records: readonly DevRecord[],
@@ -1033,7 +1074,7 @@ export function homeWorkSummary(
   const calendarRows = [...events, ...dueDates]
   return {
     ts: {
-      received: ts.filter((item) => item.state === "접수").length,
+      received: ts.filter((item) => item.state === "등록").length,
       processing: ts.filter((item) => item.state === "처리중").length,
       done: ts.filter((item) => item.state === "완료").length,
     },
@@ -1149,7 +1190,7 @@ export function tsMaterials(ts: readonly TsMaterialSource[]): MaterialItem[] {
       id: `ts-${record.id}`,
       kind: "TS",
       title: record.subject,
-      summary: materialSummary(record.causes),
+      summary: materialSummary(record.inquiry || record.analysis || record.causes),
       date: record.receivedAt,
       tags,
       link: httpsMaterialLink(record.attachment),
@@ -1313,7 +1354,7 @@ export function weeklyLines(
   today = new Date(),
 ): [string, string] {
   const summary = kpis(records, today)
-  const tsNew = tsRows.filter((row) => row.state === "접수").length
+  const tsNew = tsRows.filter((row) => row.state === "등록").length
   const tsProcessing = tsRows.filter((row) => row.state === "처리중").length
   const tsDone = tsRows.filter((row) => row.state === "완료").length
   return [

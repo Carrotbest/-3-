@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-import { saveCache } from "../data/cache"
+import { saveCache, saveCacheLocal } from "@/data/cache"
 import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } from "../data/chemical"
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
 import { isFabricBalanceExhausted } from "../data/fabric-ledger"
@@ -21,10 +21,12 @@ import {
   type TsRecord,
   type TrendItem,
 } from "../data/sample"
+import { tsSeed, TS_SEED_VERSION } from "@/data/ts-seed"
 
 export type Theme = "light" | "dark"
 export type AppFilters = Record<string, unknown>
 export const TS_STORAGE_KEY = "fabric.ts"
+const TS_SEED_VERSION_KEY = "fabric.ts.seedVersion"
 
 export type IngestStep = "reading" | "parsing" | "validating" | "done" | "error"
 
@@ -76,7 +78,7 @@ export function createInitialAppState(): AppState {
   const records = sampleRecords()
   const completed = sampleCompleted()
   const fabricAnalysis = sampleFabricAnalysis()
-  const ts: TsRecord[] = []
+  const ts: TsRecord[] = tsSeed()
   const study = sampleStudy()
   const events = sampleEvents()
   const rdda = sampleRdda()
@@ -208,6 +210,17 @@ export function saveTsRecords(records: TsRecord[]): void {
   const sorted = sortTsByDate(records)
   setAppState({ ts: sorted })
   persistTsRecords(sorted)
+}
+
+/** seed 버전이 바뀌면 로컬 TS(localStorage+IndexedDB 캐시)를 seed로 1회 강제 교체한다. */
+export async function ensureTsSeed(): Promise<void> {
+  let applied: string | null = null
+  try { applied = window.localStorage.getItem(TS_SEED_VERSION_KEY) } catch { /* noop */ }
+  if (applied === TS_SEED_VERSION) return
+  const seed = tsSeed()
+  saveTsRecords(seed)
+  try { await saveCacheLocal("ts", seed) } catch { /* noop */ }
+  try { window.localStorage.setItem(TS_SEED_VERSION_KEY, TS_SEED_VERSION) } catch { /* noop */ }
 }
 
 export async function clearTsRecords(): Promise<void> {

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
-import { CheckCircle2, ChevronUp, ClipboardList, Download, ExternalLink, LoaderCircle, Plus, Trash2 } from "lucide-react"
+import { ChevronUp, Download, ExternalLink, Plus, Trash2 } from "lucide-react"
+import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import * as XLSX from "xlsx"
 
-import { MaterialDeckSection, MaterialSearchSection } from "@/components/cards/MaterialDeck"
+import { MaterialDeckSection } from "@/components/cards/MaterialDeck"
+import { TsTrendCard } from "@/components/charts/TsTrendCard"
 import { SectionCard } from "@/components/dashboard/SectionCard"
-import { StatCard } from "@/components/dashboard/StatCard"
 import { DataTable, type DataTableColumn } from "@/components/data-table/DataTable"
-import { RecordListDialog } from "@/components/data-table/RecordListDialog"
 import { StatusBadge } from "@/components/data-table/StatusBadge"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Reveal } from "@/components/motion/Reveal"
@@ -26,7 +26,114 @@ import { ingestTs } from "@/data/upload"
 import { clearTsRecords, loadTsRecords, saveTsRecords, useAppStore } from "@/store/useAppStore"
 
 const ALL = "전체"
-const TS_STATES: TsState[] = ["접수", "처리중", "완료"]
+const TS_STATES: TsState[] = ["등록", "처리중", "완료"]
+
+// DD 마스터 상태 칩(ddStatusStyle)과 동일한 톤앤매너.
+const TS_STATE_STYLE: Record<TsState, string> = {
+  등록: "bg-sky-500/15 text-sky-700 dark:text-sky-300 ring-1 ring-inset ring-sky-500/30",
+  처리중: "bg-amber-500/18 text-amber-700 dark:text-amber-300 ring-1 ring-inset ring-amber-500/35",
+  완료: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 ring-1 ring-inset ring-emerald-500/30",
+}
+const TS_STATE_DOT: Record<TsState, string> = {
+  등록: "bg-sky-500",
+  처리중: "bg-amber-500",
+  완료: "bg-emerald-500",
+}
+
+function TsStateChip({ state }: { state: TsState }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-[calc(var(--radius)-2px)] px-2 py-0.5 text-xs font-semibold ${TS_STATE_STYLE[state]}`}>
+      <span aria-hidden="true" className={`size-1.5 rounded-full ${TS_STATE_DOT[state]}`} />{state}
+    </span>
+  )
+}
+
+interface TsStageCounts {
+  received: number
+  processing: number
+  done: number
+}
+
+function TsStagePanel({ counts, activeState, onSelect }: {
+  counts: TsStageCounts
+  activeState: TsState | null
+  onSelect: (state: TsState | null) => void
+}) {
+  const total = counts.received + counts.processing + counts.done
+  const steps: { state: TsState | null; label: string; count: number; caption: string; dot: string }[] = [
+    { state: null, label: ALL, count: total, caption: "모든 요청", dot: "bg-[var(--muted-foreground)]" },
+    { state: "등록", label: "등록", count: counts.received, caption: "새 요청 확인", dot: TS_STATE_DOT.등록 },
+    { state: "처리중", label: "처리중", count: counts.processing, caption: "분석·해결 진행", dot: TS_STATE_DOT.처리중 },
+    { state: "완료", label: "완료", count: counts.done, caption: "결과 정리 완료", dot: TS_STATE_DOT.완료 },
+  ]
+  const chartData = total > 0
+    ? [
+        { name: "등록", value: counts.received, fill: "#0ea5e9" },
+        { name: "처리중", value: counts.processing, fill: "#f59e0b" },
+        { name: "완료", value: counts.done, fill: "#10b981" },
+      ]
+    : [{ name: "데이터 없음", value: 1, fill: "var(--muted)" }]
+
+  return (
+    <Reveal className="h-full">
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>처리 단계</CardTitle>
+          <CardDescription>단계를 선택하면 목록이 좁혀집니다</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col">
+          <div className="flex flex-1 items-center gap-4">
+            <div className="relative h-40 w-40 shrink-0" role="img" aria-label={`TS 처리 단계 분포, 전체 ${total}건`}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    dataKey="value"
+                    innerRadius={48}
+                    outerRadius={70}
+                    startAngle={90}
+                    endAngle={-270}
+                    paddingAngle={2}
+                    stroke="var(--card)"
+                    isAnimationActive={false}
+                  >
+                    {chartData.map((item) => <Cell key={item.name} fill={item.fill} />)}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                <strong className="text-2xl font-semibold text-[var(--foreground)]">{total}건</strong>
+                <span className="text-xs text-[var(--muted-foreground)]">전체</span>
+              </div>
+            </div>
+            <ol className="min-w-0 flex-1 space-y-2" aria-label="TS 처리 단계">
+              {steps.map((step) => {
+                const active = activeState === step.state
+                return (
+                  <li key={step.label}>
+                    <button
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => onSelect(step.state)}
+                      className={`flex w-full items-center gap-3 rounded-[var(--radius)] border p-3 text-left outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${active ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--accent)]"}`}
+                    >
+                      <span aria-hidden="true" className={`size-2.5 shrink-0 rounded-full ${step.dot}`} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold">{step.label}</span>
+                        <span className={`block truncate text-xs ${active ? "text-[var(--primary-foreground)]" : "text-[var(--muted-foreground)]"}`}>{step.caption}</span>
+                      </span>
+                      <span className={`inline-flex shrink-0 items-center rounded-[calc(var(--radius)-2px)] border px-2.5 py-0.5 text-xs font-semibold ${active ? "border-transparent bg-[var(--secondary)] text-[var(--secondary-foreground)]" : "border-[var(--border)] text-[var(--foreground)]"}`}>{step.count}건</span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ol>
+          </div>
+        </CardContent>
+      </Card>
+    </Reveal>
+  )
+}
 
 interface FormValues {
   receivedAt: string
@@ -68,14 +175,17 @@ const initialForm = (): FormValues => ({
   causes: "",
   action: "",
   result: "",
-  state: "접수",
+  state: "등록",
   orderVolume: "",
   attachment: "",
 })
 
 function nextTsId(rows: readonly TsRecord[]): string {
-  const max = rows.reduce((value, row) => Math.max(value, Number(row.id.match(/(\d+)$/)?.[1] ?? 0)), 0)
-  return `TS26-${String(max + 1).padStart(3, "0")}`
+  const yy = String(new Date().getFullYear()).slice(2)
+  const prefix = `TS${yy}-`
+  const max = rows.reduce((v, r) => r.id.startsWith(prefix)
+    ? Math.max(v, Number(r.id.slice(prefix.length)) || 0) : v, 0)
+  return `${prefix}${String(max + 1).padStart(3, "0")}`
 }
 
 function exportTechnicalServices(rows: readonly TsRecord[]): string {
@@ -108,15 +218,27 @@ function exportTechnicalServices(rows: readonly TsRecord[]): string {
 const textareaClassName = "flex min-h-28 w-full resize-y rounded-[var(--radius)] border border-[var(--input)] bg-transparent px-3 py-2 text-sm text-[var(--foreground)] shadow-sm outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
 
 function DetailRows({ rows }: { rows: ReadonlyArray<readonly [string, string]> }) {
+  const filled = rows.filter(([, value]) => Boolean(value && value.trim()))
+  if (!filled.length) return null
   return (
     <dl className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
-      {rows.map(([label, value]) => (
+      {filled.map(([label, value]) => (
         <div key={label} className="grid gap-1 border-b border-[var(--border)] p-4 last:border-b-0 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-4">
           <dt className="text-xs font-semibold text-[var(--muted-foreground)]">{label}</dt>
-          <dd className="whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{value || "—"}</dd>
+          <dd className="whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">{value}</dd>
         </div>
       ))}
     </dl>
+  )
+}
+
+function DetailSection({ id, title, rows }: { id: string; title: string; rows: ReadonlyArray<readonly [string, string]> }) {
+  if (!rows.some(([, value]) => Boolean(value && value.trim()))) return null
+  return (
+    <section aria-labelledby={id}>
+      <h3 id={id} className="mb-3 text-sm font-semibold text-[var(--foreground)]">{title}</h3>
+      <DetailRows rows={rows} />
+    </section>
   )
 }
 
@@ -133,18 +255,9 @@ function TsDetailDialog({ record, onOpenChange }: { record: TsRecord | null; onO
               <DialogDescription>접수일 {fmtDate(record.receivedAt)}</DialogDescription>
             </DialogHeader>
             <DialogBody className="space-y-6">
-              <section aria-labelledby="ts-detail-people">
-                <h3 id="ts-detail-people" className="mb-3 text-sm font-semibold text-[var(--foreground)]">의뢰 주체</h3>
-                <DetailRows rows={[["요청자 From", record.from], ["유관부서", record.relatedDepartment], ["수신자 Attn", record.attn], ["담당 Advisor", record.advisor]]} />
-              </section>
-              <section aria-labelledby="ts-detail-workflow">
-                <h3 id="ts-detail-workflow" className="mb-3 text-sm font-semibold text-[var(--foreground)]">Trouble shooting 내용</h3>
-                <DetailRows rows={[["의뢰 내용", record.inquiry], ["현황 분석", record.analysis], ["원인", record.causes], ["해결 방안", record.action], ["결과", record.result]]} />
-              </section>
-              <section aria-labelledby="ts-detail-etc">
-                <h3 id="ts-detail-etc" className="mb-3 text-sm font-semibold text-[var(--foreground)]">상태·기타</h3>
-                <DetailRows rows={[["상태", record.state], ["생산처", record.productionSite], ["발주량", record.orderVolume]]} />
-              </section>
+              <DetailSection id="ts-detail-people" title="의뢰 주체" rows={[["요청자 From", record.from], ["유관부서", record.relatedDepartment], ["수신자 Attn", record.attn], ["담당 Advisor", record.advisor]]} />
+              <DetailSection id="ts-detail-workflow" title="Trouble shooting 내용" rows={[["의뢰 내용", record.inquiry], ["현황 분석", record.analysis], ["원인", record.causes], ["해결 방안", record.action], ["결과", record.result]]} />
+              <DetailSection id="ts-detail-etc" title="상태·기타" rows={[["생산처", record.productionSite], ["발주량", record.orderVolume]]} />
               {attachment ? <Button asChild className="w-full"><a href={attachment} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : null}
             </DialogBody>
           </>
@@ -158,10 +271,16 @@ export function TS() {
   const rows = useAppStore((state) => state.ts)
   const materialsManual = useAppStore((state) => state.materialsManual)
   const materialItems = useMemo(() => materialsOf("TS", tsMaterials(rows), materialsManual), [materialsManual, rows])
-  const [activeState, setActiveState] = useState(ALL)
+  const peopleOptions = useMemo(() => {
+    const set = new Set<string>()
+    const push = (value?: string) => value?.split("/").map((part) => part.trim()).filter(Boolean).forEach((part) => set.add(part))
+    rows.forEach((row) => { push(row.advisor); push(row.from) })
+    MEMBERS.forEach((member) => set.add(member.name))
+    return [...set].sort((a, b) => a.localeCompare(b, "ko-KR"))
+  }, [rows])
+  const [activeState, setActiveState] = useState<TsState | null>(null)
   const [search, setSearch] = useState("")
   const [selectedRow, setSelectedRow] = useState<TsRecord | null>(null)
-  const [selectedState, setSelectedState] = useState<TsState | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState<FormValues>(initialForm)
   const [formErrors, setFormErrors] = useState<FormErrors>({})
@@ -171,43 +290,32 @@ export function TS() {
 
   useEffect(() => {
     const stored = loadTsRecords()
-    if (stored) saveTsRecords(stored)
+    if (stored && stored.length) saveTsRecords(stored)
   }, [])
 
   const counts = useMemo(() => ({
-    received: rows.filter((row) => row.state === "접수").length,
+    received: rows.filter((row) => row.state === "등록").length,
     processing: rows.filter((row) => row.state === "처리중").length,
     done: rows.filter((row) => row.state === "완료").length,
   }), [rows])
   const filteredRows = useMemo(() => {
     const query = search.normalize("NFKC").trim().toLocaleLowerCase("ko-KR")
     return rows.filter((row) => {
-      if (activeState !== ALL && row.state !== activeState) return false
+      if (activeState && row.state !== activeState) return false
       if (!query) return true
       return [row.subject, row.from, row.advisor, row.inquiry]
         .some((value) => value.normalize("NFKC").toLocaleLowerCase("ko-KR").includes(query))
     })
   }, [activeState, rows, search])
-  const steps: { state: TsState; count: number; caption: string }[] = [
-    { state: "접수", count: counts.received, caption: "새 요청 확인" },
-    { state: "처리중", count: counts.processing, caption: "분석·해결 진행" },
-    { state: "완료", count: counts.done, caption: "결과 정리 완료" },
-  ]
-
   const columns: DataTableColumn<TsRecord>[] = [
-    { id: "id", header: "#T/S", accessor: (row) => row.id },
-    { id: "receivedAt", header: "접수일", accessor: (row) => row.receivedAt, cell: (row) => fmtDate(row.receivedAt) },
-    { id: "subject", header: "Subject", accessor: (row) => row.subject },
-    { id: "from", header: "요청자", accessor: (row) => row.from },
-    { id: "advisor", header: "담당", accessor: (row) => row.advisor },
-    { id: "state", header: "상태", accessor: (row) => row.state, cell: (row) => <StatusBadge status={row.state} /> },
-    { id: "orderVolume", header: "발주량", accessor: (row) => row.orderVolume, cell: (row) => row.orderVolume || "—" },
+    { id: "id", header: "# T/S", accessor: (r) => r.id, headerClassName: "w-24" },
+    { id: "receivedAt", header: "Date", accessor: (r) => r.receivedAt, cell: (r) => fmtDate(r.receivedAt), headerClassName: "w-28" },
+    { id: "subject", header: "Subject", accessor: (r) => r.subject, headerClassName: "w-80" },
+    { id: "analysis", header: "Analysis", accessor: (r) => r.analysis, cell: (r) => r.analysis || "—", headerClassName: "w-64" },
+    { id: "action", header: "Action", accessor: (r) => r.action, cell: (r) => r.action || "—", headerClassName: "w-64" },
+    { id: "productionSite", header: "CO", accessor: (r) => r.productionSite, cell: (r) => r.productionSite || "—", headerClassName: "w-32" },
+    { id: "state", header: "상태", accessor: (r) => r.state, cell: (r) => <TsStateChip state={r.state} />, headerClassName: "w-28" },
   ]
-
-  const openStatePopup = (state: TsState) => {
-    setActiveState(state)
-    setSelectedState(state)
-  }
 
   const setField = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
     setForm((current) => ({ ...current, [key]: value }))
@@ -236,7 +344,7 @@ export function TS() {
     try {
       await clearTsRecords()
       setSelectedRow(null)
-      setActiveState(ALL)
+      setActiveState(null)
       setSearch("")
       setActionNotice({ tone: "success", message: "모든 TS 기록을 삭제했습니다." })
     } catch (error) {
@@ -252,7 +360,7 @@ export function TS() {
     if (!form.receivedAt.trim()) errors.receivedAt = "접수일을 입력해 주세요."
     if (!form.subject.trim()) errors.subject = "Subject 건명을 입력해 주세요."
     if (!form.from.trim()) errors.from = "요청자를 입력해 주세요."
-    if (!form.advisor.trim()) errors.advisor = "담당자를 선택해 주세요."
+    if (!form.advisor.trim()) errors.advisor = "담당자를 입력해 주세요."
     const attachment = httpsMaterialLink(form.attachment)
     if (form.attachment.trim() && !attachment) errors.attachment = "https://로 시작하는 SharePoint 공유 링크를 입력해 주세요."
     setFormErrors(errors)
@@ -286,7 +394,7 @@ export function TS() {
     <section className="min-w-0 space-y-6">
       <PageHeader
         title="TS 관리"
-        subtitle="Technical Service 접수부터 Trouble shooting 결과까지 관리합니다. 웹 입력이 원본이며 기존 엑셀은 수동으로 가져옵니다."
+        subtitle="Technical Service 등록부터 Trouble shooting 결과까지 관리합니다. 웹 입력이 원본이며 기존 엑셀은 수동으로 가져옵니다."
         actions={(
           <div className="flex flex-wrap justify-end gap-2">
             <DataUpload kind="ts-workbook" label="TS 파일 업로드" accept=".xlsx,.xls,.csv" compact onFiles={(files) => { if (files[0]) void ingestTs(files[0]) }} />
@@ -298,7 +406,7 @@ export function TS() {
         )}
       />
 
-      <MaterialDeckSection kind="TS" title="TS 자료 덱" description="사고사례와 불량 trouble shooting 자료 중 최신 6건입니다." emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
+      <MaterialDeckSection kind="TS" title="TS 자료 덱" description="사고사례·Trouble shooting 자료" emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} visibleCards={7} hideBadges deepPerspective />
 
       {actionNotice ? (
         <p role={actionNotice.tone === "error" ? "alert" : "status"} aria-live="polite" className={`rounded-[var(--radius)] border px-4 py-3 text-sm ${actionNotice.tone === "error" ? "border-[var(--destructive)] text-[var(--destructive)]" : "border-[var(--border)] bg-[var(--muted)] text-[var(--foreground)]"}`}>
@@ -306,52 +414,38 @@ export function TS() {
         </p>
       ) : null}
 
-      <Reveal>
-        <Card>
-          <CardHeader>
-            <CardTitle>처리 단계</CardTitle>
-            <CardDescription>단계를 선택하면 아래 목록도 같은 상태로 좁혀집니다.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto pb-1">
-              <ol className="grid min-w-[38rem] grid-cols-3" aria-label="TS 처리 단계">
-                {steps.map((step, index) => {
-                  const active = activeState === step.state
-                  return (
-                    <li key={step.state} className="relative flex min-w-0 items-center">
-                      <button type="button" aria-current={active ? "step" : undefined} aria-haspopup="dialog" onClick={() => openStatePopup(step.state)} className={`relative z-10 flex w-full items-center gap-3 rounded-[var(--radius)] border p-3 text-left outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${active ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--accent)]"}`}>
-                        <span className={`flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${active ? "border-[var(--primary-foreground)]" : "border-[var(--border)] bg-[var(--muted)]"}`}>{index + 1}</span>
-                        <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{step.state}</span><span className={`block truncate text-xs ${active ? "text-[var(--primary-foreground)]" : "text-[var(--muted-foreground)]"}`}>{step.caption}</span></span>
-                        <span className={`inline-flex shrink-0 items-center rounded-[calc(var(--radius)-2px)] border px-2.5 py-0.5 text-xs font-semibold ${active ? "border-transparent bg-[var(--secondary)] text-[var(--secondary-foreground)]" : "border-[var(--border)] text-[var(--foreground)]"}`}>{step.count}건</span>
-                      </button>
-                      {index < steps.length - 1 ? <span aria-hidden="true" className="absolute left-full top-1/2 z-0 h-px w-4 -translate-y-1/2 bg-[var(--border)]" /> : null}
-                    </li>
-                  )
-                })}
-              </ol>
-            </div>
-          </CardContent>
-        </Card>
-      </Reveal>
+      <div className="grid gap-4 xl:grid-cols-3">
+        <div className="min-w-0 xl:col-span-2"><TsTrendCard ts={rows} /></div>
+        <aside className="xl:col-span-1"><TsStagePanel counts={counts} activeState={activeState} onSelect={setActiveState} /></aside>
+      </div>
 
       <Reveal delay={75}>
         <Card className="border-[var(--primary)] bg-[var(--accent)]/40 shadow-lg ring-1 ring-[var(--ring)]">
-          <CardHeader className="flex-col items-start justify-between gap-4 space-y-0 sm:flex-row sm:items-center">
-            <div className="min-w-0 space-y-1.5"><CardTitle>신규 접수</CardTitle><CardDescription>엑셀 내용을 여기에 하나씩 입력하세요. 필수 4개 항목과 필요한 처리 내용을 덧붙일 수 있습니다.</CardDescription></div>
-            <Button type="button" variant="default" size="lg" className="shrink-0 shadow-sm transition-[transform,box-shadow] hover:scale-[1.02] hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none" aria-expanded={formOpen} aria-controls="ts-intake-form" onClick={() => setFormOpen((open) => !open)}>
-              {formOpen ? <ChevronUp aria-hidden="true" /> : <Plus aria-hidden="true" />}{formOpen ? "접기" : "+ 신규 접수 입력"}
+          <CardHeader className="flex-col items-start justify-start gap-4 space-y-0 sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              size="lg"
+              className="group relative shrink-0 overflow-hidden rounded-full border-0 bg-[linear-gradient(110deg,#5B6CFF,#8B5CF6_55%,#EC4899)] bg-[length:200%_100%] text-white shadow-[0_8px_24px_-8px_rgba(91,108,255,0.7)] transition-[transform,box-shadow,background-position] duration-300 hover:-translate-y-0.5 hover:bg-[position:100%_0] hover:shadow-[0_14px_32px_-8px_rgba(139,92,246,0.85)] active:translate-y-0 active:scale-[0.96] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transform-none motion-reduce:transition-none"
+              aria-expanded={formOpen}
+              aria-controls="ts-intake-form"
+              onClick={() => setFormOpen((open) => !open)}
+            >
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent)] transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden" />
+              <span className="relative z-10 inline-flex items-center gap-2">{formOpen ? <ChevronUp aria-hidden="true" /> : <Plus aria-hidden="true" />}{formOpen ? "접기" : "신규 등록 입력"}</span>
             </Button>
+            <div className="min-w-0 space-y-1.5"><CardTitle>신규 등록</CardTitle></div>
           </CardHeader>
           {formOpen ? (
             <CardContent id="ts-intake-form">
               <form className="space-y-7" noValidate onSubmit={submit}>
+                <datalist id="ts-people">{peopleOptions.map((person) => <option key={person} value={person} />)}</datalist>
                 <fieldset>
                   <legend className="mb-3 text-sm font-semibold text-[var(--foreground)]">필수 항목</legend>
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div className="space-y-2"><Label htmlFor="ts-received-at">접수일 <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-received-at" type="date" required aria-invalid={Boolean(formErrors.receivedAt) || undefined} aria-describedby={formErrors.receivedAt ? "ts-received-at-error" : undefined} value={form.receivedAt} onChange={(event) => setField("receivedAt", event.target.value)} />{formErrors.receivedAt ? <p id="ts-received-at-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.receivedAt}</p> : null}</div>
                     <div className="space-y-2"><Label htmlFor="ts-subject">Subject 건명 <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-subject" required value={form.subject} aria-invalid={Boolean(formErrors.subject) || undefined} aria-describedby={formErrors.subject ? "ts-subject-error" : undefined} onChange={(event) => setField("subject", event.target.value)} placeholder="의뢰 건명을 입력하세요" />{formErrors.subject ? <p id="ts-subject-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.subject}</p> : null}</div>
-                    <div className="space-y-2"><Label htmlFor="ts-from">요청자 From <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-from" required value={form.from} aria-invalid={Boolean(formErrors.from) || undefined} aria-describedby={formErrors.from ? "ts-from-error" : undefined} onChange={(event) => setField("from", event.target.value)} />{formErrors.from ? <p id="ts-from-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.from}</p> : null}</div>
-                    <div className="space-y-2"><Label htmlFor="ts-advisor">담당 Advisor <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Select value={form.advisor} onValueChange={(value) => setField("advisor", value)}><SelectTrigger id="ts-advisor" aria-required="true" aria-invalid={Boolean(formErrors.advisor) || undefined} aria-describedby={formErrors.advisor ? "ts-advisor-error" : undefined}><SelectValue /></SelectTrigger><SelectContent>{MEMBERS.map((member) => <SelectItem key={member.id} value={member.name}>{member.name}</SelectItem>)}</SelectContent></Select>{formErrors.advisor ? <p id="ts-advisor-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.advisor}</p> : null}</div>
+                    <div className="space-y-2"><Label htmlFor="ts-from">요청자 From <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-from" list="ts-people" required value={form.from} aria-invalid={Boolean(formErrors.from) || undefined} aria-describedby={formErrors.from ? "ts-from-error" : undefined} onChange={(event) => setField("from", event.target.value)} />{formErrors.from ? <p id="ts-from-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.from}</p> : null}</div>
+                    <div className="space-y-2"><Label htmlFor="ts-advisor">담당 Advisor <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-advisor" list="ts-people" required value={form.advisor} aria-invalid={Boolean(formErrors.advisor) || undefined} aria-describedby={formErrors.advisor ? "ts-advisor-error" : undefined} onChange={(event) => setField("advisor", event.target.value)} />{formErrors.advisor ? <p id="ts-advisor-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.advisor}</p> : null}</div>
                   </div>
                 </fieldset>
 
@@ -384,22 +478,13 @@ export function TS() {
                   </div>
                 </fieldset>
 
-                <div className="flex justify-end"><Button type="submit">접수 저장</Button></div>
+                <div className="flex justify-start"><Button type="submit">등록</Button></div>
               </form>
             </CardContent>
           ) : null}
         </Card>
       </Reveal>
 
-      <div className="grid gap-4 xl:grid-cols-12">
-        <aside className="xl:col-span-4 xl:order-2">
-        <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-        <StatCard icon={<ClipboardList aria-hidden="true" className="size-4" />} label="접수" value={counts.received} caption="신규 확인 필요" info="클릭하면 현재 접수 상태인 요청을 확인합니다." revealDelay={0} onClick={() => openStatePopup("접수")} />
-        <StatCard icon={<LoaderCircle aria-hidden="true" className="size-4" />} label="처리중" value={counts.processing} caption="분석·해결 진행 중" info="클릭하면 처리중 요청을 확인합니다." revealDelay={75} onClick={() => openStatePopup("처리중")} />
-        <StatCard icon={<CheckCircle2 aria-hidden="true" className="size-4" />} label="완료" value={counts.done} caption="결과 정리 완료" info="클릭하면 완료 요청을 확인합니다." revealDelay={150} onClick={() => openStatePopup("완료")} />
-        </div>
-        </aside>
-        <div className="min-w-0 xl:col-span-8 xl:order-1">
       <SectionCard
         title="TS 목록"
         subtitle={`현재 보기 ${filteredRows.length}건`}
@@ -422,21 +507,22 @@ export function TS() {
           rows={filteredRows}
           getRowId={(row) => row.id}
           pageSize={10}
+          resizableColumns
+          storageKey="ts-list-v2"
+          fillToPageSize
           onRowClick={setSelectedRow}
           toolbar={(
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <Tabs value={activeState} onValueChange={setActiveState}><TabsList aria-label="TS 상태 필터">{[ALL, ...TS_STATES].map((state) => <TabsTrigger key={state} value={state}>{state}</TabsTrigger>)}</TabsList></Tabs>
+              <Tabs value={activeState ?? ALL} onValueChange={(value) => setActiveState(value === ALL ? null : value as TsState)}>
+                <TabsList aria-label="TS 상태 필터">
+                  {[ALL, ...TS_STATES].map((state) => <TabsTrigger key={state} value={state}>{state}</TabsTrigger>)}
+                </TabsList>
+              </Tabs>
               <Input className="lg:max-w-sm" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Subject · 요청자 · 담당 · 의뢰 내용 검색" aria-label="TS 목록 검색" />
             </div>
           )}
         />
       </SectionCard>
-        </div>
-      </div>
-
-      <MaterialSearchSection kind="TS" emptyMessage="SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." items={materialItems} allowAdd={false} />
-
-      <RecordListDialog open={Boolean(selectedState)} title={`${selectedState ?? "TS"} TS 목록`} description={`${selectedState ? rows.filter((row) => row.state === selectedState).length : 0}건 · 행을 선택하면 상세 내용을 확인할 수 있습니다.`} rows={selectedState ? rows.filter((row) => row.state === selectedState) : []} columns={columns} getRowId={(row) => row.id} onOpenChange={(open) => { if (!open) setSelectedState(null) }} onRowClick={(row) => { setSelectedState(null); setSelectedRow(row) }} />
       <TsDetailDialog record={selectedRow} onOpenChange={(open) => { if (!open) setSelectedRow(null) }} />
     </section>
   )

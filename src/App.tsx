@@ -6,6 +6,7 @@ import { Topbar } from "@/components/layout/Topbar"
 import { ParsingOverlay } from "@/components/upload/ParsingOverlay"
 import { LoginGate } from "@/components/auth/AuthExperience"
 import { useAuthStore } from "@/data/auth"
+import { CAPTURE } from "@/data/capture"
 import { loadAllCache, saveCacheLocal } from "@/data/cache"
 import { startStateSync, stopStateSync } from "@/data/firestore-sync"
 import { loadEmbeddedAppData, markEmbeddedAppDataApplied } from "@/data/embedded-workbooks"
@@ -23,7 +24,7 @@ import { TS } from "@/routes/TS"
 import { FabricAnalysis } from "@/routes/FabricAnalysis"
 import { Warehouse } from "@/routes/Warehouse"
 import { Portfolio } from "@/routes/Portfolio"
-import { setAppState } from "@/store/useAppStore"
+import { ensureTsSeed, setAppState } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
 const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio"])
@@ -48,7 +49,8 @@ function AppLayout() {
   const location = useLocation()
   const { pathname } = location
   const mainRef = useRef<HTMLElement>(null)
-  const isOwner = useAuthStore((state) => state.isOwner)
+  const isOwnerRaw = useAuthStore((state) => state.isOwner)
+  const isOwner = CAPTURE || isOwnerRaw
   const screenPermissions = useAuthStore((state) => state.screenPermissions)
   const canViewCurrentPath = isOwner || canAccessScreenPath(pathname, screenPermissions)
   // DD 마스터는 엑셀 작업공간처럼 좌우 빈칸 없이 콘텐츠 폭 전체를 쓴다(폭 제약·패딩 해제).
@@ -81,6 +83,7 @@ function AppLayout() {
     let current = true
     void (async () => {
       const cached = await loadAllCache().catch(() => ({}))
+      if (Array.isArray((cached as any).ts) && (cached as any).ts.length === 0) delete (cached as any).ts
       const embedded = await loadEmbeddedAppData(cached).catch(() => null)
       if (!current) return
       if (embedded) {
@@ -93,9 +96,10 @@ function AppLayout() {
           saveCacheLocal("meta", embedded.patch.meta),
         ])
         markEmbeddedAppDataApplied(embedded.signature)
-        return
+      } else if (Object.keys(cached).length) {
+        setAppState(cached)
       }
-      if (Object.keys(cached).length) setAppState(cached)
+      await ensureTsSeed()
     })()
     return () => { current = false }
   }, [])
@@ -103,6 +107,7 @@ function AppLayout() {
   // 로그인 상태에서만 렌더되므로, 마운트 시 Firestore 실시간 동기화를 시작한다.
   // 중앙 데이터가 도착하면 데모/로컬 대신 실데이터가 화면에 반영된다.
   useEffect(() => {
+    if (CAPTURE) return
     void startStateSync()
     return () => { stopStateSync() }
   }, [])
