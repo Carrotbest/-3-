@@ -114,7 +114,7 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
           mobileOpen && "translate-x-0",
         )}
       >
-        <div className="relative flex h-16 items-center gap-3 px-5">
+        <div className="relative flex h-16 shrink-0 items-center gap-3 border-b border-[var(--sidebar-border)] px-5">
           <Avatar className="size-9">
             <AvatarFallback className="bg-linear-to-br from-[var(--chart-1)] to-[var(--chart-2)] font-semibold text-[var(--sidebar-primary-foreground)]">
               F
@@ -142,8 +142,6 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
             <span aria-hidden="true">{collapsed ? "📌" : "◀️"}</span>
           </button>
         </div>
-
-        <Separator className="bg-[var(--sidebar-border)]" />
 
         <nav className="flex-1 overflow-y-auto px-3 py-5">
           {visibleNavigationGroups.map((group, groupIndex) => (
