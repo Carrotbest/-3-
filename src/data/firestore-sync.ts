@@ -11,6 +11,8 @@ import { db, auth } from "./firebase"
 import { CACHE_KEYS, saveCacheLocal, setFirestorePush, type CacheKey } from "./cache"
 import { currentUserIsOwner } from "./auth"
 import { setAppState, useAppStore, type AppState, type AppStatePatch } from "../store/useAppStore"
+import type { TsRecord } from "./sample"
+import { isTsWellFormed } from "./ts-health"
 
 const COLLECTION = "state"
 // Firestore 문자열 필드 한도는 약 1,048,487바이트. 한글(UTF-8 3바이트) 최악을 감안해
@@ -61,10 +63,25 @@ async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promis
 }
 
 const CACHE_KEY_SET = new Set<string>(CACHE_KEYS)
-const SKIP_SYNC_KEYS = new Set<string>(["ts"]) // TS는 로컬(localStorage)+seed로 관리, 아직 팀 공유 대상 아님
+// 모든 캐시 키를 팀 공유 대상으로 실시간 반영한다(TS 포함).
+const SKIP_SYNC_KEYS = new Set<string>()
 
-/** 스냅샷 전체에서 각 키의 값을 재조립해 store와 로컬 캐시에 반영한다. */
-function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }[]): void {
+/**
+ * 아직 중앙에 시딩되지 않은(또는 잘못 비워진) 원격 값으로
+ * 화면에 떠 있는 로컬 실데이터를 지우지 않는다.
+ * 원격이 빈 배열인데 로컬에 데이터가 있으면 해당 키는 건너뛴다.
+ */
+function wouldWipeLocalData(key: CacheKey, value: unknown): boolean {
+  if (!Array.isArray(value) || value.length > 0) return false
+  const local = (useAppStore.getState() as unknown as Record<string, unknown>)[key]
+  return Array.isArray(local) && local.length > 0
+}
+
+/**
+ * 스냅샷 전체에서 각 키의 값을 재조립해 store와 로컬 캐시에 반영한다.
+ * 중앙에 존재하는 키 목록을 돌려준다(최초 시딩 판단에 사용).
+ */
+function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }[]): Set<string> {
   const metas = new Map<string, number>()
   const chunks = new Map<string, Map<number, string>>()
 
@@ -99,6 +116,17 @@ function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }
     }
     try {
       const value = JSON.parse(json) as AppState[CacheKey]
+      if (wouldWipeLocalData(key as CacheKey, value)) return
+      // 중앙에 구버전 파서가 만든 낡은 TS가 남아 있을 수 있다.
+      // 그 값이 정상 데이터를 덮지 않도록 막고, 소유자면 정상 로컬 값으로 중앙을 고쳐 쓴다.
+      if (key === "ts") {
+        const incoming = (value ?? []) as TsRecord[]
+        const local = useAppStore.getState().ts
+        if (!isTsWellFormed(incoming) && isTsWellFormed(local)) {
+          if (currentUserIsOwner()) void pushCache("ts", local)
+          return
+        }
+      }
       ;(patch as Record<string, unknown>)[key] = value
       void saveCacheLocal(key as CacheKey, value)
       changed = true
@@ -108,6 +136,27 @@ function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }
   })
 
   if (changed) setAppState(patch)
+  return new Set(metas.keys())
+}
+
+let autoSeedDone = false
+
+/**
+ * 소유자 첫 로그인 시, 중앙에 아직 없는 키만 현재 화면 데이터로 자동 시딩한다.
+ * 이미 중앙에 있는 키는 건드리지 않으므로 팀 데이터를 덮어쓸 위험이 없다.
+ * (이 자동 시딩이 없으면 소유자가 "중앙에 올리기"를 누르기 전까지 팀원은 빈 화면을 본다.)
+ */
+async function autoSeedMissingKeys(remoteKeys: Set<string>): Promise<void> {
+  if (autoSeedDone || !currentUserIsOwner()) return
+  autoSeedDone = true
+  const state = useAppStore.getState()
+  for (const key of CACHE_KEYS) {
+    if (remoteKeys.has(key)) continue
+    const value = state[key]
+    if (value === undefined || value === null) continue
+    if (Array.isArray(value) && value.length === 0) continue
+    await pushCache(key, value)
+  }
 }
 
 let unsubscribe: Unsubscribe | null = null
@@ -126,7 +175,8 @@ export function startStateSync(): Promise<void> {
     unsubscribe = onSnapshot(
       collection(db, COLLECTION),
       (snap) => {
-        applySnapshot(snap.docs)
+        const remoteKeys = applySnapshot(snap.docs)
+        void autoSeedMissingKeys(remoteKeys)
         if (!resolved) {
           resolved = true
           resolve()
@@ -166,5 +216,6 @@ export function stopStateSync(): void {
     unsubscribe = null
   }
   started = false
+  autoSeedDone = false
   lastChunkCount.clear()
 }

@@ -22,7 +22,6 @@ function loadTsTrendMonths(): number {
 }
 
 const TS_TREND_SERIES = [
-  { key: "registered", label: "등록", color: "var(--chart-1)" },
   { key: "processing", label: "처리중", color: "var(--chart-4)" },
   { key: "done", label: "완료", color: "var(--chart-2)" },
 ] as const
@@ -88,7 +87,7 @@ function TsTrendChart({ monthly, reduceMotion }: { monthly: MonthlyTsDatum[]; re
   }, [started])
 
   return (
-    <div ref={rootRef} className="absolute inset-0" role="img" aria-label="접수일 기준 월별 TS 등록 전체 추이와 등록, 처리중, 완료 비율 차트">
+    <div ref={rootRef} className="absolute inset-0" role="img" aria-label="접수일 기준 월별 TS 전체 추이와 처리중, 완료 비율 차트">
       {started ? <ResponsiveContainer width="100%" height="100%"><ComposedChart data={monthly} margin={{ top: 28, right: 12, bottom: 0, left: -18 }} barCategoryGap="32%" onMouseMove={(state: unknown) => { const index = (state as { activeTooltipIndex?: number }).activeTooltipIndex; setHoveredMonth(typeof index === "number" ? index : null) }} onMouseLeave={() => setHoveredMonth(null)}>
         <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 5" />
         <XAxis dataKey="month" tickFormatter={(value: string) => `${value.slice(2, 4)}.${value.slice(5)}월`} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} interval={monthly.length > 14 ? 1 : 0} />
@@ -142,7 +141,7 @@ export function TsTrendCard({ ts, today }: { ts: readonly TsRecord[]; today?: Da
             </div>
           </div>
         </div>
-        <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           <div className="group rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)]/80 p-3 transition duration-300 hover:-translate-y-1 hover:border-[var(--chart-1)] hover:shadow-md motion-reduce:transition-none">
             <p className="text-[11px] font-medium text-[var(--muted-foreground)]">{months}개월 TOTAL</p><p className="mt-1 text-2xl font-semibold tracking-tight"><NumberTicker value={monthlyKpis.total} /><span className="ml-1 text-xs text-[var(--muted-foreground)]">건</span></p>
           </div>

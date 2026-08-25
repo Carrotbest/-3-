@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react"
-import { ChevronUp, Download, ExternalLink, Plus, Trash2 } from "lucide-react"
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
+import { Check, ChevronUp, Download, ExternalLink, Pencil, Plus, Trash2 } from "lucide-react"
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import * as XLSX from "xlsx"
 
@@ -10,7 +10,6 @@ import { DataTable, type DataTableColumn } from "@/components/data-table/DataTab
 import { StatusBadge } from "@/components/data-table/StatusBadge"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Reveal } from "@/components/motion/Reveal"
-import { DataUpload } from "@/components/upload/DataUpload"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -22,11 +21,11 @@ import { materialsOf, tsMaterials } from "@/data/derive"
 import { fmtDate } from "@/data/format"
 import { httpsMaterialLink, MEMBERS } from "@/data/schema"
 import { type TsRecord, type TsState } from "@/data/sample"
-import { ingestTs } from "@/data/upload"
-import { clearTsRecords, loadTsRecords, saveTsRecords, useAppStore } from "@/store/useAppStore"
+import { saveTsRecords, useAppStore } from "@/store/useAppStore"
 
 const ALL = "전체"
-const TS_STATES: TsState[] = ["등록", "처리중", "완료"]
+// 등록 단계는 쓰지 않는다(웹에서 접수하면 곧바로 처리중). 선택지는 처리중·완료 둘뿐이다.
+const TS_STATES: TsState[] = ["처리중", "완료"]
 
 // DD 마스터 상태 칩(ddStatusStyle)과 동일한 톤앤매너.
 const TS_STATE_STYLE: Record<TsState, string> = {
@@ -62,13 +61,11 @@ function TsStagePanel({ counts, activeState, onSelect }: {
   const total = counts.received + counts.processing + counts.done
   const steps: { state: TsState | null; label: string; count: number; caption: string; dot: string }[] = [
     { state: null, label: ALL, count: total, caption: "모든 요청", dot: "bg-[var(--muted-foreground)]" },
-    { state: "등록", label: "등록", count: counts.received, caption: "새 요청 확인", dot: TS_STATE_DOT.등록 },
     { state: "처리중", label: "처리중", count: counts.processing, caption: "분석·해결 진행", dot: TS_STATE_DOT.처리중 },
     { state: "완료", label: "완료", count: counts.done, caption: "결과 정리 완료", dot: TS_STATE_DOT.완료 },
   ]
   const chartData = total > 0
     ? [
-        { name: "등록", value: counts.received, fill: "#0ea5e9" },
         { name: "처리중", value: counts.processing, fill: "#f59e0b" },
         { name: "완료", value: counts.done, fill: "#10b981" },
       ]
@@ -175,7 +172,7 @@ const initialForm = (): FormValues => ({
   causes: "",
   action: "",
   result: "",
-  state: "등록",
+  state: "처리중",
   orderVolume: "",
   attachment: "",
 })
@@ -242,23 +239,140 @@ function DetailSection({ id, title, rows }: { id: string; title: string; rows: R
   )
 }
 
-function TsDetailDialog({ record, onOpenChange }: { record: TsRecord | null; onOpenChange: (open: boolean) => void }) {
+function TsDetailDialog({ record, startInEdit, onOpenChange, onSave, onDelete }: {
+  record: TsRecord | null
+  startInEdit: boolean
+  onOpenChange: (open: boolean) => void
+  onSave: (record: TsRecord) => void
+  onDelete: (record: TsRecord) => void
+}) {
+  const [editing, setEditing] = useState(startInEdit)
+  const [draft, setDraft] = useState<TsRecord | null>(record)
+  const [error, setError] = useState<string | null>(null)
+  const [justSaved, setJustSaved] = useState(false)
+  const savedTimer = useRef<number | null>(null)
+
+  // 다른 행을 열거나 저장 후 목록이 갱신되면 편집 상태를 초기화한다.
+  useEffect(() => {
+    setDraft(record)
+    setEditing(startInEdit)
+    setError(null)
+  }, [record, startInEdit])
+
+  // 저장 완료 표시 타이머는 팝업이 닫혀도 남지 않도록 정리한다.
+  useEffect(() => () => { if (savedTimer.current) window.clearTimeout(savedTimer.current) }, [])
+
   const attachment = httpsMaterialLink(record?.attachment)
+  const setField = <K extends keyof TsRecord>(key: K, value: TsRecord[K]) =>
+    setDraft((current) => (current ? { ...current, [key]: value } : current))
+
+  const handleSave = () => {
+    if (!draft) return
+    if (!draft.subject.trim()) { setError("Subject 건명을 입력해 주세요."); return }
+    if (!draft.receivedAt.trim()) { setError("접수일을 입력해 주세요."); return }
+    const normalizedAttachment = httpsMaterialLink(draft.attachment)
+    if (draft.attachment && draft.attachment.trim() && !normalizedAttachment) {
+      setError("첨부는 https://로 시작하는 SharePoint 공유 링크여야 합니다."); return
+    }
+    onSave({
+      ...draft,
+      subject: draft.subject.trim(),
+      from: draft.from.trim(),
+      relatedDepartment: draft.relatedDepartment.trim(),
+      attn: draft.attn.trim(),
+      advisor: draft.advisor.trim(),
+      productionSite: draft.productionSite.trim(),
+      orderVolume: draft.orderVolume.trim(),
+      inquiry: draft.inquiry.trim(),
+      analysis: draft.analysis.trim(),
+      causes: draft.causes.trim(),
+      action: draft.action.trim(),
+      result: draft.result.trim(),
+      attachment: normalizedAttachment,
+    })
+    setError(null)
+    // 저장이 먹혔다는 걸 눈으로 확인할 수 있게 잠깐 완료 상태를 보여준 뒤 보기 모드로 돌아간다.
+    setJustSaved(true)
+    if (savedTimer.current) window.clearTimeout(savedTimer.current)
+    savedTimer.current = window.setTimeout(() => {
+      setJustSaved(false)
+      setEditing(false)
+      savedTimer.current = null
+    }, 900)
+  }
+
   return (
     <Dialog open={Boolean(record)} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
-        {record ? (
+        {record && draft ? (
           <>
             <DialogHeader>
-              <div className="flex flex-wrap items-center gap-2"><StatusBadge status={record.state} /><span className="text-xs font-medium text-[var(--muted-foreground)]">{record.id}</span></div>
-              <DialogTitle className="pt-2">{record.subject}</DialogTitle>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2"><StatusBadge status={record.state} /><span className="text-xs font-medium text-[var(--muted-foreground)]">{record.id}</span></div>
+                {editing ? null : (
+                  <Button type="button" size="sm" variant="outline" className="mr-8" onClick={() => setEditing(true)}><Pencil aria-hidden="true" />수정</Button>
+                )}
+              </div>
+              <DialogTitle className="pt-2">{editing ? "TS 수정" : record.subject}</DialogTitle>
               <DialogDescription>접수일 {fmtDate(record.receivedAt)}</DialogDescription>
             </DialogHeader>
             <DialogBody className="space-y-6">
-              <DetailSection id="ts-detail-people" title="의뢰 주체" rows={[["요청자 From", record.from], ["유관부서", record.relatedDepartment], ["수신자 Attn", record.attn], ["담당 Advisor", record.advisor]]} />
-              <DetailSection id="ts-detail-workflow" title="Trouble shooting 내용" rows={[["의뢰 내용", record.inquiry], ["현황 분석", record.analysis], ["원인", record.causes], ["해결 방안", record.action], ["결과", record.result]]} />
-              <DetailSection id="ts-detail-etc" title="상태·기타" rows={[["생산처", record.productionSite], ["발주량", record.orderVolume]]} />
-              {attachment ? <Button asChild className="w-full"><a href={attachment} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : null}
+              {editing ? (
+                <div className="space-y-5">
+                  {error ? <p role="alert" className="rounded-[var(--radius)] border border-[var(--destructive)] px-3 py-2 text-xs text-[var(--destructive)]">{error}</p> : null}
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="space-y-2"><Label htmlFor="ts-edit-received">접수일</Label><Input id="ts-edit-received" type="date" value={draft.receivedAt} onChange={(e) => setField("receivedAt", e.target.value)} /></div>
+                    <div className="space-y-2 sm:col-span-2"><Label htmlFor="ts-edit-subject">Subject 건명</Label><Input id="ts-edit-subject" value={draft.subject} onChange={(e) => setField("subject", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-from">요청자 From</Label><Input id="ts-edit-from" value={draft.from} onChange={(e) => setField("from", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-dept">유관부서</Label><Input id="ts-edit-dept" value={draft.relatedDepartment} onChange={(e) => setField("relatedDepartment", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-attn">수신자 Attn</Label><Input id="ts-edit-attn" value={draft.attn} onChange={(e) => setField("attn", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-advisor">담당 Advisor</Label><Input id="ts-edit-advisor" value={draft.advisor} onChange={(e) => setField("advisor", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-site">생산처</Label><Input id="ts-edit-site" value={draft.productionSite} onChange={(e) => setField("productionSite", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-state">상태</Label><Select value={draft.state} onValueChange={(v) => setField("state", v as TsState)}><SelectTrigger id="ts-edit-state"><SelectValue /></SelectTrigger><SelectContent>{TS_STATES.map((state) => <SelectItem key={state} value={state}>{state}</SelectItem>)}</SelectContent></Select></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-volume">발주량</Label><Input id="ts-edit-volume" value={draft.orderVolume} onChange={(e) => setField("orderVolume", e.target.value)} /></div>
+                    <div className="space-y-2 sm:col-span-2 xl:col-span-3"><Label htmlFor="ts-edit-attachment">첨부 SharePoint 링크</Label><Input id="ts-edit-attachment" type="url" placeholder="https://" value={draft.attachment ?? ""} onChange={(e) => setField("attachment", e.target.value)} /></div>
+                  </div>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <div className="space-y-2"><Label htmlFor="ts-edit-inquiry">의뢰 내용 Inquiry</Label><textarea id="ts-edit-inquiry" className={textareaClassName} value={draft.inquiry} onChange={(e) => setField("inquiry", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-analysis">현황 분석 Analysis</Label><textarea id="ts-edit-analysis" className={textareaClassName} value={draft.analysis} onChange={(e) => setField("analysis", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-causes">원인 Causes</Label><textarea id="ts-edit-causes" className={textareaClassName} value={draft.causes} onChange={(e) => setField("causes", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-action">해결 방안 Action</Label><textarea id="ts-edit-action" className={textareaClassName} value={draft.action} onChange={(e) => setField("action", e.target.value)} /></div>
+                    <div className="space-y-2 lg:col-span-2"><Label htmlFor="ts-edit-result">결과 Result</Label><textarea id="ts-edit-result" className={textareaClassName} value={draft.result} onChange={(e) => setField("result", e.target.value)} /></div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" disabled={justSaved} onClick={() => { setDraft(record); setEditing(false); setError(null) }}>취소</Button>
+                    <Button
+                      type="button"
+                      disabled={justSaved}
+                      aria-live="polite"
+                      onClick={handleSave}
+                      className={justSaved
+                        ? "bg-[var(--status-normal,#10b981)] text-white animate-[save-pop_0.45s_ease-out] motion-reduce:animate-none"
+                        : "transition-transform duration-150 active:scale-[0.96] motion-reduce:transition-none"}
+                    >
+                      {justSaved ? <><Check aria-hidden="true" />저장됨</> : "저장"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <DetailSection id="ts-detail-people" title="의뢰 주체" rows={[["요청자 From", record.from], ["유관부서", record.relatedDepartment], ["수신자 Attn", record.attn], ["담당 Advisor", record.advisor]]} />
+                  <DetailSection id="ts-detail-workflow" title="Trouble shooting 내용" rows={[["의뢰 내용", record.inquiry], ["현황 분석", record.analysis], ["원인", record.causes], ["해결 방안", record.action], ["결과", record.result]]} />
+                  <DetailSection id="ts-detail-etc" title="상태·기타" rows={[["생산처", record.productionSite], ["발주량", record.orderVolume]]} />
+                  {attachment ? <Button asChild className="w-full"><a href={attachment} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : null}
+                  {/* 삭제는 닫기(X)와 멀리 떨어진 우측 맨 아래에 둔다 — 실수로 눌리지 않게. */}
+                  <div className="flex justify-end border-t border-[var(--border)] pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-[var(--destructive)] text-[var(--destructive)] hover:bg-[var(--destructive)] hover:text-[var(--destructive-foreground)]"
+                      onClick={() => onDelete(record)}
+                    >
+                      <Trash2 aria-hidden="true" />이 건 삭제
+                    </Button>
+                  </div>
+                </>
+              )}
             </DialogBody>
           </>
         ) : null}
@@ -281,17 +395,12 @@ export function TS() {
   const [activeState, setActiveState] = useState<TsState | null>(null)
   const [search, setSearch] = useState("")
   const [selectedRow, setSelectedRow] = useState<TsRecord | null>(null)
+  const [openInEdit, setOpenInEdit] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState<FormValues>(initialForm)
   const [formErrors, setFormErrors] = useState<FormErrors>({})
   const [exporting, setExporting] = useState(false)
-  const [deleting, setDeleting] = useState(false)
   const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null)
-
-  useEffect(() => {
-    const stored = loadTsRecords()
-    if (stored && stored.length) saveTsRecords(stored)
-  }, [])
 
   const counts = useMemo(() => ({
     received: rows.filter((row) => row.state === "등록").length,
@@ -314,7 +423,57 @@ export function TS() {
     { id: "analysis", header: "Analysis", accessor: (r) => r.analysis, cell: (r) => r.analysis || "—", headerClassName: "w-64" },
     { id: "action", header: "Action", accessor: (r) => r.action, cell: (r) => r.action || "—", headerClassName: "w-64" },
     { id: "productionSite", header: "CO", accessor: (r) => r.productionSite, cell: (r) => r.productionSite || "—", headerClassName: "w-32" },
-    { id: "state", header: "상태", accessor: (r) => r.state, cell: (r) => <TsStateChip state={r.state} />, headerClassName: "w-28" },
+    {
+      id: "state",
+      header: "상태",
+      accessor: (r) => r.state,
+      headerClassName: "w-32",
+      // 목록에서 바로 처리중/완료를 바꾼다. 행 클릭(상세 열기)과 겹치지 않게 전파를 멈춘다.
+      cell: (record) => (
+        <div onClick={(event) => event.stopPropagation()}>
+          <Select value={record.state} onValueChange={(value) => changeRowState(record, value as TsState)}>
+            <SelectTrigger className="h-8 w-full" aria-label={`${record.id} 상태 변경`}>
+              <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${TS_STATE_DOT[record.state]}`} />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TS_STATES.map((state) => <SelectItem key={state} value={state}><TsStateChip state={state} /></SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      ),
+    },
+    {
+      id: "manage",
+      header: "관리",
+      accessor: () => "",
+      sortable: false,
+      headerClassName: "w-28",
+      // 행 클릭(상세 열기)과 겹치지 않도록 버튼에서 이벤트 전파를 멈춘다.
+      cell: (record) => (
+        <div className="flex items-center gap-1" onClick={(event) => event.stopPropagation()}>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            aria-label={`${record.id} 수정`}
+            onClick={() => { setSelectedRow(record); setOpenInEdit(true) }}
+          >
+            <Pencil aria-hidden="true" />
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="text-[var(--destructive)] hover:bg-[var(--destructive)] hover:text-[var(--destructive-foreground)]"
+            aria-label={`${record.id} 삭제`}
+            onClick={() => deleteRow(record)}
+          >
+            <Trash2 aria-hidden="true" />
+          </Button>
+        </div>
+      ),
+    },
   ]
 
   const setField = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
@@ -322,6 +481,30 @@ export function TS() {
     if (key === "receivedAt" || key === "subject" || key === "from" || key === "advisor" || key === "attachment") {
       setFormErrors((current) => ({ ...current, [key]: undefined }))
     }
+  }
+
+  const changeRowState = (record: TsRecord, state: TsState) => {
+    if (record.state === state) return
+    const next = useAppStore.getState().ts.map((row) => (row.id === record.id ? { ...row, state } : row))
+    saveTsRecords(next)
+    setSelectedRow((current) => (current && current.id === record.id ? { ...current, state } : current))
+    setActionNotice({ tone: "success", message: `${record.id} 상태를 ${state}(으)로 변경했습니다.` })
+  }
+
+  const saveRow = (updated: TsRecord) => {
+    const next = useAppStore.getState().ts.map((row) => (row.id === updated.id ? updated : row))
+    saveTsRecords(next)
+    setSelectedRow(updated)
+    setActionNotice({ tone: "success", message: `${updated.id} 수정 내용을 저장했습니다. 팀원 화면에 실시간 반영됩니다.` })
+  }
+
+  const deleteRow = (record: TsRecord) => {
+    if (!window.confirm(`${record.id} · ${record.subject}\n\n이 TS 건을 삭제할까요? 되돌릴 수 없습니다.`)) return
+    const next = useAppStore.getState().ts.filter((row) => row.id !== record.id)
+    saveTsRecords(next)
+    setSelectedRow(null)
+    setOpenInEdit(false)
+    setActionNotice({ tone: "success", message: `${record.id} 건을 삭제했습니다.` })
   }
 
   const exportRows = () => {
@@ -334,23 +517,6 @@ export function TS() {
       setActionNotice({ tone: "error", message: error instanceof Error ? error.message : "TS 엑셀을 내보내지 못했습니다." })
     } finally {
       setExporting(false)
-    }
-  }
-
-  const deleteAllRows = async () => {
-    if (!rows.length || !window.confirm("모든 TS 기록을 삭제할까요? 이 작업은 되돌릴 수 없습니다.")) return
-    setDeleting(true)
-    setActionNotice(null)
-    try {
-      await clearTsRecords()
-      setSelectedRow(null)
-      setActiveState(null)
-      setSearch("")
-      setActionNotice({ tone: "success", message: "모든 TS 기록을 삭제했습니다." })
-    } catch (error) {
-      setActionNotice({ tone: "error", message: error instanceof Error ? error.message : "TS 기록을 모두 삭제하지 못했습니다." })
-    } finally {
-      setDeleting(false)
     }
   }
 
@@ -394,10 +560,9 @@ export function TS() {
     <section className="min-w-0 space-y-6">
       <PageHeader
         title="TS 관리"
-        subtitle="Technical Service 등록부터 Trouble shooting 결과까지 관리합니다. 웹 입력이 원본이며 기존 엑셀은 수동으로 가져옵니다."
+        subtitle="Technical Service 등록부터 Trouble shooting 결과까지 웹에서 관리합니다."
         actions={(
           <div className="flex flex-wrap justify-end gap-2">
-            <DataUpload kind="ts-workbook" label="TS 파일 업로드" accept=".xlsx,.xls,.csv" compact onFiles={(files) => { if (files[0]) void ingestTs(files[0]) }} />
             <Button type="button" disabled={exporting || rows.length === 0} onClick={exportRows}>
               <Download aria-hidden="true" />
               {exporting ? "내보내는 중" : "엑셀 내보내기"}
@@ -433,7 +598,6 @@ export function TS() {
               <span aria-hidden="true" className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent)] transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden" />
               <span className="relative z-10 inline-flex items-center gap-2">{formOpen ? <ChevronUp aria-hidden="true" /> : <Plus aria-hidden="true" />}{formOpen ? "접기" : "신규 등록 입력"}</span>
             </Button>
-            <div className="min-w-0 space-y-1.5"><CardTitle>신규 등록</CardTitle></div>
           </CardHeader>
           {formOpen ? (
             <CardContent id="ts-intake-form">
@@ -488,18 +652,6 @@ export function TS() {
       <SectionCard
         title="TS 목록"
         subtitle={`현재 보기 ${filteredRows.length}건`}
-        actions={(
-          <Button
-            type="button"
-            variant="outline"
-            className="border-[var(--destructive)] text-[var(--destructive)] hover:bg-[var(--destructive)] hover:text-[var(--destructive-foreground)]"
-            disabled={deleting || rows.length === 0}
-            onClick={() => { void deleteAllRows() }}
-          >
-            <Trash2 aria-hidden="true" />
-            {deleting ? "삭제 중" : "전체 삭제"}
-          </Button>
-        )}
         contentClassName="p-0"
       >
         <DataTable
@@ -508,9 +660,10 @@ export function TS() {
           getRowId={(row) => row.id}
           pageSize={10}
           resizableColumns
-          storageKey="ts-list-v2"
+          fitContainer
+          storageKey="ts-list-v3"
           fillToPageSize
-          onRowClick={setSelectedRow}
+          onRowClick={(record) => { setSelectedRow(record); setOpenInEdit(false) }}
           toolbar={(
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <Tabs value={activeState ?? ALL} onValueChange={(value) => setActiveState(value === ALL ? null : value as TsState)}>
@@ -523,7 +676,13 @@ export function TS() {
           )}
         />
       </SectionCard>
-      <TsDetailDialog record={selectedRow} onOpenChange={(open) => { if (!open) setSelectedRow(null) }} />
+      <TsDetailDialog
+        record={selectedRow}
+        startInEdit={openInEdit}
+        onOpenChange={(open) => { if (!open) { setSelectedRow(null); setOpenInEdit(false) } }}
+        onSave={saveRow}
+        onDelete={deleteRow}
+      />
     </section>
   )
 }

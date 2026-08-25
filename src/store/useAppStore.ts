@@ -22,11 +22,14 @@ import {
   type TrendItem,
 } from "../data/sample"
 import { tsSeed, TS_SEED_VERSION } from "@/data/ts-seed"
+import { isTsWellFormed } from "@/data/ts-health"
 
 export type Theme = "light" | "dark"
 export type AppFilters = Record<string, unknown>
 export const TS_STORAGE_KEY = "fabric.ts"
 const TS_SEED_VERSION_KEY = "fabric.ts.seedVersion"
+/** localStorage 전용이던 TS를 팀 공유 데이터로 1회 이관했는지 표시한다. */
+const TS_SYNC_MIGRATED_KEY = "fabric.ts.syncMigrated"
 
 export type IngestStep = "reading" | "parsing" | "validating" | "done" | "error"
 
@@ -206,21 +209,76 @@ export function loadTsRecords(): TsRecord[] | null {
 const sortTsByDate = (records: readonly TsRecord[]): TsRecord[] =>
   [...records].sort((a, b) => (b.receivedAt || "").localeCompare(a.receivedAt || ""))
 
+/**
+ * TS 목록을 저장한다. 다른 데이터와 동일하게 IndexedDB에 캐시하고,
+ * 소유자로 로그인한 경우 Firestore 중앙 DB로도 반영해 팀원 화면에 실시간 공유된다.
+ * localStorage 기록은 이전 버전과의 호환·로컬 백업 용도로만 남긴다(복구 시 사용).
+ */
 export function saveTsRecords(records: TsRecord[]): void {
   const sorted = sortTsByDate(records)
   setAppState({ ts: sorted })
   persistTsRecords(sorted)
+  void saveCache("ts", sorted)
 }
 
-/** seed 버전이 바뀌면 로컬 TS(localStorage+IndexedDB 캐시)를 seed로 1회 강제 교체한다. */
+/**
+ * seed 버전이 바뀌면 로컬(IndexedDB) TS를 seed로 1회 교체한다.
+ * seed는 내장 기준 데이터이므로 Firestore로는 올리지 않는다(saveCacheLocal).
+ * 중앙에 실데이터가 있으면 로그인 후 스냅샷이 이 값을 덮어쓴다.
+ */
 export async function ensureTsSeed(): Promise<void> {
   let applied: string | null = null
   try { applied = window.localStorage.getItem(TS_SEED_VERSION_KEY) } catch { /* noop */ }
   if (applied === TS_SEED_VERSION) return
-  const seed = tsSeed()
-  saveTsRecords(seed)
+  const seed = sortTsByDate(tsSeed())
+  setAppState({ ts: seed })
+  persistTsRecords(seed)
   try { await saveCacheLocal("ts", seed) } catch { /* noop */ }
   try { window.localStorage.setItem(TS_SEED_VERSION_KEY, TS_SEED_VERSION) } catch { /* noop */ }
+}
+
+/**
+ * TS는 예전에 localStorage에만 저장됐다(팀 공유 대상 밖).
+ * 팀 공유(IndexedDB+Firestore)로 전환하면서, 그 시절 웹으로 등록·수정한 건이
+ * 화면에서 사라지지 않도록 최초 1회만 현재 목록과 합친다.
+ * 같은 id는 localStorage 값(=마지막으로 화면에 보이던 값)을 우선한다.
+ * 1회 실행 뒤 플래그를 남겨, 이후 삭제한 건이 되살아나지 않게 한다.
+ */
+export async function migrateLocalTsIntoSync(): Promise<void> {
+  try {
+    if (window.localStorage.getItem(TS_SYNC_MIGRATED_KEY) === "1") return
+  } catch {
+    return
+  }
+  const stored = loadTsRecords()
+  const current = useAppStore.getState().ts
+  if (stored && stored.length) {
+    const byId = new Map<string, TsRecord>()
+    for (const record of current) byId.set(record.id.trim(), record)
+    for (const record of stored) byId.set(record.id.trim(), record)
+    const merged = sortTsByDate([...byId.values()])
+    setAppState({ ts: merged })
+    try { await saveCacheLocal("ts", merged) } catch { /* noop */ }
+  }
+  try { window.localStorage.setItem(TS_SYNC_MIGRATED_KEY, "1") } catch { /* noop */ }
+}
+
+/**
+ * 구버전 파서가 만든 낡은 TS(접수일 없음 → "날짜 미등록"·월별 그래프 0)가
+ * 중앙에서 내려와 로컬 캐시까지 덮은 경우를 되돌린다.
+ * 복구 우선순위: localStorage 백업 → 내장 seed. 정상 데이터일 때는 아무것도 하지 않는다.
+ */
+export async function repairTsData(): Promise<boolean> {
+  const current = useAppStore.getState().ts
+  if (isTsWellFormed(current)) return false
+  const backup = loadTsRecords()
+  const source = isTsWellFormed(backup) ? backup! : tsSeed()
+  if (!isTsWellFormed(source)) return false
+  const repaired = sortTsByDate(source)
+  setAppState({ ts: repaired })
+  persistTsRecords(repaired)
+  try { await saveCacheLocal("ts", repaired) } catch { /* noop */ }
+  return true
 }
 
 export async function clearTsRecords(): Promise<void> {

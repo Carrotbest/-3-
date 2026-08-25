@@ -24,7 +24,7 @@ import { TS } from "@/routes/TS"
 import { FabricAnalysis } from "@/routes/FabricAnalysis"
 import { Warehouse } from "@/routes/Warehouse"
 import { Portfolio } from "@/routes/Portfolio"
-import { ensureTsSeed, setAppState } from "@/store/useAppStore"
+import { ensureTsSeed, migrateLocalTsIntoSync, repairTsData, setAppState } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
 const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio"])
@@ -79,6 +79,10 @@ function AppLayout() {
     return () => { window.history.scrollRestoration = previous }
   }, [])
 
+  // 로컬 데이터(IndexedDB·seed·localStorage 이관)를 모두 반영한 뒤에야 실시간 동기화를 시작한다.
+  // 순서가 뒤바뀌면 중앙 스냅샷이 먼저 반영됐다가 로컬 값에 다시 덮여 화면이 튄다.
+  const [hydrated, setHydrated] = useState(false)
+
   useEffect(() => {
     let current = true
     void (async () => {
@@ -100,6 +104,11 @@ function AppLayout() {
         setAppState(cached)
       }
       await ensureTsSeed()
+      // 팀 공유 전환 전 localStorage에만 있던 TS 등록·수정 건을 1회 합친다.
+      await migrateLocalTsIntoSync()
+      // 낡은 TS가 캐시에 남아 있으면 백업(localStorage)·seed로 되돌린 뒤 동기화를 시작한다.
+      await repairTsData()
+      if (current) setHydrated(true)
     })()
     return () => { current = false }
   }, [])
@@ -107,10 +116,10 @@ function AppLayout() {
   // 로그인 상태에서만 렌더되므로, 마운트 시 Firestore 실시간 동기화를 시작한다.
   // 중앙 데이터가 도착하면 데모/로컬 대신 실데이터가 화면에 반영된다.
   useEffect(() => {
-    if (CAPTURE) return
+    if (CAPTURE || !hydrated) return
     void startStateSync()
     return () => { stopStateSync() }
-  }, [])
+  }, [hydrated])
 
   const handleSidebarToggle = () => setMobileSidebarOpen((current) => !current)
   const toggleCollapsed = () => setSidebarCollapsed((current) => !current)
