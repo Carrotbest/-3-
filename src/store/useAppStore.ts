@@ -25,7 +25,6 @@ import { tsSeed, TS_SEED_VERSION } from "@/data/ts-seed"
 
 export type Theme = "light" | "dark"
 export type AppFilters = Record<string, unknown>
-export const TS_STORAGE_KEY = "fabric.ts"
 const TS_SEED_VERSION_KEY = "fabric.ts.seedVersion"
 
 export type IngestStep = "reading" | "parsing" | "validating" | "done" | "error"
@@ -185,40 +184,31 @@ export function deleteTeamEvent(id: string): void {
   void saveCache("events", next)
 }
 
-function persistTsRecords(records: readonly TsRecord[]): void {
-  try {
-    window.localStorage.setItem(TS_STORAGE_KEY, JSON.stringify(records))
-  } catch {
-    // 저장소를 사용할 수 없어도 현재 세션의 웹 입력은 유지한다.
-  }
-}
-
-export function loadTsRecords(): TsRecord[] | null {
-  try {
-    const stored = JSON.parse(window.localStorage.getItem(TS_STORAGE_KEY) ?? "null") as unknown
-    return Array.isArray(stored) ? stored as TsRecord[] : null
-  } catch {
-    return null
-  }
-}
-
 /** TS 목록은 접수일(receivedAt) 기준 정렬로 유지한다 — 최신이 위로. */
 const sortTsByDate = (records: readonly TsRecord[]): TsRecord[] =>
   [...records].sort((a, b) => (b.receivedAt || "").localeCompare(a.receivedAt || ""))
 
+/**
+ * TS 목록을 저장한다. 다른 데이터와 동일하게 IndexedDB에 캐시하고,
+ * 소유자로 로그인한 경우 Firestore 중앙 DB로도 반영해 팀원 화면에 실시간 공유된다.
+ */
 export function saveTsRecords(records: TsRecord[]): void {
   const sorted = sortTsByDate(records)
   setAppState({ ts: sorted })
-  persistTsRecords(sorted)
+  void saveCache("ts", sorted)
 }
 
-/** seed 버전이 바뀌면 로컬 TS(localStorage+IndexedDB 캐시)를 seed로 1회 강제 교체한다. */
+/**
+ * seed 버전이 바뀌면 로컬(IndexedDB) TS를 seed로 1회 교체한다.
+ * seed는 내장 기준 데이터이므로 Firestore로는 올리지 않는다(saveCacheLocal).
+ * 중앙 데이터가 있으면 로그인 후 스냅샷이 이 값을 덮어쓴다.
+ */
 export async function ensureTsSeed(): Promise<void> {
   let applied: string | null = null
   try { applied = window.localStorage.getItem(TS_SEED_VERSION_KEY) } catch { /* noop */ }
   if (applied === TS_SEED_VERSION) return
-  const seed = tsSeed()
-  saveTsRecords(seed)
+  const seed = sortTsByDate(tsSeed())
+  setAppState({ ts: seed })
   try { await saveCacheLocal("ts", seed) } catch { /* noop */ }
   try { window.localStorage.setItem(TS_SEED_VERSION_KEY, TS_SEED_VERSION) } catch { /* noop */ }
 }
@@ -226,7 +216,6 @@ export async function ensureTsSeed(): Promise<void> {
 export async function clearTsRecords(): Promise<void> {
   const empty: TsRecord[] = []
   setAppState({ ts: empty })
-  persistTsRecords(empty)
   await saveCache("ts", empty)
 }
 
