@@ -977,7 +977,7 @@ export function Home() {
 
       <section aria-labelledby="owner-board-title">
         <div className="mb-4 flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--gradient-3)] to-[var(--gradient-1)] text-white shadow-[0_7px_18px_-6px_rgba(76,91,212,0.65)]"><ClipboardList className="size-4" aria-hidden="true" /></span><div><h2 id="owner-board-title" className="text-base font-semibold text-[var(--foreground)]">담당자별 진행 현황</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">담당자·공정 단계별 진행 중 스타일 분포입니다.</p></div></div>
-        <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}><OwnerLaneBoard rows={records} onSelect={() => navigate("/development")} ownerAliases={{ "진영은": "담당자A" }} /></Card>
+        <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}><OwnerLaneBoard rows={records} onSelect={() => navigate("/development")} /></Card>
       </section>
 
       <section aria-labelledby="work-report-title">

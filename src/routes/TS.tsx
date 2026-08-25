@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
-import { ChevronUp, Download, ExternalLink, Pencil, Plus, Trash2 } from "lucide-react"
+import { ChevronUp, Download, ExternalLink, Plus, Trash2 } from "lucide-react"
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import * as XLSX from "xlsx"
 
@@ -23,7 +23,7 @@ import { fmtDate } from "@/data/format"
 import { httpsMaterialLink, MEMBERS } from "@/data/schema"
 import { type TsRecord, type TsState } from "@/data/sample"
 import { ingestTs } from "@/data/upload"
-import { clearTsRecords, saveTsRecords, useAppStore } from "@/store/useAppStore"
+import { clearTsRecords, loadTsRecords, saveTsRecords, useAppStore } from "@/store/useAppStore"
 
 const ALL = "전체"
 const TS_STATES: TsState[] = ["등록", "처리중", "완료"]
@@ -242,99 +242,23 @@ function DetailSection({ id, title, rows }: { id: string; title: string; rows: R
   )
 }
 
-function TsDetailDialog({ record, onOpenChange, onSave }: { record: TsRecord | null; onOpenChange: (open: boolean) => void; onSave: (record: TsRecord) => void }) {
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState<TsRecord | null>(record)
-  const [error, setError] = useState<string | null>(null)
-
-  // 다른 행을 열거나 저장 후 목록이 갱신되면 편집 상태를 초기화한다.
-  useEffect(() => {
-    setDraft(record)
-    setEditing(false)
-    setError(null)
-  }, [record])
-
+function TsDetailDialog({ record, onOpenChange }: { record: TsRecord | null; onOpenChange: (open: boolean) => void }) {
   const attachment = httpsMaterialLink(record?.attachment)
-  const setField = <K extends keyof TsRecord>(key: K, value: TsRecord[K]) =>
-    setDraft((current) => (current ? { ...current, [key]: value } : current))
-
-  const handleSave = () => {
-    if (!draft) return
-    if (!draft.subject.trim()) { setError("Subject 건명을 입력해 주세요."); return }
-    if (!draft.receivedAt.trim()) { setError("접수일을 입력해 주세요."); return }
-    const normalizedAttachment = httpsMaterialLink(draft.attachment)
-    if (draft.attachment && draft.attachment.trim() && !normalizedAttachment) {
-      setError("첨부는 https://로 시작하는 SharePoint 공유 링크여야 합니다."); return
-    }
-    onSave({
-      ...draft,
-      subject: draft.subject.trim(),
-      from: draft.from.trim(),
-      relatedDepartment: draft.relatedDepartment.trim(),
-      attn: draft.attn.trim(),
-      advisor: draft.advisor.trim(),
-      productionSite: draft.productionSite.trim(),
-      orderVolume: draft.orderVolume.trim(),
-      inquiry: draft.inquiry.trim(),
-      analysis: draft.analysis.trim(),
-      causes: draft.causes.trim(),
-      action: draft.action.trim(),
-      result: draft.result.trim(),
-      attachment: normalizedAttachment,
-    })
-    setError(null)
-    setEditing(false)
-  }
-
   return (
     <Dialog open={Boolean(record)} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
-        {record && draft ? (
+        {record ? (
           <>
             <DialogHeader>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2"><StatusBadge status={record.state} /><span className="text-xs font-medium text-[var(--muted-foreground)]">{record.id}</span></div>
-                {editing ? null : <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}><Pencil aria-hidden="true" />수정</Button>}
-              </div>
-              <DialogTitle className="pt-2">{editing ? "TS 수정" : record.subject}</DialogTitle>
+              <div className="flex flex-wrap items-center gap-2"><StatusBadge status={record.state} /><span className="text-xs font-medium text-[var(--muted-foreground)]">{record.id}</span></div>
+              <DialogTitle className="pt-2">{record.subject}</DialogTitle>
               <DialogDescription>접수일 {fmtDate(record.receivedAt)}</DialogDescription>
             </DialogHeader>
             <DialogBody className="space-y-6">
-              {editing ? (
-                <div className="space-y-5">
-                  {error ? <p role="alert" className="rounded-[var(--radius)] border border-[var(--destructive)] px-3 py-2 text-xs text-[var(--destructive)]">{error}</p> : null}
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    <div className="space-y-2"><Label htmlFor="ts-edit-received">접수일</Label><Input id="ts-edit-received" type="date" value={draft.receivedAt} onChange={(e) => setField("receivedAt", e.target.value)} /></div>
-                    <div className="space-y-2 sm:col-span-2"><Label htmlFor="ts-edit-subject">Subject 건명</Label><Input id="ts-edit-subject" value={draft.subject} onChange={(e) => setField("subject", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-from">요청자 From</Label><Input id="ts-edit-from" value={draft.from} onChange={(e) => setField("from", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-dept">유관부서</Label><Input id="ts-edit-dept" value={draft.relatedDepartment} onChange={(e) => setField("relatedDepartment", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-attn">수신자 Attn</Label><Input id="ts-edit-attn" value={draft.attn} onChange={(e) => setField("attn", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-advisor">담당 Advisor</Label><Input id="ts-edit-advisor" value={draft.advisor} onChange={(e) => setField("advisor", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-site">생산처</Label><Input id="ts-edit-site" value={draft.productionSite} onChange={(e) => setField("productionSite", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-state">상태</Label><Select value={draft.state} onValueChange={(v) => setField("state", v as TsState)}><SelectTrigger id="ts-edit-state"><SelectValue /></SelectTrigger><SelectContent>{TS_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-volume">발주량</Label><Input id="ts-edit-volume" value={draft.orderVolume} onChange={(e) => setField("orderVolume", e.target.value)} /></div>
-                    <div className="space-y-2 sm:col-span-2 xl:col-span-3"><Label htmlFor="ts-edit-attachment">첨부 SharePoint 링크</Label><Input id="ts-edit-attachment" type="url" placeholder="https://" value={draft.attachment ?? ""} onChange={(e) => setField("attachment", e.target.value)} /></div>
-                  </div>
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <div className="space-y-2"><Label htmlFor="ts-edit-inquiry">의뢰 내용 Inquiry</Label><textarea id="ts-edit-inquiry" className={textareaClassName} value={draft.inquiry} onChange={(e) => setField("inquiry", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-analysis">현황 분석 Analysis</Label><textarea id="ts-edit-analysis" className={textareaClassName} value={draft.analysis} onChange={(e) => setField("analysis", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-causes">원인 Causes</Label><textarea id="ts-edit-causes" className={textareaClassName} value={draft.causes} onChange={(e) => setField("causes", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-action">해결 방안 Action</Label><textarea id="ts-edit-action" className={textareaClassName} value={draft.action} onChange={(e) => setField("action", e.target.value)} /></div>
-                    <div className="space-y-2 lg:col-span-2"><Label htmlFor="ts-edit-result">결과 Result</Label><textarea id="ts-edit-result" className={textareaClassName} value={draft.result} onChange={(e) => setField("result", e.target.value)} /></div>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => { setDraft(record); setEditing(false); setError(null) }}>취소</Button>
-                    <Button type="button" onClick={handleSave}>저장</Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <DetailSection id="ts-detail-people" title="의뢰 주체" rows={[["요청자 From", record.from], ["유관부서", record.relatedDepartment], ["수신자 Attn", record.attn], ["담당 Advisor", record.advisor]]} />
-                  <DetailSection id="ts-detail-workflow" title="Trouble shooting 내용" rows={[["의뢰 내용", record.inquiry], ["현황 분석", record.analysis], ["원인", record.causes], ["해결 방안", record.action], ["결과", record.result]]} />
-                  <DetailSection id="ts-detail-etc" title="상태·기타" rows={[["생산처", record.productionSite], ["발주량", record.orderVolume]]} />
-                  {attachment ? <Button asChild className="w-full"><a href={attachment} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : null}
-                </>
-              )}
+              <DetailSection id="ts-detail-people" title="의뢰 주체" rows={[["요청자 From", record.from], ["유관부서", record.relatedDepartment], ["수신자 Attn", record.attn], ["담당 Advisor", record.advisor]]} />
+              <DetailSection id="ts-detail-workflow" title="Trouble shooting 내용" rows={[["의뢰 내용", record.inquiry], ["현황 분석", record.analysis], ["원인", record.causes], ["해결 방안", record.action], ["결과", record.result]]} />
+              <DetailSection id="ts-detail-etc" title="상태·기타" rows={[["생산처", record.productionSite], ["발주량", record.orderVolume]]} />
+              {attachment ? <Button asChild className="w-full"><a href={attachment} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : null}
             </DialogBody>
           </>
         ) : null}
@@ -363,6 +287,11 @@ export function TS() {
   const [exporting, setExporting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null)
+
+  useEffect(() => {
+    const stored = loadTsRecords()
+    if (stored && stored.length) saveTsRecords(stored)
+  }, [])
 
   const counts = useMemo(() => ({
     received: rows.filter((row) => row.state === "등록").length,
@@ -393,13 +322,6 @@ export function TS() {
     if (key === "receivedAt" || key === "subject" || key === "from" || key === "advisor" || key === "attachment") {
       setFormErrors((current) => ({ ...current, [key]: undefined }))
     }
-  }
-
-  const saveRow = (updated: TsRecord) => {
-    const next = useAppStore.getState().ts.map((row) => (row.id === updated.id ? updated : row))
-    saveTsRecords(next)
-    setSelectedRow(updated)
-    setActionNotice({ tone: "success", message: `${updated.id} 수정 내용을 저장했습니다. 팀원 화면에 실시간 반영됩니다.` })
   }
 
   const exportRows = () => {
@@ -601,7 +523,7 @@ export function TS() {
           )}
         />
       </SectionCard>
-      <TsDetailDialog record={selectedRow} onOpenChange={(open) => { if (!open) setSelectedRow(null) }} onSave={saveRow} />
+      <TsDetailDialog record={selectedRow} onOpenChange={(open) => { if (!open) setSelectedRow(null) }} />
     </section>
   )
 }

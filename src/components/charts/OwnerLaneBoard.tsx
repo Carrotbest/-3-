@@ -16,8 +16,6 @@ interface OwnerLaneBoardProps {
   rows: readonly DevRecord[]
   today?: Date
   onSelect: (record: DevRecord) => void
-  /** 특정 담당자 이름을 화면 표시용으로 치환합니다(예: 퇴사자 익명화). 집계 로직에는 영향 없음. */
-  ownerAliases?: Record<string, string>
 }
 
 const URGENCY_DOT: Record<LaneUrgency, string> = {
@@ -67,9 +65,8 @@ function LaneChip({ group, owner, onSelect }: { group: LaneStyleGroup; owner: st
   )
 }
 
-export function OwnerLaneBoard({ rows, today = new Date(), onSelect, ownerAliases }: OwnerLaneBoardProps) {
+export function OwnerLaneBoard({ rows, today = new Date(), onSelect }: OwnerLaneBoardProps) {
   const board = useMemo(() => ownerLaneBoard(rows, today), [rows, today])
-  const displayOwner = (owner: string) => ownerAliases?.[owner] ?? owner
 
   const urgencyCounts = useMemo(() => rows.reduce((counts, record) => {
     const status = statusOf(record, today)
@@ -102,28 +99,25 @@ export function OwnerLaneBoard({ rows, today = new Date(), onSelect, ownerAliase
                 </tr>
               </thead>
               <tbody>
-                {board.rows.map((row) => {
-                  const owner = displayOwner(row.owner)
-                  return (
+                {board.rows.map((row) => (
                   <tr key={row.owner} className="transition-colors duration-200 hover:bg-white/45">
-                    <th scope="row" className="sticky left-0 z-10 border-b border-b-[rgba(15,23,42,0.12)] border-r border-r-white/65 bg-white/82 px-3 py-3 text-left font-semibold text-[var(--foreground)] backdrop-blur">{owner}</th>
+                    <th scope="row" className="sticky left-0 z-10 border-b border-r border-white/65 bg-white/82 px-3 py-3 text-left font-semibold text-[var(--foreground)] backdrop-blur">{row.owner}</th>
                     {row.cells.map((cell) => {
                       const stage = BOARD_STAGES.find((item) => item.key === cell.stageKey)!
                       return (
-                        <td key={cell.stageKey} aria-label={`${owner} · ${stage.label} · ${cell.count}건`} className="h-14 border-b border-b-[rgba(15,23,42,0.12)] border-r border-r-white/60 px-2 py-2 align-middle">
+                        <td key={cell.stageKey} aria-label={`${row.owner} · ${stage.label} · ${cell.count}건`} className="h-14 border-b border-r border-white/60 px-2 py-2 align-middle">
                           {cell.groups.length ? (
                             <div className="flex flex-col items-center gap-1.5">
-                              <div className="flex flex-wrap justify-center gap-1.5">{cell.groups.map((group) => <LaneChip key={group.styleNo} group={group} owner={owner} onSelect={onSelect} />)}</div>
+                              <div className="flex flex-wrap justify-center gap-1.5">{cell.groups.map((group) => <LaneChip key={group.styleNo} group={group} owner={row.owner} onSelect={onSelect} />)}</div>
                               <span className="text-[11px] font-medium tabular-nums text-[var(--muted-foreground)]">{cell.count.toLocaleString("ko-KR")}건</span>
                             </div>
                           ) : null}
                         </td>
                       )
                     })}
-                    <td className="border-b border-b-[rgba(15,23,42,0.12)] px-3 py-3 text-center font-semibold text-[var(--foreground)]">{row.total.toLocaleString("ko-KR")}</td>
+                    <td className="border-b border-white/60 px-3 py-3 text-center font-semibold text-[var(--foreground)]">{row.total.toLocaleString("ko-KR")}</td>
                   </tr>
-                  )
-                })}
+                ))}
               </tbody>
               <tfoot>
                 <tr className="bg-white/55 font-semibold text-[var(--foreground)] backdrop-blur">
