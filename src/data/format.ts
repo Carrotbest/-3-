@@ -89,3 +89,28 @@ export function checkStyleNo(
 
 export const initials = (name: unknown): string =>
   String(name ?? "").trim().slice(0, 2) || "—"
+
+export interface TsRequester {
+  dept: string
+  name: string
+}
+
+const TS_REQUESTER_TITLE = "차장|부장|과장|대리|이사|주임|사원|전무|상무|팀장|실장|본부장|수석|책임|선임"
+const TS_REQUESTER_RE = new RegExp(
+  `^(.*?)\\s*([가-힣]{2,4}\\s?(?:${TS_REQUESTER_TITLE})(?:\\s*\\(.*\\))?)$`,
+)
+
+/**
+ * TS 요청자 값을 의뢰 부서와 이름으로 분리한다.
+ * - fromDept가 채워진 레코드(신규·수정분)는 그 값을 그대로 쓴다.
+ * - 없으면 기존 free-text `from`에서 끝의 "이름+직급"을 이름으로, 그 앞을 부서로 추정한다.
+ *   추정이 안 되면 전체를 이름으로 두고 부서는 빈 값으로 둔다(원본 훼손 방지).
+ */
+export function tsRequester(record: { from?: string; fromDept?: string }): TsRequester {
+  const dept = (record.fromDept ?? "").trim()
+  const name = (record.from ?? "").trim()
+  if (dept) return { dept, name }
+  const m = name.match(TS_REQUESTER_RE)
+  if (m && m[1].trim()) return { dept: m[1].trim(), name: m[2].trim() }
+  return { dept: "", name }
+}

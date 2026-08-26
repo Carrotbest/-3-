@@ -113,6 +113,8 @@ export interface MaterialItem {
   tags: string[]
   link?: string
   owner?: string
+  /** 덱 카드 날짜줄 우측에 표시할 부서(현재 TS 의뢰 부서에서 채움). */
+  department?: string
   source: "excel" | "manual" | "ts" | "study"
   detail?: MaterialDetailRow[]
   readOnly?: boolean
@@ -152,6 +154,8 @@ export function httpsMaterialLink(value: string | undefined): string | undefined
 }
 
 export interface CompletedSample {
+  /** 웹 저장용 고유 키. 엑셀 재업로드 없이도 유지되도록 파싱 시 부여한다(completedSampleId). */
+  id?: string
   /** 샘플관리대장 창고보관·소진완료·폐기 시트의 4자리 R&D No. */
   storageNo?: string
   styleNo: string
@@ -180,6 +184,19 @@ export interface CompletedSample {
   completedAt: string
   requestDate?: string
   sourceSheet?: string
+}
+
+/**
+ * 완료 샘플의 안정적인 고유 키. FL#(정규화) 우선, 없으면 R&D No., 그것도 없으면 시트+스타일로 생성.
+ * 엑셀 재업로드가 사라져도 웹 저장분을 이 값으로 식별·중복 판단한다.
+ */
+export function completedSampleId(sample: Pick<CompletedSample, "id" | "flNo" | "storageNo" | "styleNo" | "sourceSheet">): string {
+  if (sample.id) return sample.id
+  const fl = (sample.flNo ?? "").replace(/\s+/g, "").toUpperCase()
+  if (fl) return `fl:${fl}`
+  const rnd = (sample.storageNo ?? "").trim()
+  if (rnd) return `rnd:${rnd}`
+  return `s:${(sample.sourceSheet ?? "").trim()}:${(sample.styleNo ?? "").trim()}`
 }
 
 /** DD와 샘플관리대장을 하나의 업무 흐름으로 보여주기 위한 원단 상태. */
@@ -301,15 +318,50 @@ export const STATUS = {
 
 export type StatusKey = keyof typeof STATUS
 
-/** 팀 구성 — 담당자 필터·매트릭스의 기준 순서 */
+/** 팀 구성 — 담당자 드롭다운·필터·매트릭스의 기준 순서. 현재 재직 중인 3팀 담당자만 둔다. */
 export const MEMBERS = [
+  { id: "pkh", name: "박근후", role: "팀장" },
   { id: "phg", name: "박향근", role: "소팀장" },
   { id: "kjh", name: "김지현", role: "팀원" },
   { id: "bjh", name: "변재휘", role: "팀원" },
-  { id: "jye", name: "진영은", role: "팀원" },
 ] as const
 
 export type Member = (typeof MEMBERS)[number]
+
+/**
+ * 퇴사한 과거 3팀 담당자. 드롭다운·현재 담당자 목록에는 넣지 않는다.
+ * 다만 과거 RDDA·DD 이력 집계에서는 3팀으로 인정해야 하므로 이 목록으로 보정한다.
+ */
+export const RETIRED_MEMBERS = ["이종현", "박세현", "진영은"] as const
+
+/**
+ * 샘플 개발 실적 보드(담당자별 현황·월별 트렌드) 전용 담당자 목록.
+ * 박근후(팀장)는 샘플 개발을 직접 하지 않아 실적이 0이므로, 그 자리를 실제 개발 이력이 있는
+ * 퇴사자 진영은으로 대체해 보여준다. 드롭다운·현재 담당자 목록(MEMBERS)과는 별개다.
+ * `name`은 실데이터 매칭용(레코드 owner), `label`은 화면 표시용이다. 퇴사자는 이니셜로 익명 표기한다.
+ */
+export const SAMPLE_OWNERS = [
+  { id: "jye", name: "진영은", label: "J", role: "팀원" },
+  { id: "phg", name: "박향근", label: "박향근", role: "소팀장" },
+  { id: "kjh", name: "김지현", label: "김지현", role: "팀원" },
+  { id: "bjh", name: "변재휘", label: "변재휘", role: "팀원" },
+] as const
+
+/** 담당자 표시명 치환 규칙(실데이터 값 → 화면 표기). 퇴사자 익명화 등에 쓴다. */
+const OWNER_DISPLAY_ALIASES = new Map<string, string>([["진영은", "J"]])
+
+/**
+ * 담당자 표시명. 실데이터의 owner/advisor 값을 화면 표기로 바꾼다(집계·매칭에는 쓰지 않는다).
+ * "진영은/박근후"처럼 슬래시로 이어진 복수 담당자도 토큰별로 치환한다.
+ */
+export const ownerDisplayName = (name: string): string =>
+  (name ?? "")
+    .split("/")
+    .map((part) => {
+      const trimmed = part.trim()
+      return OWNER_DISPLAY_ALIASES.get(trimmed) ?? trimmed
+    })
+    .join("/")
 
 /** 민감 필드 — sensitiveUnlocked 가 false면 화면에 그리지 않는다 */
 export const SENSITIVE_FIELDS = ["unitPrice", "vendor", "vendorCode"] as const

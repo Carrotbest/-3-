@@ -1,55 +1,24 @@
-# AGENTS.md — Codex 작업 규약
+# AGENTS.md — Fabric R&D 작업 규약
 
-**현재 상태: Claude가 빠지고 Codex 단독 진행이다. 먼저 `docs/codex/HANDOFF.md`를 읽어라.**
-남은 작업 순서, 이미 끝난 파일, 밟지 말아야 할 지뢰가 거기 정리돼 있다.
+한솔섬유 통합원단부 3팀 React 업무 플랫폼. 현재 상태는 `CLAUDE.md`를 먼저 보고, 필요한 과거 지시서만 `docs/codex/R*.md`에서 선택해 읽는다.
 
-설계와 계약은 `docs/ARCHITECTURE.md`에 고정돼 있다. 너(Codex)는 아래 규약을 지킨다.
+## 현재 구조
 
-## 반드시 지킬 것
+- 위치 `C:\Users\hkpark\Desktop\fabric-rnd`, 브랜치 `main`.
+- React 18 · TypeScript · Vite · Zustand · Recharts · Tailwind v4 · SheetJS.
+- 실행 `npm run dev`, 검증 `npm run build`; base `/-3-/`, 해시 라우터.
+- `legacy/`, `legacy-vanilla/`, `backup/`은 현재 구현이 아니므로 열거나 수정하지 않는다.
 
-1. **지시서에 명시된 파일만 수정한다.** 다른 파일은 읽어도 되지만 고치지 않는다.
-   특히 `assets/js/core/`, `assets/js/data/`, `index.html`은 Claude가 관리한다 — 건드리지 않는다.
-2. **`legacy/` 폴더는 열지 마라.** 9,000줄짜리 구버전 파일이며 토큰만 낭비된다.
-   필요한 정보는 지시서에 발췌되어 있다.
-3. **`docs/ARCHITECTURE.md`의 "계약" 절을 위반하지 않는다.** 함수 시그니처·모듈 export·
-   레코드 필드명을 임의로 바꾸지 않는다. 바꿔야 한다고 판단되면 코드를 고치지 말고
-   그 이유를 출력으로 보고한다.
-4. **빌드 도구를 도입하지 않는다.** npm 패키지 추가, 번들러, TypeScript, 프레임워크 금지.
-   순수 ES 모듈 + 브라우저 표준 API만 쓴다. 외부 라이브러리는 이미 쓰는 Chart.js·SheetJS(CDN)뿐이다.
-5. **색·간격·폰트는 `assets/css/tokens.css`의 CSS 변수만 쓴다.** 하드코딩된 hex, px 폰트크기 금지.
-   토큰에 없는 값이 필요하면 토큰을 추가하지 말고 가장 가까운 기존 토큰을 쓰고 보고한다.
-   화면 전용 스타일은 뷰 모듈 안 `STYLE_TEXT` 상수에 넣고 `build()`에서 `root`에 붙인다
-   (`assets/js/views/development.js` 참고). 공용 CSS 파일은 건드리지 않는다.
-6. **한국어 UI 문구**를 쓴다. 메뉴 코드(HOME, DEVELOPMENT, TS 관리 등)는 지시서 표기를 그대로 따른다.
-7. **접근성**: 키보드 포커스 표시 유지, `aria-*` 속성 유지, `prefers-reduced-motion` 존중.
-8. **브라우저 확인은 하지 마라.** 이 환경에는 브라우저가 없다. 헤드리스 브라우저를 설치하거나
-   스크립트로 띄우려 시도하지 마라 — 시간과 토큰만 쓴다.
-   너의 확인 범위는 여기까지다: `node --check`(문법), import 경로가 실제 파일과 맞는지,
-   지시서의 계약대로 export 했는지. 실제 렌더링·콘솔 에러·반응형 확인은 Claude가 한다.
+## 작업 원칙
 
-## 하지 말 것
+1. 사용자 요청 범위만 수정하고 기존 미커밋 변경을 보존한다. reset/checkout으로 되돌리지 않는다.
+2. 실데이터·캐시·단가·협력사명은 로그, 문서, Git, 공개 파일에 넣지 않는다.
+3. 새 패키지·아키텍처·데이터 계약은 필요성이 명확할 때만 도입하고 영향 범위를 먼저 보고한다.
+4. Firebase/TS 동기화 수정 전 Claude 메모리 `fabric-rnd-ts-sync-incident`를 읽는다.
+5. RDDA/FL 집계는 `mergedFlRegistrations`: 2026-07까지 대장, 2026-08부터 DD, 동일 FL 1건(대장 우선).
+6. 커밋·푸시·배포는 사용자 지시가 있을 때만 한다.
+7. 검증은 변경 규모에 맞게 `npm run build`와 필요한 테스트를 수행한다. 브라우저가 가능하면 해당 라우트도 확인한다.
 
-- 요청하지 않은 리팩터링, 파일 이동, 이름 변경
-- 주석으로 채운 빈 함수(placeholder) 남기기 — 지시서 범위는 실제로 동작하게 완성한다
-- `!important`, 인라인 style 속성, 전역 요소 셀렉터(`div {}`, `table {}`)
-- **`MutationObserver`로 자기가 고칠 DOM을 감시하기.** 콜백이 그 DOM을 바꾸면 콜백이 다시 불려
-  무한 루프가 되고, 콘솔 에러 없이 브라우저가 멈춘다. 표의 셀을 꾸며야 하면
-  `createTable`의 `onRender(tableEl, rows)` 훅을 써라 — 정렬·필터·더보기 이후에도 항상 불린다.
-- 실제 팀원 이름·바이어명·단가를 새로 지어내기 — 더미가 필요하면 `data/sample.js`의 기존 값만 쓴다
+## 보고
 
-## 보고 형식
-
-작업이 끝나면 다음만 출력한다. 코드 전문을 다시 붙여넣지 않는다.
-
-```
-DONE: <수정한 파일 목록>
-ADDED: <새로 만든 CSS 클래스 / export한 함수>
-CHECK: <node --check 통과 여부, import 경로 확인 결과>
-NOTES: <계약 위반 없이는 불가능했던 부분, 판단이 필요한 지점>
-```
-
-## 프로젝트 맥락 (요약)
-
-한솔섬유 통합원단부 3팀의 사내 업무 플랫폼. 팀이 쓰는 TDS 엑셀을 브라우저에서 읽어
-합계 대조를 통과한 값만 화면에 표시한다. 웹은 조회 중심이고 원본 수정은 엑셀에서 한다.
-자세한 내용은 `docs/ARCHITECTURE.md`.
+완료 시 수정 파일, 검증 결과, 남은 위험/판단 지점만 간결히 알린다.

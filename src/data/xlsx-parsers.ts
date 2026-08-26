@@ -10,7 +10,7 @@ import type {
   RddaSnapshot,
   TsRecord,
 } from "./sample"
-import { httpsMaterialLink, materialIdOf, MEMBERS } from "./schema"
+import { completedSampleId, httpsMaterialLink, materialIdOf, MEMBERS, RETIRED_MEMBERS } from "./schema"
 import type {
   CompletedSample,
   DevRecord,
@@ -691,10 +691,13 @@ function parseSampleSheet(workbook: XLSX.WorkBook, wanted: string, detectedHeade
     const row = rows[index]
     const styleNo = text(row[columns.styleNo])
     if (!styleNo || isSubtotal(styleNo)) continue
+    const storageNo = text(row[columns.storageNo])
+    const flNo = text(row[columns.flNo])
     samples.push({
-      storageNo: text(row[columns.storageNo]),
+      id: completedSampleId({ flNo, storageNo, styleNo, sourceSheet: name }),
+      storageNo,
       styleNo,
-      flNo: text(row[columns.flNo]),
+      flNo,
       season: normalizeSeason(row[columns.season]).value,
       category: normalizeCategory(row[columns.category]),
       buyer: text(row[columns.buyer]),
@@ -981,7 +984,8 @@ export function parseTechnicalServices(workbook: XLSX.WorkBook): TsRecord[] {
 }
 
 const RDDA_DISTRIBUTION_LIMIT = 8
-const RDDA_TEAM3 = new Set(["박향근", "김지현", "변재휘", "진영은"].map(compact))
+// 과거 이력 집계는 재직·퇴사자 모두 3팀으로 인정한다(퇴사자 실적 누락 방지).
+const RDDA_TEAM3 = new Set([...MEMBERS.map((member) => member.name), ...RETIRED_MEMBERS].map(compact))
 
 type RddaItemAggregate = {
   meeting: number

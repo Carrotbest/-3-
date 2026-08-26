@@ -15,7 +15,7 @@ import { fmtDateFull, toDate } from "@/data/format"
 import { dayToneText, holidayName } from "@/data/holidays"
 import { ingestDevelopment, ingestSamples } from "@/data/upload"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
-import { MEMBERS, type DevRecord, type DevTechnical } from "@/data/schema"
+import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical } from "@/data/schema"
 import { saveDevelopmentRecord, useAppStore } from "@/store/useAppStore"
 
 const ALL = "__all__"
@@ -721,7 +721,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     <div className="flex min-h-0 flex-1 flex-col border-y border-[var(--border)] bg-[var(--card)]">
       <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] p-2">
         <label className="relative block min-w-0 flex-1 basis-full md:basis-auto md:max-w-md"><span className="sr-only">DD 전체 열 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="64개 전체 열에서 검색" className="pl-9" /></label>
-        <Select value={owner} onValueChange={setOwner}><SelectTrigger className="w-full md:w-36"><SelectValue placeholder="담당" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 담당</SelectItem>{ownerOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
+        <Select value={owner} onValueChange={setOwner}><SelectTrigger className="w-full md:w-36"><SelectValue placeholder="담당" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 담당</SelectItem>{ownerOptions.map((item) => <SelectItem key={item} value={item}>{ownerDisplayName(item)}</SelectItem>)}</SelectContent></Select>
         <Select value={status} onValueChange={setStatus}><SelectTrigger className="w-full md:w-36"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
         <Button type="button" variant="outline" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL) }}><RotateCcw className="size-4" />초기화</Button>
         <div className="ml-auto flex flex-wrap items-center gap-2 text-xs text-[var(--muted-foreground)]">
@@ -773,7 +773,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   if (active) return <td key={column.id} onClick={() => selectCell(column.id)} className={`${stickyBase} p-0`} style={{ width: column.width, minWidth: column.width, left }}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} onCommit={(raw) => void commitCell(record, column, raw)} onCancel={() => setEditCell(null)} /></td>
                   return <td key={column.id} onDoubleClick={() => setEditCell({ row: rowId, col: column.id })} className={`${stickyBase} max-w-0 cursor-cell px-2 text-xs font-normal ${column.mono ? "font-mono" : ""}`} style={{ width: column.width, minWidth: column.width, left }}>
                     {column.id === "owner"
-                      ? <div className="flex items-center justify-between gap-1"><span className="truncate">{text(record.owner)}</span><button type="button" title="전체 항목 수정" onClick={(event) => { event.stopPropagation(); openEditor(record) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:opacity-100"><Maximize2 className="size-3.5" /></button></div>
+                      ? <div className="flex items-center justify-between gap-1"><span className="truncate">{text(ownerDisplayName(record.owner))}</span><button type="button" title="전체 항목 수정" onClick={(event) => { event.stopPropagation(); openEditor(record) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:opacity-100"><Maximize2 className="size-3.5" /></button></div>
                       : column.id === "styleNo" && warnings.length
                         ? <span className="flex items-center gap-1 truncate" title={warnings.map((warning) => warning.label).join(" · ")}><span className="truncate">{text(record.styleNo)}</span><TriangleAlert className="size-3.5 shrink-0 text-[var(--destructive)]" /></span>
                         : <span className="truncate">{text(column.value(record, linked))}</span>}

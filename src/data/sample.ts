@@ -258,6 +258,8 @@ export interface TsRecord {
   receivedAt: string
   subject: string
   from: string
+  /** 의뢰 부서(요청자 소속). 신규·수정분에 저장하며, 없으면 from에서 추정한다(format.tsRequester). */
+  fromDept?: string
   relatedDepartment: string
   attn: string
   advisor: string
@@ -576,7 +578,7 @@ export function sampleRdda(): RddaReport {
 /** 데모 모드에서도 동기화 화면이 비지 않도록 대조 결과 5종을 채워 둔다. */
 export function sampleChecks(total = 48): ReconcileCheck[] {
   return [
-    { name: "담당자별 시트 합", excel: total, applied: total, diff: 0, ok: true, note: "박향근 14 · 김지현 12 · 변재휘 11 · 진영은 11" },
+    { name: "담당자별 시트 합", excel: total, applied: total, diff: 0, ok: true, note: "박근후 13 · 박향근 13 · 김지현 11 · 변재휘 11" },
     { name: "전체 현황 시트 합", excel: total, applied: total, diff: 0, ok: true, note: "Overview" },
     { name: "카테고리별 합", excel: total, applied: total, diff: 0, ok: true, note: "미분류 없음" },
     { name: "시즌별 합", excel: total, applied: total, diff: 0, ok: true, note: "SS'27 18 · FW'27 14 · SS'26 9 · FW'26 7" },
@@ -602,7 +604,7 @@ export function sampleHistory(): ApplyHistoryEntry[] {
     new Date(2026, 7, day, hour, minute).toISOString()
   return [
     { appliedAt: at(3, 8, 40), appliedBy: "박향근", fileName: "통원부3팀 TDS.xlsx", count: 48, passed: true, state: "사용 중", reason: null },
-    { appliedAt: at(2, 17, 20), appliedBy: "박향근", fileName: "통원부3팀 TDS.xlsx", count: null, passed: false, state: "전송 안 됨", reason: "담당자별 시트 합 3건 차이 (진영은 · SEASON)" },
+    { appliedAt: at(2, 17, 20), appliedBy: "박향근", fileName: "통원부3팀 TDS.xlsx", count: null, passed: false, state: "전송 안 됨", reason: "담당자별 시트 합 3건 차이 (변재휘 · SEASON)" },
     { appliedAt: at(1, 9, 5), appliedBy: "팀장", fileName: "통원부3팀 TDS.xlsx", count: 45, passed: true, state: "교체됨", reason: null },
   ]
 }

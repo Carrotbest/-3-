@@ -47,7 +47,7 @@ const STANDARD_GROUPS = [
 function defaults(): SettingsState {
   return {
     standards: Object.fromEntries(STANDARD_GROUPS.map((group) => [group.key, group.values.map((value) => ({ value, active: true }))])),
-    users: MEMBERS.map((member, index) => ({ ...member, permission: index === 0 ? "관리자" : "등록·처리", active: true })),
+    users: MEMBERS.map((member) => ({ ...member, permission: member.name === "박향근" ? "관리자" : "등록·처리", active: true })),
     alerts: [
       { key: "dueSoon", label: "납기 임박 알림", enabled: true, value: "3", unit: "일 전" },
       { key: "overdue", label: "납기 초과 알림", enabled: true, value: "당일", unit: "" },

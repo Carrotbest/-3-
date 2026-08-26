@@ -1,11 +1,13 @@
 /* derive.ts — 파생 집계
    화면에서 숫자를 다시 계산하지 않도록, 집계는 전부 여기서 한 번만 한다. */
 
-import { daysLeft, normalizeSeason, toDate } from "./format"
+import { daysLeft, normalizeSeason, toDate, tsRequester } from "./format"
 import {
   CATEGORIES,
   httpsMaterialLink,
   MEMBERS,
+  ownerDisplayName,
+  SAMPLE_OWNERS,
   type DevRecord,
   type CompletedSample,
   type DevRecordFieldKey,
@@ -159,7 +161,10 @@ export interface OwnerProcessDatum {
 
 export interface OwnerDetailedDatum extends DevTypeSummary {
   id: string
+  /** 실데이터 매칭용 이름(레코드 owner와 대조). 화면 표시는 displayName을 쓴다. */
   name: string
+  /** 화면 표시용 이름(퇴사자는 이니셜로 익명 표기). */
+  displayName: string
   role: string
   process: OwnerProcessDatum[]
 }
@@ -341,12 +346,13 @@ export function byOwnerDetailed(records: readonly DevRecord[]): OwnerDetailedDat
     { key: "registration", label: "등록대기", matches: ({ dyeing, finishing }) => dyeing || finishing },
   ]
 
-  return MEMBERS.map((member) => {
+  return SAMPLE_OWNERS.map((member) => {
     const owned = records.filter((record) => record.owner === member.name)
     const split = devTypeSplit(owned)
     return {
       id: member.id,
       name: member.name,
+      displayName: member.label,
       role: member.role,
       ...split,
       process: processDefinitions.map((definition) => {
@@ -453,7 +459,8 @@ function urgentRecordOrder(left: DevRecord, right: DevRecord, today: Date): numb
 
 /** 담당자별 5공정 레인과 병목 히트맵에 쓰는 단일 집계. */
 export function ownerLaneBoard(rows: readonly DevRecord[], today = new Date()): OwnerLaneBoard {
-  const knownOwners: string[] = MEMBERS.map((member) => member.name)
+  // 홈 담당자 레인도 개발 실적 보드와 같은 기준: 박근후(개발 미수행) 대신 진영은을 기본 레인으로 둔다.
+  const knownOwners: string[] = SAMPLE_OWNERS.map((member) => member.name)
   const ownerOrder = [...knownOwners]
   const ownerSet = new Set(ownerOrder)
   const ownerName = (record: DevRecord) => record.owner.trim() || "미지정"
@@ -916,21 +923,10 @@ export function rddaMonthFromFlNo(flNo: string): string | null {
   return `20${String(year).padStart(2, "0")}-${String(month).padStart(2, "0")}`
 }
 
-const incrementMonthlyType = (
-  map: Map<string, Record<RddaProductionType, number>>,
-  month: string,
-  flNo: string,
-) => {
-  const current = map.get(month) ?? { gd: 0, domestic: 0, production: 0, purchase: 0, other: 0 }
-  current[rddaProductionType(flNo)] += 1
-  map.set(month, current)
-}
-
 /**
- * RDDA 등록 현황 1년 추이.
- * 2026년 7월까지는 샘플관리대장의 FL.#에 인코딩된 YYMM을 고정 사용하고,
- * 8월부터는 DD의 Received Date를 사용한다.
- * 양쪽 모두 동일 FL No.는 한 번만 집계한다.
+ * RDDA 등록 현황 추이.
+ * 2026년 7월까지는 샘플관리대장의 FL.#에 인코딩된 YYMM, 8월부터는 DD의 Received Date를 쓴다.
+ * DD·대장에 같은 FL No.가 있으면 하나로 합쳐 1건만 집계한다(mergedFlRegistrations).
  */
 export function monthlyDevelopmentTrend(
   records: readonly DevRecord[],
@@ -943,30 +939,23 @@ export function monthlyDevelopmentTrend(
     const date = new Date(today.getFullYear(), today.getMonth() - (span - 1) + index, 1)
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
   })
-  const dd = new Map<string, Record<RddaProductionType, number>>()
-  const archive = new Map<string, Record<RddaProductionType, number>>()
-  const uniqueDd = new Map(records.filter((record) => record.flNo).map((record) => [record.flNo.replace(/\s+/g, "").toUpperCase(), record]))
-  uniqueDd.forEach((record) => {
-    const month = record.receivedDate?.slice(0, 7)
-    if (month && month > RDDA_ARCHIVE_CUTOFF_MONTH) incrementMonthlyType(dd, month, record.flNo)
-  })
-  const uniqueSamples = new Map(samples.filter((sample) => sample.flNo).map((sample) => [sample.flNo.replace(/\s+/g, "").toUpperCase(), sample]))
-  uniqueSamples.forEach((sample) => {
-    const month = rddaMonthFromFlNo(sample.flNo)
-    if (month && month <= RDDA_ARCHIVE_CUTOFF_MONTH) incrementMonthlyType(archive, month, sample.flNo)
-  })
+  const byMonth = new Map<string, Record<RddaProductionType, number>>()
+  for (const reg of mergedFlRegistrations(records, samples)) {
+    const current = byMonth.get(reg.month) ?? { gd: 0, domestic: 0, production: 0, purchase: 0, other: 0 }
+    current[reg.type] += 1
+    byMonth.set(reg.month, current)
+  }
   const latestPopulated = [...months].reverse().find((month) => {
-    const values = month <= RDDA_ARCHIVE_CUTOFF_MONTH ? archive.get(month) : dd.get(month)
+    const values = byMonth.get(month)
     return values ? Object.values(values).some((value) => value > 0) : false
   })
   return months.map((month) => {
-    const source = month <= RDDA_ARCHIVE_CUTOFF_MONTH ? "샘플대장" as const : "DD" as const
-    const values = (source === "샘플대장" ? archive : dd).get(month) ?? { gd: 0, domestic: 0, production: 0, purchase: 0, other: 0 }
+    const values = byMonth.get(month) ?? { gd: 0, domestic: 0, production: 0, purchase: 0, other: 0 }
     return {
       month,
       total: Object.values(values).reduce((sum, value) => sum + value, 0),
       ...values,
-      source,
+      source: month <= RDDA_ARCHIVE_CUTOFF_MONTH ? "샘플대장" as const : "DD" as const,
       latest: month === latestPopulated,
     }
   })
@@ -1012,46 +1001,149 @@ export function monthlyTsTrend(
   })
 }
 
-/** 담당자별 RDDA 등록 현황. 홈 RDDA 등록 추이와 같은 소스를 담당자별로 분해한다. */
+export interface FlRegistration {
+  flKey: string
+  month: string
+  owner: string
+  type: RddaProductionType
+  source: "ledger" | "dd"
+}
+
+const normalizeFlKey = (flNo: string): string => flNo.replace(/\s+/g, "").toUpperCase()
+
+/**
+ * DD 현황과 샘플관리대장을 하나의 FL 등록 원장으로 합친다(중복 FL은 1건).
+ * - 2026-07까지: 샘플관리대장(FL.#에 인코딩된 YYMM) 기준.
+ * - 2026-08부터: DD Received Date 기준.
+ * - 같은 FL이 대장·DD 양쪽에 있으면 대장(과거 확정분)을 우선해 하나로 합친다.
+ * FL# 없는 행은 등록으로 세지 않는다(작지등록만 되고 FL 미부여 상태).
+ */
+export function mergedFlRegistrations(
+  records: readonly DevRecord[],
+  samples: readonly CompletedSample[],
+): FlRegistration[] {
+  const byFl = new Map<string, FlRegistration>()
+  for (const sample of samples) {
+    if (!sample.flNo) continue
+    const month = rddaMonthFromFlNo(sample.flNo)
+    if (!month || month > RDDA_ARCHIVE_CUTOFF_MONTH) continue
+    const key = normalizeFlKey(sample.flNo)
+    if (!byFl.has(key)) byFl.set(key, { flKey: key, month, owner: sample.owner, type: rddaProductionType(sample.flNo), source: "ledger" })
+  }
+  for (const record of records) {
+    if (!record.flNo) continue
+    const key = normalizeFlKey(record.flNo)
+    if (byFl.has(key)) continue // 중복 FL → 대장 우선(합침)
+    const month = record.receivedDate?.slice(0, 7)
+    if (!month || month <= RDDA_ARCHIVE_CUTOFF_MONTH) continue
+    byFl.set(key, { flKey: key, month, owner: record.owner, type: rddaProductionType(record.flNo), source: "dd" })
+  }
+  return [...byFl.values()]
+}
+
+/** 담당자별 월별 FL 등록 추이. DD·대장을 합친 원장(mergedFlRegistrations)에서 담당자별로 분해한다. */
 export function ownerMonthlyFlTrend(
   records: readonly DevRecord[],
   samples: readonly CompletedSample[],
   today = new Date(),
   monthCount = 12,
+  ownerList: readonly string[] = SAMPLE_OWNERS.map((member) => member.name),
 ): Record<string, { month: string; count: number }[]> {
   const span = Math.max(1, Math.round(monthCount))
   const months = Array.from({ length: span }, (_, index) => {
     const date = new Date(today.getFullYear(), today.getMonth() - (span - 1) + index, 1)
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
   })
-  const owners = MEMBERS.map((member) => member.name)
-  const dd = new Map<string, Map<string, number>>(owners.map((owner) => [owner, new Map()]))
-  const archive = new Map<string, Map<string, number>>(owners.map((owner) => [owner, new Map()]))
-  const increment = (source: Map<string, Map<string, number>>, owner: string, month: string) => {
-    const counts = source.get(owner)
-    if (!counts) return
-    counts.set(month, (counts.get(month) ?? 0) + 1)
+  const monthSet = new Set(months)
+  const owners = [...ownerList]
+  const ownerSet = new Set(owners)
+  const counts = new Map<string, Map<string, number>>(owners.map((owner) => [owner, new Map()]))
+  for (const reg of mergedFlRegistrations(records, samples)) {
+    if (!ownerSet.has(reg.owner) || !monthSet.has(reg.month)) continue
+    const bucket = counts.get(reg.owner)!
+    bucket.set(reg.month, (bucket.get(reg.month) ?? 0) + 1)
   }
-
-  const uniqueDd = new Map(records.filter((record) => record.flNo).map((record) => [record.flNo.replace(/\s+/g, "").toUpperCase(), record]))
-  uniqueDd.forEach((record) => {
-    const month = record.receivedDate?.slice(0, 7)
-    if (month && month > RDDA_ARCHIVE_CUTOFF_MONTH) increment(dd, record.owner, month)
-  })
-
-  const uniqueSamples = new Map(samples.filter((sample) => sample.flNo).map((sample) => [sample.flNo.replace(/\s+/g, "").toUpperCase(), sample]))
-  uniqueSamples.forEach((sample) => {
-    const month = rddaMonthFromFlNo(sample.flNo)
-    if (month && month <= RDDA_ARCHIVE_CUTOFF_MONTH) increment(archive, sample.owner, month)
-  })
-
   return Object.fromEntries(owners.map((owner) => [
     owner,
-    months.map((month) => ({
-      month,
-      count: (month <= RDDA_ARCHIVE_CUTOFF_MONTH ? archive : dd).get(owner)?.get(month) ?? 0,
-    })),
+    months.map((month) => ({ month, count: counts.get(owner)?.get(month) ?? 0 })),
   ]))
+}
+
+export interface OwnerFlSourceDatum {
+  total: number
+  gd: number
+  domestic: number
+  production: number
+  purchase: number
+  etc: number
+  gdPct: number
+  domesticPct: number
+  productionPct: number
+  purchasePct: number
+  etcPct: number
+}
+
+/** 샘플관리대장(완료 샘플)에 developer로 등록된 담당자 중 이름이 한글 3글자인 사람 목록. */
+export function ledgerDevelopers(samples: readonly CompletedSample[]): string[] {
+  const set = new Set<string>()
+  for (const sample of samples) {
+    const name = (sample.owner ?? "").trim()
+    if (/^[가-힣]{3}$/.test(name)) set.add(name)
+  }
+  return [...set].sort((a, b) => a.localeCompare(b, "ko-KR"))
+}
+
+/**
+ * 담당자별 기간 FL 등록 건수를 개발처(FL 끝 4자리)로 분해한다.
+ * ownerMonthlyFlTrend와 동일한 FL 집합·기간 창을 쓰되, 월 대신 개발처로 집계한다.
+ * gd=9천번대(GD개발), domestic=5천번대(자체개발·국내), production=0천번대(생산팀·국내),
+ * purchase=2천번대(완사입), etc=그 외.
+ */
+export function ownerFlSourceBreakdown(
+  records: readonly DevRecord[],
+  samples: readonly CompletedSample[],
+  today = new Date(),
+  monthCount = 12,
+  owners: readonly string[] = SAMPLE_OWNERS.map((member) => member.name),
+): Record<string, OwnerFlSourceDatum> {
+  const span = Math.max(1, Math.round(monthCount))
+  const months = new Set(Array.from({ length: span }, (_, index) => {
+    const date = new Date(today.getFullYear(), today.getMonth() - (span - 1) + index, 1)
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
+  }))
+  const ownerSet = new Set<string>(owners)
+  const acc = new Map<string, { gd: number; domestic: number; production: number; purchase: number; etc: number }>(
+    owners.map((owner) => [owner, { gd: 0, domestic: 0, production: 0, purchase: 0, etc: 0 }]),
+  )
+  for (const reg of mergedFlRegistrations(records, samples)) {
+    if (!months.has(reg.month) || !ownerSet.has(reg.owner)) continue
+    const bucket = acc.get(reg.owner)
+    if (!bucket) continue
+    if (reg.type === "gd") bucket.gd += 1
+    else if (reg.type === "domestic") bucket.domestic += 1
+    else if (reg.type === "production") bucket.production += 1
+    else if (reg.type === "purchase") bucket.purchase += 1
+    else bucket.etc += 1
+  }
+
+  return Object.fromEntries(owners.map((owner) => {
+    const bucket = acc.get(owner)!
+    const total = bucket.gd + bucket.domestic + bucket.production + bucket.purchase + bucket.etc
+    const share = (value: number) => (total > 0 ? Math.round((value / total) * 100) : 0)
+    return [owner, {
+      total,
+      gd: bucket.gd,
+      domestic: bucket.domestic,
+      production: bucket.production,
+      purchase: bucket.purchase,
+      etc: bucket.etc,
+      gdPct: share(bucket.gd),
+      domesticPct: share(bucket.domestic),
+      productionPct: share(bucket.production),
+      purchasePct: share(bucket.purchase),
+      etcPct: share(bucket.etc),
+    }]
+  }))
 }
 
 export function homeWorkSummary(
@@ -1146,6 +1238,7 @@ type TsMaterialSource = {
   receivedAt: string
   subject: string
   from?: string
+  fromDept?: string
   advisor?: string
   inquiry?: string
   causes?: string
@@ -1185,6 +1278,7 @@ export function tsMaterials(ts: readonly TsMaterialSource[]): MaterialItem[] {
       .map((value) => value.trim())
       .filter(Boolean)
     const tags = [...new Set([productionSite, ...relatedDepartments].filter(Boolean))]
+    const requester = tsRequester(record)
 
     return {
       id: `ts-${record.id}`,
@@ -1194,13 +1288,15 @@ export function tsMaterials(ts: readonly TsMaterialSource[]): MaterialItem[] {
       date: record.receivedAt,
       tags,
       link: httpsMaterialLink(record.attachment),
-      owner: cleanMaterialText(record.advisor) || undefined,
+      owner: ownerDisplayName(cleanMaterialText(record.advisor)) || undefined,
+      department: requester.dept || undefined,
       source: "ts",
       detail: materialDetails([
-        ["요청자", record.from],
+        ["의뢰 부서", requester.dept],
+        ["요청자", requester.name],
         ["유관부서", record.relatedDepartment],
         ["수신자", record.attn],
-        ["담당", record.advisor],
+        ["담당", ownerDisplayName(record.advisor ?? "")],
         ["의뢰 내용", record.inquiry],
         ["현황 분석", record.analysis],
         ["원인", record.causes],

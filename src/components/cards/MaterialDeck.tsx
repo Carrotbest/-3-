@@ -506,7 +506,10 @@ export function MaterialDeck({
                 <span aria-hidden="true" className={`pointer-events-none absolute inset-0 z-20 bg-[var(--foreground)] transition-opacity duration-300 motion-reduce:transition-none ${isActive ? "opacity-0" : "opacity-[0.06]"}`} />
                 {hideBadges ? (
                   <span className="relative z-10 flex h-full flex-col">
-                    <span className="text-xs font-medium text-[var(--muted-foreground)]">{item.date ? fmtDateFull(item.date) : "날짜 미등록"}</span>
+                    <span className="flex items-center justify-between gap-2 text-xs font-medium text-[var(--muted-foreground)]">
+                      <span>{item.date ? fmtDateFull(item.date) : "날짜 미등록"}</span>
+                      {item.department ? <span className="min-w-0 truncate text-right">{item.department}</span> : null}
+                    </span>
                     <strong className="mt-3 line-clamp-2 text-base leading-6 text-[var(--foreground)]">{item.title}</strong>
                     <span className="mt-auto line-clamp-2 border-t border-[var(--border)] pt-2 text-xs leading-4 text-[var(--muted-foreground)]">{item.summary || "의뢰 내용이 등록되지 않았습니다."}</span>
                   </span>

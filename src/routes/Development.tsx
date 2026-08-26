@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
   Boxes,
   CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   ClipboardList,
   Info,
   Layers3,
+  Plus,
   RotateCcw,
   Search,
   Shapes,
@@ -60,6 +63,7 @@ import {
   devTypeSplit,
   isInProgress,
   kpis,
+  ownerFlSourceBreakdown,
   ownerMonthlyFlTrend,
   processFunnel,
   receiptStatus,
@@ -70,6 +74,7 @@ import {
   type CategoryStyleRow,
   type CompletedLibraryItem,
   type OwnerDetailedDatum,
+  type OwnerFlSourceDatum,
   type OwnerProcessDatum,
   type OwnerProcessKey,
   type ProcessFunnelKey,
@@ -79,6 +84,7 @@ import { dayToneText, holidayName } from "@/data/holidays"
 import {
   DEFAULT_COLUMNS,
   FIELDS,
+  ownerDisplayName,
   STATUS,
   type CompletedSample,
   type DevRecord,
@@ -327,10 +333,16 @@ const ACCENT: Record<AccentKey, { from: string; to: string; glow: string; soft: 
 }
 
 const OWNER_ACCENTS: AccentKey[] = ["teal", "violet", "emerald", "amber", "slate"]
+// 담당자별 현황 기본 노출 4명(실이름). 화면 표시는 ownerDisplayName으로 진영은→J 익명화.
+const DEFAULT_OWNER_NAMES = ["박향근", "진영은", "김지현", "변재휘"]
+// 접힌 상태로만 두는 그 외 담당자(퇴사자). 펼치면 카드가 열린다.
+const EXTRA_OWNER_NAMES = ["이종현", "박세현"]
 const OWNER_RANGE_OPTIONS = [
   { months: 6, label: "6개월" },
   { months: 12, label: "1년" },
   { months: 24, label: "2년" },
+  { months: 60, label: "5년" },
+  { months: 120, label: "10년" },
 ] as const
 const OWNER_MONTHS_STORAGE_KEY = "fabric-rnd-home-rdda-months-v1"
 
@@ -500,33 +512,103 @@ function OwnerMonthlyChart({ data, stroke, owner, gradientId, started }: { data:
   )
 }
 
-function OwnerCard({ owner, rank, trend, onClick }: { owner: OwnerDetailedDatum; rank: number; trend: { month: string; count: number }[]; onClick: () => void }) {
+const EMPTY_OWNER_SOURCE: OwnerFlSourceDatum = { total: 0, gd: 0, domestic: 0, production: 0, purchase: 0, etc: 0, gdPct: 0, domesticPct: 0, productionPct: 0, purchasePct: 0, etcPct: 0 }
+
+const SOURCE_STYLE = {
+  gd: { dot: "#06b6d4", gradient: "linear-gradient(90deg,#0e7490,#06b6d4,#a5f3fc)" },
+  domestic: { dot: "#a855f7", gradient: "linear-gradient(90deg,#7c3aed,#a855f7,#d8b4fe)" },
+  production: { dot: "#10b981", gradient: "linear-gradient(90deg,#047857,#10b981,#6ee7b7)" },
+  purchase: { dot: "#f59e0b", gradient: "linear-gradient(90deg,#b45309,#f59e0b,#fcd34d)" },
+  etc: { dot: "#94a3b8", gradient: "linear-gradient(90deg,#475569,#94a3b8,#cbd5e1)" },
+} as const
+
+/** 담당자 카드 하단 — 기간 FL 등록을 개발처(GD·자체개발·생산팀·완사입)로 나눈 KPI·바. */
+function OwnerSourceBreakdown({ data, started }: { data: OwnerFlSourceDatum; started: boolean }) {
+  const { ref, inView } = useInView<HTMLDivElement>({ once: true, threshold: 0.25 })
+  const show = started || inView
+  const barSegments = ([
+    ["gd", data.gd, data.gdPct],
+    ["domestic", data.domestic, data.domesticPct],
+    ["production", data.production, data.productionPct],
+    ["purchase", data.purchase, data.purchasePct],
+    ["etc", data.etc, data.etcPct],
+  ] as const).filter(([, count]) => count > 0)
+  const cards: { key: string; label: string; count: number; pct: number | null; dot: string }[] = [
+    { key: "total", label: "전체", count: data.total, pct: null, dot: "var(--foreground)" },
+    { key: "gd", label: "GD개발", count: data.gd, pct: data.gdPct, dot: SOURCE_STYLE.gd.dot },
+    { key: "domestic", label: "자체개발", count: data.domestic, pct: data.domesticPct, dot: SOURCE_STYLE.domestic.dot },
+    { key: "production", label: "생산팀", count: data.production, pct: data.productionPct, dot: SOURCE_STYLE.production.dot },
+    { key: "purchase", label: "완사입", count: data.purchase, pct: data.purchasePct, dot: SOURCE_STYLE.purchase.dot },
+  ]
+  return (
+    <div className="min-w-0">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted-foreground)]">기간 FL 등록 · 개발처</p>
+        {data.etc > 0 ? <p className="shrink-0 text-xs text-[var(--muted-foreground)]">기타 <strong className="font-semibold text-[var(--foreground)]">{data.etc}</strong>건</p> : null}
+      </div>
+      <div ref={ref} className="flex h-6 w-full overflow-hidden rounded-full bg-[var(--muted)] shadow-inner" role="img" aria-label={`GD ${data.gd}건, 자체개발 ${data.domestic}건, 생산팀 ${data.production}건, 완사입 ${data.purchase}건${data.etc ? `, 기타 ${data.etc}건` : ""}`}>
+        {barSegments.map(([key, , pct]) => (
+          <div key={key} className={`h-full transition-[width] ${GAUGE_BAR}`} style={{ width: `${show ? pct : 0}%`, background: SOURCE_STYLE[key].gradient }} />
+        ))}
+        {data.total === 0 ? <span className="flex w-full items-center justify-center text-[10px] text-[var(--muted-foreground)]">데이터 없음</span> : null}
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-1.5 sm:grid-cols-5" role="list" aria-label="개발처별 FL 등록">
+        {cards.map((card) => (
+          <div key={card.key} role="listitem" className="min-w-0 rounded-[var(--radius)] border border-[var(--border)] p-2">
+            <span className="flex items-center gap-1.5">
+              <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: card.dot }} />
+              <span className="truncate text-[11px] text-[var(--muted-foreground)]">{card.label}</span>
+            </span>
+            <span className="mt-1 flex items-baseline gap-1">
+              <strong className="text-base font-semibold tabular-nums leading-none text-[var(--foreground)]"><NumberTicker value={card.count} duration={GAUGE_MS} startOnView /></strong>
+              <span className="text-[10px] text-[var(--muted-foreground)]">건{card.pct !== null ? ` · ${card.pct}%` : ""}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** 담당자 FL 등록 카드 — 상단 총계·아바타, 월별 FL 추이, 개발처 분해, 접기 버튼. */
+function OwnerCard({ name, displayName, rank, trend, source, onCollapse, onOpen }: {
+  name: string
+  displayName: string
+  rank: number
+  trend: { month: string; count: number }[]
+  source: OwnerFlSourceDatum
+  onCollapse: () => void
+  onOpen: () => void
+}) {
   const a = ACCENT[OWNER_ACCENTS[(rank - 1) % OWNER_ACCENTS.length]]
   const { ref, inView: started } = useInView<HTMLElement>({ once: true, threshold: 0.25 })
   return (
-    <article ref={ref} role="button" tabIndex={0} aria-haspopup="dialog" onClick={onClick} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onClick() } }} className={`group relative cursor-pointer overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] ${hoverLift}`}>
+    <article ref={ref} className={`group relative overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5 ${hoverLift}`}>
       <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: `radial-gradient(120% 80% at 0% 0%, ${a.soft}, transparent 55%)` }} />
       <div className="relative">
         <div className="flex items-center gap-3">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ background: `linear-gradient(135deg, ${a.from}, ${a.to})`, boxShadow: `0 6px 16px ${a.glow}` }}>{owner.name.slice(0, 1)}</span>
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-semibold text-[var(--foreground)]">{owner.name}</h3>
-            <p className="text-xs text-[var(--muted-foreground)]">{owner.role}</p>
-          </div>
-          <p className="flex items-baseline gap-1 text-right">
-            <span className="text-2xl font-semibold leading-none tracking-tight text-[var(--foreground)]"><NumberTicker value={owner.total} duration={GAUGE_MS} startOnView /></span>
-            <span className="text-xs font-medium text-[var(--muted-foreground)]">건</span>
-          </p>
+          <button type="button" onClick={onOpen} aria-haspopup="dialog" aria-label={`${displayName} 개발 목록 열기`} className="flex min-w-0 flex-1 items-center gap-3 rounded-[var(--radius)] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ background: `linear-gradient(135deg, ${a.from}, ${a.to})`, boxShadow: `0 6px 16px ${a.glow}` }}>{displayName.slice(0, 1)}</span>
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-sm font-semibold text-[var(--foreground)]">{displayName}</h3>
+              <p className="text-xs text-[var(--muted-foreground)]">기간 FL 등록</p>
+            </div>
+            <p className="flex items-baseline gap-1 text-right">
+              <span className="text-2xl font-semibold leading-none tracking-tight text-[var(--foreground)]"><NumberTicker value={source.total} duration={GAUGE_MS} startOnView /></span>
+              <span className="text-xs font-medium text-[var(--muted-foreground)]">건</span>
+            </p>
+          </button>
+          <button type="button" onClick={onCollapse} aria-label={`${displayName} 카드 접기`} className="shrink-0 rounded-[var(--radius)] p-1.5 text-[var(--muted-foreground)] outline-none transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+            <ChevronUp aria-hidden="true" className="size-4" />
+          </button>
         </div>
 
-        <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">GD {owner.gd} · 국내 {owner.dom}</p>
-
         <div className="mt-4">
-          <OwnerMonthlyChart data={trend} stroke={a.fg} owner={owner.name} gradientId={`owner-area-${rank}`} started={started} />
+          <OwnerMonthlyChart data={trend} stroke={a.fg} owner={displayName} gradientId={`owner-area-${rank}`} started={started} />
         </div>
 
         <div className="mt-5">
-          <ProcessStatus owner={owner.name} total={owner.total} process={owner.process} started={started} />
+          <OwnerSourceBreakdown data={source} started={started} />
         </div>
       </div>
     </article>
@@ -549,7 +631,7 @@ function developmentListColumns(today: Date): DataTableColumn<DevRecord>[] {
     { id: "season", header: "시즌", accessor: (row) => row.season, cell: (row) => row.season || "—" },
     { id: "devType", header: "유형", accessor: (row) => row.devType ?? (row.gdNo ? "GD" : "국내"), cell: (row) => row.devType ?? (row.gdNo ? "GD" : "국내") },
     { id: "gdNo", header: "GD#", accessor: (row) => row.gdNo, cell: (row) => row.gdNo || "미기입" },
-    { id: "owner", header: "담당", accessor: (row) => row.owner, cell: (row) => row.owner || "미지정" },
+    { id: "owner", header: "담당", accessor: (row) => ownerDisplayName(row.owner), cell: (row) => (row.owner ? ownerDisplayName(row.owner) : "미지정") },
     { id: "stage", header: "현재 공정", accessor: (row) => row.stage, cell: (row) => row.stage || "—" },
     { id: "status", header: "상태", accessor: (row) => STATUS[statusOf(row, today)].label, cell: (row) => <StatusBadge status={STATUS[statusOf(row, today)].label} /> },
     { id: "dueDate", header: "납기", accessor: (row) => row.dueDate, cell: (row) => fmtDate(row.dueDate) },
@@ -569,7 +651,22 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
   const receipt = useMemo(() => receiptStatus(active), [active])
   const funnel = useMemo(() => processFunnel(active), [active])
   const owners = useMemo(() => byOwnerDetailed(active), [active])
-  const ownerTrends = useMemo(() => ownerMonthlyFlTrend(records, completed, today, ownerMonths), [completed, ownerMonths, records, today])
+  // 담당자 카드 로스터: 기본 4명 + 그 외(이종현·박세현)만. 실이름 기준.
+  const roster = useMemo(() => [...DEFAULT_OWNER_NAMES, ...EXTRA_OWNER_NAMES], [])
+  const ownerTrends = useMemo(() => ownerMonthlyFlTrend(records, completed, today, ownerMonths, roster), [completed, ownerMonths, records, roster, today])
+  const ownerSources = useMemo(() => ownerFlSourceBreakdown(records, completed, today, ownerMonths, roster), [completed, ownerMonths, records, roster, today])
+  // 기본 4명(박향근/J/김지현/변재휘)을 먼저, 나머지는 기간 FL 등록 많은 순으로 배치.
+  const ownerOrder = useMemo(() => {
+    const rest = roster.filter((name) => !DEFAULT_OWNER_NAMES.includes(name))
+    rest.sort((x, y) => (ownerSources[y]?.total ?? 0) - (ownerSources[x]?.total ?? 0) || x.localeCompare(y, "ko-KR"))
+    return [...DEFAULT_OWNER_NAMES.filter((name) => roster.includes(name)), ...rest]
+  }, [ownerSources, roster])
+  const [expandedOwners, setExpandedOwners] = useState<Set<string>>(() => new Set(DEFAULT_OWNER_NAMES))
+  const toggleOwner = (name: string) => setExpandedOwners((current) => {
+    const next = new Set(current)
+    if (next.has(name)) next.delete(name); else next.add(name)
+    return next
+  })
   useEffect(() => {
     window.localStorage.setItem(OWNER_MONTHS_STORAGE_KEY, String(ownerMonths))
   }, [ownerMonths])
@@ -582,7 +679,8 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
     const process: OwnerProcessDatum[] = order.map((k) => ({ key: k, label: label[k], count: counts[k], pct: total > 0 ? Math.round((counts[k] / total) * 100) : 0 }))
     return { process, total }
   }, [owners])
-  const categories = useMemo(() => categoryOverview(active), [active])
+  // Categories 카드는 항상 건수 내림차순(동수면 OPT 수)으로 배치한다.
+  const categories = useMemo(() => [...categoryOverview(active)].sort((a, b) => b.count - a.count || b.options - a.options), [active])
   const [categoryDetail, setCategoryDetail] = useState<CategoryOverviewDatum | null>(null)
   const [listPopup, setListPopup] = useState<DevelopmentListPopup | null>(null)
   const [selectedRecord, setSelectedRecord] = useState<DevRecord | null>(null)
@@ -669,7 +767,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         </Reveal>
       </div>
 
-      <SectionCard title="4공정 KPI" subtitle={`진행중 ${activeTotal.toLocaleString("ko-KR")}건 기준 · 현재 단계까지 도달한 누적 비율입니다.`} contentClassName="pt-2">
+      <SectionCard title="공정별 현황" subtitle={`진행중 ${activeTotal.toLocaleString("ko-KR")}건 기준 · 현재 단계까지 도달한 누적 비율입니다.`} contentClassName="pt-2">
         <div className="grid gap-8 py-3 sm:grid-cols-2 xl:grid-cols-4">
           {funnel.map((item, index) => (
             <RadialKpi
@@ -685,7 +783,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Categories" subtitle={`진행중 ${activeTotal.toLocaleString("ko-KR")}건의 카테고리별 건수와 OPT 분포입니다. 카드를 클릭하면 대표 스타일을 확인할 수 있습니다.`}>
+      <SectionCard title="개발 카테고리" subtitle={`진행중 ${activeTotal.toLocaleString("ko-KR")}건의 카테고리별 건수와 OPT 분포입니다. 카드를 클릭하면 대표 스타일을 확인할 수 있습니다.`}>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {categories.map((item, index) => {
             const a = ACCENT[OWNER_ACCENTS[index % OWNER_ACCENTS.length]]
@@ -724,7 +822,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
 
       <SectionCard
         title="담당자별 현황"
-        subtitle={`진행중 ${activeTotal.toLocaleString("ko-KR")}건의 현재 현황 · 월별 FL 등록은 홈과 동일한 기준으로 최근 ${ownerMonths}개월을 집계합니다.`}
+        subtitle={`최근 ${ownerMonths >= 12 ? `${ownerMonths / 12}년` : `${ownerMonths}개월`} 월별 FL 등록 추이와 개발처(GD·자체개발·생산팀·완사입) 분포입니다. 기본 4명 표시, 그 외 담당자는 펼쳐서 확인하세요.`}
         actions={(
           <div className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] p-1" role="group" aria-label="담당자별 현황 조회 기간 선택">
             {OWNER_RANGE_OPTIONS.map((option) => (
@@ -741,12 +839,39 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
           </div>
         )}
       >
-        <div className="grid gap-4 xl:grid-cols-2">
-          {owners.map((owner, index) => (
-            <Reveal key={owner.id} delay={index * 75}>
-              <OwnerCard owner={owner} rank={index + 1} trend={ownerTrends[owner.name] ?? []} onClick={() => setListPopup({ title: `${owner.name} 개발 목록`, description: `진행중 ${owner.total.toLocaleString("ko-KR")}건`, rows: active.filter((row) => row.owner === owner.name) })} />
-            </Reveal>
-          ))}
+        <div className="space-y-4">
+          <div className="grid gap-4 xl:grid-cols-2">
+            {ownerOrder.filter((name) => expandedOwners.has(name)).map((name, index) => (
+              <Reveal key={name} delay={index * 75}>
+                <OwnerCard
+                  name={name}
+                  displayName={ownerDisplayName(name)}
+                  rank={index + 1}
+                  trend={ownerTrends[name] ?? []}
+                  source={ownerSources[name] ?? EMPTY_OWNER_SOURCE}
+                  onCollapse={() => toggleOwner(name)}
+                  onOpen={() => setListPopup({ title: `${ownerDisplayName(name)} 개발 목록`, description: `진행중 ${active.filter((row) => row.owner === name).length.toLocaleString("ko-KR")}건`, rows: active.filter((row) => row.owner === name) })}
+                />
+              </Reveal>
+            ))}
+          </div>
+          {ownerOrder.some((name) => !expandedOwners.has(name)) ? (
+            <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] p-3">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[var(--muted-foreground)]"><ChevronDown aria-hidden="true" className="size-3.5" />그 외 담당자 · 눌러서 펼치기</p>
+              <div className="flex flex-wrap gap-2">
+                {ownerOrder.filter((name) => !expandedOwners.has(name)).map((name) => (
+                  <button key={name} type="button" onClick={() => toggleOwner(name)} className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)] outline-none transition-colors hover:bg-[var(--accent)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+                    <Plus aria-hidden="true" className="size-3.5 text-[var(--muted-foreground)]" />
+                    {ownerDisplayName(name)}
+                    <span className="tabular-nums text-[var(--muted-foreground)]">{(ownerSources[name]?.total ?? 0).toLocaleString("ko-KR")}건</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {ownerOrder.every((name) => !expandedOwners.has(name)) ? (
+            <p className="rounded-[var(--radius)] border border-dashed border-[var(--border)] p-6 text-center text-sm text-[var(--muted-foreground)]">펼친 담당자가 없습니다. 위 목록에서 담당자를 선택하세요.</p>
+          ) : null}
         </div>
       </SectionCard>
 
@@ -799,7 +924,7 @@ function CategoryStyleDialog({
                       {styles.map((row) => (
                         <TableRow key={row.styleNo}>
                           <TableCell className="whitespace-nowrap px-4 font-mono font-medium text-[var(--foreground)]">{row.styleNo}</TableCell>
-                          <TableCell className="whitespace-nowrap px-4 text-[var(--foreground)]">{row.owners.length ? row.owners.join(", ") : "미지정"}</TableCell>
+                          <TableCell className="whitespace-nowrap px-4 text-[var(--foreground)]">{row.owners.length ? row.owners.map(ownerDisplayName).join(", ") : "미지정"}</TableCell>
                           <TableCell className="whitespace-nowrap px-4 text-[var(--foreground)]">{row.buyer || "—"}</TableCell>
                           <TableCell className="whitespace-nowrap px-4 text-[var(--foreground)]">{row.season || "—"}</TableCell>
                           <TableCell className="whitespace-nowrap px-4 text-right font-semibold text-[var(--foreground)]">{row.options}</TableCell>
@@ -830,6 +955,7 @@ function displayField(row: DevRecord, key: DevRecordFieldKey, fullDate = false):
   const value = row[key]
   if (field?.type === "date") return fullDate ? fmtDateFull(value) : fmtDate(value)
   if (key === "weight") return fmtNum(value, field?.unit)
+  if (key === "owner") { const v = String(value ?? ""); return v ? ownerDisplayName(v) : "—" }
   return value === "" ? "—" : String(value)
 }
 
@@ -843,9 +969,11 @@ interface FilterSelectProps {
   value: string
   options: string[]
   onChange: (value: string) => void
+  /** 표시용 라벨 변환(선택 값·필터 비교는 원본 유지). 예: 퇴사자 익명화. */
+  formatOption?: (value: string) => string
 }
 
-function FilterSelect({ label, value, options, onChange }: FilterSelectProps) {
+function FilterSelect({ label, value, options, onChange, formatOption }: FilterSelectProps) {
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-full sm:w-36" aria-label={label}>
@@ -853,7 +981,7 @@ function FilterSelect({ label, value, options, onChange }: FilterSelectProps) {
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={ALL}>{label} 전체</SelectItem>
-        {options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}
+        {options.map((option) => <SelectItem key={option} value={option}>{formatOption ? formatOption(option) : option}</SelectItem>)}
       </SelectContent>
     </Select>
   )
@@ -995,7 +1123,7 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
     { id: "season", header: "시즌", accessor: (item) => item.season },
     { id: "category", header: "카테고리", accessor: (item) => item.category },
     { id: "construction", header: "조직", accessor: (item) => item.construction },
-    { id: "owner", header: "담당", accessor: (item) => item.owner },
+    { id: "owner", header: "담당", accessor: (item) => ownerDisplayName(item.owner) },
     { id: "completedAt", header: "완료일", accessor: (item) => item.completedAt, cell: (item) => fmtDateFull(item.completedAt) },
     { id: "source", header: "출처", accessor: (item) => item.source, cell: (item) => <Badge variant={item.source === "DD" ? "default" : "outline"}>{item.source}</Badge> },
   ], [])
@@ -1044,7 +1172,7 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
                       <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${item.source === "DD" ? "bg-[var(--chart-1)]" : "bg-[var(--chart-4)]"}`} />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-xs font-semibold text-[var(--foreground)]">{item.styleNo || item.flNo}</span>
-                        <span className="block truncate text-[10px] text-[var(--muted-foreground)]">담당 · {item.owner || "미지정"}</span>
+                        <span className="block truncate text-[10px] text-[var(--muted-foreground)]">담당 · {item.owner ? ownerDisplayName(item.owner) : "미지정"}</span>
                       </span>
                       <span className="text-xs text-[var(--muted-foreground)]">{item.source}</span>
                     </button>
@@ -1149,7 +1277,7 @@ function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChan
                     <div className="mt-6 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4"><p className="text-xs font-medium text-[var(--muted-foreground)]">원본 위치</p><p className="mt-1 text-sm text-[var(--foreground)]">{resolvedRecord._src.sheet} · {resolvedRecord._src.row}행</p></div>
                   </>
                 ) : libraryItem ? (
-                  <DetailPairs pairs={[["Style No.", libraryItem.styleNo], ["FL No.", libraryItem.flNo], ["시즌", libraryItem.season], ["카테고리", libraryItem.category], ["Buyer", sample?.buyer], ["담당", libraryItem.owner], ["조직", libraryItem.construction], ["완료일", fmtDateFull(libraryItem.completedAt)], ["원본 시트", sample?.sourceSheet]]} />
+                  <DetailPairs pairs={[["Style No.", libraryItem.styleNo], ["FL No.", libraryItem.flNo], ["시즌", libraryItem.season], ["카테고리", libraryItem.category], ["Buyer", sample?.buyer], ["담당", ownerDisplayName(libraryItem.owner)], ["조직", libraryItem.construction], ["완료일", fmtDateFull(libraryItem.completedAt)], ["원본 시트", sample?.sourceSheet]]} />
                 ) : null}
               </TabsContent>
 
@@ -1319,7 +1447,7 @@ function DevelopmentList() {
         <FilterSelect label="시즌" value={season} options={options.season} onChange={setSeason} />
         <FilterSelect label="카테고리" value={category} options={options.category} onChange={setCategory} />
         <FilterSelect label="Buyer" value={buyer} options={options.buyer} onChange={setBuyer} />
-        <FilterSelect label="담당" value={owner} options={options.owner} onChange={setOwner} />
+        <FilterSelect label="담당" value={owner} options={options.owner} onChange={setOwner} formatOption={ownerDisplayName} />
         <FilterSelect label="공정 단계" value={stage} options={options.stage} onChange={setStage} />
         <Button type="button" variant="outline" onClick={resetFilters}>
           <RotateCcw aria-hidden="true" />

@@ -8,7 +8,7 @@ import {
   type LaneUrgency,
 } from "@/data/derive"
 import { daysLeft } from "@/data/format"
-import type { DevRecord } from "@/data/schema"
+import { ownerDisplayName, type DevRecord } from "@/data/schema"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -69,7 +69,7 @@ function LaneChip({ group, owner, onSelect }: { group: LaneStyleGroup; owner: st
 
 export function OwnerLaneBoard({ rows, today = new Date(), onSelect, ownerAliases }: OwnerLaneBoardProps) {
   const board = useMemo(() => ownerLaneBoard(rows, today), [rows, today])
-  const displayOwner = (owner: string) => ownerAliases?.[owner] ?? owner
+  const displayOwner = (owner: string) => ownerAliases?.[owner] ?? ownerDisplayName(owner)
 
   const urgencyCounts = useMemo(() => rows.reduce((counts, record) => {
     const status = statusOf(record, today)

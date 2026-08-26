@@ -18,8 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { materialsOf, tsMaterials } from "@/data/derive"
-import { fmtDate } from "@/data/format"
-import { httpsMaterialLink, MEMBERS } from "@/data/schema"
+import { fmtDate, tsRequester } from "@/data/format"
+import { httpsMaterialLink, MEMBERS, ownerDisplayName } from "@/data/schema"
 import { type TsRecord, type TsState } from "@/data/sample"
 import { saveTsRecords, useAppStore } from "@/store/useAppStore"
 
@@ -135,6 +135,7 @@ function TsStagePanel({ counts, activeState, onSelect }: {
 interface FormValues {
   receivedAt: string
   subject: string
+  fromDept: string
   from: string
   advisor: string
   relatedDepartment: string
@@ -151,7 +152,7 @@ interface FormValues {
 }
 
 type ActionNotice = { tone: "success" | "error"; message: string }
-type FormErrorKey = "receivedAt" | "subject" | "from" | "advisor" | "attachment"
+type FormErrorKey = "receivedAt" | "subject" | "fromDept" | "from" | "advisor" | "attachment"
 type FormErrors = Partial<Record<FormErrorKey, string>>
 
 function localDate(): string {
@@ -162,6 +163,7 @@ function localDate(): string {
 const initialForm = (): FormValues => ({
   receivedAt: localDate(),
   subject: "",
+  fromDept: "",
   from: "",
   advisor: MEMBERS[0].name,
   relatedDepartment: "",
@@ -186,10 +188,13 @@ function nextTsId(rows: readonly TsRecord[]): string {
 }
 
 function exportTechnicalServices(rows: readonly TsRecord[]): string {
-  const exportRows = rows.map((row) => ({
+  const exportRows = rows.map((row) => {
+    const requester = tsRequester(row)
+    return {
     "# T/S": row.id,
     Date: row.receivedAt,
-    From: row.from,
+    의뢰부서: requester.dept,
+    From: requester.name,
     유관부서: row.relatedDepartment,
     Attn: row.attn,
     Advisor: row.advisor,
@@ -203,7 +208,8 @@ function exportTechnicalServices(rows: readonly TsRecord[]): string {
     "Order Volume": row.orderVolume,
     상태: row.state,
     첨부: row.attachment ?? "",
-  }))
+  }
+  })
   const worksheet = XLSX.utils.json_to_sheet(exportRows)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, "TS")
@@ -239,6 +245,14 @@ function DetailSection({ id, title, rows }: { id: string; title: string; rows: R
   )
 }
 
+/** 편집 진입 시 legacy `from`(부서+이름 혼합)을 의뢰 부서·이름으로 분리해 둔다. */
+function withRequesterSplit(record: TsRecord): TsRecord {
+  if ((record.fromDept ?? "").trim()) return record
+  const { dept, name } = tsRequester(record)
+  if (!dept) return record
+  return { ...record, fromDept: dept, from: name }
+}
+
 function TsDetailDialog({ record, startInEdit, onOpenChange, onSave, onDelete }: {
   record: TsRecord | null
   startInEdit: boolean
@@ -247,14 +261,14 @@ function TsDetailDialog({ record, startInEdit, onOpenChange, onSave, onDelete }:
   onDelete: (record: TsRecord) => void
 }) {
   const [editing, setEditing] = useState(startInEdit)
-  const [draft, setDraft] = useState<TsRecord | null>(record)
+  const [draft, setDraft] = useState<TsRecord | null>(record ? withRequesterSplit(record) : record)
   const [error, setError] = useState<string | null>(null)
   const [justSaved, setJustSaved] = useState(false)
   const savedTimer = useRef<number | null>(null)
 
   // 다른 행을 열거나 저장 후 목록이 갱신되면 편집 상태를 초기화한다.
   useEffect(() => {
-    setDraft(record)
+    setDraft(record ? withRequesterSplit(record) : record)
     setEditing(startInEdit)
     setError(null)
   }, [record, startInEdit])
@@ -277,6 +291,7 @@ function TsDetailDialog({ record, startInEdit, onOpenChange, onSave, onDelete }:
     onSave({
       ...draft,
       subject: draft.subject.trim(),
+      fromDept: (draft.fromDept ?? "").trim(),
       from: draft.from.trim(),
       relatedDepartment: draft.relatedDepartment.trim(),
       attn: draft.attn.trim(),
@@ -323,7 +338,8 @@ function TsDetailDialog({ record, startInEdit, onOpenChange, onSave, onDelete }:
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     <div className="space-y-2"><Label htmlFor="ts-edit-received">접수일</Label><Input id="ts-edit-received" type="date" value={draft.receivedAt} onChange={(e) => setField("receivedAt", e.target.value)} /></div>
                     <div className="space-y-2 sm:col-span-2"><Label htmlFor="ts-edit-subject">Subject 건명</Label><Input id="ts-edit-subject" value={draft.subject} onChange={(e) => setField("subject", e.target.value)} /></div>
-                    <div className="space-y-2"><Label htmlFor="ts-edit-from">요청자 From</Label><Input id="ts-edit-from" value={draft.from} onChange={(e) => setField("from", e.target.value)} /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-from-dept">의뢰 부서</Label><Input id="ts-edit-from-dept" value={draft.fromDept ?? ""} onChange={(e) => setField("fromDept", e.target.value)} placeholder="예: 사업4부 1팀" /></div>
+                    <div className="space-y-2"><Label htmlFor="ts-edit-from">요청자 이름</Label><Input id="ts-edit-from" value={draft.from} onChange={(e) => setField("from", e.target.value)} placeholder="예: 이인옥" /></div>
                     <div className="space-y-2"><Label htmlFor="ts-edit-dept">유관부서</Label><Input id="ts-edit-dept" value={draft.relatedDepartment} onChange={(e) => setField("relatedDepartment", e.target.value)} /></div>
                     <div className="space-y-2"><Label htmlFor="ts-edit-attn">수신자 Attn</Label><Input id="ts-edit-attn" value={draft.attn} onChange={(e) => setField("attn", e.target.value)} /></div>
                     <div className="space-y-2"><Label htmlFor="ts-edit-advisor">담당 Advisor</Label><Input id="ts-edit-advisor" value={draft.advisor} onChange={(e) => setField("advisor", e.target.value)} /></div>
@@ -340,7 +356,7 @@ function TsDetailDialog({ record, startInEdit, onOpenChange, onSave, onDelete }:
                     <div className="space-y-2 lg:col-span-2"><Label htmlFor="ts-edit-result">결과 Result</Label><textarea id="ts-edit-result" className={textareaClassName} value={draft.result} onChange={(e) => setField("result", e.target.value)} /></div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" disabled={justSaved} onClick={() => { setDraft(record); setEditing(false); setError(null) }}>취소</Button>
+                    <Button type="button" variant="outline" disabled={justSaved} onClick={() => { setDraft(withRequesterSplit(record)); setEditing(false); setError(null) }}>취소</Button>
                     <Button
                       type="button"
                       disabled={justSaved}
@@ -356,7 +372,7 @@ function TsDetailDialog({ record, startInEdit, onOpenChange, onSave, onDelete }:
                 </div>
               ) : (
                 <>
-                  <DetailSection id="ts-detail-people" title="의뢰 주체" rows={[["요청자 From", record.from], ["유관부서", record.relatedDepartment], ["수신자 Attn", record.attn], ["담당 Advisor", record.advisor]]} />
+                  <DetailSection id="ts-detail-people" title="의뢰 주체" rows={[["의뢰 부서", tsRequester(record).dept], ["요청자 이름", tsRequester(record).name], ["유관부서", record.relatedDepartment], ["수신자 Attn", record.attn], ["담당 Advisor", ownerDisplayName(record.advisor)]]} />
                   <DetailSection id="ts-detail-workflow" title="Trouble shooting 내용" rows={[["의뢰 내용", record.inquiry], ["현황 분석", record.analysis], ["원인", record.causes], ["해결 방안", record.action], ["결과", record.result]]} />
                   <DetailSection id="ts-detail-etc" title="상태·기타" rows={[["생산처", record.productionSite], ["발주량", record.orderVolume]]} />
                   {attachment ? <Button asChild className="w-full"><a href={attachment} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button> : null}
@@ -412,13 +428,14 @@ export function TS() {
     return rows.filter((row) => {
       if (activeState && row.state !== activeState) return false
       if (!query) return true
-      return [row.subject, row.from, row.advisor, row.inquiry]
+      return [row.subject, row.from, tsRequester(row).dept, row.advisor, row.inquiry]
         .some((value) => value.normalize("NFKC").toLocaleLowerCase("ko-KR").includes(query))
     })
   }, [activeState, rows, search])
   const columns: DataTableColumn<TsRecord>[] = [
     { id: "id", header: "# T/S", accessor: (r) => r.id, headerClassName: "w-24" },
     { id: "receivedAt", header: "Date", accessor: (r) => r.receivedAt, cell: (r) => fmtDate(r.receivedAt), headerClassName: "w-28" },
+    { id: "fromDept", header: "의뢰 부서", accessor: (r) => tsRequester(r).dept, cell: (r) => tsRequester(r).dept || "—", headerClassName: "w-36" },
     { id: "subject", header: "Subject", accessor: (r) => r.subject, headerClassName: "w-80" },
     { id: "analysis", header: "Analysis", accessor: (r) => r.analysis, cell: (r) => r.analysis || "—", headerClassName: "w-64" },
     { id: "action", header: "Action", accessor: (r) => r.action, cell: (r) => r.action || "—", headerClassName: "w-64" },
@@ -478,7 +495,7 @@ export function TS() {
 
   const setField = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
     setForm((current) => ({ ...current, [key]: value }))
-    if (key === "receivedAt" || key === "subject" || key === "from" || key === "advisor" || key === "attachment") {
+    if (key === "receivedAt" || key === "subject" || key === "fromDept" || key === "from" || key === "advisor" || key === "attachment") {
       setFormErrors((current) => ({ ...current, [key]: undefined }))
     }
   }
@@ -525,6 +542,7 @@ export function TS() {
     const errors: FormErrors = {}
     if (!form.receivedAt.trim()) errors.receivedAt = "접수일을 입력해 주세요."
     if (!form.subject.trim()) errors.subject = "Subject 건명을 입력해 주세요."
+    if (!form.fromDept.trim()) errors.fromDept = "의뢰 부서를 입력해 주세요."
     if (!form.from.trim()) errors.from = "요청자를 입력해 주세요."
     if (!form.advisor.trim()) errors.advisor = "담당자를 입력해 주세요."
     const attachment = httpsMaterialLink(form.attachment)
@@ -536,6 +554,7 @@ export function TS() {
       id: nextTsId(rows),
       receivedAt: form.receivedAt,
       subject: form.subject.trim(),
+      fromDept: form.fromDept.trim(),
       from: form.from.trim(),
       relatedDepartment: form.relatedDepartment.trim(),
       attn: form.attn.trim(),
@@ -608,7 +627,8 @@ export function TS() {
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div className="space-y-2"><Label htmlFor="ts-received-at">접수일 <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-received-at" type="date" required aria-invalid={Boolean(formErrors.receivedAt) || undefined} aria-describedby={formErrors.receivedAt ? "ts-received-at-error" : undefined} value={form.receivedAt} onChange={(event) => setField("receivedAt", event.target.value)} />{formErrors.receivedAt ? <p id="ts-received-at-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.receivedAt}</p> : null}</div>
                     <div className="space-y-2"><Label htmlFor="ts-subject">Subject 건명 <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-subject" required value={form.subject} aria-invalid={Boolean(formErrors.subject) || undefined} aria-describedby={formErrors.subject ? "ts-subject-error" : undefined} onChange={(event) => setField("subject", event.target.value)} placeholder="의뢰 건명을 입력하세요" />{formErrors.subject ? <p id="ts-subject-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.subject}</p> : null}</div>
-                    <div className="space-y-2"><Label htmlFor="ts-from">요청자 From <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-from" list="ts-people" required value={form.from} aria-invalid={Boolean(formErrors.from) || undefined} aria-describedby={formErrors.from ? "ts-from-error" : undefined} onChange={(event) => setField("from", event.target.value)} />{formErrors.from ? <p id="ts-from-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.from}</p> : null}</div>
+                    <div className="space-y-2"><Label htmlFor="ts-from-dept">의뢰 부서 <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-from-dept" required value={form.fromDept} aria-invalid={Boolean(formErrors.fromDept) || undefined} aria-describedby={formErrors.fromDept ? "ts-from-dept-error" : undefined} onChange={(event) => setField("fromDept", event.target.value)} placeholder="예: 사업4부 1팀" />{formErrors.fromDept ? <p id="ts-from-dept-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.fromDept}</p> : null}</div>
+                    <div className="space-y-2"><Label htmlFor="ts-from">요청자 이름 <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-from" list="ts-people" required value={form.from} aria-invalid={Boolean(formErrors.from) || undefined} aria-describedby={formErrors.from ? "ts-from-error" : undefined} onChange={(event) => setField("from", event.target.value)} placeholder="예: 이인옥" />{formErrors.from ? <p id="ts-from-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.from}</p> : null}</div>
                     <div className="space-y-2"><Label htmlFor="ts-advisor">담당 Advisor <span aria-hidden="true" className="text-[var(--destructive)]">*</span></Label><Input id="ts-advisor" list="ts-people" required value={form.advisor} aria-invalid={Boolean(formErrors.advisor) || undefined} aria-describedby={formErrors.advisor ? "ts-advisor-error" : undefined} onChange={(event) => setField("advisor", event.target.value)} />{formErrors.advisor ? <p id="ts-advisor-error" role="alert" className="text-xs text-[var(--destructive)]">{formErrors.advisor}</p> : null}</div>
                   </div>
                 </fieldset>
@@ -661,7 +681,7 @@ export function TS() {
           pageSize={10}
           resizableColumns
           fitContainer
-          storageKey="ts-list-v3"
+          storageKey="ts-list-v4"
           fillToPageSize
           onRowClick={(record) => { setSelectedRow(record); setOpenInEdit(false) }}
           toolbar={(
