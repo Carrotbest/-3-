@@ -49,14 +49,20 @@ export interface LeadTimelineRow {
 }
 
 export const BOARD_STAGES = [
+  { key: "intake", label: "접수" },
   { key: "yarn", label: "원사" },
   { key: "knit", label: "편직" },
   { key: "dye", label: "염색" },
   { key: "finish", label: "가공" },
-  { key: "done", label: "완료" },
 ] as const
 
-export type LaneUrgency = "normal" | "soon" | "danger" | "done"
+export type LaneUrgency = "normal" | "soon" | "danger"
+
+export interface LaneUrgencyCounts {
+  normal: number
+  soon: number
+  danger: number
+}
 
 /** 레인 셀 하나 = 같은 담당자·같은 공정에 있는 스타일 1개(OPT 묶음). */
 export interface LaneStyleGroup {
@@ -72,6 +78,7 @@ export interface LaneCell {
   groups: LaneStyleGroup[]
   count: number
   urgency: LaneUrgency
+  urgencyCounts: LaneUrgencyCounts
 }
 
 export interface LaneRow {
@@ -421,15 +428,20 @@ export function statusOf(rec: DevRecord, today = new Date()): StatusKey {
   return "progress"
 }
 
-/** 서브페이지 보드에서 공통으로 쓰는 5단계 진행 위치. */
-export function boardStagePosition(row: DevRecord, today = new Date()): number {
-  if (statusOf(row, today) === "done") return 4
+/** 진행 중 레코드의 현재 위치를 접수→원사→편직→염색→가공 5단계로 환산한다. */
+export function boardStagePosition(row: DevRecord): number {
+  if (row.processReached) {
+    if (row.processReached.finishing) return 4
+    if (row.processReached.dyeing) return 3
+    if (row.processReached.knitting) return 2
+    if (row.processReached.yarn) return 1
+    return 0
+  }
   const index = BOARD_STAGES.findIndex((item) => item.label === row.stage)
   return Math.max(0, index)
 }
 
 const LANE_URGENCY_RANK: Record<LaneUrgency, number> = {
-  done: 0,
   normal: 1,
   soon: 2,
   danger: 3,
@@ -437,7 +449,6 @@ const LANE_URGENCY_RANK: Record<LaneUrgency, number> = {
 
 function laneUrgency(record: DevRecord, today: Date): LaneUrgency {
   const status = statusOf(record, today)
-  if (status === "done") return "done"
   const remaining = daysLeft(record.dueDate, today)
   if (status === "late" || remaining === 0) return "danger"
   if (remaining !== null && remaining >= 1 && remaining <= 7) return "soon"
@@ -449,8 +460,8 @@ function urgentRecordOrder(left: DevRecord, right: DevRecord, today: Date): numb
   const rightUrgency = laneUrgency(right, today)
   const urgencyDiff = LANE_URGENCY_RANK[rightUrgency] - LANE_URGENCY_RANK[leftUrgency]
   if (urgencyDiff) return urgencyDiff
-  const leftDays = leftUrgency === "done" ? null : daysLeft(left.dueDate, today)
-  const rightDays = rightUrgency === "done" ? null : daysLeft(right.dueDate, today)
+  const leftDays = daysLeft(left.dueDate, today)
+  const rightDays = daysLeft(right.dueDate, today)
   if (leftDays !== null && rightDays !== null && leftDays !== rightDays) return leftDays - rightDays
   if (leftDays !== null) return -1
   if (rightDays !== null) return 1
@@ -459,13 +470,14 @@ function urgentRecordOrder(left: DevRecord, right: DevRecord, today: Date): numb
 
 /** 담당자별 5공정 레인과 병목 히트맵에 쓰는 단일 집계. */
 export function ownerLaneBoard(rows: readonly DevRecord[], today = new Date()): OwnerLaneBoard {
+  const activeRows = rows.filter(isInProgress)
   // 홈 담당자 레인도 개발 실적 보드와 같은 기준: 박근후(개발 미수행) 대신 진영은을 기본 레인으로 둔다.
   const knownOwners: string[] = SAMPLE_OWNERS.map((member) => member.name)
   const ownerOrder = [...knownOwners]
   const ownerSet = new Set(ownerOrder)
   const ownerName = (record: DevRecord) => record.owner.trim() || "미지정"
 
-  for (const record of rows) {
+  for (const record of activeRows) {
     const owner = ownerName(record)
     if (!ownerSet.has(owner)) {
       ownerSet.add(owner)
@@ -479,9 +491,9 @@ export function ownerLaneBoard(rows: readonly DevRecord[], today = new Date()): 
     grouped.set(owner, BOARD_STAGES.map(() => new Map<string, DevRecord[]>()))
   }
 
-  for (const record of rows) {
+  for (const record of activeRows) {
     const owner = ownerName(record)
-    const stageIndex = boardStagePosition(record, today)
+    const stageIndex = boardStagePosition(record)
     const styleNo = record.styleNo.trim() || "Style 미기재"
     const stageGroups = grouped.get(owner)![stageIndex]
     const styleRecords = stageGroups.get(styleNo)
@@ -499,9 +511,8 @@ export function ownerLaneBoard(rows: readonly DevRecord[], today = new Date()): 
         const urgency = sortedRecords.reduce<LaneUrgency>((highest, record) => {
           const current = laneUrgency(record, today)
           return LANE_URGENCY_RANK[current] > LANE_URGENCY_RANK[highest] ? current : highest
-        }, "done")
+        }, "normal")
         const activeDays = sortedRecords
-          .filter((record) => laneUrgency(record, today) !== "done")
           .map((record) => daysLeft(record.dueDate, today))
           .filter((value): value is number => value !== null)
         return {
@@ -525,13 +536,17 @@ export function ownerLaneBoard(rows: readonly DevRecord[], today = new Date()): 
             LANE_URGENCY_RANK[group.urgency] > LANE_URGENCY_RANK[highest] ? group.urgency : highest,
           groups[0].urgency)
         : "normal"
+      const urgencyCounts = groups.reduce<LaneUrgencyCounts>((counts, group) => {
+        for (const record of group.records) counts[laneUrgency(record, today)] += 1
+        return counts
+      }, { normal: 0, soon: 0, danger: 0 })
       maxCell = Math.max(maxCell, count)
-      return { stageKey: BOARD_STAGES[stageIndex].key, groups, count, urgency }
+      return { stageKey: BOARD_STAGES[stageIndex].key, groups, count, urgency, urgencyCounts }
     })
     return { owner, cells, total: cells.reduce((sum, cell) => sum + cell.count, 0) }
   })
 
-  return { rows: laneRows, stageTotals, total: rows.length, maxCell }
+  return { rows: laneRows, stageTotals, total: activeRows.length, maxCell }
 }
 
 export function kpis(records: readonly DevRecord[], today = new Date()): KpiSummary {

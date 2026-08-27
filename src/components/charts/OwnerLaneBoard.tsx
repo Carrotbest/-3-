@@ -1,153 +1,316 @@
-import { useMemo } from "react"
+import { useMemo, useState, type CSSProperties } from "react"
+import { ArrowUpRight } from "lucide-react"
 
 import {
   BOARD_STAGES,
   ownerLaneBoard,
-  statusOf,
+  type LaneCell,
   type LaneStyleGroup,
   type LaneUrgency,
 } from "@/data/derive"
-import { daysLeft } from "@/data/format"
 import { ownerDisplayName, type DevRecord } from "@/data/schema"
-import { cn } from "@/lib/utils"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Magnetic } from "@/components/motion/Magnetic"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface OwnerLaneBoardProps {
   rows: readonly DevRecord[]
   today?: Date
   onSelect: (record: DevRecord) => void
-  /** 특정 담당자 이름을 화면 표시용으로 치환합니다(예: 퇴사자 익명화). 집계 로직에는 영향 없음. */
   ownerAliases?: Record<string, string>
 }
 
-const URGENCY_DOT: Record<LaneUrgency, string> = {
-  normal: "bg-[var(--status-normal)]",
-  soon: "bg-[var(--status-soon)]",
-  danger: "bg-[var(--status-danger)]",
-  done: "bg-[var(--status-done)]",
-}
+const CHART_WIDTH = 1200
+const STAGE_X = [225, 420, 615, 810, 1005] as const
+const ROW_START = 135
+const ROW_GAP = 82
 
-const STAGE_ACCENTS = [
-  "from-[var(--gradient-1)] to-[var(--chart-4)]",
-  "from-[var(--chart-2)] to-[var(--gradient-2)]",
-  "from-[var(--chart-3)] to-[var(--gradient-1)]",
-  "from-[var(--chart-4)] to-[var(--gradient-3)]",
+const STAGE_COLORS = [
+  "var(--gradient-1)",
+  "var(--chart-4)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--gradient-3)",
 ] as const
 
+const OWNER_COLORS = [
+  "var(--gradient-1)",
+  "var(--chart-2)",
+  "var(--chart-5)",
+  "var(--gradient-3)",
+  "var(--chart-3)",
+] as const
+
+const URGENCY_COLORS: Record<LaneUrgency, string> = {
+  normal: "var(--status-normal)",
+  soon: "var(--status-soon)",
+  danger: "var(--status-danger)",
+}
+
 function dueLabel(group: LaneStyleGroup): string {
-  if (group.urgency === "done") return "완료"
   if (group.dayOffset === null) return "납기 미기재"
   if (group.dayOffset < 0) return `D+${Math.abs(group.dayOffset)}`
   if (group.dayOffset === 0) return "오늘 마감"
   return `D-${group.dayOffset}`
 }
 
-function groupLabel(group: LaneStyleGroup, owner: string): string {
-  const options = group.opts.length ? group.opts.join("·") : "미기재"
-  return `${group.styleNo} · OPT ${options} · ${owner} · ${dueLabel(group)}`
+function urgencyText(cell: LaneCell): string {
+  const parts = []
+  if (cell.urgencyCounts.danger) parts.push(`오늘·지연 ${cell.urgencyCounts.danger}`)
+  if (cell.urgencyCounts.soon) parts.push(`임박 ${cell.urgencyCounts.soon}`)
+  if (cell.urgencyCounts.normal) parts.push(`정상 ${cell.urgencyCounts.normal}`)
+  return parts.join(" · ") || "진행 없음"
 }
 
-function LaneChip({ group, owner, onSelect }: { group: LaneStyleGroup; owner: string; onSelect: (record: DevRecord) => void }) {
-  const label = groupLabel(group, owner)
+function nodeStyle(stageIndex: number, ownerIndex: number, urgency: LaneUrgency): CSSProperties {
+  const stageColor = STAGE_COLORS[stageIndex]
+  const ownerColor = OWNER_COLORS[ownerIndex % OWNER_COLORS.length]
+  return {
+    borderColor: `color-mix(in oklab, ${stageColor} 48%, var(--border))`,
+    background: `linear-gradient(145deg, color-mix(in oklab, var(--card) 94%, ${stageColor}), color-mix(in oklab, var(--card) 82%, ${ownerColor}))`,
+    boxShadow: `0 9px 18px -14px color-mix(in oklab, ${ownerColor} 62%, transparent), 0 0 0 3px color-mix(in oklab, ${URGENCY_COLORS[urgency]} 9%, transparent)`,
+  }
+}
+
+function FlowNode({
+  cell,
+  owner,
+  ownerIndex,
+  stageIndex,
+  x,
+  y,
+  maxCell,
+  onActivate,
+  onDeactivate,
+  onOpen,
+}: {
+  cell: LaneCell
+  owner: string
+  ownerIndex: number
+  stageIndex: number
+  x: number
+  y: number
+  maxCell: number
+  onActivate: () => void
+  onDeactivate: () => void
+  onOpen: () => void
+}) {
+  const stage = BOARD_STAGES[stageIndex]
+  const density = maxCell ? cell.count / maxCell : 0
+  const size = 38 + Math.sqrt(density) * 12
+  if (!cell.count) {
+    return <span aria-hidden="true" className="absolute z-[2] size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--border)] bg-[var(--card)]" style={{ left: `${(x / CHART_WIDTH) * 100}%`, top: y }} />
+  }
+
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
+    <div
+      className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+      style={{ left: `${(x / CHART_WIDTH) * 100}%`, top: y, width: 68, height: 68 }}
+      onPointerEnter={onActivate}
+      onPointerLeave={onDeactivate}
+      onFocusCapture={onActivate}
+      onBlurCapture={onDeactivate}
+    >
+      <Magnetic strength={2} tilt={4} lift={5} scale={1.035} stiffness={105} damping={18} className="grid place-items-center rounded-full">
         <button
           type="button"
-          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/80 bg-white/68 px-2 text-xs font-semibold text-[var(--foreground)] shadow-[0_5px_14px_-10px_rgba(15,23,42,0.2)] outline-none backdrop-blur transition-[transform,box-shadow,border-color] hover:-translate-y-0.5 hover:scale-105 hover:border-white hover:shadow-[0_9px_18px_-10px_rgba(15,23,42,0.28)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none"
-          aria-label={label}
-          onClick={() => onSelect(group.records[0])}
+          aria-label={`${owner} · ${stage.label} · ${cell.count} OPT · 옵션 목록 열기`}
+          onClick={onOpen}
+          className="relative grid place-items-center rounded-full border text-[var(--foreground)] outline-none transition-[box-shadow] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none"
+          style={{ width: size, height: size, ...nodeStyle(stageIndex, ownerIndex, cell.urgency) }}
         >
-          <span aria-hidden="true" className={cn("size-2.5 rounded-full", URGENCY_DOT[group.urgency])} />
-          <span>{group.records.length}</span>
+          <span className="flex flex-col items-center leading-none">
+            <strong className="text-sm font-bold tabular-nums">{cell.count.toLocaleString("ko-KR")}</strong>
+            <span className="mt-0.5 text-[7px] font-semibold tracking-[0.08em] text-[var(--muted-foreground)]">OPT</span>
+          </span>
+          <span className="absolute right-0 top-0 size-2.5 rounded-full border-2 border-[var(--card)]" style={{ background: URGENCY_COLORS[cell.urgency] }} aria-hidden="true" />
         </button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+      </Magnetic>
+    </div>
   )
+}
+
+interface SelectedProcess {
+  owner: string
+  stageIndex: number
+  cell: LaneCell
 }
 
 export function OwnerLaneBoard({ rows, today = new Date(), onSelect, ownerAliases }: OwnerLaneBoardProps) {
   const board = useMemo(() => ownerLaneBoard(rows, today), [rows, today])
+  const [activeOwner, setActiveOwner] = useState<number | null>(null)
+  const [selectedProcess, setSelectedProcess] = useState<SelectedProcess | null>(null)
+  const chartHeight = Math.max(300, ROW_START + Math.max(0, board.rows.length - 1) * ROW_GAP + 58)
   const displayOwner = (owner: string) => ownerAliases?.[owner] ?? ownerDisplayName(owner)
 
-  const urgencyCounts = useMemo(() => rows.reduce((counts, record) => {
-    const status = statusOf(record, today)
-    if (status === "done") { counts.done += 1; return counts }
-    const remaining = daysLeft(record.dueDate, today)
-    if (status === "late" || remaining === 0) counts.danger += 1
-    else if (remaining !== null && remaining >= 1 && remaining <= 7) counts.soon += 1
-    else counts.normal += 1
-    return counts
-  }, { normal: 0, soon: 0, danger: 0, done: 0 }), [rows, today])
+  const selectedStage = selectedProcess ? BOARD_STAGES[selectedProcess.stageIndex] : null
+  const selectedRecord = selectedProcess?.cell.groups[0]?.records[0]
 
   return (
-    <TooltipProvider delayDuration={150}>
-      <div className="relative space-y-4 p-4">
-        <section className="overflow-hidden rounded-[11px] border border-white/75 bg-white/48 shadow-[0_12px_32px_-26px_rgba(15,23,42,0.18)] backdrop-blur" aria-labelledby="owner-lane-title">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/70 bg-white/36 px-4 py-3">
-            <div>
-              <h3 id="owner-lane-title" className="text-sm font-semibold text-[var(--foreground)]">담당자 레인</h3>
-              <p className="mt-1 text-xs text-[var(--muted-foreground)]">같은 스타일의 OPT를 하나의 칩으로 묶었습니다. 담당별·공정별 합계를 함께 표시합니다.</p>
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-max border-collapse text-sm">
-              <caption className="sr-only">담당자별 공정 레인과 스타일 OPT 묶음, 담당별·공정별 합계</caption>
-              <thead>
-                <tr className="bg-white/48 text-[var(--muted-foreground)] backdrop-blur">
-                  <th scope="col" className="sticky left-0 z-10 min-w-28 border-b border-r border-white/70 bg-white/78 px-3 py-3 text-left font-medium">담당자</th>
-                  {BOARD_STAGES.map((stage, index) => <th key={stage.key} scope="col" className="relative min-w-36 border-b border-r border-white/70 px-3 py-3 text-center font-medium"><span aria-hidden="true" className={`absolute inset-x-8 top-0 h-0.5 rounded-full bg-gradient-to-r ${STAGE_ACCENTS[index % STAGE_ACCENTS.length]}`} />{stage.label}</th>)}
-                  <th scope="col" className="min-w-20 border-b border-white/70 px-3 py-3 text-center font-medium">합계</th>
-                </tr>
-              </thead>
-              <tbody>
-                {board.rows.map((row) => {
-                  const owner = displayOwner(row.owner)
+    <>
+      <div className="relative p-4">
+        <section className="overflow-hidden rounded-[14px] border border-white/70 bg-white/44 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.26)] backdrop-blur" aria-labelledby="owner-lane-title">
+          <div className="overflow-x-auto px-4 py-4">
+            <div className="min-w-[1120px]">
+              <div
+                className="relative isolate overflow-hidden rounded-[14px] border border-white/65 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--card)_90%,transparent),color-mix(in_oklab,var(--muted)_28%,transparent))]"
+                style={{ height: chartHeight }}
+                role="group"
+                aria-label="담당자별 접수, 원사, 편직, 염색, 가공 진행 흐름"
+                onPointerLeave={() => setActiveOwner(null)}
+              >
+                <svg className="pointer-events-none absolute inset-0 size-full" viewBox={`0 0 ${CHART_WIDTH} ${chartHeight}`} preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    {board.rows.map((row, rowIndex) => (
+                      <linearGradient key={row.owner} id={`owner-track-${rowIndex}`} x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0" stopColor={OWNER_COLORS[rowIndex % OWNER_COLORS.length]} stopOpacity="0.45" />
+                        <stop offset="0.5" stopColor={OWNER_COLORS[rowIndex % OWNER_COLORS.length]} stopOpacity="0.9" />
+                        <stop offset="1" stopColor={OWNER_COLORS[rowIndex % OWNER_COLORS.length]} stopOpacity="0.55" />
+                      </linearGradient>
+                    ))}
+                  </defs>
+
+                  {STAGE_X.map((x, index) => (
+                    <g key={BOARD_STAGES[index].key}>
+                      <rect x={x - 72} y="80" width="144" height={chartHeight - 100} rx="20" fill={`color-mix(in oklab, ${STAGE_COLORS[index]} 3%, transparent)`} />
+                      <line x1={x} y1="82" x2={x} y2={chartHeight - 18} stroke="var(--border)" strokeWidth="1" strokeDasharray="2 8" opacity="0.65" />
+                    </g>
+                  ))}
+
+                  {board.rows.map((row, rowIndex) => {
+                    const y = ROW_START + rowIndex * ROW_GAP
+                    const selected = activeOwner === rowIndex
+                    const subdued = activeOwner !== null && !selected
+                    return (
+                      <g key={row.owner} opacity={subdued ? 0.18 : 1} style={{ transition: "opacity 220ms ease" }}>
+                        <line x1={STAGE_X[0]} y1={y} x2={STAGE_X[4]} y2={y} stroke="var(--border)" strokeWidth="1" opacity="0.55" />
+                        <line x1={STAGE_X[0]} y1={y} x2={STAGE_X[4]} y2={y} stroke={`url(#owner-track-${rowIndex})`} strokeWidth={selected ? 5 : 3} strokeLinecap="round" opacity={selected ? 1 : 0.68} style={{ transition: "stroke-width 220ms ease, opacity 220ms ease" }} />
+                      </g>
+                    )
+                  })}
+                </svg>
+
+                <div className="absolute inset-x-0 top-0 h-[82px] border-b border-white/55 bg-white/28 backdrop-blur-sm" aria-hidden="true" />
+                <span id="owner-lane-title" className="absolute left-3 top-6 w-24 text-center text-[10px] font-semibold tracking-[0.08em] text-[var(--muted-foreground)]">담당자</span>
+
+                {BOARD_STAGES.map((stage, stageIndex) => {
+                  const total = board.stageTotals[stageIndex]
+                  const share = board.total ? Math.round((total / board.total) * 100) : 0
                   return (
-                  <tr key={row.owner} className="transition-colors duration-200 hover:bg-white/45">
-                    <th scope="row" className="sticky left-0 z-10 border-b border-b-[rgba(15,23,42,0.12)] border-r border-r-white/65 bg-white/82 px-3 py-3 text-left font-semibold text-[var(--foreground)] backdrop-blur">{owner}</th>
-                    {row.cells.map((cell) => {
-                      const stage = BOARD_STAGES.find((item) => item.key === cell.stageKey)!
-                      return (
-                        <td key={cell.stageKey} aria-label={`${owner} · ${stage.label} · ${cell.count}건`} className="h-14 border-b border-b-[rgba(15,23,42,0.12)] border-r border-r-white/60 px-2 py-2 align-middle">
-                          {cell.groups.length ? (
-                            <div className="flex flex-col items-center gap-1.5">
-                              <div className="flex flex-wrap justify-center gap-1.5">{cell.groups.map((group) => <LaneChip key={group.styleNo} group={group} owner={owner} onSelect={onSelect} />)}</div>
-                              <span className="text-[11px] font-medium tabular-nums text-[var(--muted-foreground)]">{cell.count.toLocaleString("ko-KR")}건</span>
-                            </div>
-                          ) : null}
-                        </td>
-                      )
-                    })}
-                    <td className="border-b border-b-[rgba(15,23,42,0.12)] px-3 py-3 text-center font-semibold text-[var(--foreground)]">{row.total.toLocaleString("ko-KR")}</td>
-                  </tr>
+                    <div key={stage.key} className="absolute top-4 z-[3] w-28 -translate-x-1/2 text-center" style={{ left: `${(STAGE_X[stageIndex] / CHART_WIDTH) * 100}%` }}>
+                      <span className="mx-auto mb-1.5 block h-0.5 w-7 rounded-full" style={{ background: STAGE_COLORS[stageIndex] }} aria-hidden="true" />
+                      <strong className="block text-sm font-semibold text-[var(--foreground)]">{stage.label}</strong>
+                      <span className="mt-0.5 block text-[10px] tabular-nums text-[var(--muted-foreground)]">{total.toLocaleString("ko-KR")} OPT · {share}%</span>
+                    </div>
                   )
                 })}
-              </tbody>
-              <tfoot>
-                <tr className="bg-white/55 font-semibold text-[var(--foreground)] backdrop-blur">
-                  <th scope="row" className="sticky left-0 z-10 border-r border-white/70 bg-white/82 px-3 py-2 text-left">공정 합계</th>
-                  {board.stageTotals.map((total, index) => <td key={BOARD_STAGES[index].key} className="border-r border-white/70 px-3 py-2 text-center tabular-nums">{total.toLocaleString("ko-KR")}</td>)}
-                  <td className="px-3 py-2 text-center tabular-nums">{board.total.toLocaleString("ko-KR")}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-white/70 bg-white/38 px-4 py-3 text-xs text-[var(--muted-foreground)]">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2" aria-label="긴급도 범례">
-              {([
-                ["normal", "정상"],
-                ["soon", "임박 D-7"],
-                ["danger", "오늘·지연"],
-                ["done", "완료"],
-              ] as const).map(([urgency, label]) => <span key={urgency} className="inline-flex items-center gap-1.5"><span aria-hidden="true" className={cn("size-2.5 rounded-full", URGENCY_DOT[urgency])} />{label}</span>)}
-              <span>숫자 = OPT 수</span>
+
+                {board.rows.map((row, rowIndex) => {
+                  const owner = displayOwner(row.owner)
+                  const y = ROW_START + rowIndex * ROW_GAP
+                  const selected = activeOwner === rowIndex
+                  const subdued = activeOwner !== null && !selected
+                  return (
+                    <div key={row.owner} className="contents">
+                      <button
+                        type="button"
+                        className="absolute left-3 z-10 w-24 -translate-y-1/2 rounded-lg px-1.5 py-2 text-center outline-none transition-[opacity,background-color] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none"
+                        style={{ top: y, opacity: subdued ? 0.32 : 1, background: selected ? `color-mix(in oklab, ${OWNER_COLORS[rowIndex % OWNER_COLORS.length]} 9%, transparent)` : "transparent" }}
+                        aria-label={`${owner} 레인 · ${row.total} OPT`}
+                        onPointerEnter={() => setActiveOwner(rowIndex)}
+                        onPointerLeave={() => setActiveOwner(null)}
+                        onFocus={() => setActiveOwner(rowIndex)}
+                        onBlur={() => setActiveOwner(null)}
+                      >
+                        <span className="flex items-center justify-center gap-1.5"><span className="size-2 shrink-0 rounded-full" style={{ background: OWNER_COLORS[rowIndex % OWNER_COLORS.length] }} aria-hidden="true" /><strong className="truncate text-sm font-semibold text-[var(--foreground)]">{owner}</strong></span>
+                        <span className="mt-1 block text-[9px] tabular-nums text-[var(--muted-foreground)]">{row.total.toLocaleString("ko-KR")} OPT</span>
+                      </button>
+
+                      {row.cells.map((cell, stageIndex) => (
+                        <FlowNode
+                          key={cell.stageKey}
+                          cell={cell}
+                          owner={owner}
+                          ownerIndex={rowIndex}
+                          stageIndex={stageIndex}
+                          x={STAGE_X[stageIndex]}
+                          y={y}
+                          maxCell={board.maxCell}
+                          onActivate={() => setActiveOwner(rowIndex)}
+                          onDeactivate={() => setActiveOwner(null)}
+                          onOpen={() => setSelectedProcess({ owner, stageIndex, cell })}
+                        />
+                      ))}
+
+                      <div className="absolute right-6 z-[3] -translate-y-1/2 text-right" style={{ top: y, opacity: subdued ? 0.32 : 1 }}>
+                        <strong className="block text-sm font-bold tabular-nums text-[var(--foreground)]">{row.total.toLocaleString("ko-KR")}</strong>
+                        <span className="text-[8px] font-semibold text-[var(--muted-foreground)]">TOTAL</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-            <p className="font-medium text-[var(--foreground)]">총 정상 {urgencyCounts.normal.toLocaleString("ko-KR")}건 · 지연 {urgencyCounts.danger.toLocaleString("ko-KR")}건</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/65 px-5 py-3 text-xs text-[var(--muted-foreground)]">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2" aria-label="차트 범례">
+              <span>노드 크기 = OPT 밀도</span>
+              {(["normal", "soon", "danger"] as const).map((urgency) => <span key={urgency} className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-full" style={{ background: URGENCY_COLORS[urgency] }} aria-hidden="true" />{{ normal: "정상", soon: "임박 D-7", danger: "오늘·지연" }[urgency]}</span>)}
+            </div>
           </div>
         </section>
       </div>
-    </TooltipProvider>
+
+      <Dialog open={Boolean(selectedProcess)} onOpenChange={(open) => { if (!open) setSelectedProcess(null) }}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{selectedProcess?.owner} · {selectedStage?.label} 옵션</DialogTitle>
+            <DialogDescription>
+              {selectedProcess ? `${selectedProcess.cell.groups.length.toLocaleString("ko-KR")}개 스타일 · ${selectedProcess.cell.count.toLocaleString("ko-KR")} OPT · ${urgencyText(selectedProcess.cell)}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody className="px-5 py-3">
+            <div className="max-h-[52vh] divide-y divide-[var(--border)] overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--background)]">
+              {selectedProcess?.cell.groups.map((group) => (
+                <div key={group.styleNo} className="grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+                  <div className="min-w-0">
+                    <strong className="block truncate text-sm font-semibold text-[var(--foreground)]">{group.styleNo}</strong>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {(group.opts.length ? group.opts : ["미기재"]).map((opt) => (
+                        <span key={opt} className="rounded-full border border-[var(--border)] bg-[var(--card)] px-2.5 py-1 text-xs font-medium tabular-nums text-[var(--foreground)]">OPT {opt}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <span className="whitespace-nowrap text-xs font-medium text-[var(--muted-foreground)]">{dueLabel(group)}</span>
+                </div>
+              ))}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button
+              type="button"
+              disabled={!selectedRecord}
+              onClick={() => {
+                if (!selectedRecord) return
+                setSelectedProcess(null)
+                onSelect(selectedRecord)
+              }}
+            >
+              전체보기
+              <ArrowUpRight aria-hidden="true" />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

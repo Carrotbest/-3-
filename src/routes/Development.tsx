@@ -1074,6 +1074,7 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
   const [selectedItem, setSelectedItem] = useState<CompletedLibraryItem | null>(null)
   const latestMonth = useMemo(() => library.map((item) => monthFromDate(item.completedAt)).find(Boolean) || monthFromDate(new Date().toISOString()), [library])
   const [calendarMonth, setCalendarMonth] = useState("")
+  const todayKey = normalizedDateKey(new Date())
 
   useEffect(() => {
     if (latestMonth) setCalendarMonth(latestMonth)
@@ -1100,8 +1101,7 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
     if (!calendarMonth) return []
     const [year, monthNumber] = calendarMonth.split("-").map(Number)
     const first = new Date(year, monthNumber - 1, 1)
-    const mondayOffset = (first.getDay() + 6) % 7
-    const start = new Date(year, monthNumber - 1, 1 - mondayOffset)
+    const start = new Date(year, monthNumber - 1, 1 - first.getDay())
     const byDate = new Map<string, CompletedLibraryItem[]>()
     for (const item of filteredItems) {
       const key = normalizedDateKey(item.completedAt)
@@ -1158,12 +1158,14 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
           <Button type="button" variant="outline" size="icon" onClick={() => setCalendarMonth((month) => shiftMonth(month || latestMonth, 1))} aria-label="다음 달"><ChevronRight aria-hidden="true" /></Button>
         </div>
         <div className="grid grid-cols-7 border-b border-[var(--border)] bg-[var(--muted)]/50 text-center text-xs font-medium text-[var(--muted-foreground)]">
-          {['월', '화', '수', '목', '금', '토', '일'].map((day, index) => <span key={day} className={`py-2 ${index === 5 ? "text-sky-500 dark:text-sky-400" : index === 6 ? "text-rose-500 dark:text-rose-400" : ""}`}>{day}</span>)}
+          {['일', '월', '화', '수', '목', '금', '토'].map((day, index) => <span key={day} className={`py-2 ${index === 0 ? "text-rose-500 dark:text-rose-400" : index === 6 ? "text-sky-500 dark:text-sky-400" : ""}`}>{day}</span>)}
         </div>
         <div className="grid grid-cols-7">
           {calendarDays.map((day) => (
-            <div key={day.key} className={`min-h-28 border-b border-r border-[var(--border)] p-1.5 last:border-r-0 ${day.inMonth ? "bg-[var(--card)]" : "bg-[var(--muted)]/35 text-[var(--muted-foreground)] opacity-50"}`}>
-              <span className={`block px-1 text-xs font-medium ${dayToneText(day.date)}`}>{day.day}</span>
+            <div key={day.key} className={`min-h-28 border-b border-r border-[var(--border)] p-1.5 last:border-r-0 ${day.key === todayKey ? "relative z-[1] bg-[color-mix(in_oklab,var(--primary)_7%,var(--card))] ring-2 ring-inset ring-[var(--primary)]" : day.inMonth ? "bg-[var(--card)]" : "bg-[var(--muted)]/35 text-[var(--muted-foreground)] opacity-50"}`}>
+              <span aria-current={day.key === todayKey ? "date" : undefined} className={`inline-flex size-6 items-center justify-center rounded-full text-xs font-medium ${day.key === todayKey ? "bg-[var(--primary)] font-semibold text-[var(--primary-foreground)] shadow-sm" : dayToneText(day.date)}`}>
+                {day.day}<span className="sr-only">{day.key === todayKey ? " 오늘" : ""}</span>
+              </span>
               {holidayName(day.key) ? <span className="block truncate px-1 text-[10px] text-[var(--muted-foreground)]">{holidayName(day.key)}</span> : null}
               <div className="mt-1 grid gap-1">
                 {day.items.slice(0, 3).map((item) => (
@@ -1395,7 +1397,7 @@ function DevelopmentList() {
     () => statusFilter === "all" ? scopedFiltered : scopedFiltered.filter((row) => statusOf(row, today) === statusFilter),
     [scopedFiltered, statusFilter, today],
   )
-  const boardRows = useMemo(() => visibleRows.filter((row) => row.stage !== "시험"), [visibleRows])
+  const boardRows = useMemo(() => visibleRows.filter((row) => isInProgress(row) && row.stage !== "시험"), [visibleRows])
   const timeline = useMemo(() => sampleLeadTimeline(visibleRows, today), [today, visibleRows])
   const columns = useMemo<DataTableColumn<DevRecord>[]>(() => {
     const base = DEFAULT_COLUMNS.map((key) => {
@@ -1502,7 +1504,7 @@ function DevelopmentList() {
           </SectionCard>
         </TabsContent>
         <TabsContent value="board" className="mt-6">
-          <SectionCard title="공정 보드" subtitle={`필터 결과 ${boardRows.length.toLocaleString("ko-KR")}건 · 시험 단계는 보드에서 제외 · 조회 전용`} contentClassName="p-0">
+          <SectionCard title="공정 보드" subtitle={`진행 중 ${boardRows.length.toLocaleString("ko-KR")}건 · 접수→가공 현재 위치 · 완료·시험 제외 · 조회 전용`} contentClassName="p-0">
             <div className="border-b border-[var(--border)] p-4">{toolbar}</div>
             <OwnerLaneBoard rows={boardRows} today={today} onSelect={setSelectedRecord} />
           </SectionCard>

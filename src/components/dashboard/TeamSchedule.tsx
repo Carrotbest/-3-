@@ -168,26 +168,26 @@ export function TeamSchedule() {
   }
 
   return (
-    <Card className="group relative flex h-full flex-col overflow-hidden rounded-[12px] border-white/70 bg-white/55 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_18px_42px_-22px_rgba(15,23,42,0.16)] backdrop-blur-md [--hover-lift:0px] hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_18px_42px_-22px_rgba(15,23,42,0.16)]">
-      <span aria-hidden="true" className="pointer-events-none absolute inset-x-4 top-0 h-px bg-white/95" />
+    <Card className="group relative flex h-full flex-col overflow-hidden rounded-[12px] border-white/60 bg-white/46 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.025),0_18px_42px_-28px_rgba(15,23,42,0.12)] backdrop-blur-md [--hover-lift:0px] hover:shadow-[0_1px_2px_rgba(15,23,42,0.025),0_18px_42px_-28px_rgba(15,23,42,0.12)]">
+      <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/80" />
       <div className="relative flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--chart-4)] to-[var(--gradient-3)] text-white shadow-[0_7px_18px_-6px_rgba(139,92,246,0.65)]"><CalendarDays className="size-4" aria-hidden="true" /></span>
-          <div><h2 className="text-base font-semibold text-[var(--foreground)]">팀 일정</h2><p className="mt-1 text-xs text-[var(--muted-foreground)]">미팅·연차·외근·출장 공유</p></div>
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-[9px] border border-white/70 bg-[color-mix(in_oklab,var(--chart-4)_11%,var(--card))] text-[var(--chart-4)] shadow-[0_7px_16px_-12px_rgba(15,23,42,0.28)]"><CalendarDays className="size-4" aria-hidden="true" /></span>
+          <div><h2 className="text-base font-semibold tracking-[-0.015em] text-[var(--foreground)]">팀 일정</h2><p className="mt-1 text-xs font-normal text-[color-mix(in_oklab,var(--muted-foreground)_72%,transparent)]">미팅·연차·외근·출장 공유</p></div>
         </div>
-        <Button type="button" size="sm" onClick={openForm}><Plus aria-hidden="true" />일정 추가</Button>
+        <Button type="button" variant="outline" size="sm" className="border-white/70 bg-white/34 font-medium" onClick={openForm}><Plus aria-hidden="true" />일정 추가</Button>
       </div>
 
       <div className="relative mt-4 flex flex-wrap gap-2" aria-label="팀 일정 구분 범례">
         {TEAM_EVENT_TYPES.map((type) => (
-          <span key={type} className="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/60 px-2 py-1 text-[11px] text-[var(--muted-foreground)] shadow-sm backdrop-blur">
+          <span key={type} className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/30 px-2 py-1 text-[11px] font-normal text-[color-mix(in_oklab,var(--muted-foreground)_78%,transparent)] backdrop-blur">
             <span aria-hidden="true" className={`size-2 rounded-full ${CATEGORY_META[type].dot}`} />
             {CATEGORY_META[type].label}
           </span>
         ))}
       </div>
 
-      <div className="relative mt-4 rounded-[11px] border border-white/80 bg-white/55 p-2 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.18)] backdrop-blur">
+      <div className="relative mt-5 rounded-[11px] border border-white/60 bg-white/34 p-2.5 shadow-[0_10px_28px_-25px_rgba(15,23,42,0.12)] backdrop-blur">
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-1">
             <Button type="button" variant="ghost" size="icon" className="size-7" onClick={() => moveMonth(-1)} aria-label="이전 달"><ChevronLeft aria-hidden="true" /></Button>

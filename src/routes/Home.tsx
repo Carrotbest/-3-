@@ -33,6 +33,7 @@ import {
   defaultHomeDateRanges,
   homeTrendCards,
   homeWorkSummary,
+  isInProgress,
   materialsOf,
   monthlyDevelopmentTrend,
   studyMaterials as deriveStudyMaterials,
@@ -41,18 +42,19 @@ import {
   type HomeKpiDetailKind,
   type HomeKpiRanges,
   type MonthlyDevelopmentDatum,
+  type ProcessFunnelKey,
   type TrendCard,
 } from "@/data/derive"
 import { fmtDate, fmtDateFull } from "@/data/format"
 import { stageOf, type ChemicalCategory, type ChemicalPortfolio } from "@/data/chemical"
-import type { MaterialItem, MaterialKind } from "@/data/schema"
+import type { DevRecord, MaterialItem, MaterialKind } from "@/data/schema"
 import { ingestDevelopment, ingestSamples } from "@/data/upload"
 import { hoverLift } from "@/lib/motion"
 import { useAppStore } from "@/store/useAppStore"
 
-const HOME_GLASS_SURFACE = "rounded-[12px] border-white/70 bg-white/55 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_18px_42px_-22px_rgba(15,23,42,0.16)] backdrop-blur-md"
-const HOME_GLASS_STATIC = "[--hover-lift:0px] hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_18px_42px_-22px_rgba(15,23,42,0.16)]"
-const HOME_GLASS_HOVER = "transition-[box-shadow,border-color] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:border-white hover:shadow-[0_3px_8px_rgba(15,23,42,0.06),0_24px_48px_-18px_rgba(15,23,42,0.2)] motion-reduce:transition-none"
+const HOME_GLASS_SURFACE = "rounded-[12px] border-white/60 bg-white/46 shadow-[0_1px_2px_rgba(15,23,42,0.025),0_18px_42px_-28px_rgba(15,23,42,0.12)] backdrop-blur-md"
+const HOME_GLASS_STATIC = "[--hover-lift:0px] hover:shadow-[0_1px_2px_rgba(15,23,42,0.025),0_18px_42px_-28px_rgba(15,23,42,0.12)]"
+const HOME_GLASS_HOVER = "transition-[box-shadow,border-color] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:border-white/80 hover:shadow-[0_2px_6px_rgba(15,23,42,0.04),0_22px_44px_-26px_rgba(15,23,42,0.16)] motion-reduce:transition-none"
 
 function KpiCard({ icon, label, value, rangeLabel, caption, accent, delay = 0, children, onClick, onCalendarClick }: {
   icon: ReactNode
@@ -69,29 +71,29 @@ function KpiCard({ icon, label, value, rangeLabel, caption, accent, delay = 0, c
 }) {
   return (
     <Reveal delay={delay}>
-      <Magnetic strength={8} lift={7} tilt={2}>
+      <Magnetic strength={5} lift={4} tilt={1.2}>
       <Card className={`group relative h-full overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`}>
-        <span aria-hidden="true" className="pointer-events-none absolute inset-x-4 top-0 h-px bg-white/95" />
-        <span aria-hidden="true" className="pointer-events-none absolute -right-12 -top-14 size-36 rounded-full opacity-[0.12] blur-2xl transition-[opacity,transform] duration-500 group-hover:scale-125 group-hover:opacity-30 motion-reduce:transition-none" style={{ background: accent }} />
-        <CardContent className="relative flex h-full flex-col p-5">
+        <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/80" />
+        <span aria-hidden="true" className="pointer-events-none absolute -right-12 -top-14 size-32 rounded-full opacity-[0.055] blur-2xl transition-[opacity,transform] duration-500 group-hover:scale-110 group-hover:opacity-[0.11] motion-reduce:transition-none" style={{ background: accent }} />
+        <CardContent className="relative flex h-full flex-col p-5 sm:p-6">
           <div className="flex items-start justify-between gap-3">
-            <span className="flex size-10 items-center justify-center rounded-[10px] text-white shadow-[0_7px_18px_-6px_rgba(76,91,212,0.65)] transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105 motion-reduce:transition-none" style={{ background: `linear-gradient(135deg, ${accent}, color-mix(in oklab, ${accent} 62%, var(--gradient-1)))` }}>{icon}</span>
+            <span className="flex size-9 items-center justify-center rounded-[9px] border border-white/70 shadow-[0_7px_16px_-12px_rgba(15,23,42,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 motion-reduce:transition-none" style={{ color: accent, background: `color-mix(in oklab, ${accent} 11%, var(--card))` }}>{icon}</span>
             <div className="flex items-center gap-2">
               {onCalendarClick ? (
-                <Button type="button" variant="outline" size="icon" className="size-8 border-white/80 bg-white/65 backdrop-blur" aria-label={`${label} 기간 설정`} onClick={onCalendarClick}>
-                  <CalendarDays className="size-4" />
+                <Button type="button" variant="ghost" size="icon" className="size-8 text-[var(--muted-foreground)]" aria-label={`${label} 기간 설정`} onClick={onCalendarClick}>
+                  <CalendarDays className="size-3.5" />
                 </Button>
               ) : null}
-              <Badge variant="secondary" className="border border-white/80 bg-white/65">DD 전체현황</Badge>
+              <Badge variant="outline" className="border-white/65 bg-white/34 text-[10px] font-medium text-[var(--muted-foreground)]">DD 전체현황</Badge>
             </div>
           </div>
-          <button type="button" aria-haspopup="dialog" onClick={onClick} className="mt-4 w-full cursor-pointer rounded-sm text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
-            <p className="mt-4 text-sm font-medium text-[var(--muted-foreground)]">{label}</p>
-            <p className="mt-1 text-4xl font-semibold tracking-tight" style={{ color: accent }}>
-              <NumberTicker value={value} /><span className="ml-1 text-sm font-medium text-[var(--muted-foreground)]">건</span>
+          <button type="button" aria-haspopup="dialog" onClick={onClick} className="mt-5 w-full cursor-pointer rounded-sm text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+            <p className="text-sm font-medium text-[var(--muted-foreground)]">{label}</p>
+            <p className="mt-1.5 text-4xl font-semibold tracking-[-0.035em] text-[var(--foreground)]">
+              <NumberTicker value={value} /><span className="ml-1.5 text-xs font-normal tracking-normal text-[color-mix(in_oklab,var(--muted-foreground)_78%,transparent)]">건</span>
             </p>
-            <p className="mt-2 text-base font-semibold tracking-tight text-[var(--foreground)]">{rangeLabel}</p>
-            <p className="mt-1 text-xs text-[var(--muted-foreground)]">{caption}</p>
+            <p className="mt-3 text-sm font-medium tracking-[-0.01em] text-[color-mix(in_oklab,var(--foreground)_86%,transparent)]">{rangeLabel}</p>
+            <p className="mt-1.5 text-xs font-normal text-[color-mix(in_oklab,var(--muted-foreground)_72%,transparent)]">{caption}</p>
           </button>
           {children}
         </CardContent>
@@ -105,30 +107,26 @@ function ScheduleCard({ dueSoon, late, onClick }: { dueSoon: number; late: numbe
   return (
     <Reveal delay={150}>
       <button type="button" aria-haspopup="dialog" onClick={onClick} className="group block h-full w-full cursor-pointer rounded-[12px] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
-        <Magnetic strength={8} lift={7} tilt={2}>
+        <Magnetic strength={5} lift={4} tilt={1.2}>
         <Card className={`relative h-full overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`}>
-          <span aria-hidden="true" className="pointer-events-none absolute inset-x-4 top-0 h-px bg-white/95" />
-          <span aria-hidden="true" className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full bg-[var(--warning)] opacity-10 blur-2xl transition-[opacity,transform] duration-500 group-hover:scale-125 group-hover:opacity-25 motion-reduce:transition-none" />
-          <span aria-hidden="true" className="pointer-events-none absolute -bottom-10 -left-8 size-24 rounded-full bg-[var(--destructive)] opacity-[0.07] blur-2xl" />
-          <CardContent className="relative flex h-full flex-col p-5">
+          <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/80" />
+          <CardContent className="relative flex h-full flex-col p-5 sm:p-6">
             <div className="flex items-start justify-between gap-3">
-              <span className="flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--warning)] to-[var(--chart-4)] text-white shadow-[0_7px_18px_-6px_rgba(245,158,11,0.7)] transition-transform duration-300 group-hover:rotate-3 group-hover:scale-105 motion-reduce:transition-none"><CalendarDays className="size-4" /></span>
-              <Badge variant="secondary" className="border border-white/80 bg-white/65">DD 전체현황</Badge>
+              <span className="flex size-9 items-center justify-center rounded-[9px] border border-white/70 bg-[color-mix(in_oklab,var(--warning)_11%,var(--card))] text-[var(--warning)] shadow-[0_7px_16px_-12px_rgba(15,23,42,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 motion-reduce:transition-none"><CalendarDays className="size-4" /></span>
+              <Badge variant="outline" className="border-white/65 bg-white/34 text-[10px] font-medium text-[var(--muted-foreground)]">DD 전체현황</Badge>
             </div>
-            <p className="mt-4 text-sm font-medium text-[var(--muted-foreground)]">스케줄</p>
-            <div className="mt-2 grid grid-cols-2 gap-2.5">
-              <div className="relative overflow-hidden rounded-[10px] border border-white/75 bg-white/60 px-3 py-2.5 shadow-[0_8px_18px_-16px_rgba(245,158,11,0.8)] backdrop-blur">
-                <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-[var(--warning)] opacity-80" />
-                <p className="text-xs font-medium text-[var(--warning)]">납기 임박 <span className="font-semibold">D-7</span></p>
-                <p className="mt-1 text-3xl font-semibold tracking-tight text-[var(--warning)]"><NumberTicker value={dueSoon} /><span className="ml-1 text-sm font-medium opacity-80">건</span></p>
+            <p className="mt-5 text-sm font-medium text-[var(--muted-foreground)]">스케줄</p>
+            <div className="mt-3 grid grid-cols-2 gap-4">
+              <div className="relative border-t border-[color-mix(in_oklab,var(--warning)_52%,var(--border))] px-1 pt-3">
+                <p className="text-xs font-medium text-[color-mix(in_oklab,var(--warning)_70%,var(--muted-foreground))]">납기 임박 <span className="font-semibold">D-7</span></p>
+                <p className="mt-1.5 text-3xl font-semibold tracking-[-0.03em] text-[var(--foreground)]"><NumberTicker value={dueSoon} /><span className="ml-1.5 text-xs font-normal tracking-normal text-[var(--muted-foreground)]">건</span></p>
               </div>
-              <div className="relative overflow-hidden rounded-[10px] border border-white/75 bg-white/60 px-3 py-2.5 shadow-[0_8px_18px_-16px_rgba(239,68,68,0.75)] backdrop-blur">
-                <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-[var(--destructive)] opacity-80" />
-                <p className="text-xs font-medium text-[var(--destructive)]">납기 지연 <span className="font-semibold">D+</span></p>
-                <p className="mt-1 text-3xl font-semibold tracking-tight text-[var(--destructive)]"><NumberTicker value={late} /><span className="ml-1 text-sm font-medium opacity-80">건</span></p>
+              <div className="relative border-t border-[color-mix(in_oklab,var(--destructive)_50%,var(--border))] px-1 pt-3">
+                <p className="text-xs font-medium text-[color-mix(in_oklab,var(--destructive)_70%,var(--muted-foreground))]">납기 지연 <span className="font-semibold">D+</span></p>
+                <p className="mt-1.5 text-3xl font-semibold tracking-[-0.03em] text-[var(--foreground)]"><NumberTicker value={late} /><span className="ml-1.5 text-xs font-normal tracking-normal text-[var(--muted-foreground)]">건</span></p>
               </div>
             </div>
-            <p className="mt-2 text-xs text-[var(--muted-foreground)]">진행 중 · Due Date 기준</p>
+            <p className="mt-3 text-xs font-normal text-[color-mix(in_oklab,var(--muted-foreground)_72%,transparent)]">진행 중 · Due Date 기준</p>
           </CardContent>
         </Card>
         </Magnetic>
@@ -307,28 +305,89 @@ const PROCESS_GRADIENT: Record<string, string> = {
   finishing: "from-[#F5DFA6] to-[#BE8D1F]",
 }
 
-function ProcessFunnel({ process, reduceMotion }: {
-  process: readonly { key: string; label: string; pct: number; done: number; total: number }[]
+interface PendingStyleSummary {
+  styleNo: string
+  optCount: number
+}
+
+type PendingProcessStyles = Record<ProcessFunnelKey, PendingStyleSummary[]>
+
+const PROCESS_KEYS = ["yarn", "knitting", "dyeing", "finishing"] as const satisfies readonly ProcessFunnelKey[]
+const PROCESS_MINIMUM: Record<ProcessFunnelKey, number> = { yarn: 0, knitting: 1, dyeing: 2, finishing: 3 }
+
+function pendingStylesByProcess(records: readonly DevRecord[]): PendingProcessStyles {
+  const active = records.filter(isInProgress)
+  const stageOrder = ["원사", "편직", "염색", "가공", "시험", "완료"]
+  const result: PendingProcessStyles = { yarn: [], knitting: [], dyeing: [], finishing: [] }
+
+  for (const processKey of PROCESS_KEYS) {
+    const grouped = new Map<string, { opts: Set<string>; rows: number }>()
+    for (const record of active) {
+      const reached = record.processReached
+        ? record.processReached[processKey]
+        : stageOrder.indexOf(record.stage) >= PROCESS_MINIMUM[processKey]
+      if (reached) continue
+      const styleNo = record.styleNo.trim() || "Style 미기재"
+      const bucket = grouped.get(styleNo) ?? { opts: new Set<string>(), rows: 0 }
+      if (record.opt.trim()) bucket.opts.add(record.opt.trim())
+      bucket.rows += 1
+      grouped.set(styleNo, bucket)
+    }
+    result[processKey] = [...grouped.entries()]
+      .map(([styleNo, bucket]) => ({ styleNo, optCount: bucket.opts.size || bucket.rows }))
+      .sort((left, right) => right.optCount - left.optCount || left.styleNo.localeCompare(right.styleNo, "ko-KR", { numeric: true }))
+  }
+  return result
+}
+
+function ProcessFunnel({ process, pendingStyles, reduceMotion, onNavigate }: {
+  process: readonly { key: ProcessFunnelKey; label: string; pct: number; done: number; total: number }[]
+  pendingStyles: PendingProcessStyles
   reduceMotion: boolean
+  onNavigate: () => void
 }) {
   return (
-    <div className="relative mt-6" role="img" aria-label={`공정 누적 도달률 — ${process.map((item) => `${PROCESS_LABEL_EN[item.key] ?? item.label} ${item.done}건 ${item.pct}%`).join(", ")}`}>
-      <span aria-hidden="true" className="pointer-events-none absolute left-[8%] right-[8%] top-1/2 hidden h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent sm:block" />
-      <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="relative mt-7" role="group" aria-label={`공정 누적 도달률 — ${process.map((item) => `${PROCESS_LABEL_EN[item.key] ?? item.label} ${item.done}건 ${item.pct}%`).join(", ")}`}>
+      <div className="relative grid grid-cols-2 gap-px overflow-hidden rounded-[11px] border border-white/58 bg-[color-mix(in_oklab,var(--border)_56%,transparent)] sm:grid-cols-4">
         {process.map((item, index) => (
-          <Magnetic key={item.key} strength={9} lift={7} tilt={3}>
-          <div className="group relative h-full min-w-0 overflow-hidden rounded-[11px] border border-white/75 bg-white/58 p-3.5 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)] backdrop-blur transition-[box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:shadow-[0_16px_30px_-18px_rgba(15,23,42,0.24)] motion-reduce:transition-none">
-            <span aria-hidden="true" className={`absolute -right-5 -top-6 size-16 rounded-full bg-gradient-to-br ${PROCESS_GRADIENT[item.key] ?? ""} opacity-[0.13] blur-xl transition-opacity duration-300 group-hover:opacity-30`} />
-            <div className="relative flex items-start justify-between gap-2">
-              <div className="min-w-0"><p className="truncate text-[13px] font-semibold text-[var(--foreground)]">{PROCESS_LABEL_EN[item.key] ?? item.label}</p><p className="mt-0.5 text-[11px] tabular-nums text-[var(--muted-foreground)]">{item.done}/{item.total}건</p></div>
-              <span className={`size-2.5 shrink-0 rounded-full bg-gradient-to-br ${PROCESS_GRADIENT[item.key] ?? ""} shadow-sm`} />
-            </div>
-            <p className="relative mt-4 text-2xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={item.pct} decimals={Number.isInteger(item.pct) ? 0 : 1} suffix="%" duration={1000} /></p>
-            <div className="relative mt-2 h-1.5 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--muted)_70%,transparent)]">
-              <div className={`h-full rounded-full bg-gradient-to-r ${PROCESS_GRADIENT[item.key] ?? ""}`} style={{ width: `${item.pct}%`, animation: reduceMotion ? undefined : `gaugeGrow 1000ms cubic-bezier(.22,.61,.36,1) ${index * 80}ms backwards` }} />
-            </div>
+          <div key={item.key} className="group/card h-[10.5rem] min-w-0 bg-[var(--card)]/88 [perspective:1000px]">
+            <button type="button" onClick={onNavigate} className="block size-full cursor-pointer text-left outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--ring)]">
+              <span className="sr-only">{PROCESS_LABEL_EN[item.key] ?? item.label} 미완료 대표 스타일 확인 후 개발 현황으로 이동</span>
+              <div className="relative size-full transition-transform duration-500 ease-[cubic-bezier(.2,.7,.2,1)] [transform-style:preserve-3d] group-hover/card:[transform:rotateY(180deg)] group-focus-within/card:[transform:rotateY(180deg)] motion-reduce:duration-0">
+                <div className="absolute inset-0 flex flex-col bg-[color-mix(in_oklab,var(--card)_94%,transparent)] p-5 [backface-visibility:hidden]">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-[color-mix(in_oklab,var(--foreground)_88%,transparent)]">{PROCESS_LABEL_EN[item.key] ?? item.label}</p>
+                    <p className="mt-1 text-xs tabular-nums text-[color-mix(in_oklab,var(--muted-foreground)_72%,transparent)]">{item.done}/{item.total}건</p>
+                  </div>
+                  <p className="mt-auto text-2xl font-semibold tracking-[-0.03em] text-[var(--foreground)]"><NumberTicker value={item.pct} decimals={Number.isInteger(item.pct) ? 0 : 1} suffix="%" duration={1000} /></p>
+                  <div className="mt-3 h-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--muted)_60%,transparent)]">
+                    <div className={`h-full rounded-full bg-gradient-to-r ${PROCESS_GRADIENT[item.key] ?? ""}`} style={{ width: `${item.pct}%`, animation: reduceMotion ? undefined : `gaugeGrow 1000ms cubic-bezier(.22,.61,.36,1) ${index * 80}ms backwards` }} />
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 flex flex-col bg-[color-mix(in_oklab,var(--card)_97%,var(--muted))] p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                  <div className="flex items-center justify-between gap-2 border-b border-[var(--border)]/70 pb-2">
+                    <p className="text-xs font-medium text-[var(--foreground)]">미완료 대표 스타일</p>
+                    <span className="text-[10px] tabular-nums text-[var(--muted-foreground)]">{Math.max(0, item.total - item.done)} OPT</span>
+                  </div>
+                  <div className="mt-2 min-h-0 flex-1">
+                    {pendingStyles[item.key].length ? (
+                      <ul className="space-y-1.5">
+                        {pendingStyles[item.key].slice(0, 3).map((style) => (
+                          <li key={style.styleNo} className="flex items-center justify-between gap-3 text-xs">
+                            <span className="truncate font-medium text-[color-mix(in_oklab,var(--foreground)_84%,transparent)]">{style.styleNo}</span>
+                            <span className="shrink-0 tabular-nums text-[var(--muted-foreground)]">OPT {style.optCount}</span>
+                          </li>
+                        ))}
+                        {pendingStyles[item.key].length > 3 ? <li className="text-[10px] text-[var(--muted-foreground)]">외 {pendingStyles[item.key].length - 3}개 스타일</li> : null}
+                      </ul>
+                    ) : <p className="pt-3 text-xs text-[var(--muted-foreground)]">미완료 스타일이 없습니다.</p>}
+                  </div>
+                  <p className="mt-2 text-[10px] font-medium text-[var(--muted-foreground)]">클릭하여 개발 현황에서 확인 →</p>
+                </div>
+              </div>
+            </button>
           </div>
-          </Magnetic>
         ))}
       </div>
     </div>
@@ -819,6 +878,7 @@ export function Home() {
   const [editingMaterial, setEditingMaterial] = useState<MaterialItem | null>(null)
   const [trendKind, setTrendKind] = useState<MaterialKind>("PORTFOLIO")
   const sections = useMemo(() => homeSectionCards(records, today, kpiRanges), [records, today, kpiRanges])
+  const processPendingStyles = useMemo(() => pendingStylesByProcess(records), [records])
   const kpiDetails = useMemo(() => homeKpiRecordDetails(records, today, kpiRanges), [records, today, kpiRanges])
   const monthly = useMemo(() => monthlyDevelopmentTrend(records, completed, today, rddaMonths), [records, completed, today, rddaMonths])
   const monthlyKpis = useMemo(() => monthly.reduce((summary, item) => ({
@@ -884,37 +944,32 @@ export function Home() {
   }
 
   return (
-    <section className="min-w-0 space-y-6">
+    <section className="-mt-1 min-w-0 space-y-5">
       <PageHeader title="대시보드" subtitle="DD 전체현황을 기준으로 개발 업무와 최신 정보를 확인합니다." actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="home-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><DataUpload kind="home-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} /><Button type="button" variant="outline" onClick={() => navigate("/sync")}><RefreshCw aria-hidden="true" />데이터 상태</Button></div>} />
 
       <Reveal>
-        <button type="button" onClick={() => navigate("/development")} className="group block w-full cursor-pointer rounded-[12px] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
+        <div className="group block w-full rounded-[12px] text-left">
           <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}>
-            <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/95" />
-            <svg aria-hidden="true" viewBox="0 0 260 120" className="pointer-events-none absolute right-0 top-0 h-full w-72 opacity-[0.16] transition-transform duration-700 group-hover:translate-x-2 group-hover:scale-105 motion-reduce:transition-none">
-              <path d="M12 96C56 28 91 114 138 52s72 20 114-28" fill="none" stroke="var(--gradient-1)" strokeWidth="2" />
-              <path d="M42 111c38-54 76 5 112-38s62 5 94-31" fill="none" stroke="var(--gradient-3)" strokeWidth="1.5" strokeDasharray="5 7" />
-              <circle cx="138" cy="52" r="7" fill="var(--gradient-1)" /><circle cx="213" cy="54" r="4" fill="var(--gradient-3)" />
-            </svg>
-            <CardContent className="relative p-5 sm:p-6">
+            <span aria-hidden="true" className="pointer-events-none absolute inset-x-6 top-0 h-px bg-white/80" />
+            <CardContent className="relative p-6 sm:p-7">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <span className="flex size-11 items-center justify-center rounded-[11px] bg-gradient-to-br from-[var(--gradient-1)] to-[var(--gradient-3)] text-white shadow-[0_8px_20px_-6px_rgba(76,91,212,0.7)]"><LoaderCircle className="size-5 transition-transform duration-700 group-hover:rotate-180 motion-reduce:transition-none" /></span>
+                  <span className="flex size-10 items-center justify-center rounded-[10px] border border-white/70 bg-[color-mix(in_oklab,var(--gradient-1)_11%,var(--card))] text-[var(--gradient-1)] shadow-[0_8px_18px_-14px_rgba(15,23,42,0.28)]"><LoaderCircle className="size-4.5 transition-transform duration-700 group-hover:rotate-90 motion-reduce:transition-none" /></span>
                   <div>
-                    <p className="text-sm font-semibold tracking-wide text-[var(--muted-foreground)]">Overall status</p>
-                    <p className="text-4xl font-semibold tracking-tight text-[var(--foreground)]"><NumberTicker value={sections.progress.total} /><span className="ml-1 text-sm font-medium text-[var(--muted-foreground)]">건 진행 중</span></p>
+                    <p className="text-xs font-medium tracking-[0.04em] text-[color-mix(in_oklab,var(--muted-foreground)_78%,transparent)]">Overall status</p>
+                    <p className="mt-1 text-4xl font-semibold tracking-[-0.04em] text-[var(--foreground)]"><NumberTicker value={sections.progress.total} /><span className="ml-1.5 text-xs font-normal tracking-normal text-[color-mix(in_oklab,var(--muted-foreground)_72%,transparent)]">건 진행 중</span></p>
                   </div>
                 </div>
-                <Badge variant="secondary" className="border border-white/80 bg-white/65 backdrop-blur">DD 전체현황</Badge>
+                <Badge variant="outline" className="border-white/65 bg-white/32 text-[10px] font-medium text-[var(--muted-foreground)] backdrop-blur">DD 전체현황</Badge>
               </div>
-              <ProcessFunnel process={sections.progress.process} reduceMotion={reduceMotion} />
+              <ProcessFunnel process={sections.progress.process} pendingStyles={processPendingStyles} reduceMotion={reduceMotion} onNavigate={() => navigate("/development")} />
             </CardContent>
           </Card>
-        </button>
+        </div>
       </Reveal>
 
-      <div className="grid gap-4 xl:grid-cols-12">
-        <div className="flex flex-col gap-4 xl:col-span-8">
+      <div className="grid gap-5 xl:grid-cols-12">
+        <div className="flex flex-col gap-5 xl:col-span-8">
       <div className="grid gap-4 sm:grid-cols-3">
         <KpiCard icon={<CheckCircle2 className="size-4" />} label="완료" value={sections.lastWeekDone} rangeLabel={rangeLabel("completed")} caption="Received Date 기준" accent="var(--chart-2)" onClick={() => setKpiDetailKind("completed")} onCalendarClick={() => setKpiDetailKind("completed")} />
         <KpiCard icon={<TimerReset className="size-4" />} label="접수" value={sections.thisWeekNew} rangeLabel={rangeLabel("new")} caption="Request Date 기준" accent="var(--gradient-1)" delay={75} onClick={() => setKpiDetailKind("new")} onCalendarClick={() => setKpiDetailKind("new")} />

@@ -133,7 +133,7 @@ export function createBlankDevRecord(owner = ""): DevRecord {
   return {
     styleNo: "", opt: "1", season: "", category: "", buyer: "", owner, planner: "",
     gdNo: "", saNo: "", construction: "", weight: "", color: "", dyeing: "",
-    stage: "원사", dueDate: "", flNo: "", note: "",
+    stage: "접수", dueDate: "", flNo: "", note: "",
     devStatus: "진행중", requestDate: today, receivedDate: "",
     _src: { sheet: "웹 접수", row: Date.now() * 1000 + (webIntakeSeq++ % 1000) },
   }
