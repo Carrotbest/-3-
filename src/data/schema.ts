@@ -10,6 +10,8 @@ export interface DevRecordSource {
 export interface DevTechnical {
   /** DD 64열 중 개발 DETAIL 원본 식별값. 상단 요약 필드와 별도로 원문을 보존한다. */
   development?: { developer?: string; co?: string; developmentNo?: string }
+  /** 첨부 작업지시서에서 생성된 행의 중복 등록 방지용 원본 식별값. */
+  intakeSource?: { kind: "zaji"; requestKey: string; optionKey: string }
   // 공정 작업처 (DD 공정 SCHEDULE 그룹의 Mill 컬럼)
   mills?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
   // 공정별 완료일 (기존 processReached 판정에 쓰는 Status 원본값)
@@ -82,9 +84,13 @@ export interface DevRecord {
   devType?: "GD" | "국내"
   devStatus?: string
   requestDate?: string
+  /** 웹 신규 작지를 실제 DD MASTER에 등록한 시각. 기본 최신순 정렬에 사용한다. */
+  registeredAt?: string
   receivedDate?: string
   /** 공정별 완료 여부 — 각 공정 Status(완료일)이 파싱일 이전·당일이면 true. FL# 있으면 전 공정 true. */
   processReached?: { yarn: boolean; knitting: boolean; dyeing: boolean; finishing: boolean }
+  /** 수동 정렬 순서. 값이 있으면 요청일 정렬보다 우선한다(드래그로 재배치). */
+  sortOrder?: number
   tech?: DevTechnical
   _src: DevRecordSource
 }

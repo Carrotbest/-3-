@@ -326,6 +326,26 @@ export async function deleteManualMaterial(id: string): Promise<void> {
 
 const recordIdentity = (record: DevRecord): string => `${record._src.sheet}::${record._src.row}`
 
+function normalizedIntakePart(value: unknown): string {
+  return String(value ?? "").normalize("NFKC").trim().replace(/\s+/g, " ").toUpperCase()
+}
+
+function intakeSourceKey(record: DevRecord): string | null {
+  const source = record.tech?.intakeSource
+  if (!source?.requestKey || !source.optionKey) return null
+  return [source.kind, source.requestKey, source.optionKey].map(normalizedIntakePart).join("::")
+}
+
+/** 원본 식별값이 없던 기존 웹 접수 행과 비교하기 위한 보수적인 대체 키. */
+function legacyIntakeKey(record: DevRecord): string {
+  const mills = record.tech?.mills
+  return [
+    record.owner, record.styleNo, record.season, record.requestDate, record.dueDate,
+    record.buyer, record.planner, record.color, record.construction, record.weight,
+    record.dyeing, record.tech?.yarnDetail, mills?.yarn, mills?.knitting, mills?.dyeing, mills?.finishing,
+  ].map(normalizedIntakePart).join("::")
+}
+
 /** DD의 공통 업무 항목을 로컬 원장에 신규 등록하거나 수정한다. */
 export async function saveDevelopmentRecord(record: DevRecord, previousIdentity?: string): Promise<void> {
   const current = useAppStore.getState().records
@@ -334,6 +354,70 @@ export async function saveDevelopmentRecord(record: DevRecord, previousIdentity?
   const next = recalculateDevelopmentRecords(exists
     ? current.map((item) => recordIdentity(item) === identity ? record : item)
     : [record, ...current])
+  setAppState({ records: next })
+  await saveCache("records", next)
+}
+
+export interface SaveDevelopmentIntakeResult {
+  added: number
+  skipped: number
+  addedIdentities: string[]
+}
+
+/**
+ * 첨부 작지의 옵션 행을 한 번에 저장한다.
+ * 같은 작지 번호·Part·Color 조합은 재등록하지 않고, 식별값 도입 전 행은 주요 DD 필드로 대조한다.
+ */
+export async function saveDevelopmentIntakeRecords(records: readonly DevRecord[]): Promise<SaveDevelopmentIntakeResult> {
+  const current = useAppStore.getState().records
+  const existingSourceKeys = new Set(current.map(intakeSourceKey).filter((key): key is string => Boolean(key)))
+  const legacyKeys = new Set(current.filter((record) => !intakeSourceKey(record)).map(legacyIntakeKey))
+  const pendingSourceKeys = new Set<string>()
+  const additions: DevRecord[] = []
+  let skipped = 0
+
+  for (const record of records) {
+    const sourceKey = intakeSourceKey(record)
+    const duplicate = sourceKey
+      ? existingSourceKeys.has(sourceKey) || pendingSourceKeys.has(sourceKey) || legacyKeys.has(legacyIntakeKey(record))
+      : false
+    if (duplicate) {
+      skipped += 1
+      continue
+    }
+    if (sourceKey) pendingSourceKeys.add(sourceKey)
+    additions.push(record)
+  }
+
+  if (additions.length) {
+    const next = recalculateDevelopmentRecords([...additions, ...current])
+    setAppState({ records: next })
+    await saveCache("records", next)
+  }
+  return { added: additions.length, skipped, addedIdentities: additions.map(recordIdentity) }
+}
+
+/** DD 행(샘플 옵션)을 원장에서 삭제한다. */
+export async function deleteDevelopmentRecord(identity: string): Promise<void> {
+  const current = useAppStore.getState().records
+  const next = current.filter((item) => recordIdentity(item) !== identity)
+  if (next.length === current.length) return
+  setAppState({ records: next })
+  await saveCache("records", next)
+}
+
+/**
+ * 화면에 보이는 순서(identity 배열)를 그대로 수동 정렬 순서로 굳힌다.
+ * 배열에 담긴 레코드에는 index 기반 sortOrder 를 부여하고, 나머지는 그대로 둔다.
+ * 필터가 없는 전체 목록에서만 호출하므로 모든 레코드에 순서가 매겨진다.
+ */
+export async function reorderDevelopmentRecords(orderedIdentities: readonly string[]): Promise<void> {
+  const rank = new Map(orderedIdentities.map((identity, index) => [identity, index]))
+  const current = useAppStore.getState().records
+  const next = current.map((record) => {
+    const order = rank.get(recordIdentity(record))
+    return order === undefined ? record : { ...record, sortOrder: order }
+  })
   setAppState({ records: next })
   await saveCache("records", next)
 }

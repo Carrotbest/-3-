@@ -265,17 +265,31 @@ function parseGd(rows: Grid): Zaji {
     if (header !== null) {
       const cols = g.headerMap(header)
       const limit = notePos ? notePos[0] : rows.length
-      const seen = new Set<string>()
+      // 색상 번호(No)가 옵션 단위. 병합 셀 때문에 한 색상이 여러 Part 하위행으로 나뉘어도(예: DD·SD 염색 변형)
+      // 하나의 옵션으로 접는다. 대표 Part 는 수량이 찍힌 것 우선, 없으면 색상 염색과 맞는 것, 그것도 없으면 첫 Part.
+      const groups: { color: string; remark: string; parts: { code: string; hasQty: boolean }[] }[] = []
+      let current: (typeof groups)[number] | null = null
       let lastColor = ""
       for (let r = header + 1; r < limit; r++) {
+        const no = g.at(r, cols["No"])
         const color = g.at(r, cols["Color"])
         if (color) lastColor = color
         const part = g.at(r, cols["Part"])
+        // No 값이 새로 나오면 새 색상(옵션) 시작. 병합으로 빈 No·Color 는 직전 값을 잇는다.
+        if (no) { current = { color: lastColor, remark: g.at(r, cols["Remark"]), parts: [] }; groups.push(current) }
         if (!part) continue
-        const key = `${part} ${lastColor}`
-        if (seen.has(key)) { z.dupRemoved += 1; continue }
-        seen.add(key)
-        rawOpts.push({ part, color: lastColor, remark: g.at(r, cols["Remark"]) })
+        if (!current) { current = { color: lastColor, remark: g.at(r, cols["Remark"]), parts: [] }; groups.push(current) }
+        if (current.parts.some((pp) => pp.code === part)) { z.dupRemoved += 1; continue }
+        current.parts.push({ code: part, hasQty: Boolean(g.at(r, cols["Quantity"])) })
+      }
+      for (const group of groups) {
+        if (!group.parts.length) continue
+        const wantDye = matchDyeing(group.color, "")
+        const byQty = group.parts.find((pp) => pp.hasQty)
+        const byDye = wantDye ? group.parts.find((pp) => matchDyeing("", parts[pp.code]?.dyeing || "") === wantDye) : undefined
+        const chosen = byQty ?? byDye ?? group.parts[0]
+        if (group.parts.length > 1) z.dupRemoved += group.parts.length - 1
+        rawOpts.push({ part: chosen.code, color: group.color, remark: group.remark })
       }
     }
   }
@@ -326,6 +340,10 @@ function toWeight(raw: string): number | "" {
   return String(raw).trim() !== "" && Number.isFinite(num) ? num : ""
 }
 
+function intakeKeyPart(value: unknown): string {
+  return String(value ?? "").normalize("NFKC").trim().replace(/\s+/g, " ").toUpperCase()
+}
+
 /** 작지 공통(헤더) 필드를 레코드에 반영한다. */
 export function applyZajiHeader(record: DevRecord, z: Zaji): DevRecord {
   const tech: DevTechnical = {
@@ -350,8 +368,13 @@ export function applyZajiHeader(record: DevRecord, z: Zaji): DevRecord {
 export function applyZajiOption(record: DevRecord, z: Zaji, index: number): DevRecord {
   const o = z.options[index]
   if (!o) return record
+  const requestParts = [z.number, z.created, z.style, z.author].map(intakeKeyPart).filter(Boolean)
+  const optionParts = [o.part, o.color].map(intakeKeyPart).filter(Boolean)
+  const requestKey = requestParts.length ? requestParts.join("::") : "UNKNOWN-REQUEST"
+  const optionKey = optionParts.length ? optionParts.join("::") : `OPT-${index + 1}`
   const tech: DevTechnical = {
     ...record.tech,
+    intakeSource: { kind: "zaji", requestKey, optionKey },
     yarnDetail: o.yarn || record.tech?.yarnDetail,
     mills: { ...record.tech?.mills, yarn: o.mills.yarn, knitting: o.mills.knit, dyeing: o.mills.dye, finishing: o.mills.finish },
   }
