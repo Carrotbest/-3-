@@ -48,7 +48,10 @@ function reached(value: string | undefined, today: Date): boolean {
 export function recalculateDevelopmentRecords(records: readonly DevRecord[], today = new Date()): DevRecord[] {
   const groups = new Map<string, DevRecord[]>()
   records.forEach((record) => {
-    const key = `${record.owner.normalize("NFKC")}::${record.styleNo.normalize("NFKC").trim().toUpperCase()}`
+    const styleNo = record.styleNo.normalize("NFKC").trim().toUpperCase()
+    // Style No.가 없는 빈 행끼리 한 옵션 그룹으로 묶여 순번이 누적되지 않게 계산에서 제외한다.
+    if (!styleNo) return
+    const key = `${record.owner.normalize("NFKC")}::${styleNo}`
     const list = groups.get(key) ?? []
     list.push(record)
     groups.set(key, list)
@@ -62,6 +65,7 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
   })
 
   return records.map((record) => {
+    const hasStyleNo = Boolean(record.styleNo.normalize("NFKC").trim())
     const processDates = record.tech?.processDates
     const processReached = {
       yarn: Boolean(record.flNo) || reached(processDates?.yarn, today),
@@ -69,22 +73,24 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
       dyeing: Boolean(record.flNo) || reached(processDates?.dyeing, today),
       finishing: Boolean(record.flNo) || reached(processDates?.finishing, today),
     }
-    const stage = record.flNo
-      ? "완료"
-      : processReached.finishing ? "가공"
-        : processReached.dyeing ? "염색"
-          : processReached.knitting ? "편직"
-            : "원사"
+    const stage = hasStyleNo
+      ? record.flNo
+        ? "완료"
+        : processReached.finishing ? "가공"
+          : processReached.dyeing ? "염색"
+            : processReached.knitting ? "편직"
+              : "원사"
+      : record.stage
     const formula = calculated.get(identity(record))
     const targetWeight = typeof record.weight === "number" ? record.weight : Number(record.weight)
     const actualWeight = record.tech?.actual?.weight
     const balance = targetWeight && typeof actualWeight === "number" ? (actualWeight - targetWeight) / targetWeight : record.tech?.actual?.balance
     const tech = {
       ...record.tech,
-      optionProgress: formula?.optionProgress ?? record.tech?.optionProgress,
+      optionProgress: hasStyleNo ? formula?.optionProgress ?? record.tech?.optionProgress : "",
       actual: record.tech?.actual ? { ...record.tech.actual, balance } : record.tech?.actual,
     }
-    return { ...record, opt: formula?.opt ?? record.opt, stage, processReached, tech }
+    return { ...record, opt: hasStyleNo ? formula?.opt ?? record.opt : "", stage, processReached, tech }
   })
 }
 

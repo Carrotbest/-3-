@@ -33,6 +33,9 @@ const TS_SYNC_MIGRATED_KEY = "fabric.ts.syncMigrated"
 
 export type IngestStep = "reading" | "parsing" | "validating" | "done" | "error"
 
+/** DD 편집 저장 진행 상태. 편집은 즉시 반영하고 저장만 뒤로 미루므로 화면에 진행 상황을 알린다. */
+export type RecordsSaveState = "idle" | "pending" | "saving" | "saved" | "error"
+
 export interface IngestState {
   active: boolean
   kind: string | null
@@ -71,6 +74,7 @@ export interface AppState {
   theme: Theme
   sensitiveUnlocked: boolean
   ingest: IngestState
+  recordsSaveState: RecordsSaveState
 }
 
 export type AppStatePatch = Partial<Omit<AppState, "sensitiveUnlocked">>
@@ -122,6 +126,7 @@ export function createInitialAppState(): AppState {
     theme: "light",
     sensitiveUnlocked: sensitiveFrom(meta),
     ingest: { active: false, kind: null, fileName: null, step: "done", message: null },
+    recordsSaveState: "idle",
   }
 }
 
@@ -347,6 +352,67 @@ function legacyIntakeKey(record: DevRecord): string {
 }
 
 /** DD의 공통 업무 항목을 로컬 원장에 신규 등록하거나 수정한다. */
+/**
+ * DD 편집 저장 지연 계층.
+ * 셀 하나 고칠 때마다 전체 레코드를 IndexedDB·Firestore 로 쓰면 타이핑마다 왕복이 생긴다.
+ * 화면 상태는 즉시 갱신하고, 실제 저장은 마지막 편집에서 RECORDS_SAVE_DELAY 만큼 조용해진 뒤 한 번만 한다.
+ * 저장 시점에는 항상 그 순간의 최신 records 를 쓴다(중간 스냅샷을 쌓지 않는다).
+ */
+const RECORDS_SAVE_DELAY = 500
+let recordsSaveTimer: ReturnType<typeof setTimeout> | null = null
+let recordsSaveChain: Promise<void> = Promise.resolve()
+let savedNoticeTimer: ReturnType<typeof setTimeout> | null = null
+
+function setRecordsSaveState(state: RecordsSaveState): void {
+  useAppStore.setState({ recordsSaveState: state })
+}
+
+async function persistRecordsNow(): Promise<void> {
+  if (recordsSaveTimer) { clearTimeout(recordsSaveTimer); recordsSaveTimer = null }
+  setRecordsSaveState("saving")
+  try {
+    await saveCache("records", useAppStore.getState().records)
+    setRecordsSaveState("saved")
+    if (savedNoticeTimer) clearTimeout(savedNoticeTimer)
+    savedNoticeTimer = setTimeout(() => {
+      if (useAppStore.getState().recordsSaveState === "saved") setRecordsSaveState("idle")
+    }, 2000)
+  } catch (error) {
+    // 저장에 실패해도 화면의 편집 결과는 유지한다. 사용자에게 실패만 알린다.
+    setRecordsSaveState("error")
+    throw error
+  }
+}
+
+/** 편집 후 호출. 저장을 뒤로 미루되 마지막 호출 기준으로 한 번만 실행한다. */
+function scheduleRecordsSave(): void {
+  setRecordsSaveState("pending")
+  if (recordsSaveTimer) clearTimeout(recordsSaveTimer)
+  recordsSaveTimer = setTimeout(() => {
+    recordsSaveTimer = null
+    recordsSaveChain = recordsSaveChain.then(persistRecordsNow).catch(() => {})
+  }, RECORDS_SAVE_DELAY)
+}
+
+/**
+ * 대기 중인 저장을 즉시 내보낸다.
+ * 화면 이탈·탭 전환·언마운트 시점에 반드시 호출해야 편집이 유실되지 않는다.
+ */
+export async function flushDevelopmentRecords(): Promise<void> {
+  if (!recordsSaveTimer && useAppStore.getState().recordsSaveState !== "pending") {
+    await recordsSaveChain
+    return
+  }
+  recordsSaveChain = recordsSaveChain.then(persistRecordsNow).catch(() => {})
+  await recordsSaveChain
+}
+
+if (typeof window !== "undefined") {
+  // 탭을 닫거나 숨길 때 남은 편집을 흘려보낸다. beforeunload 에서는 비동기를 기다릴 수 없어 즉시 기동만 한다.
+  window.addEventListener("beforeunload", () => { void flushDevelopmentRecords() })
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") void flushDevelopmentRecords() })
+}
+
 export async function saveDevelopmentRecord(record: DevRecord, previousIdentity?: string): Promise<void> {
   const current = useAppStore.getState().records
   const identity = previousIdentity ?? recordIdentity(record)
@@ -355,7 +421,7 @@ export async function saveDevelopmentRecord(record: DevRecord, previousIdentity?
     ? current.map((item) => recordIdentity(item) === identity ? record : item)
     : [record, ...current])
   setAppState({ records: next })
-  await saveCache("records", next)
+  scheduleRecordsSave()
 }
 
 export interface SaveDevelopmentIntakeResult {
@@ -392,7 +458,8 @@ export async function saveDevelopmentIntakeRecords(records: readonly DevRecord[]
   if (additions.length) {
     const next = recalculateDevelopmentRecords([...additions, ...current])
     setAppState({ records: next })
-    await saveCache("records", next)
+    // 신규 접수는 중복 확인 결과를 곧바로 보여 주므로 저장까지 확실히 끝내고 넘어간다.
+    await persistRecordsNow()
   }
   return { added: additions.length, skipped, addedIdentities: additions.map(recordIdentity) }
 }
@@ -403,7 +470,7 @@ export async function deleteDevelopmentRecord(identity: string): Promise<void> {
   const next = current.filter((item) => recordIdentity(item) !== identity)
   if (next.length === current.length) return
   setAppState({ records: next })
-  await saveCache("records", next)
+  scheduleRecordsSave()
 }
 
 /**
@@ -411,6 +478,16 @@ export async function deleteDevelopmentRecord(identity: string): Promise<void> {
  * 배열에 담긴 레코드에는 index 기반 sortOrder 를 부여하고, 나머지는 그대로 둔다.
  * 필터가 없는 전체 목록에서만 호출하므로 모든 레코드에 순서가 매겨진다.
  */
+/**
+ * 여러 행을 한 번에 저장한다(붙여넣기·내용 지우기·되돌리기).
+ * recalculate=false 면 값을 그대로 복원한다(되돌리기 전용).
+ */
+export async function writeDevelopmentRecords(records: DevRecord[], recalculate = true): Promise<void> {
+  const next = recalculate ? recalculateDevelopmentRecords(records) : records
+  setAppState({ records: next })
+  scheduleRecordsSave()
+}
+
 export async function reorderDevelopmentRecords(orderedIdentities: readonly string[]): Promise<void> {
   const rank = new Map(orderedIdentities.map((identity, index) => [identity, index]))
   const current = useAppStore.getState().records
@@ -419,7 +496,7 @@ export async function reorderDevelopmentRecords(orderedIdentities: readonly stri
     return order === undefined ? record : { ...record, sortOrder: order }
   })
   setAppState({ records: next })
-  await saveCache("records", next)
+  scheduleRecordsSave()
 }
 
 export interface ApplyFabricActionInput {

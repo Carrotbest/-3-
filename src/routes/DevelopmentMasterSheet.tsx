@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
-import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Columns3, GripVertical, Loader2, Maximize2, Paperclip, Plus, RotateCcw, Save, Search, Trash2, TriangleAlert, X } from "lucide-react"
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, Loader2, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
 import { Popover } from "radix-ui"
 
 import { Badge } from "@/components/ui/badge"
@@ -16,14 +16,44 @@ import { dayToneText, holidayName } from "@/data/holidays"
 import { ingestDevelopment, ingestSamples } from "@/data/upload"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
 import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical } from "@/data/schema"
-import { deleteDevelopmentRecord, reorderDevelopmentRecords, saveDevelopmentIntakeRecords, saveDevelopmentRecord, useAppStore } from "@/store/useAppStore"
+import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
 
 const ALL = "__all__"
 const COL_WIDTHS_STORAGE_KEY = "dd-col-widths"
 const MIN_COLUMN_WIDTH = 56
+/** 엑셀의 행 머리글에 해당하는 좌측 번호 칸. 데이터 열이 아니므로 복사·붙여넣기 대상에서 빠진다. */
+const ROW_HEADER_WIDTH = 40
 
 /** 현재 재직 중인 메인 개발 담당(팀장 제외). 본인 개발건 우선 확인용 네임카드에 쓴다. */
 const MAIN_DEVELOPERS: string[] = MEMBERS.filter((member) => member.role !== "팀장").map((member) => member.name)
+
+interface CellRef { row: string; col: string }
+type CellMove = "up" | "down" | "left" | "right"
+
+interface CellRect {
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
+interface CellSel {
+  inRange: boolean
+  isActive: boolean
+  top: boolean
+  bottom: boolean
+  left: boolean
+  right: boolean
+  handle: boolean
+  moveEdge: boolean
+}
+
+interface MoveDrag {
+  source: CellRect
+  wholeRows: boolean
+  grabRow: number
+  grabCol: number
+}
 
 type GroupKey = "request" | "original" | "detail" | "schedule" | "result" | "data" | "history" | "ledger"
 type CellValue = string | number | null | undefined
@@ -56,6 +86,37 @@ interface MasterGroup {
 
 const text = (value: CellValue): string => value === null || value === undefined || value === "" ? "—" : String(value)
 const dateText = (value: CellValue): string => value ? fmtDateFull(String(value)) : "—"
+
+function selectionShadow(sel: CellSel): string | undefined {
+  if (!sel.inRange) return undefined
+  const parts: string[] = []
+  if (sel.top) parts.push("inset 0 1.5px 0 0 var(--grid-selection)")
+  if (sel.bottom) parts.push("inset 0 -1.5px 0 0 var(--grid-selection)")
+  if (sel.left) parts.push("inset 1.5px 0 0 0 var(--grid-selection)")
+  if (sel.right) parts.push("inset -1.5px 0 0 0 var(--grid-selection)")
+  return parts.length ? parts.join(", ") : undefined
+}
+
+function replaceText(source: string, find: string, replacement: string, matchCase: boolean): string {
+  if (!find) return source
+  if (matchCase) return source.split(find).join(replacement)
+  const sourceKey = source.toLocaleLowerCase("ko-KR")
+  const findKey = find.toLocaleLowerCase("ko-KR")
+  let cursor = 0
+  let result = ""
+  while (cursor < source.length) {
+    const index = sourceKey.indexOf(findKey, cursor)
+    if (index === -1) return result + source.slice(cursor)
+    result += source.slice(cursor, index) + replacement
+    cursor = index + find.length
+  }
+  return result
+}
+
+function FillHandle({ visible, onMouseDown }: { visible: boolean; onMouseDown: (event: ReactMouseEvent<HTMLSpanElement>) => void }) {
+  if (!visible) return null
+  return <span data-fill-handle aria-hidden="true" onMouseDown={onMouseDown} className="absolute -bottom-1 -right-1 z-30 size-[7px] cursor-crosshair border border-white bg-[var(--grid-selection)]" />
+}
 
 function ledgerStatus(ledger: FabricLedgerItem | null): ReactNode {
   if (!ledger) return <span className="text-[var(--muted-foreground)]">미연결</span>
@@ -296,6 +357,11 @@ function recordIdentity(record: DevRecord): string {
   return `${record._src.sheet}::${record._src.row}`
 }
 
+/** 그리드에 추가하는 행은 접수 화면의 기본값도 비워 엑셀의 새 빈 행처럼 시작한다. */
+function createEmptyGridRecord(owner = ""): DevRecord {
+  return { ...createBlankDevRecord(owner), opt: "", stage: "", devStatus: "", requestDate: "" }
+}
+
 const COMPUTED_COLUMN_IDS = new Set(["opt", "optionProgress", "actualBalance"])
 
 const TECH_PATHS: Record<string, string[]> = {
@@ -480,11 +546,12 @@ function SubCard({ label, color, columns, draft, onChange, optionsById, required
 function StatusChip({ record }: { record: DevRecord }) {
   const current = record.devStatus || record.stage || ""
   const style = ddStatusStyle(current)
+  const selected = DD_STATUS_OPTIONS.includes(current as (typeof DD_STATUS_OPTIONS)[number]) ? current : undefined
   const change = (next: string) => { void saveDevelopmentRecord({ ...record, devStatus: next }, recordIdentity(record)) }
-  return <Select value={DD_STATUS_OPTIONS.includes(current as (typeof DD_STATUS_OPTIONS)[number]) ? current : ""} onValueChange={change}>
+  return <Select value={selected} onValueChange={change}>
     <SelectTrigger className={`h-6 w-full gap-1 rounded-md border-0 px-2 text-[11px] font-normal shadow-none focus:ring-1 focus:ring-[var(--ring)] ${style.block}`}>
       <span className={`size-1.5 shrink-0 rounded-full ${style.dot}`} />
-      <span className="truncate">{style.label}</span>
+      <SelectValue placeholder={style.label} />
     </SelectTrigger>
     <SelectContent>{DD_STATUS_OPTIONS.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
   </Select>
@@ -495,36 +562,114 @@ const LEDGER_COL_IDS = new Set(["ledgerStatus", "storageNo", "sourceSheet", "led
 const isFixedColumn = (column: MasterColumn): boolean => COMPUTED_COLUMN_IDS.has(column.id) || LEDGER_COL_IDS.has(column.id)
 
 /** 그리드 셀 인라인 편집기. 선택형=드롭다운, 날짜=데이트피커, 그 외=수기(제안 목록 포함). */
-function InlineEditor({ record, column, options, onCommit, onCancel }: { record: DevRecord; column: MasterColumn; options?: readonly string[]; onCommit: (raw: string) => void; onCancel: () => void }) {
+function InlineEditor({ record, column, options, initial, onCommit, onCancel }: { record: DevRecord; column: MasterColumn; options?: readonly string[]; initial?: string; onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void; onCancel: () => void }) {
   const value = String(column.value(record, null) ?? "")
+  const initialValue = initial ?? value
   const cls = "h-8 w-full rounded-none border-0 bg-[var(--card)] px-1.5 text-xs text-[var(--foreground)] outline-none ring-2 ring-inset ring-[var(--ring)]"
   const opts = options && options.length ? options : undefined
+  if (initial !== undefined) {
+    return <input autoFocus type={column.number ? "number" : "text"} defaultValue={initialValue} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={(event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
+      else if (event.key === "Escape") { event.preventDefault(); onCancel() }
+      else if (event.key === "Enter" || event.key === "Tab") {
+        event.preventDefault()
+        onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
+      }
+    }} />
+  }
   if (column.date) {
-    return <DatePickerPopover value={value} initialOpen onChange={onCommit} onCancel={onCancel} triggerClassName={cls} />
+    return <div onKeyDown={(event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(value, undefined, true) }
+      else if (event.key === "Escape") { event.preventDefault(); onCancel() }
+      else if (event.key === "Enter" || event.key === "Tab") {
+        event.preventDefault()
+        onCommit(value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
+      }
+    }}><DatePickerPopover value={value} initialOpen onChange={onCommit} onCancel={onCancel} triggerClassName={cls} /></div>
   }
   if (opts && !column.suggest) {
-    return <select autoFocus defaultValue={value} className={cls} onChange={(event) => onCommit(event.target.value)} onBlur={onCancel} onKeyDown={(event) => { if (event.key === "Escape") onCancel() }}>
+    return <select autoFocus defaultValue={initialValue} className={cls} onChange={(event) => onCommit(event.target.value)} onBlur={onCancel} onKeyDown={(event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
+      else if (event.key === "Escape") { event.preventDefault(); onCancel() }
+      else if (event.key === "Enter" || event.key === "Tab") {
+        event.preventDefault()
+        onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
+      }
+    }}>
       <option value="">—</option>
-      {value && !opts.includes(value) ? <option value={value}>{value}</option> : null}
+      {initialValue && !opts.includes(initialValue) ? <option value={initialValue}>{initialValue}</option> : null}
       {opts.map((option) => <option key={option} value={option}>{option}</option>)}
     </select>
   }
   const listId = `inline-${column.id}`
-  return <><input autoFocus type={column.number ? "number" : "text"} defaultValue={value} list={column.suggest ? listId : undefined} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); else if (event.key === "Escape") onCancel() }} />{column.suggest && opts ? <datalist id={listId}>{opts.map((option) => <option key={option} value={option} />)}</datalist> : null}</>
+  return <><input autoFocus type={column.number ? "number" : "text"} defaultValue={initialValue} list={column.suggest ? listId : undefined} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={(event) => {
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
+    else if (event.key === "Escape") { event.preventDefault(); onCancel() }
+    else if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault()
+      onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
+    }
+  }} />{column.suggest && opts ? <datalist id={listId}>{opts.map((option) => <option key={option} value={option} />)}</datalist> : null}</>
 }
 
 /** 데이터 셀. 더블클릭 시 인라인 편집(고정값은 음영·수정 불가). */
-function GridCell({ record, column, width, ledger, active, highlighted, selected, options, onSelect, onEdit, onCommit, onCancel }: { record: DevRecord; column: MasterColumn; width: number; ledger: FabricLedgerItem | null; active: boolean; highlighted: boolean; selected: boolean; options?: readonly string[]; onSelect: () => void; onEdit: () => void; onCommit: (raw: string) => void; onCancel: () => void }) {
+/**
+ * 그리드 액션 묶음. 참조가 매 렌더 바뀌지 않아야 GridCell 의 memo 가 살아 있다.
+ * 부모에서 ref 위임으로 한 번만 만들고 최신 상태는 ref 로 읽는다.
+ */
+interface GridActions {
+  select: (rowId: string, colId: string) => void
+  edit: (rowId: string, colId: string) => void
+  commit: (record: DevRecord, column: MasterColumn, raw: string, move?: CellMove, fillRange?: boolean) => void
+  cancel: () => void
+  contextMenu: (event: ReactMouseEvent<HTMLTableCellElement>, rowId: string, colId: string) => void
+  fillStart: (event: ReactMouseEvent<HTMLSpanElement>) => void
+}
+
+interface GridCellProps {
+  record: DevRecord
+  column: MasterColumn
+  rowId: string
+  width: number
+  ledger: FabricLedgerItem | null
+  active: boolean
+  selIn: boolean
+  selActive: boolean
+  selTop: boolean
+  selBottom: boolean
+  selLeft: boolean
+  selRight: boolean
+  selHandle: boolean
+  selMoveEdge: boolean
+  fillPreview: boolean
+  moveStyle?: CSSProperties
+  options?: readonly string[]
+  editSeed?: string
+  actions: GridActions
+}
+
+/**
+ * 선택이 한 칸 움직일 때 표 전체가 다시 그려지지 않도록 memo 로 감싼다.
+ * 그래서 props 는 전부 원시값이거나 참조가 고정된 값이어야 한다(CellSel 객체를 그대로 넘기면 memo 가 깨진다).
+ */
+const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, moveStyle, options, editSeed, actions }: GridCellProps) {
+  const sel: CellSel = { inRange: selIn, isActive: selActive, top: selTop, bottom: selBottom, left: selLeft, right: selRight, handle: selHandle, moveEdge: selMoveEdge }
+  const onSelect = () => actions.select(rowId, column.id)
+  const onEdit = () => actions.edit(rowId, column.id)
+  const onCommit = (raw: string, move?: CellMove, fillRange?: boolean) => actions.commit(record, column, raw, move, fillRange)
+  const onCancel = () => actions.cancel()
+  const onContextMenu = (event: ReactMouseEvent<HTMLTableCellElement>) => actions.contextMenu(event, rowId, column.id)
+  const onFillStart = actions.fillStart
   const fixed = isFixedColumn(column)
   const align = `${alignOf(column) === "center" ? "text-center" : "text-left"} ${column.number ? "tabular-nums" : ""}`
-  const highlight = highlighted ? "bg-[color-mix(in_srgb,var(--primary)_6%,transparent)]" : ""
-  const selectionRing = selected ? "ring-2 ring-inset ring-[var(--ring)]" : ""
+  const highlight = sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""
+  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle }
   if (active && !fixed) {
-    return <td onClick={onSelect} className={`h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${selectionRing}`} style={{ width, minWidth: width }}><InlineEditor record={record} column={column} options={options} onCommit={onCommit} onCancel={onCancel} /></td>
+    return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={sel.handle} onMouseDown={onFillStart} /></td>
   }
   const content = column.render ? column.render(record, ledger) : column.date ? dateText(column.value(record, ledger)) : text(column.value(record, ledger))
-  return <td title={typeof content === "string" ? content : undefined} onClick={onSelect} onDoubleClick={fixed ? undefined : onEdit} className={`h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${selectionRing} ${fixed ? `${highlight ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]"}`} style={{ width, minWidth: width }}>{content}</td>
-}
+  return <td data-col-id={column.id} title={typeof content === "string" ? content : undefined} onClick={(event) => { if (!event.shiftKey) onSelect() }} onContextMenu={onContextMenu} onDoubleClick={fixed ? undefined : onEdit} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]"}`} style={selectionStyle}>{content}<FillHandle visible={sel.handle} onMouseDown={onFillStart} /></td>
+})
 
 function EditorGroup({ label, color, columns, draft, onChange, optionsById, layout, requiredIds }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; layout?: "schedule" | "data"; requiredIds?: ReadonlySet<string> }) {
   const accent = color ?? "var(--muted-foreground)"
@@ -565,6 +710,7 @@ function EditorGroup({ label, color, columns, draft, onChange, optionsById, layo
 
 export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope?: string | null }) {
   const records = useAppStore((state) => state.records)
+  const saveState = useAppStore((state) => state.recordsSaveState)
   const samples = useAppStore((state) => state.completed)
   const overrides = useAppStore((state) => state.fabricOverrides)
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides), [overrides, records, samples])
@@ -573,6 +719,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [search, setSearch] = useState("")
   const [owner, setOwner] = useState(ALL)
   const [status, setStatus] = useState(ALL)
+  const [sortBy, setSortBy] = useState<{ col: string; dir: "asc" | "desc" } | null>(null)
+  const [replaceOpen, setReplaceOpen] = useState(false)
+  const [findValue, setFindValue] = useState("")
+  const [replaceValue, setReplaceValue] = useState("")
+  const [replaceScope, setReplaceScope] = useState<"selection" | "all">("selection")
+  const [replaceMatchCase, setReplaceMatchCase] = useState(false)
   const [editing, setEditing] = useState<DevRecord | null>(null)      // 수정(전체 64열) 모드
   const [intake, setIntake] = useState<DevRecord[] | null>(null)      // 신규 접수 모드(옵션별 레코드)
   const [intakeOpt, setIntakeOpt] = useState(0)
@@ -584,20 +736,49 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [intakeNotice, setIntakeNotice] = useState<string | null>(null)
   const [recentIntakeRows, setRecentIntakeRows] = useState<Set<string>>(() => new Set())
   const [editCell, setEditCell] = useState<{ row: string; col: string } | null>(null)
-  const [selected, setSelected] = useState<{ row: string; col: string } | null>(null)
+  const [editSeed, setEditSeed] = useState<string | undefined>(undefined)
+  const [range, setRange] = useState<{ anchor: CellRef; focus: CellRef } | null>(null)
+  const [menu, setMenu] = useState<{ x: number; y: number; kind: "cells" | "bottom" } | null>(null)          // 우클릭 메뉴 위치
+  const [undoStack, setUndoStack] = useState<DevRecord[][]>([])
+  const [redoStack, setRedoStack] = useState<DevRecord[][]>([])
+  const [clipNotice, setClipNotice] = useState<string | null>(null)
+  const clipRef = useRef<{ text: string; cut: boolean } | null>(null)              // 브라우저 클립보드 차단 시 대체 버퍼
+  const cutRangeRef = useRef<{ top: number; bottom: number; left: number; right: number } | null>(null)
+  const selectingRef = useRef(false)
+  const rowSelectingRef = useRef(false)
+  const fillDragRef = useRef<{ source: CellRect } | null>(null)
+  const fillPreviewRef = useRef<CellRect | null>(null)
+  const [fillPreview, setFillPreview] = useState<CellRect | null>(null)
+  const moveDragRef = useRef<MoveDrag | null>(null)
+  const movePreviewRef = useRef<CellRect | null>(null)
+  const [movePreview, setMovePreview] = useState<CellRect | null>(null)
+  const [moveHover, setMoveHover] = useState<{ row: string; col: string | null } | null>(null)
   const [colWidths, setColWidths] = useState<Record<string, number>>(loadColumnWidths)
-  const [confirmDelete, setConfirmDelete] = useState<DevRecord | null>(null)  // 행 삭제 확인
-  const [armedRow, setArmedRow] = useState<string | null>(null)               // 드래그 손잡이 눌린 행
-  const [dragRow, setDragRow] = useState<string | null>(null)                 // 끌고 있는 행
-  const [dragOverRow, setDragOverRow] = useState<string | null>(null)         // 드롭 대상 행
+  const [confirmDelete, setConfirmDelete] = useState<DevRecord[] | null>(null)  // 행 삭제 확인
   const zajiInputRef = useRef<HTMLInputElement>(null)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
 
+  const pushUndoSnapshot = (snapshot: DevRecord[]) => {
+    setUndoStack((current) => [...current, snapshot].slice(-50))
+    setRedoStack([])
+  }
+
   useEffect(() => () => resizeCleanupRef.current?.(), [])
+  // 화면을 떠날 때 지연 중인 저장을 반드시 내보낸다(편집 유실 방지).
+  useEffect(() => () => { void flushDevelopmentRecords() }, [])
+
   useEffect(() => {
-    const clearSelected = (event: KeyboardEvent) => { if (event.key === "Escape") setSelected(null) }
-    window.addEventListener("keydown", clearSelected)
-    return () => window.removeEventListener("keydown", clearSelected)
+    const onDocumentMouseDown = (event: MouseEvent) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      if (target.closest("table[data-dd-master-grid]")) return
+      // 포털로 열린 메뉴·대화상자·달력·선택 목록을 누를 때는 작업 중인 선택을 보존한다.
+      if (target.closest('[role="menu"], [role="dialog"], [role="listbox"], [data-radix-popper-content-wrapper], [data-slot="dialog-content"]')) return
+      setRange(null)
+      setMenu(null)
+    }
+    document.addEventListener("mousedown", onDocumentMouseDown)
+    return () => document.removeEventListener("mousedown", onDocumentMouseDown)
   }, [])
 
   const scoped = useMemo(() => categoryScope ? records.filter((row) => row.category === categoryScope) : records, [categoryScope, records])
@@ -640,10 +821,28 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const displayedColumns = [...PINNED_COLUMNS, ...visibleGroups.flatMap((group) => group.columns)]
   const editingLedger = editing ? ledgerByRecord.get(recordIdentity(editing)) ?? null : null
 
+  const compareColumnRows = (left: DevRecord, right: DevRecord, column: MasterColumn): number => {
+    const leftValue = column.value(left, ledgerByRecord.get(recordIdentity(left)) ?? null)
+    const rightValue = column.value(right, ledgerByRecord.get(recordIdentity(right)) ?? null)
+    const blank = (value: CellValue) => value === null || value === undefined || String(value).trim() === ""
+    if (blank(leftValue) || blank(rightValue)) return blank(leftValue) === blank(rightValue) ? 0 : blank(leftValue) ? 1 : -1
+    if (column.number) {
+      const a = Number(leftValue), b = Number(rightValue)
+      if (!Number.isFinite(a) || !Number.isFinite(b)) return Number.isFinite(a) === Number.isFinite(b) ? 0 : Number.isFinite(a) ? -1 : 1
+      return a - b
+    }
+    if (column.date) {
+      const a = toDate(String(leftValue))?.getTime(), b = toDate(String(rightValue))?.getTime()
+      if (a === undefined || b === undefined) return a === b ? 0 : a === undefined ? 1 : -1
+      return a - b
+    }
+    return String(leftValue).localeCompare(String(rightValue), "ko-KR", { numeric: true })
+  }
+
   // 기본 순서(수동 순서 → 접수일 오래된 순). 방금 접수한 행 강조는 여기에 반영하지 않는다.
   const ordered = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("ko-KR")
-    return scoped.filter((record) => {
+    const rows = scoped.filter((record) => {
       if (owner !== ALL && record.owner !== owner) return false
       if (status !== ALL && (record.devStatus || record.stage) !== status) return false
       if (!query) return true
@@ -651,9 +850,31 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       return allColumns.some((column) => String(column.value(record, linked) ?? "").toLocaleLowerCase("ko-KR").includes(query))
         || String(record.tech?.development?.developer ?? "").toLocaleLowerCase("ko-KR").includes(query)
     }).map((record, index) => ({ record, index }))
-      .sort((a, b) => compareManualOrder(a.record, b.record) || a.index - b.index)
+    const sortColumn = sortBy ? allColumns.find((column) => column.id === sortBy.col) : undefined
+    return rows
+      .sort((a, b) => {
+        if (sortBy && sortColumn) {
+          const order = compareColumnRows(a.record, b.record, sortColumn)
+          if (order) {
+            const aValue = sortColumn.value(a.record, ledgerByRecord.get(recordIdentity(a.record)) ?? null)
+            const bValue = sortColumn.value(b.record, ledgerByRecord.get(recordIdentity(b.record)) ?? null)
+            const hasBlank = aValue === null || aValue === undefined || String(aValue).trim() === "" || bValue === null || bValue === undefined || String(bValue).trim() === ""
+            return hasBlank ? order : sortBy.dir === "asc" ? order : -order
+          }
+        }
+        return sortBy ? a.index - b.index : compareManualOrder(a.record, b.record) || a.index - b.index
+      })
       .map(({ record }) => record)
-  }, [allColumns, ledgerByRecord, owner, scoped, search, status])
+  }, [allColumns, ledgerByRecord, owner, scoped, search, sortBy, status])
+
+  // 필터를 걷어낸 전체 순서. 담당별 재배치를 저장할 때 다른 담당 행의 자리를 지키는 기준이 된다.
+  const globalOrdered = useMemo(() => scoped
+    .map((record, index) => ({ record, index }))
+    .sort((a, b) => compareManualOrder(a.record, b.record) || a.index - b.index)
+    .map(({ record }) => record), [scoped])
+
+  // 전체 보기에서는 행 이동을 막고, 담당을 고른 상태에서만 그 담당의 행을 재배치한다.
+  const dragEnabled = owner !== ALL && sortBy === null
 
   /**
    * 화면 표시 순서. 방금 접수한 행만 확인하기 쉽도록 잠시 맨 위로 끌어올린다.
@@ -731,22 +952,766 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   // 핀 고정 열도 너비 조절 대상이므로 sticky left 오프셋을 현재 너비로 계산한다.
-  const pinnedLeft = (index: number) => PINNED_COLUMNS.slice(0, index).reduce((sum, column) => sum + widthOf(column), 0)
+  const pinnedLeft = (index: number) => ROW_HEADER_WIDTH + PINNED_COLUMNS.slice(0, index).reduce((sum, column) => sum + widthOf(column), 0)
   const pinnedTotal = PINNED_COLUMNS.reduce((sum, column) => sum + widthOf(column), 0)
 
-  // 드래그 재배치는 필터가 없는 전체 목록에서만 허용한다(부분 목록 재배치 방지).
-  const dragEnabled = !categoryScope && owner === ALL && status === ALL && !search.trim()
-  const handleRowDrop = (targetId: string) => {
-    if (!dragRow || dragRow === targetId) return
-    // 신규 강조로 끌어올린 위치가 아니라 기본 순서를 기준으로 저장한다.
-    const order = ordered.map((record) => recordIdentity(record))
-    const from = order.indexOf(dragRow)
-    const to = order.indexOf(targetId)
-    if (from === -1 || to === -1) return
-    order.splice(to, 0, order.splice(from, 1)[0])
-    void reorderDevelopmentRecords(order)
+  /**
+   * 행 머리글(좌측 번호 칸)에서는 행 전체 선택을, 데이터 셀에서는 범위 선택을 한다.
+   * 엑셀의 행 머리글/셀 구분과 같은 방식이다.
+   */
+  const onRowMouseDown = (rowId: string, event: ReactMouseEvent<HTMLTableRowElement>) => {
+    if (event.button !== 0) return
+    const target = event.target as HTMLElement
+    if (target.closest("button, input, select, textarea, a, [role=\"button\"]")) return
+    if (startSelectionMove(event)) return
+    if (target.closest("[data-row-header]")) {
+      event.preventDefault()
+      selectWholeRow(rowId, event.shiftKey)
+      rowSelectingRef.current = true
+      selectingRef.current = false
+      setMenu(null)
+      return
+    }
+    const cell = target.closest("td[data-col-id]")
+    const colId = cell?.getAttribute("data-col-id") ?? null
+    if (!colId) return
+    if (event.shiftKey) extendTo(rowId, colId)
+    else setCellAnchor(rowId, colId)
+    selectingRef.current = true
+    setMenu(null)
   }
-  const endRowDrag = () => { setArmedRow(null); setDragRow(null); setDragOverRow(null) }
+
+  const onMove = (event: MouseEvent) => {
+    const moveDrag = moveDragRef.current
+    if (moveDrag) {
+      const target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null
+      const rowElement = target?.closest<HTMLElement>("tr[data-row-id]")
+      const rowId = rowElement?.dataset.rowId
+      const row = rowId ? rowIndexOf.get(rowId) : undefined
+      const cell = target?.closest<HTMLTableCellElement>("td[data-col-id]")
+      const colId = cell?.dataset.colId
+      const col = colId ? colIndexOf.get(colId) : undefined
+      if (row !== undefined && (moveDrag.wholeRows || col !== undefined)) {
+        const height = moveDrag.source.bottom - moveDrag.source.top + 1
+        const width = moveDrag.source.right - moveDrag.source.left + 1
+        const top = Math.max(0, Math.min(filtered.length - height, row - moveDrag.grabRow))
+        const left = moveDrag.wholeRows ? 0 : Math.max(0, Math.min(displayedColumns.length - width, (col as number) - moveDrag.grabCol))
+        const next = { top, bottom: top + height - 1, left, right: left + width - 1 }
+        movePreviewRef.current = next
+        setMovePreview(next)
+      }
+      const scroller = document.querySelector<HTMLElement>("[data-route-scroll-root]")
+      if (scroller) {
+        const box = scroller.getBoundingClientRect()
+        if (event.clientY < box.top + 48) scroller.scrollTop -= 16
+        else if (event.clientY > box.bottom - 48) scroller.scrollTop += 16
+        if (!moveDrag.wholeRows && event.clientX < box.left + 80) scroller.scrollLeft -= 16
+        else if (!moveDrag.wholeRows && event.clientX > box.right - 48) scroller.scrollLeft += 16
+      }
+      return
+    }
+    const fillDrag = fillDragRef.current
+    if (fillDrag) {
+      const cell = (document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null)?.closest("td[data-col-id]")
+      const colId = cell?.getAttribute("data-col-id")
+      const rowId = cell?.closest("tr[data-row-id]")?.getAttribute("data-row-id")
+      const row = rowId ? rowIndexOf.get(rowId) : undefined
+      const col = colId ? colIndexOf.get(colId) : undefined
+      if (row === undefined || col === undefined) return
+      const source = fillDrag.source
+      const down = Math.max(0, row - source.bottom)
+      const right = Math.max(0, col - source.right)
+      const next = !down && !right ? source : down >= right ? { ...source, bottom: row } : { ...source, right: col }
+      fillPreviewRef.current = next
+      setFillPreview(next)
+      return
+    }
+    if (rowSelectingRef.current) {
+      const row = (document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null)?.closest("tr[data-row-id]")
+      const rowId = row?.getAttribute("data-row-id")
+      if (rowId) selectWholeRow(rowId, true)
+      return
+    }
+    if (selectingRef.current) {
+      const cell = (document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null)?.closest("td[data-col-id]")
+      const colId = cell?.getAttribute("data-col-id")
+      const rowId = cell?.closest("tr[data-row-id]")?.getAttribute("data-row-id")
+      if (colId && rowId) extendTo(rowId, colId)
+      return
+    }
+  }
+  const onUp = () => {
+    const moveDrag = moveDragRef.current
+    const moveTarget = movePreviewRef.current
+    if (moveDrag) {
+      moveDragRef.current = null
+      movePreviewRef.current = null
+      setMovePreview(null)
+      document.body.style.cursor = ""
+      if (moveTarget) void commitSelectionMove(moveDrag, moveTarget)
+      return
+    }
+    const fillDrag = fillDragRef.current
+    const preview = fillPreviewRef.current
+    if (fillDrag) {
+      fillDragRef.current = null
+      fillPreviewRef.current = null
+      setFillPreview(null)
+      if (preview) void commitFill(fillDrag.source, preview)
+      return
+    }
+    selectingRef.current = false
+    rowSelectingRef.current = false
+  }
+  // 핸들러는 매 렌더 최신으로 바뀌지만, 리스너 등록·해제는 1회만 한다(매 렌더 재등록은 비용이 크다).
+  const gridMouseRef = useRef({ move: onMove, up: onUp })
+  gridMouseRef.current = { move: onMove, up: onUp }
+  useEffect(() => {
+    const move = (event: MouseEvent) => gridMouseRef.current.move(event)
+    const up = () => gridMouseRef.current.up()
+    window.addEventListener("mousemove", move)
+    window.addEventListener("mouseup", up)
+    return () => {
+      window.removeEventListener("mousemove", move)
+      window.removeEventListener("mouseup", up)
+    }
+  }, [])
+
+  // ── 셀 범위 선택 · 엑셀식 복사/붙여넣기 ────────────────────────────────
+  const rowIndexOf = useMemo(() => new Map(filtered.map((record, index) => [recordIdentity(record), index])), [filtered])
+  const colIndexOf = useMemo(() => new Map(displayedColumns.map((column, index) => [column.id, index])), [displayedColumns])
+
+  /** 선택 사각형(행·열 인덱스). 앵커와 포커스 사이를 모두 포함한다. */
+  const rect = useMemo(() => {
+    if (!range) return null
+    const r1 = rowIndexOf.get(range.anchor.row), r2 = rowIndexOf.get(range.focus.row)
+    const c1 = colIndexOf.get(range.anchor.col), c2 = colIndexOf.get(range.focus.col)
+    if (r1 === undefined || r2 === undefined || c1 === undefined || c2 === undefined) return null
+    return { top: Math.min(r1, r2), bottom: Math.max(r1, r2), left: Math.min(c1, c2), right: Math.max(c1, c2) } satisfies CellRect
+  }, [colIndexOf, range, rowIndexOf])
+
+  const wholeRowSelection = rect !== null && rect.left === 0 && rect.right === displayedColumns.length - 1
+
+  /** 선택 외곽 4px 안쪽만 이동 손잡이로 인정해 셀 편집·범위 선택과 충돌하지 않게 한다. */
+  const selectionEdgeAt = (target: HTMLElement, clientX: number, clientY: number): { row: string; col: string | null; rowIndex: number; colIndex: number } | null => {
+    if (!rect || target.closest("[data-fill-handle]")) return null
+    const cell = target.closest<HTMLTableCellElement>("td[data-col-id], td[data-row-header]")
+    const rowElement = cell?.closest<HTMLElement>("tr[data-row-id]")
+    const rowId = rowElement?.dataset.rowId
+    const rowIndex = rowId ? rowIndexOf.get(rowId) : undefined
+    if (!cell || !rowId || rowIndex === undefined || rowIndex < rect.top || rowIndex > rect.bottom) return null
+
+    const header = cell.hasAttribute("data-row-header")
+    if (header && (!wholeRowSelection || !dragEnabled)) return null
+    const colId = header ? null : cell.dataset.colId ?? null
+    const colIndex = colId ? colIndexOf.get(colId) : -1
+    if (!header && (colIndex === undefined || colIndex < rect.left || colIndex > rect.right)) return null
+    if (!header && wholeRowSelection && !dragEnabled) return null
+
+    const box = cell.getBoundingClientRect()
+    const edge = 4
+    const onTop = rowIndex === rect.top && clientY - box.top <= edge
+    const onBottom = rowIndex === rect.bottom && box.bottom - clientY <= edge
+    const onLeft = header
+      ? wholeRowSelection && clientX - box.left <= edge
+      : !wholeRowSelection && colIndex === rect.left && clientX - box.left <= edge
+    const onRight = !header && colIndex === rect.right && box.right - clientX <= edge
+    return onTop || onBottom || onLeft || onRight ? { row: rowId, col: colId, rowIndex, colIndex: header ? 0 : colIndex as number } : null
+  }
+
+  const startSelectionMove = (event: ReactMouseEvent<HTMLTableRowElement>): boolean => {
+    const target = event.target as HTMLElement
+    const edge = selectionEdgeAt(target, event.clientX, event.clientY)
+    if (!edge || !rect) return false
+    event.preventDefault()
+    event.stopPropagation()
+    selectingRef.current = false
+    rowSelectingRef.current = false
+    setMoveHover(null)
+    const drag = { source: { ...rect }, wholeRows: wholeRowSelection, grabRow: edge.rowIndex - rect.top, grabCol: edge.colIndex - rect.left }
+    moveDragRef.current = drag
+    movePreviewRef.current = { ...rect }
+    setMovePreview({ ...rect })
+    document.body.style.cursor = "grabbing"
+    return true
+  }
+
+  const movePreviewStyle = (rowIndex: number | undefined, colIndex: number, header = false): CSSProperties | undefined => {
+    if (!movePreview || rowIndex === undefined || rowIndex < movePreview.top || rowIndex > movePreview.bottom) return undefined
+    const wholeRows = moveDragRef.current?.wholeRows === true
+    if (header && !wholeRows) return undefined
+    if (!header && (colIndex < movePreview.left || colIndex > movePreview.right)) return undefined
+    const style: CSSProperties = {}
+    if (rowIndex === movePreview.top) style.borderTop = "1.5px dashed var(--grid-selection)"
+    if (rowIndex === movePreview.bottom) style.borderBottom = "1.5px dashed var(--grid-selection)"
+    if (header && wholeRows) style.borderLeft = "1.5px dashed var(--grid-selection)"
+    if (!header && !wholeRows && colIndex === movePreview.left) style.borderLeft = "1.5px dashed var(--grid-selection)"
+    if (!header && colIndex === movePreview.right) style.borderRight = "1.5px dashed var(--grid-selection)"
+    return style
+  }
+
+  const onGridMouseMove = (event: ReactMouseEvent<HTMLTableElement>) => {
+    if (moveDragRef.current) return
+    const edge = selectionEdgeAt(event.target as HTMLElement, event.clientX, event.clientY)
+    setMoveHover((current) => {
+      const next = edge ? { row: edge.row, col: edge.col } : null
+      return current?.row === next?.row && current?.col === next?.col ? current : next
+    })
+  }
+
+  const startFill = (event: ReactMouseEvent<HTMLSpanElement>) => {
+    if (!rect) return
+    event.preventDefault()
+    event.stopPropagation()
+    selectingRef.current = false
+    fillDragRef.current = { source: { ...rect } }
+    fillPreviewRef.current = { ...rect }
+    setFillPreview({ ...rect })
+  }
+
+  const inFillPreview = (row: number | undefined, colId: string): boolean => {
+    if (!fillPreview || row === undefined) return false
+    const col = colIndexOf.get(colId)
+    return col !== undefined && row >= fillPreview.top && row <= fillPreview.bottom && col >= fillPreview.left && col <= fillPreview.right
+      && (!rect || row < rect.top || row > rect.bottom || col < rect.left || col > rect.right)
+  }
+
+  /** 헤더 강조용 — 선택 사각형의 열 범위에 드는지. */
+  const colInRange = (colId: string): boolean => {
+    if (!rect) return false
+    const index = colIndexOf.get(colId)
+    return index !== undefined && index >= rect.left && index <= rect.right
+  }
+
+  const toggleColumnSort = (col: string) => setSortBy((current) => {
+    if (!current || current.col !== col) return { col, dir: "asc" }
+    if (current.dir === "asc") return { col, dir: "desc" }
+    return null
+  })
+
+  const sortIcon = (col: string) => sortBy?.col === col
+    ? sortBy.dir === "asc" ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />
+    : null
+
+  /** 엑셀의 행 머리글 클릭처럼 그 행의 표시 중인 모든 열을 선택한다. */
+  const selectWholeRow = (rowId: string, extend = false) => {
+    const first = displayedColumns[0], last = displayedColumns[displayedColumns.length - 1]
+    if (!first || !last) return
+    setRange((current) => extend && current
+      ? { anchor: { row: current.anchor.row, col: first.id }, focus: { row: rowId, col: last.id } }
+      : { anchor: { row: rowId, col: first.id }, focus: { row: rowId, col: last.id } })
+  }
+
+  const setCellAnchor = (row: string, col: string) => setRange({ anchor: { row, col }, focus: { row, col } })
+  const extendTo = (row: string, col: string) => setRange((current) => current ? { anchor: current.anchor, focus: { row, col } } : { anchor: { row, col }, focus: { row, col } })
+
+  const scrollCellIntoView = (cellRef: CellRef) => {
+    window.requestAnimationFrame(() => {
+      const row = [...document.querySelectorAll<HTMLElement>("tr[data-row-id]")].find((item) => item.dataset.rowId === cellRef.row)
+      const cell = row ? [...row.querySelectorAll<HTMLElement>("td[data-col-id]")].find((item) => item.dataset.colId === cellRef.col) : null
+      if (!cell) return
+      cell.scrollIntoView({ block: "nearest", inline: "nearest" })
+      const scroller = cell.closest<HTMLElement>("[data-route-scroll-root]")
+      const colIndex = colIndexOf.get(cellRef.col)
+      if (!scroller || colIndex === undefined || colIndex < PINNED_COLUMNS.length) return
+      const cellBox = cell.getBoundingClientRect()
+      const scrollBox = scroller.getBoundingClientRect()
+      const stickyEdge = scrollBox.left + ROW_HEADER_WIDTH + pinnedTotal
+      if (cellBox.left < stickyEdge) scroller.scrollLeft -= stickyEdge - cellBox.left
+    })
+  }
+
+  /** 방향키는 가장자리에서 멈추고, Tab만 행 끝에서 다음/이전 행으로 순환한다. */
+  const moveSelection = (direction: CellMove, extend = false, wrap = false, origin?: CellRef) => {
+    const rowCount = filtered.length
+    const colCount = displayedColumns.length
+    if (!rowCount || !colCount) return
+    const current = origin ?? range?.focus
+    if (!current) {
+      const first = { row: recordIdentity(filtered[0]), col: displayedColumns[0].id }
+      setRange({ anchor: first, focus: first })
+      scrollCellIntoView(first)
+      return
+    }
+    let rowIndex = current ? rowIndexOf.get(current.row) ?? 0 : 0
+    let colIndex = current ? colIndexOf.get(current.col) ?? 0 : 0
+
+    if (direction === "up") rowIndex = Math.max(0, rowIndex - 1)
+    else if (direction === "down") rowIndex = Math.min(rowCount - 1, rowIndex + 1)
+    else if (direction === "right") {
+      if (wrap && colIndex === colCount - 1 && rowIndex < rowCount - 1) { rowIndex += 1; colIndex = 0 }
+      else colIndex = Math.min(colCount - 1, colIndex + 1)
+    } else if (wrap && colIndex === 0 && rowIndex > 0) {
+      rowIndex -= 1
+      colIndex = colCount - 1
+    } else colIndex = Math.max(0, colIndex - 1)
+
+    const row = filtered[rowIndex]
+    const column = displayedColumns[colIndex]
+    if (!row || !column) return
+    const next = { row: recordIdentity(row), col: column.id }
+    setRange((currentRange) => extend && currentRange ? { anchor: currentRange.anchor, focus: next } : { anchor: next, focus: next })
+    scrollCellIntoView(next)
+  }
+
+  const beginCellEdit = (cellRef: CellRef, initial?: string) => {
+    const rowIndex = rowIndexOf.get(cellRef.row)
+    const colIndex = colIndexOf.get(cellRef.col)
+    const column = colIndex === undefined ? undefined : displayedColumns[colIndex]
+    if (rowIndex === undefined || !filtered[rowIndex] || !column || isFixedColumn(column)) return
+    setEditSeed(initial)
+    setEditCell(cellRef)
+  }
+
+  const cancelCellEdit = () => { setEditCell(null); setEditSeed(undefined) }
+
+  /** 복사·붙여넣기에 쓰는 원본 값(화면 표기 "—" 가 아닌 실제 값). */
+  const rawCellText = (record: DevRecord, column: MasterColumn): string => {
+    const linked = ledgerByRecord.get(recordIdentity(record)) ?? null
+    const value = column.value(record, linked)
+    return value === null || value === undefined ? "" : String(value)
+  }
+
+  const rangeToTsv = (box: NonNullable<typeof rect>): string => {
+    const lines: string[] = []
+    for (let r = box.top; r <= box.bottom; r += 1) {
+      const record = filtered[r]
+      if (!record) continue
+      const cells: string[] = []
+      for (let c = box.left; c <= box.right; c += 1) {
+        const column = displayedColumns[c]
+        cells.push(column ? rawCellText(record, column) : "")
+      }
+      lines.push(cells.join("\t"))
+    }
+    return lines.join("\n")
+  }
+
+  const notify = (message: string) => { setClipNotice(message); window.setTimeout(() => setClipNotice(null), 2500) }
+
+  /** 현재 화면 순서를 인덱스로 굳힌다. 편집으로 접수일이 바뀌어도 행이 튀지 않게 한다. */
+  const rankOf = (records: readonly DevRecord[]): Map<string, number> => {
+    const rank = new Map<string, number>()
+    records.map((record, index) => ({ record, index }))
+      .sort((a, b) => compareManualOrder(a.record, b.record) || a.index - b.index)
+      .forEach(({ record }, position) => rank.set(recordIdentity(record), position))
+    return rank
+  }
+
+  /**
+   * 변경 전 전체 레코드를 담아 두고 일괄 저장한다. 되돌리기는 이 스냅샷 한 단계만 지원한다.
+   * 저장 직전에 편집 전 순서를 sortOrder 로 고정해, 엑셀처럼 행이 제자리에 머물게 한다.
+   */
+  const commitRecords = async (build: (records: DevRecord[]) => DevRecord[], freezeOrder = true) => {
+    const before = useAppStore.getState().records
+    const edited = build(before)
+    if (edited === before) return
+    const rank = freezeOrder ? rankOf(before) : null
+    const next = rank ? edited.map((record) => {
+      const order = rank.get(recordIdentity(record))
+      return order === undefined || record.sortOrder === order ? record : { ...record, sortOrder: order }
+    }) : edited
+    pushUndoSnapshot(before)
+    await writeDevelopmentRecords(next)
+  }
+
+  /** 선택 테두리 이동은 셀 값 이동과 행 블록 재배치를 한 경로에서 처리해 한 번에 되돌릴 수 있게 한다. */
+  const commitSelectionMove = async (drag: MoveDrag, target: CellRect) => {
+    const source = drag.source
+    if (source.top === target.top && source.left === target.left) return
+
+    if (drag.wholeRows) {
+      if (!dragEnabled) { notify("담당 필터를 선택한 상태에서만 행을 이동할 수 있습니다."); return }
+      const selectedIds = filtered.slice(source.top, source.bottom + 1).map(recordIdentity)
+      const selectedSet = new Set(selectedIds)
+      const visible = ordered.map(recordIdentity)
+      const moving = visible.filter((identity) => selectedSet.has(identity))
+      if (!moving.length) return
+      const remaining = visible.filter((identity) => !selectedSet.has(identity))
+      const insertAt = Math.max(0, Math.min(target.top, remaining.length))
+      const movedVisible = [...remaining.slice(0, insertAt), ...moving, ...remaining.slice(insertAt)]
+      if (movedVisible.every((identity, index) => identity === visible[index])) return
+
+      // 화면에 보이는 담당 행이 차지한 슬롯만 갈아끼워 다른 담당의 전역 위치를 보존한다.
+      const visibleSet = new Set(visible)
+      const globalIds = globalOrdered.map(recordIdentity)
+      let cursor = 0
+      const reorderedIds = globalIds.map((identity) => visibleSet.has(identity) ? movedVisible[cursor++] : identity)
+      const order = new Map(reorderedIds.map((identity, index) => [identity, index]))
+      await commitRecords((records) => records.map((record) => {
+        const nextOrder = order.get(recordIdentity(record))
+        return nextOrder === undefined || record.sortOrder === nextOrder ? record : { ...record, sortOrder: nextOrder }
+      }), false)
+      const first = displayedColumns[0], last = displayedColumns[displayedColumns.length - 1]
+      if (first && last) setRange({ anchor: { row: moving[0], col: first.id }, focus: { row: moving[moving.length - 1], col: last.id } })
+      notify(`${moving.length}개 행을 이동했습니다.`)
+      return
+    }
+
+    const moves: { sourceRecord: DevRecord; sourceColumn: MasterColumn; targetRecord: DevRecord; targetColumn: MasterColumn; value: string }[] = []
+    for (let row = source.top; row <= source.bottom; row += 1) {
+      const sourceRecord = filtered[row]
+      const targetRecord = filtered[target.top + row - source.top]
+      if (!sourceRecord || !targetRecord) continue
+      for (let col = source.left; col <= source.right; col += 1) {
+        const sourceColumn = displayedColumns[col]
+        const targetColumn = displayedColumns[target.left + col - source.left]
+        if (!sourceColumn || !targetColumn || isFixedColumn(sourceColumn) || isFixedColumn(targetColumn)) continue
+        moves.push({ sourceRecord, sourceColumn, targetRecord, targetColumn, value: rawCellText(sourceRecord, sourceColumn) })
+      }
+    }
+    if (!moves.length) { notify("이동할 수 있는 셀이 없습니다."); return }
+
+    const edits = new Map<string, DevRecord>()
+    const write = (record: DevRecord, column: MasterColumn, value: string) => {
+      const identity = recordIdentity(record)
+      const draft = edits.get(identity) ?? record
+      const next = updateRecordCell(draft, column, value)
+      if (next !== draft) edits.set(identity, next)
+    }
+    // 겹치는 범위도 잘라내기처럼 동작하도록 원본을 모두 비운 뒤 스냅샷 값을 대상에 쓴다.
+    moves.forEach(({ sourceRecord, sourceColumn }) => write(sourceRecord, sourceColumn, ""))
+    moves.forEach(({ targetRecord, targetColumn, value }) => write(targetRecord, targetColumn, value))
+    if (!edits.size) return
+    await commitRecords((records) => records.map((record) => edits.get(recordIdentity(record)) ?? record))
+    const firstRow = filtered[target.top], lastRow = filtered[target.bottom]
+    const firstCol = displayedColumns[target.left], lastCol = displayedColumns[target.right]
+    if (firstRow && lastRow && firstCol && lastCol) setRange({ anchor: { row: recordIdentity(firstRow), col: firstCol.id }, focus: { row: recordIdentity(lastRow), col: lastCol.id } })
+    notify(`${moves.length}개 셀을 이동했습니다.`)
+  }
+
+  /** 채우기 핸들은 원본 사각형의 값을 행/열 패턴 그대로 반복한다. */
+  const commitFill = async (source: CellRect, target: CellRect) => {
+    const edits = new Map<string, DevRecord>()
+    let changed = 0
+    const write = (rowIndex: number, colIndex: number, sourceRow: number, sourceCol: number) => {
+      const record = filtered[rowIndex]
+      const fromRecord = filtered[sourceRow]
+      const column = displayedColumns[colIndex]
+      const fromColumn = displayedColumns[sourceCol]
+      if (!record || !fromRecord || !column || !fromColumn || isFixedColumn(column)) return
+      const identity = recordIdentity(record)
+      const draft = edits.get(identity) ?? record
+      const next = updateRecordCell(draft, column, rawCellText(fromRecord, fromColumn))
+      if (next !== draft) { edits.set(identity, next); changed += 1 }
+    }
+
+    if (target.bottom > source.bottom) {
+      const height = source.bottom - source.top + 1
+      for (let row = source.bottom + 1; row <= target.bottom; row += 1) {
+        const sourceRow = source.top + ((row - source.top) % height)
+        for (let col = source.left; col <= source.right; col += 1) write(row, col, sourceRow, col)
+      }
+    } else if (target.right > source.right) {
+      const width = source.right - source.left + 1
+      for (let row = source.top; row <= source.bottom; row += 1) {
+        for (let col = source.right + 1; col <= target.right; col += 1) {
+          const sourceCol = source.left + ((col - source.left) % width)
+          write(row, col, row, sourceCol)
+        }
+      }
+    }
+    if (!edits.size) return
+    await commitRecords((records) => records.map((record) => edits.get(recordIdentity(record)) ?? record))
+    const firstRow = filtered[target.top], lastRow = filtered[target.bottom]
+    const firstCol = displayedColumns[target.left], lastCol = displayedColumns[target.right]
+    if (firstRow && lastRow && firstCol && lastCol) setRange({ anchor: { row: recordIdentity(firstRow), col: firstCol.id }, focus: { row: recordIdentity(lastRow), col: lastCol.id } })
+    notify(`${changed}개 셀을 채웠습니다.`)
+  }
+
+  /** Ctrl+D: 첫 행을 아래로 복사하고, 단일 셀은 바로 위 값을 가져온다. */
+  const fillDown = async () => {
+    if (!rect) return
+    const single = rect.top === rect.bottom && rect.left === rect.right
+    const sourceRow = single ? rect.top - 1 : rect.top
+    const startRow = single ? rect.top : rect.top + 1
+    if (sourceRow < 0 || startRow > rect.bottom) { notify("위에서 가져올 값이 없습니다."); return }
+    const edits = new Map<string, DevRecord>()
+    let changed = 0
+    for (let row = startRow; row <= rect.bottom; row += 1) {
+      const record = filtered[row]
+      const fromRecord = filtered[sourceRow]
+      if (!record || !fromRecord) continue
+      let draft = record
+      for (let col = rect.left; col <= rect.right; col += 1) {
+        const column = displayedColumns[col]
+        if (!column || isFixedColumn(column)) continue
+        const next = updateRecordCell(draft, column, rawCellText(fromRecord, column))
+        if (next !== draft) { draft = next; changed += 1 }
+      }
+      if (draft !== record) edits.set(recordIdentity(record), draft)
+    }
+    if (!edits.size) return
+    await commitRecords((records) => records.map((record) => edits.get(recordIdentity(record)) ?? record))
+    notify(`${changed}개 셀을 아래로 채웠습니다.`)
+  }
+
+  const replaceAllMatches = async () => {
+    if (!findValue) { notify("찾을 내용을 입력하세요."); return }
+    const edits = new Map<string, DevRecord>()
+    let changed = 0
+    const replaceCell = (record: DevRecord, column: MasterColumn) => {
+      if (isFixedColumn(column)) return
+      const identity = recordIdentity(record)
+      const draft = edits.get(identity) ?? record
+      const linked = ledgerByRecord.get(identity) ?? null
+      const raw = column.value(draft, linked)
+      const before = raw === null || raw === undefined ? "" : String(raw)
+      const after = replaceText(before, findValue, replaceValue, replaceMatchCase)
+      if (after === before) return
+      const next = updateRecordCell(draft, column, after)
+      if (next !== draft) { edits.set(identity, next); changed += 1 }
+    }
+
+    if (replaceScope === "selection") {
+      if (!rect) { notify("먼저 바꿀 영역을 선택하세요."); return }
+      for (let row = rect.top; row <= rect.bottom; row += 1) {
+        const record = filtered[row]
+        if (!record) continue
+        for (let col = rect.left; col <= rect.right; col += 1) {
+          const column = displayedColumns[col]
+          if (column) replaceCell(record, column)
+        }
+      }
+    } else {
+      for (const record of scoped) for (const column of allColumns) replaceCell(record, column)
+    }
+
+    if (!edits.size) { notify("바꿀 셀이 없습니다."); return }
+    await commitRecords((records) => records.map((record) => edits.get(recordIdentity(record)) ?? record))
+    notify(`${changed}개 셀을 바꿨습니다.`)
+  }
+
+  /** 엑셀의 "복사한 셀 삽입" — 클립보드 내용을 선택 행 아래에 새 행으로 끼워 넣는다. */
+  const insertCopiedRows = async () => {
+    if (!rect) return
+    let text = ""
+    try { text = await navigator.clipboard.readText() } catch { text = "" }
+    if (!text) text = clipRef.current?.text ?? ""
+    if (!text) { notify("삽입할 내용이 없습니다.") ; return }
+
+    const grid = text.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n").map((line) => line.split("\t"))
+    const created = grid.map((line) => {
+      let draft = createBlankDevRecord()
+      line.forEach((value, index) => {
+        const column = displayedColumns[rect.left + index]
+        if (column && !isFixedColumn(column)) draft = updateRecordCell(draft, column, value)
+      })
+      return draft
+    })
+    if (!created.length) return
+
+    const before = useAppStore.getState().records
+    const rank = rankOf(before)
+    const sorted = [...before].sort((a, b) => (rank.get(recordIdentity(a)) ?? 0) - (rank.get(recordIdentity(b)) ?? 0))
+    const anchor = filtered[rect.bottom]
+    const at = anchor ? sorted.findIndex((record) => recordIdentity(record) === recordIdentity(anchor)) : -1
+    const cut = at === -1 ? sorted.length : at + 1
+    const merged = [...sorted.slice(0, cut), ...created, ...sorted.slice(cut)]
+
+    pushUndoSnapshot(before)
+    await writeDevelopmentRecords(merged.map((record, index) => ({ ...record, sortOrder: index })))
+    setRange(null)
+    notify(`${created.length}개 행을 아래에 삽입했습니다.`)
+  }
+
+  const selectedRows = (): DevRecord[] => rect ? filtered.slice(rect.top, rect.bottom + 1) : []
+
+  const insertBlankRows = async (position: "above" | "below") => {
+    if (!rect) return
+    const count = Math.max(1, rect.bottom - rect.top + 1)
+    const blankOwner = owner === ALL ? "" : owner
+    const created = Array.from({ length: count }, () => createEmptyGridRecord(blankOwner))
+    const before = useAppStore.getState().records
+    const rank = rankOf(before)
+    const sorted = [...before].sort((a, b) => (rank.get(recordIdentity(a)) ?? 0) - (rank.get(recordIdentity(b)) ?? 0))
+    const anchor = filtered[position === "above" ? rect.top : rect.bottom]
+    const anchorIndex = anchor ? sorted.findIndex((record) => recordIdentity(record) === recordIdentity(anchor)) : -1
+    const at = anchorIndex === -1 ? sorted.length : anchorIndex + (position === "below" ? 1 : 0)
+    const merged = [...sorted.slice(0, at), ...created, ...sorted.slice(at)]
+    pushUndoSnapshot(before)
+    await writeDevelopmentRecords(merged.map((record, index) => ({ ...record, sortOrder: index })))
+    const first = displayedColumns[0], last = displayedColumns[displayedColumns.length - 1]
+    if (first && last) {
+      const firstCell = { row: recordIdentity(created[0]), col: first.id }
+      setRange({ anchor: firstCell, focus: { row: recordIdentity(created[created.length - 1]), col: last.id } })
+      scrollCellIntoView(firstCell)
+    }
+    notify(`${created.length}개 빈 행을 ${position === "above" ? "위" : "아래"}에 삽입했습니다.`)
+  }
+
+  const appendBlankRows = async (count: number) => {
+    const blankOwner = owner === ALL ? "" : owner
+    const created = Array.from({ length: count }, () => createEmptyGridRecord(blankOwner))
+    await commitRecords((records) => {
+      const rank = rankOf(records)
+      const sorted = [...records].sort((a, b) => (rank.get(recordIdentity(a)) ?? 0) - (rank.get(recordIdentity(b)) ?? 0))
+      return [...sorted, ...created].map((record, index) => ({ ...record, sortOrder: index }))
+    })
+    const first = displayedColumns[0], last = displayedColumns[displayedColumns.length - 1]
+    if (first && last) {
+      const lastCell = { row: recordIdentity(created[created.length - 1]), col: first.id }
+      setRange({ anchor: { row: recordIdentity(created[0]), col: first.id }, focus: { row: lastCell.row, col: last.id } })
+      scrollCellIntoView(lastCell)
+    }
+    notify(`${created.length}개 빈 행을 목록 아래에 추가했습니다.`)
+  }
+
+  const requestDeleteSelectedRows = () => {
+    const rows = selectedRows()
+    if (rows.length) setConfirmDelete(rows)
+  }
+
+  const copyRange = async (cut = false) => {
+    if (!rect) return
+    const text = rangeToTsv(rect)
+    clipRef.current = { text, cut }
+    cutRangeRef.current = cut ? { ...rect } : null
+    try { await navigator.clipboard.writeText(text) } catch { /* 클립보드 권한이 없어도 앱 내부 붙여넣기는 동작한다. */ }
+    const count = (rect.bottom - rect.top + 1) * (rect.right - rect.left + 1)
+    notify(cut ? `${count}개 셀 잘라내기` : `${count}개 셀 복사`)
+  }
+
+  /** 선택 영역의 편집 가능한 셀을 비운다(수식·대장연결 열은 건너뛴다). */
+  const clearRange = async () => {
+    if (!rect) return
+    const edits = new Map<string, DevRecord>()
+    for (let r = rect.top; r <= rect.bottom; r += 1) {
+      const record = filtered[r]
+      if (!record) continue
+      let draft = edits.get(recordIdentity(record)) ?? record
+      for (let c = rect.left; c <= rect.right; c += 1) {
+        const column = displayedColumns[c]
+        if (!column || isFixedColumn(column)) continue
+        draft = updateRecordCell(draft, column, "")
+      }
+      if (draft !== record) edits.set(recordIdentity(record), draft)
+    }
+    if (!edits.size) return
+    await commitRecords((records) => records.map((record) => edits.get(recordIdentity(record)) ?? record))
+    notify("선택 영역을 비웠습니다.")
+  }
+
+  const pasteRange = async () => {
+    if (!rect) return
+    let text = ""
+    try { text = await navigator.clipboard.readText() } catch { text = "" }
+    if (!text) text = clipRef.current?.text ?? ""
+    if (!text) { notify("붙여넣을 내용이 없습니다.") ; return }
+
+    const grid = text.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n").map((line) => line.split("\t"))
+    const cut = clipRef.current?.cut ? cutRangeRef.current : null
+    const edits = new Map<string, DevRecord>()
+    const put = (record: DevRecord, draft: DevRecord) => { if (draft !== record) edits.set(recordIdentity(record), draft) }
+
+    // 잘라내기 원본을 먼저 비운다(원본과 대상이 겹쳐도 값이 남지 않게).
+    if (cut) {
+      for (let r = cut.top; r <= cut.bottom; r += 1) {
+        const record = filtered[r]
+        if (!record) continue
+        let draft = edits.get(recordIdentity(record)) ?? record
+        for (let c = cut.left; c <= cut.right; c += 1) {
+          const column = displayedColumns[c]
+          if (!column || isFixedColumn(column)) continue
+          draft = updateRecordCell(draft, column, "")
+        }
+        put(record, draft)
+      }
+    }
+
+    let skipped = 0
+    for (let r = 0; r < grid.length; r += 1) {
+      const record = filtered[rect.top + r]
+      if (!record) break
+      let draft = edits.get(recordIdentity(record)) ?? record
+      for (let c = 0; c < grid[r].length; c += 1) {
+        const column = displayedColumns[rect.left + c]
+        if (!column) break
+        if (isFixedColumn(column)) { skipped += 1; continue }
+        draft = updateRecordCell(draft, column, grid[r][c])
+      }
+      put(record, draft)
+    }
+    if (!edits.size) { notify("붙여넣을 수 있는 셀이 없습니다.") ; return }
+
+    await commitRecords((records) => records.map((record) => edits.get(recordIdentity(record)) ?? record))
+    clipRef.current = clipRef.current ? { ...clipRef.current, cut: false } : null
+    cutRangeRef.current = null
+    notify(skipped ? `붙여넣기 완료 · 수정 불가 ${skipped}칸 제외` : "붙여넣기 완료")
+  }
+
+  /** 우클릭: 선택 밖 셀이면 그 셀을 먼저 선택하고 메뉴를 연다(엑셀과 동일). */
+  const openCellMenu = (event: ReactMouseEvent<HTMLTableCellElement>, rowId: string, colId: string) => {
+    event.preventDefault()
+    const rowIdx = rowIndexOf.get(rowId)
+    const colIdx = colIndexOf.get(colId)
+    const inside = rect !== null && rowIdx !== undefined && colIdx !== undefined
+      && rowIdx >= rect.top && rowIdx <= rect.bottom && colIdx >= rect.left && colIdx <= rect.right
+    if (!inside) setCellAnchor(rowId, colId)
+    setMenu({ x: event.clientX, y: event.clientY, kind: "cells" })
+  }
+
+  const undoLast = async () => {
+    const snapshot = undoStack[undoStack.length - 1]
+    if (!snapshot) return
+    const current = useAppStore.getState().records
+    setUndoStack((stack) => stack.slice(0, -1))
+    setRedoStack((stack) => [...stack, current].slice(-50))
+    await writeDevelopmentRecords(snapshot, false)
+    notify("이전 상태로 되돌렸습니다.")
+  }
+
+  const redoLast = async () => {
+    const snapshot = redoStack[redoStack.length - 1]
+    if (!snapshot) return
+    const current = useAppStore.getState().records
+    setRedoStack((stack) => stack.slice(0, -1))
+    setUndoStack((stack) => [...stack, current].slice(-50))
+    await writeDevelopmentRecords(snapshot, false)
+    notify("되돌린 작업을 다시 실행했습니다.")
+  }
+
+  const onKey = (event: KeyboardEvent) => {
+    if (event.isComposing) return
+    // 인라인 편집기·모달 입력 중에는 표 단축키를 가로채지 않는다.
+    const active = document.activeElement
+    if (active instanceof HTMLElement && active.closest("input, textarea, select, [contenteditable=true]")) return
+    const mod = event.ctrlKey || event.metaKey
+    const key = event.key.toLowerCase()
+
+    if (mod && key === "h") { event.preventDefault(); setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true); return }
+    if (mod && key === "c") { event.preventDefault(); void copyRange(); return }
+    if (mod && key === "x") { event.preventDefault(); void copyRange(true); return }
+    if (mod && key === "v") { event.preventDefault(); void pasteRange(); return }
+    if (mod && key === "d") { event.preventDefault(); void fillDown(); return }
+    if (mod && key === "z" && event.shiftKey) { event.preventDefault(); void redoLast(); return }
+    if (mod && key === "z") { event.preventDefault(); void undoLast(); return }
+    if (mod && key === "y") { event.preventDefault(); void redoLast(); return }
+    if (event.key === "Escape") { setRange(null); setMenu(null); return }
+    if (event.key === "Delete" || event.key === "Backspace") { if (rect) { event.preventDefault(); void clearRange() }; return }
+    if (event.shiftKey && event.code === "Space") { if (range) { event.preventDefault(); selectWholeRow(range.focus.row) }; return }
+    if (event.key.startsWith("Arrow")) {
+      event.preventDefault()
+      const direction = event.key.slice(5).toLowerCase() as CellMove
+      moveSelection(direction, event.shiftKey)
+      return
+    }
+    if (event.key === "Tab") { event.preventDefault(); moveSelection(event.shiftKey ? "left" : "right", false, true); return }
+    if (event.key === "Enter") { event.preventDefault(); moveSelection(event.shiftKey ? "up" : "down"); return }
+    if (event.key === "F2") { if (range) { event.preventDefault(); beginCellEdit(range.focus) }; return }
+    if (event.key.length === 1 && !mod && !event.altKey && range) {
+      event.preventDefault()
+      beginCellEdit(range.focus, event.key)
+    }
+  }
+  // 핸들러는 매 렌더 최신으로 바뀌지만, 리스너 등록·해제는 1회만 한다(매 렌더 재등록은 비용이 크다).
+  const keyHandlerRef = useRef(onKey)
+  keyHandlerRef.current = onKey
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => keyHandlerRef.current(event)
+    window.addEventListener("keydown", listener)
+    return () => window.removeEventListener("keydown", listener)
+  }, [])
 
   const applyPreset = (preset: "core" | "process" | "all") => {
     if (preset === "all") setOpenGroups({ request: true, original: true, detail: true, schedule: true, result: true, data: true, history: true, ledger: true })
@@ -755,7 +1720,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const resetAttach = () => { setAttached(null); setAttachError(null); setAttaching(false) }
-  const openEditor = (record: DevRecord) => { setEditing(structuredClone(record)); setEditCell(null) }
+  const openEditor = (record: DevRecord) => { setEditing(structuredClone(record)); cancelCellEdit() }
   const openNew = () => { setIntake([createBlankDevRecord()]); setIntakeOpt(0); setIntakeError(null); setIntakeNotice(null); resetAttach() }
   const closeEditor = () => { setEditing(null) }
   const closeIntake = () => { setIntake(null); setIntakeOpt(0); setIntakeError(null); resetAttach() }
@@ -826,18 +1791,57 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     await saveDevelopmentRecord(editing, recordIdentity(editing))
     closeEditor()
   }
-  const commitCell = async (record: DevRecord, column: MasterColumn, raw: string) => {
-    setEditCell(null)
+  const commitCell = async (record: DevRecord, column: MasterColumn, raw: string, move?: CellMove, fillRange = false) => {
+    const origin = { row: recordIdentity(record), col: column.id }
+    cancelCellEdit()
+    if (fillRange && rect) {
+      const edits = new Map<string, DevRecord>()
+      let changed = 0
+      for (let row = rect.top; row <= rect.bottom; row += 1) {
+        const target = filtered[row]
+        if (!target) continue
+        let draft = target
+        for (let col = rect.left; col <= rect.right; col += 1) {
+          const targetColumn = displayedColumns[col]
+          if (!targetColumn || isFixedColumn(targetColumn)) continue
+          const next = updateRecordCell(draft, targetColumn, raw)
+          if (next !== draft) { draft = next; changed += 1 }
+        }
+        if (draft !== target) edits.set(recordIdentity(target), draft)
+      }
+      if (edits.size) await commitRecords((records) => records.map((item) => edits.get(recordIdentity(item)) ?? item))
+      notify(`${changed}개 셀에 같은 값을 입력했습니다.`)
+      return
+    }
     const next = updateRecordCell(record, column, raw)
-    if (next !== record) await saveDevelopmentRecord(next, recordIdentity(record))
+    if (next !== record) {
+      const identity = recordIdentity(record)
+      await commitRecords((records) => records.map((item) => recordIdentity(item) === identity ? next : item))
+    }
+    if (move) moveSelection(move, false, move === "left" || move === "right", origin)
   }
+  // GridCell 은 memo 라 콜백 참조가 고정돼야 한다. 최신 상태는 ref 로 읽고 객체 자체는 한 번만 만든다.
+  const gridActionsRef = useRef({ setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, startFill })
+  gridActionsRef.current = { setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, startFill }
+  const gridActions = useMemo<GridActions>(() => ({
+    select: (rowId, colId) => gridActionsRef.current.setCellAnchor(rowId, colId),
+    edit: (rowId, colId) => gridActionsRef.current.beginCellEdit({ row: rowId, col: colId }),
+    commit: (record, column, raw, move, fillRange) => void gridActionsRef.current.commitCell(record, column, raw, move, fillRange),
+    cancel: () => gridActionsRef.current.cancelCellEdit(),
+    contextMenu: (event, rowId, colId) => gridActionsRef.current.openCellMenu(event, rowId, colId),
+    fillStart: (event) => gridActionsRef.current.startFill(event),
+  }), [])
+
   const confirmDeleteRecord = async () => {
-    if (!confirmDelete) return
-    await deleteDevelopmentRecord(recordIdentity(confirmDelete))
+    if (!confirmDelete?.length) return
+    const identities = new Set(confirmDelete.map(recordIdentity))
+    await commitRecords((records) => records.filter((record) => !identities.has(recordIdentity(record))))
     setConfirmDelete(null)
+    setRange(null)
+    notify(`${identities.size}개 행을 삭제했습니다.`)
   }
 
-  return <div className="flex min-h-0 flex-1 flex-col gap-2 -mx-4 sm:-mx-6 lg:-mx-8">
+  return <div className="flex min-h-0 flex-1 flex-col gap-2 -mx-4 sm:-mx-6 lg:-mx-8" style={{ "--grid-selection": "#217346" } as CSSProperties}>
     <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-center gap-1.5" aria-label="주요 개발 담당">
         {[{ key: ALL, label: "전체", initial: "전", stat: ownerStats.all }, ...MAIN_DEVELOPERS.map((name) => ({ key: name, label: name, initial: name.charAt(0), stat: ownerStats.byOwner.get(name) ?? { total: 0, active: 0 } }))].map((card) => {
@@ -856,6 +1860,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <Button type="button" size="sm" variant="outline" onClick={() => applyPreset("core")}>핵심 보기</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => applyPreset("process")}>공정·결과</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => applyPreset("all")}><Columns3 className="size-4" />전체 64열</Button>
+        {saveState === "idle" ? null : <span role="status" className={`mr-0.5 whitespace-nowrap rounded-full px-2 py-1 text-[11px] font-medium ${saveState === "error" ? "bg-[var(--destructive)] text-white" : "bg-[var(--muted)] text-[var(--muted-foreground)]"}`}>{saveState === "error" ? "저장 실패" : saveState === "saved" ? "저장됨" : "저장 중"}</span>}
+        <Button type="button" size="sm" variant="outline" disabled={!undoStack.length} title={undoStack.length ? "이전 편집 되돌리기 (Ctrl+Z)" : "되돌릴 편집이 없습니다"} onClick={() => void undoLast()}><Undo2 className="size-4" />되돌리기</Button>
+        <Button type="button" size="sm" variant="outline" disabled={!redoStack.length} title={redoStack.length ? "되돌린 편집 다시 실행 (Ctrl+Y)" : "다시 실행할 편집이 없습니다"} onClick={() => void redoLast()}><Redo2 className="size-4" />다시 실행</Button>
+        <Button type="button" size="sm" variant="outline" title="찾기·바꾸기 (Ctrl+H)" onClick={() => { setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true) }}><Search className="size-4" />찾기·바꾸기</Button>
+        {sortBy ? <Button type="button" size="sm" variant="outline" onClick={() => setSortBy(null)}><X className="size-4" />정렬 해제</Button> : null}
         <Button type="button" size="sm" variant="outline" onClick={resetColumnWidths}><RotateCcw className="size-4" />열 너비 초기화</Button>
       </div>
     </div>
@@ -879,19 +1888,26 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </div>
       </div>
 
-      <div data-route-scroll-root className="min-h-0 flex-1 overflow-auto">
-        <table className="border-separate border-spacing-0 text-left">
+      <div data-route-scroll-root onContextMenu={(event) => {
+        const target = event.target as HTMLElement
+        if (target.closest("table[data-dd-master-grid], [role=\"menu\"]")) return
+        event.preventDefault()
+        setRange(null)
+        setMenu({ x: event.clientX, y: event.clientY, kind: "bottom" })
+      }} className="min-h-0 flex-1 overflow-auto">
+        <table data-dd-master-grid onMouseMove={onGridMouseMove} onMouseLeave={() => { if (!moveDragRef.current) setMoveHover(null) }} className="select-none border-separate border-spacing-0 text-left [&_input]:select-text [&_textarea]:select-text">
           <thead className="sticky top-0 z-30 bg-[var(--card)] shadow-sm">
             <tr className="h-6">
-              <th colSpan={PINNED_COLUMNS.length} rowSpan={2} className="sticky left-0 z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] px-2 text-center text-[11px] font-normal text-[var(--muted-foreground)]" style={{ width: pinnedTotal, minWidth: pinnedTotal }}><span className="relative block">고정 핵심<span aria-hidden="true" title="고정 핵심 너비 조절" onMouseDown={(event) => startGroupResize(PINNED_COLUMNS, event)} className="absolute right-[-9px] top-1/2 h-4 w-1.5 -translate-y-1/2 cursor-col-resize rounded-full bg-[var(--border)] transition-colors hover:bg-[var(--primary)]" /></span></th>
+              <th rowSpan={3} className="sticky left-0 z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] text-center text-[10px] font-normal text-[var(--muted-foreground)]" style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH }} />
+              <th colSpan={PINNED_COLUMNS.length} rowSpan={2} className="sticky z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] px-2 text-center text-[11px] font-normal text-[var(--muted-foreground)]" style={{ width: pinnedTotal, minWidth: pinnedTotal, left: ROW_HEADER_WIDTH }}><span className="relative block">고정 핵심<span aria-hidden="true" title="고정 핵심 너비 조절" onMouseDown={(event) => startGroupResize(PINNED_COLUMNS, event)} className="absolute right-[-9px] top-1/2 h-4 w-1.5 -translate-y-1/2 cursor-col-resize rounded-full bg-[var(--border)] transition-colors hover:bg-[var(--primary)]" /></span></th>
               {visibleGroups.map((group) => <th key={group.key} colSpan={group.columns.length} rowSpan={group.columns.some((column) => column.sub) ? 1 : 2} className="relative border-b border-r border-[var(--border)] px-2 text-center text-[11px] font-semibold" style={{ color: group.color, background: `color-mix(in srgb, ${group.color} 12%, var(--card))` }}>{group.label}<span aria-hidden="true" title={`${group.label} 너비 조절`} onMouseDown={(event) => startGroupResize(group.columns, event)} className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th>)}
             </tr>
             <tr className="h-6">
               {visibleGroups.filter((group) => group.columns.some((column) => column.sub)).flatMap((group) => subRuns(group.columns).map((run, index) => <th key={`${group.key}-sub-${index}`} colSpan={run.span} className="border-b border-r border-[var(--border)] px-2 text-center text-[10px] font-semibold" style={{ color: run.label ? group.color : "transparent", background: `color-mix(in srgb, ${group.color} ${run.label ? 18 : 12}%, var(--card))` }}>{run.label || "·"}</th>))}
             </tr>
             <tr className="h-8">
-              {PINNED_COLUMNS.map((column, index) => { const width = widthOf(column); return <th key={column.id} className={`relative sticky z-40 border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${selected?.col === column.id ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${column.id === "owner" ? "text-center" : "text-left"}`} style={{ width, minWidth: width, left: pinnedLeft(index) }}>{column.label}<span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> })}
-              {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column); return <th key={`${group.key}-${column.id}`} className={`relative border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${selected?.col === column.id ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${alignOf(column) === "center" ? "text-center" : "text-left"}`} style={{ width, minWidth: width }}>{column.label}<span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
+              {PINNED_COLUMNS.map((column, index) => { const width = widthOf(column); return <th key={column.id} onClick={() => toggleColumnSort(column.id)} className={`relative sticky z-40 cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${column.id === "owner" ? "text-center" : "text-left"}`} style={{ width, minWidth: width, left: pinnedLeft(index) }}><span className="inline-flex items-center gap-1">{column.label}{sortIcon(column.id)}</span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> })}
+              {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column); return <th key={`${group.key}-${column.id}`} onClick={() => toggleColumnSort(column.id)} className={`relative cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${alignOf(column) === "center" ? "text-center" : "text-left"}`} style={{ width, minWidth: width }}><span className="inline-flex items-center gap-1">{column.label}{sortIcon(column.id)}</span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
             </tr>
           </thead>
           <tbody>
@@ -902,53 +1918,135 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               const rowId = recordIdentity(record)
               const isRecent = recentIntakeRows.has(rowId)
               const isActive = (colId: string) => editCell?.row === rowId && editCell?.col === colId
-              const rowSelected = selected?.row === rowId
-              const selectCell = (colId: string) => setSelected({ row: rowId, col: colId })
-              const isDragging = dragRow === rowId
-              const isDropTarget = dragOverRow === rowId && dragRow !== null && dragRow !== rowId
+              const rowIdx = rowIndexOf.get(rowId)
+              const rowSelected = rect !== null && rowIdx !== undefined && rowIdx >= rect.top && rowIdx <= rect.bottom
+              const wholeRowSelected = rect !== null && rect.left === 0 && rect.right === displayedColumns.length - 1
+              const cellSel = (colId: string): CellSel => {
+                const empty = { inRange: false, isActive: false, top: false, bottom: false, left: false, right: false, handle: false, moveEdge: false }
+                if (!rect || rowIdx === undefined || rowIdx < rect.top || rowIdx > rect.bottom) return empty
+                const colIdx = colIndexOf.get(colId)
+                if (colIdx === undefined || colIdx < rect.left || colIdx > rect.right) return empty
+                return {
+                  inRange: true,
+                  isActive: range?.focus.row === rowId && range.focus.col === colId,
+                  top: rowIdx === rect.top,
+                  bottom: rowIdx === rect.bottom,
+                  left: colIdx === rect.left && !wholeRowSelected,
+                  right: colIdx === rect.right,
+                  handle: rowIdx === rect.bottom && colIdx === rect.right,
+                  moveEdge: moveHover?.row === rowId && moveHover.col === colId,
+                }
+              }
+              const selectCell = (colId: string) => setCellAnchor(rowId, colId)
+              const rowHeaderSel: CellSel = {
+                inRange: rowSelected && wholeRowSelected,
+                isActive: false,
+                top: rowIdx === rect?.top,
+                bottom: rowIdx === rect?.bottom,
+                left: true,
+                right: false,
+                handle: false,
+                moveEdge: moveHover?.row === rowId && moveHover.col === null,
+              }
               return <tr key={rowId}
-                draggable={dragEnabled && armedRow === rowId}
-                onDragStart={() => setDragRow(rowId)}
-                onDragEnter={(event) => { if (dragRow && dragRow !== rowId) { event.preventDefault(); setDragOverRow(rowId) } }}
-                onDragOver={(event) => { if (dragRow && dragRow !== rowId) event.preventDefault() }}
-                onDrop={(event) => { event.preventDefault(); handleRowDrop(rowId); endRowDrag() }}
-                onDragEnd={endRowDrag}
-                onMouseUp={() => { if (!dragRow && armedRow === rowId) setArmedRow(null) }}
-                onClick={(event) => {
-                const cell = (event.target as HTMLElement).closest("td")
-                const column = cell instanceof HTMLTableCellElement ? displayedColumns[cell.cellIndex] : undefined
-                if (column) selectCell(column.id)
-              }} className={`group bg-[var(--card)] transition-colors hover:bg-[var(--accent)] ${isDragging ? "opacity-40" : ""} ${isDropTarget ? "[&>td]:shadow-[inset_0_2px_0_0_var(--primary)]" : ""}`}>
+                data-row-id={rowId}
+                onMouseDown={(event) => onRowMouseDown(rowId, event)}
+                className="group bg-[var(--card)] transition-colors hover:bg-[var(--accent)]">
+                <td data-row-header onContextMenu={(event) => { event.preventDefault(); if (!rowSelected) selectWholeRow(rowId); setMenu({ x: event.clientX, y: event.clientY, kind: "cells" }) }} title="클릭: 행 전체 선택 · 끌기: 여러 행 선택" className={`sticky left-0 z-20 h-8 cursor-pointer select-none border-b border-r border-[var(--border)] text-center text-[10px] tabular-nums ${rowHeaderSel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)] text-[var(--foreground)]" : "bg-[var(--muted)] text-[var(--muted-foreground)] group-hover:bg-[var(--accent)]"}`} style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH, boxShadow: selectionShadow(rowHeaderSel), cursor: rowHeaderSel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, -1, true) }}>{(rowIdx ?? 0) + 1}</td>
                 {PINNED_COLUMNS.map((column, index) => {
                   const left = pinnedLeft(index)
                   const width = widthOf(column)
-                  const highlighted = rowSelected || selected?.col === column.id
-                  const cellSelected = rowSelected && selected?.col === column.id
-                  const stickyBase = `sticky z-20 h-8 border-b border-r border-[var(--border)] ${highlighted ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--card))]" : "bg-[var(--card)] group-hover:bg-[var(--accent)]"} ${cellSelected ? "ring-2 ring-inset ring-[var(--ring)]" : ""} ${index === 0 ? `border-l-4 ${rowStyle.row}` : ""}`
-                  if (column.id === "status") return <td key={column.id} onClick={() => selectCell(column.id)} className={`${stickyBase} px-1.5`} style={{ width, minWidth: width, left }}><StatusChip record={record} /></td>
+                  const sel = cellSel(column.id)
+                  const preview = inFillPreview(rowIdx, column.id)
+                  const stickyBase = `relative sticky z-20 h-8 border-b border-r border-[var(--border)] ${sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : "bg-[var(--card)] group-hover:bg-[var(--accent)]"} ${preview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${index === 0 ? `border-l-4 ${rowStyle.row}` : ""}`
+                  const cellStyle = { width, minWidth: width, left, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1) }
                   const active = isActive(column.id)
-                  if (active) return <td key={column.id} onClick={() => selectCell(column.id)} className={`${stickyBase} p-0`} style={{ width, minWidth: width, left }}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} onCommit={(raw) => void commitCell(record, column, raw)} onCancel={() => setEditCell(null)} /></td>
-                  return <td key={column.id} onDoubleClick={column.id === "owner" ? undefined : () => setEditCell({ row: rowId, col: column.id })} className={`${stickyBase} max-w-0 ${column.id === "owner" ? "" : "cursor-cell"} px-2 text-xs font-normal ${column.mono ? "font-mono" : ""}`} style={{ width, minWidth: width, left }}>
+                  if (active) return <td key={column.id} data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} className={`${stickyBase} p-0`} style={cellStyle}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} initial={editSeed} onCommit={(raw, move, fillRange) => void commitCell(record, column, raw, move, fillRange)} onCancel={cancelCellEdit} /><FillHandle visible={sel.handle} onMouseDown={startFill} /></td>
+                  if (column.id === "status") return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} onDoubleClick={() => beginCellEdit({ row: rowId, col: column.id })} className={`${stickyBase} px-1.5`} style={cellStyle}><StatusChip record={record} /><FillHandle visible={sel.handle} onMouseDown={startFill} /></td>
+                  return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onDoubleClick={() => beginCellEdit({ row: rowId, col: column.id })} className={`${stickyBase} max-w-0 cursor-cell px-2 text-xs font-normal ${column.mono ? "font-mono" : ""}`} style={cellStyle}>
                     {column.id === "owner"
                       ? <div className="flex items-center gap-0.5">
-                          {dragEnabled ? <span role="button" title="드래그로 순서 이동" aria-label="행 순서 이동" onMouseDown={() => setArmedRow(rowId)} onClick={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} className="inline-flex shrink-0 cursor-grab rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:opacity-100 active:cursor-grabbing"><GripVertical className="size-3.5" /></span> : null}
                           <span className="min-w-0 flex-1 truncate">{text(ownerDisplayName(record.owner))}</span>
                           <button type="button" title="전체 항목 수정" onClick={(event) => { event.stopPropagation(); openEditor(record) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:opacity-100"><Maximize2 className="size-3.5" /></button>
-                          <button type="button" title="이 옵션 삭제" aria-label="이 옵션 삭제" onClick={(event) => { event.stopPropagation(); setConfirmDelete(record) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--destructive)] hover:text-white group-hover:opacity-100"><Trash2 className="size-3.5" /></button>
+                          <button type="button" title="이 옵션 삭제" aria-label="이 옵션 삭제" onClick={(event) => { event.stopPropagation(); setConfirmDelete([record]) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--destructive)] hover:text-white group-hover:opacity-100"><Trash2 className="size-3.5" /></button>
                         </div>
                       : column.id === "styleNo"
                         ? <span className="flex items-center gap-1 truncate" title={warnings.map((warning) => warning.label).join(" · ") || undefined}>{isRecent ? <span className="shrink-0 rounded-full bg-[linear-gradient(110deg,#06b6d4,#2563eb_55%,#7c3aed)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.04em] text-white">신규</span> : null}<span className="truncate">{text(record.styleNo)}</span>{warnings.length ? <TriangleAlert className="size-3.5 shrink-0 text-[var(--destructive)]" /> : null}</span>
                         : <span className="truncate">{text(column.value(record, linked))}</span>}
+                    <FillHandle visible={sel.handle} onMouseDown={startFill} />
                   </td>
                 })}
-                {visibleGroups.flatMap((group) => group.columns.map((column) => <GridCell key={`${group.key}-${column.id}`} record={record} column={column} width={widthOf(column)} ledger={linked} active={isActive(column.id)} highlighted={rowSelected || selected?.col === column.id} selected={rowSelected && selected?.col === column.id} options={optionsById[column.id] ?? column.options} onSelect={() => selectCell(column.id)} onEdit={() => setEditCell({ row: rowId, col: column.id })} onCommit={(raw) => void commitCell(record, column, raw)} onCancel={() => setEditCell(null)} />))}
+                {visibleGroups.flatMap((group) => group.columns.map((column) => {
+                  const cs = cellSel(column.id)
+                  return <GridCell key={`${group.key}-${column.id}`} record={record} column={column} rowId={rowId} width={widthOf(column)} ledger={linked} active={isActive(column.id)}
+                    selIn={cs.inRange} selActive={cs.isActive} selTop={cs.top} selBottom={cs.bottom} selLeft={cs.left} selRight={cs.right} selHandle={cs.handle} selMoveEdge={cs.moveEdge}
+                    fillPreview={inFillPreview(rowIdx, column.id)} moveStyle={movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1)}
+                    options={optionsById[column.id] ?? column.options} editSeed={editSeed} actions={gridActions} />
+                }))}
               </tr>
             })}
           </tbody>
         </table>
         {!filtered.length ? <div className="p-12 text-center text-sm text-[var(--muted-foreground)]">{scoped.length ? "조건에 맞는 DD 행이 없습니다." : "DD를 업로드하거나 신규 작지를 접수해 현황판을 시작하세요."}</div> : null}
+        <div data-grid-bottom-area aria-hidden="true" className="h-28 min-w-full" />
       </div>
+
+      {clipNotice ? <div role="status" className="pointer-events-none fixed bottom-6 left-1/2 z-[80] -translate-x-1/2 rounded-full bg-[var(--foreground)] px-4 py-2 text-xs font-medium text-[var(--background)] shadow-lg">{clipNotice}</div> : null}
+
+      {menu ? <>
+        <div className="fixed inset-0 z-[90]" onMouseDown={() => setMenu(null)} onContextMenu={(event) => { event.preventDefault(); setMenu(null) }} />
+        <div role="menu" className="fixed z-[91] min-w-44 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] py-1 text-sm shadow-lg" style={{ left: Math.min(menu.x, window.innerWidth - 190), top: Math.min(menu.y, window.innerHeight - (menu.kind === "bottom" ? 100 : 210)) }}>
+          {(menu.kind === "bottom" ? [
+            { key: "append-one", label: "행 1개 추가", hint: "목록 맨 아래", icon: <Plus className="size-3.5" />, run: () => void appendBlankRows(1) },
+            { key: "append-five", label: "행 5개 추가", hint: "목록 맨 아래", icon: <Rows3 className="size-3.5" />, run: () => void appendBlankRows(5) },
+          ] : [
+            { key: "copy", label: "복사", hint: "Ctrl+C", icon: <Copy className="size-3.5" />, run: () => void copyRange() },
+            { key: "cut", label: "잘라내기", hint: "Ctrl+X", icon: <Scissors className="size-3.5" />, run: () => void copyRange(true) },
+            { key: "paste", label: "붙여넣기", hint: "Ctrl+V", icon: <ClipboardPaste className="size-3.5" />, run: () => void pasteRange() },
+            { key: "insert", label: "복사한 행 삽입", hint: "아래에 추가", icon: <Rows3 className="size-3.5" />, run: () => void insertCopiedRows() },
+            { key: "insert-above", label: "위에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("above") },
+            { key: "insert-below", label: "아래에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("below") },
+            { key: "delete-row", label: "행 삭제", hint: "선택 행 전체", icon: <Trash2 className="size-3.5" />, run: requestDeleteSelectedRows },
+            { key: "clear", label: "내용 지우기", hint: "Delete", icon: <Eraser className="size-3.5" />, run: () => void clearRange() },
+            { key: "row", label: "행 전체 선택", hint: "Shift+Space", icon: <Rows3 className="size-3.5" />, run: () => { if (range) selectWholeRow(range.focus.row) } },
+          ]).map((item) => <button key={item.key} type="button" role="menuitem" onClick={() => { setMenu(null); item.run() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)]">
+            <span className="text-[var(--muted-foreground)]">{item.icon}</span>
+            <span className="flex-1">{item.label}</span>
+            <span className="text-[11px] text-[var(--muted-foreground)]">{item.hint}</span>
+          </button>)}
+          {menu.kind === "cells" ? <><div className="my-1 h-px bg-[var(--border)]" />
+          <button type="button" role="menuitem" disabled={!undoStack.length} onClick={() => { setMenu(null); void undoLast() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40">
+            <span className="text-[var(--muted-foreground)]"><Undo2 className="size-3.5" /></span>
+            <span className="flex-1">되돌리기</span>
+            <span className="text-[11px] text-[var(--muted-foreground)]">Ctrl+Z</span>
+          </button>
+          <button type="button" role="menuitem" disabled={!redoStack.length} onClick={() => { setMenu(null); void redoLast() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40">
+            <span className="text-[var(--muted-foreground)]"><Redo2 className="size-3.5" /></span>
+            <span className="flex-1">다시 실행</span>
+            <span className="text-[11px] text-[var(--muted-foreground)]">Ctrl+Y</span>
+          </button></> : null}
+        </div>
+      </> : null}
     </div>
+
+    <Dialog open={replaceOpen} onOpenChange={setReplaceOpen}>
+      <DialogContent className="w-[92vw] max-w-lg">
+        <DialogHeader className="py-2.5">
+          <DialogTitle>찾기 · 바꾸기</DialogTitle>
+          <DialogDescription>부분 문자열을 찾아 한 번에 바꿉니다. 수식과 샘플대장 연결 열은 제외됩니다.</DialogDescription>
+        </DialogHeader>
+        <DialogBody className="grid gap-3">
+          <div className="grid gap-1.5"><Label htmlFor="dd-find">찾을 내용</Label><Input id="dd-find" autoFocus value={findValue} onChange={(event) => setFindValue(event.target.value)} /></div>
+          <div className="grid gap-1.5"><Label htmlFor="dd-replace">바꿀 내용</Label><Input id="dd-replace" value={replaceValue} onChange={(event) => setReplaceValue(event.target.value)} /></div>
+          <div className="grid gap-1.5"><Label>대상</Label><Select value={replaceScope} onValueChange={(value) => setReplaceScope(value as "selection" | "all")}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="selection" disabled={!rect}>선택 영역</SelectItem><SelectItem value="all">전체</SelectItem></SelectContent></Select></div>
+          <label className="flex items-center gap-2 text-sm text-[var(--foreground)]"><input type="checkbox" checked={replaceMatchCase} onChange={(event) => setReplaceMatchCase(event.target.checked)} className="size-4 accent-[var(--primary)]" />대소문자 구분</label>
+        </DialogBody>
+        <DialogFooter className="gap-1.5 py-2.5">
+          <Button type="button" size="sm" variant="outline" onClick={() => setReplaceOpen(false)}>닫기</Button>
+          <Button type="button" size="sm" onClick={() => void replaceAllMatches()}>모두 바꾸기</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     {/* 신규 작지 접수 — 결과/DATA/REVIEW 없음. REQUEST·ORIGINAL 공통, DETAIL·SCHEDULE 옵션별. */}
     <Dialog open={Boolean(intake)} onOpenChange={(open) => { if (!open) closeIntake() }}>
@@ -1027,13 +2125,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     {/* 행(샘플 옵션) 삭제 확인 */}
     <Dialog open={Boolean(confirmDelete)} onOpenChange={(open) => { if (!open) setConfirmDelete(null) }}>
       <DialogContent className="w-[92vw] max-w-md">
-        {confirmDelete ? <>
+        {confirmDelete?.length ? <>
           <DialogHeader className="py-2.5">
-            <DialogTitle>샘플 옵션 삭제</DialogTitle>
+            <DialogTitle>{confirmDelete.length > 1 ? `${confirmDelete.length}개 행 삭제` : "샘플 옵션 삭제"}</DialogTitle>
             <DialogDescription>
-              <span className="font-mono text-[var(--foreground)]">{confirmDelete.styleNo || "무제"}</span>
-              {confirmDelete.color ? ` · ${confirmDelete.color}` : ""}
-              {confirmDelete.opt ? ` · 옵션 ${confirmDelete.opt}` : ""} 행을 현황판에서 삭제합니다. 되돌릴 수 없습니다.
+              {confirmDelete.length === 1 ? <><span className="font-mono text-[var(--foreground)]">{confirmDelete[0].styleNo || "무제"}</span>{confirmDelete[0].color ? ` · ${confirmDelete[0].color}` : ""}{confirmDelete[0].opt ? ` · 옵션 ${confirmDelete[0].opt}` : ""} 행을 현황판에서 삭제합니다.</> : `선택한 ${confirmDelete.length}개 행을 현황판에서 삭제합니다.`} 삭제 후 되돌리기를 사용할 수 있습니다.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-1.5 py-2.5">
