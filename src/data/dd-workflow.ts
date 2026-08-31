@@ -25,6 +25,20 @@ export function ddStatusStyle(status: string | undefined): { label: string; bloc
 }
 export const DD_SEASON_OPTIONS = ["SS'26", "FW'26", "SS'27", "FW'27", "SS'28", "FW'28", "SS'29", "FW'29"] as const
 export const DD_CATEGORY_OPTIONS = ["EU MARKET", "SEASON", "CORE", "PROJECT"] as const
+
+/** Category별 글자색. 블럭·배경을 두면 Status 칩과 색이 부딪히므로 텍스트 색만 바꾼다.
+ *  SEASON=블루, CORE=레드, PROJECT=오렌지, EU MARKET=그린. */
+export const DD_CATEGORY_TEXT: Record<string, string> = {
+  SEASON: "text-blue-500",
+  CORE: "text-red-500",
+  PROJECT: "text-orange-500",
+  "EU MARKET": "text-green-500",
+}
+
+/** 목록에 없는 값은 색을 주지 않고 기본 글자색으로 둔다. */
+export function ddCategoryTextClass(category: string | undefined): string {
+  return DD_CATEGORY_TEXT[String(category ?? "").trim().toUpperCase()] ?? ""
+}
 export const DD_COMPANY_OPTIONS = ["GD", "국내", "생산"] as const
 export const DD_DYEING_OPTIONS = ["SD", "DD", "PSD", "YD", "SOAP", "PFD", "기타"] as const
 export const DD_PASS_FAIL_OPTIONS = ["PASS", "FAIL"] as const

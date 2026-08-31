@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
-import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, Loader2, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
+import { CalendarDays, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, Loader2, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
 import { Popover } from "radix-ui"
 
 import { Badge } from "@/components/ui/badge"
@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataUpload } from "@/components/upload/DataUpload"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddStatusStyle, ddWarnings } from "@/data/dd-workflow"
+import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings } from "@/data/dd-workflow"
+import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { fmtDateFull, toDate } from "@/data/format"
 import { dayToneText, holidayName } from "@/data/holidays"
 import { ingestDevelopment, ingestSamples } from "@/data/upload"
@@ -21,6 +22,11 @@ import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, useAppStore, flush
 const ALL = "__all__"
 const COL_WIDTHS_STORAGE_KEY = "dd-col-widths"
 const MIN_COLUMN_WIDTH = 56
+/** 더 이상 진행하지 않는 상태. 전체 탭에서는 감추고, 담당 탭에서는 위로 올려 흐리게 보여 준다. */
+const CLOSED_STATUSES = new Set(["완료", "DROP", "REJECT"])
+/** 종료된 행의 회색. DD MASTER 에서 쓰는 회색 중 가장 진하다. */
+const DIMMED_ROW_BG = "color-mix(in srgb, var(--foreground) 24%, var(--card))"
+const isClosedRecord = (record: DevRecord): boolean => CLOSED_STATUSES.has(String(record.devStatus || record.stage || "").trim())
 /** 엑셀의 행 머리글에 해당하는 좌측 번호 칸. 데이터 열이 아니므로 복사·붙여넣기 대상에서 빠진다. */
 const ROW_HEADER_WIDTH = 40
 
@@ -124,6 +130,17 @@ function ledgerStatus(ledger: FabricLedgerItem | null): ReactNode {
   return <Badge variant="outline" className="gap-1.5 whitespace-nowrap bg-[var(--background)] font-normal"><span className={`size-2 rounded-full ${meta.tone}`} />{meta.label}</Badge>
 }
 
+/**
+ * 옵션 순번을 "2/4" 분수로 보여준다. 전체 개수는 수식 열 optionProgress("완료 / 전체")의 분모를 쓴다.
+ * 표시만 바꾸고 value 는 순번 그대로라 복사·붙여넣기 값은 달라지지 않는다.
+ */
+function optionSequenceText(row: DevRecord): string {
+  const sequence = String(row.opt ?? "").trim()
+  if (!sequence) return ""
+  const total = String(row.tech?.optionProgress ?? "").split("/")[1]?.trim()
+  return total ? `${sequence}/${total}` : sequence
+}
+
 const PINNED_COLUMNS: MasterColumn[] = [
   { id: "owner", label: "담당", width: 118, suggest: true, value: (row) => row.owner },
   { id: "status", label: "Status", width: 108, options: DD_STATUS_OPTIONS, value: (row) => row.devStatus || row.stage },
@@ -133,10 +150,10 @@ const PINNED_COLUMNS: MasterColumn[] = [
 const GROUPS: MasterGroup[] = [
   {
     key: "request", label: "개발 REQUEST", color: "var(--chart-1)", columns: [
-      { id: "opt", label: "# of Opt", width: 68, mono: true, align: "center", value: (row) => row.opt },
+      { id: "opt", label: "# of Opt", width: 68, mono: true, align: "center", value: (row) => row.opt, render: (row) => optionSequenceText(row) },
       { id: "season", label: "Season", width: 82, value: (row) => row.season, options: DD_SEASON_OPTIONS },
       { id: "buyer", label: "Buyer", width: 104, suggest: true, value: (row) => row.buyer },
-      { id: "category", label: "Category", width: 104, value: (row) => row.category, options: DD_CATEGORY_OPTIONS },
+      { id: "category", label: "Category", width: 104, value: (row) => row.category, options: DD_CATEGORY_OPTIONS, render: (row) => <span className={ddCategoryTextClass(row.category)}>{text(row.category)}</span> },
       { id: "planner", label: "Planner", width: 92, suggest: true, value: (row) => row.planner },
       { id: "requestDate", label: "Request Date", width: 108, date: true, value: (row) => row.requestDate },
       { id: "dueDate", label: "Due Date", width: 108, date: true, value: (row) => row.dueDate, render: (row) => <span className={ddWarnings(row).some((item) => item.key === "due") ? "text-[var(--destructive)]" : ""}>{dateText(row.dueDate)}</span> },
@@ -642,6 +659,7 @@ interface GridCellProps {
   selHandle: boolean
   selMoveEdge: boolean
   fillPreview: boolean
+  dimmed: boolean
   moveStyle?: CSSProperties
   options?: readonly string[]
   editSeed?: string
@@ -652,7 +670,7 @@ interface GridCellProps {
  * 선택이 한 칸 움직일 때 표 전체가 다시 그려지지 않도록 memo 로 감싼다.
  * 그래서 props 는 전부 원시값이거나 참조가 고정된 값이어야 한다(CellSel 객체를 그대로 넘기면 memo 가 깨진다).
  */
-const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, moveStyle, options, editSeed, actions }: GridCellProps) {
+const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, dimmed, moveStyle, options, editSeed, actions }: GridCellProps) {
   const sel: CellSel = { inRange: selIn, isActive: selActive, top: selTop, bottom: selBottom, left: selLeft, right: selRight, handle: selHandle, moveEdge: selMoveEdge }
   const onSelect = () => actions.select(rowId, column.id)
   const onEdit = () => actions.edit(rowId, column.id)
@@ -663,7 +681,9 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const fixed = isFixedColumn(column)
   const align = `${alignOf(column) === "center" ? "text-center" : "text-left"} ${column.number ? "tabular-nums" : ""}`
   const highlight = sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""
-  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle }
+  // 종료된 행의 회색은 클래스로는 다른 배경 클래스에 밀리므로 인라인으로 덮는다. 글자색은 건드리지 않는다.
+  const dimStyle = dimmed && !sel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null
+  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...dimStyle }
   if (active && !fixed) {
     return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={sel.handle} onMouseDown={onFillStart} /></td>
   }
@@ -720,6 +740,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [owner, setOwner] = useState(ALL)
   const [status, setStatus] = useState(ALL)
   const [sortBy, setSortBy] = useState<{ col: string; dir: "asc" | "desc" } | null>(null)
+  // 담당 탭에서 완료·DROP·REJECT 를 감출지. 전체 탭은 항상 감춘다.
+  const [hideClosed, setHideClosed] = useState(false)
   const [replaceOpen, setReplaceOpen] = useState(false)
   const [findValue, setFindValue] = useState("")
   const [replaceValue, setReplaceValue] = useState("")
@@ -844,6 +866,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const query = search.trim().toLocaleLowerCase("ko-KR")
     const rows = scoped.filter((record) => {
       if (owner !== ALL && record.owner !== owner) return false
+      // 전체 탭은 진행 중인 건만 본다. 담당 탭은 숨김을 켰을 때만 감춘다.
+      if ((owner === ALL || hideClosed) && status === ALL && isClosedRecord(record)) return false
       if (status !== ALL && (record.devStatus || record.stage) !== status) return false
       if (!query) return true
       const linked = ledgerByRecord.get(recordIdentity(record)) ?? null
@@ -864,8 +888,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         }
         return sortBy ? a.index - b.index : compareManualOrder(a.record, b.record) || a.index - b.index
       })
+      .sort((a, b) => {
+        // 담당 탭에서는 끝난 건을 위로 모은다. 상태를 바꾸는 즉시 자리가 올라간다.
+        if (owner === ALL || hideClosed) return 0
+        return Number(isClosedRecord(b.record)) - Number(isClosedRecord(a.record))
+      })
       .map(({ record }) => record)
-  }, [allColumns, ledgerByRecord, owner, scoped, search, sortBy, status])
+  }, [allColumns, hideClosed, ledgerByRecord, owner, scoped, search, sortBy, status])
 
   // 필터를 걷어낸 전체 순서. 담당별 재배치를 저장할 때 다른 담당 행의 자리를 지키는 기준이 된다.
   const globalOrdered = useMemo(() => scoped
@@ -1820,6 +1849,57 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     }
     if (move) moveSelection(move, false, move === "left" || move === "right", origin)
   }
+  const [exporting, setExporting] = useState(false)
+  /**
+   * 화면에서 보고 있는 순서 그대로 DD 엑셀 양식으로 내보낸다.
+   * 시트는 전체현황과 담당별로 나눈다. 접혀 있는 열도 포함해 64열 전부를 쓴다.
+   */
+  const exportExcel = async () => {
+    if (exporting) return
+    setExporting(true)
+    try {
+      // 담당 필터만 걷어내고 화면과 같은 정렬·검색 조건을 그대로 쓴다.
+      // 전체현황 시트가 비어 보이지 않게 하되, 소팅한 순서는 화면 그대로 유지한다.
+      const query = search.trim().toLocaleLowerCase("ko-KR")
+      const sortColumn = sortBy ? allColumns.find((column) => column.id === sortBy.col) : undefined
+      const base = scoped.filter((record) => {
+        if (status !== ALL && (record.devStatus || record.stage) !== status) return false
+        if (!query) return true
+        const linked = ledgerByRecord.get(recordIdentity(record)) ?? null
+        return allColumns.some((column) => String(column.value(record, linked) ?? "").toLocaleLowerCase("ko-KR").includes(query))
+      }).map((record, index) => ({ record, index }))
+        .sort((a, b) => {
+          if (sortBy && sortColumn) {
+            const left = String(sortColumn.value(a.record, null) ?? "").trim()
+            const right = String(sortColumn.value(b.record, null) ?? "").trim()
+            if (!left !== !right) return left ? -1 : 1
+            const order = left.localeCompare(right, "ko-KR", { numeric: true })
+            if (order) return sortBy.dir === "asc" ? order : -order
+          }
+          return compareManualOrder(a.record, b.record) || a.index - b.index
+        })
+        .map(({ record }) => record)
+      const owners = [...new Set(base.map((record) => record.owner).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, "ko-KR"))
+      const stamp = new Date().toLocaleDateString("ko-KR")
+      const sheets: DdExportSheet[] = [
+        { name: "전체현황", title: `DEVELOPMENT DASHBOARD 전체현황 (${base.length}건, ${stamp} 내보냄)`, rows: base },
+        ...owners.map((name) => {
+          const rows = base.filter((record) => record.owner === name)
+          return { name: ownerDisplayName(name), title: `DEVELOPMENT DASHBOARD ${ownerDisplayName(name)} (${rows.length}건, ${stamp} 내보냄)`, rows }
+        }),
+      ]
+      const blob = await buildDdWorkbook(sheets)
+      // 통합문서에는 담당 필터와 상관없이 전체현황과 담당별 시트가 모두 들어가므로 파일명도 하나로 둔다.
+      downloadBlob(blob, ddExportFileName("전체현황"))
+      notify(`엑셀 ${sheets.length}개 시트로 내보냈습니다.`)
+    } catch {
+      notify("엑셀 내보내기에 실패했습니다.")
+    } finally {
+      setExporting(false)
+    }
+  }
+
   // GridCell 은 memo 라 콜백 참조가 고정돼야 한다. 최신 상태는 ref 로 읽고 객체 자체는 한 번만 만든다.
   const gridActionsRef = useRef({ setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, startFill })
   gridActionsRef.current = { setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, startFill }
@@ -1865,6 +1945,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <Button type="button" size="sm" variant="outline" disabled={!redoStack.length} title={redoStack.length ? "되돌린 편집 다시 실행 (Ctrl+Y)" : "다시 실행할 편집이 없습니다"} onClick={() => void redoLast()}><Redo2 className="size-4" />다시 실행</Button>
         <Button type="button" size="sm" variant="outline" title="찾기·바꾸기 (Ctrl+H)" onClick={() => { setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true) }}><Search className="size-4" />찾기·바꾸기</Button>
         {sortBy ? <Button type="button" size="sm" variant="outline" onClick={() => setSortBy(null)}><X className="size-4" />정렬 해제</Button> : null}
+        <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
         <Button type="button" size="sm" variant="outline" onClick={resetColumnWidths}><RotateCcw className="size-4" />열 너비 초기화</Button>
       </div>
     </div>
@@ -1875,6 +1956,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <Select value={owner} onValueChange={setOwner}><SelectTrigger className="w-28 shrink-0"><SelectValue placeholder="담당" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 담당</SelectItem>{ownerOptions.map((item) => <SelectItem key={item} value={item}>{ownerDisplayName(item)}</SelectItem>)}</SelectContent></Select>
         <Select value={status} onValueChange={setStatus}><SelectTrigger className="w-28 shrink-0"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
         <Button type="button" variant="outline" className="shrink-0" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL) }}><RotateCcw className="size-4" />초기화</Button>
+        <Button type="button" variant={hideClosed ? "default" : "outline"} className="shrink-0" aria-pressed={hideClosed} title="완료, DROP, REJECT 건을 감춥니다" onClick={() => setHideClosed((current) => !current)}>{hideClosed ? <EyeOff className="size-4" /> : <Eye className="size-4" />}진행중만</Button>
         {intakeNotice ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full bg-[var(--muted)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)]">{intakeNotice}</span> : null}
         <div className="ml-auto flex flex-wrap items-center justify-end gap-2 text-xs text-[var(--muted-foreground)]">
           <div className="flex flex-wrap items-center justify-end gap-1" aria-label="DD 열 그룹 표시">
@@ -1917,6 +1999,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               const rowStyle = ddStatusStyle(record.devStatus || record.stage)
               const rowId = recordIdentity(record)
               const isRecent = recentIntakeRows.has(rowId)
+              const rowDimmed = isClosedRecord(record)
               const isActive = (colId: string) => editCell?.row === rowId && editCell?.col === colId
               const rowIdx = rowIndexOf.get(rowId)
               const rowSelected = rect !== null && rowIdx !== undefined && rowIdx >= rect.top && rowIdx <= rect.bottom
@@ -1952,14 +2035,14 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                 data-row-id={rowId}
                 onMouseDown={(event) => onRowMouseDown(rowId, event)}
                 className="group bg-[var(--card)] transition-colors hover:bg-[var(--accent)]">
-                <td data-row-header onContextMenu={(event) => { event.preventDefault(); if (!rowSelected) selectWholeRow(rowId); setMenu({ x: event.clientX, y: event.clientY, kind: "cells" }) }} title="클릭: 행 전체 선택 · 끌기: 여러 행 선택" className={`sticky left-0 z-20 h-8 cursor-pointer select-none border-b border-r border-[var(--border)] text-center text-[10px] tabular-nums ${rowHeaderSel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)] text-[var(--foreground)]" : "bg-[var(--muted)] text-[var(--muted-foreground)] group-hover:bg-[var(--accent)]"}`} style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH, boxShadow: selectionShadow(rowHeaderSel), cursor: rowHeaderSel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, -1, true) }}>{(rowIdx ?? 0) + 1}</td>
+                <td data-row-header onContextMenu={(event) => { event.preventDefault(); if (!rowSelected) selectWholeRow(rowId); setMenu({ x: event.clientX, y: event.clientY, kind: "cells" }) }} title="클릭: 행 전체 선택 · 끌기: 여러 행 선택" className={`sticky left-0 z-20 h-8 cursor-pointer select-none border-b border-r border-[var(--border)] text-center text-[10px] tabular-nums ${rowHeaderSel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)] text-[var(--foreground)]" : "bg-[var(--muted)] text-[var(--muted-foreground)] group-hover:bg-[var(--accent)]"}`} style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH, boxShadow: selectionShadow(rowHeaderSel), cursor: rowHeaderSel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, -1, true), ...(rowDimmed && !rowHeaderSel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null) }}>{(rowIdx ?? 0) + 1}</td>
                 {PINNED_COLUMNS.map((column, index) => {
                   const left = pinnedLeft(index)
                   const width = widthOf(column)
                   const sel = cellSel(column.id)
                   const preview = inFillPreview(rowIdx, column.id)
                   const stickyBase = `relative sticky z-20 h-8 border-b border-r border-[var(--border)] ${sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : "bg-[var(--card)] group-hover:bg-[var(--accent)]"} ${preview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${index === 0 ? `border-l-4 ${rowStyle.row}` : ""}`
-                  const cellStyle = { width, minWidth: width, left, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1) }
+                  const cellStyle = { width, minWidth: width, left, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1), ...(rowDimmed && !sel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null) }
                   const active = isActive(column.id)
                   if (active) return <td key={column.id} data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} className={`${stickyBase} p-0`} style={cellStyle}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} initial={editSeed} onCommit={(raw, move, fillRange) => void commitCell(record, column, raw, move, fillRange)} onCancel={cancelCellEdit} /><FillHandle visible={sel.handle} onMouseDown={startFill} /></td>
                   if (column.id === "status") return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} onDoubleClick={() => beginCellEdit({ row: rowId, col: column.id })} className={`${stickyBase} px-1.5`} style={cellStyle}><StatusChip record={record} /><FillHandle visible={sel.handle} onMouseDown={startFill} /></td>
@@ -1980,7 +2063,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   const cs = cellSel(column.id)
                   return <GridCell key={`${group.key}-${column.id}`} record={record} column={column} rowId={rowId} width={widthOf(column)} ledger={linked} active={isActive(column.id)}
                     selIn={cs.inRange} selActive={cs.isActive} selTop={cs.top} selBottom={cs.bottom} selLeft={cs.left} selRight={cs.right} selHandle={cs.handle} selMoveEdge={cs.moveEdge}
-                    fillPreview={inFillPreview(rowIdx, column.id)} moveStyle={movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1)}
+                    fillPreview={inFillPreview(rowIdx, column.id)} dimmed={rowDimmed} moveStyle={movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1)}
                     options={optionsById[column.id] ?? column.options} editSeed={editSeed} actions={gridActions} />
                 }))}
               </tr>
