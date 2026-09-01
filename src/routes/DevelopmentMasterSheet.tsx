@@ -20,6 +20,7 @@ import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical } from "@/
 import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
 
 const ALL = "__all__"
+const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니다."
 const COL_WIDTHS_STORAGE_KEY = "dd-col-widths"
 const MIN_COLUMN_WIDTH = 56
 /** 더 이상 진행하지 않는 상태. 전체 탭에서는 감추고, 담당 탭에서는 위로 올려 흐리게 보여 준다. */
@@ -537,9 +538,10 @@ function DateInput({ value, disabled, invalid, onChange }: { value: string; disa
   return <DatePickerPopover value={value} disabled={disabled} invalid={invalid} onChange={onChange} triggerClassName={`h-9 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${invalid ? "ring-1 ring-[var(--destructive)]" : ""}`} />
 }
 
-function EditorField({ column, draft, onChange, optionsById, requiredIds }: { column: MasterColumn; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; requiredIds?: ReadonlySet<string> }) {
+function EditorField({ column, draft, onChange, optionsById, requiredIds, readOnly = false }: { column: MasterColumn; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {
   const value = String(column.value(draft, null) ?? "")
-  const disabled = COMPUTED_COLUMN_IDS.has(column.id)
+  const computed = COMPUTED_COLUMN_IDS.has(column.id)
+  const disabled = readOnly || computed
   const required = requiredIds?.has(column.id) ?? false
   const invalid = required && !value.trim()
   const set = (raw: string) => onChange(updateRecordCell(draft, column, raw))
@@ -547,7 +549,7 @@ function EditorField({ column, draft, onChange, optionsById, requiredIds }: { co
   // 작지 자동 채움 값이 정규 목록에 없어도 드롭다운에 표시되도록 앞에 끼워 넣는다.
   const options = baseOptions && value && !baseOptions.includes(value) ? [value, ...baseOptions] : baseOptions
   const invalidClass = invalid ? "ring-1 ring-[var(--destructive)]" : ""
-  const label = <Label className="truncate text-xs text-[var(--muted-foreground)]">{column.label}{required ? <span className="text-[var(--destructive)]"> *</span> : null}{disabled ? " ·수식" : ""}</Label>
+  const label = <Label className="truncate text-xs text-[var(--muted-foreground)]">{column.label}{required ? <span className="text-[var(--destructive)]"> *</span> : null}{computed ? " ·수식" : ""}</Label>
   if (column.date) return <div className="grid min-w-0 gap-1">{label}<DateInput value={value} disabled={disabled} invalid={invalid} onChange={set} /></div>
   if (options && options.length && !column.suggest) return <div className="grid min-w-0 gap-1">{label}<Select value={value || ALL} onValueChange={(next) => set(next === ALL ? "" : next)} disabled={disabled}><SelectTrigger aria-invalid={invalid} className={`text-sm ${invalidClass}`}><SelectValue placeholder="선택" /></SelectTrigger><SelectContent><SelectItem value={ALL}>미입력</SelectItem>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div>
   if (column.suggest) return <div className="grid min-w-0 gap-1">{label}<Input list={`dl-${column.id}`} value={value} disabled={disabled} aria-invalid={invalid} onChange={(event) => set(event.target.value)} className={`text-sm ${invalidClass}`} /><datalist id={`dl-${column.id}`}>{(options ?? []).map((option) => <option key={option} value={option} />)}</datalist></div>
@@ -555,17 +557,17 @@ function EditorField({ column, draft, onChange, optionsById, requiredIds }: { co
 }
 
 /** 에디터 병합 단위 카드(공정·단계). 같은 sub 필드를 한 박스로 묶어 엑셀 병합셀처럼 보이게 한다. */
-function SubCard({ label, color, columns, draft, onChange, optionsById, requiredIds }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; requiredIds?: ReadonlySet<string> }) {
-  return <div className="rounded-md border border-[var(--border)] p-2.5" style={color ? { background: `color-mix(in srgb, ${color} 6%, var(--card))`, borderColor: `color-mix(in srgb, ${color} 30%, var(--border))` } : undefined}><p className="mb-2 truncate text-[11px] font-semibold uppercase tracking-wide" style={color ? { color } : undefined}>{label}</p><div className="grid grid-cols-2 gap-2">{columns.map((column) => <EditorField key={column.id} column={column} draft={draft} onChange={onChange} optionsById={optionsById} requiredIds={requiredIds} />)}</div></div>
+function SubCard({ label, color, columns, draft, onChange, optionsById, requiredIds, readOnly }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {
+  return <div className="rounded-md border border-[var(--border)] p-2.5" style={color ? { background: `color-mix(in srgb, ${color} 6%, var(--card))`, borderColor: `color-mix(in srgb, ${color} 30%, var(--border))` } : undefined}><p className="mb-2 truncate text-[11px] font-semibold uppercase tracking-wide" style={color ? { color } : undefined}>{label}</p><div className="grid grid-cols-2 gap-2">{columns.map((column) => <EditorField key={column.id} column={column} draft={draft} onChange={onChange} optionsById={optionsById} requiredIds={requiredIds} readOnly={readOnly} />)}</div></div>
 }
 
 /** 그리드에서 Status 를 색 블럭 칩으로 바로 바꾼다(변경 즉시 저장). */
-function StatusChip({ record }: { record: DevRecord }) {
+function StatusChip({ record, disabled }: { record: DevRecord; disabled?: boolean }) {
   const current = record.devStatus || record.stage || ""
   const style = ddStatusStyle(current)
   const selected = DD_STATUS_OPTIONS.includes(current as (typeof DD_STATUS_OPTIONS)[number]) ? current : undefined
-  const change = (next: string) => { void saveDevelopmentRecord({ ...record, devStatus: next }, recordIdentity(record)) }
-  return <Select value={selected} onValueChange={change}>
+  const change = (next: string) => { if (!disabled) void saveDevelopmentRecord({ ...record, devStatus: next }, recordIdentity(record)) }
+  return <Select value={selected} onValueChange={change} disabled={disabled}>
     <SelectTrigger className={`h-6 w-full gap-1 rounded-md border-0 px-2 text-[11px] font-normal shadow-none focus:ring-1 focus:ring-[var(--ring)] ${style.block}`}>
       <span className={`size-1.5 shrink-0 rounded-full ${style.dot}`} />
       <SelectValue placeholder={style.label} />
@@ -663,6 +665,7 @@ interface GridCellProps {
   moveStyle?: CSSProperties
   options?: readonly string[]
   editSeed?: string
+  editEnabled: boolean
   actions: GridActions
 }
 
@@ -670,7 +673,7 @@ interface GridCellProps {
  * 선택이 한 칸 움직일 때 표 전체가 다시 그려지지 않도록 memo 로 감싼다.
  * 그래서 props 는 전부 원시값이거나 참조가 고정된 값이어야 한다(CellSel 객체를 그대로 넘기면 memo 가 깨진다).
  */
-const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, dimmed, moveStyle, options, editSeed, actions }: GridCellProps) {
+const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, dimmed, moveStyle, options, editSeed, editEnabled, actions }: GridCellProps) {
   const sel: CellSel = { inRange: selIn, isActive: selActive, top: selTop, bottom: selBottom, left: selLeft, right: selRight, handle: selHandle, moveEdge: selMoveEdge }
   const onSelect = () => actions.select(rowId, column.id)
   const onEdit = () => actions.edit(rowId, column.id)
@@ -684,17 +687,17 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   // 종료된 행의 회색은 클래스로는 다른 배경 클래스에 밀리므로 인라인으로 덮는다. 글자색은 건드리지 않는다.
   const dimStyle = dimmed && !sel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null
   const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...dimStyle }
-  if (active && !fixed) {
-    return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={sel.handle} onMouseDown={onFillStart} /></td>
+  if (editEnabled && active && !fixed) {
+    return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
   }
   const content = column.render ? column.render(record, ledger) : column.date ? dateText(column.value(record, ledger)) : text(column.value(record, ledger))
-  return <td data-col-id={column.id} title={typeof content === "string" ? content : undefined} onClick={(event) => { if (!event.shiftKey) onSelect() }} onContextMenu={onContextMenu} onDoubleClick={fixed ? undefined : onEdit} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]"}`} style={selectionStyle}>{content}<FillHandle visible={sel.handle} onMouseDown={onFillStart} /></td>
+  return <td data-col-id={column.id} title={typeof content === "string" ? content : undefined} onClick={(event) => { if (!event.shiftKey) onSelect() }} onContextMenu={onContextMenu} onDoubleClick={fixed || !editEnabled ? undefined : onEdit} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{content}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
 })
 
-function EditorGroup({ label, color, columns, draft, onChange, optionsById, layout, requiredIds }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; layout?: "schedule" | "data"; requiredIds?: ReadonlySet<string> }) {
+function EditorGroup({ label, color, columns, draft, onChange, optionsById, layout, requiredIds, readOnly }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; layout?: "schedule" | "data"; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {
   const accent = color ?? "var(--muted-foreground)"
   const blocks = groupSubBlocks(columns)
-  const field = (column: MasterColumn) => <EditorField key={column.id} column={column} draft={draft} onChange={onChange} optionsById={optionsById} requiredIds={requiredIds} />
+  const field = (column: MasterColumn) => <EditorField key={column.id} column={column} draft={draft} onChange={onChange} optionsById={optionsById} requiredIds={requiredIds} readOnly={readOnly} />
 
   let body: ReactNode
   if (layout === "schedule") {
@@ -717,7 +720,7 @@ function EditorGroup({ label, color, columns, draft, onChange, optionsById, layo
   } else {
     body = <div className="gap-2 p-3 [column-fill:balance] sm:columns-2 lg:columns-3 xl:columns-4">
       {blocks.map((block, index) => block.sub
-        ? <div key={`${block.sub}-${index}`} className="mb-2 break-inside-avoid"><SubCard label={block.sub} color={color} columns={block.columns} draft={draft} onChange={onChange} optionsById={optionsById} requiredIds={requiredIds} /></div>
+        ? <div key={`${block.sub}-${index}`} className="mb-2 break-inside-avoid"><SubCard label={block.sub} color={color} columns={block.columns} draft={draft} onChange={onChange} optionsById={optionsById} requiredIds={requiredIds} readOnly={readOnly} /></div>
         : block.columns.map((column) => <div key={column.id} className="mb-2 break-inside-avoid">{field(column)}</div>))}
     </div>
   }
@@ -904,6 +907,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   // 전체 보기에서는 행 이동을 막고, 담당을 고른 상태에서만 그 담당의 행을 재배치한다.
   const dragEnabled = owner !== ALL && sortBy === null
+  const editEnabled = owner !== ALL
 
   /**
    * 화면 표시 순서. 방금 접수한 행만 확인하기 쉽도록 잠시 맨 위로 끌어올린다.
@@ -1123,7 +1127,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 선택 외곽 4px 안쪽만 이동 손잡이로 인정해 셀 편집·범위 선택과 충돌하지 않게 한다. */
   const selectionEdgeAt = (target: HTMLElement, clientX: number, clientY: number): { row: string; col: string | null; rowIndex: number; colIndex: number } | null => {
-    if (!rect || target.closest("[data-fill-handle]")) return null
+    if (!editEnabled || !rect || target.closest("[data-fill-handle]")) return null
     const cell = target.closest<HTMLTableCellElement>("td[data-col-id], td[data-row-header]")
     const rowElement = cell?.closest<HTMLElement>("tr[data-row-id]")
     const rowId = rowElement?.dataset.rowId
@@ -1189,6 +1193,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const startFill = (event: ReactMouseEvent<HTMLSpanElement>) => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
     event.preventDefault()
     event.stopPropagation()
@@ -1284,6 +1289,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const beginCellEdit = (cellRef: CellRef, initial?: string) => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const rowIndex = rowIndexOf.get(cellRef.row)
     const colIndex = colIndexOf.get(cellRef.col)
     const column = colIndex === undefined ? undefined : displayedColumns[colIndex]
@@ -1346,6 +1352,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 선택 테두리 이동은 셀 값 이동과 행 블록 재배치를 한 경로에서 처리해 한 번에 되돌릴 수 있게 한다. */
   const commitSelectionMove = async (drag: MoveDrag, target: CellRect) => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const source = drag.source
     if (source.top === target.top && source.left === target.left) return
 
@@ -1411,6 +1418,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 채우기 핸들은 원본 사각형의 값을 행/열 패턴 그대로 반복한다. */
   const commitFill = async (source: CellRect, target: CellRect) => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const edits = new Map<string, DevRecord>()
     let changed = 0
     const write = (rowIndex: number, colIndex: number, sourceRow: number, sourceCol: number) => {
@@ -1450,6 +1458,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** Ctrl+D: 첫 행을 아래로 복사하고, 단일 셀은 바로 위 값을 가져온다. */
   const fillDown = async () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
     const single = rect.top === rect.bottom && rect.left === rect.right
     const sourceRow = single ? rect.top - 1 : rect.top
@@ -1476,6 +1485,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const replaceAllMatches = async () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!findValue) { notify("찾을 내용을 입력하세요."); return }
     const edits = new Map<string, DevRecord>()
     let changed = 0
@@ -1513,6 +1523,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 엑셀의 "복사한 셀 삽입" — 클립보드 내용을 선택 행 아래에 새 행으로 끼워 넣는다. */
   const insertCopiedRows = async () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
     let text = ""
     try { text = await navigator.clipboard.readText() } catch { text = "" }
@@ -1547,6 +1558,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const selectedRows = (): DevRecord[] => rect ? filtered.slice(rect.top, rect.bottom + 1) : []
 
   const insertBlankRows = async (position: "above" | "below") => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
     const count = Math.max(1, rect.bottom - rect.top + 1)
     const blankOwner = owner === ALL ? "" : owner
@@ -1570,6 +1582,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const appendBlankRows = async (count: number) => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const blankOwner = owner === ALL ? "" : owner
     const created = Array.from({ length: count }, () => createEmptyGridRecord(blankOwner))
     await commitRecords((records) => {
@@ -1587,11 +1600,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const requestDeleteSelectedRows = () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const rows = selectedRows()
     if (rows.length) setConfirmDelete(rows)
   }
 
   const copyRange = async (cut = false) => {
+    if (cut && !editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
     const text = rangeToTsv(rect)
     clipRef.current = { text, cut }
@@ -1603,6 +1618,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 선택 영역의 편집 가능한 셀을 비운다(수식·대장연결 열은 건너뛴다). */
   const clearRange = async () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
     const edits = new Map<string, DevRecord>()
     for (let r = rect.top; r <= rect.bottom; r += 1) {
@@ -1622,6 +1638,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const pasteRange = async () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
     let text = ""
     try { text = await navigator.clipboard.readText() } catch { text = "" }
@@ -1708,7 +1725,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const mod = event.ctrlKey || event.metaKey
     const key = event.key.toLowerCase()
 
-    if (mod && key === "h") { event.preventDefault(); setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true); return }
+    if (mod && key === "h") { event.preventDefault(); if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }; setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true); return }
     if (mod && key === "c") { event.preventDefault(); void copyRange(); return }
     if (mod && key === "x") { event.preventDefault(); void copyRange(true); return }
     if (mod && key === "v") { event.preventDefault(); void pasteRange(); return }
@@ -1816,11 +1833,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     }
   }
   const saveEditor = async () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!editing) return
     await saveDevelopmentRecord(editing, recordIdentity(editing))
     closeEditor()
   }
   const commitCell = async (record: DevRecord, column: MasterColumn, raw: string, move?: CellMove, fillRange = false) => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const origin = { row: recordIdentity(record), col: column.id }
     cancelCellEdit()
     if (fillRange && rect) {
@@ -1913,6 +1932,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }), [])
 
   const confirmDeleteRecord = async () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!confirmDelete?.length) return
     const identities = new Set(confirmDelete.map(recordIdentity))
     await commitRecords((records) => records.filter((record) => !identities.has(recordIdentity(record))))
@@ -1943,7 +1963,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         {saveState === "idle" ? null : <span role="status" className={`mr-0.5 whitespace-nowrap rounded-full px-2 py-1 text-[11px] font-medium ${saveState === "error" ? "bg-[var(--destructive)] text-white" : "bg-[var(--muted)] text-[var(--muted-foreground)]"}`}>{saveState === "error" ? "저장 실패" : saveState === "saved" ? "저장됨" : "저장 중"}</span>}
         <Button type="button" size="sm" variant="outline" disabled={!undoStack.length} title={undoStack.length ? "이전 편집 되돌리기 (Ctrl+Z)" : "되돌릴 편집이 없습니다"} onClick={() => void undoLast()}><Undo2 className="size-4" />되돌리기</Button>
         <Button type="button" size="sm" variant="outline" disabled={!redoStack.length} title={redoStack.length ? "되돌린 편집 다시 실행 (Ctrl+Y)" : "다시 실행할 편집이 없습니다"} onClick={() => void redoLast()}><Redo2 className="size-4" />다시 실행</Button>
-        <Button type="button" size="sm" variant="outline" title="찾기·바꾸기 (Ctrl+H)" onClick={() => { setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true) }}><Search className="size-4" />찾기·바꾸기</Button>
+        <Button type="button" size="sm" variant="outline" disabled={!editEnabled} title={editEnabled ? "찾기·바꾸기 (Ctrl+H)" : EDIT_DISABLED_MESSAGE} onClick={() => { setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true) }}><Search className="size-4" />찾기·바꾸기</Button>
         {sortBy ? <Button type="button" size="sm" variant="outline" onClick={() => setSortBy(null)}><X className="size-4" />정렬 해제</Button> : null}
         <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
         <Button type="button" size="sm" variant="outline" onClick={resetColumnWidths}><RotateCcw className="size-4" />열 너비 초기화</Button>
@@ -1957,6 +1977,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <Select value={status} onValueChange={setStatus}><SelectTrigger className="w-28 shrink-0"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
         <Button type="button" variant="outline" className="shrink-0" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL) }}><RotateCcw className="size-4" />초기화</Button>
         <Button type="button" variant={hideClosed ? "default" : "outline"} className="shrink-0" aria-pressed={hideClosed} title="완료, DROP, REJECT 건을 감춥니다" onClick={() => setHideClosed((current) => !current)}>{hideClosed ? <EyeOff className="size-4" /> : <Eye className="size-4" />}진행중만</Button>
+        {!editEnabled ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--background)] px-2.5 py-1 text-[11px] text-[var(--muted-foreground)]">읽기 전용 · 담당을 선택하면 수정할 수 있습니다</span> : null}
         {intakeNotice ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full bg-[var(--muted)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)]">{intakeNotice}</span> : null}
         <div className="ml-auto flex flex-wrap items-center justify-end gap-2 text-xs text-[var(--muted-foreground)]">
           <div className="flex flex-wrap items-center justify-end gap-1" aria-label="DD 열 그룹 표시">
@@ -2043,19 +2064,19 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   const stickyBase = `relative sticky z-20 h-8 border-b border-r border-[var(--border)] ${sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : "bg-[var(--card)] group-hover:bg-[var(--accent)]"} ${preview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${index === 0 ? `border-l-4 ${rowStyle.row}` : ""}`
                   const cellStyle = { width, minWidth: width, left, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1), ...(rowDimmed && !sel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null) }
                   const active = isActive(column.id)
-                  if (active) return <td key={column.id} data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} className={`${stickyBase} p-0`} style={cellStyle}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} initial={editSeed} onCommit={(raw, move, fillRange) => void commitCell(record, column, raw, move, fillRange)} onCancel={cancelCellEdit} /><FillHandle visible={sel.handle} onMouseDown={startFill} /></td>
-                  if (column.id === "status") return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} onDoubleClick={() => beginCellEdit({ row: rowId, col: column.id })} className={`${stickyBase} px-1.5`} style={cellStyle}><StatusChip record={record} /><FillHandle visible={sel.handle} onMouseDown={startFill} /></td>
-                  return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onDoubleClick={() => beginCellEdit({ row: rowId, col: column.id })} className={`${stickyBase} max-w-0 cursor-cell px-2 text-xs font-normal ${column.mono ? "font-mono" : ""}`} style={cellStyle}>
+                  if (editEnabled && active) return <td key={column.id} data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} className={`${stickyBase} p-0`} style={cellStyle}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} initial={editSeed} onCommit={(raw, move, fillRange) => void commitCell(record, column, raw, move, fillRange)} onCancel={cancelCellEdit} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} /></td>
+                  if (column.id === "status") return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined} className={`${stickyBase} px-1.5`} style={cellStyle}><StatusChip record={record} disabled={!editEnabled} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} /></td>
+                  return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined} className={`${stickyBase} max-w-0 px-2 text-xs font-normal ${editEnabled ? "cursor-cell" : ""} ${column.mono ? "font-mono" : ""}`} style={cellStyle}>
                     {column.id === "owner"
                       ? <div className="flex items-center gap-0.5">
                           <span className="min-w-0 flex-1 truncate">{text(ownerDisplayName(record.owner))}</span>
-                          <button type="button" title="전체 항목 수정" onClick={(event) => { event.stopPropagation(); openEditor(record) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:opacity-100"><Maximize2 className="size-3.5" /></button>
-                          <button type="button" title="이 옵션 삭제" aria-label="이 옵션 삭제" onClick={(event) => { event.stopPropagation(); setConfirmDelete([record]) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--destructive)] hover:text-white group-hover:opacity-100"><Trash2 className="size-3.5" /></button>
+                          <button type="button" title={editEnabled ? "전체 항목 수정" : "전체 항목 보기"} onClick={(event) => { event.stopPropagation(); openEditor(record) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:opacity-100"><Maximize2 className="size-3.5" /></button>
+                          <button type="button" title={editEnabled ? "이 옵션 삭제" : EDIT_DISABLED_MESSAGE} aria-label="이 옵션 삭제" disabled={!editEnabled} onClick={(event) => { event.stopPropagation(); setConfirmDelete([record]) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--destructive)] hover:text-white group-hover:opacity-100 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[var(--muted-foreground)]"><Trash2 className="size-3.5" /></button>
                         </div>
                       : column.id === "styleNo"
                         ? <span className="flex items-center gap-1 truncate" title={warnings.map((warning) => warning.label).join(" · ") || undefined}>{isRecent ? <span className="shrink-0 rounded-full bg-[linear-gradient(110deg,#06b6d4,#2563eb_55%,#7c3aed)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.04em] text-white">신규</span> : null}<span className="truncate">{text(record.styleNo)}</span>{warnings.length ? <TriangleAlert className="size-3.5 shrink-0 text-[var(--destructive)]" /> : null}</span>
                         : <span className="truncate">{text(column.value(record, linked))}</span>}
-                    <FillHandle visible={sel.handle} onMouseDown={startFill} />
+                    <FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} />
                   </td>
                 })}
                 {visibleGroups.flatMap((group) => group.columns.map((column) => {
@@ -2063,7 +2084,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   return <GridCell key={`${group.key}-${column.id}`} record={record} column={column} rowId={rowId} width={widthOf(column)} ledger={linked} active={isActive(column.id)}
                     selIn={cs.inRange} selActive={cs.isActive} selTop={cs.top} selBottom={cs.bottom} selLeft={cs.left} selRight={cs.right} selHandle={cs.handle} selMoveEdge={cs.moveEdge}
                     fillPreview={inFillPreview(rowIdx, column.id)} dimmed={rowDimmed} moveStyle={movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1)}
-                    options={optionsById[column.id] ?? column.options} editSeed={editSeed} actions={gridActions} />
+                    options={optionsById[column.id] ?? column.options} editSeed={editSeed} editEnabled={editEnabled} actions={gridActions} />
                 }))}
               </tr>
             })}
@@ -2079,19 +2100,19 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <div className="fixed inset-0 z-[90]" onMouseDown={() => setMenu(null)} onContextMenu={(event) => { event.preventDefault(); setMenu(null) }} />
         <div role="menu" className="fixed z-[91] min-w-44 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] py-1 text-sm shadow-lg" style={{ left: Math.min(menu.x, window.innerWidth - 190), top: Math.min(menu.y, window.innerHeight - (menu.kind === "bottom" ? 100 : 210)) }}>
           {(menu.kind === "bottom" ? [
-            { key: "append-one", label: "행 1개 추가", hint: "목록 맨 아래", icon: <Plus className="size-3.5" />, run: () => void appendBlankRows(1) },
-            { key: "append-five", label: "행 5개 추가", hint: "목록 맨 아래", icon: <Rows3 className="size-3.5" />, run: () => void appendBlankRows(5) },
+            { key: "append-one", label: "행 1개 추가", hint: "목록 맨 아래", icon: <Plus className="size-3.5" />, run: () => void appendBlankRows(1), disabled: !editEnabled },
+            { key: "append-five", label: "행 5개 추가", hint: "목록 맨 아래", icon: <Rows3 className="size-3.5" />, run: () => void appendBlankRows(5), disabled: !editEnabled },
           ] : [
-            { key: "copy", label: "복사", hint: "Ctrl+C", icon: <Copy className="size-3.5" />, run: () => void copyRange() },
-            { key: "cut", label: "잘라내기", hint: "Ctrl+X", icon: <Scissors className="size-3.5" />, run: () => void copyRange(true) },
-            { key: "paste", label: "붙여넣기", hint: "Ctrl+V", icon: <ClipboardPaste className="size-3.5" />, run: () => void pasteRange() },
-            { key: "insert", label: "복사한 행 삽입", hint: "아래에 추가", icon: <Rows3 className="size-3.5" />, run: () => void insertCopiedRows() },
-            { key: "insert-above", label: "위에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("above") },
-            { key: "insert-below", label: "아래에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("below") },
-            { key: "delete-row", label: "행 삭제", hint: "선택 행 전체", icon: <Trash2 className="size-3.5" />, run: requestDeleteSelectedRows },
-            { key: "clear", label: "내용 지우기", hint: "Delete", icon: <Eraser className="size-3.5" />, run: () => void clearRange() },
-            { key: "row", label: "행 전체 선택", hint: "Shift+Space", icon: <Rows3 className="size-3.5" />, run: () => { if (range) selectWholeRow(range.focus.row) } },
-          ]).map((item) => <button key={item.key} type="button" role="menuitem" onClick={() => { setMenu(null); item.run() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)]">
+            { key: "copy", label: "복사", hint: "Ctrl+C", icon: <Copy className="size-3.5" />, run: () => void copyRange(), disabled: false },
+            { key: "cut", label: "잘라내기", hint: "Ctrl+X", icon: <Scissors className="size-3.5" />, run: () => void copyRange(true), disabled: !editEnabled },
+            { key: "paste", label: "붙여넣기", hint: "Ctrl+V", icon: <ClipboardPaste className="size-3.5" />, run: () => void pasteRange(), disabled: !editEnabled },
+            { key: "insert", label: "복사한 행 삽입", hint: "아래에 추가", icon: <Rows3 className="size-3.5" />, run: () => void insertCopiedRows(), disabled: !editEnabled },
+            { key: "insert-above", label: "위에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("above"), disabled: !editEnabled },
+            { key: "insert-below", label: "아래에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("below"), disabled: !editEnabled },
+            { key: "delete-row", label: "행 삭제", hint: "선택 행 전체", icon: <Trash2 className="size-3.5" />, run: requestDeleteSelectedRows, disabled: !editEnabled },
+            { key: "clear", label: "내용 지우기", hint: "Delete", icon: <Eraser className="size-3.5" />, run: () => void clearRange(), disabled: !editEnabled },
+            { key: "row", label: "행 전체 선택", hint: "Shift+Space", icon: <Rows3 className="size-3.5" />, run: () => { if (range) selectWholeRow(range.focus.row) }, disabled: false },
+          ]).map((item) => <button key={item.key} type="button" role="menuitem" disabled={item.disabled} title={item.disabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); item.run() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent">
             <span className="text-[var(--muted-foreground)]">{item.icon}</span>
             <span className="flex-1">{item.label}</span>
             <span className="text-[11px] text-[var(--muted-foreground)]">{item.hint}</span>
@@ -2125,7 +2146,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </DialogBody>
         <DialogFooter className="gap-1.5 py-2.5">
           <Button type="button" size="sm" variant="outline" onClick={() => setReplaceOpen(false)}>닫기</Button>
-          <Button type="button" size="sm" onClick={() => void replaceAllMatches()}>모두 바꾸기</Button>
+          <Button type="button" size="sm" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => void replaceAllMatches()}>모두 바꾸기</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -2190,15 +2211,15 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               {(() => { const style = ddStatusStyle(editing.devStatus || editing.stage); return <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] ${style.block}`}><span className={`size-1.5 rounded-full ${style.dot}`} />{style.label}</span> })()}
               {ledgerStatus(editingLedger)}
             </div>
-            <DialogDescription>{`DD 원본 행 ${editing._src.sheet === "웹 접수" ? "· 웹 접수" : editing._src.row} · 수식 열은 자동 계산되며 나머지는 직접 수정합니다.`}</DialogDescription>
+            <DialogDescription>{editEnabled ? `DD 원본 행 ${editing._src.sheet === "웹 접수" ? "· 웹 접수" : editing._src.row} · 수식 열은 자동 계산되며 나머지는 직접 수정합니다.` : "읽기 전용 · 담당을 선택하면 수정할 수 있습니다."}</DialogDescription>
           </DialogHeader>
           <DialogBody className="space-y-2.5">
-            <EditorGroup label="고정 핵심" color="var(--chart-1)" columns={PINNED_COLUMNS} draft={editing} onChange={setEditing} optionsById={optionsById} />
-            {GROUPS.filter((group) => group.key !== "ledger").map((group) => <EditorGroup key={group.key} label={group.label} color={group.color} columns={group.columns} draft={editing} onChange={setEditing} optionsById={optionsById} layout={group.editorLayout} />)}
+            <EditorGroup label="고정 핵심" color="var(--chart-1)" columns={PINNED_COLUMNS} draft={editing} onChange={setEditing} optionsById={optionsById} readOnly={!editEnabled} />
+            {GROUPS.filter((group) => group.key !== "ledger").map((group) => <EditorGroup key={group.key} label={group.label} color={group.color} columns={group.columns} draft={editing} onChange={setEditing} optionsById={optionsById} layout={group.editorLayout} readOnly={!editEnabled} />)}
           </DialogBody>
           <DialogFooter className="gap-1.5 py-2.5">
             <Button type="button" size="sm" variant="outline" onClick={closeEditor}>취소</Button>
-            <Button type="button" size="sm" onClick={() => void saveEditor()}><Save className="size-4" />변경 저장</Button>
+            <Button type="button" size="sm" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => void saveEditor()}><Save className="size-4" />변경 저장</Button>
           </DialogFooter>
         </> : null}
       </DialogContent>
@@ -2216,7 +2237,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           </DialogHeader>
           <DialogFooter className="gap-1.5 py-2.5">
             <Button type="button" size="sm" variant="outline" onClick={() => setConfirmDelete(null)}>취소</Button>
-            <Button type="button" size="sm" variant="destructive" onClick={() => void confirmDeleteRecord()}><Trash2 className="size-4" />삭제</Button>
+            <Button type="button" size="sm" variant="destructive" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => void confirmDeleteRecord()}><Trash2 className="size-4" />삭제</Button>
           </DialogFooter>
         </> : null}
       </DialogContent>

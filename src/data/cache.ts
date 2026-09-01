@@ -82,7 +82,10 @@ export async function loadAllCache(): Promise<Partial<AppState>> {
       request.onsuccess = () => resolve([key, request.result])
       request.onerror = () => reject(request.error ?? new Error("캐시를 읽을 수 없습니다."))
     })))
-    return Object.fromEntries(entries.filter(([, value]) => value !== undefined)) as Partial<AppState>
+    // null도 함께 버린다. undefined만 걸러내면 캐시나 Firestore에서 흘러든 null이
+    // 배열 기본값을 덮어써서, 그 값을 for...of로 도는 파생 계산이 통째로 터진다.
+    // (completed가 null이 되어 mergedFlRegistrations에서 HOME 전체가 죽은 사례가 있다.)
+    return Object.fromEntries(entries.filter(([, value]) => value !== undefined && value !== null)) as Partial<AppState>
   } finally {
     database.close()
   }
