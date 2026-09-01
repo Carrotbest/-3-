@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEven
 import { ArchiveRestore, GripVertical, Info, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
-import { DataUpload } from "@/components/upload/DataUpload"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -23,7 +22,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FABRIC_STATUS_META, buildFabricLedger, fabricRecordIdentity, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { fmtDateFull } from "@/data/format"
 import type { FabricLedgerStatus } from "@/data/schema"
-import { ingestSamples } from "@/data/upload"
 import { useInView } from "@/lib/useInView"
 import { applyFabricAction, useAppStore } from "@/store/useAppStore"
 
@@ -567,7 +565,6 @@ export function Warehouse() {
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("EXHAUST", selectedRows)}><PackageOpen />일괄 소진</Button> : null}
         {tab === "READY" || tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("DISPOSE", selectedRows)}><Trash2 />일괄 폐기</Button> : null}
         {tab === "EXHAUSTED" || tab === "DISPOSED" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows)}><ArchiveRestore />일괄 복구</Button> : null}
-        <DataUpload kind="development-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} />
       </div>
 
       <TabFade tabKey={tab}>

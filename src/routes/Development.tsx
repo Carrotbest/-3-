@@ -92,7 +92,7 @@ import {
   type FieldDefinition,
 } from "@/data/schema"
 import { useAppStore } from "@/store/useAppStore"
-import { ingestDevelopment, ingestSamples } from "@/data/upload"
+import { ingestDevelopment } from "@/data/upload"
 import { hoverLift } from "@/lib/motion"
 import { useInView } from "@/lib/useInView"
 import { DevelopmentMasterSheet } from "@/routes/DevelopmentMasterSheet"
@@ -695,7 +695,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
       <PageHeader
         title="DEVELOPMENT"
         subtitle="샘플 개발 유형과 공정 도달률, 담당자별 현황을 한눈에 확인합니다."
-        actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="development-dd-overview" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><DataUpload kind="development-samples-overview" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} /></div>}
+        actions={<DataUpload kind="development-dd-overview" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} />}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -1091,8 +1091,7 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
       if (season !== ALL && item.season !== season) return false
       if (category !== ALL && item.category !== category) return false
       if (!query) return true
-      const buyer = item.record?.buyer || item.sample?.buyer || ""
-      return [item.styleNo, item.flNo, item.construction, buyer, item.owner]
+      return [item.styleNo, item.flNo, item.construction, item.buyer, item.owner]
         .some((value) => value.toLocaleLowerCase("ko-KR").includes(query))
     })
   }, [category, library, search, season])
@@ -1122,10 +1121,9 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
     { id: "flNo", header: "FL No.", accessor: (item) => item.flNo, cell: (item) => <span className="font-mono">{item.flNo || "—"}</span> },
     { id: "season", header: "시즌", accessor: (item) => item.season },
     { id: "category", header: "카테고리", accessor: (item) => item.category },
-    { id: "construction", header: "조직", accessor: (item) => item.construction },
+    { id: "buyer", header: "Buyer", accessor: (item) => item.buyer },
     { id: "owner", header: "담당", accessor: (item) => ownerDisplayName(item.owner) },
-    { id: "completedAt", header: "완료일", accessor: (item) => item.completedAt, cell: (item) => fmtDateFull(item.completedAt) },
-    { id: "source", header: "출처", accessor: (item) => item.source, cell: (item) => <Badge variant={item.source === "DD" ? "default" : "outline"}>{item.source}</Badge> },
+    { id: "construction", header: "조직", accessor: (item) => item.construction },
   ], [])
 
   const resetFilters = () => {
@@ -1213,9 +1211,21 @@ function DetailPairs({ pairs }: { pairs: Array<[string, unknown, string?]> }) {
   )
 }
 
+function processReachedText(record: DevRecord): string {
+  const process = record.processReached
+  if (!process) return "—"
+  return ([
+    ["원사", process.yarn],
+    ["편직", process.knitting],
+    ["염색", process.dyeing],
+    ["가공", process.finishing],
+  ] as const).filter(([, reached]) => reached).map(([label]) => label).join(" · ") || "미도달"
+}
+
 function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChange }: { record?: DevRecord | null; libraryItem?: CompletedLibraryItem | null; onOpenChange: (open: boolean) => void }) {
   const resolvedRecord = libraryItem?.record ?? record
   const sample = libraryItem?.sample ?? null
+  const archiveSample = libraryItem?.source === "샘플대장" ? sample : null
   const tech = resolvedRecord?.tech
   const open = Boolean(resolvedRecord || libraryItem)
   const ddProcessTechnical = Boolean(
@@ -1224,12 +1234,13 @@ function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChan
   )
   const processVisible = Boolean(
     ddProcessTechnical || hasValue(resolvedRecord?.note)
-    || (sample && Object.values(sample.process).some(hasValue)),
+    || (archiveSample && Object.values(archiveSample.process).some(hasValue)),
   )
   const physicalVisible = Boolean(
     hasObjectValue(tech?.actual) || hasObjectValue(tech?.stageData) || hasObjectValue(tech?.finish)
-    || (sample && (hasValue(sample.inhouse.widthCm) || hasValue(sample.inhouse.weightGsm)
-      || (typeof sample.inhouse.shrinkagePct === "number" ? hasValue(sample.inhouse.shrinkagePct) : hasObjectValue(sample.inhouse.shrinkagePct)))),
+    || (archiveSample && (hasValue(archiveSample.inhouse.widthCm) || hasValue(archiveSample.inhouse.weightGsm)
+      || hasValue(archiveSample.inhouse.pilling)
+      || (typeof archiveSample.inhouse.shrinkagePct === "number" ? hasValue(archiveSample.inhouse.shrinkagePct) : hasObjectValue(archiveSample.inhouse.shrinkagePct)))),
   )
   const fabricVisible = Boolean(hasObjectValue(tech?.knitSpec) || hasObjectValue(tech?.original))
   const historyVisible = Boolean(tech && [tech.passFail, tech.failReason, tech.styleHistory, tech.review, tech.arrangeNo, tech.optionProgress].some(hasValue))
@@ -1246,7 +1257,7 @@ function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChan
               <div className="flex flex-wrap items-center gap-2">
                 <DialogTitle>{title}{resolvedRecord?.opt ? ` · ${resolvedRecord.opt}` : ""}</DialogTitle>
                 {resolvedRecord ? <StatusBadge status={STATUS[statusOf(resolvedRecord)].label} /> : null}
-                {libraryItem ? <Badge variant={libraryItem.source === "DD" ? "default" : "outline"}>{libraryItem.source === "DD" ? "DD · 기술데이터" : "대장 아카이브 · DD 미연결"}</Badge> : null}
+                {libraryItem ? <Badge variant={libraryItem.source === "DD" ? "default" : "outline"}>{libraryItem.source}</Badge> : null}
               </div>
               <DialogDescription>{libraryItem ? `${libraryItem.flNo || "FL 미기재"} · 완료 ${fmtDateFull(libraryItem.completedAt)}` : "개발 항목과 공정·물성·이력 기술데이터입니다."}</DialogDescription>
             </DialogHeader>
@@ -1263,7 +1274,13 @@ function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChan
               </div>
 
               <TabsContent value="overview" className="mt-0 min-h-0 flex-1 overflow-y-scroll px-6 py-6 [scrollbar-gutter:stable]">
-                {resolvedRecord ? (
+                {libraryItem ? (
+                  <div className="space-y-6">
+                    <DetailPairs pairs={[["Style No.", libraryItem.styleNo], ["FL No.", libraryItem.flNo], ["시즌", libraryItem.season], ["카테고리", libraryItem.category], ["Buyer", libraryItem.buyer], ["담당", ownerDisplayName(libraryItem.owner)], ["조직", libraryItem.construction]]} />
+                    {archiveSample ? <div className="border-t border-[var(--border)] pt-6"><h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">샘플대장 원본</h3><DetailPairs pairs={[["R&D No.", archiveSample.storageNo], ["완료일", fmtDateFull(archiveSample.completedAt)]]} /></div> : null}
+                    {resolvedRecord ? <div className="border-t border-[var(--border)] pt-6"><h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">DD 원본</h3><DetailPairs pairs={[["단계", resolvedRecord.stage], ["납기", fmtDateFull(resolvedRecord.dueDate)], ["개발 상태", resolvedRecord.devStatus], ["도달 공정", processReachedText(resolvedRecord)], ["접수 완료일", fmtDateFull(resolvedRecord.receivedDate)]]} /></div> : null}
+                  </div>
+                ) : resolvedRecord ? (
                   <>
                     <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
                       {FIELDS.map((field) => (
@@ -1278,8 +1295,6 @@ function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChan
                     </dl>
                     <div className="mt-6 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4"><p className="text-xs font-medium text-[var(--muted-foreground)]">원본 위치</p><p className="mt-1 text-sm text-[var(--foreground)]">{resolvedRecord._src.sheet} · {resolvedRecord._src.row}행</p></div>
                   </>
-                ) : libraryItem ? (
-                  <DetailPairs pairs={[["Style No.", libraryItem.styleNo], ["FL No.", libraryItem.flNo], ["시즌", libraryItem.season], ["카테고리", libraryItem.category], ["Buyer", sample?.buyer], ["담당", ownerDisplayName(libraryItem.owner)], ["조직", libraryItem.construction], ["완료일", fmtDateFull(libraryItem.completedAt)], ["원본 시트", sample?.sourceSheet]]} />
                 ) : null}
               </TabsContent>
 
@@ -1300,7 +1315,7 @@ function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChan
                       ))}
                     </div>
                   ) : null}
-                  {sample && !ddProcessTechnical ? <DetailPairs pairs={[["원사", sample.process.yarn], ["편직", sample.process.knit], ["염색", sample.process.dye], ["가공", sample.process.finish], ["Remark", sample.process.remark]]} /> : null}
+                  {archiveSample && !ddProcessTechnical ? <DetailPairs pairs={[["원사", archiveSample.process.yarn], ["편직", archiveSample.process.knit], ["염색", archiveSample.process.dye], ["가공", archiveSample.process.finish], ["Remark", archiveSample.process.remark]]} /> : null}
                   {resolvedRecord ? <DetailPairs pairs={[["Yarn Detail", tech?.yarnDetail], ["Finishing A~D", tech?.finishing?.join(" · ")], ["Remark", resolvedRecord.note]]} /> : null}
                 </TabsContent>
               ) : null}
@@ -1308,7 +1323,7 @@ function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChan
               {physicalVisible ? (
                 <TabsContent value="physical" className="mt-0 min-h-0 flex-1 space-y-5 overflow-y-scroll px-6 py-6 [scrollbar-gutter:stable]">
                   {tech?.actual ? <DetailPairs pairs={[["Actual Width", tech.actual.width, " cm"], ["Actual Weight", tech.actual.weight, " g/m²"], ["Balance", tech.actual.balance], ["축률 L", tech.actual.shrinkageLength, " %"], ["축률 W", tech.actual.shrinkageWidth, " %"]]} /> : null}
-                  {sample && !tech?.actual ? <DetailPairs pairs={[["폭", sample.inhouse.widthCm, " cm"], ["중량", sample.inhouse.weightGsm, " g/m²"], ["축률", typeof sample.inhouse.shrinkagePct === "number" ? sample.inhouse.shrinkagePct : `장 ${detailValue(sample.inhouse.shrinkagePct.length)} % · 폭 ${detailValue(sample.inhouse.shrinkagePct.width)} %`]]} /> : null}
+                  {archiveSample && !tech?.actual ? <DetailPairs pairs={[["폭", archiveSample.inhouse.widthCm, " cm"], ["중량", archiveSample.inhouse.weightGsm, " g/m²"], ["축률", typeof archiveSample.inhouse.shrinkagePct === "number" ? archiveSample.inhouse.shrinkagePct : `장 ${detailValue(archiveSample.inhouse.shrinkagePct.length)} % · 폭 ${detailValue(archiveSample.inhouse.shrinkagePct.width)} %`], ["필링", archiveSample.inhouse.pilling]]} /> : null}
                   {tech?.stageData ? (
                     <div className="overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]"><Table><TableHeader><TableRow><TableHead>단계</TableHead><TableHead>폭</TableHead><TableHead>중량</TableHead></TableRow></TableHeader><TableBody>{[["Greige", tech.stageData.greige], ["Tenter", tech.stageData.tenter], ["Wash", tech.stageData.wash]].map(([label, data]) => { const metric = data as { width?: number | null; weight?: number | null } | undefined; return <TableRow key={label as string}><TableCell className="font-medium">{label as string}</TableCell><TableCell>{fmtNum(metric?.width, " cm")}</TableCell><TableCell>{fmtNum(metric?.weight, " g/m²")}</TableCell></TableRow> })}</TableBody></Table></div>
                   ) : null}
@@ -1468,7 +1483,7 @@ function DevelopmentList() {
           : routeCategory
             ? `${routeCategory} 카테고리 개발 현황입니다.`
             : "개발 건의 전체 진행 현황을 확인합니다."}
-        actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="development-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><DataUpload kind="development-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} /></div>}
+        actions={<DataUpload kind="development-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} />}
       />
 
       {view !== "completed" ? (

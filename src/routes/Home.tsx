@@ -41,7 +41,7 @@ import { fmtDateFull } from "@/data/format"
 import { stageOf, type ChemicalCategory, type ChemicalPortfolio } from "@/data/chemical"
 import { loadTrendFeed, loadTrendKpi, type TrendFeed, type TrendKpi } from "@/data/trend"
 import type { DevRecord, MaterialItem, MaterialKind } from "@/data/schema"
-import { ingestDevelopment, ingestSamples } from "@/data/upload"
+import { ingestDevelopment } from "@/data/upload"
 import { hoverLift } from "@/lib/motion"
 import { HOME_GLASS_HOVER, HOME_GLASS_STATIC, HOME_GLASS_SURFACE } from "@/lib/home-surface"
 import { useAppStore } from "@/store/useAppStore"
@@ -678,9 +678,15 @@ const RDDA_SERIES = [
   { key: "purchase", label: "사입", range: "2천번대", color: "var(--chart-4)" },
 ] as const
 
+interface CumulativeRddaDatum extends MonthlyDevelopmentDatum {
+  monthly: Pick<MonthlyDevelopmentDatum, "total" | "gd" | "domestic" | "production" | "purchase" | "other">
+  totalSolid: number | null
+  totalCurrent: number | null
+}
+
 function RddaTrendTooltip({ active, payload }: {
   active?: boolean
-  payload?: ReadonlyArray<{ payload?: MonthlyDevelopmentDatum }>
+  payload?: ReadonlyArray<{ payload?: CumulativeRddaDatum }>
 }) {
   const item = payload?.[0]?.payload
   if (!active || !item) return null
@@ -692,17 +698,18 @@ function RddaTrendTooltip({ active, payload }: {
       </div>
       <div className="mt-2 space-y-1.5">
         {RDDA_SERIES.map((series) => {
-          const value = item[series.key]
+          const monthlyValue = item.monthly[series.key]
+          const cumulativeValue = item[series.key]
           return (
             <div key={series.key} className="flex items-center justify-between gap-5 text-xs">
               <span className="flex items-center gap-2 text-[var(--muted-foreground)]"><i className="size-2 rounded-full" style={{ background: series.color }} />{series.label}</span>
-              <strong>{value}건 <span className="font-normal text-[var(--muted-foreground)]">({item.total ? Math.round(value / item.total * 100) : 0}%)</span></strong>
+              <strong>그 달 {monthlyValue}건 <span className="font-normal text-[var(--muted-foreground)]">/ 누적 {cumulativeValue}건</span></strong>
             </div>
           )
         })}
-        {item.other ? <div className="flex items-center justify-between gap-5 text-xs text-[var(--muted-foreground)]"><span>기타</span><strong className="text-[var(--foreground)]">{item.other}건</strong></div> : null}
+        {item.monthly.other || item.other ? <div className="flex items-center justify-between gap-5 text-xs text-[var(--muted-foreground)]"><span>기타</span><strong className="text-[var(--foreground)]">그 달 {item.monthly.other}건 <span className="font-normal text-[var(--muted-foreground)]">/ 누적 {item.other}건</span></strong></div> : null}
       </div>
-      <div className="mt-2 flex items-center justify-between border-t border-[var(--border)] pt-2 text-sm"><span className="font-medium">TOTAL</span><strong>{item.total}건</strong></div>
+      <div className="mt-2 flex items-center justify-between border-t border-[var(--border)] pt-2 text-sm"><span className="font-medium">TOTAL</span><strong>그 달 {item.monthly.total}건 <span className="font-normal text-[var(--muted-foreground)]">/ 누적 {item.total}건</span></strong></div>
     </div>
   )
 }
@@ -726,6 +733,34 @@ function RddaTrendChart({ monthly, reduceMotion }: { monthly: MonthlyDevelopment
   const rootRef = useRef<HTMLDivElement>(null)
   const [started, setStarted] = useState(reduceMotion)
   const [hoveredMonth, setHoveredMonth] = useState<number | null>(null)
+  const cumulativeMonthly = useMemo<CumulativeRddaDatum[]>(() => {
+    const cumulative = { total: 0, gd: 0, domestic: 0, production: 0, purchase: 0, other: 0 }
+    const lastIndex = monthly.length - 1
+    return monthly.map((item, index) => {
+      const monthlyValues = {
+        total: item.total,
+        gd: item.gd,
+        domestic: item.domestic,
+        production: item.production,
+        purchase: item.purchase,
+        other: item.other,
+      }
+      cumulative.total += monthlyValues.total
+      cumulative.gd += monthlyValues.gd
+      cumulative.domestic += monthlyValues.domestic
+      cumulative.production += monthlyValues.production
+      cumulative.purchase += monthlyValues.purchase
+      cumulative.other += monthlyValues.other
+      return {
+        ...item,
+        ...cumulative,
+        monthly: monthlyValues,
+        totalSolid: index < lastIndex ? cumulative.total : null,
+        totalCurrent: index >= Math.max(0, lastIndex - 1) ? cumulative.total : null,
+      }
+    })
+  }, [monthly])
+  const lastMonth = cumulativeMonthly.at(-1)?.month
 
   useEffect(() => {
     const node = rootRef.current
@@ -741,15 +776,16 @@ function RddaTrendChart({ monthly, reduceMotion }: { monthly: MonthlyDevelopment
   }, [started])
 
   return (
-    <div ref={rootRef} className="h-[25rem] w-full" role="img" aria-label="FL 번호 기준 월별 RDDA 등록 전체 추이와 GD, 국내, 생산, 사입 비율 차트">
-      {started ? <ResponsiveContainer width="100%" height="100%"><ComposedChart data={monthly} margin={{ top: 28, right: 12, bottom: 0, left: -18 }} barCategoryGap="32%" onMouseMove={(state: unknown) => { const index = (state as { activeTooltipIndex?: number }).activeTooltipIndex; setHoveredMonth(typeof index === "number" ? index : null) }} onMouseLeave={() => setHoveredMonth(null)}>
+    <div ref={rootRef} className="h-[25rem] w-full" role="img" aria-label="FL 번호 기준 생산처별 누적 등록 흐름과 월별 등록 건수 차트">
+      {started ? <ResponsiveContainer width="100%" height="100%"><ComposedChart data={cumulativeMonthly} margin={{ top: 28, right: 12, bottom: 0, left: -18 }} barCategoryGap="32%" onMouseMove={(state: unknown) => { const index = (state as { activeTooltipIndex?: number }).activeTooltipIndex; setHoveredMonth(typeof index === "number" ? index : null) }} onMouseLeave={() => setHoveredMonth(null)}>
         <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 5" />
-        <XAxis dataKey="month" tickFormatter={(value: string) => `${value.slice(2, 4)}.${value.slice(5)}월`} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} interval={monthly.length > 14 ? 1 : 0} />
+        <XAxis dataKey="month" tickFormatter={(value: string) => `${value.slice(2, 4)}.${value.slice(5)}월`} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} interval={cumulativeMonthly.length > 14 ? 1 : 0} />
         <YAxis allowDecimals={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
         <Tooltip cursor={{ stroke: "var(--gradient-1)", strokeOpacity: 0.25, strokeDasharray: "4 4" }} content={<RddaTrendTooltip />} />
         {RDDA_SERIES.map((series) => <Bar key={series.key} dataKey={series.key} name={series.label} stackId="production-source" fill={series.color} isAnimationActive={false} shape={(props: unknown) => { const bar = props as AnimatedRddaBarProps; return <AnimatedRddaBar {...bar} active={bar.index === hoveredMonth} reduceMotion={reduceMotion} /> }} />)}
-        <Line type="natural" dataKey="total" name="TOTAL" stroke="var(--gradient-1)" strokeWidth={2} dot={{ r: 2.5, fill: "var(--background)", stroke: "var(--gradient-1)", strokeWidth: 1.5 }} activeDot={{ r: 5, strokeWidth: 2, fill: "var(--background)", stroke: "var(--gradient-1)" }} isAnimationActive={!reduceMotion} animationDuration={1950} animationEasing="linear">
-          <LabelList dataKey="total" position="top" offset={10} fill="var(--muted-foreground)" fontSize={10} fontWeight={600} />
+        <Line type="natural" dataKey="totalSolid" name="TOTAL" stroke="var(--gradient-1)" strokeWidth={2} dot={{ r: 2.5, fill: "var(--background)", stroke: "var(--gradient-1)", strokeWidth: 1.5 }} activeDot={{ r: 5, strokeWidth: 2, fill: "var(--background)", stroke: "var(--gradient-1)" }} isAnimationActive={!reduceMotion} animationDuration={1950} animationEasing="linear" />
+        <Line type="linear" dataKey="totalCurrent" name="진행 중 TOTAL" stroke="var(--gradient-1)" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 2.5, fill: "var(--background)", stroke: "var(--gradient-1)", strokeWidth: 1.5 }} activeDot={{ r: 5, strokeWidth: 2, fill: "var(--background)", stroke: "var(--gradient-1)" }} isAnimationActive={!reduceMotion} animationDuration={1950} animationEasing="linear">
+          <LabelList dataKey="total" valueAccessor={(entry: { payload?: CumulativeRddaDatum }) => entry.payload?.month === lastMonth ? entry.payload?.total ?? "" : ""} position="top" offset={10} fill="var(--muted-foreground)" fontSize={10} fontWeight={600} />
         </Line>
       </ComposedChart></ResponsiveContainer> : null}
     </div>
@@ -837,7 +873,7 @@ export function Home() {
 
   return (
     <section className="-mt-1 min-w-0 space-y-8">
-      <PageHeader title="대시보드" subtitle="DD 전체현황을 기준으로 개발 업무와 최신 정보를 확인합니다." actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="home-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><DataUpload kind="home-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} /><Button type="button" variant="outline" onClick={() => navigate("/sync")}><RefreshCw aria-hidden="true" />데이터 상태</Button></div>} />
+      <PageHeader title="대시보드" subtitle="DD 전체현황을 기준으로 개발 업무와 최신 정보를 확인합니다." actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="home-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><Button type="button" variant="outline" onClick={() => navigate("/sync")}><RefreshCw aria-hidden="true" />데이터 상태</Button></div>} />
 
       <Reveal>
         <div className="group block w-full rounded-[12px] text-left">
@@ -873,9 +909,9 @@ export function Home() {
           <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/95" />
           <CardContent className="relative p-6 sm:p-7">
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--chart-2)] to-[var(--gradient-1)] text-white shadow-[0_7px_18px_-6px_rgba(76,91,212,0.65)]"><TrendingUp className="size-4" aria-hidden="true" /></span><div><h2 className="text-base font-semibold text-[var(--foreground)]">RDDA 등록 현황</h2><p className="mt-1 text-xs text-[var(--muted-foreground)]">생산처별 등록 흐름과 월별 추이</p></div></div>
+            <div className="flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--chart-2)] to-[var(--gradient-1)] text-white shadow-[0_7px_18px_-6px_rgba(76,91,212,0.65)]"><TrendingUp className="size-4" aria-hidden="true" /></span><div><h2 className="text-base font-semibold text-[var(--foreground)]">FL 등록 현황</h2><p className="mt-1 text-xs text-[var(--muted-foreground)]">생산처별 누적 등록 흐름</p></div></div>
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-1 rounded-full border border-white/80 bg-white/60 p-1 shadow-sm backdrop-blur" role="group" aria-label="RDDA 조회 기간 선택">
+              <div className="flex items-center gap-1 rounded-full border border-white/80 bg-white/60 p-1 shadow-sm backdrop-blur" role="group" aria-label="FL 등록 현황 조회 기간 선택">
                 {RDDA_RANGE_OPTIONS.map((option) => (
                   <button
                     key={option.months}

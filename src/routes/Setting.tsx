@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { checkStyleNo, fmtDateFull, fmtTime, normalizeSeason } from "@/data/format"
 import { clearCache } from "@/data/cache"
+import { currentUserIsOwner } from "@/data/auth"
+import { downloadLedgerArchive } from "@/data/ledger-archive"
 import { ingestChemical, ingestDevelopment, ingestFabric, ingestMaterials, ingestRdda, ingestSamples, ingestStudyWorkbook, ingestTs } from "@/data/upload"
 import { rddaMonthFromFlNo } from "@/data/derive"
 import { CATEGORIES, MEMBERS } from "@/data/schema"
@@ -84,6 +86,7 @@ export function Setting() {
   const orgMembers = useAppStore((state) => state.orgMembers)
   const materialDiagnostics = useAppStore((state) => state.materialDiagnostics)
   const chemical = useAppStore((state) => state.chemical)
+  const isOwner = currentUserIsOwner()
   const [saved, setSaved] = useState<SettingsState>(loadSettings)
   const [draft, setDraft] = useState<SettingsState>(() => cloneSettings(saved))
   const [selectedGroup, setSelectedGroup] = useState("construction")
@@ -138,6 +141,15 @@ export function Setting() {
     if (!file) return
     setRecentUploads((current) => ({ ...current, [key]: file.name }))
     void handler(file)
+  }
+
+  const exportLedgerArchive = (files: File[]) => {
+    const file = files[0]
+    if (!file) return
+    setRecentUploads((current) => ({ ...current, "samples-archive": file.name }))
+    void downloadLedgerArchive(file)
+      .then((count) => setSaveMessage(`샘플관리대장 ${count.toLocaleString("ko-KR")}건을 archive.json으로 내보냈습니다.`))
+      .catch(() => setSaveMessage("샘플관리대장 아카이브를 만들지 못했습니다. 파일 형식을 확인해 주세요."))
   }
 
   const useCount = (key: string, value: string) => records.filter((record) => String(record[key as keyof typeof record] ?? "") === value).length
@@ -205,20 +217,23 @@ export function Setting() {
         <div className="grid gap-4 lg:grid-cols-2">
           {[
             { key: "development", title: "개발 현황 (DD)", file: "Development Dashboard.xlsx", targets: "HOME 완료·신규·스케줄 / DEVELOPMENT 전체 현황", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("development", files, ingestDevelopment) },
-            { key: "samples", title: "샘플 관리 대장", file: "샘플 관리 대장.xlsx", targets: "HOME RDDA 등록 현황(7월까지) / DEVELOPMENT 완료 샘플", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("samples", files, ingestSamples) },
+            { key: "samples", title: "샘플 관리 대장", file: "샘플 관리 대장.xlsx", targets: "FL 등록 현황 / DEVELOPMENT 완료 샘플 아카이브", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("samples", files, ingestSamples), ownerOnly: true },
             { key: "study", title: "STUDY 현황", file: "Capability Improvement.xlsx", targets: "STUDY 진행 현황 / HOME 업무 카드", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("study", files, ingestStudyWorkbook) },
             { key: "ts", title: "TS 관리", file: "Technical survices {연도}.xlsx", targets: "TS 접수·처리 목록 / HOME 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("ts", files, ingestTs) },
             { key: "rdda", title: "RDDA 리포트", file: "26년 N월 RDDA.xlsx", targets: "RDDA REPORT Meeting·Pickup·월별 스냅샷", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("rdda", files, async (file) => ingestRdda([file])) },
             { key: "fabric", title: "원단분석", file: "원단분석 export 파일", targets: "FABRIC ANALYSIS / HOME 원단분석 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("fabric", files, ingestFabric) },
             { key: "materials", title: "자료목록", file: "자료목록.xlsx", targets: "트렌드 자료 목록 엑셀 (MACRO·FABRIC·PORTFOLIO). TS·STUDY는 각 화면 엑셀에서 자동 반영됩니다.", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("materials", files, ingestMaterials) },
             { key: "chemical", title: "기능성 개발 List", file: "Chemical 개발 List.xlsx", targets: "PORTFOLIO / HOME 포트폴리오 카드", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("chemical", files, ingestChemical) },
-          ].map((item) => (
+          ].filter((item) => !("ownerOnly" in item && item.ownerOnly) || isOwner).map((item) => (
             <article key={item.key} className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]">
               <div className="flex items-start gap-3 border-b border-[var(--border)] p-4">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><Database className="size-4" /></span>
                 <div className="min-w-0 flex-1"><h3 className="text-sm font-semibold text-[var(--foreground)]">{item.title}</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">파일: {item.file}</p><p className="mt-2 text-xs font-medium text-[var(--foreground)]">연결: {item.targets}</p>{item.key === "chemical" ? <p className="mt-2 text-xs text-[var(--muted-foreground)]">초기 이관은 엑셀로 진행하고, 이후 신규 건은 PORTFOLIO 화면에서 직접 등록합니다.</p> : null}{recentUploads[item.key] ? <p className="mt-2 truncate text-[11px] text-[var(--chart-2)]">최근 선택: {recentUploads[item.key]}</p> : null}{item.key === "materials" ? <div className="mt-3 space-y-1 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3 text-xs text-[var(--muted-foreground)]" aria-live="polite"><p><strong className="text-[var(--foreground)]">인식</strong> {materialDiagnostics.recognized.toLocaleString("ko-KR")}건</p><p>TS {materialDiagnostics.byKind.TS.toLocaleString("ko-KR")} · STUDY {materialDiagnostics.byKind.STUDY.toLocaleString("ko-KR")} · MACRO {materialDiagnostics.byKind.MACRO.toLocaleString("ko-KR")} · FABRIC {materialDiagnostics.byKind.FABRIC.toLocaleString("ko-KR")} · PORTFOLIO {materialDiagnostics.byKind.PORTFOLIO.toLocaleString("ko-KR")}</p><p>구분 불명 {materialDiagnostics.unknownKind.toLocaleString("ko-KR")}건 · 링크 없음 {materialDiagnostics.missingLink.toLocaleString("ko-KR")}건</p></div> : null}{item.key === "chemical" && chemical ? <div className="mt-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3 text-xs text-[var(--muted-foreground)]" aria-live="polite"><strong className="text-[var(--foreground)]">인식</strong> 카테고리 {chemical.totals.categories.toLocaleString("ko-KR")} · 항목 {chemical.totals.items.toLocaleString("ko-KR")} · FL {chemical.totals.fl.toLocaleString("ko-KR")} · PASS {chemical.totals.pass.toLocaleString("ko-KR")}</div> : null}</div>
               </div>
-              <div className="p-3"><DataUpload kind={item.key} label={`${item.title} 파일 놓기`} accept={item.accept} onFiles={item.onFiles} /></div>
+              <div className="space-y-3 p-3">
+                <DataUpload kind={item.key} label={`${item.title} 파일 놓기`} accept={item.accept} onFiles={item.onFiles} />
+                {item.key === "samples" ? <div className="border-t border-[var(--border)] pt-3"><p className="mb-2 text-xs text-[var(--muted-foreground)]">컷오버 파일 생성: 같은 파서로 읽어 archive.json을 내려받습니다. 현재 앱 데이터와 캐시는 바꾸지 않습니다.</p><DataUpload kind="samples-archive" label="아카이브 JSON 내보내기" accept=".xlsx,.xls" compact onFiles={exportLedgerArchive} />{recentUploads["samples-archive"] ? <p className="mt-2 truncate text-[11px] text-[var(--chart-2)]">최근 선택: {recentUploads["samples-archive"]}</p> : null}</div> : null}
+              </div>
             </article>
           ))}
         </div>

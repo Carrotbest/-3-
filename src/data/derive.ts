@@ -101,10 +101,11 @@ export interface CompletedLibraryItem {
   flNo: string
   season: string
   category: string
+  buyer: string
   owner: string
   construction: string
   completedAt: string
-  source: "DD" | "대장"
+  source: "DD" | "샘플대장"
   record: DevRecord | null
   sample: CompletedSample | null
 }
@@ -208,7 +209,7 @@ export interface MonthlyDevelopmentDatum {
   production: number
   purchase: number
   other: number
-  source: "DD" | "샘플대장"
+  source: "DD" | "샘플대장" | "혼합"
   latest: boolean
 }
 
@@ -732,6 +733,7 @@ export function completedLibrary(
       flNo: record.flNo,
       season: record.season,
       category: record.category,
+      buyer: record.buyer,
       owner: record.owner,
       construction: record.construction,
       completedAt: completionDate(record),
@@ -755,6 +757,7 @@ export function completedLibrary(
       ddMatch.flNo ||= sample.flNo
       ddMatch.season ||= sample.season
       ddMatch.category ||= sample.category
+      ddMatch.buyer ||= sample.buyer
       ddMatch.owner ||= sample.owner
       ddMatch.construction ||= sample.construction
       ddMatch.completedAt ||= sample.completedAt
@@ -770,10 +773,11 @@ export function completedLibrary(
       flNo: sample.flNo,
       season: sample.season,
       category: sample.category,
+      buyer: sample.buyer,
       owner: sample.owner,
       construction: sample.construction,
       completedAt: sample.completedAt,
-      source: "대장",
+      source: "샘플대장",
       record: null,
       sample,
     }
@@ -914,8 +918,6 @@ export function homeKpiDetails(records: readonly DevRecord[], today = new Date()
 
 export type RddaProductionType = "gd" | "domestic" | "production" | "purchase" | "other"
 
-export const RDDA_ARCHIVE_CUTOFF_MONTH = "2026-07"
-
 /** FL 번호의 마지막 네 자리 첫 숫자로 생산처를 구분한다. */
 export function rddaProductionType(flNo: string): RddaProductionType {
   const digits = flNo.replace(/\D/g, "")
@@ -939,9 +941,8 @@ export function rddaMonthFromFlNo(flNo: string): string | null {
 }
 
 /**
- * RDDA 등록 현황 추이.
- * 2026년 7월까지는 샘플관리대장의 FL.#에 인코딩된 YYMM, 8월부터는 DD의 Received Date를 쓴다.
- * DD·대장에 같은 FL No.가 있으면 하나로 합쳐 1건만 집계한다(mergedFlRegistrations).
+ * FL 등록 현황 추이.
+ * 샘플관리대장 전체와 DD의 고유 FL을 합치며, 같은 FL No.는 대장을 우선해 1건만 집계한다.
  */
 export function monthlyDevelopmentTrend(
   records: readonly DevRecord[],
@@ -955,10 +956,14 @@ export function monthlyDevelopmentTrend(
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
   })
   const byMonth = new Map<string, Record<RddaProductionType, number>>()
+  const sourcesByMonth = new Map<string, Set<FlRegistration["source"]>>()
   for (const reg of mergedFlRegistrations(records, samples)) {
     const current = byMonth.get(reg.month) ?? { gd: 0, domestic: 0, production: 0, purchase: 0, other: 0 }
     current[reg.type] += 1
     byMonth.set(reg.month, current)
+    const sources = sourcesByMonth.get(reg.month) ?? new Set<FlRegistration["source"]>()
+    sources.add(reg.source)
+    sourcesByMonth.set(reg.month, sources)
   }
   const latestPopulated = [...months].reverse().find((month) => {
     const values = byMonth.get(month)
@@ -966,11 +971,13 @@ export function monthlyDevelopmentTrend(
   })
   return months.map((month) => {
     const values = byMonth.get(month) ?? { gd: 0, domestic: 0, production: 0, purchase: 0, other: 0 }
+    const sources = sourcesByMonth.get(month)
+    const source = sources?.size === 2 ? "혼합" as const : sources?.has("ledger") ? "샘플대장" as const : "DD" as const
     return {
       month,
       total: Object.values(values).reduce((sum, value) => sum + value, 0),
       ...values,
-      source: month <= RDDA_ARCHIVE_CUTOFF_MONTH ? "샘플대장" as const : "DD" as const,
+      source,
       latest: month === latestPopulated,
     }
   })
@@ -1028,9 +1035,9 @@ const normalizeFlKey = (flNo: string): string => flNo.replace(/\s+/g, "").toUppe
 
 /**
  * DD 현황과 샘플관리대장을 하나의 FL 등록 원장으로 합친다(중복 FL은 1건).
- * - 2026-07까지: 샘플관리대장(FL.#에 인코딩된 YYMM) 기준.
- * - 2026-08부터: DD Received Date 기준.
- * - 같은 FL이 대장·DD 양쪽에 있으면 대장(과거 확정분)을 우선해 하나로 합친다.
+ * - 샘플관리대장은 모든 FL을 넣고 FL.#에 인코딩된 YYMM을 쓴다.
+ * - DD는 대장에 없는 FL만 넣고 Received Date의 월을 쓴다.
+ * - 같은 FL이 대장·DD 양쪽에 있으면 대장을 우선해 하나로 합친다.
  * FL# 없는 행은 등록으로 세지 않는다(작지등록만 되고 FL 미부여 상태).
  */
 export function mergedFlRegistrations(
@@ -1041,7 +1048,7 @@ export function mergedFlRegistrations(
   for (const sample of samples) {
     if (!sample.flNo) continue
     const month = rddaMonthFromFlNo(sample.flNo)
-    if (!month || month > RDDA_ARCHIVE_CUTOFF_MONTH) continue
+    if (!month) continue
     const key = normalizeFlKey(sample.flNo)
     if (!byFl.has(key)) byFl.set(key, { flKey: key, month, owner: sample.owner, type: rddaProductionType(sample.flNo), source: "ledger" })
   }
@@ -1050,7 +1057,7 @@ export function mergedFlRegistrations(
     const key = normalizeFlKey(record.flNo)
     if (byFl.has(key)) continue // 중복 FL → 대장 우선(합침)
     const month = record.receivedDate?.slice(0, 7)
-    if (!month || month <= RDDA_ARCHIVE_CUTOFF_MONTH) continue
+    if (!month) continue
     byFl.set(key, { flKey: key, month, owner: record.owner, type: rddaProductionType(record.flNo), source: "dd" })
   }
   return [...byFl.values()]

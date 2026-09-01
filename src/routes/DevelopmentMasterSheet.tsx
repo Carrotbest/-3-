@@ -14,7 +14,7 @@ import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEIN
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { fmtDateFull, toDate } from "@/data/format"
 import { dayToneText, holidayName } from "@/data/holidays"
-import { ingestDevelopment, ingestSamples } from "@/data/upload"
+import { ingestDevelopment } from "@/data/upload"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
 import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical } from "@/data/schema"
 import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
@@ -1965,7 +1965,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           <p className="shrink-0 whitespace-nowrap">{filtered.length.toLocaleString("ko-KR")} / {scoped.length.toLocaleString("ko-KR")}행</p>
           <div className="flex shrink-0 items-center gap-2">
             <DataUpload kind="development-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} />
-            <DataUpload kind="development-samples" label="샘플대장 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestSamples(files[0]) }} />
           </div>
         </div>
       </div>

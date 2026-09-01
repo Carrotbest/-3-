@@ -41,6 +41,7 @@ function splitChunks(text: string): string[] {
 /** 소유자로 로그인한 경우에만 값을 Firestore로 반영한다(청크 분할·원자적 배치). */
 async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
   if (!currentUserIsOwner()) return
+  if (SKIP_SYNC_KEYS.has(key)) return
   const json = JSON.stringify(value ?? null)
   const chunks = splitChunks(json)
   const batch = writeBatch(db)
@@ -63,8 +64,8 @@ async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promis
 }
 
 const CACHE_KEY_SET = new Set<string>(CACHE_KEYS)
-// 모든 캐시 키를 팀 공유 대상으로 실시간 반영한다(TS 포함).
-const SKIP_SYNC_KEYS = new Set<string>()
+// 샘플관리대장은 저장소의 정적 아카이브만 사용하며 Firestore에서는 주고받지 않는다.
+const SKIP_SYNC_KEYS = new Set<string>(["completed"])
 
 /**
  * 아직 중앙에 시딩되지 않은(또는 잘못 비워진) 원격 값으로
@@ -151,6 +152,7 @@ async function autoSeedMissingKeys(remoteKeys: Set<string>): Promise<void> {
   autoSeedDone = true
   const state = useAppStore.getState()
   for (const key of CACHE_KEYS) {
+    if (SKIP_SYNC_KEYS.has(key)) continue
     if (remoteKeys.has(key)) continue
     const value = state[key]
     if (value === undefined || value === null) continue
@@ -202,6 +204,7 @@ export async function pushAllToFirestore(): Promise<{ pushed: number }> {
   const state = useAppStore.getState()
   let pushed = 0
   for (const key of CACHE_KEYS) {
+    if (SKIP_SYNC_KEYS.has(key)) continue
     await pushCache(key, state[key])
     pushed += 1
   }

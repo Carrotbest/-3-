@@ -10,6 +10,7 @@ import { CAPTURE } from "@/data/capture"
 import { loadAllCache, saveCacheLocal } from "@/data/cache"
 import { startStateSync, stopStateSync } from "@/data/firestore-sync"
 import { loadEmbeddedAppData, markEmbeddedAppDataApplied } from "@/data/embedded-workbooks"
+import { loadLedgerArchive } from "@/data/ledger-archive"
 import { canAccessScreenPath } from "@/data/screen-permissions"
 import { cn } from "@/lib/utils"
 import { Development } from "@/routes/Development"
@@ -104,6 +105,15 @@ function AppLayout() {
         markEmbeddedAppDataApplied(embedded.signature)
       } else if (Object.keys(cached).length) {
         setAppState(cached)
+      }
+      // 샘플관리대장은 배포된 아카이브가 유일한 원천이다. 기존 IndexedDB·내장값보다 항상 나중에 덮어쓴다.
+      // 다만 아카이브를 못 읽었을 때(null)는 건드리지 않는다. 빈 배열로 덮으면 기존 대장이 지워지고,
+      // completed는 Firestore 동기화 대상에서 뺐으므로 되돌릴 방법이 없다.
+      const archive = await loadLedgerArchive()
+      if (!current) return
+      if (archive) {
+        setAppState({ completed: archive })
+        await saveCacheLocal("completed", archive)
       }
       await ensureTsSeed()
       // 팀 공유 전환 전 localStorage에만 있던 TS 등록·수정 건을 1회 합친다.
