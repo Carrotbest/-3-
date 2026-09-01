@@ -1,0 +1,19 @@
+{
+  "_note": "미국 상장 바이어 14개사. COSTCO와 AMAZON을 포함한다. alias는 기업 동향 기사 연결에 쓴다.",
+  "buyers": [
+    {"key":"walmart","name":"Walmart","ticker":"WMT","cik":"0000104169","note":"회계연도가 1월 말에 끝난다.","alias":["Walmart","Wal-Mart","월마트"]},
+    {"key":"target","name":"Target","ticker":"TGT","cik":"0000027419","note":"","alias":["Target Corp","Target Corporation","타깃","타겟"],"ambiguous":true},
+    {"key":"kohls","name":"Kohl's","ticker":"KSS","cik":"0000885639","note":"","alias":["Kohl's","Kohls","콜스"]},
+    {"key":"costco","name":"Costco","ticker":"COST","cik":"0000909832","note":"회계연도가 8월 말 또는 9월 초에 끝난다.","alias":["Costco","코스트코"]},
+    {"key":"amazon","name":"Amazon","ticker":"AMZN","cik":"0001018724","note":"의류는 전체 매출의 일부이므로 총액보다 증감 방향을 본다.","alias":["Amazon","아마존"],"ambiguous":true},
+    {"key":"anf","name":"Abercrombie & Fitch","ticker":"ANF","cik":"0001018840","note":"","alias":["Abercrombie & Fitch","Abercrombie","Hollister","아베크롬비"]},
+    {"key":"aeo","name":"American Eagle Outfitters","ticker":"AEO","cik":"0000919012","note":"","alias":["American Eagle Outfitters","American Eagle","Aerie"]},
+    {"key":"carters","name":"Carter's","ticker":"CRI","cik":"0001060822","note":"","alias":["Carter's","Carters","카터스"]},
+    {"key":"pvh","name":"PVH","ticker":"PVH","cik":"0000078239","note":"","alias":["PVH","Calvin Klein","Tommy Hilfiger"]},
+    {"key":"ua","name":"Under Armour","ticker":"UAA","cik":"0001336917","note":"","alias":["Under Armour","언더아머"]},
+    {"key":"vsco","name":"Victoria's Secret & Co.","ticker":"VSCO","cik":"0001856437","note":"","alias":["Victoria's Secret","Victorias Secret","빅토리아 시크릿"]},
+    {"key":"urban","name":"Urban Outfitters","ticker":"URBN","cik":"0000912615","note":"","alias":["Urban Outfitters","Anthropologie","Free People"]},
+    {"key":"duluth","name":"Duluth Trading","ticker":"DLTH","cik":"0001649744","note":"","alias":["Duluth Trading","Duluth"]},
+    {"key":"nike","name":"Nike","ticker":"NKE","cik":"0000320187","note":"","alias":["Nike","나이키"]}
+  ]
+}

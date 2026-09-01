@@ -1,0 +1,152 @@
+{
+ "metric": "buyer_revenue_urban",
+ "label": "Urban Outfitters 분기 매출",
+ "unit": "백만 달러",
+ "freq": "분기",
+ "group": "buyer",
+ "entity": "Urban Outfitters",
+ "kind": "level",
+ "side": "buyer",
+ "note": "",
+ "stale_days": null,
+ "source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+ "source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000912615&type=10-",
+ "fetched_at": "2026-09-01T03:28:49+00:00",
+ "points": [
+  {
+   "period": "2019-Q1",
+   "value": 855.7,
+   "end": "2018-04-30"
+  },
+  {
+   "period": "2019-Q2",
+   "value": 992.5,
+   "end": "2018-07-31"
+  },
+  {
+   "period": "2019-Q3",
+   "value": 973.5,
+   "end": "2018-10-31"
+  },
+  {
+   "period": "2019-Q4",
+   "value": 1128.9,
+   "end": "2019-01-31"
+  },
+  {
+   "period": "2020-Q1",
+   "value": 864.4,
+   "end": "2019-04-30"
+  },
+  {
+   "period": "2020-Q2",
+   "value": 962.3,
+   "end": "2019-07-31"
+  },
+  {
+   "period": "2020-Q3",
+   "value": 987.5,
+   "end": "2019-10-31"
+  },
+  {
+   "period": "2020-Q4",
+   "value": 1169.6,
+   "end": "2020-01-31"
+  },
+  {
+   "period": "2021-Q1",
+   "value": 588.5,
+   "end": "2020-04-30"
+  },
+  {
+   "period": "2021-Q2",
+   "value": 803.3,
+   "end": "2020-07-31"
+  },
+  {
+   "period": "2021-Q3",
+   "value": 969.6,
+   "end": "2020-10-31"
+  },
+  {
+   "period": "2021-Q4",
+   "value": 1088.4,
+   "end": "2021-01-31"
+  },
+  {
+   "period": "2022-Q1",
+   "value": 927.4,
+   "end": "2021-04-30"
+  },
+  {
+   "period": "2022-Q2",
+   "value": 1157.7,
+   "end": "2021-07-31"
+  },
+  {
+   "period": "2022-Q3",
+   "value": 1131.4,
+   "end": "2021-10-31"
+  },
+  {
+   "period": "2022-Q4",
+   "value": 1332.2,
+   "end": "2022-01-31"
+  },
+  {
+   "period": "2023-Q2",
+   "value": 1183.4,
+   "end": "2022-07-31"
+  },
+  {
+   "period": "2023-Q3",
+   "value": 1175.3,
+   "end": "2022-10-31"
+  },
+  {
+   "period": "2023-Q4",
+   "value": 1322.8,
+   "end": "2023-01-31"
+  },
+  {
+   "period": "2023-Q1",
+   "value": 1113.7,
+   "end": "2023-04-30"
+  },
+  {
+   "period": "2024-Q2",
+   "value": 1352.0,
+   "end": "2024-07-31"
+  },
+  {
+   "period": "2024-Q3",
+   "value": 1361.9,
+   "end": "2024-10-31"
+  },
+  {
+   "period": "2025-Q4",
+   "value": 1187.1,
+   "end": "2025-01-31"
+  },
+  {
+   "period": "2025-Q1",
+   "value": 1329.5,
+   "end": "2025-04-30"
+  },
+  {
+   "period": "2025-Q2",
+   "value": 1504.8,
+   "end": "2025-07-31"
+  },
+  {
+   "period": "2025-Q3",
+   "value": 1529.3,
+   "end": "2025-10-31"
+  },
+  {
+   "period": "2026-Q1",
+   "value": 1481.3,
+   "end": "2026-04-30"
+  }
+ ]
+}

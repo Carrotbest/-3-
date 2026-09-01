@@ -11,6 +11,7 @@ import {
 import { ownerDisplayName, type DevRecord } from "@/data/schema"
 import { Magnetic } from "@/components/motion/Magnetic"
 import { Button } from "@/components/ui/button"
+import { useInView } from "@/lib/useInView"
 import {
   Dialog,
   DialogBody,
@@ -55,6 +56,14 @@ const URGENCY_COLORS: Record<LaneUrgency, string> = {
   danger: "var(--status-danger)",
 }
 
+const URGENCY_ORDER = ["normal", "soon", "danger"] as const
+const GAUGE_CIRCUMFERENCE = 2 * Math.PI * 46
+const GAUGE_DELAYS: Record<LaneUrgency, string> = {
+  normal: "0ms",
+  soon: "140ms",
+  danger: "280ms",
+}
+
 function dueLabel(group: LaneStyleGroup): string {
   if (group.dayOffset === null) return "납기 미기재"
   if (group.dayOffset < 0) return `D+${Math.abs(group.dayOffset)}`
@@ -74,7 +83,6 @@ function nodeStyle(stageIndex: number, ownerIndex: number, urgency: LaneUrgency)
   const stageColor = STAGE_COLORS[stageIndex]
   const ownerColor = OWNER_COLORS[ownerIndex % OWNER_COLORS.length]
   return {
-    borderColor: `color-mix(in oklab, ${stageColor} 48%, var(--border))`,
     background: `linear-gradient(145deg, color-mix(in oklab, var(--card) 94%, ${stageColor}), color-mix(in oklab, var(--card) 82%, ${ownerColor}))`,
     boxShadow: `0 9px 18px -14px color-mix(in oklab, ${ownerColor} 62%, transparent), 0 0 0 3px color-mix(in oklab, ${URGENCY_COLORS[urgency]} 9%, transparent)`,
   }
@@ -88,6 +96,7 @@ function FlowNode({
   x,
   y,
   maxCell,
+  inView,
   onActivate,
   onDeactivate,
   onOpen,
@@ -99,6 +108,7 @@ function FlowNode({
   x: number
   y: number
   maxCell: number
+  inView: boolean
   onActivate: () => void
   onDeactivate: () => void
   onOpen: () => void
@@ -109,6 +119,20 @@ function FlowNode({
   if (!cell.count) {
     return <span aria-hidden="true" className="absolute z-[2] size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--border)] bg-[var(--card)]" style={{ left: `${(x / CHART_WIDTH) * 100}%`, top: y }} />
   }
+
+  let cumulativeRatio = 0
+  const gaugeSegments = URGENCY_ORDER.flatMap((urgency) => {
+    const count = cell.urgencyCounts[urgency]
+    if (!count) return []
+    const ratio = count / cell.count
+    const segment = {
+      urgency,
+      length: GAUGE_CIRCUMFERENCE * ratio,
+      rotation: cumulativeRatio * 360,
+    }
+    cumulativeRatio += ratio
+    return [segment]
+  })
 
   return (
     <div
@@ -122,16 +146,40 @@ function FlowNode({
       <Magnetic strength={2} tilt={4} lift={5} scale={1.035} stiffness={105} damping={18} className="grid place-items-center rounded-full">
         <button
           type="button"
-          aria-label={`${owner} · ${stage.label} · ${cell.count} OPT · 옵션 목록 열기`}
+          aria-label={`${owner} · ${stage.label} · ${cell.count} OPT · ${urgencyText(cell)} · 옵션 목록 열기`}
           onClick={onOpen}
-          className="relative grid place-items-center rounded-full border text-[var(--foreground)] outline-none transition-[box-shadow] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none"
+          className="relative grid place-items-center rounded-full text-[var(--foreground)] outline-none transition-[box-shadow] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none"
           style={{ width: size, height: size, ...nodeStyle(stageIndex, ownerIndex, cell.urgency) }}
         >
+          <svg viewBox="0 0 100 100" className="pointer-events-none absolute inset-0 size-full" aria-hidden="true">
+            <circle cx="50" cy="50" r="46" fill="none" stroke="var(--border)" strokeWidth="8" opacity="0.42" />
+            <g transform="rotate(-90 50 50)">
+              {gaugeSegments.map(({ urgency, length, rotation }) => (
+                <circle
+                  key={urgency}
+                  cx="50"
+                  cy="50"
+                  r="46"
+                  fill="none"
+                  stroke={URGENCY_COLORS[urgency]}
+                  strokeWidth="8"
+                  strokeLinecap="butt"
+                  strokeDasharray={`${length} ${GAUGE_CIRCUMFERENCE - length}`}
+                  strokeDashoffset={inView ? 0 : length}
+                  transform={`rotate(${rotation} 50 50)`}
+                  className="motion-reduce:transition-none"
+                  style={{
+                    transition: "stroke-dashoffset 520ms cubic-bezier(0.22, 1, 0.36, 1)",
+                    transitionDelay: GAUGE_DELAYS[urgency],
+                  }}
+                />
+              ))}
+            </g>
+          </svg>
           <span className="flex flex-col items-center leading-none">
             <strong className="text-sm font-bold tabular-nums">{cell.count.toLocaleString("ko-KR")}</strong>
             <span className="mt-0.5 text-[7px] font-semibold tracking-[0.08em] text-[var(--muted-foreground)]">OPT</span>
           </span>
-          <span className="absolute right-0 top-0 size-2.5 rounded-full border-2 border-[var(--card)]" style={{ background: URGENCY_COLORS[cell.urgency] }} aria-hidden="true" />
         </button>
       </Magnetic>
     </div>
@@ -145,6 +193,7 @@ interface SelectedProcess {
 }
 
 export function OwnerLaneBoard({ rows, today = new Date(), onSelect, ownerAliases }: OwnerLaneBoardProps) {
+  const { ref: boardRef, inView } = useInView<HTMLDivElement>()
   const board = useMemo(() => ownerLaneBoard(rows, today), [rows, today])
   const [activeOwner, setActiveOwner] = useState<number | null>(null)
   const [selectedProcess, setSelectedProcess] = useState<SelectedProcess | null>(null)
@@ -156,7 +205,7 @@ export function OwnerLaneBoard({ rows, today = new Date(), onSelect, ownerAliase
 
   return (
     <>
-      <div className="relative p-4">
+      <div ref={boardRef} className="relative p-4">
         <section className="overflow-hidden rounded-[14px] border border-white/70 bg-white/44 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.26)] backdrop-blur" aria-labelledby="owner-lane-title">
           <div className="overflow-x-auto px-4 py-4">
             <div className="min-w-[1120px]">
@@ -244,6 +293,7 @@ export function OwnerLaneBoard({ rows, today = new Date(), onSelect, ownerAliase
                           x={STAGE_X[stageIndex]}
                           y={y}
                           maxCell={board.maxCell}
+                          inView={inView}
                           onActivate={() => setActiveOwner(rowIndex)}
                           onDeactivate={() => setActiveOwner(null)}
                           onOpen={() => setSelectedProcess({ owner, stageIndex, cell })}

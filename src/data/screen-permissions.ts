@@ -4,7 +4,7 @@ export const SCREEN_PERMISSION_OPTIONS = [
   { key: "ddMaster", label: "DD MASTER", prefixes: ["/development/"] },
   { key: "warehouse", label: "WAREHOUSE", paths: ["/warehouse"] },
   { key: "ts", label: "TROUBLE SHOOTING", paths: ["/ts"] },
-  { key: "study", label: "FABRIC STUDY", paths: ["/study"] },
+  { key: "study", label: "TECHNICAL REFERENCES", paths: ["/study"] },
   { key: "rdda", label: "RDDA REPORT", paths: ["/rdda"] },
   { key: "fabricAnalysis", label: "FABRIC ANALYSIS", paths: ["/fabric-analysis"] },
   { key: "fabricTrend", label: "FABRIC TREND", paths: ["/trend/fabric", "/trend/macro"] },

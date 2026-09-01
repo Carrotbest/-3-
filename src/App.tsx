@@ -24,10 +24,12 @@ import { TS } from "@/routes/TS"
 import { FabricAnalysis } from "@/routes/FabricAnalysis"
 import { Warehouse } from "@/routes/Warehouse"
 import { Portfolio } from "@/routes/Portfolio"
+import { TrendFabric } from "@/routes/TrendFabric"
+import { TrendMacro } from "@/routes/TrendMacro"
 import { ensureTsSeed, migrateLocalTsIntoSync, repairTsData, setAppState } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
-const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio"])
+const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
 
 function ScreenAccessDenied() {
   return (
@@ -148,6 +150,8 @@ function AppLayout() {
             <Route path="/sync" element={<Sync />} />
             <Route path="/setting" element={<Setting />} />
             <Route path="/trend/portfolio" element={<Portfolio />} />
+            <Route path="/trend/fabric" element={<TrendFabric />} />
+            <Route path="/trend/macro" element={<TrendMacro />} />
             {routeDefinitions.filter((route) => !IMPLEMENTED_ROUTES.has(route.path) && !route.path.startsWith("/development")).map((route) => (
               <Route
                 key={route.path}

@@ -1,0 +1,112 @@
+{
+ "metric": "buyer_operating_vsco",
+ "label": "Victoria's Secret & Co. 분기 영업이익",
+ "unit": "백만 달러",
+ "freq": "분기",
+ "group": "buyer",
+ "entity": "Victoria's Secret & Co.",
+ "kind": "level",
+ "side": "buyer",
+ "note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+ "stale_days": null,
+ "source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+ "source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001856437&type=10-",
+ "fetched_at": "2026-09-01T03:28:49+00:00",
+ "points": [
+  {
+   "period": "2021-Q2",
+   "value": 203.0,
+   "end": "2021-07-31"
+  },
+  {
+   "period": "2021-Q3",
+   "value": 108.0,
+   "end": "2021-10-30"
+  },
+  {
+   "period": "2022-Q1",
+   "value": 94.0,
+   "end": "2022-04-30"
+  },
+  {
+   "period": "2022-Q2",
+   "value": 98.0,
+   "end": "2022-07-30"
+  },
+  {
+   "period": "2022-Q3",
+   "value": 43.0,
+   "end": "2022-10-29"
+  },
+  {
+   "period": "2022-Q4",
+   "value": 243.0,
+   "end": "2023-01-28"
+  },
+  {
+   "period": "2023-Q1",
+   "value": 28.0,
+   "end": "2023-04-29"
+  },
+  {
+   "period": "2023-Q2",
+   "value": 26.0,
+   "end": "2023-07-29"
+  },
+  {
+   "period": "2023-Q3",
+   "value": -67.0,
+   "end": "2023-10-28"
+  },
+  {
+   "period": "2023-Q4",
+   "value": 259.0,
+   "end": "2024-02-03"
+  },
+  {
+   "period": "2024-Q1",
+   "value": 26.0,
+   "end": "2024-05-04"
+  },
+  {
+   "period": "2024-Q2",
+   "value": 62.0,
+   "end": "2024-08-03"
+  },
+  {
+   "period": "2024-Q3",
+   "value": -47.0,
+   "end": "2024-11-02"
+  },
+  {
+   "period": "2024-Q4",
+   "value": 269.0,
+   "end": "2025-02-01"
+  },
+  {
+   "period": "2025-Q1",
+   "value": 20.0,
+   "end": "2025-05-03"
+  },
+  {
+   "period": "2025-Q2",
+   "value": 41.0,
+   "end": "2025-08-02"
+  },
+  {
+   "period": "2025-Q3",
+   "value": -19.0,
+   "end": "2025-11-01"
+  },
+  {
+   "period": "2025-Q4",
+   "value": 229.0,
+   "end": "2026-01-31"
+  },
+  {
+   "period": "2026-Q1",
+   "value": 76.0,
+   "end": "2026-05-02"
+  }
+ ]
+}

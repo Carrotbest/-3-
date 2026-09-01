@@ -4,6 +4,9 @@ on:
   push:
     branches: [main, redesign/v2]
   workflow_dispatch:
+  # 트렌드 수집 워크플로가 데이터를 커밋한 뒤 직접 호출한다.
+  # GITHUB_TOKEN이 만든 push는 다른 워크플로를 깨우지 않으므로 push 트리거로는 배포가 안 된다.
+  workflow_call:
 
 permissions:
   contents: read

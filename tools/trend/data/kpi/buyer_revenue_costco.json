@@ -1,0 +1,172 @@
+{
+ "metric": "buyer_revenue_costco",
+ "label": "Costco 분기 매출",
+ "unit": "백만 달러",
+ "freq": "분기",
+ "group": "buyer",
+ "entity": "Costco",
+ "kind": "level",
+ "side": "buyer",
+ "note": "회계연도가 8월 말 또는 9월 초에 끝난다.",
+ "stale_days": null,
+ "source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+ "source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000909832&type=10-",
+ "fetched_at": "2026-09-01T03:28:48+00:00",
+ "points": [
+  {
+   "period": "2019-Q1",
+   "value": 35069.0,
+   "end": "2018-11-25"
+  },
+  {
+   "period": "2019-Q2",
+   "value": 35396.0,
+   "end": "2019-02-17"
+  },
+  {
+   "period": "2019-Q3",
+   "value": 34740.0,
+   "end": "2019-05-12"
+  },
+  {
+   "period": "2019-Q4",
+   "value": 34740.0,
+   "end": "2019-05-12"
+  },
+  {
+   "period": "2020-Q1",
+   "value": 37040.0,
+   "end": "2019-11-24"
+  },
+  {
+   "period": "2020-Q2",
+   "value": 39072.0,
+   "end": "2020-02-16"
+  },
+  {
+   "period": "2020-Q3",
+   "value": 37266.0,
+   "end": "2020-05-10"
+  },
+  {
+   "period": "2020-Q4",
+   "value": 53383.0,
+   "end": "2020-08-30"
+  },
+  {
+   "period": "2021-Q1",
+   "value": 43208.0,
+   "end": "2020-11-22"
+  },
+  {
+   "period": "2021-Q2",
+   "value": 44769.0,
+   "end": "2021-02-14"
+  },
+  {
+   "period": "2021-Q3",
+   "value": 45277.0,
+   "end": "2021-05-09"
+  },
+  {
+   "period": "2021-Q4",
+   "value": 62675.0,
+   "end": "2021-08-29"
+  },
+  {
+   "period": "2022-Q1",
+   "value": 50363.0,
+   "end": "2021-11-21"
+  },
+  {
+   "period": "2022-Q2",
+   "value": 51904.0,
+   "end": "2022-02-13"
+  },
+  {
+   "period": "2022-Q3",
+   "value": 52596.0,
+   "end": "2022-05-08"
+  },
+  {
+   "period": "2022-Q4",
+   "value": 72091.0,
+   "end": "2022-08-28"
+  },
+  {
+   "period": "2023-Q1",
+   "value": 54437.0,
+   "end": "2022-11-20"
+  },
+  {
+   "period": "2023-Q2",
+   "value": 55266.0,
+   "end": "2023-02-12"
+  },
+  {
+   "period": "2023-Q3",
+   "value": 53648.0,
+   "end": "2023-05-07"
+  },
+  {
+   "period": "2023-Q4",
+   "value": 78939.0,
+   "end": "2023-09-03"
+  },
+  {
+   "period": "2024-Q1",
+   "value": 57799.0,
+   "end": "2023-11-26"
+  },
+  {
+   "period": "2024-Q2",
+   "value": 58442.0,
+   "end": "2024-02-18"
+  },
+  {
+   "period": "2024-Q3",
+   "value": 58515.0,
+   "end": "2024-05-12"
+  },
+  {
+   "period": "2024-Q4",
+   "value": 79697.0,
+   "end": "2024-09-01"
+  },
+  {
+   "period": "2025-Q1",
+   "value": 62151.0,
+   "end": "2024-11-24"
+  },
+  {
+   "period": "2025-Q2",
+   "value": 63723.0,
+   "end": "2025-02-16"
+  },
+  {
+   "period": "2025-Q3",
+   "value": 63205.0,
+   "end": "2025-05-11"
+  },
+  {
+   "period": "2025-Q4",
+   "value": 86156.0,
+   "end": "2025-08-31"
+  },
+  {
+   "period": "2026-Q1",
+   "value": 67307.0,
+   "end": "2025-11-23"
+  },
+  {
+   "period": "2026-Q2",
+   "value": 69597.0,
+   "end": "2026-02-15"
+  },
+  {
+   "period": "2026-Q3",
+   "value": 70527.0,
+   "end": "2026-05-10"
+  }
+ ]
+}

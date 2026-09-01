@@ -1,0 +1,257 @@
+{
+ "metric": "us_real_gdp",
+ "label": "미국 실질 GDP",
+ "unit": "십억 달러",
+ "freq": "분기",
+ "group": "gov",
+ "entity": "",
+ "kind": "level",
+ "side": "",
+ "note": "",
+ "stale_days": null,
+ "source_name": "FRED · GDPC1",
+ "source_url": "https://fred.stlouisfed.org/series/GDPC1",
+ "fetched_at": "2026-09-01T03:28:53+00:00",
+ "points": [
+  {
+   "period": "2011-Q3",
+   "value": 17031.313
+  },
+  {
+   "period": "2011-Q4",
+   "value": 17222.583
+  },
+  {
+   "period": "2012-Q1",
+   "value": 17367.01
+  },
+  {
+   "period": "2012-Q2",
+   "value": 17444.525
+  },
+  {
+   "period": "2012-Q3",
+   "value": 17469.65
+  },
+  {
+   "period": "2012-Q4",
+   "value": 17489.852
+  },
+  {
+   "period": "2013-Q1",
+   "value": 17662.4
+  },
+  {
+   "period": "2013-Q2",
+   "value": 17709.671
+  },
+  {
+   "period": "2013-Q3",
+   "value": 17860.45
+  },
+  {
+   "period": "2013-Q4",
+   "value": 18016.147
+  },
+  {
+   "period": "2014-Q1",
+   "value": 17953.974
+  },
+  {
+   "period": "2014-Q2",
+   "value": 18185.911
+  },
+  {
+   "period": "2014-Q3",
+   "value": 18406.941
+  },
+  {
+   "period": "2014-Q4",
+   "value": 18500.031
+  },
+  {
+   "period": "2015-Q1",
+   "value": 18666.621
+  },
+  {
+   "period": "2015-Q2",
+   "value": 18782.243
+  },
+  {
+   "period": "2015-Q3",
+   "value": 18857.418
+  },
+  {
+   "period": "2015-Q4",
+   "value": 18892.206
+  },
+  {
+   "period": "2016-Q1",
+   "value": 19001.69
+  },
+  {
+   "period": "2016-Q2",
+   "value": 19062.709
+  },
+  {
+   "period": "2016-Q3",
+   "value": 19197.938
+  },
+  {
+   "period": "2016-Q4",
+   "value": 19304.352
+  },
+  {
+   "period": "2017-Q1",
+   "value": 19398.343
+  },
+  {
+   "period": "2017-Q2",
+   "value": 19506.949
+  },
+  {
+   "period": "2017-Q3",
+   "value": 19660.766
+  },
+  {
+   "period": "2017-Q4",
+   "value": 19882.352
+  },
+  {
+   "period": "2018-Q1",
+   "value": 20044.077
+  },
+  {
+   "period": "2018-Q2",
+   "value": 20150.476
+  },
+  {
+   "period": "2018-Q3",
+   "value": 20276.154
+  },
+  {
+   "period": "2018-Q4",
+   "value": 20304.874
+  },
+  {
+   "period": "2019-Q1",
+   "value": 20431.641
+  },
+  {
+   "period": "2019-Q2",
+   "value": 20602.275
+  },
+  {
+   "period": "2019-Q3",
+   "value": 20843.322
+  },
+  {
+   "period": "2019-Q4",
+   "value": 20985.448
+  },
+  {
+   "period": "2020-Q1",
+   "value": 20709.212
+  },
+  {
+   "period": "2020-Q2",
+   "value": 19077.992
+  },
+  {
+   "period": "2020-Q3",
+   "value": 20558.879
+  },
+  {
+   "period": "2020-Q4",
+   "value": 20791.917
+  },
+  {
+   "period": "2021-Q1",
+   "value": 21082.134
+  },
+  {
+   "period": "2021-Q2",
+   "value": 21440.929
+  },
+  {
+   "period": "2021-Q3",
+   "value": 21617.828
+  },
+  {
+   "period": "2021-Q4",
+   "value": 21988.737
+  },
+  {
+   "period": "2022-Q1",
+   "value": 21932.71
+  },
+  {
+   "period": "2022-Q2",
+   "value": 21967.045
+  },
+  {
+   "period": "2022-Q3",
+   "value": 22125.625
+  },
+  {
+   "period": "2022-Q4",
+   "value": 22278.345
+  },
+  {
+   "period": "2023-Q1",
+   "value": 22439.607
+  },
+  {
+   "period": "2023-Q2",
+   "value": 22580.499
+  },
+  {
+   "period": "2023-Q3",
+   "value": 22840.989
+  },
+  {
+   "period": "2023-Q4",
+   "value": 23033.78
+  },
+  {
+   "period": "2024-Q1",
+   "value": 23082.119
+  },
+  {
+   "period": "2024-Q2",
+   "value": 23286.508
+  },
+  {
+   "period": "2024-Q3",
+   "value": 23478.57
+  },
+  {
+   "period": "2024-Q4",
+   "value": 23586.542
+  },
+  {
+   "period": "2025-Q1",
+   "value": 23548.21
+  },
+  {
+   "period": "2025-Q2",
+   "value": 23770.976
+  },
+  {
+   "period": "2025-Q3",
+   "value": 24026.834
+  },
+  {
+   "period": "2025-Q4",
+   "value": 24055.749
+  },
+  {
+   "period": "2026-Q1",
+   "value": 24180.419
+  },
+  {
+   "period": "2026-Q2",
+   "value": 24269.613
+  }
+ ]
+}

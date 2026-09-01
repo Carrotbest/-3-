@@ -1,0 +1,172 @@
+{
+ "metric": "buyer_revenue_walmart",
+ "label": "Walmart 분기 매출",
+ "unit": "백만 달러",
+ "freq": "분기",
+ "group": "buyer",
+ "entity": "Walmart",
+ "kind": "level",
+ "side": "buyer",
+ "note": "회계연도가 1월 말에 끝난다.",
+ "stale_days": null,
+ "source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+ "source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=10-",
+ "fetched_at": "2026-09-01T03:28:48+00:00",
+ "points": [
+  {
+   "period": "2019-Q3",
+   "value": 123897.0,
+   "end": "2018-10-31"
+  },
+  {
+   "period": "2020-Q1",
+   "value": 122949.0,
+   "end": "2019-04-30"
+  },
+  {
+   "period": "2020-Q2",
+   "value": 129388.0,
+   "end": "2019-07-31"
+  },
+  {
+   "period": "2020-Q3",
+   "value": 126981.0,
+   "end": "2019-10-31"
+  },
+  {
+   "period": "2020-Q4",
+   "value": 140608.0,
+   "end": "2020-01-31"
+  },
+  {
+   "period": "2021-Q1",
+   "value": 133672.0,
+   "end": "2020-04-30"
+  },
+  {
+   "period": "2021-Q2",
+   "value": 136824.0,
+   "end": "2020-07-31"
+  },
+  {
+   "period": "2021-Q3",
+   "value": 133752.0,
+   "end": "2020-10-31"
+  },
+  {
+   "period": "2021-Q4",
+   "value": 150985.0,
+   "end": "2021-01-31"
+  },
+  {
+   "period": "2022-Q1",
+   "value": 137159.0,
+   "end": "2021-04-30"
+  },
+  {
+   "period": "2022-Q2",
+   "value": 139871.0,
+   "end": "2021-07-31"
+  },
+  {
+   "period": "2022-Q3",
+   "value": 139207.0,
+   "end": "2021-10-31"
+  },
+  {
+   "period": "2022-Q4",
+   "value": 151525.0,
+   "end": "2022-01-31"
+  },
+  {
+   "period": "2023-Q1",
+   "value": 140288.0,
+   "end": "2022-04-30"
+  },
+  {
+   "period": "2023-Q2",
+   "value": 151381.0,
+   "end": "2022-07-31"
+  },
+  {
+   "period": "2023-Q3",
+   "value": 151469.0,
+   "end": "2022-10-31"
+  },
+  {
+   "period": "2023-Q4",
+   "value": 162743.0,
+   "end": "2023-01-31"
+  },
+  {
+   "period": "2024-Q1",
+   "value": 151004.0,
+   "end": "2023-04-30"
+  },
+  {
+   "period": "2024-Q2",
+   "value": 160280.0,
+   "end": "2023-07-31"
+  },
+  {
+   "period": "2024-Q3",
+   "value": 159439.0,
+   "end": "2023-10-31"
+  },
+  {
+   "period": "2024-Q4",
+   "value": 171914.0,
+   "end": "2024-01-31"
+  },
+  {
+   "period": "2025-Q1",
+   "value": 159938.0,
+   "end": "2024-04-30"
+  },
+  {
+   "period": "2025-Q2",
+   "value": 167767.0,
+   "end": "2024-07-31"
+  },
+  {
+   "period": "2025-Q3",
+   "value": 168003.0,
+   "end": "2024-10-31"
+  },
+  {
+   "period": "2025-Q4",
+   "value": 178830.0,
+   "end": "2025-01-31"
+  },
+  {
+   "period": "2026-Q1",
+   "value": 163981.0,
+   "end": "2025-04-30"
+  },
+  {
+   "period": "2026-Q2",
+   "value": 175750.0,
+   "end": "2025-07-31"
+  },
+  {
+   "period": "2026-Q3",
+   "value": 177769.0,
+   "end": "2025-10-31"
+  },
+  {
+   "period": "2026-Q4",
+   "value": 188913.0,
+   "end": "2026-01-31"
+  },
+  {
+   "period": "2027-Q1",
+   "value": 175684.0,
+   "end": "2026-04-30"
+  },
+  {
+   "period": "2027-Q2",
+   "value": 186100.0,
+   "end": "2026-07-31"
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+  "_note": "소재와 리테일을 순서대로 판정하는 이중 게이트. 낮은 점수 기사도 보관 후 rescore할 수 있다.",
+  "gates": {
+    "material": {"threshold": 7, "category_pool": ["MATERIAL", "YARN", "FABRIC", "CHEMICAL"]},
+    "retail": {"threshold": 6, "category_pool": ["RETAIL"]}
+  },
+  "source_bias": {
+    "Knitting Industry":3,"Innovation in Textiles":3,"Textile World":3,"Textile Exchange":2,
+    "Ecotextile News":2,"Textile Today":2,"Textile Focus":2,"Apparel Insider":1,
+    "Indian Textile Magazine":1,"Fibre2Fashion":1,"국제섬유신문":2,"한국섬유신문":2,
+    "주제검색 · 신소재":1,"주제검색 · 염색가공":1,"주제검색 · 국내소재":1,
+    "EURATEX":0,"NCTO":0,"The Interline":0,"Sourcing Journal":0,"Just Style":0,
+    "Apparel Resources":0,"WWD":-2,"Retail Dive":-2,"McKinsey Insights":-1
+  },
+  "signals": [
+    {"name":"core","gate":"material","weight":3,"max_hits":3,"terms":["fiber","fibre","yarn","fabric","textile","polymer","filament","knit","woven","nonwoven","dye","dyeing","finishing","coating","membrane","spinning","weaving","cellulose","polyester","polyamide","nylon","cotton","viscose","lyocell","elastane","spandex","wool","denim","섬유","원사","원단","소재","편직","제직","염색","가공","방적","폴리에스터","bio-based","biobased","warp","weft","cellulos","화섬","복합소재"]},
+    {"name":"innovation","gate":"material","weight":3,"max_hits":2,"requires":"core","terms":["develop","development","innovation","innovative","breakthrough","patent","patented","launches","unveil","introduce","new generation","next-generation","first commercial","commercial scale","pilot plant","pilot line","scale-up","r&d","research","prototype","trial","technology","joint development","개발","혁신","출시","특허","상용화","실증","양산","공동개발","기술개발","연구"]},
+    {"name":"spec","gate":"material","weight":2,"max_hits":2,"requires":"core","terms":["gsm","denier","tex","tensile","elongation","abrasion","pilling","colorfastness","shrinkage","moisture management","wicking","breathability","hydrostatic","uv protection","thermal","stretch recovery","hand feel","drape","opacity","gauge","count","물성","중량","밀도","축률","필링","견뢰도","신도","인장","흡습","속건","통기"]},
+    {"name":"standard","gate":"material","weight":1,"max_hits":2,"requires":"core","terms":["grs","gots","rcs","oeko-tex","bluesign","zdhc","mrsl","cradle to cradle","espr","digital product passport","eudr","csddd","uflpa","lca","recycled content","traceability","인증","규제","재생원료"]},
+    {"name":"noise_generic","gate":"material","weight":-3,"max_hits":2,"terms":["trade show & fair","conference & seminar","exhibition & fair","trade fair","expo 2026","expo 2027","international seminar","to be held","개최","성료","참가 모집","appoints","names new","steps down","resigns","board of directors","joins as","welcomes new","인사","선임","사임","대표단","협회장"]},
+    {"name":"retail_core","gate":"retail","weight":3,"max_hits":3,"terms":["retailer","apparel brand","collection","store","consumer","shopper","merchandis","assortment","유통","브랜드","매장","소비자"]},
+    {"name":"retail_business","gate":"retail","weight":3,"max_hits":2,"requires":"retail_core","terms":["earnings","revenue","quarterly results","guidance","same-store","inventory","tariff","sourcing shift","실적","매출","관세","소싱"]},
+    {"name":"retail_launch","gate":"retail","weight":2,"max_hits":2,"requires":"retail_core","terms":["launches","unveils","collection drop","campaign","capsule","collaboration","출시","컬렉션","캠페인","협업"]},
+    {"name":"retail_noise","gate":"retail","weight":-4,"max_hits":2,"terms":["recipe","wine","celebrity gossip","red carpet","horoscope","deals of the day","할인정보","연예"]}
+  ]
+}

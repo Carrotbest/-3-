@@ -1,0 +1,187 @@
+{
+ "metric": "buyer_revenue_carters",
+ "label": "Carter's 분기 매출",
+ "unit": "백만 달러",
+ "freq": "분기",
+ "group": "buyer",
+ "entity": "Carter's",
+ "kind": "level",
+ "side": "buyer",
+ "note": "",
+ "stale_days": null,
+ "source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+ "source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001060822&type=10-",
+ "fetched_at": "2026-09-01T03:28:48+00:00",
+ "points": [
+  {
+   "period": "2018-Q1",
+   "value": 755.8,
+   "end": "2018-03-31"
+  },
+  {
+   "period": "2018-Q2",
+   "value": 696.2,
+   "end": "2018-06-30"
+  },
+  {
+   "period": "2018-Q3",
+   "value": 923.9,
+   "end": "2018-09-29"
+  },
+  {
+   "period": "2018-Q4",
+   "value": 1086.4,
+   "end": "2018-12-29"
+  },
+  {
+   "period": "2019-Q1",
+   "value": 741.1,
+   "end": "2019-03-30"
+  },
+  {
+   "period": "2019-Q2",
+   "value": 734.4,
+   "end": "2019-06-29"
+  },
+  {
+   "period": "2019-Q3",
+   "value": 943.3,
+   "end": "2019-09-28"
+  },
+  {
+   "period": "2019-Q4",
+   "value": 1100.5,
+   "end": "2019-12-28"
+  },
+  {
+   "period": "2020-Q1",
+   "value": 654.5,
+   "end": "2020-03-28"
+  },
+  {
+   "period": "2020-Q2",
+   "value": 514.9,
+   "end": "2020-06-27"
+  },
+  {
+   "period": "2020-Q3",
+   "value": 865.1,
+   "end": "2020-09-26"
+  },
+  {
+   "period": "2020-Q4",
+   "value": 989.9,
+   "end": "2021-01-02"
+  },
+  {
+   "period": "2021-Q1",
+   "value": 787.4,
+   "end": "2021-04-03"
+  },
+  {
+   "period": "2021-Q2",
+   "value": 746.4,
+   "end": "2021-07-03"
+  },
+  {
+   "period": "2021-Q3",
+   "value": 890.6,
+   "end": "2021-10-02"
+  },
+  {
+   "period": "2021-Q4",
+   "value": 1062.1,
+   "end": "2022-01-01"
+  },
+  {
+   "period": "2022-Q1",
+   "value": 781.3,
+   "end": "2022-04-02"
+  },
+  {
+   "period": "2022-Q2",
+   "value": 700.7,
+   "end": "2022-07-02"
+  },
+  {
+   "period": "2022-Q3",
+   "value": 818.6,
+   "end": "2022-10-01"
+  },
+  {
+   "period": "2022-Q4",
+   "value": 912.1,
+   "end": "2022-12-31"
+  },
+  {
+   "period": "2023-Q1",
+   "value": 695.9,
+   "end": "2023-04-01"
+  },
+  {
+   "period": "2023-Q2",
+   "value": 600.2,
+   "end": "2023-07-01"
+  },
+  {
+   "period": "2023-Q3",
+   "value": 791.7,
+   "end": "2023-09-30"
+  },
+  {
+   "period": "2023-Q4",
+   "value": 857.9,
+   "end": "2023-12-30"
+  },
+  {
+   "period": "2024-Q1",
+   "value": 661.5,
+   "end": "2024-03-30"
+  },
+  {
+   "period": "2024-Q2",
+   "value": 564.4,
+   "end": "2024-06-29"
+  },
+  {
+   "period": "2024-Q3",
+   "value": 758.5,
+   "end": "2024-09-28"
+  },
+  {
+   "period": "2024-Q4",
+   "value": 859.7,
+   "end": "2024-12-28"
+  },
+  {
+   "period": "2025-Q1",
+   "value": 629.8,
+   "end": "2025-03-29"
+  },
+  {
+   "period": "2025-Q2",
+   "value": 585.3,
+   "end": "2025-06-28"
+  },
+  {
+   "period": "2025-Q3",
+   "value": 757.8,
+   "end": "2025-09-27"
+  },
+  {
+   "period": "2025-Q4",
+   "value": 925.5,
+   "end": "2026-01-03"
+  },
+  {
+   "period": "2026-Q1",
+   "value": 681.1,
+   "end": "2026-04-04"
+  },
+  {
+   "period": "2026-Q2",
+   "value": 615.5,
+   "end": "2026-07-04"
+  }
+ ]
+}

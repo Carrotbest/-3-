@@ -1,0 +1,23 @@
+{
+  "_note": "제목을 한국어로 바꿀 때 원문 표기를 유지할 용어. tags.json의 영문 매칭어는 자동으로 여기에 합쳐지므로 중복해서 넣지 않아도 된다. 브랜드명, 상표 소재명, 규격 약어, 설비명을 넣는다.",
+  "keep_original": [
+    "TENCEL", "Lyocell", "Modal", "Ecovero", "Refibra", "Livaeco", "Naia", "Sorona",
+    "Coolmax", "Thermolite", "Cordura", "Supplex", "Tactel", "Lycra", "Roica", "Creora",
+    "Spandex", "Elastane", "Gore-Tex", "Sympatex", "eVent", "Polartec", "Primaloft",
+    "Thinsulate", "Repreve", "Seaqual", "Newlife", "Circulose", "Infinna", "Spinnova",
+    "Renewcell", "Carbios", "Ambercycle", "Syre", "Reju", "Loopamid", "Econyl",
+    "Lenzing", "Hyosung", "Toray", "Teijin", "Asahi Kasei", "Indorama", "Reliance",
+    "Archroma", "Huntsman", "DyStar", "Rudolf", "Nicca", "Tanatex", "Bluesign",
+    "OEKO-TEX", "STANDARD 100", "GRS", "RCS", "GOTS", "ZDHC", "MRSL", "RSL", "BCI",
+    "Higg", "MSI", "LCA", "DPP", "ESPR", "EUDR", "CSDDD", "UFLPA", "PFAS", "PFC",
+    "DWR", "CDP", "PET", "rPET", "r-PET", "PLA", "PHA", "PTT", "PBT", "PTA", "MEG",
+    "DTY", "FDY", "POY", "ATY", "GSM", "denier", "gauge", "interlock", "jersey",
+    "pique", "jacquard", "fleece", "sherpa", "terry", "rib", "mesh", "twill", "poplin",
+    "seamless", "warp", "weft", "nonwoven", "spunbond", "meltblown",
+    "Walmart", "Target", "Kohl's", "Costco", "Amazon", "Carter's", "PVH",
+    "Under Armour", "Abercrombie", "Fitch", "Nike", "Adidas", "Uniqlo", "Decathlon",
+    "Fast Retailing", "Inditex", "Primark", "Shein", "Temu",
+    "ITMA", "Techtextil", "Intertextile", "Performance Days", "Premiere Vision",
+    "Texworld", "Kingpins", "Bangladesh", "Vietnam"
+  ]
+}

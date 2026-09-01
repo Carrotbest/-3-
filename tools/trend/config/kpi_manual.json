@@ -1,0 +1,9 @@
+{
+  "_note": "자동 수집이 안 되는 지표의 정의. 값은 kpi_manual.csv에 metric,period,value로 넣는다. period는 2026-07 또는 2026-Q2 형식이다.",
+  "metrics": {
+    "buyer_revenue_hm": {"label": "H&M 분기 매출", "unit": "백만 SEK", "freq": "분기", "group": "buyer", "entity": "H&M", "source_name": "H&M Group 실적 발표", "source_url": "https://hmgroup.com/investors/", "note": "스웨덴 상장사라 SEC 공시가 없다. 분기 발표를 보고 입력한다."},
+    "buyer_revenue_uniqlo": {"label": "Fast Retailing 분기 매출", "unit": "억 엔", "freq": "분기", "group": "buyer", "entity": "Fast Retailing", "source_name": "Fast Retailing IR", "source_url": "https://www.fastretailing.com/eng/ir/", "note": ""},
+    "vn_textile_export": {"label": "베트남 섬유·의류 수출액", "unit": "억 달러", "freq": "월간", "group": "gov", "entity": "베트남", "source_name": "VITAS 발표", "source_url": "https://vietnamtextile.org.vn/", "note": "공개 API가 없다. 월 발표를 보고 입력한다."},
+    "kr_textile_export": {"label": "한국 섬유류 수출액", "unit": "백만 달러", "freq": "월간", "group": "gov", "entity": "한국", "source_name": "산업통상자원부 수출입 동향", "source_url": "https://www.motie.go.kr/", "note": "월초 발표 자료에서 섬유류 항목을 옮긴다."}
+  }
+}

@@ -1,0 +1,62 @@
+{
+ "metric": "buyer_revenue_ua",
+ "label": "Under Armour 분기 매출",
+ "unit": "백만 달러",
+ "freq": "분기",
+ "group": "buyer",
+ "entity": "Under Armour",
+ "kind": "level",
+ "side": "buyer",
+ "note": "",
+ "stale_days": null,
+ "source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+ "source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001336917&type=10-",
+ "fetched_at": "2026-09-01T03:28:48+00:00",
+ "points": [
+  {
+   "period": "2025-Q1",
+   "value": 1183.7,
+   "end": "2024-06-30"
+  },
+  {
+   "period": "2025-Q2",
+   "value": 1399.0,
+   "end": "2024-09-30"
+  },
+  {
+   "period": "2025-Q3",
+   "value": 1401.0,
+   "end": "2024-12-31"
+  },
+  {
+   "period": "2025-Q4",
+   "value": 1180.6,
+   "end": "2025-03-31"
+  },
+  {
+   "period": "2026-Q1",
+   "value": 1134.1,
+   "end": "2025-06-30"
+  },
+  {
+   "period": "2026-Q2",
+   "value": 1333.4,
+   "end": "2025-09-30"
+  },
+  {
+   "period": "2026-Q3",
+   "value": 1327.8,
+   "end": "2025-12-31"
+  },
+  {
+   "period": "2026-Q4",
+   "value": 1171.2,
+   "end": "2026-03-31"
+  },
+  {
+   "period": "2027-Q1",
+   "value": 1097.9,
+   "end": "2026-06-30"
+  }
+ ]
+}

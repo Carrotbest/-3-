@@ -1,0 +1,117 @@
+{
+ "metric": "buyer_inventory_vsco",
+ "label": "Victoria's Secret & Co. 분기말 재고",
+ "unit": "백만 달러",
+ "freq": "분기",
+ "group": "buyer",
+ "entity": "Victoria's Secret & Co.",
+ "kind": "level",
+ "side": "buyer",
+ "note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+ "stale_days": null,
+ "source_name": "SEC EDGAR XBRL · InventoryNet",
+ "source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001856437&type=10-",
+ "fetched_at": "2026-09-01T03:28:49+00:00",
+ "points": [
+  {
+   "period": "2021-Q2",
+   "value": 745.0,
+   "end": "2021-07-31"
+  },
+  {
+   "period": "2021-Q3",
+   "value": 1019.0,
+   "end": "2021-10-30"
+  },
+  {
+   "period": "2021-Q4",
+   "value": 949.0,
+   "end": "2022-01-29"
+  },
+  {
+   "period": "2022-Q1",
+   "value": 1046.0,
+   "end": "2022-04-30"
+  },
+  {
+   "period": "2022-Q2",
+   "value": 1086.0,
+   "end": "2022-07-30"
+  },
+  {
+   "period": "2022-Q3",
+   "value": 1242.0,
+   "end": "2022-10-29"
+  },
+  {
+   "period": "2022-Q4",
+   "value": 1052.0,
+   "end": "2023-01-28"
+  },
+  {
+   "period": "2023-Q1",
+   "value": 1041.0,
+   "end": "2023-04-29"
+  },
+  {
+   "period": "2023-Q2",
+   "value": 1040.0,
+   "end": "2023-07-29"
+  },
+  {
+   "period": "2023-Q3",
+   "value": 1211.0,
+   "end": "2023-10-28"
+  },
+  {
+   "period": "2023-Q4",
+   "value": 985.0,
+   "end": "2024-02-03"
+  },
+  {
+   "period": "2024-Q1",
+   "value": 987.0,
+   "end": "2024-05-04"
+  },
+  {
+   "period": "2024-Q2",
+   "value": 1019.0,
+   "end": "2024-08-03"
+  },
+  {
+   "period": "2024-Q3",
+   "value": 1290.0,
+   "end": "2024-11-02"
+  },
+  {
+   "period": "2024-Q4",
+   "value": 955.0,
+   "end": "2025-02-01"
+  },
+  {
+   "period": "2025-Q1",
+   "value": 1043.0,
+   "end": "2025-05-03"
+  },
+  {
+   "period": "2025-Q2",
+   "value": 1058.0,
+   "end": "2025-08-02"
+  },
+  {
+   "period": "2025-Q3",
+   "value": 1377.0,
+   "end": "2025-11-01"
+  },
+  {
+   "period": "2025-Q4",
+   "value": 1071.0,
+   "end": "2026-01-31"
+  },
+  {
+   "period": "2026-Q1",
+   "value": 1098.0,
+   "end": "2026-05-02"
+  }
+ ]
+}

@@ -1,0 +1,4541 @@
+{
+"generated_at": "2026-09-01T04:35:02+00:00",
+"cards": [
+{
+"metric": "buyer_revenue_anf",
+"label": "Abercrombie & Fitch 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Abercrombie & Fitch",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · Revenues",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018840&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 836.0,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 935.3,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 1056.4,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 1452.9,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 1020.7,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 1134.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 1209.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 1584.9,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 1097.3,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 1208.6,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 1290.6,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 1669.8,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 1113.8,
+"end": "2026-05-02"
+}
+],
+"value": 1113.8,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": -33.3,
+"yoy": 1.5,
+"stale": false
+},
+{
+"metric": "buyer_operating_anf",
+"label": "Abercrombie & Fitch 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Abercrombie & Fitch",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018840&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 34.0,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 89.8,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 138.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 222.8,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 129.8,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 175.6,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 179.3,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 256.1,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 101.5,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 206.7,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 155.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 235.9,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 88.8,
+"end": "2026-05-02"
+}
+],
+"value": 88.8,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": -62.4,
+"yoy": -12.5,
+"stale": false
+},
+{
+"metric": "buyer_inventory_anf",
+"label": "Abercrombie & Fitch 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Abercrombie & Fitch",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018840&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 447.8,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 493.5,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 595.1,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 469.5,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 449.3,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 539.8,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 692.6,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 575.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 542.1,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 593.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 730.5,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 601.2,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 532.7,
+"end": "2026-05-02"
+}
+],
+"value": 532.7,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": -11.4,
+"yoy": -1.7,
+"stale": false
+},
+{
+"metric": "buyer_revenue_amazon",
+"label": "Amazon 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Amazon",
+"kind": "level",
+"side": "buyer",
+"note": "의류는 전체 매출의 일부이므로 총액보다 증감 방향을 본다.",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 134383.0,
+"end": "2023-06-30"
+},
+{
+"period": "2023-Q3",
+"value": 143083.0,
+"end": "2023-09-30"
+},
+{
+"period": "2023-Q4",
+"value": 169961.0,
+"end": "2023-12-31"
+},
+{
+"period": "2024-Q1",
+"value": 143313.0,
+"end": "2024-03-31"
+},
+{
+"period": "2024-Q2",
+"value": 147977.0,
+"end": "2024-06-30"
+},
+{
+"period": "2024-Q3",
+"value": 158877.0,
+"end": "2024-09-30"
+},
+{
+"period": "2024-Q4",
+"value": 187792.0,
+"end": "2024-12-31"
+},
+{
+"period": "2025-Q1",
+"value": 155667.0,
+"end": "2025-03-31"
+},
+{
+"period": "2025-Q2",
+"value": 167702.0,
+"end": "2025-06-30"
+},
+{
+"period": "2025-Q3",
+"value": 180169.0,
+"end": "2025-09-30"
+},
+{
+"period": "2025-Q4",
+"value": 213386.0,
+"end": "2025-12-31"
+},
+{
+"period": "2026-Q1",
+"value": 181519.0,
+"end": "2026-03-31"
+},
+{
+"period": "2026-Q2",
+"value": 200606.0,
+"end": "2026-06-30"
+}
+],
+"value": 200606.0,
+"period": "2026-Q2",
+"period_end": "2026-06-30",
+"prev": 10.5,
+"yoy": 19.6,
+"stale": false
+},
+{
+"metric": "buyer_operating_amazon",
+"label": "Amazon 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Amazon",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 7681.0,
+"end": "2023-06-30"
+},
+{
+"period": "2023-Q3",
+"value": 11188.0,
+"end": "2023-09-30"
+},
+{
+"period": "2023-Q4",
+"value": 13209.0,
+"end": "2023-12-31"
+},
+{
+"period": "2024-Q1",
+"value": 15307.0,
+"end": "2024-03-31"
+},
+{
+"period": "2024-Q2",
+"value": 14672.0,
+"end": "2024-06-30"
+},
+{
+"period": "2024-Q3",
+"value": 17411.0,
+"end": "2024-09-30"
+},
+{
+"period": "2024-Q4",
+"value": 21203.0,
+"end": "2024-12-31"
+},
+{
+"period": "2025-Q1",
+"value": 18405.0,
+"end": "2025-03-31"
+},
+{
+"period": "2025-Q2",
+"value": 19171.0,
+"end": "2025-06-30"
+},
+{
+"period": "2025-Q3",
+"value": 17422.0,
+"end": "2025-09-30"
+},
+{
+"period": "2025-Q4",
+"value": 24977.0,
+"end": "2025-12-31"
+},
+{
+"period": "2026-Q1",
+"value": 23852.0,
+"end": "2026-03-31"
+},
+{
+"period": "2026-Q2",
+"value": 27461.0,
+"end": "2026-06-30"
+}
+],
+"value": 27461.0,
+"period": "2026-Q2",
+"period_end": "2026-06-30",
+"prev": 15.1,
+"yoy": 43.2,
+"stale": false
+},
+{
+"metric": "buyer_inventory_amazon",
+"label": "Amazon 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Amazon",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 36587.0,
+"end": "2023-06-30"
+},
+{
+"period": "2023-Q3",
+"value": 35406.0,
+"end": "2023-09-30"
+},
+{
+"period": "2023-Q4",
+"value": 33318.0,
+"end": "2023-12-31"
+},
+{
+"period": "2024-Q1",
+"value": 31147.0,
+"end": "2024-03-31"
+},
+{
+"period": "2024-Q2",
+"value": 34109.0,
+"end": "2024-06-30"
+},
+{
+"period": "2024-Q3",
+"value": 36103.0,
+"end": "2024-09-30"
+},
+{
+"period": "2024-Q4",
+"value": 34214.0,
+"end": "2024-12-31"
+},
+{
+"period": "2025-Q1",
+"value": 35864.0,
+"end": "2025-03-31"
+},
+{
+"period": "2025-Q2",
+"value": 40825.0,
+"end": "2025-06-30"
+},
+{
+"period": "2025-Q3",
+"value": 41494.0,
+"end": "2025-09-30"
+},
+{
+"period": "2025-Q4",
+"value": 38325.0,
+"end": "2025-12-31"
+},
+{
+"period": "2026-Q1",
+"value": 36534.0,
+"end": "2026-03-31"
+},
+{
+"period": "2026-Q2",
+"value": 38184.0,
+"end": "2026-06-30"
+}
+],
+"value": 38184.0,
+"period": "2026-Q2",
+"period_end": "2026-06-30",
+"prev": 4.5,
+"yoy": -6.5,
+"stale": false
+},
+{
+"metric": "buyer_revenue_aeo",
+"label": "American Eagle Outfitters 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "American Eagle Outfitters",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000919012&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 1080.9,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 1200.9,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 1301.1,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 1678.9,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 1143.9,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 1291.1,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 1289.1,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 1604.6,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 1089.6,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 1283.7,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 1362.7,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 1811.3,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 1195.3,
+"end": "2026-05-02"
+}
+],
+"value": 1195.3,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": -34.0,
+"yoy": 9.7,
+"stale": false
+},
+{
+"metric": "buyer_operating_aeo",
+"label": "American Eagle Outfitters 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "American Eagle Outfitters",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000919012&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 22.8,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 65.3,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 125.4,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 9.2,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 77.8,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 101.1,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 106.1,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 142.3,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": -85.2,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 103.1,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 112.6,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 95.7,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 28.2,
+"end": "2026-05-02"
+}
+],
+"value": 28.2,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": -70.5,
+"yoy": 133.1,
+"stale": false
+},
+{
+"metric": "buyer_inventory_aeo",
+"label": "American Eagle Outfitters 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "American Eagle Outfitters",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000919012&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 624.9,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 637.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 769.3,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 640.7,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 681.1,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 663.7,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 804.3,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 636.7,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 645.1,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 718.3,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 891.2,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 702.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 816.7,
+"end": "2026-05-02"
+}
+],
+"value": 816.7,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": 16.3,
+"yoy": 26.6,
+"stale": false
+},
+{
+"metric": "buyer_revenue_carters",
+"label": "Carter's 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Carter's",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001060822&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 600.2,
+"end": "2023-07-01"
+},
+{
+"period": "2023-Q3",
+"value": 791.7,
+"end": "2023-09-30"
+},
+{
+"period": "2023-Q4",
+"value": 857.9,
+"end": "2023-12-30"
+},
+{
+"period": "2024-Q1",
+"value": 661.5,
+"end": "2024-03-30"
+},
+{
+"period": "2024-Q2",
+"value": 564.4,
+"end": "2024-06-29"
+},
+{
+"period": "2024-Q3",
+"value": 758.5,
+"end": "2024-09-28"
+},
+{
+"period": "2024-Q4",
+"value": 859.7,
+"end": "2024-12-28"
+},
+{
+"period": "2025-Q1",
+"value": 629.8,
+"end": "2025-03-29"
+},
+{
+"period": "2025-Q2",
+"value": 585.3,
+"end": "2025-06-28"
+},
+{
+"period": "2025-Q3",
+"value": 757.8,
+"end": "2025-09-27"
+},
+{
+"period": "2025-Q4",
+"value": 925.5,
+"end": "2026-01-03"
+},
+{
+"period": "2026-Q1",
+"value": 681.1,
+"end": "2026-04-04"
+},
+{
+"period": "2026-Q2",
+"value": 615.5,
+"end": "2026-07-04"
+}
+],
+"value": 615.5,
+"period": "2026-Q2",
+"period_end": "2026-07-04",
+"prev": -9.6,
+"yoy": 5.2,
+"stale": false
+},
+{
+"metric": "buyer_operating_carters",
+"label": "Carter's 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Carter's",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001060822&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 37.6,
+"end": "2023-07-01"
+},
+{
+"period": "2023-Q3",
+"value": 93.4,
+"end": "2023-09-30"
+},
+{
+"period": "2023-Q4",
+"value": 136.1,
+"end": "2023-12-30"
+},
+{
+"period": "2024-Q1",
+"value": 55.0,
+"end": "2024-03-30"
+},
+{
+"period": "2024-Q2",
+"value": 39.5,
+"end": "2024-06-29"
+},
+{
+"period": "2024-Q3",
+"value": 77.0,
+"end": "2024-09-28"
+},
+{
+"period": "2024-Q4",
+"value": 83.2,
+"end": "2024-12-28"
+},
+{
+"period": "2025-Q1",
+"value": 26.1,
+"end": "2025-03-29"
+},
+{
+"period": "2025-Q2",
+"value": 4.0,
+"end": "2025-06-28"
+},
+{
+"period": "2025-Q3",
+"value": 29.1,
+"end": "2025-09-27"
+},
+{
+"period": "2025-Q4",
+"value": 84.7,
+"end": "2026-01-03"
+},
+{
+"period": "2026-Q1",
+"value": 28.4,
+"end": "2026-04-04"
+},
+{
+"period": "2026-Q2",
+"value": 139.8,
+"end": "2026-07-04"
+}
+],
+"value": 139.8,
+"period": "2026-Q2",
+"period_end": "2026-07-04",
+"prev": 392.3,
+"yoy": 3395.0,
+"stale": false
+},
+{
+"metric": "buyer_inventory_carters",
+"label": "Carter's 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Carter's",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001060822&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 681.6,
+"end": "2023-07-01"
+},
+{
+"period": "2023-Q3",
+"value": 620.7,
+"end": "2023-09-30"
+},
+{
+"period": "2023-Q4",
+"value": 537.1,
+"end": "2023-12-30"
+},
+{
+"period": "2024-Q1",
+"value": 473.4,
+"end": "2024-03-30"
+},
+{
+"period": "2024-Q2",
+"value": 599.3,
+"end": "2024-06-29"
+},
+{
+"period": "2024-Q3",
+"value": 607.4,
+"end": "2024-09-28"
+},
+{
+"period": "2024-Q4",
+"value": 502.3,
+"end": "2024-12-28"
+},
+{
+"period": "2025-Q1",
+"value": 474.1,
+"end": "2025-03-29"
+},
+{
+"period": "2025-Q2",
+"value": 619.1,
+"end": "2025-06-28"
+},
+{
+"period": "2025-Q3",
+"value": 656.1,
+"end": "2025-09-27"
+},
+{
+"period": "2025-Q4",
+"value": 544.6,
+"end": "2026-01-03"
+},
+{
+"period": "2026-Q1",
+"value": 465.9,
+"end": "2026-04-04"
+},
+{
+"period": "2026-Q2",
+"value": 577.7,
+"end": "2026-07-04"
+}
+],
+"value": 577.7,
+"period": "2026-Q2",
+"period_end": "2026-07-04",
+"prev": 24.0,
+"yoy": -6.7,
+"stale": false
+},
+{
+"metric": "buyer_revenue_costco",
+"label": "Costco 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Costco",
+"kind": "level",
+"side": "buyer",
+"note": "회계연도가 8월 말 또는 9월 초에 끝난다.",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000909832&type=10-",
+"points": [
+{
+"period": "2023-Q3",
+"value": 53648.0,
+"end": "2023-05-07"
+},
+{
+"period": "2023-Q4",
+"value": 78939.0,
+"end": "2023-09-03"
+},
+{
+"period": "2024-Q1",
+"value": 57799.0,
+"end": "2023-11-26"
+},
+{
+"period": "2024-Q2",
+"value": 58442.0,
+"end": "2024-02-18"
+},
+{
+"period": "2024-Q3",
+"value": 58515.0,
+"end": "2024-05-12"
+},
+{
+"period": "2024-Q4",
+"value": 79697.0,
+"end": "2024-09-01"
+},
+{
+"period": "2025-Q1",
+"value": 62151.0,
+"end": "2024-11-24"
+},
+{
+"period": "2025-Q2",
+"value": 63723.0,
+"end": "2025-02-16"
+},
+{
+"period": "2025-Q3",
+"value": 63205.0,
+"end": "2025-05-11"
+},
+{
+"period": "2025-Q4",
+"value": 86156.0,
+"end": "2025-08-31"
+},
+{
+"period": "2026-Q1",
+"value": 67307.0,
+"end": "2025-11-23"
+},
+{
+"period": "2026-Q2",
+"value": 69597.0,
+"end": "2026-02-15"
+},
+{
+"period": "2026-Q3",
+"value": 70527.0,
+"end": "2026-05-10"
+}
+],
+"value": 70527.0,
+"period": "2026-Q3",
+"period_end": "2026-05-10",
+"prev": 1.3,
+"yoy": 11.6,
+"stale": false
+},
+{
+"metric": "buyer_operating_costco",
+"label": "Costco 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Costco",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000909832&type=10-",
+"points": [
+{
+"period": "2023-Q3",
+"value": 1679.0,
+"end": "2023-05-07"
+},
+{
+"period": "2023-Q4",
+"value": 2781.0,
+"end": "2023-09-03"
+},
+{
+"period": "2024-Q1",
+"value": 1984.0,
+"end": "2023-11-26"
+},
+{
+"period": "2024-Q2",
+"value": 2062.0,
+"end": "2024-02-18"
+},
+{
+"period": "2024-Q3",
+"value": 2197.0,
+"end": "2024-05-12"
+},
+{
+"period": "2024-Q4",
+"value": 3042.0,
+"end": "2024-09-01"
+},
+{
+"period": "2025-Q1",
+"value": 2196.0,
+"end": "2024-11-24"
+},
+{
+"period": "2025-Q2",
+"value": 2316.0,
+"end": "2025-02-16"
+},
+{
+"period": "2025-Q3",
+"value": 2530.0,
+"end": "2025-05-11"
+},
+{
+"period": "2025-Q4",
+"value": 3341.0,
+"end": "2025-08-31"
+},
+{
+"period": "2026-Q1",
+"value": 2463.0,
+"end": "2025-11-23"
+},
+{
+"period": "2026-Q2",
+"value": 2606.0,
+"end": "2026-02-15"
+},
+{
+"period": "2026-Q3",
+"value": 2815.0,
+"end": "2026-05-10"
+}
+],
+"value": 2815.0,
+"period": "2026-Q3",
+"period_end": "2026-05-10",
+"prev": 8.0,
+"yoy": 11.3,
+"stale": false
+},
+{
+"metric": "buyer_inventory_costco",
+"label": "Costco 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Costco",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000909832&type=10-",
+"points": [
+{
+"period": "2023-Q3",
+"value": 16324.0,
+"end": "2023-05-07"
+},
+{
+"period": "2023-Q4",
+"value": 16651.0,
+"end": "2023-09-03"
+},
+{
+"period": "2024-Q1",
+"value": 18001.0,
+"end": "2023-11-26"
+},
+{
+"period": "2024-Q2",
+"value": 17075.0,
+"end": "2024-02-18"
+},
+{
+"period": "2024-Q3",
+"value": 17430.0,
+"end": "2024-05-12"
+},
+{
+"period": "2024-Q4",
+"value": 18647.0,
+"end": "2024-09-01"
+},
+{
+"period": "2025-Q1",
+"value": 20979.0,
+"end": "2024-11-24"
+},
+{
+"period": "2025-Q2",
+"value": 18754.0,
+"end": "2025-02-16"
+},
+{
+"period": "2025-Q3",
+"value": 18606.0,
+"end": "2025-05-11"
+},
+{
+"period": "2025-Q4",
+"value": 18116.0,
+"end": "2025-08-31"
+},
+{
+"period": "2026-Q1",
+"value": 21141.0,
+"end": "2025-11-23"
+},
+{
+"period": "2026-Q2",
+"value": 18991.0,
+"end": "2026-02-15"
+},
+{
+"period": "2026-Q3",
+"value": 19418.0,
+"end": "2026-05-10"
+}
+],
+"value": 19418.0,
+"period": "2026-Q3",
+"period_end": "2026-05-10",
+"prev": 2.2,
+"yoy": 4.4,
+"stale": false
+},
+{
+"metric": "buyer_revenue_duluth",
+"label": "Duluth Trading 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Duluth Trading",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001649744&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 122.9,
+"end": "2022-05-01"
+},
+{
+"period": "2023-Q2",
+"value": 141.5,
+"end": "2022-07-31"
+},
+{
+"period": "2023-Q3",
+"value": 147.1,
+"end": "2022-10-30"
+},
+{
+"period": "2022-Q4",
+"value": 225.5,
+"end": "2023-01-29"
+},
+{
+"period": "2024-Q1",
+"value": 123.8,
+"end": "2023-04-30"
+},
+{
+"period": "2024-Q2",
+"value": 139.1,
+"end": "2023-07-30"
+},
+{
+"period": "2023-Q4",
+"value": 235.1,
+"end": "2024-01-28"
+},
+{
+"period": "2024-Q3",
+"value": 127.1,
+"end": "2024-10-27"
+},
+{
+"period": "2024-Q4",
+"value": 236.7,
+"end": "2025-02-02"
+},
+{
+"period": "2025-Q1",
+"value": 102.7,
+"end": "2025-05-04"
+},
+{
+"period": "2025-Q2",
+"value": 131.7,
+"end": "2025-08-03"
+},
+{
+"period": "2025-Q3",
+"value": 114.9,
+"end": "2025-11-02"
+},
+{
+"period": "2026-Q1",
+"value": 98.6,
+"end": "2026-05-03"
+}
+],
+"value": 98.6,
+"period": "2026-Q1",
+"period_end": "2026-05-03",
+"prev": -14.2,
+"yoy": -4.0,
+"stale": false
+},
+{
+"metric": "buyer_operating_duluth",
+"label": "Duluth Trading 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Duluth Trading",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001649744&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": -0.9,
+"end": "2022-05-01"
+},
+{
+"period": "2023-Q2",
+"value": 3.9,
+"end": "2022-07-31"
+},
+{
+"period": "2023-Q3",
+"value": -7.4,
+"end": "2022-10-30"
+},
+{
+"period": "2022-Q4",
+"value": -13.6,
+"end": "2023-01-29"
+},
+{
+"period": "2024-Q1",
+"value": -4.5,
+"end": "2023-04-30"
+},
+{
+"period": "2024-Q2",
+"value": -1.4,
+"end": "2023-07-30"
+},
+{
+"period": "2023-Q4",
+"value": -4.4,
+"end": "2024-01-28"
+},
+{
+"period": "2024-Q3",
+"value": -22.6,
+"end": "2024-10-27"
+},
+{
+"period": "2024-Q4",
+"value": -8.3,
+"end": "2025-02-02"
+},
+{
+"period": "2025-Q1",
+"value": -12.4,
+"end": "2025-05-04"
+},
+{
+"period": "2025-Q2",
+"value": 2.4,
+"end": "2025-08-03"
+},
+{
+"period": "2025-Q3",
+"value": -8.8,
+"end": "2025-11-02"
+},
+{
+"period": "2026-Q1",
+"value": -9.2,
+"end": "2026-05-03"
+}
+],
+"value": -9.2,
+"period": "2026-Q1",
+"period_end": "2026-05-03",
+"prev": -4.5,
+"yoy": 25.8,
+"stale": false
+},
+{
+"metric": "buyer_inventory_duluth",
+"label": "Duluth Trading 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Duluth Trading",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001649744&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 164.5,
+"end": "2022-07-31"
+},
+{
+"period": "2023-Q3",
+"value": 204.7,
+"end": "2022-10-30"
+},
+{
+"period": "2022-Q4",
+"value": 154.9,
+"end": "2023-01-29"
+},
+{
+"period": "2024-Q1",
+"value": 145.0,
+"end": "2023-04-30"
+},
+{
+"period": "2024-Q2",
+"value": 157.1,
+"end": "2023-07-30"
+},
+{
+"period": "2023-Q4",
+"value": 125.8,
+"end": "2024-01-28"
+},
+{
+"period": "2024-Q3",
+"value": 231.4,
+"end": "2024-10-27"
+},
+{
+"period": "2024-Q4",
+"value": 166.5,
+"end": "2025-02-02"
+},
+{
+"period": "2025-Q1",
+"value": 176.1,
+"end": "2025-05-04"
+},
+{
+"period": "2025-Q2",
+"value": 148.1,
+"end": "2025-08-03"
+},
+{
+"period": "2025-Q3",
+"value": 192.2,
+"end": "2025-11-02"
+},
+{
+"period": "2026-Q4",
+"value": 131.3,
+"end": "2026-02-01"
+},
+{
+"period": "2026-Q1",
+"value": 132.4,
+"end": "2026-05-03"
+}
+],
+"value": 132.4,
+"period": "2026-Q1",
+"period_end": "2026-05-03",
+"prev": 0.8,
+"yoy": -24.8,
+"stale": false
+},
+{
+"metric": "buyer_revenue_kohls",
+"label": "Kohl's 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Kohl's",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000885639&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 3571.0,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 3895.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 4054.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 5956.0,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 3382.0,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 3732.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 3710.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 5397.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 3233.0,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 3546.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 3575.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 5173.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 3167.0,
+"end": "2026-05-02"
+}
+],
+"value": 3167.0,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": -38.8,
+"yoy": -2.0,
+"stale": false
+},
+{
+"metric": "buyer_operating_kohls",
+"label": "Kohl's 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Kohl's",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000885639&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 98.0,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 163.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 157.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 299.0,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 43.0,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 166.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 98.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 126.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 60.0,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 279.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 73.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 212.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 46.0,
+"end": "2026-05-02"
+}
+],
+"value": 46.0,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": -78.3,
+"yoy": -23.3,
+"stale": false
+},
+{
+"metric": "buyer_inventory_kohls",
+"label": "Kohl's 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Kohl's",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000885639&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 3526.0,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 3474.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 4239.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 2880.0,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 3083.0,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 3151.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 4099.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 2945.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 3137.0,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 2994.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 3895.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 2745.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 2897.0,
+"end": "2026-05-02"
+}
+],
+"value": 2897.0,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": 5.5,
+"yoy": -7.7,
+"stale": false
+},
+{
+"metric": "buyer_revenue_nike",
+"label": "Nike 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Nike",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320187&type=10-",
+"points": [
+{
+"period": "2023-Q4",
+"value": 12825.0,
+"end": "2023-05-31"
+},
+{
+"period": "2024-Q1",
+"value": 12939.0,
+"end": "2023-08-31"
+},
+{
+"period": "2024-Q2",
+"value": 13388.0,
+"end": "2023-11-30"
+},
+{
+"period": "2024-Q3",
+"value": 12429.0,
+"end": "2024-02-29"
+},
+{
+"period": "2024-Q4",
+"value": 12606.0,
+"end": "2024-05-31"
+},
+{
+"period": "2025-Q1",
+"value": 11589.0,
+"end": "2024-08-31"
+},
+{
+"period": "2025-Q2",
+"value": 12354.0,
+"end": "2024-11-30"
+},
+{
+"period": "2025-Q3",
+"value": 11269.0,
+"end": "2025-02-28"
+},
+{
+"period": "2025-Q4",
+"value": 11097.0,
+"end": "2025-05-31"
+},
+{
+"period": "2026-Q1",
+"value": 11720.0,
+"end": "2025-08-31"
+},
+{
+"period": "2026-Q2",
+"value": 12427.0,
+"end": "2025-11-30"
+},
+{
+"period": "2026-Q3",
+"value": 11279.0,
+"end": "2026-02-28"
+},
+{
+"period": "2026-Q4",
+"value": 10972.0,
+"end": "2026-05-31"
+}
+],
+"value": 10972.0,
+"period": "2026-Q4",
+"period_end": "2026-05-31",
+"prev": -2.7,
+"yoy": -1.1,
+"stale": false
+},
+{
+"metric": "buyer_operating_nike",
+"label": "Nike 분기 세전이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Nike",
+"kind": "level",
+"side": "buyer",
+"note": "영업이익을 공시하지 않아 세전이익으로 대체했습니다",
+"source_name": "SEC EDGAR XBRL · IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320187&type=10-",
+"points": [
+{
+"period": "2023-Q4",
+"value": 1246.0,
+"end": "2023-05-31"
+},
+{
+"period": "2024-Q1",
+"value": 1648.0,
+"end": "2023-08-31"
+},
+{
+"period": "2024-Q2",
+"value": 1922.0,
+"end": "2023-11-30"
+},
+{
+"period": "2024-Q3",
+"value": 1404.0,
+"end": "2024-02-29"
+},
+{
+"period": "2024-Q4",
+"value": 1726.0,
+"end": "2024-05-31"
+},
+{
+"period": "2025-Q1",
+"value": 1307.0,
+"end": "2024-08-31"
+},
+{
+"period": "2025-Q2",
+"value": 1416.0,
+"end": "2024-11-30"
+},
+{
+"period": "2025-Q3",
+"value": 844.0,
+"end": "2025-02-28"
+},
+{
+"period": "2025-Q4",
+"value": 318.0,
+"end": "2025-05-31"
+},
+{
+"period": "2026-Q1",
+"value": 922.0,
+"end": "2025-08-31"
+},
+{
+"period": "2026-Q2",
+"value": 999.0,
+"end": "2025-11-30"
+},
+{
+"period": "2026-Q3",
+"value": 650.0,
+"end": "2026-02-28"
+},
+{
+"period": "2026-Q4",
+"value": 1329.0,
+"end": "2026-05-31"
+}
+],
+"value": 1329.0,
+"period": "2026-Q4",
+"period_end": "2026-05-31",
+"prev": 104.5,
+"yoy": 317.9,
+"stale": false
+},
+{
+"metric": "buyer_inventory_nike",
+"label": "Nike 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Nike",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryFinishedGoodsNetOfReserves",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320187&type=10-",
+"points": [
+{
+"period": "2023-Q4",
+"value": 8454.0,
+"end": "2023-05-31"
+},
+{
+"period": "2024-Q1",
+"value": 8698.0,
+"end": "2023-08-31"
+},
+{
+"period": "2024-Q2",
+"value": 7979.0,
+"end": "2023-11-30"
+},
+{
+"period": "2024-Q3",
+"value": 7726.0,
+"end": "2024-02-29"
+},
+{
+"period": "2024-Q4",
+"value": 7519.0,
+"end": "2024-05-31"
+},
+{
+"period": "2025-Q1",
+"value": 8253.0,
+"end": "2024-08-31"
+},
+{
+"period": "2025-Q2",
+"value": 7981.0,
+"end": "2024-11-30"
+},
+{
+"period": "2025-Q3",
+"value": 7539.0,
+"end": "2025-02-28"
+},
+{
+"period": "2025-Q4",
+"value": 7489.0,
+"end": "2025-05-31"
+},
+{
+"period": "2026-Q1",
+"value": 8114.0,
+"end": "2025-08-31"
+},
+{
+"period": "2026-Q2",
+"value": 7726.0,
+"end": "2025-11-30"
+},
+{
+"period": "2026-Q3",
+"value": 7487.0,
+"end": "2026-02-28"
+},
+{
+"period": "2026-Q4",
+"value": 7501.0,
+"end": "2026-05-31"
+}
+],
+"value": 7501.0,
+"period": "2026-Q4",
+"period_end": "2026-05-31",
+"prev": 0.2,
+"yoy": 0.2,
+"stale": false
+},
+{
+"metric": "buyer_revenue_pvh",
+"label": "PVH 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "PVH",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · Revenues",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000078239&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 2157.9,
+"end": "2023-04-30"
+},
+{
+"period": "2023-Q2",
+"value": 2207.0,
+"end": "2023-07-30"
+},
+{
+"period": "2023-Q3",
+"value": 2362.9,
+"end": "2023-10-29"
+},
+{
+"period": "2023-Q4",
+"value": 2489.9,
+"end": "2024-02-04"
+},
+{
+"period": "2024-Q1",
+"value": 1951.9,
+"end": "2024-05-05"
+},
+{
+"period": "2024-Q2",
+"value": 2074.3,
+"end": "2024-08-04"
+},
+{
+"period": "2024-Q3",
+"value": 2255.1,
+"end": "2024-11-03"
+},
+{
+"period": "2024-Q4",
+"value": 2371.6,
+"end": "2025-02-02"
+},
+{
+"period": "2025-Q1",
+"value": 1983.6,
+"end": "2025-05-04"
+},
+{
+"period": "2025-Q2",
+"value": 2167.2,
+"end": "2025-08-03"
+},
+{
+"period": "2025-Q3",
+"value": 2294.3,
+"end": "2025-11-02"
+},
+{
+"period": "2025-Q4",
+"value": 2505.1,
+"end": "2026-02-01"
+},
+{
+"period": "2026-Q1",
+"value": 2025.1,
+"end": "2026-05-03"
+}
+],
+"value": 2025.1,
+"period": "2026-Q1",
+"period_end": "2026-05-03",
+"prev": -19.2,
+"yoy": 2.1,
+"stale": false
+},
+{
+"metric": "buyer_operating_pvh",
+"label": "PVH 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "PVH",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000078239&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 198.8,
+"end": "2023-04-30"
+},
+{
+"period": "2023-Q2",
+"value": 143.3,
+"end": "2023-07-30"
+},
+{
+"period": "2023-Q3",
+"value": 229.8,
+"end": "2023-10-29"
+},
+{
+"period": "2023-Q4",
+"value": 356.9,
+"end": "2024-02-04"
+},
+{
+"period": "2024-Q1",
+"value": 205.1,
+"end": "2024-05-05"
+},
+{
+"period": "2024-Q2",
+"value": 173.9,
+"end": "2024-08-04"
+},
+{
+"period": "2024-Q3",
+"value": 183.1,
+"end": "2024-11-03"
+},
+{
+"period": "2024-Q4",
+"value": 210.2,
+"end": "2025-02-02"
+},
+{
+"period": "2025-Q1",
+"value": -332.2,
+"end": "2025-05-04"
+},
+{
+"period": "2025-Q2",
+"value": 133.2,
+"end": "2025-08-03"
+},
+{
+"period": "2025-Q3",
+"value": 180.8,
+"end": "2025-11-02"
+},
+{
+"period": "2025-Q4",
+"value": 248.8,
+"end": "2026-02-01"
+},
+{
+"period": "2026-Q1",
+"value": 124.3,
+"end": "2026-05-03"
+}
+],
+"value": 124.3,
+"period": "2026-Q1",
+"period_end": "2026-05-03",
+"prev": -50.0,
+"yoy": 137.4,
+"stale": false
+},
+{
+"metric": "buyer_inventory_pvh",
+"label": "PVH 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "PVH",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000078239&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 1718.1,
+"end": "2023-04-30"
+},
+{
+"period": "2023-Q2",
+"value": 1795.5,
+"end": "2023-07-30"
+},
+{
+"period": "2023-Q3",
+"value": 1476.9,
+"end": "2023-10-29"
+},
+{
+"period": "2023-Q4",
+"value": 1419.7,
+"end": "2024-02-04"
+},
+{
+"period": "2024-Q1",
+"value": 1346.8,
+"end": "2024-05-05"
+},
+{
+"period": "2024-Q2",
+"value": 1582.8,
+"end": "2024-08-04"
+},
+{
+"period": "2024-Q3",
+"value": 1608.2,
+"end": "2024-11-03"
+},
+{
+"period": "2024-Q4",
+"value": 1508.7,
+"end": "2025-02-02"
+},
+{
+"period": "2025-Q1",
+"value": 1596.0,
+"end": "2025-05-04"
+},
+{
+"period": "2025-Q2",
+"value": 1791.0,
+"end": "2025-08-03"
+},
+{
+"period": "2025-Q3",
+"value": 1664.0,
+"end": "2025-11-02"
+},
+{
+"period": "2025-Q4",
+"value": 1583.5,
+"end": "2026-02-01"
+},
+{
+"period": "2026-Q1",
+"value": 1510.2,
+"end": "2026-05-03"
+}
+],
+"value": 1510.2,
+"period": "2026-Q1",
+"period_end": "2026-05-03",
+"prev": -4.6,
+"yoy": -5.4,
+"stale": false
+},
+{
+"metric": "buyer_revenue_target",
+"label": "Target 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Target",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000027419&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 24773.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 25398.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 31919.0,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 24531.0,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 25452.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 25668.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 30915.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 23846.0,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 25211.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 25270.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 30453.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 25443.0,
+"end": "2026-05-02"
+},
+{
+"period": "2026-Q2",
+"value": 26539.0,
+"end": "2026-08-01"
+}
+],
+"value": 26539.0,
+"period": "2026-Q2",
+"period_end": "2026-08-01",
+"prev": 4.3,
+"yoy": 5.3,
+"stale": false
+},
+{
+"metric": "buyer_operating_target",
+"label": "Target 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Target",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000027419&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 1197.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 1317.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 1865.0,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 1296.0,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 1635.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 1168.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 1467.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 1472.0,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 1317.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 948.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 1380.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 1135.0,
+"end": "2026-05-02"
+},
+{
+"period": "2026-Q2",
+"value": 2560.0,
+"end": "2026-08-01"
+}
+],
+"value": 2560.0,
+"period": "2026-Q2",
+"period_end": "2026-08-01",
+"prev": 125.6,
+"yoy": 94.4,
+"stale": false
+},
+{
+"metric": "buyer_inventory_target",
+"label": "Target 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Target",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000027419&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 12684.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 14731.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 11886.0,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 11730.0,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 12604.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 15165.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 12740.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 13048.0,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 12881.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 14896.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 12304.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 12317.0,
+"end": "2026-05-02"
+},
+{
+"period": "2026-Q2",
+"value": 13249.0,
+"end": "2026-08-01"
+}
+],
+"value": 13249.0,
+"period": "2026-Q2",
+"period_end": "2026-08-01",
+"prev": 7.6,
+"yoy": 2.9,
+"stale": false
+},
+{
+"metric": "buyer_revenue_ua",
+"label": "Under Armour 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Under Armour",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001336917&type=10-",
+"points": [
+{
+"period": "2025-Q1",
+"value": 1183.7,
+"end": "2024-06-30"
+},
+{
+"period": "2025-Q2",
+"value": 1399.0,
+"end": "2024-09-30"
+},
+{
+"period": "2025-Q3",
+"value": 1401.0,
+"end": "2024-12-31"
+},
+{
+"period": "2025-Q4",
+"value": 1180.6,
+"end": "2025-03-31"
+},
+{
+"period": "2026-Q1",
+"value": 1134.1,
+"end": "2025-06-30"
+},
+{
+"period": "2026-Q2",
+"value": 1333.4,
+"end": "2025-09-30"
+},
+{
+"period": "2026-Q3",
+"value": 1327.8,
+"end": "2025-12-31"
+},
+{
+"period": "2026-Q4",
+"value": 1171.2,
+"end": "2026-03-31"
+},
+{
+"period": "2027-Q1",
+"value": 1097.9,
+"end": "2026-06-30"
+}
+],
+"value": 1097.9,
+"period": "2027-Q1",
+"period_end": "2026-06-30",
+"prev": -6.3,
+"yoy": -3.2,
+"stale": false
+},
+{
+"metric": "buyer_operating_ua",
+"label": "Under Armour 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Under Armour",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001336917&type=10-",
+"points": [
+{
+"period": "2024-Q1",
+"value": 20.9,
+"end": "2023-06-30"
+},
+{
+"period": "2024-Q2",
+"value": 145.8,
+"end": "2023-09-30"
+},
+{
+"period": "2024-Q3",
+"value": 69.5,
+"end": "2023-12-31"
+},
+{
+"period": "2024-Q4",
+"value": -6.5,
+"end": "2024-03-31"
+},
+{
+"period": "2025-Q1",
+"value": -299.7,
+"end": "2024-06-30"
+},
+{
+"period": "2025-Q2",
+"value": 173.1,
+"end": "2024-09-30"
+},
+{
+"period": "2025-Q3",
+"value": 13.5,
+"end": "2024-12-31"
+},
+{
+"period": "2025-Q4",
+"value": -72.1,
+"end": "2025-03-31"
+},
+{
+"period": "2026-Q1",
+"value": 3.3,
+"end": "2025-06-30"
+},
+{
+"period": "2026-Q2",
+"value": 17.0,
+"end": "2025-09-30"
+},
+{
+"period": "2026-Q3",
+"value": -149.8,
+"end": "2025-12-31"
+},
+{
+"period": "2026-Q4",
+"value": -33.7,
+"end": "2026-03-31"
+},
+{
+"period": "2027-Q1",
+"value": 46.7,
+"end": "2026-06-30"
+}
+],
+"value": 46.7,
+"period": "2027-Q1",
+"period_end": "2026-06-30",
+"prev": 238.6,
+"yoy": 1315.2,
+"stale": false
+},
+{
+"metric": "buyer_inventory_ua",
+"label": "Under Armour 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Under Armour",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001336917&type=10-",
+"points": [
+{
+"period": "2024-Q1",
+"value": 1320.5,
+"end": "2023-06-30"
+},
+{
+"period": "2024-Q2",
+"value": 1143.9,
+"end": "2023-09-30"
+},
+{
+"period": "2024-Q3",
+"value": 1104.0,
+"end": "2023-12-31"
+},
+{
+"period": "2024-Q4",
+"value": 958.5,
+"end": "2024-03-31"
+},
+{
+"period": "2025-Q1",
+"value": 1119.6,
+"end": "2024-06-30"
+},
+{
+"period": "2025-Q2",
+"value": 1105.9,
+"end": "2024-09-30"
+},
+{
+"period": "2025-Q3",
+"value": 1100.5,
+"end": "2024-12-31"
+},
+{
+"period": "2025-Q4",
+"value": 945.8,
+"end": "2025-03-31"
+},
+{
+"period": "2026-Q1",
+"value": 1141.8,
+"end": "2025-06-30"
+},
+{
+"period": "2026-Q2",
+"value": 1037.2,
+"end": "2025-09-30"
+},
+{
+"period": "2026-Q3",
+"value": 1074.5,
+"end": "2025-12-31"
+},
+{
+"period": "2026-Q4",
+"value": 914.8,
+"end": "2026-03-31"
+},
+{
+"period": "2027-Q1",
+"value": 1109.2,
+"end": "2026-06-30"
+}
+],
+"value": 1109.2,
+"period": "2027-Q1",
+"period_end": "2026-06-30",
+"prev": 21.3,
+"yoy": -2.9,
+"stale": false
+},
+{
+"metric": "buyer_revenue_urban",
+"label": "Urban Outfitters 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Urban Outfitters",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000912615&type=10-",
+"points": [
+{
+"period": "2022-Q3",
+"value": 1131.4,
+"end": "2021-10-31"
+},
+{
+"period": "2022-Q4",
+"value": 1332.2,
+"end": "2022-01-31"
+},
+{
+"period": "2023-Q2",
+"value": 1183.4,
+"end": "2022-07-31"
+},
+{
+"period": "2023-Q3",
+"value": 1175.3,
+"end": "2022-10-31"
+},
+{
+"period": "2023-Q4",
+"value": 1322.8,
+"end": "2023-01-31"
+},
+{
+"period": "2023-Q1",
+"value": 1113.7,
+"end": "2023-04-30"
+},
+{
+"period": "2024-Q2",
+"value": 1352.0,
+"end": "2024-07-31"
+},
+{
+"period": "2024-Q3",
+"value": 1361.9,
+"end": "2024-10-31"
+},
+{
+"period": "2025-Q4",
+"value": 1187.1,
+"end": "2025-01-31"
+},
+{
+"period": "2025-Q1",
+"value": 1329.5,
+"end": "2025-04-30"
+},
+{
+"period": "2025-Q2",
+"value": 1504.8,
+"end": "2025-07-31"
+},
+{
+"period": "2025-Q3",
+"value": 1529.3,
+"end": "2025-10-31"
+},
+{
+"period": "2026-Q1",
+"value": 1481.3,
+"end": "2026-04-30"
+}
+],
+"value": 1481.3,
+"period": "2026-Q1",
+"period_end": "2026-04-30",
+"prev": -3.1,
+"yoy": 11.4,
+"stale": false
+},
+{
+"metric": "buyer_operating_urban",
+"label": "Urban Outfitters 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Urban Outfitters",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000912615&type=10-",
+"points": [
+{
+"period": "2022-Q3",
+"value": 115.9,
+"end": "2021-10-31"
+},
+{
+"period": "2022-Q4",
+"value": 53.3,
+"end": "2022-01-31"
+},
+{
+"period": "2023-Q2",
+"value": 85.8,
+"end": "2022-07-31"
+},
+{
+"period": "2023-Q3",
+"value": 57.3,
+"end": "2022-10-31"
+},
+{
+"period": "2023-Q4",
+"value": 12.1,
+"end": "2023-01-31"
+},
+{
+"period": "2023-Q1",
+"value": 71.4,
+"end": "2023-04-30"
+},
+{
+"period": "2024-Q2",
+"value": 145.1,
+"end": "2024-07-31"
+},
+{
+"period": "2024-Q3",
+"value": 128.7,
+"end": "2024-10-31"
+},
+{
+"period": "2025-Q4",
+"value": 26.8,
+"end": "2025-01-31"
+},
+{
+"period": "2025-Q1",
+"value": 128.2,
+"end": "2025-04-30"
+},
+{
+"period": "2025-Q2",
+"value": 174.4,
+"end": "2025-07-31"
+},
+{
+"period": "2025-Q3",
+"value": 144.3,
+"end": "2025-10-31"
+},
+{
+"period": "2026-Q1",
+"value": 139.7,
+"end": "2026-04-30"
+}
+],
+"value": 139.7,
+"period": "2026-Q1",
+"period_end": "2026-04-30",
+"prev": -3.2,
+"yoy": 9.0,
+"stale": false
+},
+{
+"metric": "buyer_inventory_urban",
+"label": "Urban Outfitters 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Urban Outfitters",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000912615&type=10-",
+"points": [
+{
+"period": "2023-Q2",
+"value": 697.5,
+"end": "2022-07-31"
+},
+{
+"period": "2023-Q3",
+"value": 743.6,
+"end": "2022-10-31"
+},
+{
+"period": "2023-Q4",
+"value": 587.5,
+"end": "2023-01-31"
+},
+{
+"period": "2023-Q1",
+"value": 590.3,
+"end": "2023-04-30"
+},
+{
+"period": "2024-Q4",
+"value": 550.2,
+"end": "2024-01-31"
+},
+{
+"period": "2024-Q2",
+"value": 604.7,
+"end": "2024-07-31"
+},
+{
+"period": "2024-Q3",
+"value": 793.3,
+"end": "2024-10-31"
+},
+{
+"period": "2025-Q4",
+"value": 621.1,
+"end": "2025-01-31"
+},
+{
+"period": "2025-Q1",
+"value": 663.8,
+"end": "2025-04-30"
+},
+{
+"period": "2025-Q2",
+"value": 696.2,
+"end": "2025-07-31"
+},
+{
+"period": "2025-Q3",
+"value": 839.8,
+"end": "2025-10-31"
+},
+{
+"period": "2026-Q4",
+"value": 700.9,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 726.9,
+"end": "2026-04-30"
+}
+],
+"value": 726.9,
+"period": "2026-Q1",
+"period_end": "2026-04-30",
+"prev": 3.7,
+"yoy": 9.5,
+"stale": false
+},
+{
+"metric": "buyer_revenue_vsco",
+"label": "Victoria's Secret & Co. 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Victoria's Secret & Co.",
+"kind": "level",
+"side": "buyer",
+"note": "",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001856437&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 1407.0,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 1427.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 1265.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 2083.0,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 1359.0,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 1417.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 1347.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 2107.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 1353.0,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 1459.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 1472.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 2269.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 1560.0,
+"end": "2026-05-02"
+}
+],
+"value": 1560.0,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": -31.2,
+"yoy": 15.3,
+"stale": false
+},
+{
+"metric": "buyer_operating_vsco",
+"label": "Victoria's Secret & Co. 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Victoria's Secret & Co.",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001856437&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 28.0,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 26.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": -67.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 259.0,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 26.0,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 62.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": -47.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 269.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 20.0,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 41.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": -19.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 229.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 76.0,
+"end": "2026-05-02"
+}
+],
+"value": 76.0,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": -66.8,
+"yoy": 280.0,
+"stale": false
+},
+{
+"metric": "buyer_inventory_vsco",
+"label": "Victoria's Secret & Co. 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Victoria's Secret & Co.",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001856437&type=10-",
+"points": [
+{
+"period": "2023-Q1",
+"value": 1041.0,
+"end": "2023-04-29"
+},
+{
+"period": "2023-Q2",
+"value": 1040.0,
+"end": "2023-07-29"
+},
+{
+"period": "2023-Q3",
+"value": 1211.0,
+"end": "2023-10-28"
+},
+{
+"period": "2023-Q4",
+"value": 985.0,
+"end": "2024-02-03"
+},
+{
+"period": "2024-Q1",
+"value": 987.0,
+"end": "2024-05-04"
+},
+{
+"period": "2024-Q2",
+"value": 1019.0,
+"end": "2024-08-03"
+},
+{
+"period": "2024-Q3",
+"value": 1290.0,
+"end": "2024-11-02"
+},
+{
+"period": "2024-Q4",
+"value": 955.0,
+"end": "2025-02-01"
+},
+{
+"period": "2025-Q1",
+"value": 1043.0,
+"end": "2025-05-03"
+},
+{
+"period": "2025-Q2",
+"value": 1058.0,
+"end": "2025-08-02"
+},
+{
+"period": "2025-Q3",
+"value": 1377.0,
+"end": "2025-11-01"
+},
+{
+"period": "2025-Q4",
+"value": 1071.0,
+"end": "2026-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 1098.0,
+"end": "2026-05-02"
+}
+],
+"value": 1098.0,
+"period": "2026-Q1",
+"period_end": "2026-05-02",
+"prev": 2.5,
+"yoy": 5.3,
+"stale": false
+},
+{
+"metric": "buyer_revenue_walmart",
+"label": "Walmart 분기 매출",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Walmart",
+"kind": "level",
+"side": "buyer",
+"note": "회계연도가 1월 말에 끝난다.",
+"source_name": "SEC EDGAR XBRL · RevenueFromContractWithCustomerExcludingAssessedTax",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=10-",
+"points": [
+{
+"period": "2024-Q2",
+"value": 160280.0,
+"end": "2023-07-31"
+},
+{
+"period": "2024-Q3",
+"value": 159439.0,
+"end": "2023-10-31"
+},
+{
+"period": "2024-Q4",
+"value": 171914.0,
+"end": "2024-01-31"
+},
+{
+"period": "2025-Q1",
+"value": 159938.0,
+"end": "2024-04-30"
+},
+{
+"period": "2025-Q2",
+"value": 167767.0,
+"end": "2024-07-31"
+},
+{
+"period": "2025-Q3",
+"value": 168003.0,
+"end": "2024-10-31"
+},
+{
+"period": "2025-Q4",
+"value": 178830.0,
+"end": "2025-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 163981.0,
+"end": "2025-04-30"
+},
+{
+"period": "2026-Q2",
+"value": 175750.0,
+"end": "2025-07-31"
+},
+{
+"period": "2026-Q3",
+"value": 177769.0,
+"end": "2025-10-31"
+},
+{
+"period": "2026-Q4",
+"value": 188913.0,
+"end": "2026-01-31"
+},
+{
+"period": "2027-Q1",
+"value": 175684.0,
+"end": "2026-04-30"
+},
+{
+"period": "2027-Q2",
+"value": 186100.0,
+"end": "2026-07-31"
+}
+],
+"value": 186100.0,
+"period": "2027-Q2",
+"period_end": "2026-07-31",
+"prev": 5.9,
+"yoy": 5.9,
+"stale": false
+},
+{
+"metric": "buyer_operating_walmart",
+"label": "Walmart 분기 영업이익",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Walmart",
+"kind": "level",
+"side": "buyer",
+"note": "매출이 늘어도 이익이 눌리면 원가 압박이 우리 쪽으로 넘어온다.",
+"source_name": "SEC EDGAR XBRL · OperatingIncomeLoss",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=10-",
+"points": [
+{
+"period": "2024-Q2",
+"value": 7316.0,
+"end": "2023-07-31"
+},
+{
+"period": "2024-Q3",
+"value": 6202.0,
+"end": "2023-10-31"
+},
+{
+"period": "2024-Q4",
+"value": 7254.0,
+"end": "2024-01-31"
+},
+{
+"period": "2025-Q1",
+"value": 6841.0,
+"end": "2024-04-30"
+},
+{
+"period": "2025-Q2",
+"value": 7940.0,
+"end": "2024-07-31"
+},
+{
+"period": "2025-Q3",
+"value": 6708.0,
+"end": "2024-10-31"
+},
+{
+"period": "2025-Q4",
+"value": 7859.0,
+"end": "2025-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 7135.0,
+"end": "2025-04-30"
+},
+{
+"period": "2026-Q2",
+"value": 7286.0,
+"end": "2025-07-31"
+},
+{
+"period": "2026-Q3",
+"value": 6696.0,
+"end": "2025-10-31"
+},
+{
+"period": "2026-Q4",
+"value": 8708.0,
+"end": "2026-01-31"
+},
+{
+"period": "2027-Q1",
+"value": 7493.0,
+"end": "2026-04-30"
+},
+{
+"period": "2027-Q2",
+"value": 9383.0,
+"end": "2026-07-31"
+}
+],
+"value": 9383.0,
+"period": "2027-Q2",
+"period_end": "2026-07-31",
+"prev": 25.2,
+"yoy": 28.8,
+"stale": false
+},
+{
+"metric": "buyer_inventory_walmart",
+"label": "Walmart 분기말 재고",
+"unit": "백만 달러",
+"freq": "분기",
+"group": "buyer",
+"entity": "Walmart",
+"kind": "level",
+"side": "buyer",
+"note": "재고가 쌓이면 신규 발주가 줄어든다. 매출과 함께 본다.",
+"source_name": "SEC EDGAR XBRL · InventoryNet",
+"source_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=10-",
+"points": [
+{
+"period": "2024-Q2",
+"value": 56722.0,
+"end": "2023-07-31"
+},
+{
+"period": "2024-Q3",
+"value": 63951.0,
+"end": "2023-10-31"
+},
+{
+"period": "2024-Q4",
+"value": 54892.0,
+"end": "2024-01-31"
+},
+{
+"period": "2025-Q1",
+"value": 55382.0,
+"end": "2024-04-30"
+},
+{
+"period": "2025-Q2",
+"value": 55611.0,
+"end": "2024-07-31"
+},
+{
+"period": "2025-Q3",
+"value": 63302.0,
+"end": "2024-10-31"
+},
+{
+"period": "2025-Q4",
+"value": 56435.0,
+"end": "2025-01-31"
+},
+{
+"period": "2026-Q1",
+"value": 57467.0,
+"end": "2025-04-30"
+},
+{
+"period": "2026-Q2",
+"value": 57729.0,
+"end": "2025-07-31"
+},
+{
+"period": "2026-Q3",
+"value": 65354.0,
+"end": "2025-10-31"
+},
+{
+"period": "2026-Q4",
+"value": 58851.0,
+"end": "2026-01-31"
+},
+{
+"period": "2027-Q1",
+"value": 62570.0,
+"end": "2026-04-30"
+},
+{
+"period": "2027-Q2",
+"value": 61600.0,
+"end": "2026-07-31"
+}
+],
+"value": 61600.0,
+"period": "2027-Q2",
+"period_end": "2026-07-31",
+"prev": -1.6,
+"yoy": 6.7,
+"stale": false
+},
+{
+"metric": "usdkrw",
+"label": "USD/KRW 환율",
+"unit": "원/달러",
+"freq": "월간",
+"group": "gov",
+"entity": "",
+"kind": "level",
+"side": "",
+"note": "",
+"source_name": "FRED · DEXKOUS",
+"source_url": "https://fred.stlouisfed.org/series/DEXKOUS",
+"points": [
+{
+"period": "2025-08",
+"value": 1388.999
+},
+{
+"period": "2025-09",
+"value": 1392.905
+},
+{
+"period": "2025-10",
+"value": 1423.08
+},
+{
+"period": "2025-11",
+"value": 1459.879
+},
+{
+"period": "2025-12",
+"value": 1465.355
+},
+{
+"period": "2026-01",
+"value": 1455.496
+},
+{
+"period": "2026-02",
+"value": 1447.286
+},
+{
+"period": "2026-03",
+"value": 1490.518
+},
+{
+"period": "2026-04",
+"value": 1483.798
+},
+{
+"period": "2026-05",
+"value": 1488.396
+},
+{
+"period": "2026-06",
+"value": 1529.462
+},
+{
+"period": "2026-07",
+"value": 1486.013
+},
+{
+"period": "2026-08",
+"value": 1404.967
+}
+],
+"value": 1404.967,
+"period": "2026-08",
+"period_end": null,
+"prev": -5.5,
+"yoy": 1.1,
+"stale": false
+},
+{
+"metric": "us_real_gdp",
+"label": "미국 실질 GDP",
+"unit": "십억 달러",
+"freq": "분기",
+"group": "gov",
+"entity": "",
+"kind": "level",
+"side": "",
+"note": "",
+"source_name": "FRED · GDPC1",
+"source_url": "https://fred.stlouisfed.org/series/GDPC1",
+"points": [
+{
+"period": "2023-Q2",
+"value": 22580.499
+},
+{
+"period": "2023-Q3",
+"value": 22840.989
+},
+{
+"period": "2023-Q4",
+"value": 23033.78
+},
+{
+"period": "2024-Q1",
+"value": 23082.119
+},
+{
+"period": "2024-Q2",
+"value": 23286.508
+},
+{
+"period": "2024-Q3",
+"value": 23478.57
+},
+{
+"period": "2024-Q4",
+"value": 23586.542
+},
+{
+"period": "2025-Q1",
+"value": 23548.21
+},
+{
+"period": "2025-Q2",
+"value": 23770.976
+},
+{
+"period": "2025-Q3",
+"value": 24026.834
+},
+{
+"period": "2025-Q4",
+"value": 24055.749
+},
+{
+"period": "2026-Q1",
+"value": 24180.419
+},
+{
+"period": "2026-Q2",
+"value": 24269.613
+}
+],
+"value": 24269.613,
+"period": "2026-Q2",
+"period_end": null,
+"prev": 0.4,
+"yoy": 2.1,
+"stale": false
+},
+{
+"metric": "us_apparel_cpi",
+"label": "미국 의류 CPI",
+"unit": "지수",
+"freq": "월간",
+"group": "gov",
+"entity": "",
+"kind": "level",
+"side": "",
+"note": "",
+"source_name": "FRED · CPIAPPSL",
+"source_url": "https://fred.stlouisfed.org/series/CPIAPPSL",
+"points": [
+{
+"period": "2025-06",
+"value": 131.214
+},
+{
+"period": "2025-07",
+"value": 131.354
+},
+{
+"period": "2025-08",
+"value": 131.694
+},
+{
+"period": "2025-09",
+"value": 132.411
+},
+{
+"period": "2025-11",
+"value": 131.883
+},
+{
+"period": "2025-12",
+"value": 132.317
+},
+{
+"period": "2026-01",
+"value": 132.723
+},
+{
+"period": "2026-02",
+"value": 134.419
+},
+{
+"period": "2026-03",
+"value": 135.804
+},
+{
+"period": "2026-04",
+"value": 136.67
+},
+{
+"period": "2026-05",
+"value": 137.069
+},
+{
+"period": "2026-06",
+"value": 136.313
+},
+{
+"period": "2026-07",
+"value": 136.434
+}
+],
+"value": 136.434,
+"period": "2026-07",
+"period_end": null,
+"prev": 0.1,
+"yoy": 3.9,
+"stale": false
+},
+{
+"metric": "us_apparel_inventory_ratio",
+"label": "미국 의류 소매 재고율",
+"unit": "배",
+"freq": "월간",
+"group": "gov",
+"entity": "",
+"kind": "level",
+"side": "",
+"note": "Census 재고 통계는 월말 기준 약 6주 뒤에 공표됩니다",
+"source_name": "FRED · MRTSIR448USS",
+"source_url": "https://fred.stlouisfed.org/series/MRTSIR448USS",
+"points": [
+{
+"period": "2025-06",
+"value": 2.19
+},
+{
+"period": "2025-07",
+"value": 2.16
+},
+{
+"period": "2025-08",
+"value": 2.14
+},
+{
+"period": "2025-09",
+"value": 2.17
+},
+{
+"period": "2025-10",
+"value": 2.14
+},
+{
+"period": "2025-11",
+"value": 2.14
+},
+{
+"period": "2025-12",
+"value": 2.15
+},
+{
+"period": "2026-01",
+"value": 2.16
+},
+{
+"period": "2026-02",
+"value": 2.1
+},
+{
+"period": "2026-03",
+"value": 2.11
+},
+{
+"period": "2026-04",
+"value": 2.13
+},
+{
+"period": "2026-05",
+"value": 2.11
+},
+{
+"period": "2026-06",
+"value": 2.14
+}
+],
+"value": 2.14,
+"period": "2026-06",
+"period_end": null,
+"prev": 1.4,
+"yoy": -2.3,
+"stale": false
+},
+{
+"metric": "crude_brent",
+"label": "국제 유가 (Brent)",
+"unit": "$/bbl",
+"freq": "월간",
+"group": "gov",
+"entity": "원자재",
+"kind": "level",
+"side": "",
+"note": "폴리에스터 원료(PTA·MEG) 가격의 선행 지표.",
+"source_name": "World Bank Commodity Markets (Pink Sheet)",
+"source_url": "https://www.worldbank.org/en/research/commodity-markets",
+"points": [
+{
+"period": "2025-07",
+"value": 71.0
+},
+{
+"period": "2025-08",
+"value": 68.2
+},
+{
+"period": "2025-09",
+"value": 68.0
+},
+{
+"period": "2025-10",
+"value": 64.7
+},
+{
+"period": "2025-11",
+"value": 63.6
+},
+{
+"period": "2025-12",
+"value": 62.7
+},
+{
+"period": "2026-01",
+"value": 66.8
+},
+{
+"period": "2026-02",
+"value": 71.1
+},
+{
+"period": "2026-03",
+"value": 103.7
+},
+{
+"period": "2026-04",
+"value": 120.4
+},
+{
+"period": "2026-05",
+"value": 107.5
+},
+{
+"period": "2026-06",
+"value": 85.4
+},
+{
+"period": "2026-07",
+"value": 83.4
+}
+],
+"value": 83.4,
+"period": "2026-07",
+"period_end": null,
+"prev": -2.3,
+"yoy": 17.5,
+"stale": false
+},
+{
+"metric": "cotton_a_index",
+"label": "면화 A Index",
+"unit": "$/kg",
+"freq": "월간",
+"group": "gov",
+"entity": "원자재",
+"kind": "level",
+"side": "",
+"note": "면 원사 원가의 선행 지표. 급등하면 코튼 개발 건의 원가 재검토가 필요하다.",
+"source_name": "World Bank Commodity Markets (Pink Sheet)",
+"source_url": "https://www.worldbank.org/en/research/commodity-markets",
+"points": [
+{
+"period": "2025-07",
+"value": 1.74
+},
+{
+"period": "2025-08",
+"value": 1.73
+},
+{
+"period": "2025-09",
+"value": 1.72
+},
+{
+"period": "2025-10",
+"value": 1.68
+},
+{
+"period": "2025-11",
+"value": 1.66
+},
+{
+"period": "2025-12",
+"value": 1.63
+},
+{
+"period": "2026-01",
+"value": 1.64
+},
+{
+"period": "2026-02",
+"value": 1.63
+},
+{
+"period": "2026-03",
+"value": 1.7
+},
+{
+"period": "2026-04",
+"value": 1.9
+},
+{
+"period": "2026-05",
+"value": 2.03
+},
+{
+"period": "2026-06",
+"value": 1.9
+},
+{
+"period": "2026-07",
+"value": 1.96
+}
+],
+"value": 1.96,
+"period": "2026-07",
+"period_end": null,
+"prev": 3.2,
+"yoy": 12.6,
+"stale": false
+}
+],
+"entity_keys": {
+"Walmart": "walmart",
+"Target": "target",
+"Kohl's": "kohls",
+"Costco": "costco",
+"Amazon": "amazon",
+"Abercrombie & Fitch": "anf",
+"American Eagle Outfitters": "aeo",
+"Carter's": "carters",
+"PVH": "pvh",
+"Under Armour": "ua",
+"Victoria's Secret & Co.": "vsco",
+"Urban Outfitters": "urban",
+"Duluth Trading": "duluth",
+"Nike": "nike"
+},
+"entity_sides": {
+"Walmart": "buyer",
+"Target": "buyer",
+"Kohl's": "buyer",
+"Costco": "buyer",
+"Amazon": "buyer",
+"Abercrombie & Fitch": "buyer",
+"American Eagle Outfitters": "buyer",
+"Carter's": "buyer",
+"PVH": "buyer",
+"Under Armour": "buyer",
+"Victoria's Secret & Co.": "buyer",
+"Urban Outfitters": "buyer",
+"Duluth Trading": "buyer",
+"Nike": "buyer"
+},
+"entity_codes": {
+"Walmart": "WMT",
+"Target": "TGT",
+"Kohl's": "KSS",
+"Costco": "COST",
+"Amazon": "AMZN",
+"Abercrombie & Fitch": "ANF",
+"American Eagle Outfitters": "AEO",
+"Carter's": "CRI",
+"PVH": "PVH",
+"Under Armour": "UAA",
+"Victoria's Secret & Co.": "VSCO",
+"Urban Outfitters": "URBN",
+"Duluth Trading": "DLTH",
+"Nike": "NKE"
+},
+"news": {
+"carters": [
+{
+"d": "2026-07-31",
+"t": "Carter's, Inc. 2026년 2분기 - 결과 - 실적 발표 프레젠테이션(NYSE:CRI) 2026-07-31",
+"o": "Carter's, Inc. 2026 Q2 - Results - Earnings Call Presentation (NYSE:CRI) 2026-07-31",
+"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPeTExSXItc1FldnhMaFdpamUzUkZpRUNXdHpHamMxbGdpQnAtdnZfQlluTWdjZ3k3OXRfaXFCa1hsTGhGLWc3YWZEdDJqWGh1R21ZOTdqN21BLV9UZW8tNGc2Q0tfV2Z4eVp6V1Q4OUZPcVY3aHU5bDZkdUNmWFROSkY5OTNOYlZaTzdUZEFpN05pdzVuRTdUOWdGMA?oc=5",
+"m": "바이어 · Carter's"
+},
+{
+"d": "2026-07-28",
+"t": "Carter's Inc 2분기 결과: 7월 31일 실적 발표 예정",
+"o": "Carter's Inc Q2 Results: Earnings call set for July 31",
+"u": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQMm1fTHY0S2pyZ3hyTHM5X18yRW5lUHdqOGNVSDI2V1RKLVZfRVNlUDdKY1oxYnFTSlR3YWF5djJpZlZlcnpVU2h2aktSbUdwLW1DMWlDUXdQSHZTOWpXSVlyZXNvRm1WSHlILXhlUF9XejRSR0VmanEydDZSSDRERUhWNXNxUEdYOGo0cjF6aEZNclRzVUpubDZDdkRNOXBUQkFJZDJjcFM5eVkzUmZR?oc=5",
+"m": "바이어 · Carter's"
+}
+],
+"ua": [
+{
+"d": "2026-08-27",
+"t": "Dodge, 근육에서 영감을 받은 새로운 의류 라인을 위해 Under Armour와 협력",
+"o": "Dodge Teams Up With Under Armour For New Muscle-Inspired Apparel Line",
+"u": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPQWhKRV9ucGkzX1E0OF83aUZzWlkzR2oyWk1uOWZyTDdGaWNRc0pIZ1VaWXp4VWUzYUNnWWpUdnVqa2tDbkpicHlfZUlMTm1Zamd3N1NlSjdoLXloejNLSEZmcXBuT3dBMUZGY3A1TFhnZTFjRXFnR2VwbmptbFVCYnQtaGpLeTZNMTdxdlJRUUZUZWNYTXhTazN6REo?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-08-24",
+"t": "Under Armour, 새로운 P-Star 브랜드의 Gunna 크리에이티브 디렉터 임명: 의류 및 UA Scorpio 스니커즈 출시",
+"o": "Under Armour Names Gunna Creative Director of New P-Star Brand: Launching Apparel & UA Scorpio Sneaker",
+"u": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOOEtQWWxFelotNmRjNDBLcTRDTXV4dWtPNVBHc1FBTzNTSDlsR1k3dm1ZTGRjVEp2OF9Sd3hwQW1feWJtSUtiLUc1MmNrbE5CN0FYcGltZWcwSmtkaEpoZ2cwbDJRcTF4bjVmbHdoc2xrYXFETTJCejVWZHd1YzVmWWJMSjNDVy1wcFJNYVVzdnp2MGJ5WW1aNDVjRVFGQmhQdWZr?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-08-22",
+"t": "Under Armour: 지속적인 수익 감소는 주요 위험 신호입니다.",
+"o": "Under Armour: Continued Revenue Declines Are A Major Red Flag",
+"u": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOM1ZqZnRHR3RFRnlCMmlXNy1JTFp6c2RBaEpqUVJDdVhuVWY2MW1OWGR5dThjQXJLZHRrQ05ySThqRkJKYkotVElnMjhTaTNXTHphTDR5RlBMRHJHLVdYYjBuUTEzQUdmVGZfNEN1UW1FLWpMcTduLWdhQ0tENjNORFY2X0ZlNnBqUnp0dVAtXzA5UmNFMndTam5ZVjNDTWRPN2xR?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-08-20",
+"t": "Under Armour는 연간 매출 전망을 낮추었지만 수익성 지침은 유지했습니다.",
+"o": "Under Armour lowers full-year revenue outlook but holds profitability guidance",
+"u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNVy1ud0hOQ0hKTEtHVWZIbmZYdjVzX19nOURLdlY1Q1pZTkNXTXRqTjdQUlJwaVhZMWVmUTBtclJlZlNkVXlVV19rX1NxbnVjbFhiQWpRZVZ6SndUUldyR2hUQzJpYldFOVB0VU5XNnM1eTFjLVEyeUdDRGJfeHJHdDV0Smloclh5bUFaQUtHVUs2c1VEeTJuYlVwOWZyNnl4MThzY2s3UWJhUEpuZUE5aEdMRHlMYXctWTlmOU5aV1k?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-08-20",
+"t": "Under Armour, 새로운 낚시 의류 공개",
+"o": "Under Armour Unveils New Fishing Apparel",
+"u": "https://news.google.com/rss/articles/CBMipgFBVV95cUxOQURPdUJFT2tCVUJNSGkwWWRkOVAzdWVVQVRYTlB4TjFPcFdVRndDQjN1WkdEa0Rzcks5eEIwZGV0WXNZYmhnQUVhUFI4dU52c3VtckRuSDJEZDhGZ3kybHRzR2xSUjFyNWFETWRmaDBqZUZiWHFwUmxCZ0loenZXS05uYWozdzBYRms2QWs5a3pMOUVGdFpBOHg4UHd0azhSaVBkaWdR?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-08-19",
+"t": "연예인 의류 라인: Under Armour는 BoyNextDoor를 글로벌 바운시 티셔츠로 명명했습니다…",
+"o": "Celebrity Apparel Lines: Under Armour Has Named BoyNextDoor As Its Global Bouncy Tee…",
+"u": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1renFZOWRRUVRxM3VWZEU0WU5FSHdyWW5iam1NVWd5dkM1T244QzdUVTNxRUpXcmtvZTIxWllpZmZEQ3U3Q0F1bGt3UHcwbUZ1ZDAxWjczU24?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-08-18",
+"t": "미 관세 1000억불 환급…패션업계 수혜",
+"o": "미 관세 1000억불 환급…패션업계 수혜",
+"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81717",
+"m": "국제섬유신문"
+},
+{
+"d": "2026-08-18",
+"t": "Shaler Area는 의류, 유니폼 분야 Under Armour인 Millvale 회사와 5년 계약을 체결했습니다.",
+"o": "Shaler Area reaches 5-year agreement with Millvale firm, Under Armour for apparel, uniforms",
+"u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPdnlaT19RcThQMEV6M1J6X0VfRkJoNDVBS3JfZjhaTllWR3BoVTk2ZUtjVTJJMV9mWXhsWC1fQWpMZGxhTVQwaHVtcU9RUXU4cXNqVmM3eXZvdDVIaThTY1laVlVxMDh3UVdfZmp0R2NDUzlsd2lmY1Rld1BZNmV6U1pRUjlmdFdzVXc3STJRdTJ0YWRnal9NVVFKc0FKVFZKLXY2dURvLU1USUhUV3hXdGZocV9xZW9GNWo0?oc=5",
+"m": "바이어 · Under Armour"
+}
+],
+"amazon": [
+{
+"d": "2026-08-31",
+"t": "올리브인터내셔널, 40여 개국 유통망 확대 맞춰 글로벌 인재 채용",
+"o": "올리브인터내셔널, 40여 개국 유통망 확대 맞춰 글로벌 인재 채용",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148073",
+"m": "한국섬유신문"
+},
+{
+"d": "2026-08-29",
+"t": "INTO THE AM 남성용 폴로 셔츠, Amazon에서 20달러로 하락",
+"o": "INTO THE AM Men's Polo Shirts Drop to $20 on Amazon",
+"u": "https://news.google.com/rss/articles/CBMickFVX3lxTE82Q3BuNlBWT1lLVjY5Q21mWVFsTzVBX3BFeDJGREZyUUU2OFpnTlNtTUVzdi1lYmE1bDRiVm1KLTlwTnFfSmdkWDJpZVdNVTFMazYwT2gxZGxKOWZrb2hGandxNHhOVEhWTVh0dWRpd1BzZw?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-08-28",
+"t": "이 최고 등급 골프 폴로는 현재 Amazon에서 단 20달러에 판매됩니다.",
+"o": "This Top-Rated Golf Polo Is Just $20 on Amazon Right Now",
+"u": "https://news.google.com/rss/articles/CBMiggFBVV95cUxOSlF2eGVQOVVFd3prMzY2cUVwYnNJSXFIWkVBVTBJTGxHMDdRRFFEdFRxN05uWi11WnVDVmxqel9EZmVhLUtIN3FPelpDUVIzY2NTalJVUERXNWZ5OERNMDY3V194cWtzZU1VQUxxY1VJNzdFNHEtVFpKc0Y0Mk0tam1R?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-08-27",
+"t": "Amazon는 이제 분기별 두 배의 패션 주문으로 300개 도시를 목표로 하고 있습니다.",
+"o": "Amazon Now Targets 300 Cities as Fashion Orders Double Quarterly",
+"u": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNcmhXSkFsRjBMNnBGMzVGWGw5cXFqV3RvMnFFUjV2MTlkc1lTOFRzRE50dHpubFJ3VGNwRGhvaG5JZUg4dkZRdS1lNE1GVG5RRUtiNVNidzBlYkt0cTdYTmNIamk1eWhUQXd0MUtVajF4S1lobmtxMmpJRFozT3FZVDVfNUd2VUZ5TmZWaDhQUXhadDdneHA5TE56UkF6V29SUWxaYXlpTkYxZ1Bka3Blek13?oc=5",
+"m": "Apparel Resources"
+},
+{
+"d": "2026-08-24",
+"t": "Walmart는 젊은 쇼핑객을 유치하고 Amazon와 경쟁하기 위해 저렴한 트렌디 의류 라인을 출시합니다.",
+"o": "Walmart launches affordable trendy apparel line to attract younger shoppers and compete with Amazon.",
+"u": "https://news.google.com/rss/articles/CBMihgFBVV95cUxQNTB5RHluSmhMdm9aR05acUJ4QWJnemNBdnA4ZzZ1WEotenVzVTg4M1BYQmRRdDJlRDRKOVBSczdpVktRR2F0V0VWZUpxdHF4Tk9ab1I4dkhBYkUtUlZEQ056Q2prYlpJQjZCTWVDZG5nek16YWRqZ3NleW1FTndBbEdUQ3Qwdw?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-08-24",
+"t": "Amazon 글로벌 셀링은 가정, 의류, 가구 시계 등 인도의 수출 클러스터에 베팅 30%+ 성장",
+"o": "Amazon Global Selling bets on India’s export clusters as home, apparel and furniture clock 30%+ growth",
+"u": "https://news.google.com/rss/articles/CBMiigJBVV95cUxQcTRmZUxfdmpobjZWdkh4SFo4TFNCSkx1cmYtQWg5U3BldEVwRGNmQW5ZaEZnN3FVa2NHU21rRmpLQ1JYZk1pRnZTUmdNTTV3WW41ckNPcVAyNDVGRks3SHJ2dkxvaFpqdUdFczlBMG1Na1h4LVRFd0Zqc3c3ZUNYaEFXdW5SaWdtcDRLM2JQZ0dET3Z0RUl5RlFjTU94UWlHR2ExRlFMVjBNcFhFMWJiZG83dk1nbTJOWGIzUHdsVjVkMzF6Mm5MaUt0M2wydTV4RHNSNDVQdXBRSXF1N08xTElYMW9TUmd6WWhLQ19hSTB6OEVBaV9kS1BockdYbE9ySFF5Tm42MVg0QQ?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-08-21",
+"t": "$10 수분 흡수 성능 폴로가 Amazon에서 75% 할인됨",
+"o": "$10 Moisture-Wicking Performance Polo Is 75% Off on Amazon",
+"u": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQY2RQMnBiaDd5OElnX1BNX0ZSM1JLUE1XNHh0N2pkQ1duMnhKS1JUdko3TmxHMkkxTHNTQmtkM0VXUkVmWWNHRE04aHVWMnJfSHl3QmtnTlJPY1pwaUtsTTRFUDJzcVNrbGxOZUlaTzRRY2h2R1R6TksyU2xwc1J3U3JhdFBqLTdm?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-08-12",
+"t": "Lacoste x Novak Djokovic Tennis Polo Amazon에서 15% 할인",
+"o": "Lacoste x Novak Djokovic Tennis Polo 15% Off on Amazon",
+"u": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNWkVDaUtvbTdaSmpnLUhadV95cHN5WkNIdkRtU2o5VFBiQlYyTm9JN2VmbFRvd2JNRjZiNUwzbFB2el9ERl9SYUo1V0RFY1hDOENiY0FNMHhLLV9ldDM2dVduQmhtXzVzZ2JGVkpjY0l3akx0OUdweEhfQlJ1b2lwTg?oc=5",
+"m": "바이어 · Amazon"
+}
+],
+"nike": [
+{
+"d": "2026-08-25",
+"t": "Jobs at risk as Nike foam supplier offshores production",
+"o": "Jobs at risk as Nike foam supplier offshores production",
+"u": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNOVJ1Z2pmb1Z4RzI2dTg0MTZtdkJvOU1DUDJBMGR1cWN1aW9NSXdObFg4TGFDQWZTcEpLYnV0bnNpcW5iQmpFb25ySmF6Wkw2UFR3aFRMQWQwME9xNThldUk4dHBVenlmRU9YYzliTjF0Zy1JdkJILVd1T2JoS0x5X2lzaFBWUXJyZ3dpUXo4S0sydw?oc=5",
+"m": "Just Style"
+},
+{
+"d": "2026-07-24",
+"t": "Nike says it will streamline online business in China",
+"o": "Nike says it will streamline online business in China",
+"u": "https://news.google.com/rss/articles/CBMijwFBVV95cUxOb3dZdS1JZmpWdzdXdEwxV1pMRG5CQ2wzcGlsMl9XQ1pjbzNrQlNvblp1T1RabW9YZFFoVldfMG5aLVcxeFMta3BQVlJpOGNVaTkyN0F0Zy1lbUI5VWFfOVNuRXNYTWxXdi02bFlmSm5qTGh0WHJRMERzYUZ6alRybHNWRmtQMjFBanFGdmc3TQ?oc=5",
+"m": "Just Style"
+}
+],
+"pvh": [
+{
+"d": "2026-08-28",
+"t": "수익 미리보기: PVH Corp, 9월 2일 시판 후 재무 결과 보고 예정",
+"o": "Earnings Preview: PVH Corp to Report Financial Results Post-market on September 02",
+"u": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNQV9DTmtNN0h2NXZzWjE1RnAtMWp5cEU0NkROX0MyakZrYXhYdnpvWWJoZmhnTElkRmpwOXJxamZyTmtlUGVXeXk2U0dwcUJsUC0tTU1nb0JpSnVJenhyMHg3TWNKLTV1bWJYNXlTMy1uLXJGZmRvSUdKMWZIbnFtUzZoMWJFWFAxN3RxdDR3Mng0QkJ4eC1rV0lGcE1tVzZtSy1QcEJ4WVdwYXM?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-08-26",
+"t": "PVH(PVH) 수익 증가 예상: 다음 주 출시에 앞서 알아야 할 사항",
+"o": "PVH (PVH) Earnings Expected to Grow: What to Know Ahead of Next Week's Release",
+"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQZDdmb0xfdUQtQ005bE5sWU5CUGtkanQ2RHg4NkVhdTNMUTY0TkItbXVoR01JZ3kxNXN1Sk5NeldUVlUwVHVGN3NISFMzQlFhZkJoejV0aWtwclE3NTVPdGdMNWZkUXdMZ1hKUFZsNkllLUxrb1p6Yi1fb21XNWMwdlRycGE3SG44ekRadDBwRk5TRFJpSVdPUjRjWQ?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-08-26",
+"t": "PVH Corp 주식은 다가오는 수익 보고서에서 9.2% 변동할 수 있습니다 부터 Investing.com",
+"o": "PVH Corp. stock may move 9.2% on upcoming earnings report By Investing.com",
+"u": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPc1Y2MUt0dnY1ai1PbXBPMDJBaVd2TkFFZUxZZGZta2t0S2I2ZmwtOEdteFdJNVozREhTeVpZb3l0MEd3UkxUQkNaaTJHMFdEOXIxRUxDbU1SSzhOck53YjF3bnNjblNyeUdjNHVENG5IWi0yaG5EVHh4MzN0eWVtcnk5azlaaUtVLWVJaS1ZZDVzdzJlLVBqczREcktTSnRSWDJWb0xScVZwXzd0NjRaQmY4TkFUdw?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-08-26",
+"t": "PVH Corp., 2분기 실적 보고 예정: 투자자들이 알아야 할 사항은 다음과 같습니다.",
+"o": "PVH Corp. Set to Report Q2 Earnings: Here's What Investors Should Know",
+"u": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOVW9uTkh0VVd5YW14SU4tQ0VqVm5FaDhPSlR3UXNTZ1ltazJkY2JNbHc4Q1hwcHdSU0t3VHdFUlYwdHBRWk9xNnNJblZOMFJnR3ViSWF2NGpfMi1XMkFpNTMxR0hyLTFQRlNxU3hENmdLMWNvaWhXaXJoRGZISjc1cjJhTVl2LXBsLXpwVDg3Ml8?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-08-26",
+"t": "PVH Corp. 주식은 다가오는 수익 보고서에서 9.2% 움직일 수 있습니다",
+"o": "PVH Corp. stock may move 9.2% on upcoming earnings report",
+"u": "https://news.google.com/rss/articles/CBMitwFBVV95cUxPT0tHNm80Ynk4dmVya3ZJMGxLbFdDaTJZOU1nYktQT2wtT1BROWRrNnJBalhMZ2VjUkFOM2dMSW1OZ0xOdk5ZVkJoeTMtaDFkRDNwazRNaUE4eFROOVZ0RWdzR2RSeWhnLXdQMFd3cUFBRkc0NkVPSjVEUzFYLWpITGI4WUdUUEswekgwRlhCZjQ2ZGFDRkxyS24wRm0zbFk3OFBiYXIwYy05Q3Mxam81YU1mTFZQdTg?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-08-23",
+"t": "PVH (PVH) 2026년 4분기 실적 통화 기록",
+"o": "PVH (PVH) Q4 2026 Earnings Call Transcript",
+"u": "https://news.google.com/rss/articles/CBMiXkFVX3lxTFBZeTZWSXpOS296cmRlRkcwMF9hTExFMVVDblU1ajZXdk8xcXAtVlh6MEt2b2V5WHhia2VWVTFjYUJjTU5OWkRtR3F1NWRlQm1MaHo5eWpNa1ljQy16Vnc?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-08-18",
+"t": "마진 지원이 포함된 PVH 주식 및 관세 탄력적 소비자 이름",
+"o": "PVH Stock And Tariff Resilient Consumer Names With Margin Support",
+"u": "https://news.google.com/rss/articles/CBMixwFBVV95cUxPNjZLX1RsTTZaVGVUZmoxZG55OXl3ZFo1bzBEZ3BZbnRiV2JMbGVZVmdndWQ5UmNDLUJNLU5FQWtKWjdrRjEwZWE3S1gyQloyWXRJTmZuMEhoa3JlQWhOSlF3MFlaWnNUMlloWndqNHFuNEs2Zm9xSG4zYkduSmNTc25makV0eVhuQzEtNlNZaHE0ZGphWmdhb2VERm5iZ19DQVRxekp1S0pqZkJiWktZN2U5NHpUcEZEVEFYUUxXT1dXdFBTMWh30gHMAUFVX3lxTE40UmR3dHVqZ1NPVU92UUY0dDB5VHhrcDJySjQ5TkNWNUhjT196dFZtbHQ4R1htT20yT0JTdEE4Y05pSTZ0V0ctQmJYeHhZemc4UkJpSTc5TjJWUlJEQm1kTkdoeVFBNDZBeVVNbGtsd19uVFJQTDRfbWFMTS1veGpBNThYNTUtVW92OWxkbm1HWnNWNWZ2OWxVWGNNek1RTlRIY3pCamRIYmxyQzhNeVI1NnJXSW9kQXlpMFRTSFRaS0dRWFRLenNyVTFWTg?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-08-17",
+"t": "PVH Corp, 2026년 2분기 실적 논의를 위한 컨퍼런스 콜 개최",
+"o": "PVH Corp. to Host Conference Call to Discuss Second Quarter 2026 Earnings Results",
+"u": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxQdklYRHMxSjQ2ZzJJLUQ4WEFnNHd1bHZtOWJhNTdtOUsya01LeWFiNEJFSkVyMVJZOG5fQWk2Smo4UFdRWWFFOEpoQlEtbmxTUHhTSnQ3QndYOVIxYmt6S0gyam9USjVDZURfYXViaGE0SzRZUnJISUwyR3ZNejl3MzRYVjlHZGZpb01xOV9lLUFkMUdoM0ZDZERrRHd0dkhETjdKV0xZcEJ1aW9QeFVrQ3F0Y1FtM0syZ2dnR18tRkJqWWVKeVhmMGZPaXc4Sm1DNlNPNA?oc=5",
+"m": "바이어 · PVH"
+}
+],
+"costco": [
+{
+"d": "2026-08-31",
+"t": "Costco 2026년 3분기 실적과 분석가 목표가 높은 가치를 뒷받침함에 따라 도매 주식은 945달러 근처에 유지됩니다.",
+"o": "Costco Wholesale stock holds near $945 as Q3 2026 earnings and analyst targets support high valuatio",
+"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOTzlvYlVrTFZWYkEtSWFjbllEZzlzU2ktZ0NzUUVRSkRJZEhrTlEyY29uOERnZThpd3lzLS02T3BjZWFTb1JuRE8xZXRvUWlmN3pQNzdWaEpudW5JaEpKcjNOLXQ5VzRZZjhSM3k4RzRKanlYeE9oSEpiRDN4dUg4MnZ6U05HU2hVTzQ0dG15TWVmNndSWHQxVUk1a3QtU0M4SzhSQ2xmbnJhRFhzUHRPZ0YxbUd6NXJnN245WkZQOUJhQ1hjN2dPc0tKODE?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-08-30",
+"t": "Costco(COST) 주가 예측: 6월 매출은 10.6% 증가했지만 주가는 영업 시간 이후 하락했습니다. - $899로 부족합니까?",
+"o": "Costco (COST) Stock Price Forecast: June Sales Up 10.6% But Stock Fell After Hours - Short to $899?",
+"u": "https://news.google.com/rss/articles/CBMizgFBVV95cUxNRzZhVEh2RktiaUpZMldjMmJiUmx5V3lBdUhhVUdxVHlYYlViT3RCeHF5N0lmVmZ2aEhpdkFCb2pwWmpXZWg4YUZ1ejJHaHRIckVDSWtsQlpLbTBzTk1FVDUwOE85SFZHSVVuS2dvWEVMeVU5TGU0b0lHZHpvM3M0ZmxoYzJIRWpEdDBDS2dzbndXOUFNc0U0eC1NX0ZqenhfTHZVNEZTV3pVQ2lqYUZkbzZzQlZfODZ5TjBGUnhlaWVBd0VaNzBwY01uNE8yZw?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-08-30",
+"t": "Costco 주식 수익 알림! Costco (COST) 주식 분석 및 예측! 2026년 밀턴 케인스 지방 선거(MNMphsdD9B)",
+"o": "Costco Stock Earnings ALERT! Costco (COST) Stock Analysis And Prediction! Milton Keynes Local Elections 2026 (MNMphsdD9B)",
+"u": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9vUjc4LTNWTDFkNE14eDJvNkJ0UUFkcDdQMEtWR1JVdjJoS0lEcFVYNHNEZHdyRHdDU0V6ekg1MUU1OGZiM3N4bjZhT0FEcDJsaGRIb3UtV2xya00?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-08-28",
+"t": "Marvell과 Dell은 Costco 테스트로 AI 모멘텀을 타고 수익보다 앞서 영역 구매 | IBD 심한 뇌우 주의보(Mmq4D08kN1)",
+"o": "Marvell And Dell Ride AI Momentum As Costco Tests Buy Zone Ahead Of Earnings | IBD Severe Thunderstorm Watch (Mmq4D08kN1)",
+"u": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9uTnp2SW9wbWMwRGNQX3paZTdOSDZEY0F6dTdmZU1XTzVYWGtvYzhoNmVMcHRCSW1EdkZidDVWWkw1MF94a2llUDZQb1dBTHFzbWx6aDJLWUQ0Tm8?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-08-26",
+"t": "Costco는 고객에게 관세 환불을 전달할 예정입니까? 우리가 알고 있는 것은 다음과 같습니다",
+"o": "Is Costco Going To Pass On Tariff Refunds To Customers? Here's What We Know",
+"u": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxPam40TjRycWlIbFF2bEVxQUxraVM1TkdIUVYtdlFzWWNJcGIxQ0tMcjNxRnhvWXZ3bm85VU44RGUtelJrWU5xSi1WMnk1Y3ZBZnZ3TXdOZ0RQcGFxc3l4VnZEWmN0aUlhNklvSi1UbkxQZ0VKdU1ZQ3JySTRfaFdxLVBRMDltU3Bxdk1fbDhXMlN1dk4zdUd2b05KTVViWEhYeUQwM2F6N2NRWHUxem9McXc3TTlqY01VaklpTWwyVjloZWV1bFZTQm9rZHV1cWN5d2tn?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-08-26",
+"t": "Jim Cramer는 2026년 네트워크 TV 취소(BGakCQpImp) 수익을 올린 후 Costco를 자세히 살펴봅니다.",
+"o": "Jim Cramer Takes A Closer Look At Costco After Earnings 2026 Network Television Cancellations (BGakCQpImp)",
+"u": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9CbGdXTlZFTzJRNWJTWHdocmxsMnBJYWptY3daTWRTRjFQWVRKdzBma29tRjY3aEM5QzFHNTIwMi1FdzZBVUh6Z0xRXy16bUJTa3ZKMElqU2xTdi0waFd3Rw?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-08-25",
+"t": "Costco는 계속 뛰고 주식은 계속 정체됩니다. 4분기 실적이 다음 시험이다",
+"o": "Costco Keeps Beating and the Stock Keeps Stalling. Q4 Earnings Are the Next Test",
+"u": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxNTHhOeXlFVFE4eUpieG5FNXdrUmV0Q3VEaWRkMXFLZzJrS3NrOGpOWjE4WWZDNllpa1VGU1BJc0FTS19PQTJRalJ1cDFzU0oyckhEMTIyWW4zUVpURGlzZXNBZ2tjWU80NlppV0g1MHZlRDliVm8zWThRMGdGb1hhN1NfQTBYM0NJTWl4bkNZNFQ4dDJ3Q0tkMFpTLVZ1MEVOUlhjeEtWVno?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-08-24",
+"t": "분석가들이 낙관적인 전망을 유지함에 따라 Costco 주가 상승",
+"o": "Costco stock rises as analysts maintain bullish outlook",
+"u": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE51NUZ6Q3N3VEkzUEsxelJsZ0RrN1lmdGFDVzYzRDNXWVhaemllRUxWclFDTURlY2dKWXZMWVY1dHBSVlBGSGZwOW80MlpFMFR1NG05Mlh6dmlQQ2RYYmFnWnhR?oc=5",
+"m": "바이어 · Costco"
+}
+],
+"target": [
+{
+"d": "2026-08-31",
+"t": "미미박스 ‘카자’, 미국 타겟 611개 매장 입점",
+"o": "미미박스 ‘카자’, 미국 타겟 611개 매장 입점",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148078",
+"m": "한국섬유신문"
+},
+{
+"d": "2026-08-21",
+"t": "Target 대 Walmart: 2분기 실적 이후 매수가 더 나은 소매 주식은 무엇입니까?",
+"o": "Target vs. Walmart: Which Retail Stock Is the Better Buy After Q2 Earnings?",
+"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOcXZMRTZKb29FaWRtS01SeFNKSmNWRDRyLVRoS1JHNF9CTFpOQXBrdVRQRl9OUnJMeTM1VTJvajEydl9mOXNMbS1GRWxMelgzR1ZqZ3hQb0VucGlERzlFSU1pSWFPLWd5MkNtVVVLemdPa3NaSjVkZjhCS25PdmlET1d5OElQWnQwVnNfelBtN1VmMW5SWFFBUlE4dw?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-08-20",
+"t": "Walmart는 2020년 이후 가장 느린 동일 매장 매출 성장으로 8% 하락; Target는 안정을 유지하고 Costco는 완화됩니다.",
+"o": "Walmart Drops 8% on Slowest Same-Store Sales Growth Since 2020; Target Holds Steady, Costco Eases",
+"u": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxPM0tHTEkyOWpaUnF2ekxySklFMHhxSWw3ZDFPWnJJU0szUlR2Tzl3dTVpdEZHMWZVQUx4cVdPV1otamNOMWxUQXRodU54S082LUpwWUxNbUlTQU9fQjRldEJSeE1pZ3RHaHZWdGZEU1B6ZlpLRG90Z1VXNi1CUlNOckZ1a2pETHpLNHBjLTc2bWduclRocGdTTmR6ZWo3YlYyVFZsMk1zQkdoNmpLb3pSaVZIVDN6LTM1X1hPZzMwSzhmQkV4RnQ5RU1TbHVIYWxuZVk2Uw?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-08-20",
+"t": "Target 2분기 실적 발표, 더 높은 판매 전망과 트래픽 강조",
+"o": "Target Q2 Earnings Call Highlights Higher Sales Outlook and Traffic",
+"u": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxOMllJaFUzdm5VWXEzejBCcVJ3aTE2STlfalprd245dUZhaXJrakRVMGcwR0h0eUYtYUtSY3h1dVVXVmdFdkdpT3ZFdnEyckZmUVJ5REl4dXlhUWlrTkFobk5uRGQwY1dQNFZfWmJWU3RNZkF4UTY5N285VEUtcXItbWUyQVNUWHZHT19MeWh3SjFUWWN6a0RTWUwzaklUQ3d5UUhpZ3pHZzMxLTNQaEhJRk1PZDhUeWFtS1FHTjdKMHh0OVFOMGVsQnFxb19NUEhBUllPb2l1RzIzT2twSTZEdW45QQ?oc=5",
+"m": "바이어 · Target"
+},
+{
+"d": "2026-08-20",
+"t": "주요 사실: Target(TGT)는 2026년 전망을 높입니다. 디지털 매출 상승",
+"o": "Key facts: Target (TGT) raises 2026 outlook; digital sales climb",
+"u": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPMGJHVVB3T0xYR2JNelVzZW5mNGVUSWZ0VVBNSDVyam5ETXhwNEFuVWd5dk9oSjhnREtDTXM1OEp5S055Qm5zMlVmUzVPNUZlbXAtbkVmMnVLVXVIUkR5d3FLenREdVREa09xNEdNZlRvUjQwNkRVeVBscF85UU92b0w4ZEpJQ2RyczM2V3dDWVlGTEMzdEVPNnVGNjBCamZzQXZsRjlUeGxSTDFNTVRfOGY3MEN0ekxEWXZ0Rmd2aw?oc=5",
+"m": "바이어 · Target"
+},
+{
+"d": "2026-08-19",
+"t": "Target, 회복 노력에 힘입어 판매 전망 향상",
+"o": "Target Boosts Sales Outlook as Recovery Efforts Gain Ground",
+"u": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxNY3pseFBUaFliTHdIclZ5SG1rU2JDeXZkZW5TdmZjYXNYY0V4V1k1TUx0eVVtZTVjaWh1QktSM1ZrZDBFREQzdkpSb2R3RVp4OC1RcWJwRWNlSTdnRENSeHdiWUxBbEhUNjllVVptZWIwR2E0eTg2cEpISlkxNjBfV25pZnhIV2hzdGZWSXRWbXVuTEVnVHRVT0ZIclhUSDBPZXRTN0wxSG5OUTJPVk53a2VQSzl3NmVt?oc=5",
+"m": "바이어 · Target"
+},
+{
+"d": "2026-08-19",
+"t": "Target, 2분기 매출 및 수익 상회 후 2026년 전망 상향",
+"o": "Target boosts 2026 outlook after Q2 sales and earnings beat",
+"u": "https://news.google.com/rss/articles/CBMiygFBVV95cUxORWs4cEFrdnJYU1JkaXBrRGZMYVdUVkZxc0hWQkZQQkRmcjdrejgtMGp6U3ptbzdHS1ZBOTZCdEpmalNNdmQwVTdTa3hqQ3lyR0w0bGdQeDdCYUdXMnhxa1RtQ3dMVFFwUU9CTlFrRDV0T3RJd2FVSDF5b3h0MzdnUFJ1ektPUjhXaVdsc1ptMGVkQjNxdmhYNzZ6cldoUkNkQ0piUzAwVkhETTc3ZFNiN3BVN1hrbzdEa0EwY3U1NHRvaXQ3SkJoTHN3?oc=5",
+"m": "바이어 · Target"
+},
+{
+"d": "2026-08-19",
+"t": "2분기 매출 반등 및 이익 두 배 증가로 Target Corp 주가 5% 상승",
+"o": "Target Corp shares rise 5% as sales rebound and profit doubles in Q2",
+"u": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxNMnpjVmd0RVJPQkdPNnhJTS1LZ3d0UTc4S0t4SlYxZHhmci0xQTJidXEtZmNMeE5zSmdKOGs1REZxb09lVlRRdWZKaUNxaHMtUXBub251Q2xqNTItaEZyTUhwUmZCTzljeS1fZGNFZTVHVm5INndDVlJ0UjVGX3NDdmF0QktCZTZTM3RZTG5XR1dld0xHMkZoMjBvUzBOV3lIVVlWZEZOVnhwb1VFNzdtTXY1Z0tGcDUtQVYtbWVEaG9tYlRIVHhMRUxsZ2NhTkswaEg1Z1RMOUk4TzlYWGNfZ1BpcDUweEJERzhROU130gHzAUFVX3lxTE1zd0cyRlJVZW9BdlVLZHZRV3I3cHo5cjVqck1leERFLVhBU3dWSWRZVjVvYWxXcVAyVWd5allWajY1UDlVeElZb3lQUkVLdEhBQVdEMXRTTktodXk5dktSeGVpZklLRnFacmxGNUxxOTJvWXNiYUhyY2wwRmNYRGplQXU1UlNsT01fbVlNaWZlellqaVZNVmNYMXkzQzcxX3pvQlNodDNHNUVMc3F0OWVNZlBERzlXc0lqXzRuNk9wdDQzaDBtY1VSWXNaUl9EdkdxRUJyQ3pDTERRVndNNzh5QVU5ZzlmYVpYdDFrNVh5aUJwaw?oc=5",
+"m": "바이어 · Target"
+}
+],
+"walmart": [
+{
+"d": "2026-08-28",
+"t": "Jim Cramer는 실적에 따라 Walmart Inc.(NASDAQ:WMT)의 매각을 권고했습니다.",
+"o": "Jim Cramer Advised Letting Go Of Walmart Inc. (NASDAQ:WMT) Following Earnings",
+"u": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQc3pkMEdKQ3o0MzBlQ0pyRUI4ZFF2VkVFWmRoZXZMNzlRX3FRaGx4alFUN3A4amRPSjNCbTBRbkpGOTd0QXI5Tk1qVHZkT21lUWI1dEtRZWc5UnA4OF83VUdZdGxYSEFhLUVfSDNIRklvN3B1dEpJcGpUN2pfd3hPc0hGSzMtVTNLZTcxZjl0UmMybXVfUTVkcXJ4eURrYzEt?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-08-27",
+"t": "Walmart 및 Amazon와 같은 회사에서 관세 환급을 어떻게 하고 있는지는 다음과 같습니다.",
+"o": "Here's what companies like Walmart and Amazon say they're doing with their tariff refunds",
+"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOS0dCODdjbWxfS2U1aVlsa0htQ2VkbjRkSEtYM29PVGZybTVubURyWmpFSVVjdVFLc1FhTF9mYUV3dkU4eFo3c0hROWt5NHh3elVQUEozS0NtOFBJYl95UHVqSEVnVFlCUTZXalRfdnJDRjhoeHlJVDJHV0lQeHJhem1PVkszc0dESVpEWkczbUktcEF3ZWw2TkwtUTVrZzRJSDQ5OVRSb1BjN3o4dlhlQ01JaXBLUk1IX1dNT1VoOUdLUGFGckVNZGxILTY?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-08-27",
+"t": "Walmart 주요 공급업체, 세이프웨이, 파산 신청, '운영 축소'",
+"o": "Major supplier to Walmart, Safeway, files for bankruptcy, ‘winding down operations’",
+"u": "https://news.google.com/rss/articles/CBMiowFBVV95cUxQeEtfUmdmaFAyaU5HWHMyS3I4dzl4dk9fVzVtR1c3eFZvNmlvN0tWWExFcEtzdFB3UDZXWFY0YjdSc3pCQVV5WUVmR3QwNnVTNlZJYTdJcHdNSGpEUlJTTmlRYnY0MWo0bVhzWUZ2bHVHc25ZVUtjaDdodkhrdmJLSU9qbkhTR3dSQmFLLTZVb2w1QWFyN1NKZDAxSzNZQ1JRMGtN?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-08-27",
+"t": "수익 후 Walmart 주식은 매수인가요, 매도인가요, 아니면 공정한 가치인가요?",
+"o": "After Earnings, Is Walmart Stock a Buy, a Sell, or Fairly Valued?",
+"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNd09lQndQb2FLcjJ2UFhLRm9SbC1rcWJrYm1Va2lXNEt5eE1xUjBDR3RUTzl4RTZfUllFTzRCU1JXWlk5cUx1MVdhYjVmRTZKNThEN2UwTUtFVlV4Y1dqWUFoRkdZeG50MFJfMFc2RnFVdE1JZk8ybTZWMFRjT1R0bTVseV84ejRWS3BDRUlTckJ3NndpeEpWTzdFMA?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-08-27",
+"t": "Walmart, 시나리오 의류 자체 브랜드 출시",
+"o": "Walmart Launches Scenario Apparel Own Brand",
+"u": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1oUXJtaUdfRFFMdVdyZkZxR1VoWDU5Vjl6c2ljREdoeXpiRWRTdjNjeVZHTGxFVHYzZTQ3aEVaN1V0N01oS3RodTk3UFZiYnJpR2lndjl5UFEwdG1CSTZBQ3U5T1ZSWVBvajB1THI2UDhuZll2NVE?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-08-27",
+"t": "Walmart의 2분기 실적 발표에서 꼭 읽어야 할 분석가 질문 5가지",
+"o": "5 Must-Read Analyst Questions From Walmart’s Q2 Earnings Call",
+"u": "https://news.google.com/rss/articles/CBMimgFBVV95cUxOSXgxY05NeGZMeG1LMkdseVFHQ1Fmbl95cUdqUlREb08wdUNkenZ6MGV1M1RmMnl2bUdkV1ZKWnpNdFNpc09xcndxdl95R2tiYklDeHF0cXI3eHBIUnRuTEFNRGJ1RWlpc1hDWlRJRTBraVZmbWI0THZGbE9wSzJERDNqWlFBOHFjQVNkSWtUWC12eEJYaklwaEdR?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-08-27",
+"t": "Walmart (WMT) 주식은 수익 측면에서 합리적으로 보이지만 광범위한 수표에 풍부합니다.",
+"o": "Walmart (WMT) Stock Looks Reasonable On Earnings But Rich On Broader Checks",
+"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxPUkJLVjNNdW8xbV9ZN2ZVYVpMOVFveUZVTnB1M1B1VXNsLTBHbU9yNHNLMjRZQ000RWRUMTNXQlYxdzA3SWNkUGVjNU5wZllVaHFzb01zWWpacmZ4Y0x2QTRfaHhUQ2l5MmM5LVZtNmRTazlkaEpLUFMtTkZaVTNQQ0VaVDhWLWJjUWZmVFctZmJ4VW90M1d6U0dQWngxQXc5LTJPd0FqZjdDUFJfaVZ2NlFtUUV0RFVXX283Ry1QYldoRjdRRzhxMWM3WGNNUGV50gHWAUFVX3lxTE53REx0YmlHMkcwQnl6cFl6TWh1ZVplaWM4T0drZ1p6eHU1Y0w0OXRJYWx1OEZaN1RDcnVxV3BpY01MYmc4dlVFRXZTQWs4QUxWbFlpMmVNcHlNMlotZDZ0M0RGam5MODIyV0NKMHVlLXZUUHNCb3JiNzRNWDBSOUxXRkQ5cEJFcGVLNTRxNWJsNkx3UUc0bHpKR0ROX3dZdGd3dUhEekdrd0oxUWp5TEc4bkpiZk1yYmtOZkNudHN2U1FMdnliMDNNVEJubzA4b3hjenQySEE?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-08-27",
+"t": "주요 Walmart 및 식료품 체인 공급업체, 7장 파산 신청",
+"o": "Key Walmart and grocery chain supplier files Chapter 7 bankruptcy",
+"u": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNRGRMTjNzRG1jT3Job0xPNUI3WE5yU01KNHRuWWVNeTUtRmU4STNqWHZMYkxwaHZ1QUVFcTl1OGFMOS0xV09rejNTbU1EZVU4VlZmZHNjZ1lJOF9DaVNMN0R6LThzM25vZW56Ulhnd2k5ZFlOVEFWR3UwS056RjNiVXBNYXk5TU40UmZzUG53bDVwaTdoSUZYQnlNeUlPRF9oZkI2NmR5ejNjOFExdDN5NVd3?oc=5",
+"m": "바이어 · Walmart"
+}
+],
+"kohls": [
+{
+"d": "2026-08-27",
+"t": "Kohl's 2분기 실적 Beat는 휴일 실행 및 마진에 초점을 맞췄습니다.",
+"o": "Kohl's Q2 Earnings Beat Shifts Focus to Holiday Execution and Margins",
+"u": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxQY2VmQTZLNFdacE5udnlhMXEyc1pjbDZOR1gwVGc1bU9USGFJSkozZUd6Tms2TzZGRUdGc3U2RkwwX3B1TXAxanRLcTY0QTdGNDVhRUFTVGRzcnhKMV9rMjd5V0s0QXZHUVpjcUUzNG9rdWFIM0Y2WVBiZWF1T083UVRJSlFrYzdaMnctS2Z5aHpsRUtIb2F0LWpYVk9QQU4wREtPMjd0ekFjMUpTZloxZE5rZFo4UVc1TDFzR0I2NlZ5YzQ?oc=5",
+"m": "바이어 · Target"
+},
+{
+"d": "2026-08-27",
+"t": "Kohl's Corp (KSS) (2026년 2분기) 실적 발표 하이라이트: 전략적",
+"o": "Kohl's Corp (KSS) (Q2 2026) Earnings Call Highlights: Strategic",
+"u": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxNVXhHRzJuaVZhd2ZUSDNIUUpXQ24zSGZhbWdiRzh4dDNGcHpVZk5oTnBrcUtpSldUR2FvYzNHc1I4SmdpeHJIN2hsNEdTZzRiRVUwam9qOHBuTWVyZWVnTU1XREo5TlZweXcxbm4wYXhHNGI1amZJU3lZMmRBQ1dkMGNFbFVPR2FIT0hYVEIyc0hqT2NJOTN2TTVCMzhial9oSFhXd3pyZFZVLWJ2ckRnRVZvT2pVZTVMY3FiRVU3WUtFcFVFMXJueW41OE1WRTFaMnduMngtTHg3NkpUOHA3RUhqS2pjenlFTnBGVXcydm51UQ?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-08-27",
+"t": "Kohl's CEO Michael Bender는 최근 실적에서 턴어라운드 조짐을 더 많이 확인했습니다.",
+"o": "Kohl's CEO Michael Bender sees more signs of a turnaround in latest earnings",
+"u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNYXJPOENzbWI0TWllT2YyVUpBRlAzN1JTSUU3eWJWTm9jVGgyN25GVkZMWWtRaHBBeGFsb1RvOHhhSTBRWUxENFk0b0g4aEFpUlRWN1BYOHNjR1Z3VXNJWUY1YW1SczR1cHgzQm1aSWlPUGNNSkVpcmFrUlhRMHhZa1FCY3diV0hRWmFCYlpfdWdWbGh3SndfRm9BYldmODBVVXc?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-08-27",
+"t": "Kohl's Corporation 2027년 2분기 실적 요약",
+"o": "Kohl's Corporation Q2 2027 Earnings Call Summary",
+"u": "https://news.google.com/rss/articles/CBMioAFBVV95cUxOdFFLWmtmb0VJU3BFclJ5LUpaVVdaUDl4TEJ1MlQ0ZkJuYjFiUzN1ZTdTMDg0SGwyTnd4ZXhONjIwQU1fTzNKeVVMa3plY19PbFdpdVliYjJ4dWxrV0hQMjl2enJSZ0piR0psSnB2M2VBR2drdmlJcHoxTmV2Qm01b2d4YWVxd1ZTYU5FTzNxcFFHeFoxTEtFeWRZb1hpNWxz?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-08-27",
+"t": "가치가 여전히 취약한 판매 회복을 만났기 때문에 Kohl's 주식은 매수입니까?",
+"o": "Is Kohl's Stock a Buy as Value Meets a Still-Fragile Sales Recovery?",
+"u": "https://news.google.com/rss/articles/CBMilwFBVV95cUxNNWt5aHZpU01qMDI5dHplUXJRajEyNEtubDhXd3RwbGNhMzJGTjJQQWVoVWo4QWtkdUhxYy1TX19HeEgxcEVxU2treDJwaGRkbmVGQkdBcXlFbXllZFVSSWFGeGxEeDQyazEyZXBaM1NFai1yaWZkdDYxZGR3d3lhS0oxQ1Q5aDJmUEpKUW9YeWJhdG93U0ZF?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-08-26",
+"t": "Kohl's 회계연도 2분기 조정 이익은 증가하고 매출은 감소합니다. 2026년 전망 상향 - Pre-Bell 주가 하락",
+"o": "Kohl's Fiscal Q2 Adjusted Earnings Rise, Sales Fall; Raises 2026 Outlook - Shares Down Pre-Bell",
+"u": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPcXpFaXUxQUdoZXkwSGEtNWtEakJFVjBKRnZEVmxOakEzTXktX0E1RjBubFFzSktDOG5YcElJX2JhOWZvdllZZmlQYnZOR3FWbGJHU1BaUjNGaS1YenFwRTZqMHJEeW8wV3YxNm5ENDJWZ3g2TFdUUmQyXy1RVF8xdUdoeUFib055ejZ1UHRuTmc4NS1YQjVhR1RzaHpEaWtJ?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-08-26",
+"t": "Earnings Flash (KSS) Kohl's Corporation, 2분기 조정 EPS를 주당 $1.28, FactSet 추정 $0.58 게시",
+"o": "Earnings Flash (KSS) Kohl's Corporation Posts Q2 Adjusted EPS $1.28 per Share, vs. FactSet Est of $0.58",
+"u": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxNczdTUVNvWjNDY0lMM0FTS2l1SHpld255OW9hdjZiSEZkWENramVUQkJsZ1ZaV2NzYTJjU2JZYklGV0ZNVnFDT0dvUjV6ektDZG0yVld0d1lqMHkyZzBjSjZyM25iVl9OQVN4WUlOWkgxa1pyRXo0SmZqZjRDWDVkVDQ3Qk9aVWM5dUc3aF93LWNEOXdRZTI3N1VyQUJkc1Izc0RaQWExWmFXQlhCaUZHQzR5N3V5T0NQUTNFT2xaLXdBRGhQTVdscnotYTJuRlk3MURFdEs3ZWYyM3ZzYkVwbA?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-08-26",
+"t": "Kohl's (KSS) 2분기 실적이 추정치를 상회했습니다.",
+"o": "Kohl's (KSS) Q2 Earnings Beat Estimates",
+"u": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPeUhRdzB1UjJScG93enRiWXFOa1I3TUlrSU1WOVNxME1ncU5fODRsa2FkV3BuR2xlZFVxQVh6R3BjOFNOOW9NUTFrV3YtWWM5enJuQTJ6WWZqa3BEc1RucndfVnEtRW9ZSFBnN3pjajI4QlNlbmNWdlNpV2N4T2x1LU9vVEtUZ2lnQUZCSkhLbkRVSzEyd0E?oc=5",
+"m": "바이어 · Kohl's"
+}
+],
+"aeo": [
+{
+"d": "2026-08-27",
+"t": "American Eagle Set to Report Q2 Earnings: What's in the Offing?",
+"o": "American Eagle Set to Report Q2 Earnings: What's in the Offing?",
+"u": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxNMjRuN0FkZk84ZVJ4ZXA0cnFGeDV1NXUzeG5CNUhpRVNlR0FoUDNMZEdOU2trOHdONXFXUXZ4U0tYM0dkVkVSXzZ6aVQ5LWoxVXh2Q0pKYkthaTdpSWNmX3dhLUJncHdUMm96bnF5UkhKck5sRENhY3U3RjV1V1dEeXdKcFgyb0xqV0RwMWZ2REV6UUNEU0tGbWhRSHBiVFhuWGtsbXF6NFNnXzBCWUtpQnVlWXZWbDZE?oc=5",
+"m": "바이어 · Costco"
+}
+],
+"anf": [
+{
+"d": "2026-08-27",
+"t": "Abercrombie & Fitch, '기록' 2분기 순매출 이후 2026년 전망 상향",
+"o": "Abercrombie & Fitch lifts 2026 outlook after ‘record’ Q2 net sales",
+"u": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9Fbm9fNHhWa0NNQzN0RTAyeFZTM042UWVsUzdPMmkwNElId2VGdUxsdmJscXdURkQ5MDdTSkpiaVVmakZJLVZwMkNkTTRJZVF1RzFiWGhLVE9FQ040WUd5V1AxZ3JEcGJnWXc?oc=5",
+"m": "Just Style"
+}
+]
+}
+}

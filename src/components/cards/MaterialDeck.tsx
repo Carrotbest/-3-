@@ -91,9 +91,9 @@ const MATERIAL_DECK_ROTATE_MAX = 52
 const MATERIAL_DECK_DEPTH_STEP = 120
 const HOME_DECK_ROTATE_MAX = 38
 const HOME_DECK_DEPTH_STEP = 80
-const DEAD_ZONE = 0.12
-const MIN_V = 1.8
-const MAX_V = 13
+const DEAD_ZONE = 0.28
+const MIN_V = 1.2
+const MAX_V = 7
 const VELOCITY_LERP = 0.18
 const MAX_FRAME_SECONDS = 0.05
 const STOP_VELOCITY = 0.025
@@ -583,11 +583,12 @@ export function MaterialDeck({
   )
 }
 
-export function MaterialDetailSheet({ item, onOpenChange, onEdit, onDeleted }: {
+export function MaterialDetailSheet({ item, onOpenChange, onEdit, onDeleted, onNavigate }: {
   item: MaterialItem | null
   onOpenChange: (open: boolean) => void
   onEdit?: (item: MaterialItem) => void
   onDeleted?: () => void
+  onNavigate?: (item: MaterialItem) => void
 }) {
   const link = httpsMaterialLink(item?.link)
   const remove = async () => {
@@ -621,6 +622,7 @@ export function MaterialDetailSheet({ item, onOpenChange, onEdit, onDeleted }: {
               )}
               <div><p className="text-xs font-semibold text-[var(--muted-foreground)]">태그</p><div className="mt-2 flex flex-wrap gap-2">{item.tags.length ? item.tags.map((tag) => <Badge key={tag} variant="outline">{tag}</Badge>) : <span className="text-sm text-[var(--muted-foreground)]">태그 없음</span>}</div></div>
               {link ? <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4"><Button asChild className="w-full"><a href={link} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true" />SharePoint에서 열기</a></Button></div> : null}
+              {onNavigate ? <Button type="button" variant="outline" className="w-full" onClick={() => { onNavigate(item); onOpenChange(false) }}><ArrowRight aria-hidden="true" />상세 화면으로 이동</Button> : null}
               {!item.readOnly && item.source === "manual" ? <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="outline" onClick={() => onEdit?.(item)}><Pencil aria-hidden="true" />수정</Button><Button type="button" variant="destructive" onClick={() => { void remove() }}><Trash2 aria-hidden="true" />삭제</Button></div> : null}
             </DialogBody>
           </>

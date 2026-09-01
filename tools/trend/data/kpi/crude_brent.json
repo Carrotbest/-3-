@@ -1,0 +1,257 @@
+{
+ "metric": "crude_brent",
+ "label": "국제 유가 (Brent)",
+ "unit": "$/bbl",
+ "freq": "월간",
+ "group": "gov",
+ "entity": "원자재",
+ "kind": "level",
+ "side": "",
+ "note": "폴리에스터 원료(PTA·MEG) 가격의 선행 지표.",
+ "stale_days": null,
+ "source_name": "World Bank Commodity Markets (Pink Sheet)",
+ "source_url": "https://www.worldbank.org/en/research/commodity-markets",
+ "fetched_at": "2026-09-01T03:28:51+00:00",
+ "points": [
+  {
+   "period": "2021-08",
+   "value": 70.0
+  },
+  {
+   "period": "2021-09",
+   "value": 74.6
+  },
+  {
+   "period": "2021-10",
+   "value": 83.7
+  },
+  {
+   "period": "2021-11",
+   "value": 80.8
+  },
+  {
+   "period": "2021-12",
+   "value": 74.3
+  },
+  {
+   "period": "2022-01",
+   "value": 85.5
+  },
+  {
+   "period": "2022-02",
+   "value": 95.8
+  },
+  {
+   "period": "2022-03",
+   "value": 115.6
+  },
+  {
+   "period": "2022-04",
+   "value": 105.8
+  },
+  {
+   "period": "2022-05",
+   "value": 112.4
+  },
+  {
+   "period": "2022-06",
+   "value": 120.1
+  },
+  {
+   "period": "2022-07",
+   "value": 108.9
+  },
+  {
+   "period": "2022-08",
+   "value": 98.6
+  },
+  {
+   "period": "2022-09",
+   "value": 90.2
+  },
+  {
+   "period": "2022-10",
+   "value": 93.1
+  },
+  {
+   "period": "2022-11",
+   "value": 91.1
+  },
+  {
+   "period": "2022-12",
+   "value": 80.9
+  },
+  {
+   "period": "2023-01",
+   "value": 83.1
+  },
+  {
+   "period": "2023-02",
+   "value": 82.7
+  },
+  {
+   "period": "2023-03",
+   "value": 78.5
+  },
+  {
+   "period": "2023-04",
+   "value": 84.1
+  },
+  {
+   "period": "2023-05",
+   "value": 75.7
+  },
+  {
+   "period": "2023-06",
+   "value": 74.9
+  },
+  {
+   "period": "2023-07",
+   "value": 80.1
+  },
+  {
+   "period": "2023-08",
+   "value": 86.2
+  },
+  {
+   "period": "2023-09",
+   "value": 94.0
+  },
+  {
+   "period": "2023-10",
+   "value": 91.1
+  },
+  {
+   "period": "2023-11",
+   "value": 83.2
+  },
+  {
+   "period": "2023-12",
+   "value": 77.9
+  },
+  {
+   "period": "2024-01",
+   "value": 80.2
+  },
+  {
+   "period": "2024-02",
+   "value": 83.8
+  },
+  {
+   "period": "2024-03",
+   "value": 85.4
+  },
+  {
+   "period": "2024-04",
+   "value": 90.1
+  },
+  {
+   "period": "2024-05",
+   "value": 82.0
+  },
+  {
+   "period": "2024-06",
+   "value": 82.6
+  },
+  {
+   "period": "2024-07",
+   "value": 85.3
+  },
+  {
+   "period": "2024-08",
+   "value": 80.9
+  },
+  {
+   "period": "2024-09",
+   "value": 74.3
+  },
+  {
+   "period": "2024-10",
+   "value": 75.7
+  },
+  {
+   "period": "2024-11",
+   "value": 74.4
+  },
+  {
+   "period": "2024-12",
+   "value": 73.8
+  },
+  {
+   "period": "2025-01",
+   "value": 79.2
+  },
+  {
+   "period": "2025-02",
+   "value": 75.2
+  },
+  {
+   "period": "2025-03",
+   "value": 72.6
+  },
+  {
+   "period": "2025-04",
+   "value": 67.7
+  },
+  {
+   "period": "2025-05",
+   "value": 64.2
+  },
+  {
+   "period": "2025-06",
+   "value": 71.5
+  },
+  {
+   "period": "2025-07",
+   "value": 71.0
+  },
+  {
+   "period": "2025-08",
+   "value": 68.2
+  },
+  {
+   "period": "2025-09",
+   "value": 68.0
+  },
+  {
+   "period": "2025-10",
+   "value": 64.7
+  },
+  {
+   "period": "2025-11",
+   "value": 63.6
+  },
+  {
+   "period": "2025-12",
+   "value": 62.7
+  },
+  {
+   "period": "2026-01",
+   "value": 66.8
+  },
+  {
+   "period": "2026-02",
+   "value": 71.1
+  },
+  {
+   "period": "2026-03",
+   "value": 103.7
+  },
+  {
+   "period": "2026-04",
+   "value": 120.4
+  },
+  {
+   "period": "2026-05",
+   "value": 107.5
+  },
+  {
+   "period": "2026-06",
+   "value": 85.4
+  },
+  {
+   "period": "2026-07",
+   "value": 83.4
+  }
+ ]
+}

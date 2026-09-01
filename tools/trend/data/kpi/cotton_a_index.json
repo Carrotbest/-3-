@@ -1,0 +1,257 @@
+{
+ "metric": "cotton_a_index",
+ "label": "면화 A Index",
+ "unit": "$/kg",
+ "freq": "월간",
+ "group": "gov",
+ "entity": "원자재",
+ "kind": "level",
+ "side": "",
+ "note": "면 원사 원가의 선행 지표. 급등하면 코튼 개발 건의 원가 재검토가 필요하다.",
+ "stale_days": null,
+ "source_name": "World Bank Commodity Markets (Pink Sheet)",
+ "source_url": "https://www.worldbank.org/en/research/commodity-markets",
+ "fetched_at": "2026-09-01T03:28:51+00:00",
+ "points": [
+  {
+   "period": "2021-08",
+   "value": 2.23
+  },
+  {
+   "period": "2021-09",
+   "value": 2.29
+  },
+  {
+   "period": "2021-10",
+   "value": 2.59
+  },
+  {
+   "period": "2021-11",
+   "value": 2.79
+  },
+  {
+   "period": "2021-12",
+   "value": 2.65
+  },
+  {
+   "period": "2022-01",
+   "value": 2.91
+  },
+  {
+   "period": "2022-02",
+   "value": 3.05
+  },
+  {
+   "period": "2022-03",
+   "value": 3.11
+  },
+  {
+   "period": "2022-04",
+   "value": 3.42
+  },
+  {
+   "period": "2022-05",
+   "value": 3.61
+  },
+  {
+   "period": "2022-06",
+   "value": 3.4
+  },
+  {
+   "period": "2022-07",
+   "value": 2.89
+  },
+  {
+   "period": "2022-08",
+   "value": 2.74
+  },
+  {
+   "period": "2022-09",
+   "value": 2.59
+  },
+  {
+   "period": "2022-10",
+   "value": 2.2
+  },
+  {
+   "period": "2022-11",
+   "value": 2.23
+  },
+  {
+   "period": "2022-12",
+   "value": 2.22
+  },
+  {
+   "period": "2023-01",
+   "value": 2.21
+  },
+  {
+   "period": "2023-02",
+   "value": 2.19
+  },
+  {
+   "period": "2023-03",
+   "value": 2.1
+  },
+  {
+   "period": "2023-04",
+   "value": 2.1
+  },
+  {
+   "period": "2023-05",
+   "value": 2.07
+  },
+  {
+   "period": "2023-06",
+   "value": 2.04
+  },
+  {
+   "period": "2023-07",
+   "value": 2.05
+  },
+  {
+   "period": "2023-08",
+   "value": 2.11
+  },
+  {
+   "period": "2023-09",
+   "value": 2.16
+  },
+  {
+   "period": "2023-10",
+   "value": 2.11
+  },
+  {
+   "period": "2023-11",
+   "value": 1.99
+  },
+  {
+   "period": "2023-12",
+   "value": 2.0
+  },
+  {
+   "period": "2024-01",
+   "value": 2.03
+  },
+  {
+   "period": "2024-02",
+   "value": 2.2
+  },
+  {
+   "period": "2024-03",
+   "value": 2.2
+  },
+  {
+   "period": "2024-04",
+   "value": 1.99
+  },
+  {
+   "period": "2024-05",
+   "value": 1.91
+  },
+  {
+   "period": "2024-06",
+   "value": 1.83
+  },
+  {
+   "period": "2024-07",
+   "value": 1.79
+  },
+  {
+   "period": "2024-08",
+   "value": 1.76
+  },
+  {
+   "period": "2024-09",
+   "value": 1.82
+  },
+  {
+   "period": "2024-10",
+   "value": 1.84
+  },
+  {
+   "period": "2024-11",
+   "value": 1.8
+  },
+  {
+   "period": "2024-12",
+   "value": 1.76
+  },
+  {
+   "period": "2025-01",
+   "value": 1.72
+  },
+  {
+   "period": "2025-02",
+   "value": 1.72
+  },
+  {
+   "period": "2025-03",
+   "value": 1.71
+  },
+  {
+   "period": "2025-04",
+   "value": 1.73
+  },
+  {
+   "period": "2025-05",
+   "value": 1.72
+  },
+  {
+   "period": "2025-06",
+   "value": 1.73
+  },
+  {
+   "period": "2025-07",
+   "value": 1.74
+  },
+  {
+   "period": "2025-08",
+   "value": 1.73
+  },
+  {
+   "period": "2025-09",
+   "value": 1.72
+  },
+  {
+   "period": "2025-10",
+   "value": 1.68
+  },
+  {
+   "period": "2025-11",
+   "value": 1.66
+  },
+  {
+   "period": "2025-12",
+   "value": 1.63
+  },
+  {
+   "period": "2026-01",
+   "value": 1.64
+  },
+  {
+   "period": "2026-02",
+   "value": 1.63
+  },
+  {
+   "period": "2026-03",
+   "value": 1.7
+  },
+  {
+   "period": "2026-04",
+   "value": 1.9
+  },
+  {
+   "period": "2026-05",
+   "value": 2.03
+  },
+  {
+   "period": "2026-06",
+   "value": 1.9
+  },
+  {
+   "period": "2026-07",
+   "value": 1.96
+  }
+ ]
+}

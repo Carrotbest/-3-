@@ -36,6 +36,12 @@ service cloud.firestore {
       allow write: if isOwner();
     }
 
+    match /trendStars/{uid} {
+      allow read: if isApproved();
+      allow create, update: if isApproved() && request.auth.uid == uid;
+      allow delete: if isOwner() || (isApproved() && request.auth.uid == uid);
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

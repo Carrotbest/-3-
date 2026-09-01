@@ -29,6 +29,17 @@
 - **실데이터·캐시 내용을 로그·git·공개 파일에 넣지 말 것.**
 - TS 실시간공유 데이터 손실 이력 있음 — 동기화 손대기 전 `fabric-rnd-ts-sync-incident` 필독.
 
+## TREND REPORT (`tools/trend`, `src/routes/TrendFabric.tsx`, `src/routes/TrendMacro.tsx`)
+- 파이썬 수집기가 `public/data/trend/{feed,kpi,status}.json`을 만들고 두 화면이 그 파일만 fetch한다. 서버와 DB가 없다. AI 호출도 없다.
+- 자동 실행은 `.github/workflows/trend.yml`. 매일 06:00 KST 기사, 화요일 06:30 KST 지표. 커밋 후 `deploy.yml`을 `workflow_call`로 직접 부른다(GITHUB_TOKEN push는 배포를 못 깨운다).
+- Secrets 두 개. `SEC_CONTACT`(바이어 매출), `CENSUS_API_KEY`(미국 수입 통계). 없으면 그 지표만 건너뛴다.
+- 기사 채택은 `config/relevance.json` 점수(기본 threshold 7). 점수 낮은 기사도 보관하므로 사전 수정 후 `python run.py rescore`만 돌리면 된다. 근거 확인은 `python run.py why "검색어"`.
+- **긴 목록을 `SectionCard`로 감싸지 말 것.** `Reveal`의 IntersectionObserver 임계값이 0.12라 카드가 뷰포트보다 훨씬 길면 영영 안 보인다. 기사 피드는 `Card`를 직접 쓴다.
+- 기사 제목은 무료 MT(clients5, MyMemory 순)로 한국어 변환해 `title_ko`에 캐시한다. `config/glossary.json` 용어는 자리표로 감싸 원문 표기를 유지한다. 실패하면 원문 제목으로 떨어진다.
+- HIT는 조회수가 아니라 같은 dedup_key를 다룬 매체 수다. RSS에 조회수가 없다.
+- `sources.json`의 `kind: buyer` 소스는 MACRO TREND 바이어 카드 전용이다. 소재 점수에서 걸러져 FABRIC TREND에는 안 나온다. 매칭어는 `buyers.json`의 `alias`이며, Target·Amazon처럼 보통명사와 겹치면 `ambiguous: true`로 두어 유통 맥락을 함께 요구한다.
+- 상세 운영 문서는 `tools/trend/README.md`.
+
 ## 데이터 소스 규칙
 | 화면 | 원본 | 기준 |
 |---|---|---|
@@ -36,6 +47,7 @@
 | RDDA 등록 | ~2026-07 대장 FL.# YYMM / 08~ DD Received | 동일 FL 1건(대장 우선) `mergedFlRegistrations` |
 | DEVELOPMENT | DD+대장 | `fabric-rnd-fl-merge-persistence` |
 | STUDY/TS | 엑셀+웹입력 | 주차별 / 중복제외 |
+| TREND | RSS 24곳, SEC 공시, World Bank, US Census | 사전 점수 채택, 공개 자료만 |
 | RDDA REPORT | 월별 파일 | YTD 스냅샷, 합산 금지(미착수) |
 
 ## 코덱스 협업
