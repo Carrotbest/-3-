@@ -27,7 +27,7 @@ import { Warehouse } from "@/routes/Warehouse"
 import { Portfolio } from "@/routes/Portfolio"
 import { TrendFabric } from "@/routes/TrendFabric"
 import { TrendMacro } from "@/routes/TrendMacro"
-import { ensureTsSeed, migrateLocalTsIntoSync, repairTsData, setAppState } from "@/store/useAppStore"
+import { ensureTsSeed, migrateLocalTsIntoSync, repairTsData, setAppState, useAppStore } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
 const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
@@ -106,13 +106,16 @@ function AppLayout() {
       } else if (Object.keys(cached).length) {
         setAppState(cached)
       }
-      // 샘플관리대장은 배포된 아카이브가 유일한 원천이다. 기존 IndexedDB·내장값보다 항상 나중에 덮어쓴다.
-      // 다만 아카이브를 못 읽었을 때(null)는 건드리지 않는다. 빈 배열로 덮으면 기존 대장이 지워지고,
-      // completed는 Firestore 동기화 대상에서 뺐으므로 되돌릴 방법이 없다.
+      // 샘플관리대장 아카이브는 "비었을 때만 채우는 씨앗"이다. 이미 값이 있으면 건드리지 않는다.
+      // 배포할 때마다 웹에서 쌓은 데이터가 되돌아가면 안 된다. 갱신은 화면에서 엑셀을 올려서 하고,
+      // 그 값이 Firestore로 팀에 퍼진다. 아카이브는 신규 PC나 캐시를 지운 경우를 위한 출발점일 뿐이다.
       const archive = await loadLedgerArchive()
       if (!current) return
-      if (archive) {
+      const existingCompleted = useAppStore.getState().completed
+      const needsLedgerSeed = !Array.isArray(existingCompleted) || existingCompleted.length === 0
+      if (archive && archive.length > 0 && needsLedgerSeed) {
         setAppState({ completed: archive })
+        // 로컬에만 둔다. 씨앗을 Firestore로 올리면 팀이 공유하는 최신 값을 덮을 수 있다.
         await saveCacheLocal("completed", archive)
       }
       await ensureTsSeed()

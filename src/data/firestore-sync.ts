@@ -64,8 +64,10 @@ async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promis
 }
 
 const CACHE_KEY_SET = new Set<string>(CACHE_KEYS)
-// 샘플관리대장은 저장소의 정적 아카이브만 사용하며 Firestore에서는 주고받지 않는다.
-const SKIP_SYNC_KEYS = new Set<string>(["completed"])
+// 모든 캐시 키를 팀 공유 대상으로 실시간 반영한다.
+// 샘플관리대장(completed)도 포함한다. 저장소의 아카이브는 값이 비었을 때만 채우는
+// 씨앗이고, 팀이 실제로 공유하는 원천은 여기다.
+const SKIP_SYNC_KEYS = new Set<string>()
 
 /**
  * 아직 중앙에 시딩되지 않은(또는 잘못 비워진) 원격 값으로
@@ -73,8 +75,12 @@ const SKIP_SYNC_KEYS = new Set<string>(["completed"])
  * 원격이 빈 배열인데 로컬에 데이터가 있으면 해당 키는 건너뛴다.
  */
 function wouldWipeLocalData(key: CacheKey, value: unknown): boolean {
-  if (!Array.isArray(value) || value.length > 0) return false
   const local = (useAppStore.getState() as unknown as Record<string, unknown>)[key]
+  // null·undefined는 중앙에 올라와서는 안 되는 값이다(pushCache가 값이 비었을 때만 만든다).
+  // 예전에 이 값이 그대로 내려와 completed를 null로 만들었고, 그걸 for...of로 도는
+  // 파생 계산이 예외를 던져 화면이 통째로 백지가 됐다. 배열 자리에는 절대 넣지 않는다.
+  if (value === null || value === undefined) return Array.isArray(local)
+  if (!Array.isArray(value) || value.length > 0) return false
   return Array.isArray(local) && local.length > 0
 }
 

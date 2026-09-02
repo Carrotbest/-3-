@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { useNavigate } from "react-router-dom"
 import {
   ArrowUpRight, BookOpenCheck, CalendarDays, CheckCircle2, ClipboardList,
-  Layers3, LoaderCircle, RefreshCw, TimerReset, TrendingUp, Wrench,
+  Layers3, LoaderCircle, TimerReset, TrendingUp, Wrench,
 } from "lucide-react"
 import { Bar, CartesianGrid, ComposedChart, LabelList, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
@@ -10,7 +10,6 @@ import { MaterialDeck, MaterialDetailSheet, MaterialFormSheet } from "@/componen
 import { OwnerLaneBoard } from "@/components/charts/OwnerLaneBoard"
 import { HomeTrendSection } from "@/components/dashboard/HomeTrendSection"
 import { PageHeader } from "@/components/layout/PageHeader"
-import { DataUpload } from "@/components/upload/DataUpload"
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Reveal } from "@/components/motion/Reveal"
 import { Magnetic } from "@/components/motion/Magnetic"
@@ -41,7 +40,6 @@ import { fmtDateFull } from "@/data/format"
 import { stageOf, type ChemicalCategory, type ChemicalPortfolio } from "@/data/chemical"
 import { loadTrendFeed, loadTrendKpi, type TrendFeed, type TrendKpi } from "@/data/trend"
 import type { DevRecord, MaterialItem, MaterialKind } from "@/data/schema"
-import { ingestDevelopment } from "@/data/upload"
 import { hoverLift } from "@/lib/motion"
 import { HOME_GLASS_HOVER, HOME_GLASS_STATIC, HOME_GLASS_SURFACE } from "@/lib/home-surface"
 import { useAppStore } from "@/store/useAppStore"
@@ -873,7 +871,8 @@ export function Home() {
 
   return (
     <section className="-mt-1 min-w-0 space-y-8">
-      <PageHeader title="대시보드" subtitle="DD 전체현황을 기준으로 개발 업무와 최신 정보를 확인합니다." actions={<div className="flex flex-wrap justify-end gap-2"><DataUpload kind="home-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} /><Button type="button" variant="outline" onClick={() => navigate("/sync")}><RefreshCw aria-hidden="true" />데이터 상태</Button></div>} />
+      {/* DD 업로드는 DEVELOPMENT와 DD MASTER에, 데이터 상태는 사이드바 DATA에 있다. HOME 머리에서는 뺀다. */}
+      <PageHeader title="대시보드" subtitle="DD 전체현황을 기준으로 개발 업무와 최신 정보를 확인합니다." />
 
       <Reveal>
         <div className="group block w-full rounded-[12px] text-left">
