@@ -690,9 +690,12 @@ function parseSampleSheet(workbook: XLSX.WorkBook, wanted: string, detectedHeade
   for (let index = dataStart; index < rows.length; index++) {
     const row = rows[index]
     const styleNo = text(row[columns.styleNo])
-    if (!styleNo || isSubtotal(styleNo)) continue
     const storageNo = text(row[columns.storageNo])
     const flNo = text(row[columns.flNo])
+    const identifiers = [styleNo, flNo, storageNo]
+    // 과거 시트는 실제 개발 건이어도 Style/#가 비어 있을 수 있다. FL 또는 R&D No.가 있으면 살리고,
+    // 세 식별값이 모두 비었거나 어느 식별 칸이 소계/합계 표시인 행만 버린다.
+    if (identifiers.every((value) => !value) || identifiers.some(isSubtotal)) continue
     samples.push({
       id: completedSampleId({ flNo, storageNo, styleNo, sourceSheet: name }),
       storageNo,
