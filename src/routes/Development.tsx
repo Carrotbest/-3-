@@ -85,6 +85,7 @@ import {
   DEFAULT_COLUMNS,
   FIELDS,
   ownerDisplayName,
+  RETIRED_MEMBERS,
   STATUS,
   type CompletedSample,
   type DevRecord,
@@ -333,10 +334,12 @@ const ACCENT: Record<AccentKey, { from: string; to: string; glow: string; soft: 
 }
 
 const OWNER_ACCENTS: AccentKey[] = ["teal", "violet", "emerald", "amber", "slate"]
-// 담당자별 현황 기본 노출 4명(실이름). 화면 표시는 ownerDisplayName으로 진영은→J 익명화.
-const DEFAULT_OWNER_NAMES = ["박향근", "진영은", "김지현", "변재휘"]
-// 접힌 상태로만 두는 그 외 담당자(퇴사자). 펼치면 카드가 열린다.
-const EXTRA_OWNER_NAMES = ["이종현", "박세현"]
+// 담당자별 현황 기본 노출 3명(현 담당자 실이름).
+const DEFAULT_OWNER_NAMES = ["박향근", "김지현", "변재휘"]
+// 퇴사자는 접힌 상태로만 두고, 펼치면 과거 실적 카드를 연다.
+const EXTRA_OWNER_NAMES: readonly string[] = RETIRED_MEMBERS
+// 공통 익명화 규칙은 유지하되 이 담당자 카드 영역에서만 실명을 보여준다.
+const ownerCardDisplayName = (name: string) => name === "진영은" ? name : ownerDisplayName(name)
 const OWNER_RANGE_OPTIONS = [
   { months: 6, label: "6개월" },
   { months: 12, label: "1년" },
@@ -651,11 +654,11 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
   const receipt = useMemo(() => receiptStatus(active), [active])
   const funnel = useMemo(() => processFunnel(active), [active])
   const owners = useMemo(() => byOwnerDetailed(active), [active])
-  // 담당자 카드 로스터: 기본 4명 + 그 외(이종현·박세현)만. 실이름 기준.
+  // 담당자 카드 로스터: 현 담당자 3명 + 퇴사자 3명. 실이름 기준.
   const roster = useMemo(() => [...DEFAULT_OWNER_NAMES, ...EXTRA_OWNER_NAMES], [])
   const ownerTrends = useMemo(() => ownerMonthlyFlTrend(records, completed, today, ownerMonths, roster), [completed, ownerMonths, records, roster, today])
   const ownerSources = useMemo(() => ownerFlSourceBreakdown(records, completed, today, ownerMonths, roster), [completed, ownerMonths, records, roster, today])
-  // 기본 4명(박향근/J/김지현/변재휘)을 먼저, 나머지는 기간 FL 등록 많은 순으로 배치.
+  // 기본 3명(박향근/김지현/변재휘)을 먼저, 퇴사자는 기간 FL 등록 많은 순으로 배치.
   const ownerOrder = useMemo(() => {
     const rest = roster.filter((name) => !DEFAULT_OWNER_NAMES.includes(name))
     rest.sort((x, y) => (ownerSources[y]?.total ?? 0) - (ownerSources[x]?.total ?? 0) || x.localeCompare(y, "ko-KR"))
@@ -822,7 +825,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
 
       <SectionCard
         title="담당자별 현황"
-        subtitle={`최근 ${ownerMonths >= 12 ? `${ownerMonths / 12}년` : `${ownerMonths}개월`} 월별 FL 등록 추이와 개발처(GD·자체개발·생산팀·완사입) 분포입니다. 기본 4명 표시, 그 외 담당자는 펼쳐서 확인하세요.`}
+        subtitle={`최근 ${ownerMonths >= 12 ? `${ownerMonths / 12}년` : `${ownerMonths}개월`} 월별 FL 등록 추이와 개발처(GD·자체개발·생산팀·완사입) 분포입니다. 기본 3명 표시, 그 외 담당자는 펼쳐서 확인하세요.`}
         actions={(
           <div className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] p-1" role="group" aria-label="담당자별 현황 조회 기간 선택">
             {OWNER_RANGE_OPTIONS.map((option) => (
@@ -845,12 +848,12 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
               <Reveal key={name} delay={index * 75}>
                 <OwnerCard
                   name={name}
-                  displayName={ownerDisplayName(name)}
+                  displayName={ownerCardDisplayName(name)}
                   rank={index + 1}
                   trend={ownerTrends[name] ?? []}
                   source={ownerSources[name] ?? EMPTY_OWNER_SOURCE}
                   onCollapse={() => toggleOwner(name)}
-                  onOpen={() => setListPopup({ title: `${ownerDisplayName(name)} 개발 목록`, description: `진행중 ${active.filter((row) => row.owner === name).length.toLocaleString("ko-KR")}건`, rows: active.filter((row) => row.owner === name) })}
+                  onOpen={() => setListPopup({ title: `${ownerCardDisplayName(name)} 개발 목록`, description: `진행중 ${active.filter((row) => row.owner === name).length.toLocaleString("ko-KR")}건`, rows: active.filter((row) => row.owner === name) })}
                 />
               </Reveal>
             ))}
@@ -862,7 +865,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
                 {ownerOrder.filter((name) => !expandedOwners.has(name)).map((name) => (
                   <button key={name} type="button" onClick={() => toggleOwner(name)} className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)] outline-none transition-colors hover:bg-[var(--accent)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
                     <Plus aria-hidden="true" className="size-3.5 text-[var(--muted-foreground)]" />
-                    {ownerDisplayName(name)}
+                    {ownerCardDisplayName(name)}
                     <span className="tabular-nums text-[var(--muted-foreground)]">{(ownerSources[name]?.total ?? 0).toLocaleString("ko-KR")}건</span>
                   </button>
                 ))}

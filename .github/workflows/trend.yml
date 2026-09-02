@@ -51,6 +51,12 @@ jobs:
           MT_CONTACT: ${{ secrets.MT_CONTACT }}
         run: python run.py collect
 
+      - name: 대표 이미지 보강
+        if: github.event.schedule == '0 21 * * *' || (github.event_name == 'workflow_dispatch' && (inputs.mode == 'articles' || inputs.mode == 'all'))
+        continue-on-error: true
+        working-directory: tools/trend
+        run: python run.py images
+
       - name: KPI 수집
         # 주간 cron 또는 웹에서 KPI/전체를 요청했을 때만 돈다. 월간 지표를 매일 긁지 않는다.
         if: github.event.schedule == '30 21 * * 1' || (github.event_name == 'workflow_dispatch' && (inputs.mode == 'kpi' || inputs.mode == 'all'))

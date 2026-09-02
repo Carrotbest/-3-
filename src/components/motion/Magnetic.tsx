@@ -47,6 +47,7 @@ export function Magnetic({
 }: MagneticProps) {
   const ref = useRef<HTMLDivElement>(null)
   const glareRef = useRef<HTMLSpanElement>(null)
+  const restingRect = useRef<DOMRect | null>(null)
   const [active, setActive] = useState(false)
 
   const reduce = useRef(false)
@@ -123,11 +124,12 @@ export function Magnetic({
     const state = springs.current
     if (!node || !state) return
 
-    const rect = node.getBoundingClientRect()
+    const rect = restingRect.current
+    if (!rect) return
     if (rect.width === 0 || rect.height === 0) return
-    // 카드 중심을 0, 가장자리를 ±1 로 본 상대 좌표.
-    const offsetX = (event.clientX - rect.left) / rect.width - 0.5
-    const offsetY = (event.clientY - rect.top) / rect.height - 0.5
+    // 진입 순간의 변형 전 경계를 기준으로 삼고, 가장자리 밖 좌표도 ±0.5 안에 가둔다.
+    const offsetX = Math.max(-0.5, Math.min(0.5, (event.clientX - rect.left) / rect.width - 0.5))
+    const offsetY = Math.max(-0.5, Math.min(0.5, (event.clientY - rect.top) / rect.height - 0.5))
 
     const { strength: pull, tilt: maxTilt } = config.current
     state.x.to(offsetX * 2 * pull)
@@ -143,10 +145,14 @@ export function Magnetic({
 
   const handleEnter = (event: PointerEvent<HTMLDivElement>) => {
     if (reduce.current || event.pointerType !== "mouse") return
+    const node = ref.current
+    if (!node) return
+    restingRect.current = node.getBoundingClientRect()
     setActive(true)
   }
 
   const handleLeave = () => {
+    restingRect.current = null
     setActive(false)
     const state = springs.current
     if (!state) return
@@ -166,6 +172,7 @@ export function Magnetic({
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
       onPointerCancel={handleLeave}
+      onPointerDown={handleLeave}
       className={cn(
         "relative h-full min-w-0 [--hover-lift:0px] [transform-style:preserve-3d]",
         active && activeClassName,

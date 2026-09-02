@@ -41,10 +41,10 @@ export interface TrendFeed {
     entities: TrendEntityFacet[]
   }
   daily: Array<{ date: string; total: number; by: Record<string, number> }>
-  momentum: Array<{ tag: string; recent: number; prior: number; delta: number; weeks: number[] }>
+  momentum: Array<{ tag: string; label_en?: string; recent: number; prior: number; delta: number; weeks: number[] }>
   /** 직전 기간에 없다가 최근 28일에 처음 나온 태그. publish.py의 _fresh가 만든다.
    *  보관 이력이 짧은 초기에는 과다 검출된다. 비교할 과거분이 아직 얇기 때문이다. */
-  fresh?: Array<{ tag: string; n: number; first: string }>
+  fresh?: Array<{ tag: string; label_en?: string; n: number; first: string }>
   intake?: {
     source_total: number
     days: Record<string, { sources: number; scanned: number; kept: number; material: number }>

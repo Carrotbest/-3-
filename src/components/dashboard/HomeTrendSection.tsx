@@ -104,11 +104,16 @@ function FabricTrendStack({ articles }: { articles: TrendArticle[] }) {
     >
       <CardContent className="p-5 sm:p-6">
         <div className="flex items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-semibold tracking-[0.12em] text-[var(--muted-foreground)]">FABRIC</p>
-            <h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">최근 소재 기술 기사</h3>
+            <h3 className="mt-1 truncate text-base font-semibold text-[var(--foreground)]">최근 소재 기술 기사</h3>
           </div>
-          <span className="text-xs tabular-nums text-[var(--muted-foreground)]">{activeIndex + 1} / {articles.length}</span>
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="text-xs tabular-nums text-[var(--muted-foreground)]">{activeIndex + 1} / {articles.length}</span>
+            <Button asChild variant="outline" size="sm" className="h-7 gap-1 px-2 text-[11px] [&_svg]:size-3.5">
+              <Link to="/trend/fabric" aria-label="FABRIC TREND 전체 보기">전체 보기<ArrowUpRight aria-hidden="true" /></Link>
+            </Button>
+          </div>
         </div>
 
         <div className="relative mt-5 h-[22rem] sm:h-[20.5rem]">
@@ -294,11 +299,16 @@ function MacroTrendTicker({ cards }: { cards: KpiCard[] }) {
     >
       <CardContent className="p-5 sm:p-6">
         <div className="flex items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-semibold tracking-[0.12em] text-[var(--muted-foreground)]">MACRO</p>
-            <h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">주요 거시 지표</h3>
+            <h3 className="mt-1 truncate text-base font-semibold text-[var(--foreground)]">주요 거시 지표</h3>
           </div>
-          <Badge variant="outline" className="border-white/65 bg-white/34 text-[10px]">3 / {cards.length}</Badge>
+          <div className="flex shrink-0 items-center gap-2">
+            <Badge variant="outline" className="border-white/65 bg-white/34 text-[10px]">3 / {cards.length}</Badge>
+            <Button asChild variant="outline" size="sm" className="h-7 gap-1 px-2 text-[11px] [&_svg]:size-3.5">
+              <Link to="/trend/macro" aria-label="MACRO TREND 전체 보기">전체 보기<ArrowUpRight aria-hidden="true" /></Link>
+            </Button>
+          </div>
         </div>
 
         <div className="relative mt-5 overflow-hidden" style={{ height: MACRO_ROW_HEIGHT * 3 }} aria-label={`거시 지표 ${cards.length}개`}>
@@ -336,15 +346,9 @@ export function HomeTrendSection({ feed, kpi, loading }: { feed: TrendFeed | nul
 
   return (
     <section aria-labelledby="trend-home-title">
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 id="trend-home-title" className="text-base font-semibold text-[var(--foreground)]">TREND</h2>
-          <p className="mt-1 text-sm text-[var(--muted-foreground)]">소재 기술 동향과 시장 거시 지표를 함께 봅니다.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline" size="sm"><Link to="/trend/fabric">FABRIC 전체 보기<ArrowUpRight aria-hidden="true" /></Link></Button>
-          <Button asChild variant="outline" size="sm"><Link to="/trend/macro">MACRO 전체 보기<ArrowUpRight aria-hidden="true" /></Link></Button>
-        </div>
+      <div className="mb-5">
+        <h2 id="trend-home-title" className="text-base font-semibold text-[var(--foreground)]">TREND</h2>
+        <p className="mt-1 text-sm text-[var(--muted-foreground)]">소재 기술 동향과 시장 거시 지표를 함께 봅니다.</p>
       </div>
 
       {loading ? (

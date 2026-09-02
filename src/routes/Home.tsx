@@ -39,10 +39,14 @@ import {
 import { fmtDateFull } from "@/data/format"
 import { stageOf, type ChemicalCategory, type ChemicalPortfolio } from "@/data/chemical"
 import { loadTrendFeed, loadTrendKpi, type TrendFeed, type TrendKpi } from "@/data/trend"
-import type { DevRecord, MaterialItem, MaterialKind } from "@/data/schema"
+import { SAMPLE_OWNERS, type DevRecord, type MaterialItem, type MaterialKind } from "@/data/schema"
 import { hoverLift } from "@/lib/motion"
 import { HOME_GLASS_HOVER, HOME_GLASS_STATIC, HOME_GLASS_SURFACE } from "@/lib/home-surface"
 import { useAppStore } from "@/store/useAppStore"
+
+const HOME_HIDDEN_OWNER_NAMES = SAMPLE_OWNERS
+  .filter((owner) => owner.label === "J")
+  .map((owner) => owner.name)
 
 function KpiCard({ icon, label, value, rangeLabel, caption, accent, delay = 0, children, onClick, onCalendarClick }: {
   icon: ReactNode
@@ -59,7 +63,7 @@ function KpiCard({ icon, label, value, rangeLabel, caption, accent, delay = 0, c
 }) {
   return (
     <Reveal delay={delay}>
-      <Magnetic strength={5} lift={4} tilt={1.2}>
+      <Magnetic strength={5} lift={4} tilt={0}>
       <Card className={`group relative h-full overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`}>
         <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/80" />
         <span aria-hidden="true" className="pointer-events-none absolute -right-12 -top-14 size-32 rounded-full opacity-[0.055] blur-2xl transition-[opacity,transform] duration-500 group-hover:scale-110 group-hover:opacity-[0.11] motion-reduce:transition-none" style={{ background: accent }} />
@@ -95,7 +99,7 @@ function ScheduleCard({ dueSoon, late, onClick }: { dueSoon: number; late: numbe
   return (
     <Reveal delay={150}>
       <button type="button" aria-haspopup="dialog" onClick={onClick} className="group block h-full w-full cursor-pointer rounded-[12px] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
-        <Magnetic strength={5} lift={4} tilt={1.2}>
+        <Magnetic strength={5} lift={4} tilt={0}>
         <Card className={`relative h-full overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`}>
           <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/80" />
           <CardContent className="relative flex h-full flex-col p-6 sm:p-7">
@@ -929,14 +933,14 @@ export function Home() {
             </div>
           </div>
           <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-5">
-            <Magnetic strength={8} lift={6} tilt={3}>
+            <Magnetic strength={8} lift={6} tilt={0}>
             <div className="group/item relative h-full overflow-hidden rounded-[10px] border border-white/75 bg-white/60 p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.2)] backdrop-blur transition-[box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.26)] motion-reduce:transition-none">
               <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-gradient-to-r from-[var(--gradient-1)] to-[var(--gradient-3)]" />
               <p className="text-[11px] font-medium text-[var(--muted-foreground)]">{rddaMonths}개월 TOTAL</p><p className="mt-1 text-2xl font-semibold tracking-tight"><NumberTicker value={monthlyKpis.total} /><span className="ml-1 text-xs text-[var(--muted-foreground)]">건</span></p>
             </div>
             </Magnetic>
             {RDDA_SERIES.map((series) => (
-              <Magnetic key={series.key} strength={8} lift={6} tilt={3}>
+              <Magnetic key={series.key} strength={8} lift={6} tilt={0}>
               <div className="group/item relative h-full overflow-hidden rounded-[10px] border border-white/75 bg-white/60 p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.18)] backdrop-blur transition-[box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.24)] motion-reduce:transition-none">
                 <span aria-hidden="true" className="absolute inset-x-3 top-0 h-0.5 rounded-full" style={{ background: series.color }} />
                 <span aria-hidden="true" className="absolute -right-4 -top-5 size-12 rounded-full opacity-10 blur-xl transition-opacity duration-300 group-hover/item:opacity-25" style={{ background: series.color }} />
@@ -952,7 +956,7 @@ export function Home() {
 
       <section aria-labelledby="owner-board-title">
         <div className="mb-5 flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--gradient-3)] to-[var(--gradient-1)] text-white shadow-[0_7px_18px_-6px_rgba(76,91,212,0.65)]"><ClipboardList className="size-4" aria-hidden="true" /></span><div><h2 id="owner-board-title" className="text-base font-semibold text-[var(--foreground)]">담당자별 진행 현황</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">담당자·공정 단계별 진행 중 스타일 분포입니다.</p></div></div>
-        <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}><OwnerLaneBoard rows={records} onSelect={() => navigate("/development")} /></Card>
+        <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}><OwnerLaneBoard rows={records} hideOwners={HOME_HIDDEN_OWNER_NAMES} onSelect={() => navigate("/development")} /></Card>
       </section>
 
       <section aria-labelledby="work-report-title">

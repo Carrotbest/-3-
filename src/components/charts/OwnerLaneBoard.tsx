@@ -27,12 +27,14 @@ interface OwnerLaneBoardProps {
   today?: Date
   onSelect: (record: DevRecord) => void
   ownerAliases?: Record<string, string>
+  hideOwners?: readonly string[]
 }
 
 const CHART_WIDTH = 1200
 const STAGE_X = [225, 420, 615, 810, 1005] as const
 const ROW_START = 135
 const ROW_GAP = 82
+const NO_HIDDEN_OWNERS: readonly string[] = []
 
 const STAGE_COLORS = [
   "var(--gradient-1)",
@@ -143,7 +145,7 @@ function FlowNode({
       onFocusCapture={onActivate}
       onBlurCapture={onDeactivate}
     >
-      <Magnetic strength={2} tilt={4} lift={5} scale={1.035} stiffness={105} damping={18} className="grid place-items-center rounded-full">
+      <Magnetic strength={2} tilt={0} lift={5} scale={1.035} stiffness={105} damping={18} className="grid place-items-center rounded-full">
         <button
           type="button"
           aria-label={`${owner} · ${stage.label} · ${cell.count} OPT · ${urgencyText(cell)} · 옵션 목록 열기`}
@@ -192,9 +194,28 @@ interface SelectedProcess {
   cell: LaneCell
 }
 
-export function OwnerLaneBoard({ rows, today = new Date(), onSelect, ownerAliases }: OwnerLaneBoardProps) {
+export function OwnerLaneBoard({ rows, today = new Date(), onSelect, ownerAliases, hideOwners = NO_HIDDEN_OWNERS }: OwnerLaneBoardProps) {
   const { ref: boardRef, inView } = useInView<HTMLDivElement>()
-  const board = useMemo(() => ownerLaneBoard(rows, today), [rows, today])
+  const board = useMemo(() => {
+    const fullBoard = ownerLaneBoard(rows, today)
+    if (!hideOwners.length) return fullBoard
+
+    const hiddenOwnerSet = new Set(hideOwners)
+    const visibleRows = fullBoard.rows.filter((row) => !hiddenOwnerSet.has(row.owner))
+    const stageTotals = BOARD_STAGES.map((_, stageIndex) =>
+      visibleRows.reduce((sum, row) => sum + row.cells[stageIndex].count, 0),
+    )
+
+    return {
+      rows: visibleRows,
+      stageTotals,
+      total: visibleRows.reduce((sum, row) => sum + row.total, 0),
+      maxCell: visibleRows.reduce(
+        (max, row) => Math.max(max, ...row.cells.map((cell) => cell.count)),
+        0,
+      ),
+    }
+  }, [hideOwners, rows, today])
   const [activeOwner, setActiveOwner] = useState<number | null>(null)
   const [selectedProcess, setSelectedProcess] = useState<SelectedProcess | null>(null)
   const chartHeight = Math.max(300, ROW_START + Math.max(0, board.rows.length - 1) * ROW_GAP + 58)

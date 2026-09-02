@@ -231,6 +231,20 @@ input.dd-date::-webkit-calendar-picker-indicator {
 @keyframes progress { from { width: 0%; } to { width: 100%; } }
 @keyframes fade-in { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
 @keyframes shine { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } to { background-position: 0% 0%; } }
+@keyframes trend-hit-pulse {
+  0%, 100% {
+    background-color: color-mix(in oklab, var(--warning) 16%, var(--card));
+    box-shadow: inset 0 0 0 color-mix(in oklab, var(--warning) 0%, transparent);
+  }
+  50% {
+    background-color: color-mix(in oklab, var(--warning) 30%, var(--card));
+    box-shadow: inset 0 0 .7rem color-mix(in oklab, var(--warning) 18%, transparent);
+  }
+}
+
+.trend-hit-badge {
+  animation: trend-hit-pulse 2.6s ease-in-out infinite;
+}
 
 /* Landing choreography: the real workspace assembles over roughly three seconds. */
 @keyframes landing-intro-reveal {
@@ -301,6 +315,11 @@ input.dd-date::-webkit-calendar-picker-indicator {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .trend-hit-badge {
+    animation: none;
+    background-color: color-mix(in oklab, var(--warning) 16%, var(--card));
+  }
+
   .landing-intro-reveal,
   .landing-intro-line,
   .landing-intro-scene,

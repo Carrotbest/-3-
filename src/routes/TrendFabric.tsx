@@ -20,6 +20,7 @@ import {
   type SortKey, type TrendArticle, type TrendCategory, type TrendFeed,
 } from "@/data/trend"
 import { HOME_GLASS_HOVER, HOME_GLASS_STATIC, HOME_GLASS_SURFACE } from "@/lib/home-surface"
+import { useInView } from "@/lib/useInView"
 import { cn } from "@/lib/utils"
 
 const PAGE = 40      // 한 번에 그리는 기사 수
@@ -46,6 +47,23 @@ interface CategorySummaryRow {
   count: number
 }
 
+const CATEGORY_GRADIENT: Record<TrendCategory, string> = {
+  MATERIAL: "linear-gradient(90deg,color-mix(in oklab,var(--chart-1) 72%,black),var(--chart-1),color-mix(in oklab,var(--chart-1) 55%,white))",
+  YARN: "linear-gradient(90deg,color-mix(in oklab,var(--chart-2) 72%,black),var(--chart-2),color-mix(in oklab,var(--chart-2) 55%,white))",
+  FABRIC: "linear-gradient(90deg,color-mix(in oklab,var(--chart-3) 72%,black),var(--chart-3),color-mix(in oklab,var(--chart-3) 55%,white))",
+  CHEMICAL: "linear-gradient(90deg,color-mix(in oklab,var(--chart-4) 72%,black),var(--chart-4),color-mix(in oklab,var(--chart-4) 55%,white))",
+  RETAIL: "linear-gradient(90deg,color-mix(in oklab,var(--chart-5) 72%,black),var(--chart-5),color-mix(in oklab,var(--chart-5) 55%,white))",
+  ETC: "linear-gradient(90deg,color-mix(in oklab,var(--muted-foreground) 72%,black),var(--muted-foreground),color-mix(in oklab,var(--muted-foreground) 48%,white))",
+}
+
+const TREND_BAR_TRANSITION = "duration-[1950ms] [transition-timing-function:linear] motion-reduce:transition-none"
+const KEYWORD_CARD_BACKGROUND = [
+  "linear-gradient(135deg,color-mix(in oklab,var(--chart-1) 30%,var(--card)),color-mix(in oklab,var(--chart-3) 18%,var(--card)))",
+  "linear-gradient(135deg,color-mix(in oklab,var(--chart-1) 24%,var(--card)),color-mix(in oklab,var(--chart-3) 14%,var(--card)))",
+  "linear-gradient(135deg,color-mix(in oklab,var(--chart-1) 18%,var(--card)),color-mix(in oklab,var(--chart-3) 10%,var(--card)))",
+  "linear-gradient(135deg,color-mix(in oklab,var(--chart-1) 13%,var(--card)),color-mix(in oklab,var(--chart-3) 7%,var(--card)))",
+] as const
+
 type ArticleExcerpt = Pick<TrendArticle, "t" | "u" | "d" | "c" | "m"> & { s?: string; x?: string; i?: string }
 
 function ArticleThumbnail({ article, className, showCategory = true }: { article: Pick<ArticleExcerpt, "i" | "c">; className?: string; showCategory?: boolean }) {
@@ -59,6 +77,7 @@ function FabricHero({ categories, onCategory }: {
   categories: CategorySummaryRow[]
   onCategory: (category: TrendCategory) => void
 }) {
+  const { ref, inView } = useInView<HTMLDivElement>({ once: true, threshold: 0.25 })
   const total = categories.reduce((sum, row) => sum + row.count, 0)
   return (
     <Reveal>
@@ -71,14 +90,14 @@ function FabricHero({ categories, onCategory }: {
               <p className="text-sm font-semibold text-[var(--foreground)]">최근 30일 기사 분류</p>
               <p className="text-xs tabular-nums text-[var(--muted-foreground)]">피드 {total}건</p>
             </div>
-            <div className="mt-4 flex h-6 overflow-hidden rounded-full bg-[var(--muted)]" aria-label={`최근 30일 기사 분류 합계 ${total}건`}>
+            <div ref={ref} className="mt-4 flex h-6 overflow-hidden rounded-full bg-[var(--muted)] shadow-inner" aria-label={`최근 30일 기사 분류 합계 ${total}건`}>
               {categories.map((row) => (
                 <button
                   key={row.category}
                   type="button"
                   onClick={() => onCategory(row.category)}
-                  className="group/bar relative min-w-2 outline-none transition-[filter,transform] hover:z-10 hover:brightness-110 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-white motion-reduce:transition-none"
-                  style={{ width: `${total ? (row.count / total) * 100 : 0}%`, backgroundColor: CATEGORY_COLOR[row.category] }}
+                  className={`group/bar relative outline-none transition-[width,filter] ${TREND_BAR_TRANSITION} hover:z-10 hover:brightness-110 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-white`}
+                  style={{ width: `${inView && total ? (row.count / total) * 100 : 0}%`, background: CATEGORY_GRADIENT[row.category] }}
                   aria-label={`${CATEGORY_LABEL[row.category]} ${row.count}건 보기`}
                   title={`${CATEGORY_LABEL[row.category]} ${row.count}건`}
                 >
@@ -102,12 +121,13 @@ function FabricHero({ categories, onCategory }: {
   )
 }
 
-function TrendKpiCard({ icon, label, value, rangeLabel, caption, accent, delay, pressed, onClick }: {
+function TrendKpiCard({ icon, label, value, rangeLabel, caption, sourceBadge, accent, delay, pressed, onClick }: {
   icon: ReactNode
   label: string
   value: number
   rangeLabel?: string
   caption: string
+  sourceBadge?: string
   accent: string
   delay: number
   pressed: boolean
@@ -115,7 +135,8 @@ function TrendKpiCard({ icon, label, value, rangeLabel, caption, accent, delay, 
 }) {
   return (
     <Reveal delay={delay} className="h-full">
-      <Magnetic strength={5} lift={4} tilt={1.2} className="h-full">
+      {/* tilt는 0이다. 3D 회전 안에 backdrop-filter 카드가 들어가면 호버 중 내용이 다시 래스터화되어 흐려진다. */}
+      <Magnetic strength={5} lift={4} tilt={0} className="h-full">
         <button type="button" onClick={onClick} aria-pressed={pressed} className="group h-full w-full rounded-[12px] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]">
           <Card className={cn(`relative h-full overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_HOVER}`, pressed && "border-white/90 shadow-[0_2px_6px_rgba(15,23,42,0.05),0_22px_44px_-24px_rgba(76,91,212,0.22)]")}>
             <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/80" />
@@ -123,7 +144,7 @@ function TrendKpiCard({ icon, label, value, rangeLabel, caption, accent, delay, 
             <CardContent className="relative flex h-full flex-col p-4 sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <span className="flex size-9 items-center justify-center rounded-[9px] border border-white/70 shadow-[0_7px_16px_-12px_rgba(15,23,42,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 motion-reduce:transition-none" style={{ color: accent, background: `color-mix(in oklab, ${accent} 11%, var(--card))` }}>{icon}</span>
-                <Badge variant="outline" className="border-white/65 bg-white/34 text-[10px] font-medium text-[var(--muted-foreground)]">RSS 43곳</Badge>
+                {sourceBadge ? <Badge variant="outline" className="border-white/65 bg-white/34 text-[10px] font-medium text-[var(--muted-foreground)]">{sourceBadge}</Badge> : null}
               </div>
               <p className="mt-5 text-sm font-medium text-[var(--muted-foreground)]">{label}</p>
               <p className="mt-1.5 text-3xl font-semibold tracking-[-0.035em] text-[var(--foreground)]">
@@ -374,13 +395,16 @@ function heatScore(article: TrendArticle) {
   return (article.h - 1) * 5 + article.v + recency
 }
 
-function HighlightGrid({ articles, stars, onStar }: {
-  articles: TrendArticle[]; stars: Set<string>; onStar: (article: TrendArticle) => void
-}) {
+function getHighlightArticles(articles: TrendArticle[]) {
   const cut = daysAgo(21)
-  const rows = FEATURE_CATEGORIES.flatMap((category) => articles
+  return FEATURE_CATEGORIES.flatMap((category) => articles
     .filter((article) => article.c === category && article.d >= cut)
     .sort((a, b) => heatScore(b) - heatScore(a) || b.d.localeCompare(a.d)).slice(0, 4))
+}
+
+function HighlightGrid({ rows, stars, onStar }: {
+  rows: TrendArticle[]; stars: Set<string>; onStar: (article: TrendArticle) => void
+}) {
   if (!rows.length) return <p className="py-12 text-center text-sm text-[var(--muted-foreground)]">최근 21일 하이라이트가 없습니다.</p>
   return <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">{rows.map((article, index) => (
     <Reveal key={article.id} delay={index * 75} className="h-full">
@@ -390,8 +414,18 @@ function HighlightGrid({ articles, stars, onStar }: {
             <button type="button" className="relative block aspect-[16/9] w-full overflow-hidden bg-gradient-to-br from-[var(--chart-3)] via-[var(--chart-2)] to-[var(--chart-1)] text-left" aria-label={`${article.t} 내용 보기`}>
               {article.i ? <img src={article.i} alt="" loading="lazy" referrerPolicy="no-referrer" className="size-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none" onError={(event) => { event.currentTarget.style.display = "none" }} /> : <Sparkles aria-hidden="true" className="absolute left-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 text-white/80" />}
               <span className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-                <Badge variant="secondary"><span className="font-mono text-[10px]">{article.c}</span><span className="ml-1">{CATEGORY_LABEL[article.c]}</span></Badge>
-                {article.h > 1 ? <Badge variant="secondary" className="gap-1 text-[10px]"><Flame aria-hidden="true" className="size-3" />HIT {article.h}</Badge> : null}
+                <Badge
+                  variant="outline"
+                  className="backdrop-blur-md"
+                  style={{
+                    backgroundColor: `color-mix(in oklab, ${CATEGORY_COLOR[article.c]} 22%, rgb(255 255 255 / 76%))`,
+                    borderColor: `color-mix(in oklab, ${CATEGORY_COLOR[article.c]} 52%, black)`,
+                    color: `color-mix(in oklab, ${CATEGORY_COLOR[article.c]} 68%, black)`,
+                  }}
+                >
+                  <span className="font-mono text-[10px]">{article.c}</span><span className="ml-1">{CATEGORY_LABEL[article.c]}</span>
+                </Badge>
+                {article.h > 1 ? <Badge variant="secondary" className="trend-hit-badge gap-1 text-[10px] [text-shadow:0_0_6px_color-mix(in_oklab,var(--warning)_55%,transparent)]"><Flame aria-hidden="true" className="size-3 drop-shadow-[0_0_4px_color-mix(in_oklab,var(--warning)_65%,transparent)]" />HIT {article.h}</Badge> : null}
               </span>
             </button>
           </ExcerptDialog>
@@ -409,7 +443,7 @@ function HighlightGrid({ articles, stars, onStar }: {
 }
 
 function HotKeywordStrip({ rows, freshTags, onSelect }: {
-  rows: Array<TrendFeed["momentum"][number] & { article: Pick<TrendArticle, "i" | "c"> }>
+  rows: TrendFeed["momentum"]
   freshTags: TrendFeed["fresh"]
   onSelect: (tag: string) => void
 }) {
@@ -421,20 +455,32 @@ function HotKeywordStrip({ rows, freshTags, onSelect }: {
       </div>
       {rows.length ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {rows.map((row, index) => (
-          <Reveal key={row.tag} delay={index * 75} className="h-full">
-            <Tilt3D max={10} lift={12} className="h-full">
-              <button type="button" onClick={() => onSelect(row.tag)} className="group relative h-full w-full overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]" aria-label={`${index + 1}위 ${row.tag} 기사 ${row.recent}건 보기`}>
-                <span className="relative block aspect-[2/1] overflow-hidden bg-gradient-to-br from-[var(--chart-3)] via-[var(--chart-2)] to-[var(--chart-1)]">
-                  {row.article.i ? <img src={row.article.i} alt="" loading="lazy" referrerPolicy="no-referrer" className="size-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none" onError={(event) => { event.currentTarget.style.display = "none" }} /> : <Sparkles aria-hidden="true" className="absolute left-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 text-white/80" />}
-                  <Badge className="absolute left-3 top-3" variant="secondary">{index + 1}</Badge>
-                  <Badge className="absolute right-3 top-3 tabular-nums" variant="secondary">+{row.delta}</Badge>
+          <Reveal key={row.tag} delay={0} className="h-full">
+            <button
+              type="button"
+              onClick={() => onSelect(row.tag)}
+              className="group relative flex min-h-40 w-full flex-col overflow-hidden rounded-[var(--radius)] border border-white/70 p-4 text-left shadow-[0_12px_30px_-24px_rgba(15,23,42,0.45)] outline-none transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-white hover:shadow-[0_20px_38px_-24px_rgba(15,23,42,0.5)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transform-none motion-reduce:transition-none"
+              style={{ background: KEYWORD_CARD_BACKGROUND[index] }}
+              aria-label={`${index + 1}위 ${row.tag} 기사 ${row.recent}건 보기`}
+            >
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-white/0 transition-colors duration-300 group-hover:bg-white/15 motion-reduce:transition-none" />
+              <span className="relative flex items-start justify-between gap-3">
+                <Badge variant="outline" className="border-white/80 bg-white/55 text-[10px] font-semibold text-[var(--foreground)] shadow-sm">{index + 1}위</Badge>
+                <Badge variant="outline" className="border-white/80 bg-white/55 text-[10px] font-semibold tabular-nums text-[var(--foreground)] shadow-sm">
+                  {row.prior > 0 ? `+${row.delta}` : "신규"}
+                </Badge>
+              </span>
+              <span className="relative mt-3 min-w-0">
+                <strong className="block truncate text-2xl font-bold uppercase leading-none tracking-[-0.035em] text-[var(--foreground)]" title={row.label_en || row.tag}>{row.label_en || row.tag}</strong>
+                {row.label_en ? <span className="mt-1.5 block truncate text-xs font-medium text-[var(--muted-foreground)]">{row.tag}</span> : null}
+              </span>
+              <span className="relative mt-auto flex items-end justify-between gap-3 pt-4">
+                <span className="text-xs tabular-nums text-[var(--muted-foreground)]">
+                  최근 4주 <strong className="font-semibold text-[var(--foreground)]">{row.recent}건</strong> · 직전 {row.prior}건 · {row.prior > 0 ? `${(row.recent / row.prior).toFixed(1)}배` : "신규"}
                 </span>
-                <span className="block p-4">
-                  <strong className="block text-lg font-semibold tracking-[-0.02em] text-[var(--foreground)]">{row.tag}</strong>
-                  <span className="mt-3 block text-xs text-[var(--muted-foreground)]">최근 4주 {row.recent}건 · 직전 {row.prior}건</span>
-                </span>
-              </button>
-            </Tilt3D>
+                <span className="shrink-0 translate-x-1 rounded-full border border-white/75 bg-white/45 px-2 py-1 text-[10px] font-semibold text-[var(--foreground)] opacity-70 transition-[transform,opacity,background-color] duration-300 group-hover:translate-x-0 group-hover:bg-white/75 group-hover:opacity-100 motion-reduce:transform-none motion-reduce:transition-none">기사 {row.recent}건 보기</span>
+              </span>
+            </button>
           </Reveal>
         ))}
       </div> : <p className="rounded-[var(--radius)] border border-dashed border-[var(--border)] py-10 text-center text-sm text-[var(--muted-foreground)]">오른 소재 태그가 아직 없습니다.</p>}
@@ -577,6 +623,7 @@ export function TrendFabric() {
   }, [articles, since, gate, category, tag, media, starOnly, stars, needle])
 
   const visible = useMemo(() => sortArticles(filtered.rows, sort), [filtered.rows, sort])
+  const highlightArticles = useMemo(() => getHighlightArticles(articles), [articles])
 
   useEffect(() => { setLimit(PAGE) }, [range, gate, category, tag, media, starOnly, needle, sort])
 
@@ -601,13 +648,6 @@ export function TrendFabric() {
     () => (feed?.momentum ?? []).filter((row) => row.delta > 0 && !TREND_CARD_EXCLUDE.has(row.tag)).slice(0, 4),
     [feed],
   )
-
-  const risingClips = useMemo(() => rising.map((row) => ({
-    ...row,
-    article: articles
-      .filter((article) => article.g.includes(row.tag) && article.i)
-      .sort((a, b) => b.d.localeCompare(a.d))[0] ?? { i: "", c: "ETC" as TrendCategory },
-  })), [articles, rising])
 
   const categorySummary = useMemo(() => {
     const cut = daysAgo(30)
@@ -677,34 +717,54 @@ export function TrendFabric() {
 
   const intake7 = feed.intake?.days["7"]
   const intake7Pct = intake7?.scanned ? Math.round((intake7.kept / intake7.scanned) * 100) : 0
+  const sourceTotal = feed.intake?.source_total
+  const sourceBadge = sourceTotal ? `RSS ${sourceTotal}곳` : undefined
+  const activeTabIndex = tab === "highlight" ? 0 : tab === "all" ? 1 : 2
 
   return (
     <section className="min-w-0 space-y-5">
-      <FabricHero categories={categorySummary} onCategory={(next) => applyCardFilter({ range: 30, category: next })} />
+      <Reveal delay={0}>
+        <HotKeywordStrip rows={rising} freshTags={freshTags} onSelect={(next) => applyCardFilter({ range: 30, tag: next })} />
+      </Reveal>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <TrendKpiCard icon={<Sparkles className="size-4" />} label="최근 7일 소재 기사" value={gateStat.d7.material}
-          rangeLabel={intake7 ? `소스 ${feed.intake?.source_total ?? 0}곳 중 ${intake7.sources}곳에서 ${intake7.scanned}건을 훑어 ${intake7.kept}건 채택 (${intake7Pct}%)` : undefined}
-          caption={intake7 ? `그중 소재 게이트 통과 ${intake7.material}건` : `피드 ${gateStat.d7.total}건의 ${gateStat.d7.pct}% · 나머지 유통 ${gateStat.d7.retail}건`}
-          accent="var(--chart-2)" delay={0} onClick={() => applyCardFilter({ range: 7, gate: "material" })}
-          pressed={tab === "all" && range === 7 && gate === "material" && !category && !tag && !media && !starOnly && !needle} />
-        <TrendKpiCard icon={<Users className="size-4" />} label="저장된 기사" value={savedStat.total}
-          rangeLabel="팀 별표" caption={savedStat.members ? `팀원 ${savedStat.members}명이 표시` : "아직 표시한 기사가 없습니다"}
-          accent="var(--chart-4)" delay={75} onClick={() => setTab("saved")} pressed={tab === "saved"} />
-      </div>
+      <Reveal delay={60} className="[transition-delay:60ms]">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <TrendKpiCard icon={<Sparkles className="size-4" />} label="최근 7일 소재 기사" value={gateStat.d7.material}
+            rangeLabel={intake7 && sourceTotal ? `소스 ${sourceTotal}곳 중 ${intake7.sources}곳에서 ${intake7.scanned}건을 훑어 ${intake7.kept}건 채택 (${intake7Pct}%)` : undefined}
+            caption={intake7 ? `그중 소재 게이트 통과 ${intake7.material}건` : `피드 ${gateStat.d7.total}건의 ${gateStat.d7.pct}% · 나머지 유통 ${gateStat.d7.retail}건`}
+            sourceBadge={sourceBadge} accent="var(--chart-2)" delay={0} onClick={() => applyCardFilter({ range: 7, gate: "material" })}
+            pressed={tab === "all" && range === 7 && gate === "material" && !category && !tag && !media && !starOnly && !needle} />
+          <TrendKpiCard icon={<Users className="size-4" />} label="저장된 기사" value={savedStat.total}
+            rangeLabel="팀 별표" caption={savedStat.members ? `팀원 ${savedStat.members}명이 표시` : "아직 표시한 기사가 없습니다"}
+            sourceBadge={sourceBadge} accent="var(--chart-4)" delay={0} onClick={() => setTab("saved")} pressed={tab === "saved"} />
+        </div>
+      </Reveal>
 
-      <HotKeywordStrip rows={risingClips} freshTags={freshTags} onSelect={(next) => applyCardFilter({ range: 30, tag: next })} />
+      <Reveal delay={120} className="[transition-delay:120ms]">
+        <FabricHero categories={categorySummary} onCategory={(next) => applyCardFilter({ range: 30, category: next })} />
+      </Reveal>
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as typeof tab)}>
-        <TabsList aria-label="TREND FABRIC 보기" className="h-auto rounded-full border border-white/80 bg-white/60 p-1">
-          <TabsTrigger value="highlight" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm">하이라이트</TabsTrigger>
-          <TabsTrigger value="all" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm">전체 기사</TabsTrigger>
-          <TabsTrigger value="saved" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm">저장 기사</TabsTrigger>
+        <TabsList aria-label="TREND FABRIC 보기" className="relative grid h-auto w-full grid-cols-3 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-1 sm:w-fit">
+          <span
+            aria-hidden="true"
+            className="absolute inset-y-1 left-1 w-[calc((100%_-_0.5rem)/3)] rounded-[calc(var(--radius)-2px)] bg-[var(--primary)] shadow-sm transition-transform duration-200 ease-out motion-reduce:transition-none"
+            style={{ transform: `translateX(${activeTabIndex * 100}%)` }}
+          />
+          <TabsTrigger value="highlight" className="relative z-10 gap-2 rounded-[calc(var(--radius)-2px)] px-4 py-2.5 text-base font-semibold text-[var(--foreground)] transition-colors duration-200 data-[state=active]:bg-transparent data-[state=active]:text-[var(--primary-foreground)] data-[state=active]:shadow-none motion-reduce:transition-none">
+            <span>하이라이트</span><span className="rounded-full border border-current px-1.5 py-0.5 text-[10px] font-semibold tabular-nums opacity-75">{highlightArticles.length}</span>
+          </TabsTrigger>
+          <TabsTrigger value="all" className="relative z-10 gap-2 rounded-[calc(var(--radius)-2px)] px-4 py-2.5 text-base font-semibold text-[var(--foreground)] transition-colors duration-200 data-[state=active]:bg-transparent data-[state=active]:text-[var(--primary-foreground)] data-[state=active]:shadow-none motion-reduce:transition-none">
+            <span>전체 기사</span><span className="rounded-full border border-current px-1.5 py-0.5 text-[10px] font-semibold tabular-nums opacity-75">{visible.length}</span>
+          </TabsTrigger>
+          <TabsTrigger value="saved" className="relative z-10 gap-2 rounded-[calc(var(--radius)-2px)] px-4 py-2.5 text-base font-semibold text-[var(--foreground)] transition-colors duration-200 data-[state=active]:bg-transparent data-[state=active]:text-[var(--primary-foreground)] data-[state=active]:shadow-none motion-reduce:transition-none">
+            <span>저장 기사</span><span className="rounded-full border border-current px-1.5 py-0.5 text-[10px] font-semibold tabular-nums opacity-75">{savedStat.total}</span>
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
       {tab === "highlight" ? (
-        <HighlightGrid articles={articles} stars={stars} onStar={toggleStar} />
+        <HighlightGrid rows={highlightArticles} stars={stars} onStar={toggleStar} />
       ) : null}
 
       {tab === "saved" ? (

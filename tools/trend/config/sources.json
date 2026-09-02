@@ -169,8 +169,8 @@
     {
       "name": "Apparel Resources",
       "region": "해외",
-      "via": "googlenews",
-      "url": "apparelresources.com",
+      "via": "direct",
+      "url": "https://apparelresources.com/feed/",
       "keyword_filter": []
     },
     {

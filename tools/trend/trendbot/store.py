@@ -14,7 +14,7 @@ from datetime import date, datetime, timedelta, timezone
 
 from . import config
 
-FIELDS = ("key", "title", "title_ko", "link", "published", "collected", "summary", "content", "image",
+FIELDS = ("key", "title", "title_ko", "link", "published", "collected", "summary", "content", "image", "image_tried",
           "source", "region", "category", "tags", "entities", "score", "relevant",
           "gate", "hits", "sources")
 

@@ -55,6 +55,21 @@ def _daily(rows, days=30):
     return [{"date": d, "total": sum(per_day[d].values()), "by": dict(per_day[d])} for d in span]
 
 
+def _tag_english_labels():
+    """태그별 매칭어 중 첫 ASCII 문자열을 화면용 영문 표기로 쓴다."""
+    tags = config.load("tags.json")
+    labels = {}
+    for tag, matches in tags.items():
+        if not isinstance(matches, list):
+            continue
+        labels[tag] = next(
+            (text.strip() for text in matches
+             if isinstance(text, str) and text.strip() and text.isascii()),
+            "",
+        )
+    return labels
+
+
 def _momentum(rows):
     """최근 28일과 직전 28일 태그 증감을 12주 스파크라인과 함께 만든다."""
     today = date.today()
@@ -75,11 +90,13 @@ def _momentum(rows):
             wk = (day - timedelta(days=day.weekday())).isoformat()
             if wk in week_keys:
                 weeks.setdefault(tag, Counter())[wk] += 1
+    labels_en = _tag_english_labels()
     candidates = []
     for tag in set(recent) | set(prior):
         if recent[tag] + prior[tag] < 3:
             continue
-        candidates.append({"tag": tag, "recent": recent[tag], "prior": prior[tag],
+        candidates.append({"tag": tag, "label_en": labels_en.get(tag, ""),
+                           "recent": recent[tag], "prior": prior[tag],
                            "delta": recent[tag] - prior[tag],
                            "weeks": [weeks.get(tag, {}).get(wk, 0) for wk in week_keys]})
     rising = sorted(candidates, key=lambda x: (x["delta"], x["recent"]), reverse=True)[:8]
@@ -110,7 +127,8 @@ def _fresh(rows, days=28):
                     first[tag] = row["published"]
             else:
                 seen_before.add(tag)
-    return [{"tag": tag, "n": n, "first": first[tag]}
+    labels_en = _tag_english_labels()
+    return [{"tag": tag, "label_en": labels_en.get(tag, ""), "n": n, "first": first[tag]}
             for tag, n in recent.most_common() if tag not in seen_before]
 
 

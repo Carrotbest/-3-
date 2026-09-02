@@ -10,7 +10,7 @@ import html
 import re
 import time
 from datetime import datetime, timedelta, timezone
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 import feedparser
 import requests
@@ -27,7 +27,8 @@ RETRY_WAIT = 3
 COOLDOWN_AFTER = 5        # 연속 실패가 이만큼 쌓이면 하루 쉬게 한다
 MAX_AGE_DAYS = 540        # 이보다 오래된 기사는 받지 않는다
 GN_WINDOW = "when:45d"    # Google News는 아무 제한이 없으면 2001년 기사까지 올려준다
-META_MAX_PER_SOURCE = 8    # RSS 이미지가 없는 신규 기사만 제한적으로 OG 이미지를 확인한다
+META_MAX_PER_SOURCE = 20   # RSS 이미지가 없는 신규 기사만 제한적으로 OG 이미지를 확인한다
+IMAGE_RETRY_DAYS = 30      # OG 이미지 확인 실패는 이 기간이 지난 뒤에만 다시 시도한다
 TAG_STRIP = re.compile(r"<[^>]+>")
 NON_WORD = re.compile(r"[^0-9a-z가-힣]+")
 HEALTH = config.DATA / "sources_health.json"
@@ -141,6 +142,26 @@ def page_image(url, session):
     return ""
 
 
+def is_google_news_link(url):
+    """중간 페이지뿐인 Google News 링크는 OG 이미지 확인 대상에서 제외한다."""
+    return urlparse(url).hostname == "news.google.com"
+
+
+def image_retry_due(record, now=None):
+    """마지막 OG 이미지 확인 실패 후 재시도 간격이 지났는지 확인한다."""
+    tried = record.get("image_tried")
+    if not tried:
+        return True
+    try:
+        tried_at = datetime.fromisoformat(tried.replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return True
+    if tried_at.tzinfo is None:
+        tried_at = tried_at.replace(tzinfo=timezone.utc)
+    now = now or datetime.now(timezone.utc)
+    return tried_at <= now - timedelta(days=IMAGE_RETRY_DAYS)
+
+
 def load_health():
     return read_json(HEALTH, {})
 
@@ -200,12 +221,17 @@ def run(store, classifier, sources, session=None):
             when = published_date(entry)
             if when < oldest:
                 continue                 # Google News 검색이 올려주는 오래된 아카이브를 막는다
+            key = dedup_key(title)
             image = entry_image(entry)
-            if not image and metadata_checked < META_MAX_PER_SOURCE and not store.has(dedup_key(title)):
+            image_tried = None
+            if (not image and metadata_checked < META_MAX_PER_SOURCE
+                    and not store.has(key) and not is_google_news_link(link)):
                 image = page_image(link, session)
                 metadata_checked += 1
+                if not image:
+                    image_tried = now
             record = {
-                "key": dedup_key(title),
+                "key": key,
                 "title": strip_publisher(title),
                 "link": link,
                 "published": when,
@@ -213,6 +239,7 @@ def run(store, classifier, sources, session=None):
                 "summary": summary[:600],
                 "content": entry_content(entry, summary),
                 "image": image,
+                "image_tried": image_tried,
                 "source": name,
                 "region": src.get("region", ""),
             }
@@ -241,7 +268,11 @@ def enrich_images(store, log, limit=240):
     """기존 최신 기사 중 이미지가 비어 있는 항목의 og:image를 병렬 보강한다."""
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    candidates = [row for row in store.recent(120, relevant_only=True) if not row.get("image")][:limit]
+    now = datetime.now(timezone.utc)
+    candidates = [row for row in store.recent(120, relevant_only=True)
+                  if not row.get("image")
+                  and not is_google_news_link(row.get("link", ""))
+                  and image_retry_due(row, now)][:limit]
 
     def fetch_one(row):
         session = requests.Session()
@@ -256,7 +287,9 @@ def enrich_images(store, log, limit=240):
             row, image = future.result()
             if image:
                 row["image"] = image
-                store.mark(row)
                 found += 1
+            else:
+                row["image_tried"] = now.isoformat(timespec="seconds")
+            store.mark(row)
     log(f"기사 대표 이미지 {found}/{len(candidates)}건 보강")
     return found
