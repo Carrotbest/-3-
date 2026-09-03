@@ -22,6 +22,7 @@ export interface DevTechnical {
   finishing?: string[]
   /** Finishing A~D의 빈 칸 위치까지 유지하기 위한 원본 슬롯. */
   finishingSlots?: { a?: string; b?: string; c?: string; d?: string }
+  sampleDates?: { fds?: string; yds?: string }
   optionProgress?: string
   review?: string
   // ORIGINAL 분석

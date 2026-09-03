@@ -30,6 +30,34 @@ export const fmtDateFull = (v: unknown): string => {
     : "—"
 }
 
+export const fmtDateMd = (v: unknown): string => {
+  const d = toDate(v)
+  return d ? `${PAD(d.getMonth() + 1)}-${PAD(d.getDate())}` : "—"
+}
+
+/**
+ * 연도 없는 날짜 입력은 올해 기준 YYYY-MM-DD로 바꾼다. 연도가 이미 있으면 보존한다.
+ * 예: 09-03, 9/3, 0903 → 올해-09-03 / 2025/9/3 → 2025-09-03
+ * 월·일이 실제 달력 범위를 벗어나거나 날짜 형식이 아니면 원문을 그대로 돌려준다.
+ */
+export function normalizeDateInput(raw: string): string {
+  const value = raw.trim()
+  if (!value) return ""
+
+  const format = (year: number, month: number, day: number): string | null => {
+    const date = new Date(year, month - 1, day)
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null
+    return `${year}-${PAD(month)}-${PAD(day)}`
+  }
+
+  const full = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/.exec(value)
+  if (full) return format(Number(full[1]), Number(full[2]), Number(full[3])) ?? raw
+
+  const short = /^(\d{1,2})[-/](\d{1,2})$/.exec(value) ?? /^(\d{2})(\d{2})$/.exec(value)
+  if (!short) return raw
+  return format(new Date().getFullYear(), Number(short[1]), Number(short[2])) ?? raw
+}
+
 export const fmtTime = (v: unknown): string => {
   const d = toDate(v) || (v instanceof Date ? v : null)
   return d ? `${PAD(d.getHours())}:${PAD(d.getMinutes())}` : "—"

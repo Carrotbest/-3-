@@ -12,7 +12,7 @@ import { DataUpload } from "@/components/upload/DataUpload"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
-import { fmtDateFull, toDate } from "@/data/format"
+import { fmtDateMd, normalizeDateInput, toDate } from "@/data/format"
 import { dayToneText, holidayName } from "@/data/holidays"
 import { ingestDevelopment } from "@/data/upload"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
@@ -21,7 +21,7 @@ import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, useAppStore, flush
 
 const ALL = "__all__"
 const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니다."
-const COL_WIDTHS_STORAGE_KEY = "dd-col-widths"
+const COL_WIDTHS_STORAGE_KEY = "dd-col-widths-v2"
 const MIN_COLUMN_WIDTH = 56
 /** 더 이상 진행하지 않는 상태. 전체 탭에서는 감추고, 담당 탭에서는 위로 올려 흐리게 보여 준다. */
 const CLOSED_STATUSES = new Set(["완료", "DROP", "REJECT"])
@@ -91,8 +91,8 @@ interface MasterGroup {
   editorLayout?: "schedule" | "data"
 }
 
-const text = (value: CellValue): string => value === null || value === undefined || value === "" ? "—" : String(value)
-const dateText = (value: CellValue): string => value ? fmtDateFull(String(value)) : "—"
+const text = (value: CellValue): string => value === null || value === undefined || value === "" ? "" : String(value)
+const dateText = (value: CellValue): string => value ? fmtDateMd(String(value)) : ""
 
 function selectionShadow(sel: CellSel): string | undefined {
   if (!sel.inRange) return undefined
@@ -156,8 +156,8 @@ const GROUPS: MasterGroup[] = [
       { id: "buyer", label: "Buyer", width: 104, suggest: true, value: (row) => row.buyer },
       { id: "category", label: "Category", width: 104, value: (row) => row.category, options: DD_CATEGORY_OPTIONS, render: (row) => <span className={ddCategoryTextClass(row.category)}>{text(row.category)}</span> },
       { id: "planner", label: "Planner", width: 92, suggest: true, value: (row) => row.planner },
-      { id: "requestDate", label: "Request Date", width: 108, date: true, value: (row) => row.requestDate },
-      { id: "dueDate", label: "Due Date", width: 108, date: true, value: (row) => row.dueDate, render: (row) => <span className={ddWarnings(row).some((item) => item.key === "due") ? "text-[var(--destructive)]" : ""}>{dateText(row.dueDate)}</span> },
+      { id: "requestDate", label: "Request Date", width: 76, date: true, value: (row) => row.requestDate },
+      { id: "dueDate", label: "Due Date", width: 76, date: true, value: (row) => row.dueDate, render: (row) => <span className={ddWarnings(row).some((item) => item.key === "due") ? "text-[var(--destructive)]" : ""}>{dateText(row.dueDate)}</span> },
     ],
   },
   {
@@ -189,29 +189,31 @@ const GROUPS: MasterGroup[] = [
   },
   {
     key: "schedule", label: "공정 SCHEDULE", color: "var(--warning)", editorLayout: "schedule", columns: [
-      { id: "yarnMill", label: "업체", width: 108, sub: "원사", value: (row) => row.tech?.mills?.yarn },
-      { id: "yarnStatus", label: "완료일", width: 104, sub: "원사", value: (row) => row.tech?.processDates?.yarn },
-      { id: "knittingMill", label: "업체", width: 108, sub: "편직", value: (row) => row.tech?.mills?.knitting },
-      { id: "knittingStatus", label: "완료일", width: 104, sub: "편직", value: (row) => row.tech?.processDates?.knitting },
-      { id: "dyeingMill", label: "업체", width: 108, sub: "염색", value: (row) => row.tech?.mills?.dyeing },
-      { id: "dyeingStatus", label: "완료일", width: 104, sub: "염색", value: (row) => row.tech?.processDates?.dyeing },
-      { id: "finishingMill", label: "업체", width: 108, sub: "가공", value: (row) => row.tech?.mills?.finishing },
-      { id: "finishingStatus", label: "완료일", width: 104, sub: "가공", value: (row) => row.tech?.processDates?.finishing },
+      { id: "yarnMill", label: "업체", width: 65, sub: "원사", value: (row) => row.tech?.mills?.yarn },
+      { id: "yarnStatus", label: "완료일", width: 76, date: true, sub: "원사", value: (row) => row.tech?.processDates?.yarn },
+      { id: "knittingMill", label: "업체", width: 65, sub: "편직", value: (row) => row.tech?.mills?.knitting },
+      { id: "knittingStatus", label: "완료일", width: 76, date: true, sub: "편직", value: (row) => row.tech?.processDates?.knitting },
+      { id: "dyeingMill", label: "업체", width: 65, sub: "염색", value: (row) => row.tech?.mills?.dyeing },
+      { id: "dyeingStatus", label: "완료일", width: 76, date: true, sub: "염색", value: (row) => row.tech?.processDates?.dyeing },
+      { id: "finishingMill", label: "업체", width: 65, sub: "가공", value: (row) => row.tech?.mills?.finishing },
+      { id: "finishingStatus", label: "완료일", width: 76, date: true, sub: "가공", value: (row) => row.tech?.processDates?.finishing },
     ],
   },
   {
     key: "result", label: "결과 RESULT", color: "var(--chart-2)", columns: [
-      { id: "receivedDate", label: "Received Date", width: 114, date: true, value: (row) => row.receivedDate },
-      { id: "flNo", label: "FL#", width: 116, mono: true, value: (row) => row.flNo, render: (row) => row.flNo ? <span className="font-mono">{row.flNo}</span> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미입력</span> : "—" },
-      { id: "optionProgress", label: "옵션 완료", width: 96, align: "center", value: (row) => row.tech?.optionProgress },
-      { id: "review", label: "Review", width: 176, value: (row) => row.tech?.review },
+      { id: "receivedDate", label: "Received Date", width: 80, date: true, value: (row) => row.receivedDate },
+      { id: "fds", label: "FDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.fds, render: (row) => row.tech?.sampleDates?.fds ? dateText(row.tech.sampleDates.fds) : row.receivedDate ? <span className="text-[var(--destructive)]">미요청</span> : "" },
+      { id: "yds", label: "YDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.yds, render: (row) => row.tech?.sampleDates?.yds ? dateText(row.tech.sampleDates.yds) : row.receivedDate ? <span className="text-[var(--destructive)]">미요청</span> : "" },
+      { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo ? <span className="font-mono">{row.flNo}</span> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미입력</span> : "" },
+      { id: "optionProgress", label: "옵션 완료", width: 67, align: "center", value: (row) => row.tech?.optionProgress },
+      { id: "review", label: "Review", width: 123, value: (row) => row.tech?.review },
     ],
   },
   {
     key: "data", label: "DATA", color: "var(--chart-4)", editorLayout: "data", columns: [
       { id: "actualWidth", label: "폭", width: 84, sub: "실측", align: "right", number: true, value: (row) => row.tech?.actual?.width },
       { id: "actualWeight", label: "중량", width: 84, sub: "실측", align: "right", number: true, value: (row) => row.tech?.actual?.weight },
-      { id: "actualBalance", label: "Balance", width: 92, sub: "실측", align: "right", number: true, value: (row) => row.tech?.actual?.balance, render: (row) => { const balance = row.tech?.actual?.balance; return balance === null || balance === undefined ? "—" : `${balance >= 0 ? "+" : ""}${balance.toFixed(1)}%` } },
+      { id: "actualBalance", label: "Balance", width: 92, sub: "실측", align: "right", number: true, value: (row) => row.tech?.actual?.balance, render: (row) => { const balance = row.tech?.actual?.balance; return balance === null || balance === undefined ? "" : `${balance >= 0 ? "+" : ""}${balance.toFixed(1)}%` } },
       { id: "shrinkageLength", label: "축률L%", width: 84, sub: "실측", align: "right", number: true, value: (row) => row.tech?.actual?.shrinkageLength },
       { id: "shrinkageWidth", label: "축률W%", width: 84, sub: "실측", align: "right", number: true, value: (row) => row.tech?.actual?.shrinkageWidth },
       { id: "knitInch", label: "Inch", width: 84, sub: "편직 사양", value: (row) => row.tech?.knitSpec?.inch },
@@ -242,12 +244,14 @@ const GROUPS: MasterGroup[] = [
       { id: "ledgerStatus", label: "대장 상태", width: 116, value: (_row, ledger) => ledger ? FABRIC_STATUS_META[ledger.status].label : "", render: (_row, ledger) => ledgerStatus(ledger) },
       { id: "storageNo", label: "넘버링", width: 104, mono: true, value: (_row, ledger) => ledger?.storageNo },
       { id: "sourceSheet", label: "대장 시트", width: 108, value: (_row, ledger) => ledger?.sample?.sourceSheet },
-      { id: "ledgerUpdated", label: "웹 최종 변경", width: 136, value: (_row, ledger) => ledger?.updatedAt, render: (_row, ledger) => ledger?.updatedAt ? new Date(ledger.updatedAt).toLocaleString("ko-KR") : "—" },
+      { id: "ledgerUpdated", label: "웹 최종 변경", width: 136, value: (_row, ledger) => ledger?.updatedAt, render: (_row, ledger) => ledger?.updatedAt ? new Date(ledger.updatedAt).toLocaleString("ko-KR") : "" },
     ],
   },
 ]
 
-const DEFAULT_OPEN: Record<GroupKey, boolean> = { request: true, original: false, detail: true, schedule: true, result: true, data: false, history: false, ledger: true }
+const DEFAULT_OPEN: Record<GroupKey, boolean> = { request: true, original: false, detail: true, schedule: false, result: true, data: false, history: false, ledger: false }
+const FINISHING_COLUMN_IDS = new Set(["finishingA", "finishingB", "finishingC", "finishingD", "remark"])
+const COMPANY_COLOR_COLUMN_IDS = new Set(["co", "yarnMill", "knittingMill", "dyeingMill", "finishingMill"])
 const GROUP_COLUMNS = GROUPS.flatMap((group) => group.columns)
 const GROUP_COLUMN_IDS = new Set(GROUP_COLUMNS.map((column) => column.id))
 // 핀 고정 열도 그룹(고정 핵심)처럼 너비 조절·저장 대상에 포함한다.
@@ -255,7 +259,7 @@ const RESIZABLE_COLUMNS = [...PINNED_COLUMNS, ...GROUP_COLUMNS]
 const RESIZABLE_COLUMN_IDS = new Set(RESIZABLE_COLUMNS.map((column) => column.id))
 const LEFT_ALIGN_IDS = new Set([
   "styleNo", "developmentNo", "arrangeNo", "yarnDetail", "construction", "color", "remark",
-  "receivedDate", "flNo", "review", "failReason", "styleHistory",
+  "failReason", "styleHistory",
   "origBrand", "origContents", "origConstruction", "origWeight", "origYarn", "origComments",
 ])
 
@@ -387,7 +391,7 @@ const TECH_PATHS: Record<string, string[]> = {
   developer: ["development", "developer"], co: ["development", "co"], developmentNo: ["development", "developmentNo"], arrangeNo: ["arrangeNo"], yarnDetail: ["yarnDetail"],
   finishingA: ["finishingSlots", "a"], finishingB: ["finishingSlots", "b"], finishingC: ["finishingSlots", "c"], finishingD: ["finishingSlots", "d"],
   yarnMill: ["mills", "yarn"], yarnStatus: ["processDates", "yarn"], knittingMill: ["mills", "knitting"], knittingStatus: ["processDates", "knitting"], dyeingMill: ["mills", "dyeing"], dyeingStatus: ["processDates", "dyeing"], finishingMill: ["mills", "finishing"], finishingStatus: ["processDates", "finishing"],
-  optionProgress: ["optionProgress"], review: ["review"], actualWidth: ["actual", "width"], actualWeight: ["actual", "weight"], actualBalance: ["actual", "balance"], shrinkageLength: ["actual", "shrinkageLength"], shrinkageWidth: ["actual", "shrinkageWidth"],
+  fds: ["sampleDates", "fds"], yds: ["sampleDates", "yds"], optionProgress: ["optionProgress"], review: ["review"], actualWidth: ["actual", "width"], actualWeight: ["actual", "weight"], actualBalance: ["actual", "balance"], shrinkageLength: ["actual", "shrinkageLength"], shrinkageWidth: ["actual", "shrinkageWidth"],
   knitInch: ["knitSpec", "inch"], knitGauge: ["knitSpec", "gauge"], knitNeedles: ["knitSpec", "needles"], loopF: ["knitSpec", "loopF"], loopT: ["knitSpec", "loopT"], loopB: ["knitSpec", "loopB"],
   greigeWidth: ["stageData", "greige", "width"], greigeWeight: ["stageData", "greige", "weight"], tenterWidth: ["stageData", "tenter", "width"], tenterWeight: ["stageData", "tenter", "weight"], washWidth: ["stageData", "wash", "width"], washWeight: ["stageData", "wash", "weight"],
   finishBrush: ["finish", "brush"], finishChemical: ["finish", "chemical"], passFail: ["passFail"], failReason: ["failReason"], styleHistory: ["styleHistory"],
@@ -405,35 +409,36 @@ function setNested(target: Record<string, unknown>, path: string[], value: unkno
 
 function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string): DevRecord {
   if (COMPUTED_COLUMN_IDS.has(column.id)) return record
-  const value: string | number | null = column.number ? (raw.trim() === "" ? null : Number(raw)) : raw
+  const input = column.date ? normalizeDateInput(raw) : raw
+  const value: string | number | null = column.number ? (input.trim() === "" ? null : Number(input)) : input
   switch (column.id) {
-    case "owner": return { ...record, owner: raw }
-    case "status": return { ...record, devStatus: raw }
-    case "styleNo": return { ...record, styleNo: raw }
-    case "season": return { ...record, season: raw }
-    case "buyer": return { ...record, buyer: raw }
-    case "category": return { ...record, category: raw }
-    case "planner": return { ...record, planner: raw }
-    case "requestDate": return { ...record, requestDate: raw }
-    case "dueDate": return { ...record, dueDate: raw }
-    case "construction": return { ...record, construction: raw }
-    case "targetWeight": return { ...record, weight: raw === "" ? "" : Number(raw) }
-    case "color": return { ...record, color: raw }
-    case "dyeing": return { ...record, dyeing: raw }
-    case "remark": return { ...record, note: raw }
-    case "receivedDate": return { ...record, receivedDate: raw }
-    case "flNo": return { ...record, flNo: raw }
+    case "owner": return { ...record, owner: input }
+    case "status": return { ...record, devStatus: input }
+    case "styleNo": return { ...record, styleNo: input }
+    case "season": return { ...record, season: input }
+    case "buyer": return { ...record, buyer: input }
+    case "category": return { ...record, category: input }
+    case "planner": return { ...record, planner: input }
+    case "requestDate": return { ...record, requestDate: input }
+    case "dueDate": return { ...record, dueDate: input }
+    case "construction": return { ...record, construction: input }
+    case "targetWeight": return { ...record, weight: input === "" ? "" : Number(input) }
+    case "color": return { ...record, color: input }
+    case "dyeing": return { ...record, dyeing: input }
+    case "remark": return { ...record, note: input }
+    case "receivedDate": return { ...record, receivedDate: input }
+    case "flNo": return { ...record, flNo: input }
   }
   const path = TECH_PATHS[column.id]
   if (!path) return record
   const tech = structuredClone(record.tech ?? {}) as DevTechnical
   setNested(tech as unknown as Record<string, unknown>, path, value === "" ? undefined : value)
   if (column.id === "co") {
-    const devType = raw === "GD" ? "GD" : raw === "국내" ? "국내" : undefined
+    const devType = input === "GD" ? "GD" : input === "국내" ? "국내" : undefined
     return { ...record, tech, devType }
   }
   if (column.id === "developmentNo") {
-    return { ...record, tech, gdNo: record.tech?.development?.co === "GD" ? raw : record.gdNo, saNo: record.tech?.development?.co === "국내" ? raw : record.saNo }
+    return { ...record, tech, gdNo: record.tech?.development?.co === "GD" ? input : record.gdNo, saNo: record.tech?.development?.co === "국내" ? input : record.saNo }
   }
   return { ...record, tech }
 }
@@ -466,13 +471,13 @@ interface DatePickerPopoverProps {
   invalid?: boolean
   onChange: (raw: string) => void
   onCancel?: () => void
-  initialOpen?: boolean
+  iconOnly?: boolean
   triggerClassName?: string
 }
 
 /** 포털로 렌더링하는 로컬 기준 월간 달력. 그리드 스크롤 컨테이너에 잘리지 않는다. */
-function DatePickerPopover({ value, disabled = false, invalid = false, onChange, onCancel, initialOpen = false, triggerClassName = "" }: DatePickerPopoverProps) {
-  const [open, setOpen] = useState(initialOpen)
+function DatePickerPopover({ value, disabled = false, invalid = false, onChange, onCancel, iconOnly = false, triggerClassName = "" }: DatePickerPopoverProps) {
+  const [open, setOpen] = useState(false)
   const [month, setMonth] = useState(() => monthStart(localDate(value) ?? new Date()))
   const committedRef = useRef(false)
   const selected = localDate(value)
@@ -507,7 +512,7 @@ function DatePickerPopover({ value, disabled = false, invalid = false, onChange,
   return <Popover.Root open={open} onOpenChange={changeOpen}>
     <Popover.Trigger asChild>
       <button type="button" disabled={disabled} aria-invalid={invalid} aria-label={value ? `날짜 선택: ${value}` : "날짜 선택"} className={`flex min-w-0 items-center gap-1.5 text-left disabled:cursor-not-allowed disabled:opacity-40 ${triggerClassName}`}>
-        <span className="min-w-0 flex-1 truncate">{value || "날짜 선택"}</span>
+        {iconOnly ? null : <span className="min-w-0 flex-1 truncate">{value || "날짜 선택"}</span>}
         <CalendarDays aria-hidden="true" className="size-4 shrink-0 text-[var(--muted-foreground)]" />
       </button>
     </Popover.Trigger>
@@ -533,9 +538,31 @@ function DatePickerPopover({ value, disabled = false, invalid = false, onChange,
   </Popover.Root>
 }
 
-/** 모달 날짜 필드도 동일한 포털 캘린더로 표시한다. */
+function DateValuePreview({ raw, className = "" }: { raw: string; className?: string }) {
+  if (!raw.trim()) return null
+  const normalized = normalizeDateInput(raw)
+  const valid = /^\d{4}-\d{2}-\d{2}$/.test(normalized) && localDate(normalized) !== null
+  return <span className={`text-[10px] leading-tight ${valid ? "text-[var(--muted-foreground)]" : "text-[var(--destructive)]"} ${className}`}>{valid ? normalized : "형식 확인"}</span>
+}
+
+/** 모달 날짜 필드도 수기 입력, 포털 캘린더, 저장값 미리보기를 함께 제공한다. */
 function DateInput({ value, disabled, invalid, onChange }: { value: string; disabled?: boolean; invalid?: boolean; onChange: (raw: string) => void }) {
-  return <DatePickerPopover value={value} disabled={disabled} invalid={invalid} onChange={onChange} triggerClassName={`h-9 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${invalid ? "ring-1 ring-[var(--destructive)]" : ""}`} />
+  // 저장된 YYYY-MM-DD를 그대로 초기화해야 과거 연도가 Enter만으로 올해로 바뀌지 않는다.
+  const [raw, setRaw] = useState(value)
+  useEffect(() => {
+    if (value !== normalizeDateInput(raw)) setRaw(value)
+  }, [value, raw])
+  const change = (next: string) => {
+    setRaw(next)
+    onChange(next)
+  }
+  return <div className="grid min-w-0 gap-1">
+    <div className={`flex h-9 min-w-0 rounded-md border border-[var(--border)] bg-[var(--background)] transition-colors focus-within:ring-2 focus-within:ring-[var(--ring)] ${invalid ? "ring-1 ring-[var(--destructive)]" : ""}`}>
+      <input type="text" value={raw} disabled={disabled} aria-invalid={invalid} onChange={(event) => change(event.target.value)} className="min-w-0 flex-1 bg-transparent px-3 text-sm text-[var(--foreground)] outline-none disabled:cursor-not-allowed disabled:opacity-40" />
+      <DatePickerPopover value={raw} disabled={disabled} invalid={invalid} onChange={change} iconOnly triggerClassName="h-full w-9 shrink-0 justify-center border-l border-[var(--border)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]" />
+    </div>
+    <DateValuePreview raw={raw} />
+  </div>
 }
 
 function EditorField({ column, draft, onChange, optionsById, requiredIds, readOnly = false }: { column: MasterColumn; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {
@@ -580,12 +607,39 @@ const LEDGER_COL_IDS = new Set(["ledgerStatus", "storageNo", "sourceSheet", "led
 /** 고정값(수식·샘플대장 연결)은 그리드에서 직접 수정하지 않는다. */
 const isFixedColumn = (column: MasterColumn): boolean => COMPUTED_COLUMN_IDS.has(column.id) || LEDGER_COL_IDS.has(column.id)
 
+function InlineDateEditor({ initialValue, onCommit, onCancel }: { initialValue: string; onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void; onCancel: () => void }) {
+  // 저장된 전체 날짜를 초기값으로 보존하므로, 손대지 않고 Enter를 눌러도 연도가 바뀌지 않는다.
+  const [raw, setRaw] = useState(initialValue)
+  const editorRef = useRef<HTMLDivElement>(null)
+  const chooseDate = (next: string) => {
+    setRaw(next)
+    onCommit(next)
+  }
+  return <div ref={editorRef} className="relative flex h-8 min-w-0 bg-[var(--card)] ring-2 ring-inset ring-[var(--ring)]">
+    <input autoFocus type="text" value={raw} onChange={(event) => setRaw(event.target.value)} onBlur={(event) => {
+      const next = event.relatedTarget
+      if (next instanceof Node && editorRef.current?.contains(next)) return
+      onCommit(event.currentTarget.value)
+    }} className="h-8 min-w-0 flex-1 rounded-none border-0 bg-transparent px-1.5 text-xs text-[var(--foreground)] outline-none" onKeyDown={(event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
+      else if (event.key === "Escape") { event.preventDefault(); onCancel() }
+      else if (event.key === "Enter" || event.key === "Tab") {
+        event.preventDefault()
+        onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
+      }
+    }} />
+    <DatePickerPopover value={raw} onChange={chooseDate} iconOnly triggerClassName="h-8 w-8 shrink-0 justify-center border-l border-[var(--border)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]" />
+    <DateValuePreview raw={raw} className="absolute left-1 top-[calc(100%+2px)] z-[65] whitespace-nowrap rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 shadow-sm" />
+  </div>
+}
+
 /** 그리드 셀 인라인 편집기. 선택형=드롭다운, 날짜=데이트피커, 그 외=수기(제안 목록 포함). */
 function InlineEditor({ record, column, options, initial, onCommit, onCancel }: { record: DevRecord; column: MasterColumn; options?: readonly string[]; initial?: string; onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void; onCancel: () => void }) {
   const value = String(column.value(record, null) ?? "")
   const initialValue = initial ?? value
   const cls = "h-8 w-full rounded-none border-0 bg-[var(--card)] px-1.5 text-xs text-[var(--foreground)] outline-none ring-2 ring-inset ring-[var(--ring)]"
   const opts = options && options.length ? options : undefined
+  if (column.date) return <InlineDateEditor initialValue={initialValue} onCommit={onCommit} onCancel={onCancel} />
   if (initial !== undefined) {
     return <input autoFocus type={column.number ? "number" : "text"} defaultValue={initialValue} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={(event) => {
       if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
@@ -595,16 +649,6 @@ function InlineEditor({ record, column, options, initial, onCommit, onCancel }: 
         onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
       }
     }} />
-  }
-  if (column.date) {
-    return <div onKeyDown={(event) => {
-      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(value, undefined, true) }
-      else if (event.key === "Escape") { event.preventDefault(); onCancel() }
-      else if (event.key === "Enter" || event.key === "Tab") {
-        event.preventDefault()
-        onCommit(value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
-      }
-    }}><DatePickerPopover value={value} initialOpen onChange={onCommit} onCancel={onCancel} triggerClassName={cls} /></div>
   }
   if (opts && !column.suggest) {
     return <select autoFocus defaultValue={initialValue} className={cls} onChange={(event) => onCommit(event.target.value)} onBlur={onCancel} onKeyDown={(event) => {
@@ -686,7 +730,12 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const highlight = sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""
   // 종료된 행의 회색은 클래스로는 다른 배경 클래스에 밀리므로 인라인으로 덮는다. 글자색은 건드리지 않는다.
   const dimStyle = dimmed && !sel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null
-  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...dimStyle }
+  // 셀마다 도는 코드다. 대상 열일 때만 column.value 를 부른다(전체 셀이 5천 개 규모).
+  const companyValue = COMPANY_COLOR_COLUMN_IDS.has(column.id) ? String(column.value(record, ledger) ?? "").trim() : ""
+  const companyColorStyle = companyValue && !sel.inRange
+    ? { backgroundColor: `color-mix(in srgb, ${/gd/i.test(companyValue) ? "#a78bfa" : "#6ee7b7"} 18%, var(--card))` }
+    : null
+  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...companyColorStyle, ...dimStyle }
   if (editEnabled && active && !fixed) {
     return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
   }
@@ -739,6 +788,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides), [overrides, records, samples])
   const ledgerByRecord = useMemo(() => new Map(ledger.flatMap((item) => item.record ? [[recordIdentity(item.record), item] as const] : [])), [ledger])
   const [openGroups, setOpenGroups] = useState(DEFAULT_OPEN)
+  const [finishingOpen, setFinishingOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [owner, setOwner] = useState(ALL)
   const [status, setStatus] = useState(ALL)
@@ -778,6 +828,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const movePreviewRef = useRef<CellRect | null>(null)
   const [movePreview, setMovePreview] = useState<CellRect | null>(null)
   const [moveHover, setMoveHover] = useState<{ row: string; col: string | null } | null>(null)
+  const lastDragPointerRef = useRef<{ x: number; y: number } | null>(null)
+  const dragAutoScrollFrameRef = useRef<number | null>(null)
   const [colWidths, setColWidths] = useState<Record<string, number>>(loadColumnWidths)
   const [confirmDelete, setConfirmDelete] = useState<DevRecord[] | null>(null)  // 행 삭제 확인
   const zajiInputRef = useRef<HTMLInputElement>(null)
@@ -842,7 +894,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       planner: sortKo(distinct((record) => record.planner)),
     }
   }, [records])
-  const visibleGroups = GROUPS.filter((group) => openGroups[group.key])
+  const visibleGroups = GROUPS
+    .filter((group) => openGroups[group.key])
+    .map((group) => group.key === "detail" && !finishingOpen
+      ? { ...group, columns: group.columns.filter((column) => !FINISHING_COLUMN_IDS.has(column.id)) }
+      : group)
   const displayedColumns = [...PINNED_COLUMNS, ...visibleGroups.flatMap((group) => group.columns)]
   const editingLedger = editing ? ledgerByRecord.get(recordIdentity(editing)) ?? null : null
 
@@ -988,6 +1044,36 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const pinnedLeft = (index: number) => ROW_HEADER_WIDTH + PINNED_COLUMNS.slice(0, index).reduce((sum, column) => sum + widthOf(column), 0)
   const pinnedTotal = PINNED_COLUMNS.reduce((sum, column) => sum + widthOf(column), 0)
 
+  const stopDragAutoScroll = () => {
+    if (dragAutoScrollFrameRef.current !== null) window.cancelAnimationFrame(dragAutoScrollFrameRef.current)
+    dragAutoScrollFrameRef.current = null
+    lastDragPointerRef.current = null
+  }
+  const startDragAutoScroll = (clientX: number, clientY: number) => {
+    lastDragPointerRef.current = { x: clientX, y: clientY }
+    if (dragAutoScrollFrameRef.current !== null) return
+    const tick = () => {
+      dragAutoScrollFrameRef.current = null
+      const pointer = lastDragPointerRef.current
+      const moveDrag = moveDragRef.current
+      const dragActive = Boolean(moveDrag || fillDragRef.current || rowSelectingRef.current || selectingRef.current)
+      if (!pointer || !dragActive) return
+      const scroller = document.querySelector<HTMLElement>("[data-route-scroll-root]")
+      if (scroller) {
+        const box = scroller.getBoundingClientRect()
+        if (pointer.y < box.top + 48) scroller.scrollTop -= 16
+        else if (pointer.y > box.bottom - 48) scroller.scrollTop += 16
+        const wholeRowDrag = moveDrag?.wholeRows === true || rowSelectingRef.current
+        if (!wholeRowDrag && pointer.x < box.left + 80) scroller.scrollLeft -= 16
+        else if (!wholeRowDrag && pointer.x > box.right - 48) scroller.scrollLeft += 16
+      }
+      // 스크롤 뒤 포인터 아래 대상을 매 프레임 다시 찾아, 마우스가 멈춰도 선택·미리보기를 확장한다.
+      gridMouseRef.current.moveAt(pointer.x, pointer.y)
+      dragAutoScrollFrameRef.current = window.requestAnimationFrame(tick)
+    }
+    dragAutoScrollFrameRef.current = window.requestAnimationFrame(tick)
+  }
+
   /**
    * 행 머리글(좌측 번호 칸)에서는 행 전체 선택을, 데이터 셀에서는 범위 선택을 한다.
    * 엑셀의 행 머리글/셀 구분과 같은 방식이다.
@@ -1002,6 +1088,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       selectWholeRow(rowId, event.shiftKey)
       rowSelectingRef.current = true
       selectingRef.current = false
+      startDragAutoScroll(event.clientX, event.clientY)
       setMenu(null)
       return
     }
@@ -1011,13 +1098,14 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (event.shiftKey) extendTo(rowId, colId)
     else setCellAnchor(rowId, colId)
     selectingRef.current = true
+    startDragAutoScroll(event.clientX, event.clientY)
     setMenu(null)
   }
 
-  const onMove = (event: MouseEvent) => {
+  const updateDragAt = (clientX: number, clientY: number) => {
     const moveDrag = moveDragRef.current
     if (moveDrag) {
-      const target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null
+      const target = document.elementFromPoint(clientX, clientY) as HTMLElement | null
       const rowElement = target?.closest<HTMLElement>("tr[data-row-id]")
       const rowId = rowElement?.dataset.rowId
       const row = rowId ? rowIndexOf.get(rowId) : undefined
@@ -1033,19 +1121,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         movePreviewRef.current = next
         setMovePreview(next)
       }
-      const scroller = document.querySelector<HTMLElement>("[data-route-scroll-root]")
-      if (scroller) {
-        const box = scroller.getBoundingClientRect()
-        if (event.clientY < box.top + 48) scroller.scrollTop -= 16
-        else if (event.clientY > box.bottom - 48) scroller.scrollTop += 16
-        if (!moveDrag.wholeRows && event.clientX < box.left + 80) scroller.scrollLeft -= 16
-        else if (!moveDrag.wholeRows && event.clientX > box.right - 48) scroller.scrollLeft += 16
-      }
       return
     }
     const fillDrag = fillDragRef.current
     if (fillDrag) {
-      const cell = (document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null)?.closest("td[data-col-id]")
+      const cell = (document.elementFromPoint(clientX, clientY) as HTMLElement | null)?.closest("td[data-col-id]")
       const colId = cell?.getAttribute("data-col-id")
       const rowId = cell?.closest("tr[data-row-id]")?.getAttribute("data-row-id")
       const row = rowId ? rowIndexOf.get(rowId) : undefined
@@ -1060,20 +1140,26 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       return
     }
     if (rowSelectingRef.current) {
-      const row = (document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null)?.closest("tr[data-row-id]")
+      const row = (document.elementFromPoint(clientX, clientY) as HTMLElement | null)?.closest("tr[data-row-id]")
       const rowId = row?.getAttribute("data-row-id")
       if (rowId) selectWholeRow(rowId, true)
       return
     }
     if (selectingRef.current) {
-      const cell = (document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null)?.closest("td[data-col-id]")
+      const cell = (document.elementFromPoint(clientX, clientY) as HTMLElement | null)?.closest("td[data-col-id]")
       const colId = cell?.getAttribute("data-col-id")
       const rowId = cell?.closest("tr[data-row-id]")?.getAttribute("data-row-id")
       if (colId && rowId) extendTo(rowId, colId)
       return
     }
   }
+  const onMove = (event: MouseEvent) => {
+    lastDragPointerRef.current = { x: event.clientX, y: event.clientY }
+    updateDragAt(event.clientX, event.clientY)
+  }
   const onUp = () => {
+    // mouseup 에서 rAF를 먼저 취소해 포인터를 놓은 뒤 스크롤이 남지 않게 한다.
+    stopDragAutoScroll()
     const moveDrag = moveDragRef.current
     const moveTarget = movePreviewRef.current
     if (moveDrag) {
@@ -1097,8 +1183,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     rowSelectingRef.current = false
   }
   // 핸들러는 매 렌더 최신으로 바뀌지만, 리스너 등록·해제는 1회만 한다(매 렌더 재등록은 비용이 크다).
-  const gridMouseRef = useRef({ move: onMove, up: onUp })
-  gridMouseRef.current = { move: onMove, up: onUp }
+  const gridMouseRef = useRef({ move: onMove, moveAt: updateDragAt, up: onUp })
+  gridMouseRef.current = { move: onMove, moveAt: updateDragAt, up: onUp }
   useEffect(() => {
     const move = (event: MouseEvent) => gridMouseRef.current.move(event)
     const up = () => gridMouseRef.current.up()
@@ -1107,6 +1193,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     return () => {
       window.removeEventListener("mousemove", move)
       window.removeEventListener("mouseup", up)
+      // 언마운트에서도 예약 프레임을 취소해 화면을 떠난 뒤 루프가 남지 않게 한다.
+      stopDragAutoScroll()
     }
   }, [])
 
@@ -1166,6 +1254,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     movePreviewRef.current = { ...rect }
     setMovePreview({ ...rect })
     document.body.style.cursor = "grabbing"
+    startDragAutoScroll(event.clientX, event.clientY)
     return true
   }
 
@@ -1201,6 +1290,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     fillDragRef.current = { source: { ...rect } }
     fillPreviewRef.current = { ...rect }
     setFillPreview({ ...rect })
+    startDragAutoScroll(event.clientX, event.clientY)
   }
 
   const inFillPreview = (row: number | undefined, colId: string): boolean => {
@@ -2001,14 +2091,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           <thead className="sticky top-0 z-30 bg-[var(--card)] shadow-sm">
             <tr className="h-6">
               <th rowSpan={3} className="sticky left-0 z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] text-center text-[10px] font-normal text-[var(--muted-foreground)]" style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH }} />
-              <th colSpan={PINNED_COLUMNS.length} rowSpan={2} className="sticky z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] px-2 text-center text-[11px] font-normal text-[var(--muted-foreground)]" style={{ width: pinnedTotal, minWidth: pinnedTotal, left: ROW_HEADER_WIDTH }}><span className="relative block">고정 핵심<span aria-hidden="true" title="고정 핵심 너비 조절" onMouseDown={(event) => startGroupResize(PINNED_COLUMNS, event)} className="absolute right-[-9px] top-1/2 h-4 w-1.5 -translate-y-1/2 cursor-col-resize rounded-full bg-[var(--border)] transition-colors hover:bg-[var(--primary)]" /></span></th>
-              {visibleGroups.map((group) => <th key={group.key} colSpan={group.columns.length} rowSpan={group.columns.some((column) => column.sub) ? 1 : 2} className="relative border-b border-r border-[var(--border)] px-2 text-center text-[11px] font-semibold" style={{ color: group.color, background: `color-mix(in srgb, ${group.color} 12%, var(--card))` }}>{group.label}<span aria-hidden="true" title={`${group.label} 너비 조절`} onMouseDown={(event) => startGroupResize(group.columns, event)} className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th>)}
+              {PINNED_COLUMNS.map((column, index) => { const width = widthOf(column); return <th key={column.id} rowSpan={3} onClick={() => toggleColumnSort(column.id)} className={`relative sticky z-40 cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width, left: pinnedLeft(index) }}><span className="inline-flex items-center gap-1">{column.label}{sortIcon(column.id)}</span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> })}
+              {visibleGroups.map((group) => <th key={group.key} colSpan={group.columns.length} rowSpan={group.columns.some((column) => column.sub) ? 1 : 2} className="relative border-b border-r border-[var(--border)] px-2 text-center text-[11px] font-semibold" style={{ color: group.color, background: `color-mix(in srgb, ${group.color} 12%, var(--card))` }}><span>{group.label}</span>{group.key === "detail" ? <button type="button" aria-label={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} aria-pressed={finishingOpen} title={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} onClick={(event) => { event.stopPropagation(); setFinishingOpen((current) => !current) }} className="absolute right-3 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none hover:bg-[var(--muted)]">{finishingOpen ? "-" : "+"}</button> : null}<span aria-hidden="true" title={`${group.label} 너비 조절`} onMouseDown={(event) => startGroupResize(group.columns, event)} className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th>)}
             </tr>
             <tr className="h-6">
               {visibleGroups.filter((group) => group.columns.some((column) => column.sub)).flatMap((group) => subRuns(group.columns).map((run, index) => <th key={`${group.key}-sub-${index}`} colSpan={run.span} className="border-b border-r border-[var(--border)] px-2 text-center text-[10px] font-semibold" style={{ color: run.label ? group.color : "transparent", background: `color-mix(in srgb, ${group.color} ${run.label ? 18 : 12}%, var(--card))` }}>{run.label || "·"}</th>))}
             </tr>
             <tr className="h-8">
-              {PINNED_COLUMNS.map((column, index) => { const width = widthOf(column); return <th key={column.id} onClick={() => toggleColumnSort(column.id)} className={`relative sticky z-40 cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${column.id === "owner" ? "text-center" : "text-left"}`} style={{ width, minWidth: width, left: pinnedLeft(index) }}><span className="inline-flex items-center gap-1">{column.label}{sortIcon(column.id)}</span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> })}
               {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column); return <th key={`${group.key}-${column.id}`} onClick={() => toggleColumnSort(column.id)} className={`relative cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${alignOf(column) === "center" ? "text-center" : "text-left"}`} style={{ width, minWidth: width }}><span className="inline-flex items-center gap-1">{column.label}{sortIcon(column.id)}</span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
             </tr>
           </thead>
@@ -2068,11 +2157,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   if (column.id === "status") return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined} className={`${stickyBase} px-1.5`} style={cellStyle}><StatusChip record={record} disabled={!editEnabled} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} /></td>
                   return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined} className={`${stickyBase} max-w-0 px-2 text-xs font-normal ${editEnabled ? "cursor-cell" : ""} ${column.mono ? "font-mono" : ""}`} style={cellStyle}>
                     {column.id === "owner"
-                      ? <div className="flex items-center gap-0.5">
-                          <span className="min-w-0 flex-1 truncate">{text(ownerDisplayName(record.owner))}</span>
+                      ? <>
+                          <span className="block w-full truncate text-center">{text(ownerDisplayName(record.owner))}</span>
+                          <div className="pointer-events-none absolute right-1 top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 group-hover:pointer-events-auto">
                           <button type="button" title={editEnabled ? "전체 항목 수정" : "전체 항목 보기"} onClick={(event) => { event.stopPropagation(); openEditor(record) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:opacity-100"><Maximize2 className="size-3.5" /></button>
                           <button type="button" title={editEnabled ? "이 옵션 삭제" : EDIT_DISABLED_MESSAGE} aria-label="이 옵션 삭제" disabled={!editEnabled} onClick={(event) => { event.stopPropagation(); setConfirmDelete([record]) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--destructive)] hover:text-white group-hover:opacity-100 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[var(--muted-foreground)]"><Trash2 className="size-3.5" /></button>
-                        </div>
+                          </div>
+                        </>
                       : column.id === "styleNo"
                         ? <span className="flex items-center gap-1 truncate" title={warnings.map((warning) => warning.label).join(" · ") || undefined}>{isRecent ? <span className="shrink-0 rounded-full bg-[linear-gradient(110deg,#06b6d4,#2563eb_55%,#7c3aed)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.04em] text-white">신규</span> : null}<span className="truncate">{text(record.styleNo)}</span>{warnings.length ? <TriangleAlert className="size-3.5 shrink-0 text-[var(--destructive)]" /> : null}</span>
                         : <span className="truncate">{text(column.value(record, linked))}</span>}
