@@ -24,6 +24,7 @@ import { Study } from "@/routes/Study"
 import { Sync } from "@/routes/Sync"
 import { TS } from "@/routes/TS"
 import { FabricAnalysis } from "@/routes/FabricAnalysis"
+import { FabricDetail } from "@/routes/FabricDetail"
 import { Warehouse } from "@/routes/Warehouse"
 import { Portfolio } from "@/routes/Portfolio"
 import { TrendFabric } from "@/routes/TrendFabric"
@@ -31,7 +32,7 @@ import { TrendMacro } from "@/routes/TrendMacro"
 import { ensureTsSeed, migrateLocalTsIntoSync, repairTsData, setAppState, useAppStore } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
-const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
+const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/fabric/:key", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
 
 function ScreenAccessDenied() {
   return (
@@ -159,6 +160,7 @@ function AppLayout() {
             <Route path="/ts" element={<TS />} />
             <Route path="/study" element={<Study />} />
             <Route path="/fabric-analysis" element={<FabricAnalysis />} />
+            <Route path="/fabric/:key" element={<FabricDetail />} />
             <Route path="/warehouse" element={<Warehouse />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/sync" element={<Sync />} />

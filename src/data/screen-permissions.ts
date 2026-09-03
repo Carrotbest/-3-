@@ -2,7 +2,7 @@ export const SCREEN_PERMISSION_OPTIONS = [
   { key: "home", label: "HOME", paths: ["/"] },
   { key: "development", label: "DEVELOPMENT", paths: ["/development"] },
   { key: "ddMaster", label: "DD MASTER", prefixes: ["/development/"] },
-  { key: "warehouse", label: "WAREHOUSE", paths: ["/warehouse"] },
+  { key: "warehouse", label: "WAREHOUSE", paths: ["/warehouse"], prefixes: ["/fabric/"] },
   { key: "ts", label: "TROUBLE SHOOTING", paths: ["/ts"] },
   { key: "study", label: "TECHNICAL REFERENCES", paths: ["/study"] },
   { key: "rdda", label: "RDDA REPORT", paths: ["/rdda"] },

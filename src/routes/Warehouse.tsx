@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from "react"
 import { ArchiveRestore, GripVertical, Info, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
+import { Link } from "react-router-dom"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Badge } from "@/components/ui/badge"
@@ -41,19 +42,57 @@ const TAB_META: Record<WarehouseTab, { label: string; description: string }> = {
   DISPOSED: { label: "폐기", description: "용량 초과 또는 품질 불량으로 폐기된 원단" },
 }
 
-const CORE_HEADERS = [
-  { id: "storageNo", label: "R&D No." },
-  { id: "styleNo", label: "Style No." },
-  { id: "flNo", label: "FL No." },
-  { id: "season", label: "Season" },
-  { id: "category", label: "Category" },
-  { id: "buyer", label: "Buyer" },
-  { id: "owner", label: "담당" },
-  { id: "construction", label: "조직" },
-  { id: "weight", label: "중량" },
-  { id: "completedAt", label: "완료일" },
-  { id: "inventory", label: "재고/잔량" },
-] as const
+type WarehouseColumnId = "storageNo" | "styleNo" | "owner" | "status"
+  | "yds" | "outboundTotal" | "balance" | "lastMovedAt"
+  | "intakeAt" | "lastOutbound.to" | "lastOutbound.division"
+  | "flNo" | "season" | "category" | "buyer" | "completedAt"
+  | "construction" | "weight" | "color" | "dyeing"
+
+interface WarehouseColumn {
+  id: WarehouseColumnId
+  label: string
+  width: number
+}
+
+interface WarehouseGroup {
+  key: "fixed" | "stock" | "movement" | "development" | "spec"
+  label: string
+  collapsible?: boolean
+  columns: readonly WarehouseColumn[]
+}
+
+const COLUMN_GROUPS: readonly WarehouseGroup[] = [
+  { key: "fixed", label: "고정", columns: [
+    { id: "storageNo", label: "R&D No.", width: 88 },
+    { id: "styleNo", label: "Style No.", width: 112 },
+    { id: "owner", label: "담당", width: 76 },
+    { id: "status", label: "Status", width: 88 },
+  ] },
+  { key: "stock", label: "재고", columns: [
+    { id: "yds", label: "보유", width: 76 },
+    { id: "outboundTotal", label: "반출", width: 76 },
+    { id: "balance", label: "잔량", width: 76 },
+    { id: "lastMovedAt", label: "최종 이동일", width: 94 },
+  ] },
+  { key: "movement", label: "입출고", columns: [
+    { id: "intakeAt", label: "입고일", width: 88 },
+    { id: "lastOutbound.to", label: "최근 반출처", width: 104 },
+    { id: "lastOutbound.division", label: "사업부", width: 88 },
+  ] },
+  { key: "development", label: "개발", collapsible: true, columns: [
+    { id: "flNo", label: "FL No.", width: 100 },
+    { id: "season", label: "Season", width: 76 },
+    { id: "category", label: "Category", width: 92 },
+    { id: "buyer", label: "Buyer", width: 96 },
+    { id: "completedAt", label: "완료일", width: 88 },
+  ] },
+  { key: "spec", label: "사양", collapsible: true, columns: [
+    { id: "construction", label: "조직", width: 124 },
+    { id: "weight", label: "중량", width: 76 },
+    { id: "color", label: "Color", width: 92 },
+    { id: "dyeing", label: "Dyeing", width: 92 },
+  ] },
+]
 
 const DISPOSAL_REASONS: DisposalReason[] = ["용량 초과", "품질 불량"]
 const TAB_ORDER: WarehouseTab[] = ["READY", "WAREHOUSE", "EXHAUSTED", "DISPOSED"]
@@ -66,10 +105,8 @@ const TAB_ACCENT: Record<WarehouseTab, { fill: string; dot: string; active: stri
   DISPOSED: { fill: "bg-rose-500", dot: "bg-rose-500", active: "data-[state=active]:bg-rose-500/15 data-[state=active]:text-rose-700 dark:data-[state=active]:text-rose-300", badge: "bg-rose-500/15 text-rose-700 dark:text-rose-300", bar: "bg-rose-500", drop: "ring-2 ring-rose-500 bg-rose-500/15", rowBar: "border-l-rose-500", borderTop: "border-t-rose-500" },
 }
 
-/** 탭을 넘겨도 열 경계가 흔들리지 않도록 폭은 단 하나만 쓴다(체크·처리 열 항상 렌더). */
-const GRIP_WIDTH = "w-[4%]"
-const ACTION_WIDTH = "w-[12%]"
-const COLUMN_WIDTHS = ["w-[7%]", "w-[9%]", "w-[8%]", "w-[6%]", "w-[8%]", "w-[8%]", "w-[6%]", "w-[8%]", "w-[5%]", "w-[8%]", "w-[11%]"]
+const GRIP_WIDTH = 42
+const ACTION_WIDTH = 120
 
 /** DEVELOPMENT Overview와 동일한 게이지 모션(1500ms · easeInOutCubic). */
 const GAUGE_MS = 1500
@@ -112,15 +149,9 @@ function TextCell({ value, mono = false }: { value: unknown; mono?: boolean }) {
   return <span title={text} className={`block truncate ${mono ? "font-mono" : ""}`}>{text}</span>
 }
 
-function InventoryCell({ item }: { item: FabricLedgerItem }) {
-  if (item.status === "READY" || item.status === "DISPOSED") return <span className="text-[var(--muted-foreground)]">—</span>
-  if (item.status === "EXHAUSTED") return <span className="font-semibold text-[var(--destructive)]">소진(0)</span>
-  if (item.yds === null || item.balance === null) return <span className="text-[var(--muted-foreground)]">미기입</span>
-  return (
-    <span className="block truncate" title={`보유 ${formatYds(item.yds)} · 잔량 ${formatYds(item.balance)} yds`}>
-      보유 {formatYds(item.yds)} · <strong className="text-[var(--primary)]">잔량 {formatYds(item.balance)} yds</strong>
-    </span>
-  )
+function QuantityCell({ value, emphasize = false }: { value: number | null; emphasize?: boolean }) {
+  if (value === null) return <span className="text-[var(--muted-foreground)]">—</span>
+  return <span className={`block truncate tabular-nums ${emphasize ? "font-semibold text-[var(--primary)]" : ""}`} title={`${formatYds(value)} yds`}>{formatYds(value)}</span>
 }
 
 function processDetails(item: FabricLedgerItem): { label: string; value: string }[] {
@@ -215,6 +246,7 @@ export function Warehouse() {
   const fabricEvents = useAppStore((state) => state.fabricEvents)
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents), [fabricEvents, overrides, records, samples])
   const [tab, setTab] = useState<WarehouseTab>("READY")
+  const [openGroups, setOpenGroups] = useState({ development: false, spec: false })
   const [search, setSearch] = useState("")
   const [checked, setChecked] = useState<Set<string>>(() => new Set())
   const [detailKey, setDetailKey] = useState<string | null>(null)
@@ -222,6 +254,7 @@ export function Warehouse() {
   const [receiveYds, setReceiveYds] = useState<Record<string, string>>({})
   const [stockYds, setStockYds] = useState("")
   const [recipient, setRecipient] = useState("")
+  const [division, setDivision] = useState("")
   const [outboundQty, setOutboundQty] = useState("")
   const [outboundDate, setOutboundDate] = useState(localDateValue)
   const [disposalReason, setDisposalReason] = useState<DisposalReason | "">("")
@@ -237,8 +270,14 @@ export function Warehouse() {
   const counts = useMemo(() => Object.fromEntries((Object.keys(TAB_META) as WarehouseTab[]).map((key) => [key, ledger.filter((item) => item.status === key).length])) as Record<WarehouseTab, number>, [ledger])
   const rows = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("ko-KR")
-    return ledger.filter((item) => item.status === tab).filter((item) => !query || [item.storageNo, item.styleNo, item.flNo, item.season, item.category, item.buyer, item.owner, item.construction].some((value) => String(value).toLocaleLowerCase("ko-KR").includes(query)))
+    return ledger.filter((item) => item.status === tab).filter((item) => !query || [item.storageNo, item.styleNo, item.flNo, item.season, item.category, item.buyer, item.owner, item.construction, item.lastOutbound?.to, item.lastOutbound?.division, item.note].some((value) => String(value ?? "").toLocaleLowerCase("ko-KR").includes(query)))
   }, [ledger, search, tab])
+  const divisionSuggestions = useMemo(() => [...new Set(fabricEvents.map((event) => event.division?.trim()).filter((value): value is string => Boolean(value)))].sort((left, right) => left.localeCompare(right, "ko-KR", { numeric: true })), [fabricEvents])
+  const visibleGroups = COLUMN_GROUPS.filter((group) => !group.collapsible || openGroups[group.key as keyof typeof openGroups])
+  const visibleColumns = visibleGroups.flatMap((group) => group.columns)
+  const fixedColumns = visibleColumns.filter((column) => COLUMN_GROUPS[0].columns.some((fixed) => fixed.id === column.id))
+  const groupedColumns = visibleGroups.filter((group) => group.key !== "fixed")
+  const tableWidth = GRIP_WIDTH + ACTION_WIDTH + visibleColumns.reduce((sum, column) => sum + column.width, 0)
   const ledgerByKey = useMemo(() => new Map(ledger.map((item) => [item.key, item])), [ledger])
   const detailItem = detailKey ? ledgerByKey.get(detailKey) ?? null : null
   const actionItems = actionDialog?.keys.map((key) => ledgerByKey.get(key)).filter((item): item is FabricLedgerItem => Boolean(item)) ?? []
@@ -362,6 +401,7 @@ export function Warehouse() {
     setReceiveYds(Object.fromEntries(items.map((item) => [item.key, item.yds === null ? "" : String(item.yds)])))
     setStockYds(items[0].yds === null ? "" : String(items[0].yds))
     setRecipient("")
+    setDivision("")
     setOutboundQty("")
     setOutboundDate(localDateValue())
     setDisposalReason("")
@@ -414,7 +454,7 @@ export function Warehouse() {
         if (!Number.isFinite(qty) || qty <= 0) throw new Error("출고 수량을 0보다 큰 숫자로 입력하세요.")
         if (qty > item.balance) throw new Error(`현재 잔량 ${formatYds(item.balance)} yds를 초과할 수 없습니다.`)
         if (!outboundDate) throw new Error("출고 날짜를 선택하세요.")
-        await applyFabricAction({ fabricKey: item.key, action: "OUTBOUND", fromStatus: "WAREHOUSE", toStatus: "WAREHOUSE", storageNo: item.storageNo, qty, to: recipient, date: outboundDate, note: "출고 등록" })
+        await applyFabricAction({ fabricKey: item.key, action: "OUTBOUND", fromStatus: "WAREHOUSE", toStatus: "WAREHOUSE", storageNo: item.storageNo, qty, to: recipient, division, date: outboundDate, note: "출고 등록" })
         if (qty >= item.balance) setTab("EXHAUSTED")
       } else if (actionDialog.kind === "EXHAUST") {
         for (const item of actionItems) {
@@ -441,18 +481,31 @@ export function Warehouse() {
     }
   }
 
-  const coreCell = (item: FabricLedgerItem, id: (typeof CORE_HEADERS)[number]["id"]): ReactNode => {
-    if (id === "storageNo") return <TextCell value={item.storageNo || (item.status === "READY" ? "자동 채번" : "—")} mono />
-    if (id === "styleNo") return <TextCell value={item.styleNo} mono />
+  const coreCell = (item: FabricLedgerItem, id: WarehouseColumnId): ReactNode => {
+    if (id === "storageNo") return item.storageNo
+      ? <Link to={`/fabric/${encodeURIComponent(item.key)}`} title={item.storageNo} className="block truncate font-mono text-[var(--primary)] hover:underline" onMouseDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>{item.storageNo}</Link>
+      : <TextCell value={item.status === "READY" ? "자동 채번" : "—"} mono />
+    if (id === "styleNo") return !item.storageNo && item.status === "READY" && item.styleNo
+      ? <Link to={`/fabric/${encodeURIComponent(item.key)}`} title={item.styleNo} className="block truncate font-mono text-[var(--primary)] hover:underline" onMouseDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>{item.styleNo}</Link>
+      : <TextCell value={item.styleNo} mono />
+    if (id === "owner") return <TextCell value={item.owner} />
+    if (id === "status") return <Badge variant="secondary" className="max-w-full truncate text-[10px]">{FABRIC_STATUS_META[item.status].label}</Badge>
+    if (id === "yds") return <QuantityCell value={item.yds} />
+    if (id === "outboundTotal") return <QuantityCell value={item.outboundTotal} />
+    if (id === "balance") return <QuantityCell value={item.balance === null ? null : Math.max(0, item.balance)} emphasize />
+    if (id === "lastMovedAt") return <TextCell value={item.lastMovedAt ? fmtDateFull(item.lastMovedAt) : ""} />
+    if (id === "intakeAt") return <TextCell value={item.intakeAt ? fmtDateFull(item.intakeAt) : ""} />
+    if (id === "lastOutbound.to") return <TextCell value={item.lastOutbound?.to} />
+    if (id === "lastOutbound.division") return <TextCell value={item.lastOutbound?.division} />
     if (id === "flNo") return <TextCell value={item.flNo} mono />
     if (id === "season") return <TextCell value={item.season} />
     if (id === "category") return <TextCell value={item.category} />
     if (id === "buyer") return <TextCell value={item.buyer} />
-    if (id === "owner") return <TextCell value={item.owner} />
     if (id === "construction") return <TextCell value={item.construction} />
     if (id === "weight") return <TextCell value={item.weight === "" ? "—" : `${item.weight} gsm`} />
     if (id === "completedAt") return <TextCell value={item.completedAt ? fmtDateFull(item.completedAt) : "—"} />
-    return <InventoryCell item={item} />
+    if (id === "color") return <TextCell value={item.color} />
+    return <TextCell value={item.dyeing} />
   }
 
   const actionCell = (item: FabricLedgerItem) => {
@@ -569,17 +622,29 @@ export function Warehouse() {
 
       <TabFade tabKey={tab}>
         <div className="min-h-0 flex-1 overflow-auto">
-          <Table className="w-full table-fixed text-xs">
+          <Table className="table-fixed text-xs" style={{ width: tableWidth, minWidth: tableWidth }}>
             <colgroup>
-              <col className={GRIP_WIDTH} />
-              {COLUMN_WIDTHS.map((width, index) => <col key={CORE_HEADERS[index].id} className={width} />)}
-              <col className={ACTION_WIDTH} />
+              <col style={{ width: GRIP_WIDTH }} />
+              {visibleColumns.map((column) => <col key={column.id} style={{ width: column.width }} />)}
+              <col style={{ width: ACTION_WIDTH }} />
             </colgroup>
             <TableHeader className="sticky top-0 z-10 bg-[var(--card)] shadow-sm">
               <TableRow className="h-9 hover:bg-[var(--card)]">
-                <TableHead className="px-1.5 text-center"><Checkbox checked={allRowsSelected ? true : someRowsSelected ? "indeterminate" : false} onCheckedChange={toggleAll} aria-label={`${TAB_META[tab].label} 전체 선택`} /></TableHead>
-                {CORE_HEADERS.map((header) => <TableHead key={header.id} className="truncate px-1.5 text-xs" title={header.label}>{header.label}</TableHead>)}
-                <TableHead className="px-1.5 text-right text-xs">처리</TableHead>
+                <TableHead rowSpan={2} className="border-r border-[var(--border)] px-1.5 text-center"><Checkbox checked={allRowsSelected ? true : someRowsSelected ? "indeterminate" : false} onCheckedChange={toggleAll} aria-label={`${TAB_META[tab].label} 전체 선택`} /></TableHead>
+                {fixedColumns.map((column) => <TableHead key={column.id} rowSpan={2} className="border-r border-[var(--border)] px-1.5 text-center text-xs" title={column.label}>{column.label}</TableHead>)}
+                {groupedColumns.map((group) => <TableHead key={group.key} colSpan={group.columns.length} className="relative border-b border-r border-[var(--border)] px-2 text-center text-[11px] font-semibold">
+                  <span>{group.label}</span>
+                  {group.collapsible ? <button type="button" aria-label={`${group.label} 열 접기`} aria-pressed={true} title={`${group.label} 열 접기`} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: false }))} className="absolute right-2 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none hover:bg-[var(--muted)]">-</button> : null}
+                </TableHead>)}
+                <TableHead rowSpan={2} className="relative px-1.5 text-right text-xs">
+                  <span>처리</span>
+                  <span className="absolute right-full top-1 flex -translate-y-0 gap-1 pr-2">
+                    {COLUMN_GROUPS.filter((group) => group.collapsible && !openGroups[group.key as keyof typeof openGroups]).map((group) => <button key={group.key} type="button" aria-label={`${group.label} 열 펼치기`} aria-pressed={false} title={`${group.label} 열 펼치기`} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: true }))} className="inline-flex h-5 shrink-0 items-center gap-1 rounded border border-[var(--border)] bg-[var(--card)] px-1.5 text-[10px] font-semibold leading-none hover:bg-[var(--muted)]"><span>{group.label}</span><span aria-hidden="true">+</span></button>)}
+                  </span>
+                </TableHead>
+              </TableRow>
+              <TableRow className="h-8 hover:bg-[var(--card)]">
+                {groupedColumns.flatMap((group) => group.columns.map((column) => <TableHead key={column.id} className="truncate border-r border-[var(--border)] px-1.5 text-xs" title={column.label}>{column.label}</TableHead>))}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -611,10 +676,10 @@ export function Warehouse() {
                       <Checkbox checked={selected} onCheckedChange={(value) => toggleChecked(item.key, value === true)} aria-label={`${item.styleNo || item.flNo} 선택`} />
                     </div>
                   </TableCell>
-                  {CORE_HEADERS.map((header) => <TableCell key={header.id} className="min-w-0 px-1.5 py-1.5">{coreCell(item, header.id)}</TableCell>)}
+                  {visibleColumns.map((column) => <TableCell key={column.id} className="min-w-0 px-1.5 py-1.5">{coreCell(item, column.id)}</TableCell>)}
                   <TableCell className="px-1.5 py-1.5 text-right" data-no-range onClick={(event) => event.stopPropagation()}>{actionCell(item)}</TableCell>
                 </TableRow>
-              }) : <TableRow><TableCell colSpan={CORE_HEADERS.length + 2} className="h-32 text-center text-sm text-[var(--muted-foreground)]">{TAB_META[tab].label} 항목이 없습니다.</TableCell></TableRow>}
+              }) : <TableRow><TableCell colSpan={visibleColumns.length + 2} className="h-32 text-center text-sm text-[var(--muted-foreground)]">{TAB_META[tab].label} 항목이 없습니다.</TableCell></TableRow>}
             </TableBody>
           </Table>
         </div>
@@ -636,7 +701,7 @@ export function Warehouse() {
               <section aria-labelledby="warehouse-detail-process"><h3 id="warehouse-detail-process" className="mb-2 text-sm font-semibold">공정 4단계</h3><dl className="grid gap-2 sm:grid-cols-2">{processDetails(detailItem).map((detail) => <DetailValue key={detail.label} label={detail.label}>{detail.value}</DetailValue>)}</dl></section>
               <section aria-labelledby="warehouse-detail-inhouse"><h3 id="warehouse-detail-inhouse" className="mb-2 text-sm font-semibold">in-house 4종</h3><dl className="grid gap-2 sm:grid-cols-2">{inhouse.map((detail) => <DetailValue key={detail.label} label={detail.label}>{detail.value === null || detail.value === undefined ? "—" : `${detail.value}${detail.unit}`}</DetailValue>)}</dl></section>
             </div>
-            {(detailItem.status === "WAREHOUSE" || detailItem.status === "EXHAUSTED") ? <section aria-labelledby="warehouse-detail-stock"><div className="mb-2 flex items-center justify-between gap-2"><h3 id="warehouse-detail-stock" className="text-sm font-semibold">출고 이력</h3><span className="text-sm">보유 {detailItem.yds === null ? "—" : `${formatYds(detailItem.yds)} yds`} · <strong className="text-[var(--primary)]">잔량 {detailItem.balance === null ? "—" : `${formatYds(Math.max(0, detailItem.balance))} yds`}</strong></span></div><div className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]"><table className="w-full text-sm"><thead className="bg-[var(--muted)] text-left text-xs text-[var(--muted-foreground)]"><tr><th className="px-3 py-2">수령자</th><th className="px-3 py-2 text-right">수량</th><th className="px-3 py-2">날짜</th></tr></thead><tbody>{detailItem.outbound.length ? detailItem.outbound.map((event, index) => <tr key={`${event.date}-${index}`} className="border-t border-[var(--border)]"><td className="px-3 py-2">{event.to}</td><td className="px-3 py-2 text-right tabular-nums">{formatYds(event.qty)} yds</td><td className="px-3 py-2">{fmtDateFull(event.date)}</td></tr>) : <tr><td colSpan={3} className="px-3 py-6 text-center text-[var(--muted-foreground)]">출고 이력이 없습니다.</td></tr>}</tbody></table></div></section> : null}
+            {(detailItem.status === "WAREHOUSE" || detailItem.status === "EXHAUSTED") ? <section aria-labelledby="warehouse-detail-stock"><div className="mb-2 flex items-center justify-between gap-2"><h3 id="warehouse-detail-stock" className="text-sm font-semibold">출고 이력</h3><span className="text-sm">보유 {detailItem.yds === null ? "—" : `${formatYds(detailItem.yds)} yds`} · <strong className="text-[var(--primary)]">잔량 {detailItem.balance === null ? "—" : `${formatYds(Math.max(0, detailItem.balance))} yds`}</strong></span></div><div className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]"><table className="w-full text-sm"><thead className="bg-[var(--muted)] text-left text-xs text-[var(--muted-foreground)]"><tr><th className="px-3 py-2">수령자</th><th className="px-3 py-2">사업부</th><th className="px-3 py-2 text-right">수량</th><th className="px-3 py-2">날짜</th></tr></thead><tbody>{detailItem.outbound.length ? detailItem.outbound.map((event, index) => <tr key={`${event.date}-${index}`} className="border-t border-[var(--border)]"><td className="px-3 py-2">{event.to}</td><td className="px-3 py-2">{event.division ?? ""}</td><td className="px-3 py-2 text-right tabular-nums">{formatYds(event.qty)} yds</td><td className="px-3 py-2">{fmtDateFull(event.date)}</td></tr>) : <tr><td colSpan={4} className="px-3 py-6 text-center text-[var(--muted-foreground)]">출고 이력이 없습니다.</td></tr>}</tbody></table></div></section> : null}
             {detailItem.status === "DISPOSED" ? <section aria-labelledby="warehouse-detail-dispose"><h3 id="warehouse-detail-dispose" className="mb-2 text-sm font-semibold">폐기 정보</h3><dl className="grid gap-2 sm:grid-cols-3"><DetailValue label="사유">{disposalEvent?.reason || "—"}</DetailValue><DetailValue label="처리자">{disposalEvent?.actor || detailItem.updatedBy || "—"}</DetailValue><DetailValue label="처리 일시">{disposalEvent ? formatDateTime(disposalEvent.occurredAt) : detailItem.updatedAt ? formatDateTime(detailItem.updatedAt) : "—"}</DetailValue></dl></section> : null}
             <section aria-labelledby="warehouse-detail-extra"><h3 id="warehouse-detail-extra" className="mb-2 text-sm font-semibold">기타 원본 값</h3><dl className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4"><DetailValue label="컬러">{detailItem.color || "—"}</DetailValue><DetailValue label="염색">{detailItem.dyeing || "—"}</DetailValue><DetailValue label="요청일">{detailItem.requestDate ? fmtDateFull(detailItem.requestDate) : "—"}</DetailValue><DetailValue label="납기">{detailItem.dueDate ? fmtDateFull(detailItem.dueDate) : "—"}</DetailValue><div className="sm:col-span-2 lg:col-span-4"><DetailValue label="비고">{detailItem.note || detailItem.sample?.process.remark || "—"}</DetailValue></div></dl></section>
           </DialogBody>
@@ -651,7 +716,7 @@ export function Warehouse() {
           {actionDialog?.kind === "RECEIVE" ? <div className="space-y-2"><p className="text-xs text-[var(--muted-foreground)]">현재 최대 번호 다음부터 순서대로 4자리 R&D No.가 부여됩니다. yds는 비워 두어도 됩니다.</p>{actionItems.map((item, index) => <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_9rem] items-end gap-3 rounded-[var(--radius)] border border-[var(--border)] p-3"><div className="min-w-0"><p className="truncate text-sm font-medium">{String(receiveBaseNo + index + 1).padStart(4, "0")} · {item.styleNo || item.flNo || "미입력"}</p><p className="truncate text-xs text-[var(--muted-foreground)]">{item.flNo || "FL No. 없음"}</p></div><div className="space-y-1"><Label htmlFor={`receive-yds-${index}`} className="text-xs">보유 yds (옵션)</Label><Input id={`receive-yds-${index}`} type="number" min="0" step="0.01" value={receiveYds[item.key] ?? ""} onChange={(event) => setReceiveYds((current) => ({ ...current, [item.key]: event.target.value }))} /></div></div>)}</div> : null}
           {actionDialog?.kind === "DISPOSE" ? <div className="space-y-2"><Label htmlFor="warehouse-disposal-reason">폐기 사유</Label><Select value={disposalReason} onValueChange={(value) => setDisposalReason(value as DisposalReason)}><SelectTrigger id="warehouse-disposal-reason"><SelectValue placeholder="사유 선택" /></SelectTrigger><SelectContent>{DISPOSAL_REASONS.map((reason) => <SelectItem key={reason} value={reason}>{reason}</SelectItem>)}</SelectContent></Select><p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건에 같은 사유가 기록됩니다.</p></div> : null}
           {actionDialog?.kind === "STOCK" ? <div className="space-y-2"><Label htmlFor="warehouse-stock-yds">보유 재고 (yds)</Label><Input id="warehouse-stock-yds" type="number" min="0" step="0.01" value={stockYds} onChange={(event) => setStockYds(event.target.value)} /><p className="text-xs text-[var(--muted-foreground)]">기존 출고 합계 {formatYds(actionItems[0]?.outboundTotal ?? 0)} yds를 반영해 잔량을 다시 계산합니다.</p></div> : null}
-          {actionDialog?.kind === "OUTBOUND" ? <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2 sm:col-span-2"><Label htmlFor="warehouse-recipient">수령자</Label><Input id="warehouse-recipient" value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="수령자를 자유롭게 입력" /></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-qty">수량 (yds)</Label><Input id="warehouse-outbound-qty" type="number" min="0.01" max={actionItems[0]?.balance ?? undefined} step="0.01" value={outboundQty} onChange={(event) => setOutboundQty(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-date">출고 날짜</Label><Input id="warehouse-outbound-date" type="date" value={outboundDate} onChange={(event) => setOutboundDate(event.target.value)} /></div><p className="text-xs text-[var(--muted-foreground)] sm:col-span-2">현재 잔량 {actionItems[0]?.balance === null ? "미기입" : `${formatYds(actionItems[0]?.balance ?? 0)} yds`} · 출고 후 잔량이 0이면 자동으로 소진 완료됩니다.</p></div> : null}
+          {actionDialog?.kind === "OUTBOUND" ? <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="warehouse-recipient">수령자</Label><Input id="warehouse-recipient" value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="수령자를 자유롭게 입력" /></div><div className="space-y-2"><Label htmlFor="warehouse-division">사업부 (옵션)</Label><Input id="warehouse-division" list="warehouse-division-suggestions" value={division} onChange={(event) => setDivision(event.target.value)} placeholder="사업부를 자유롭게 입력" /><datalist id="warehouse-division-suggestions">{divisionSuggestions.map((value) => <option key={value} value={value} />)}</datalist></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-qty">수량 (yds)</Label><Input id="warehouse-outbound-qty" type="number" min="0.01" max={actionItems[0]?.balance ?? undefined} step="0.01" value={outboundQty} onChange={(event) => setOutboundQty(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-date">출고 날짜</Label><Input id="warehouse-outbound-date" type="date" value={outboundDate} onChange={(event) => setOutboundDate(event.target.value)} /></div><p className="text-xs text-[var(--muted-foreground)] sm:col-span-2">현재 잔량 {actionItems[0]?.balance === null ? "미기입" : `${formatYds(actionItems[0]?.balance ?? 0)} yds`} · 출고 후 잔량이 0이면 자동으로 소진 완료됩니다.</p></div> : null}
           {actionDialog?.kind === "EXHAUST" ? <p className="text-sm">재고 수량과 관계없이 이 원단을 소진 완료로 이동합니다.</p> : null}
           {actionDialog?.kind === "RESTORE" ? <p className="text-sm">{actionItems[0]?.status === "EXHAUSTED" ? "창고 보관 상태로 복구합니다." : "폐기 전 상태로 복구합니다."}</p> : null}
           {formError ? <p role="alert" className="text-sm text-[var(--destructive)]">{formError}</p> : null}

@@ -235,6 +235,7 @@ export interface FabricLedgerEvent {
   storageNo?: string
   qty?: number
   to?: string
+  division?: string
   reason?: string
 }
 

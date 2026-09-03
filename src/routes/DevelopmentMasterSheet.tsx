@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
-import { CalendarDays, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, Loader2, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
+import { CalendarDays, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, Loader2, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
 import { Popover } from "radix-ui"
+import { Link } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -93,6 +94,10 @@ interface MasterGroup {
 
 const text = (value: CellValue): string => value === null || value === undefined || value === "" ? "" : String(value)
 const dateText = (value: CellValue): string => value ? fmtDateMd(String(value)) : ""
+const receiptDateRender = (value: (record: DevRecord) => CellValue): NonNullable<MasterColumn["render"]> => (record) => {
+  const date = value(record)
+  return date ? dateText(date) : <span className="text-[var(--destructive)]">미수취</span>
+}
 
 function selectionShadow(sel: CellSel): string | undefined {
   if (!sel.inRange) return undefined
@@ -201,9 +206,9 @@ const GROUPS: MasterGroup[] = [
   },
   {
     key: "result", label: "결과 RESULT", color: "var(--chart-2)", columns: [
-      { id: "receivedDate", label: "Received Date", width: 80, date: true, value: (row) => row.receivedDate },
-      { id: "fds", label: "FDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.fds, render: (row) => row.tech?.sampleDates?.fds ? dateText(row.tech.sampleDates.fds) : row.receivedDate ? <span className="text-[var(--destructive)]">미요청</span> : "" },
-      { id: "yds", label: "YDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.yds, render: (row) => row.tech?.sampleDates?.yds ? dateText(row.tech.sampleDates.yds) : row.receivedDate ? <span className="text-[var(--destructive)]">미요청</span> : "" },
+      { id: "receivedDate", label: "Hanger", width: 80, date: true, value: (row) => row.receivedDate, render: receiptDateRender((row) => row.receivedDate) },
+      { id: "fds", label: "FDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.fds, render: receiptDateRender((row) => row.tech?.sampleDates?.fds) },
+      { id: "yds", label: "YDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.yds, render: receiptDateRender((row) => row.tech?.sampleDates?.yds) },
       { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo ? <span className="font-mono">{row.flNo}</span> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미입력</span> : "" },
       { id: "optionProgress", label: "옵션 완료", width: 67, align: "center", value: (row) => row.tech?.optionProgress },
       { id: "review", label: "Review", width: 123, value: (row) => row.tech?.review },
@@ -739,7 +744,9 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   if (editEnabled && active && !fixed) {
     return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
   }
-  const content = column.render ? column.render(record, ledger) : column.date ? dateText(column.value(record, ledger)) : text(column.value(record, ledger))
+  const content = column.id === "storageNo" && ledger?.storageNo
+    ? <div className="relative min-w-0 pr-4"><span className="block truncate">{ledger.storageNo}</span><Link to={`/fabric/${encodeURIComponent(ledger.key)}`} title="원단 상세 보기" aria-label={`${ledger.storageNo} 원단 상세 보기`} onMouseDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} className="pointer-events-none absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:pointer-events-auto group-hover:opacity-100"><ExternalLink className="size-3.5" /></Link></div>
+    : column.render ? column.render(record, ledger) : column.date ? dateText(column.value(record, ledger)) : text(column.value(record, ledger))
   return <td data-col-id={column.id} title={typeof content === "string" ? content : undefined} onClick={(event) => { if (!event.shiftKey) onSelect() }} onContextMenu={onContextMenu} onDoubleClick={fixed || !editEnabled ? undefined : onEdit} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{content}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
 })
 

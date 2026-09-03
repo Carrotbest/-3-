@@ -510,6 +510,7 @@ export interface ApplyFabricActionInput {
   yds?: number
   qty?: number
   to?: string
+  division?: string
   reason?: string
   date?: string
   recordIdentity?: string
@@ -568,6 +569,7 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
     storageNo: input.storageNo?.trim() || previous?.storageNo,
     qty,
     to: recipient,
+    division: input.division?.trim() || undefined,
     reason: input.reason?.trim() || undefined,
   }
   const fabricOverrides = [override, ...state.fabricOverrides.filter((item) => item.key !== input.fabricKey)]

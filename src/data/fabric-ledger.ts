@@ -8,6 +8,7 @@ import type {
 
 export interface FabricLedgerOutbound {
   to: string
+  division?: string
   qty: number
   date: string
 }
@@ -38,6 +39,10 @@ export interface FabricLedgerItem {
   outbound: FabricLedgerOutbound[]
   outboundTotal: number
   balance: number | null
+  intakeAt: string
+  lastMovedAt: string
+  lastOutbound: FabricLedgerOutbound | null
+  sourceOrder: number | null
   record: DevRecord | null
   sample: CompletedSample | null
 }
@@ -60,12 +65,42 @@ export function isFabricBalanceExhausted(yds: number | null | undefined, outboun
   return yds !== null && yds !== undefined && Number.isFinite(yds) && yds - outboundTotal <= 0
 }
 
-export function fabricLedgerKey(flNo: string, styleNo: string, fallback = ""): string {
+export function fabricLedgerKey(flNo: string, styleNo: string, fallback = "", storageNo = ""): string {
+  const storage = normalized(storageNo)
+  if (storage) return `rnd:${storage}`
   const fl = normalized(flNo)
   if (fl) return `fl:${fl}`
   const style = normalized(styleNo)
   if (style) return `style:${style}`
   return `source:${fallback}`
+}
+
+function fabricIdentities(storageNo: string, flNo: string, styleNo: string): string[] {
+  const identities: string[] = []
+  const storage = normalized(storageNo)
+  const fl = normalized(flNo)
+  const style = normalized(styleNo)
+  if (storage) identities.push(`rnd:${storage}`)
+  if (fl) identities.push(`fl:${fl}`)
+  if (style) identities.push(`style:${style}`)
+  return identities
+}
+
+function isClosedHistorySample(sample: CompletedSample): boolean {
+  const sheet = normalized(sample.sourceSheet ?? "")
+  return sheet.includes("소진완료") || sheet.includes("폐기")
+}
+
+function closedHistoryBaseKey(sample: CompletedSample): string {
+  const values = [
+    sample.sourceSheet ?? "",
+    sample.storageNo ?? "",
+    sample.flNo,
+    sample.styleNo,
+    sample.season,
+    sample.buyer,
+  ].map(normalized)
+  return `history:${values.map((value) => `${value.length}:${value}`).join("|")}`
 }
 
 function recordIdentity(record: DevRecord): string {
@@ -77,9 +112,7 @@ export function fabricRecordIdentity(record: DevRecord | null): string | undefin
 }
 
 function statusFromRecord(record: DevRecord): FabricLedgerStatus {
-  const explicit = String(record.devStatus ?? "").trim().toLowerCase().replace(/\s+/g, "")
-  if (/^(완료|done|complete|completed)$/.test(explicit) || Boolean(record.receivedDate)) return "READY"
-  return "DEVELOPING"
+  return String(record.tech?.sampleDates?.yds ?? "").trim() ? "READY" : "DEVELOPING"
 }
 
 export function statusFromSample(sample: CompletedSample): FabricLedgerStatus {
@@ -101,8 +134,7 @@ const statusRank: Record<FabricLedgerStatus, number> = {
 
 function emptyFromRecord(record: DevRecord): FabricLedgerItem {
   return {
-    // FL 미입력 행은 동일 Style의 옵션을 합치지 않고 DD 원본 행 단위로 유지한다.
-    key: record.flNo ? fabricLedgerKey(record.flNo, "", recordIdentity(record)) : `source:${recordIdentity(record)}`,
+    key: fabricLedgerKey(record.flNo, record.styleNo, recordIdentity(record)),
     styleNo: record.styleNo,
     flNo: record.flNo,
     season: record.season,
@@ -127,6 +159,10 @@ function emptyFromRecord(record: DevRecord): FabricLedgerItem {
     outbound: [],
     outboundTotal: 0,
     balance: null,
+    intakeAt: "",
+    lastMovedAt: "",
+    lastOutbound: null,
+    sourceOrder: null,
     record,
     sample: null,
   }
@@ -134,7 +170,7 @@ function emptyFromRecord(record: DevRecord): FabricLedgerItem {
 
 function emptyFromSample(sample: CompletedSample, index: number): FabricLedgerItem {
   return {
-    key: fabricLedgerKey(sample.flNo, sample.styleNo, `${sample.sourceSheet ?? "sample"}::${index}`),
+    key: fabricLedgerKey(sample.flNo, sample.styleNo, `${sample.sourceSheet ?? "sample"}::${index}`, sample.storageNo ?? ""),
     styleNo: sample.styleNo,
     flNo: sample.flNo,
     season: sample.season,
@@ -159,13 +195,18 @@ function emptyFromSample(sample: CompletedSample, index: number): FabricLedgerIt
     outbound: [],
     outboundTotal: 0,
     balance: null,
+    intakeAt: "",
+    lastMovedAt: "",
+    lastOutbound: null,
+    sourceOrder: index,
     record: null,
     sample,
   }
 }
 
-function mergeSample(target: FabricLedgerItem, sample: CompletedSample): FabricLedgerItem {
+function mergeSample(target: FabricLedgerItem, sample: CompletedSample, index: number): FabricLedgerItem {
   const sampleStatus = statusFromSample(sample)
+  const statusUpgrades = statusRank[sampleStatus] > statusRank[target.status]
   return {
     ...target,
     styleNo: target.styleNo || sample.styleNo,
@@ -179,14 +220,41 @@ function mergeSample(target: FabricLedgerItem, sample: CompletedSample): FabricL
     requestDate: target.requestDate || sample.requestDate || "",
     completedAt: target.completedAt || sample.completedAt,
     storageNo: target.storageNo || sample.storageNo || "",
-    status: statusRank[sampleStatus] > statusRank[target.status] ? sampleStatus : target.status,
+    status: statusUpgrades ? sampleStatus : target.status,
     sourceSheet: sample.sourceSheet || target.sourceSheet,
     note: target.note || sample.process.remark,
+    // 항목은 자기가 표시되는 시트의 자리에 앉아야 한다. 상태가 올라가면 그 행의 순서를 따라간다.
+    // 그러지 않으면 현황과 창고보관에 같은 R&D No.로 걸친 건이 창고보관 맨 앞으로 튀어 오른다.
+    sourceOrder: statusUpgrades ? index : target.sourceOrder ?? index,
     sample: target.sample ?? sample,
   }
 }
 
-/** DD와 샘플관리대장을 FL 우선, Style 보조 키로 병합하고 웹 변경 상태를 마지막에 적용한다. */
+function mergeRecord(target: FabricLedgerItem, record: DevRecord): FabricLedgerItem {
+  const recordStatus = statusFromRecord(record)
+  return {
+    ...target,
+    styleNo: record.styleNo || target.styleNo,
+    flNo: record.flNo || target.flNo,
+    season: record.season || target.season,
+    category: record.category || target.category,
+    buyer: record.buyer || target.buyer,
+    owner: record.owner || target.owner,
+    planner: record.planner || target.planner,
+    construction: record.construction || target.construction,
+    weight: record.weight || target.weight,
+    color: record.color || target.color,
+    dyeing: record.dyeing || target.dyeing,
+    requestDate: record.requestDate || target.requestDate,
+    dueDate: record.dueDate || target.dueDate,
+    completedAt: record.receivedDate || target.completedAt,
+    status: statusRank[recordStatus] > statusRank[target.status] ? recordStatus : target.status,
+    note: record.note || target.note,
+    record: target.record ?? record,
+  }
+}
+
+/** R&D No.를 실물 식별자로 우선해 DD와 샘플관리대장을 병합하고 웹 변경 상태를 마지막에 적용한다. */
 export function buildFabricLedger(
   records: readonly DevRecord[],
   samples: readonly CompletedSample[],
@@ -194,32 +262,83 @@ export function buildFabricLedger(
   fabricEvents: readonly FabricLedgerEvent[] = [],
 ): FabricLedgerItem[] {
   const items = new Map<string, FabricLedgerItem>()
-  const styleIndex = new Map<string, string>()
+  const identityIndex = new Map<string, string>()
+  const closedHistoryKeyCounts = new Map<string, number>()
 
-  records.forEach((record) => {
-    const item = emptyFromRecord(record)
-    const existing = items.get(item.key)
-    if (!existing) items.set(item.key, item)
-    const style = normalized(record.styleNo)
-    if (style && !styleIndex.has(style)) styleIndex.set(style, item.key)
-  })
+  const registerIdentities = (item: FabricLedgerItem, rowIdentities: readonly string[]) => {
+    fabricIdentities(item.storageNo, item.flNo, item.styleNo).concat(rowIdentities).forEach((identity) => {
+      if (!identityIndex.has(identity)) identityIndex.set(identity, item.key)
+    })
+  }
+
+  const resolveKey = (storageNo: string, flNo: string, styleNo: string, fallback: string): string => {
+    const directKey = fabricLedgerKey(flNo, styleNo, fallback, storageNo)
+    const directMatch = identityIndex.get(directKey)
+    if (directMatch) return directMatch
+
+    // R&D No.가 있는 행은 같은 FL이나 Style의 다른 실물에 흡수하지 않는다.
+    if (normalized(storageNo)) return directKey
+
+    const fl = normalized(flNo)
+    const style = normalized(styleNo)
+    return (fl ? identityIndex.get(`fl:${fl}`) : undefined)
+      ?? (style ? identityIndex.get(`style:${style}`) : undefined)
+      ?? directKey
+  }
 
   samples.forEach((sample, index) => {
-    const directKey = fabricLedgerKey(sample.flNo, sample.styleNo, `${sample.sourceSheet ?? "sample"}::${index}`)
-    const styleKey = normalized(sample.styleNo)
-    const matchedKey = items.has(directKey) ? directKey : styleIndex.get(styleKey) ?? directKey
+    if (isClosedHistorySample(sample)) {
+      const baseKey = closedHistoryBaseKey(sample)
+      const occurrence = (closedHistoryKeyCounts.get(baseKey) ?? 0) + 1
+      closedHistoryKeyCounts.set(baseKey, occurrence)
+      // 같은 값 조합이 겹칠 때만 #2부터 순번을 붙여, 행 이동에는 안정적이면서 모든 행을 보존한다.
+      const historyKey = occurrence === 1 ? baseKey : `${baseKey}#${occurrence}`
+      const item = { ...emptyFromSample(sample, index), key: historyKey, sourceOrder: index }
+      items.set(historyKey, item)
+      // 종료 이력은 다른 항목과 병합되지 않도록 완성된 자기 key만 등록하고 FL/Style은 색인하지 않는다.
+      identityIndex.set(historyKey, historyKey)
+      return
+    }
+
+    const fallback = `${sample.sourceSheet ?? "sample"}::${index}`
+    const storageNo = sample.storageNo ?? ""
+    const matchedKey = resolveKey(storageNo, sample.flNo, sample.styleNo, fallback)
     const existing = items.get(matchedKey)
-    items.set(matchedKey, existing ? mergeSample(existing, sample) : emptyFromSample(sample, index))
-    if (styleKey && !styleIndex.has(styleKey)) styleIndex.set(styleKey, matchedKey)
+    const item = existing ? mergeSample(existing, sample, index) : emptyFromSample(sample, index)
+    items.set(matchedKey, item)
+    // R&D No.가 key여도 FL을 함께 등록해야 뒤의 DD 레코드가 같은 항목을 찾는다.
+    registerIdentities(item, fabricIdentities(storageNo, sample.flNo, sample.styleNo))
   })
 
-  const overrideMap = new Map(overrides.map((item) => [item.key, item]))
+  records.forEach((record) => {
+    const fallback = recordIdentity(record)
+    const matchedKey = resolveKey("", record.flNo, record.styleNo, fallback)
+    const existing = items.get(matchedKey)
+    const item = existing ? (existing.record ? existing : mergeRecord(existing, record)) : emptyFromRecord(record)
+    items.set(matchedKey, item)
+    registerIdentities(item, fabricIdentities("", record.flNo, record.styleNo))
+  })
+
+  // 현재 key가 아니면 예전 fl:/style: key를 색인으로 해석해 기존 웹 기록을 이어 붙인다.
+  const resolveStoredKey = (key: string): string | undefined => items.has(key) ? key : identityIndex.get(key)
+  const overrideMap = new Map<string, FabricLedgerOverride>()
+  overrides.forEach((override) => {
+    const itemKey = resolveStoredKey(override.key)
+    if (itemKey) overrideMap.set(itemKey, override)
+  })
   const outboundMap = new Map<string, FabricLedgerOutbound[]>()
+  const intakeMap = new Map<string, string>()
   fabricEvents.forEach((event) => {
+    const itemKey = resolveStoredKey(event.fabricKey)
+    if (!itemKey) return
+    if (event.action === "RECEIVE") {
+      const previous = intakeMap.get(itemKey) ?? ""
+      if (event.occurredAt > previous) intakeMap.set(itemKey, event.occurredAt)
+    }
     if (event.action !== "OUTBOUND" || typeof event.qty !== "number" || !Number.isFinite(event.qty) || event.qty <= 0) return
-    const current = outboundMap.get(event.fabricKey) ?? []
-    current.push({ to: event.to?.trim() || "미입력", qty: event.qty, date: event.occurredAt })
-    outboundMap.set(event.fabricKey, current)
+    const current = outboundMap.get(itemKey) ?? []
+    current.push({ to: event.to?.trim() || "미입력", division: event.division?.trim() || undefined, qty: event.qty, date: event.occurredAt })
+    outboundMap.set(itemKey, current)
   })
 
   return [...items.values()].map((item) => {
@@ -228,6 +347,10 @@ export function buildFabricLedger(
     const outbound = (outboundMap.get(item.key) ?? []).sort((left, right) => right.date.localeCompare(left.date))
     const outboundTotal = outbound.reduce((sum, event) => sum + event.qty, 0)
     const balance = yds === null ? null : yds - outboundTotal
+    const intakeAt = intakeMap.get(item.key) ?? ""
+    const lastOutbound = outbound[0] ?? null
+    // 반출이 없으면 입고일로, 입고 이력도 없으면 빈 문자열로 유지한다.
+    const lastMovedAt = lastOutbound?.date ?? intakeAt
     const merged = override ? {
       ...item,
       status: override.status,
@@ -236,10 +359,23 @@ export function buildFabricLedger(
       updatedAt: override.updatedAt,
       updatedBy: override.updatedBy,
     } : item
-    return { ...merged, yds, outbound, outboundTotal, balance }
-  }).sort((left, right) =>
-    statusRank[left.status] - statusRank[right.status]
-    || (right.updatedAt || right.completedAt || right.requestDate).localeCompare(left.updatedAt || left.completedAt || left.requestDate)
-    || left.styleNo.localeCompare(right.styleNo, "ko-KR", { numeric: true }),
-  )
+    return { ...merged, yds, outbound, outboundTotal, balance, intakeAt, lastMovedAt, lastOutbound }
+  }).sort((left, right) => {
+    const statusComparison = statusRank[left.status] - statusRank[right.status]
+    if (statusComparison) return statusComparison
+
+    if (left.sourceOrder !== null || right.sourceOrder !== null) {
+      if (left.sourceOrder === null) return 1
+      if (right.sourceOrder === null) return -1
+      const sourceOrderComparison = left.sourceOrder - right.sourceOrder
+      if (sourceOrderComparison) return sourceOrderComparison
+    } else {
+      const leftDate = left.updatedAt || left.completedAt || left.requestDate
+      const rightDate = right.updatedAt || right.completedAt || right.requestDate
+      const dateComparison = leftDate.localeCompare(rightDate)
+      if (dateComparison) return dateComparison
+    }
+
+    return left.styleNo.localeCompare(right.styleNo, "ko-KR", { numeric: true })
+  })
 }
