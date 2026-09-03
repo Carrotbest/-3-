@@ -3,6 +3,7 @@ import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-d
 
 import { AppSidebar } from "@/components/layout/AppSidebar"
 import { Topbar } from "@/components/layout/Topbar"
+import { UpdateBanner } from "@/components/layout/UpdateBanner"
 import { ParsingOverlay } from "@/components/upload/ParsingOverlay"
 import { LoginGate } from "@/components/auth/AuthExperience"
 import { useAuthStore } from "@/data/auth"
@@ -177,6 +178,7 @@ function AppLayout() {
         </main>
       </div>
       <ParsingOverlay />
+      <UpdateBanner />
     </div>
   )
 }
