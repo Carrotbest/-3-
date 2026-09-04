@@ -100,6 +100,8 @@ export function Sync() {
   const [rollbackMessage, setRollbackMessage] = useState("")
   const user = useAuthStore((state) => state.user)
   const isOwner = useAuthStore((state) => state.isOwner)
+  const approval = useAuthStore((state) => state.approval)
+  const canWrite = isOwner || approval === "approved"
   const [pushing, setPushing] = useState(false)
   const [pushMessage, setPushMessage] = useState("")
   const handlePushAll = async () => {
@@ -215,12 +217,12 @@ export function Sync() {
                 <div className="flex items-center gap-2">
                   <Database aria-hidden="true" className="size-4 text-[var(--muted-foreground)]" />
                   <h2 className="text-base font-semibold text-[var(--foreground)]">팀 실시간 공유</h2>
-                  <Badge variant={isOwner ? "outline" : "secondary"}>{isOwner ? "편집 권한" : "읽기 전용"}</Badge>
+                  <Badge variant={canWrite ? "outline" : "secondary"}>{canWrite ? "편집 권한" : "읽기 전용"}</Badge>
                 </div>
                 <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                  {isOwner
-                    ? `로그인 계정 ${user.email} · 업로드·편집 내용이 중앙 서버에 저장되어 팀원 화면에 실시간 반영됩니다.`
-                    : `로그인 계정 ${user.email} · 소유자가 올린 데이터를 실시간으로 함께 봅니다(편집은 소유자만).`}
+                  {canWrite
+                    ? `로그인 계정 ${user.email} · 편집 내용이 중앙 서버에 저장되어 팀원 화면에 실시간 반영됩니다.`
+                    : `로그인 계정 ${user.email} · 승인 대기 중입니다. 승인되면 편집한 내용이 팀에 공유됩니다.`}
                 </p>
               </div>
               {isOwner ? (

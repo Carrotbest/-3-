@@ -5,6 +5,7 @@ import type {
   FabricLedgerOverride,
   FabricLedgerStatus,
 } from "./schema"
+import { WEB_INTAKE_SHEET } from "./schema"
 
 export interface FabricLedgerOutbound {
   to: string
@@ -55,6 +56,7 @@ export const FABRIC_STATUS_META: Record<FabricLedgerStatus, { label: string; des
   WAREHOUSE: { label: "창고 보관", description: "넘버링 후 창고에 보관 중인 원단", tone: "bg-emerald-500" },
   EXHAUSTED: { label: "소진 완료", description: "사용이 완료되어 재고가 없는 원단", tone: "bg-slate-500" },
   DISPOSED: { label: "폐기", description: "관리자 판단으로 폐기된 원단", tone: "bg-rose-500" },
+  REMOVED: { label: "삭제됨", description: "창고 목록에서 숨긴 원단", tone: "bg-slate-400" },
 }
 
 const normalized = (value: string): string => value.normalize("NFKC").replace(/\s+/g, "").toUpperCase()
@@ -122,8 +124,10 @@ export function statusFromSample(sample: CompletedSample): FabricLedgerStatus {
   if (sheet.includes("폐기")) return "DISPOSED"
   if (sheet.includes("소진완료") || sheet.includes("소진")) return "EXHAUSTED"
   if (sheet.includes("창고보관") || sheet.includes("창고")) return "WAREHOUSE"
-  if (sheet.includes("현황")) return "READY"
-  return sample.completedAt ? "READY" : "DEVELOPING"
+  // 입고 대기는 DD MASTER 내 YDS 날짜만 만든다(statusFromRecord).
+  // 대장 '현황' 시트 행은 여기로 올리지 않는다. 창고에서 직접 추가한 행만 예외다.
+  if (sample.sourceSheet === WEB_INTAKE_SHEET) return "READY"
+  return "DEVELOPING"
 }
 
 const statusRank: Record<FabricLedgerStatus, number> = {
@@ -132,6 +136,12 @@ const statusRank: Record<FabricLedgerStatus, number> = {
   WAREHOUSE: 2,
   EXHAUSTED: 3,
   DISPOSED: 4,
+  REMOVED: 5,
+}
+
+/** 직접 등록 행은 배열 위치가 아니라 자기 id로 식별한다. 대장을 다시 올려 행 인덱스가 바뀌어도 기존 기록을 찾는다. */
+function sampleFallback(sample: CompletedSample, index: number): string {
+  return sample.sourceSheet === WEB_INTAKE_SHEET && sample.id ? sample.id : `${sample.sourceSheet ?? "sample"}::${index}`
 }
 
 function emptyFromRecord(record: DevRecord): FabricLedgerItem {
@@ -173,7 +183,7 @@ function emptyFromRecord(record: DevRecord): FabricLedgerItem {
 
 function emptyFromSample(sample: CompletedSample, index: number): FabricLedgerItem {
   return {
-    key: fabricLedgerKey(sample.flNo, sample.styleNo, `${sample.sourceSheet ?? "sample"}::${index}`, sample.storageNo ?? ""),
+    key: fabricLedgerKey(sample.flNo, sample.styleNo, sampleFallback(sample, index), sample.storageNo ?? ""),
     styleNo: sample.styleNo,
     flNo: sample.flNo,
     season: sample.season,
@@ -304,14 +314,17 @@ export function buildFabricLedger(
       return
     }
 
-    const fallback = `${sample.sourceSheet ?? "sample"}::${index}`
+    const fallback = sampleFallback(sample, index)
     const storageNo = sample.storageNo ?? ""
     const matchedKey = resolveKey(storageNo, sample.flNo, sample.styleNo, fallback)
     const existing = items.get(matchedKey)
     const item = existing ? mergeSample(existing, sample, index) : emptyFromSample(sample, index)
     items.set(matchedKey, item)
     // R&D No.가 key여도 FL을 함께 등록해야 뒤의 DD 레코드가 같은 항목을 찾는다.
-    registerIdentities(item, fabricIdentities(storageNo, sample.flNo, sample.styleNo))
+    registerIdentities(item, [
+      ...fabricIdentities(storageNo, sample.flNo, sample.styleNo),
+      `source:${sample.sourceSheet ?? "sample"}::${index}`,
+    ])
   })
 
   records.forEach((record) => {
@@ -372,7 +385,7 @@ export function buildFabricLedger(
       updatedBy: override.updatedBy,
     } : item
     return { ...merged, yds, outbound, outboundTotal, balance, intakeAt, confirmedAt, lastMovedAt, lastOutbound }
-  }).sort((left, right) => {
+  }).filter((item) => item.status !== "REMOVED").sort((left, right) => {
     const statusComparison = statusRank[left.status] - statusRank[right.status]
     if (statusComparison) return statusComparison
 

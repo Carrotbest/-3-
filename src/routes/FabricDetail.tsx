@@ -17,6 +17,7 @@ const ACTION_LABELS: Record<FabricLedgerAction, string> = {
   EXHAUST: "소진 완료",
   DISPOSE: "폐기",
   RESTORE: "상태 복구",
+  REMOVE: "목록에서 삭제",
   NOTE: "재고 변경",
 }
 

@@ -93,6 +93,13 @@ export function currentUserIsOwner(): boolean {
   return isOwnerUser(auth.currentUser)
 }
 
+/** 중앙 데이터를 쓸 수 있는 사용자인지. 소유자 또는 승인된 팀원. */
+export function currentUserCanWrite(): boolean {
+  if (currentUserIsOwner()) return true
+  const state = useAuthStore.getState()
+  return state.status === "signed-in" && state.approval === "approved"
+}
+
 function friendlyAuthError(code: string): string {
   switch (code) {
     case "auth/invalid-email":

@@ -9,7 +9,8 @@ import {
 
 import { db, auth } from "./firebase"
 import { CACHE_KEYS, saveCacheLocal, setFirestorePush, type CacheKey } from "./cache"
-import { currentUserIsOwner } from "./auth"
+import { currentUserIsOwner, currentUserCanWrite } from "./auth"
+import { mergeKeyed } from "./sync-merge"
 import { setAppState, useAppStore, type AppState, type AppStatePatch } from "../store/useAppStore"
 import type { TsRecord } from "./sample"
 import { isTsWellFormed } from "./ts-health"
@@ -18,6 +19,33 @@ const COLLECTION = "state"
 // Firestore 문자열 필드 한도는 약 1,048,487바이트. 한글(UTF-8 3바이트) 최악을 감안해
 // 200,000자(≈최대 600KB)로 잘라 한 문서에 담는다.
 const CHUNK_CHARS = 200_000
+
+// 여러 사람이 동시에 건드리는 키만 3-way 병합한다. 나머지는 원격 값을 그대로 쓴다.
+const MERGE_IDS: Record<string, (item: never) => string> = {
+  records: (item: { _src: { sheet: string; row: number } }) => `${item._src.sheet}::${item._src.row}`,
+  fabricOverrides: (item: { key: string }) => item.key,
+  fabricEvents: (item: { id: string }) => item.id,
+}
+
+/** 이 클라이언트가 마지막으로 본 원격 값. 병합 기준선이다. */
+const baseline = new Map<string, unknown[]>()
+/** 스냅샷으로 받은 최신 원격 값. 로컬 적용 여부와 무관하게 항상 갱신한다. */
+const lastRemote = new Map<string, unknown[]>()
+/** 키별 전송 직렬화. 같은 키의 쓰기가 겹치지 않게 한다. */
+const pushChains = new Map<string, Promise<void>>()
+
+function mergeIdOf(key: string): ((item: unknown) => string) | null {
+  const fn = (MERGE_IDS as Record<string, ((item: unknown) => string) | undefined>)[key]
+  return fn ?? null
+}
+
+/** 병합 대상 키이고 양쪽 다 배열일 때만 병합한다. */
+function mergeForKey(key: string, mine: unknown, theirs: unknown): unknown {
+  const idOf = mergeIdOf(key)
+  if (!idOf || !Array.isArray(mine) || !Array.isArray(theirs)) return theirs
+  const base = baseline.get(key)
+  return mergeKeyed(Array.isArray(base) ? base : null, mine, theirs, idOf)
+}
 
 // 각 키의 마지막으로 알려진 청크 수(오래된 청크 정리에 사용). 스냅샷/푸시로 갱신된다.
 const lastChunkCount = new Map<string, number>()
@@ -38,11 +66,21 @@ function splitChunks(text: string): string[] {
   return chunks
 }
 
-/** 소유자로 로그인한 경우에만 값을 Firestore로 반영한다(청크 분할·원자적 배치). */
+/** 소유자 또는 승인된 팀원이 값을 Firestore로 반영한다(청크 분할·원자적 배치). */
 async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
-  if (!currentUserIsOwner()) return
+  if (!currentUserCanWrite()) return
   if (SKIP_SYNC_KEYS.has(key)) return
-  const json = JSON.stringify(value ?? null)
+  const previousChain = pushChains.get(key) ?? Promise.resolve()
+  const chained = previousChain.then(() => pushCacheNow(key, value)).catch(() => {})
+  pushChains.set(key, chained)
+  return chained
+}
+
+async function pushCacheNow<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
+  // 쓰기 직전의 최신 원격 값과 합친다. 팀원이 방금 고친 행을 내 화면 값으로 덮지 않는다.
+  const remote = lastRemote.get(key)
+  const merged = (remote === undefined ? value : mergeForKey(key, value, remote)) as AppState[K]
+  const json = JSON.stringify(merged ?? null)
   const chunks = splitChunks(json)
   const batch = writeBatch(db)
   batch.set(metaRef(key), {
@@ -57,8 +95,18 @@ async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promis
   lastChunkCount.set(key, chunks.length)
   try {
     await batch.commit()
+    // 쓰인 값이 곧 원격 값이다. 다음 병합의 기준선으로 올린다.
+    if (Array.isArray(merged)) {
+      baseline.set(key, merged as unknown[])
+      lastRemote.set(key, merged as unknown[])
+    }
+    // 병합 결과가 내 화면과 다르면(팀원의 변경이 섞였으면) 화면에도 반영한다.
+    if (merged !== value) {
+      setAppState({ [key]: merged } as AppStatePatch)
+      void saveCacheLocal(key, merged)
+    }
   } catch (error) {
-    // 읽기 전용 사용자의 쓰기 거부 등은 조용히 무시(로컬 상태는 유지).
+    // 권한 거부·오프라인 등은 조용히 무시한다. 로컬 상태는 유지한다.
     console.warn("[firestore-sync] push 실패:", (error as Error)?.message ?? error)
   }
 }
@@ -134,8 +182,17 @@ function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }
           return
         }
       }
-      ;(patch as Record<string, unknown>)[key] = value
-      void saveCacheLocal(key as CacheKey, value)
+      // 아직 안 올라간 내 편집이 스냅샷에 지워지지 못하게 병합한다.
+      const localValue = (useAppStore.getState() as unknown as Record<string, unknown>)[key]
+      const nextValue = mergeForKey(key, localValue, value) as AppState[CacheKey]
+      // 기준선은 병합 결과가 아니라 원격 값이다. 내 편집은 아직 원격에 없다.
+      if (Array.isArray(value)) {
+        lastRemote.set(key, value as unknown[])
+        baseline.set(key, value as unknown[])
+      }
+      if (JSON.stringify(nextValue) === JSON.stringify(localValue)) return
+      ;(patch as Record<string, unknown>)[key] = nextValue
+      void saveCacheLocal(key as CacheKey, nextValue)
       changed = true
     } catch {
       // 파싱 실패 시 해당 키는 건너뛴다.
@@ -227,4 +284,7 @@ export function stopStateSync(): void {
   started = false
   autoSeedDone = false
   lastChunkCount.clear()
+  baseline.clear()
+  lastRemote.clear()
+  pushChains.clear()
 }

@@ -4,7 +4,7 @@ rules_version = '2';
 // - 가입: 방문자가 자기 계정으로 users/{uid} 문서를 status='pending'으로 생성(가입 신청)
 // - 승인: 소유자(OWNER_EMAIL)만 status를 approved/rejected로 변경
 // - 데이터 읽기: 소유자 또는 승인된(approved) 사용자
-// - 데이터 쓰기: 소유자만
+// - 데이터 쓰기: 소유자 또는 승인된 사용자
 // 소유자를 바꾸려면 아래 이메일과 src/data/app-config.ts의 OWNER_EMAIL을 함께 수정한다.
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -33,7 +33,7 @@ service cloud.firestore {
 
     match /state/{docId} {
       allow read: if isApproved();
-      allow write: if isOwner();
+      allow write: if isApproved();
     }
 
     match /trendStars/{uid} {

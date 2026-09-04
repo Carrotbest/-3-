@@ -223,9 +223,9 @@ export function completedSampleId(sample: Pick<CompletedSample, "id" | "flNo" | 
 }
 
 /** DD와 샘플관리대장을 하나의 업무 흐름으로 보여주기 위한 원단 상태. */
-export type FabricLedgerStatus = "DEVELOPING" | "READY" | "WAREHOUSE" | "EXHAUSTED" | "DISPOSED"
+export type FabricLedgerStatus = "DEVELOPING" | "READY" | "WAREHOUSE" | "EXHAUSTED" | "DISPOSED" | "REMOVED"
 
-export type FabricLedgerAction = "COMPLETE" | "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "OUTBOUND" | "EXHAUST" | "DISPOSE" | "RESTORE" | "NOTE"
+export type FabricLedgerAction = "COMPLETE" | "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "OUTBOUND" | "EXHAUST" | "DISPOSE" | "RESTORE" | "REMOVE" | "NOTE"
 
 /** 원본 엑셀은 그대로 두고 웹에서 변경한 운영 상태만 덧씌운다. */
 export interface FabricLedgerOverride {

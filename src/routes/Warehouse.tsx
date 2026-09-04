@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode , type CSSProperties } from "react"
 import * as Popover from "@radix-ui/react-popover"
-import { ArchiveRestore, Copy, Info, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
+import { ArchiveRestore, Copy, Info, ListX, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Badge } from "@/components/ui/badge"
@@ -26,11 +26,11 @@ import { fmtDateFull, fmtDateMd } from "@/data/format"
 import type { FabricLedgerStatus } from "@/data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
 import { useInView } from "@/lib/useInView"
-import { addManualIntake, updateManualIntake, applyFabricAction, useAppStore } from "@/store/useAppStore"
+import { addManualIntake, updateManualIntake, applyFabricAction, confirmWarehouseBaseline, removeFabricRows, useAppStore } from "@/store/useAppStore"
 
 type WarehouseTab = "READY" | "WAREHOUSE" | "HISTORY"
 type DisposalReason = "용량 초과" | "품질 불량"
-type ActionKind = "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "DISPOSE" | "STOCK" | "OUTBOUND" | "EXHAUST" | "RESTORE"
+type ActionKind = "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "DISPOSE" | "STOCK" | "OUTBOUND" | "EXHAUST" | "RESTORE" | "REMOVE"
 
 interface ActionDialogState {
   kind: ActionKind
@@ -402,6 +402,7 @@ export function Warehouse() {
   const [filterMenu, setFilterMenu] = useState<WarehouseColumnId | null>(null)
   const [filterSearch, setFilterSearch] = useState("")
   const [exhaustOnZero, setExhaustOnZero] = useState(true)
+  const [baselineOpen, setBaselineOpen] = useState(false)
   // 셀 범위 선택. 행은 visibleRows 인덱스, 열은 visibleColumns 인덱스다.
   const [cellRange, setCellRange] = useState<{ ar: number; ac: number; fr: number; fc: number } | null>(null)
   const cellDragRef = useRef(false)
@@ -516,10 +517,23 @@ export function Warehouse() {
     })
   }
 
+  /**
+   * 브라우저 기본 선택·드래그를 막는다. 표는 select-none이지만 바깥 텍스트는 아니라서,
+   * 그리드에서 끌기 시작하면 화면 다른 곳의 글자까지 선택된다. 그 선택을 다시 끌면
+   * 크롬이 선택 영역을 통째로 끌고 반투명 사본이 화면 밖까지 따라다닌다.
+   * 버튼·입력칸 위에서는 막지 않는다. 포커스가 사라지면 키보드 조작이 끊긴다.
+   */
+  const blockNativeDrag = (event: MouseEvent<HTMLTableCellElement>) => {
+    if ((event.target as HTMLElement).closest("button, input, textarea, select, a")) return
+    event.preventDefault()
+    ;(event.currentTarget.parentElement as HTMLElement | null)?.focus({ preventScroll: true })
+  }
+
   /** 행 본문 mousedown — 이 시점엔 선택을 바꾸지 않는다(단순 클릭은 상세 열기). */
   const beginRangeSelect = (event: MouseEvent<HTMLTableCellElement>, index: number) => {
     if (event.button !== 0) return
     if ((event.target as HTMLElement).closest("[data-no-range]")) return
+    blockNativeDrag(event)
     dragAnchorRef.current = index
     rangeDraggingRef.current = true
     suppressClickRef.current = false
@@ -617,6 +631,9 @@ export function Warehouse() {
         }
         setChecked(new Set())
         setConfirmChecks({})
+      } else if (actionDialog.kind === "REMOVE") {
+        await removeFabricRows(actionItems.map((item) => ({ key: item.key, fromStatus: item.status })))
+        setChecked(new Set())
       } else if (actionDialog.kind === "DISPOSE") {
         if (!disposalReason) throw new Error("폐기 사유를 선택하세요.")
         for (const item of actionItems) {
@@ -768,7 +785,8 @@ export function Warehouse() {
     : actionDialog?.kind === "UNRECEIVE" ? "입고 대기로 되돌리기"
     : actionDialog?.kind === "CONFIRM" ? "실물 입고 확인"
     : actionDialog?.kind === "DISPOSE" ? "선택 폐기"
-      : actionDialog?.kind === "STOCK" ? "보유 재고 수정"
+      : actionDialog?.kind === "REMOVE" ? "선택 삭제"
+        : actionDialog?.kind === "STOCK" ? "보유 재고 수정"
         : actionDialog?.kind === "OUTBOUND" ? "출고 등록"
           : actionDialog?.kind === "EXHAUST" ? "소진 완료"
             : "상태 복구"
@@ -810,6 +828,8 @@ export function Warehouse() {
     return () => window.cancelAnimationFrame(frame)
   }, [tab, visibleRows.length])
 
+  const columnIndexById = useMemo(() => new Map(visibleColumns.map((column, index) => [column.id, index])), [visibleColumns])
+
   const rangeRect = cellRange ? {
     top: Math.min(cellRange.ar, cellRange.fr),
     bottom: Math.max(cellRange.ar, cellRange.fr),
@@ -838,8 +858,12 @@ export function Warehouse() {
   const filterButton = (column: WarehouseColumn) => {
     const selected = columnFilters[column.id] ?? []
     const active = selected.length > 0 || sortRule?.col === column.id
-    const values = [...new Set(rows.map((item) => cellValue(item, column.id)))]
-      .sort((left, right) => left.localeCompare(right, "ko-KR", { numeric: true }))
+    // 열마다 전체 행을 훑는 계산이다. 팝오버가 열린 열에서만 돌린다.
+    // 닫힌 상태에서도 돌리면 이력 탭 기준 매 렌더 17만 번(4,485행 x 38열)이 된다.
+    const open = filterMenu === column.id
+    const values = open
+      ? [...new Set(rows.map((item) => cellValue(item, column.id)))].sort((left, right) => left.localeCompare(right, "ko-KR", { numeric: true }))
+      : []
     const query = filterSearch.trim().toLocaleLowerCase("ko-KR")
     const shown = (query ? values.filter((value) => value.toLocaleLowerCase("ko-KR").includes(query)) : values).slice(0, 400)
     const setFilter = (next: string[]) => setColumnFilters((current) => {
@@ -848,7 +872,7 @@ export function Warehouse() {
       else copy[column.id] = next
       return copy
     })
-    return <Popover.Root open={filterMenu === column.id} onOpenChange={(open) => { setFilterMenu(open ? column.id : null); setFilterSearch("") }}>
+    return <Popover.Root open={open} onOpenChange={(open) => { setFilterMenu(open ? column.id : null); setFilterSearch("") }}>
       <Popover.Trigger asChild>
         <button
           type="button"
@@ -906,7 +930,16 @@ export function Warehouse() {
       setViewports((current) => current[gridId]?.height === height ? current : { ...current, [gridId]: { top: element.scrollTop, height } })
     }
     return (
-        <div className="min-h-0 flex-1 overflow-auto" ref={measure} onScroll={(event) => { const el = event.currentTarget; setViewports((current) => ({ ...current, [gridId]: { top: el.scrollTop, height: el.clientHeight } })) }}>
+        <div className="min-h-0 flex-1 overflow-auto" ref={measure} onDragStart={(event) => event.preventDefault()} onScroll={(event) => {
+              const el = event.currentTarget
+              setViewports((current) => {
+                const previous = current[gridId]
+                if (previous
+                  && previous.height === el.clientHeight
+                  && Math.floor(previous.top / ROW_HEIGHT) === Math.floor(el.scrollTop / ROW_HEIGHT)) return current
+                return { ...current, [gridId]: { top: el.scrollTop, height: el.clientHeight } }
+              })
+            }}>
           <table className="w-full table-fixed select-none border-separate border-spacing-0 text-xs [&_input]:select-text [&_textarea]:select-text" style={{ width: tableWidth, minWidth: tableWidth }}>
             <colgroup>
               <col style={{ width: GRIP_WIDTH }} />
@@ -952,7 +985,7 @@ export function Warehouse() {
                   </TableCell>
                   {visibleColumns.map((column) => {
                     const fixed = fixedColumns.some((candidate) => candidate.id === column.id)
-                    const colIndex = visibleColumns.findIndex((candidate) => candidate.id === column.id)
+                    const colIndex = columnIndexById.get(column.id) ?? 0
                     const inRange = Boolean(rangeRect && index >= rangeRect.top && index <= rangeRect.bottom && colIndex >= rangeRect.left && colIndex <= rangeRect.right)
                     // DD MASTER 와 같은 방식이다. 범위 가장자리에만 선을 그어 사각형으로 보이게 한다.
                     const edges = inRange && rangeRect ? [
@@ -966,7 +999,7 @@ export function Warehouse() {
                     const manualId = item.sample?.sourceSheet === WEB_INTAKE_SHEET ? item.sample.id : undefined
                     const editable = Boolean(manualId) && MANUAL_EDITABLE.has(column.id)
                     const editing = editable && editCell?.row === item.key && editCell.col === column.id
-                    return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)] text-[var(--muted-foreground)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; cellDragRef.current = true; setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
+                    return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)] text-[var(--muted-foreground)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
                       ? <input
                           autoFocus
                           defaultValue={String(cellRawValue(item, column.id) ?? "")}
@@ -1057,11 +1090,13 @@ export function Warehouse() {
         <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{TAB_META[tab].label} <strong className="text-[var(--foreground)]">{rows.length.toLocaleString("ko-KR")}</strong>건 · 선택 {selectedRows.length}건</span>
         {tab === "READY" ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RECEIVE", selectedRows)}><PackageCheck />선택 입고</Button> : null}
         {tab === "READY" ? <Button type="button" size="sm" variant="outline" onClick={async () => { await addManualIntake(); setTab("READY"); setUnconfirmedOnly(false); setSearch("") }}><Pencil />직접 추가</Button> : null}
+        {tab === "READY" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("REMOVE", selectedRows)}><ListX />선택 삭제</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("CONFIRM", selectedRows)} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-600/40 dark:bg-emerald-500 dark:hover:bg-emerald-600"><PackageCheck />입고 확인</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" disabled={selectedRows.length !== 1} title={selectedRows.length === 1 ? undefined : "출고는 한 건씩 등록합니다."} onClick={() => openAction("OUTBOUND", selectedRows)}><Send />출고</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("EXHAUST", selectedRows)}><PackageOpen />소진</Button> : null}
         {tab === "READY" || tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("DISPOSE", selectedRows)}><Trash2 />폐기</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("UNRECEIVE", selectedRows)}><PackageOpen />입고 대기로</Button> : null}
+        {tab === "WAREHOUSE" && unconfirmedCount > 0 ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setBaselineOpen(true)}>전체 확인 처리</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant={unconfirmedOnly ? "default" : "outline"} aria-pressed={unconfirmedOnly} onClick={() => setUnconfirmedOnly((current) => !current)}>미확인 {unconfirmedCount}건</Button> : null}
       </div>
 
@@ -1079,6 +1114,30 @@ export function Warehouse() {
         <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--muted-foreground)] hover:bg-[var(--muted)]" onClick={() => { setCellRange(null); setCellMenu(null) }}>선택 해제</button>
       </div>
     </> : null}
+
+    <Dialog open={baselineOpen} onOpenChange={(open) => { if (!open && !saving) setBaselineOpen(false) }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader><DialogTitle>기존 재고 전체 확인 처리</DialogTitle><DialogDescription>엑셀 대장에서 넘어온 재고를 한 번에 확인된 것으로 표시합니다.</DialogDescription></DialogHeader>
+        <DialogBody className="space-y-3 text-sm">
+          <p>지금 창고 보관 중 미확인이 <strong>{unconfirmedCount}건</strong>입니다. 전부 확인 처리합니다.</p>
+          <p className="text-xs text-[var(--muted-foreground)]">대장의 회색 표시는 셀 서식이라 읽어올 수 없습니다. 그래서 어느 건이 확인됐는지 알 수 없고, 지금 창고에 있는 재고를 확인된 것으로 봅니다. 이력에는 &quot;기존 재고 일괄 확인 (엑셀 대장 이관)&quot;으로 남습니다.</p>
+          <p className="text-xs text-[var(--muted-foreground)]">이 작업은 한 번만 하면 됩니다. 앞으로 입고되는 건은 창고팀이 건별로 확인합니다. 되돌리려면 해당 건을 입고 대기로 보냈다가 다시 입고해야 합니다.</p>
+        </DialogBody>
+        <DialogFooter>
+          <Button type="button" variant="outline" disabled={saving} onClick={() => setBaselineOpen(false)}>취소</Button>
+          <Button type="button" disabled={saving} onClick={async () => {
+            setSaving(true)
+            try {
+              const targets = ledger.filter((item) => item.status === "WAREHOUSE" && !item.confirmedAt).map((item) => ({ key: item.key, storageNo: item.storageNo }))
+              await confirmWarehouseBaseline(targets)
+              setBaselineOpen(false)
+              setUnconfirmedOnly(false)
+            } catch (error) { window.alert(error instanceof Error ? error.message : "처리하지 못했습니다.") }
+            finally { setSaving(false) }
+          }}>{unconfirmedCount}건 확인 처리</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     <Dialog open={Boolean(outboundHistoryItem)} onOpenChange={(open) => { if (!open) setOutboundHistoryKey(null) }}>
       <DialogContent className="max-w-2xl">
@@ -1120,13 +1179,14 @@ export function Warehouse() {
             </div>
           </div> : null}
           {actionDialog?.kind === "DISPOSE" ? <div className="space-y-2"><Label htmlFor="warehouse-disposal-reason">폐기 사유</Label><Select value={disposalReason} onValueChange={(value) => setDisposalReason(value as DisposalReason)}><SelectTrigger id="warehouse-disposal-reason"><SelectValue placeholder="사유 선택" /></SelectTrigger><SelectContent>{DISPOSAL_REASONS.map((reason) => <SelectItem key={reason} value={reason}>{reason}</SelectItem>)}</SelectContent></Select><p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건에 같은 사유가 기록됩니다.</p></div> : null}
+          {actionDialog?.kind === "REMOVE" ? <div className="space-y-2"><p className="text-sm">선택한 {actionItems.length}건을 입고 대기 목록에서 숨깁니다.</p><p className="text-xs text-[var(--muted-foreground)]">DD MASTER 원본과 개발 이력은 그대로 남습니다. 창고 화면에서만 감추며 폐기로 기록하지 않습니다. 삭제 기록은 원단 상세의 이력에 남습니다.</p></div> : null}
           {actionDialog?.kind === "STOCK" ? <div className="space-y-2"><Label htmlFor="warehouse-stock-yds">보유 재고 (yds)</Label><Input id="warehouse-stock-yds" type="number" min="0" step="0.01" value={stockYds} onChange={(event) => setStockYds(event.target.value)} /><p className="text-xs text-[var(--muted-foreground)]">기존 출고 합계 {formatYds(actionItems[0]?.outboundTotal ?? 0)} yds를 반영해 잔량을 다시 계산합니다.</p></div> : null}
           {actionDialog?.kind === "OUTBOUND" ? <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="warehouse-recipient">수령자</Label><Input id="warehouse-recipient" value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="수령자를 자유롭게 입력" /></div><div className="space-y-2"><Label htmlFor="warehouse-division">사업부 (옵션)</Label><Input id="warehouse-division" list="warehouse-division-suggestions" value={division} onChange={(event) => setDivision(event.target.value)} placeholder="사업부를 자유롭게 입력" /><datalist id="warehouse-division-suggestions">{divisionSuggestions.map((value) => <option key={value} value={value} />)}</datalist></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-qty">수량 (yds)</Label><Input id="warehouse-outbound-qty" type="number" min="0.01" max={actionItems[0]?.balance ?? undefined} step="0.01" value={outboundQty} onChange={(event) => setOutboundQty(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-date">출고 날짜</Label><Input id="warehouse-outbound-date" type="date" value={outboundDate} onChange={(event) => setOutboundDate(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><p className="text-xs text-[var(--muted-foreground)]">현재 잔량 {actionItems[0]?.balance === null ? "미기입" : `${formatYds(actionItems[0]?.balance ?? 0)} yds`}</p><label className="flex items-center gap-2 text-xs"><Checkbox checked={exhaustOnZero} onCheckedChange={(value) => setExhaustOnZero(value === true)} aria-label="잔량 0이면 소진 완료" /><span>출고 후 잔량이 0이 되면 소진 완료로 옮깁니다. 체크를 풀면 창고 보관에 남습니다.</span></label></div></div> : null}
           {actionDialog?.kind === "EXHAUST" ? <p className="text-sm">재고 수량과 관계없이 이 원단을 소진 완료로 이동합니다.</p> : null}
           {actionDialog?.kind === "RESTORE" ? <p className="text-sm">{actionItems[0]?.status === "EXHAUSTED" ? "창고 보관 상태로 복구합니다." : "폐기 전 상태로 복구합니다."}</p> : null}
           {formError ? <p role="alert" className="text-sm text-[var(--destructive)]">{formError}</p> : null}
         </DialogBody>
-        <DialogFooter><Button type="button" variant="outline" disabled={saving} onClick={closeActionDialog}>취소</Button><Button type="button" variant={actionDialog?.kind === "DISPOSE" ? "destructive" : "default"} disabled={saving} onClick={() => void runAction()}>{saving ? "처리 중…" : "처리 확정"}</Button></DialogFooter>
+        <DialogFooter><Button type="button" variant="outline" disabled={saving} onClick={closeActionDialog}>취소</Button><Button type="button" variant={actionDialog?.kind === "DISPOSE" || actionDialog?.kind === "REMOVE" ? "destructive" : "default"} disabled={saving} onClick={() => void runAction()}>{saving ? "처리 중…" : "처리 확정"}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   </section>

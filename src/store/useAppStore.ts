@@ -574,6 +574,33 @@ export async function updateManualIntake(id: string, columnId: string, raw: stri
   await saveCache("completed", completed)
 }
 
+/**
+ * 엑셀 대장에서 넘어온 기존 재고를 한 번에 확인 처리한다.
+ * applyFabricAction 을 건마다 부르면 저장이 그만큼 반복되므로 이벤트를 모아 한 번만 쓴다.
+ * 대장의 회색 표시는 셀 서식이라 파싱되지 않는다. 그래서 어느 건이 확인됐는지 알 수 없고,
+ * 이관 시점에 창고에 있는 재고를 확인된 것으로 본다. 이력에는 이관이라고 남긴다.
+ */
+export async function confirmWarehouseBaseline(entries: ReadonlyArray<{ key: string; storageNo: string }>, actor = "관리자"): Promise<number> {
+  if (entries.length === 0) return 0
+  const state = useAppStore.getState()
+  const occurredAt = new Date().toISOString()
+  const events: FabricLedgerEvent[] = entries.map((entry, index) => ({
+    id: `confirm-baseline-${occurredAt}-${index}`,
+    fabricKey: entry.key,
+    action: "CONFIRM",
+    fromStatus: "WAREHOUSE",
+    toStatus: "WAREHOUSE",
+    occurredAt,
+    actor,
+    note: "기존 재고 일괄 확인 (엑셀 대장 이관)",
+    storageNo: entry.storageNo,
+  }))
+  const fabricEvents = [...events, ...state.fabricEvents]
+  setAppState({ fabricEvents })
+  await saveCache("fabricEvents", fabricEvents)
+  return events.length
+}
+
 export async function applyFabricAction(input: ApplyFabricActionInput): Promise<void> {
   const state = useAppStore.getState()
   const occurredAt = new Date().toISOString()
@@ -648,4 +675,47 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
     saveCache("fabricEvents", fabricEvents),
     records === state.records ? Promise.resolve() : saveCache("records", records),
   ])
+}
+
+/**
+ * 입고 대기에서 잘못 올라온 행을 목록에서 숨긴다.
+ * 원본(DD 레코드·샘플관리대장 등록 행)은 지우지 않고 웹 상태만 덮어쓴다.
+ * completed 배열을 건드리면 직접 등록 행의 인덱스 기반 key가 바뀌어 채번 기록이 어긋난다.
+ */
+export async function removeFabricRows(
+  entries: ReadonlyArray<{ key: string; fromStatus: FabricLedgerStatus }>,
+  actor = "관리자",
+): Promise<void> {
+  if (!entries.length) return
+  const state = useAppStore.getState()
+  const occurredAt = new Date().toISOString()
+  const keys = new Set(entries.map((entry) => entry.key))
+
+  const overrides: FabricLedgerOverride[] = entries.map((entry) => {
+    const previous = state.fabricOverrides.find((item) => item.key === entry.key)
+    return {
+      key: entry.key,
+      status: "REMOVED",
+      storageNo: previous?.storageNo,
+      yds: previous?.yds,
+      note: previous?.note,
+      updatedAt: occurredAt,
+      updatedBy: actor,
+    }
+  })
+  const events: FabricLedgerEvent[] = entries.map((entry, index) => ({
+    id: `remove-${occurredAt}-${index}`,
+    fabricKey: entry.key,
+    action: "REMOVE",
+    fromStatus: entry.fromStatus,
+    toStatus: "REMOVED",
+    occurredAt,
+    actor,
+    note: "입고 대기 목록에서 삭제",
+  }))
+
+  const fabricOverrides = [...overrides, ...state.fabricOverrides.filter((item) => !keys.has(item.key))]
+  const fabricEvents = [...events, ...state.fabricEvents]
+  setAppState({ fabricOverrides, fabricEvents })
+  await Promise.all([saveCache("fabricOverrides", fabricOverrides), saveCache("fabricEvents", fabricEvents)])
 }

@@ -13,6 +13,8 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
   const { pathname } = useLocation()
   const user = useAuthStore((state) => state.user)
   const isOwner = useAuthStore((state) => state.isOwner)
+  const approval = useAuthStore((state) => state.approval)
+  const canWrite = isOwner || approval === "approved"
   const currentRoute = routeDefinitions.find((definition) => definition.path === pathname)
     ?? [...routeDefinitions]
       .sort((left, right) => right.path.length - left.path.length)
@@ -49,13 +51,13 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
           <span
             className={
               "hidden rounded-full px-2 py-0.5 text-[11px] font-medium sm:inline-block " +
-              (isOwner
+              (canWrite
                 ? "bg-[color-mix(in_srgb,var(--primary)_16%,transparent)] text-[var(--primary)]"
                 : "bg-[var(--muted)] text-[var(--muted-foreground)]")
             }
-            title={isOwner ? "편집·업로드 권한" : "읽기 전용(편집은 소유자만)"}
+            title={canWrite ? "편집·업로드 권한" : "읽기 전용(승인 대기)"}
           >
-            {isOwner ? "편집 권한" : "읽기 전용"}
+            {canWrite ? "편집 권한" : "읽기 전용"}
           </span>
           <span className="hidden max-w-[180px] truncate text-xs text-[var(--muted-foreground)] md:inline">
             {user.email}
