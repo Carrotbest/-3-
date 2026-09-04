@@ -160,6 +160,9 @@ export function httpsMaterialLink(value: string | undefined): string | undefined
   }
 }
 
+/** 대장에 없는 건을 창고 화면에서 직접 등록할 때 쓰는 출처 표시. 대장 재업로드가 지우지 않는다. */
+export const WEB_INTAKE_SHEET = "웹 등록"
+
 export interface CompletedSample {
   /** 웹 저장용 고유 키. 엑셀 재업로드 없이도 유지되도록 파싱 시 부여한다(completedSampleId). */
   id?: string
@@ -191,6 +194,19 @@ export interface CompletedSample {
   completedAt: string
   requestDate?: string
   sourceSheet?: string
+  /** DD 레코드가 없는 과거 행을 창고 화면에 대장 그대로 보여주기 위한 원본 값. */
+  ledger?: {
+    originalRef?: string
+    planner?: string
+    yarnDetail?: string
+    targetWeight?: number | null
+    color?: string
+    dyeingSide?: string
+    dueDate?: string
+    mills?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
+    knitSpec?: { inch?: string; needles?: string; feeder?: string; loop?: string }
+    greige?: { width?: number | null; weight?: number | null }
+  }
 }
 
 /**
@@ -209,7 +225,7 @@ export function completedSampleId(sample: Pick<CompletedSample, "id" | "flNo" | 
 /** DD와 샘플관리대장을 하나의 업무 흐름으로 보여주기 위한 원단 상태. */
 export type FabricLedgerStatus = "DEVELOPING" | "READY" | "WAREHOUSE" | "EXHAUSTED" | "DISPOSED"
 
-export type FabricLedgerAction = "COMPLETE" | "RECEIVE" | "OUTBOUND" | "EXHAUST" | "DISPOSE" | "RESTORE" | "NOTE"
+export type FabricLedgerAction = "COMPLETE" | "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "OUTBOUND" | "EXHAUST" | "DISPOSE" | "RESTORE" | "NOTE"
 
 /** 원본 엑셀은 그대로 두고 웹에서 변경한 운영 상태만 덧씌운다. */
 export interface FabricLedgerOverride {

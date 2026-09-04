@@ -40,6 +40,8 @@ export interface FabricLedgerItem {
   outboundTotal: number
   balance: number | null
   intakeAt: string
+  /** 창고팀이 실물을 확인한 시각. 대장에서 셀을 회색으로 칠하던 표시를 기록으로 남긴 것이다. */
+  confirmedAt: string
   lastMovedAt: string
   lastOutbound: FabricLedgerOutbound | null
   sourceOrder: number | null
@@ -160,6 +162,7 @@ function emptyFromRecord(record: DevRecord): FabricLedgerItem {
     outboundTotal: 0,
     balance: null,
     intakeAt: "",
+    confirmedAt: "",
     lastMovedAt: "",
     lastOutbound: null,
     sourceOrder: null,
@@ -196,6 +199,7 @@ function emptyFromSample(sample: CompletedSample, index: number): FabricLedgerIt
     outboundTotal: 0,
     balance: null,
     intakeAt: "",
+    confirmedAt: "",
     lastMovedAt: "",
     lastOutbound: null,
     sourceOrder: index,
@@ -328,6 +332,7 @@ export function buildFabricLedger(
   })
   const outboundMap = new Map<string, FabricLedgerOutbound[]>()
   const intakeMap = new Map<string, string>()
+  const confirmMap = new Map<string, string>()
   fabricEvents.forEach((event) => {
     const itemKey = resolveStoredKey(event.fabricKey)
     if (!itemKey) return
@@ -335,6 +340,12 @@ export function buildFabricLedger(
       const previous = intakeMap.get(itemKey) ?? ""
       if (event.occurredAt > previous) intakeMap.set(itemKey, event.occurredAt)
     }
+    if (event.action === "CONFIRM") {
+      const previous = confirmMap.get(itemKey) ?? ""
+      if (event.occurredAt > previous) confirmMap.set(itemKey, event.occurredAt)
+    }
+    // 창고를 떠나거나 되돌아오면 실물 확인은 무효가 된다. 다시 확인받아야 한다.
+    if (event.action === "RESTORE" || event.action === "DISPOSE" || event.action === "EXHAUST" || event.action === "UNRECEIVE") confirmMap.delete(itemKey)
     if (event.action !== "OUTBOUND" || typeof event.qty !== "number" || !Number.isFinite(event.qty) || event.qty <= 0) return
     const current = outboundMap.get(itemKey) ?? []
     current.push({ to: event.to?.trim() || "미입력", division: event.division?.trim() || undefined, qty: event.qty, date: event.occurredAt })
@@ -348,6 +359,7 @@ export function buildFabricLedger(
     const outboundTotal = outbound.reduce((sum, event) => sum + event.qty, 0)
     const balance = yds === null ? null : yds - outboundTotal
     const intakeAt = intakeMap.get(item.key) ?? ""
+    const confirmedAt = confirmMap.get(item.key) ?? ""
     const lastOutbound = outbound[0] ?? null
     // 반출이 없으면 입고일로, 입고 이력도 없으면 빈 문자열로 유지한다.
     const lastMovedAt = lastOutbound?.date ?? intakeAt
@@ -359,7 +371,7 @@ export function buildFabricLedger(
       updatedAt: override.updatedAt,
       updatedBy: override.updatedBy,
     } : item
-    return { ...merged, yds, outbound, outboundTotal, balance, intakeAt, lastMovedAt, lastOutbound }
+    return { ...merged, yds, outbound, outboundTotal, balance, intakeAt, confirmedAt, lastMovedAt, lastOutbound }
   }).sort((left, right) => {
     const statusComparison = statusRank[left.status] - statusRank[right.status]
     if (statusComparison) return statusComparison

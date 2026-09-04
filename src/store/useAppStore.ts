@@ -5,6 +5,7 @@ import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } fro
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
 import { isFabricBalanceExhausted } from "../data/fabric-ledger"
 import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type StudyRecord } from "../data/schema"
+import { WEB_INTAKE_SHEET } from "@/data/schema"
 import {
   sampleCompleted,
   sampleChemicalPortfolio,
@@ -507,6 +508,7 @@ export interface ApplyFabricActionInput {
   actor?: string
   note?: string
   storageNo?: string
+  autoExhaust?: boolean
   yds?: number
   qty?: number
   to?: string
@@ -517,6 +519,61 @@ export interface ApplyFabricActionInput {
 }
 
 /** 상태 변경과 변경 이력을 함께 저장한다. 원본 엑셀은 수정하지 않는다. */
+/** 대장에 없는 건(yds 만 수취한 경우 등)을 입고 대기에 빈 행으로 추가한다. 값은 그리드에서 직접 채운다. */
+export async function addManualIntake(): Promise<string> {
+  const state = useAppStore.getState()
+  const today = new Date().toISOString().slice(0, 10)
+  const id = `web:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`
+  const sample: CompletedSample = {
+    id,
+    storageNo: "",
+    styleNo: "",
+    flNo: "",
+    season: "",
+    category: "",
+    buyer: "",
+    owner: "",
+    construction: "",
+    requestDate: today,
+    sourceSheet: WEB_INTAKE_SHEET,
+    process: { knit: "", dye: "", finish: "", remark: "" },
+    inhouse: { widthCm: null, weightGsm: null, shrinkagePct: { length: null, width: null }, pilling: null },
+    completedAt: today,
+  }
+  const completed = [...state.completed, sample]
+  setAppState({ completed })
+  await saveCache("completed", completed)
+  return id
+}
+
+/** 그리드에서 고친 값을 웹 등록 행에 반영한다. 대장·DD 에서 온 행은 대상이 아니다. */
+export async function updateManualIntake(id: string, columnId: string, raw: string): Promise<void> {
+  const state = useAppStore.getState()
+  const value = raw.trim()
+  const completed = state.completed.map((sample) => {
+    if (sample.id !== id || sample.sourceSheet !== WEB_INTAKE_SHEET) return sample
+    const ledger = { ...(sample.ledger ?? {}) }
+    switch (columnId) {
+      case "styleNo": return { ...sample, styleNo: value }
+      case "flNo": return { ...sample, flNo: value }
+      case "buyer": return { ...sample, buyer: value }
+      case "season": return { ...sample, season: value }
+      case "category": return { ...sample, category: value }
+      case "owner": return { ...sample, owner: value }
+      case "construction": return { ...sample, construction: value }
+      case "note": return { ...sample, process: { ...sample.process, remark: value } }
+      case "originalRef": ledger.originalRef = value; return { ...sample, ledger }
+      case "planner": ledger.planner = value; return { ...sample, ledger }
+      case "yarnDetail": ledger.yarnDetail = value; return { ...sample, ledger }
+      case "color": ledger.color = value; return { ...sample, ledger }
+      case "dyeing": ledger.dyeingSide = value; return { ...sample, ledger }
+      default: return sample
+    }
+  })
+  setAppState({ completed })
+  await saveCache("completed", completed)
+}
+
 export async function applyFabricAction(input: ApplyFabricActionInput): Promise<void> {
   const state = useAppStore.getState()
   const occurredAt = new Date().toISOString()
@@ -539,7 +596,9 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
       ? sum + event.qty
       : sum, 0)
   const outboundTotal = previousOutboundTotal + (input.action === "OUTBOUND" ? qty ?? 0 : 0)
-  const shouldAutoExhaust = input.action === "OUTBOUND" || (input.yds !== undefined && input.action !== "RESTORE" && input.action !== "DISPOSE")
+  // 잔량이 0이 되어도 소진 완료로 옮길지는 사용자가 정한다. 기본은 옮긴다.
+  const autoExhaust = input.autoExhaust !== false
+  const shouldAutoExhaust = autoExhaust && (input.action === "OUTBOUND" || (input.yds !== undefined && input.action !== "RESTORE" && input.action !== "DISPOSE"))
   const resolvedToStatus = shouldAutoExhaust && isFabricBalanceExhausted(yds, outboundTotal)
     ? "EXHAUSTED"
     : input.action === "OUTBOUND"
@@ -551,7 +610,8 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
   const override: FabricLedgerOverride = {
     key: input.fabricKey,
     status: resolvedToStatus,
-    storageNo: input.storageNo?.trim() || previous?.storageNo,
+    // 입고 대기로 되돌리면 채번을 취소한다. 그 번호는 다시 쓸 수 있게 풀린다.
+    storageNo: input.action === "UNRECEIVE" ? undefined : input.storageNo?.trim() || previous?.storageNo,
     yds,
     note: input.note?.trim() || previous?.note,
     updatedAt: occurredAt,

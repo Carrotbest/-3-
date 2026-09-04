@@ -115,6 +115,24 @@ const SAMPLE_DEFAULT_COLUMNS = {
   remark: 28,
   shrinkageLength: 29,
   shrinkageWidth: 30,
+  // 아래는 DD 가 없는 과거 대장 행을 창고 화면에 그대로 보여주기 위해 더 읽는 열이다.
+  originalRef: 4,
+  planner: 5,
+  yarnDetail: 9,
+  targetWeight: 11,
+  color: 15,
+  dyeingSide: 16,
+  yarnMill: 18,
+  knittingMill: 20,
+  dyeingMill: 22,
+  finishingMill: 24,
+  dueDate: 27,
+  knitInch: 31,
+  knitNeedles: 32,
+  knitFeeder: 33,
+  knitLoop: 34,
+  greigeWidth: 35,
+  greigeWeight: 36,
 } as const
 
 const compact = (value: unknown): string =>
@@ -675,6 +693,23 @@ function sampleColumns(sheet: XLSX.WorkSheet, headerRow: number): ColumnMap<type
     remark: locate(["remark/issue", "remark", "issue"], SAMPLE_DEFAULT_COLUMNS.remark),
     shrinkageLength: locate(["shrinkage length", "shrinkagelength"], SAMPLE_DEFAULT_COLUMNS.shrinkageLength),
     shrinkageWidth: locate(["shrinkage width", "shrinkagewidth"], SAMPLE_DEFAULT_COLUMNS.shrinkageWidth),
+    originalRef: locate(["original ref#", "original ref", "originalref"], SAMPLE_DEFAULT_COLUMNS.originalRef),
+    planner: locate(["requester", "요청자"], SAMPLE_DEFAULT_COLUMNS.planner),
+    yarnDetail: locate(["yarn"], SAMPLE_DEFAULT_COLUMNS.yarnDetail),
+    targetWeight: locate(["target wt' g/m2", "target wt g/m2", "targetwt"], SAMPLE_DEFAULT_COLUMNS.targetWeight),
+    color: locate(["color"], SAMPLE_DEFAULT_COLUMNS.color),
+    dyeingSide: locate(["dyeing side", "dyeingside"], SAMPLE_DEFAULT_COLUMNS.dyeingSide),
+    yarnMill: SAMPLE_DEFAULT_COLUMNS.yarnMill,
+    knittingMill: SAMPLE_DEFAULT_COLUMNS.knittingMill,
+    dyeingMill: SAMPLE_DEFAULT_COLUMNS.dyeingMill,
+    finishingMill: SAMPLE_DEFAULT_COLUMNS.finishingMill,
+    dueDate: locate(["due date", "duedate", "납기"], SAMPLE_DEFAULT_COLUMNS.dueDate),
+    knitInch: SAMPLE_DEFAULT_COLUMNS.knitInch,
+    knitNeedles: SAMPLE_DEFAULT_COLUMNS.knitNeedles,
+    knitFeeder: SAMPLE_DEFAULT_COLUMNS.knitFeeder,
+    knitLoop: SAMPLE_DEFAULT_COLUMNS.knitLoop,
+    greigeWidth: SAMPLE_DEFAULT_COLUMNS.greigeWidth,
+    greigeWeight: SAMPLE_DEFAULT_COLUMNS.greigeWeight,
   }
 }
 
@@ -725,6 +760,32 @@ function parseSampleSheet(workbook: XLSX.WorkBook, wanted: string, detectedHeade
         pilling: null,
       },
       completedAt: isoDate(row[columns.completedAt]),
+      // DD 레코드가 없는 과거 행도 창고 화면이 대장과 같게 보이도록 원본 값을 그대로 싣는다.
+      ledger: {
+        originalRef: text(row[columns.originalRef]),
+        planner: text(row[columns.planner]),
+        yarnDetail: text(row[columns.yarnDetail]),
+        targetWeight: numberOrNull(row[columns.targetWeight]),
+        color: text(row[columns.color]),
+        dyeingSide: text(row[columns.dyeingSide]),
+        dueDate: isoDate(row[columns.dueDate]),
+        mills: {
+          yarn: text(row[columns.yarnMill]),
+          knitting: text(row[columns.knittingMill]),
+          dyeing: text(row[columns.dyeingMill]),
+          finishing: text(row[columns.finishingMill]),
+        },
+        knitSpec: {
+          inch: text(row[columns.knitInch]),
+          needles: text(row[columns.knitNeedles]),
+          feeder: text(row[columns.knitFeeder]),
+          loop: text(row[columns.knitLoop]),
+        },
+        greige: {
+          width: numberOrNull(row[columns.greigeWidth]),
+          weight: numberOrNull(row[columns.greigeWeight]),
+        },
+      },
     })
   }
   return samples

@@ -11,6 +11,8 @@ import { useAppStore } from "@/store/useAppStore"
 const ACTION_LABELS: Record<FabricLedgerAction, string> = {
   COMPLETE: "개발 완료",
   RECEIVE: "입고",
+  UNRECEIVE: "입고 대기로 되돌림",
+  CONFIRM: "실물 입고 확인",
   OUTBOUND: "반출",
   EXHAUST: "소진 완료",
   DISPOSE: "폐기",
@@ -91,7 +93,12 @@ export function FabricDetail() {
   const { key: routeKey = "" } = useParams<{ key: string }>()
   const { pathname } = useLocation()
   const encodedKey = pathname.startsWith("/fabric/") ? pathname.slice("/fabric/".length) : routeKey
-  const key = decodeFabricKey(encodedKey)
+  return <FabricDetailBody fabricKey={decodeFabricKey(encodedKey)} />
+}
+
+/** 라우트와 창고 팝업이 같은 본문을 쓴다. 두 곳에 같은 화면을 따로 만들지 않는다. */
+export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
+  const key = fabricKey
   const records = useAppStore((state) => state.records)
   const samples = useAppStore((state) => state.completed)
   const overrides = useAppStore((state) => state.fabricOverrides)
@@ -119,6 +126,8 @@ export function FabricDetail() {
   const events = fabricEvents
     .filter((event) => event.fabricKey === item.key)
     .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt))
+  const disposalReason = events.find((event) => event.action === "DISPOSE")?.reason
+  const terminationReason = item.status === "EXHAUSTED" ? "전량 소진" : item.status === "DISPOSED" ? `폐기${disposalReason ? ` · ${disposalReason}` : ""}` : ""
 
   return (
     <div className="space-y-4">
@@ -176,6 +185,7 @@ export function FabricDetail() {
             <Field label="반출 합계">{numberText(item.outboundTotal, " yds")}</Field>
             <Field label="잔량">{numberText(item.balance, " yds")}</Field>
           </dl>
+          {terminationReason ? <dl className="mt-4 border-t border-[var(--border)] pt-4"><Field label="종료 사유">{terminationReason}</Field></dl> : null}
           <div className="mt-5 overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
             <table className="w-full text-sm">
               <thead className="bg-[var(--muted)] text-left text-xs text-[var(--muted-foreground)]">

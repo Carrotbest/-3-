@@ -59,7 +59,8 @@ function AppLayout() {
   const screenPermissions = useAuthStore((state) => state.screenPermissions)
   const canViewCurrentPath = isOwner || canAccessScreenPath(pathname, screenPermissions)
   // DD 마스터는 엑셀 작업공간처럼 좌우 빈칸 없이 콘텐츠 폭 전체를 쓴다(폭 제약·패딩 해제).
-  const fullBleed = pathname === "/development/workspace" && canViewCurrentPath
+  // 창고도 DD MASTER 처럼 화면 높이를 꽉 채운다. 그래야 헤더가 붙어 있고 가로 스크롤바가 하단에 온다.
+  const fullBleed = (pathname === "/development/workspace" || pathname === "/warehouse") && canViewCurrentPath
 
   // 네비게이션으로 화면이 바뀔 때 이전 화면의 스크롤 위치를 이어받지 않는다.
   // 일반 페이지(window)와 전체화면 작업공간의 내부 스크롤 루트를 함께 초기화한다.

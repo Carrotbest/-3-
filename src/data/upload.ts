@@ -2,6 +2,7 @@ import * as XLSX from "xlsx"
 
 import type { DataMeta, HistoryState, RddaSnapshot } from "./sample"
 import type { CompletedSample, DevRecord } from "./schema"
+import { WEB_INTAKE_SHEET } from "./schema"
 import { parseChemicalPortfolio } from "./chemical"
 import { reconcile, type ReconcileResult } from "./reconcile"
 import { loadTds } from "./tds-loader"
@@ -69,7 +70,10 @@ export async function ingestSamples(file: File): Promise<void> {
   return run("samples", file.name, async () => {
     const workbook = await workbookOf(file)
     setIngestState({ step: "parsing" })
-    const completed = parseSamples(workbook)
+    const parsed = parseSamples(workbook)
+    // 웹에서 직접 등록한 건은 대장에 없다. 재업로드가 통째로 갈아치우므로 따로 살려 붙인다.
+    const manual = useAppStore.getState().completed.filter((sample) => sample.sourceSheet === WEB_INTAKE_SHEET)
+    const completed = [...parsed, ...manual]
     setIngestState({ step: "validating" })
     setAppState({ completed })
     await saveCache("completed", completed)
