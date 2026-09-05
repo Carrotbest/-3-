@@ -2001,6 +2001,30 @@
   ]
  },
  {
+  "key": "3fd97405c69b7ab3",
+  "title": "| India's PTA, polyester melt prices ease; China feedstocks swing",
+  "title_ko": "| 인도의 PTA, 폴리에스터 용융물 가격 완화; 중국 공급원료 변동",
+  "link": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxPRi1Kck5FbE9RWTY0aTVrakRadl85M19PWUtldXNwN25sM213cEt2UFhTbF9SdDN3TldWV0F0NG1oZEtnQVVEcHR1d3Z4dW5INmw0RUViNDJIWE5OUm43Z3lIZnV3ZWtvOHp6WVJmU0dlVWN3d3Y3ZEJvS2p0XzJnS09oOWhtS2NzVGl5MTZiUEFQMFgtd0g0cjFQekRERkpMQzU4ZFg2UmloVGlValpYSGtiTXNaUF9OajY2OWx3MklYempuSHJFaXJUczh3U3VYd1JCUlFQLS1SX2c?oc=5",
+  "published": "2026-08-31",
+  "collected": "2026-09-05",
+  "summary": "| India's PTA, polyester melt prices ease; China feedstocks swing Fibre2Fashion",
+  "content": "| India's PTA, polyester melt prices ease; China feedstocks swing Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "3f3720b70c6b1054",
   "title": "Costco Stock Slips 0.4% as 47x P/E Tests 10.7% Sales Growth",
   "title_ko": "Costco 주가는 47배 P/E 테스트로 0.4% 하락 10.7% 매출 성장",
@@ -6800,6 +6824,34 @@
   ]
  },
  {
+  "key": "cbd6db313c9bbdfe",
+  "title": "Abercrombie & Fitch (ANF) Is Up 40.1% After Earnings Boosted by Tariff Refund and Buybacks – What's Changed",
+  "title_ko": "Abercrombie 및 Fitch(ANF)는 관세 환급 및 환매로 수익이 증가한 후 40.1% 증가했습니다. – 변경된 사항",
+  "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxON2FyRkxvN21GeElRak5tRk1sUUlmVkdxa0ROSmVRQTBLQWVMVjRRQnBSZzBaejY1LXVHS0NTdDY3Y1FVU3hPWFRvaElqcGpfMVJ6WTAwOGt0VEFxV1dIN0FTb2ZEMmU3OU1ONWpBWlR0SlN1NFk3X1FJOVhXWWswbTlHM3lwcEZ3VEdtMWx2bURSSGlrdEE?oc=5",
+  "published": "2026-08-27",
+  "collected": "2026-09-05",
+  "summary": "Abercrombie & Fitch (ANF) Is Up 40.1% After Earnings Boosted by Tariff Refund and Buybacks – What's Changed Yahoo Finance",
+  "content": "Abercrombie & Fitch (ANF) Is Up 40.1% After Earnings Boosted by Tariff Refund and Buybacks – What's Changed Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "관세"
+  ],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
+  ]
+ },
+ {
   "key": "c88f234ef325f83d",
   "title": "BUP’s 35-year celebratory webinars",
   "title_ko": null,
@@ -9835,6 +9887,34 @@
   ]
  },
  {
+  "key": "b54029c6ebf3ae8c",
+  "title": "Abercrombie & Fitch Stock Soars 41% After Blowout Earnings Beat, Tariff Refunds Boost Profit and Guidance",
+  "title_ko": "Abercrombie 및 Fitch 주식은 폭발적인 수익 감소 후 41% 급등, 관세 환급으로 이익 및 지침 향상",
+  "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxQNjZkc3VlOGE5WjJOOEhSTGZYZDNOdC03WFZ2OHltME00bHczYnFfbFhmSzRBOHphSGlpaExsTHp0cWJadzF3eTlmUXBPd2d5MFQ5XzN5d2dFRzY1bXdQOERILW5hMFd1UGtfaUZDNDNHUU5fM3JVNEZ5dHNVMjVVaXpSZU5lbjZVUDNfMXM4QQ?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-09-05",
+  "summary": "Abercrombie & Fitch Stock Soars 41% After Blowout Earnings Beat, Tariff Refunds Boost Profit and Guidance International Business Times Australia",
+  "content": "Abercrombie & Fitch Stock Soars 41% After Blowout Earnings Beat, Tariff Refunds Boost Profit and Guidance International Business Times Australia",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "관세"
+  ],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
+  ]
+ },
+ {
   "key": "b2e1ae40b0cbdb1f",
   "title": "Urban Outfitters (URBN) Matches Q2 Earnings Estimates",
   "title_ko": "Urban Outfitters (URBN), 2분기 수익 추정치와 일치",
@@ -10008,6 +10088,32 @@
   "hits": 1,
   "sources": [
    "Indian Textile Magazine"
+  ]
+ },
+ {
+  "key": "a3c89fc09b14c4d1",
+  "title": "Abercrombie raises full-year sales forecast on resilient apparel demand, net sales total $1.3 billion in Q2 - FashionNetwork",
+  "title_ko": "Abercrombie, 회복력 있는 의류 수요로 연간 매출 전망 상향 조정, 2분기 총 매출 13억 달러 - FashionNetwork",
+  "link": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxONG5UXzNIdnI5YTdPcFRQLWdvSlZyTy1vTTVXSWlPQzhTdVpWcGJmWVlkaHdpYWpLYnJpdWZuZ1ByNDFfZkNsSE12UHVYMXNNZHltWG5XakVSNHNNbFVCOWxaelRjRnRiYjFnUkRQRUd0TV9Db2xkS0ZGb1MyQXF5Y0V5MlNRZFZ6TVQ0QjAtbHVyVWlUUDZJRXpUWVFhUDhuaVlqTTJzZGlLdmVoWHA2QTZaTW11V0NUNE51TmpKYllza21mWm9qejg1cldpRmZLcHpmS3lZY2piSmhvSEJHTkVQM2JwNl9V?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-09-05",
+  "summary": "Abercrombie raises full-year sales forecast on resilient apparel demand, net sales total $1.3 billion in Q2 FashionNetwork - The World's Fashion Business News",
+  "content": "Abercrombie raises full-year sales forecast on resilient apparel demand, net sales total $1.3 billion in Q2 FashionNetwork - The World's Fashion Business News",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
   ]
  },
  {
@@ -11583,10 +11689,37 @@
   "score": 7,
   "relevant": true,
   "gate": "material",
-  "hits": 2,
+  "hits": 3,
   "sources": [
    "Indian Textile Magazine",
-   "주제검색 · 신소재"
+   "주제검색 · 신소재",
+   "주제검색 · 염색가공"
+  ]
+ },
+ {
+  "key": "3ffafe35a084b39c",
+  "title": "Abercrombie (ANF) Q2 Earnings: Taking a Look at Key Metrics Versus Estimates",
+  "title_ko": "Abercrombie (ANF) 2분기 수익: 주요 지표와 추정치 살펴보기",
+  "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxOUkxqckRCbXJmSmdmeEs3aW1BdTRUVHlhSzhsQWxfVW5Wb21VdXpQeXRMeU15WWZGLVowU01TeFIza1hxR0RHYkxWV1hOSTBzMzluSUZadUJMNlA4MkV1bU5nUHdubFZ4cEtGUWd4SWNscElwNXozOWFsSGtBNnprWXpzRkdVTlJaV19MamFET1pOam9xRWwwemo5Q1AyUWdq?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-09-05",
+  "summary": "Abercrombie (ANF) Q2 Earnings: Taking a Look at Key Metrics Versus Estimates Yahoo Finance",
+  "content": "Abercrombie (ANF) Q2 Earnings: Taking a Look at Key Metrics Versus Estimates Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
   ]
  },
  {
@@ -13300,6 +13433,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Kohl's"
+  ]
+ },
+ {
+  "key": "9313cf2de06dc548",
+  "title": "Bangladesh eyes global capital with $2-bn Hong Kong fund",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxOV2JSelAtUG1PcGhJdVBGRFB5NVNhdjQ3YkkwUmY5c1I4UFRxOEpCVGJZQUozMW5RelJoZmhIOTZMUTlYYTdzd202N1gtQ25zNnhGMmZ6ZEtDTk1BTzFSZlRDZk1iandxVnJTc180a0RXUGZzQWNtOWJjNTMzWUNzNTV0TXFiQzNPYmVveFVyRHEtZHF4MXNQc3ZtVVlpU1J6YWp1Z3ZYOFhWN0hhRExNUl81RQ?oc=5",
+  "published": "2026-08-25",
+  "collected": "2026-09-05",
+  "summary": "Bangladesh eyes global capital with $2-bn Hong Kong fund Fibre2Fashion",
+  "content": "Bangladesh eyes global capital with $2-bn Hong Kong fund Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "방글라데시"
+  ],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -17973,6 +18132,30 @@
   ]
  },
  {
+  "key": "f3fb5daaa8ef2649",
+  "title": "전자파 99% 차폐에 적외선 은폐까지···재료연, 초박막 신소재 필름 개발",
+  "title_ko": "전자파 99% 차폐에 적외선 은폐까지···재료연, 초박막 신소재 필름 개발",
+  "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBFckJKVk5BRTI3OU9PMVl6NXBuSFBtbDM4Zi1mUklrWXBET08ydi1peTBTS2lEZFY3X2pvczB5VWNudGoxTG1zZlRrcDFFbldXbWhfSjdnVGZ1N1hKbVZsNFFkX1g3RUJWUWc?oc=5",
+  "published": "2026-08-20",
+  "collected": "2026-09-05",
+  "summary": "전자파 99% 차폐에 적외선 은폐까지···재료연, 초박막 신소재 필름 개발 헬로디디",
+  "content": "전자파 99% 차폐에 적외선 은폐까지···재료연, 초박막 신소재 필름 개발 헬로디디",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 국내소재",
+  "region": "국내",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 국내소재"
+  ]
+ },
+ {
   "key": "f15dfc8fdebe0cac",
   "title": "Walmart Drops 8% on Slowest Same-Store Sales Growth Since 2020; Target Holds Steady, Costco Eases",
   "title_ko": "Walmart는 2020년 이후 가장 느린 동일 매장 매출 성장으로 8% 하락; Target는 안정을 유지하고 Costco는 완화됩니다.",
@@ -18302,6 +18485,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Victoria's Secret"
+  ]
+ },
+ {
+  "key": "d37e5656738450cc",
+  "title": "SK케미칼, 버려진 옷까지 다시 원료로…리사이클 밸류체인 구축",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9WN3lSWkVsdl9jNHd4bjFqbDJnOXYwS1hiS0FlaWNqOWY5QUE4S1FTLTkwOFRCZVNoRlVTbW54T0NfREtzZUdkU1NtY3RBRWdsZU5XQkdULV9oN1VnV2ppZERwa2JtVlBKajloUUtPRdIBc0FVX3lxTFBvM2hIdGhLdlQ1UHVkcjI4SzVOMm5FVTZXU1E5MEFpZGRZQzZIRHl5RVQtdzdrS0V4a0JGdThTdExUSXlrRjZxSmhGcHctSGFYbkh0TDRrZzlqckdGbzZUN1pGWFBtRWxjRVNKNnVLMnpSbHM?oc=5",
+  "published": "2026-08-20",
+  "collected": "2026-09-05",
+  "summary": "SK케미칼, 버려진 옷까지 다시 원료로…리사이클 밸류체인 구축 데일리한국",
+  "content": "SK케미칼, 버려진 옷까지 다시 원료로…리사이클 밸류체인 구축 데일리한국",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 국내소재",
+  "region": "국내",
+  "category": "ETC",
+  "tags": [
+   "리사이클"
+  ],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 국내소재"
   ]
  },
  {
@@ -19177,6 +19386,32 @@
   ]
  },
  {
+  "key": "6fbe2ae015c6c2b5",
+  "title": "Walmart Crashes 9.7% After Rare U.S. Sales Miss",
+  "title_ko": "Walmart, 드물게 미국 판매 실패로 인해 9.7% 충돌",
+  "link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQTUQ0aTF5Z1FHRVhIcnhVNHpPNEFnZ2thMWhKWDJ0M0pIc2tIWWNjWkdPZktyajQzSHZhUVppSWJVUzhEUU53eGV6Y25SbWZLUGx4ckVVSndYczlHQnExWFhiU3hwVTY2NzV5aXY5TlZmdGVlNGRjcFVaaER3WFZWRlc2MWNtOEc2cld4aThXZm9aZDg?oc=5",
+  "published": "2026-08-20",
+  "collected": "2026-09-05",
+  "summary": "Walmart Crashes 9.7% After Rare U.S. Sales Miss Yahoo Finance",
+  "content": "Walmart Crashes 9.7% After Rare U.S. Sales Miss Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "6cd9464c1482b1fc",
   "title": "Retail reverberations after Walmart's earnings surprise (WMT:NASDAQ)",
   "title_ko": "Walmart의 어닝 서프라이즈 이후 소매업계의 반향(WMT:NASDAQ)",
@@ -19719,6 +19954,34 @@
   ]
  },
  {
+  "key": "400d8f494e83324e",
+  "title": "At Walmart, billions in tariff refunds soften the blow from slower sales growth",
+  "title_ko": "Walmart에서는 수십억 달러의 관세 환급으로 매출 성장 둔화로 인한 타격을 완화했습니다.",
+  "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPdEw0a1J4dkdpbU9UelV2bXFmZWZjZHY3S19lUEk5R09Gb0tMdEJJUVpQbHlvY2JKZkxqQnJ3M21wY2lVYkxqSFV6LXl5QVFQZ21jbnQ2dXRWbGlVbWxwMVJYc1FRNmVSWVlnWW0zVnYxMzU4NlJXbV82QVQ3OGtlUUdGQ2c0bldJa1NvWFFNV29HeUVj?oc=5",
+  "published": "2026-08-20",
+  "collected": "2026-09-05",
+  "summary": "At Walmart, billions in tariff refunds soften the blow from slower sales growth NBC News",
+  "content": "At Walmart, billions in tariff refunds soften the blow from slower sales growth NBC News",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "관세"
+  ],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "3d749e8499a076fc",
   "title": "Walmart Quarterly US Comparable Sales Miss Views; Retailer Gives Weak Earnings Outlook",
   "title_ko": "Walmart 분기별 미국 비교 판매 미스 조회수; 소매업체, 약한 수익 전망 제시",
@@ -20026,6 +20289,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Walmart"
+  ]
+ },
+ {
+  "key": "1bb7ed4019f5182d",
+  "title": "Costco (COST) Q2 2026 Results: Reported EPS Misses Expectations on the Day; Market Response: Shares Move Lower 0.45% on the Day - Upward Estimate Revision",
+  "title_ko": "Costco(COST) 2026년 2분기 결과: 보고된 EPS가 당일 기대치를 벗어났습니다. 시장 반응: 당일 주가는 0.45% 하락 - 추정치 상향 조정",
+  "link": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxNRTVDdnRFTlBQR1FpcW1FX1dBMmJzelBBeFJPTHR1bm1YazVjXzlnRUtBdzhwYzF5WjdVd2ZBNDJYOWdaMFJweVNPQzg0MnlZSW1VRUh6YTNtVWZVWUdUdFBBZ1Y5WlVEblV1eDk4MGEwWUREd0xpVmhwWUE1Y1dVWDY5bmxlb1A2cjRoNm9PQ0FuV09QZzJRQ2FabFlBSXJCSS1EQ0paWnNGSmZWUWt1cnQ3Tk9UU2NlQXNVUHBfTk93ZEVnaUNrMWJoSWNHTm5tRk42U3h3SVdoNkRNdjhpSG9ObTBndnBZbk1URDR6RWktM19s?oc=5",
+  "published": "2026-08-20",
+  "collected": "2026-09-05",
+  "summary": "Costco (COST) Q2 2026 Results: Reported EPS Misses Expectations on the Day; Market Response: Shares Move Lower 0.45% on the Day - Upward Estimate Revision vinanet.vn",
+  "content": "Costco (COST) Q2 2026 Results: Reported EPS Misses Expectations on the Day; Market Response: Shares Move Lower 0.45% on the Day - Upward Estimate Revision vinanet.vn",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
   ]
  },
  {
@@ -22129,6 +22418,30 @@
   ]
  },
  {
+  "key": "717b2314b3c01366",
+  "title": "Louis Vuitton Engineers A New Material, Silk Tech - Prestige Online",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxPNmdEMzk4Ny1rd213dkFPWFQyZjltSTgycXhZdkhxTzQyLVZOdlZJVFpBTzVSX1E4ZzYyQkRvU1A5ejI5S2RqYU5Uc3pCbmozalYtVXQteHY5UVhpMDR3bFBXN3JnRDdWQjM4VUlTekl6VkJYdjhzLTdCOWlnOEFlaFF1RGZjRWhTZmtKYjRIcktwVUlEdnA1QXZLdG5iQdIBowFBVV95cUxQZHhBMkkzR1JCaE5vYUd1dDJoWS0xWGRhaklEbXdzM2hCVVV6WkRySkxNWHJLUXlDUHBkZTFFdHE4ZVl4elY4ODFxTHlGT1FUTm5FSEhQd3YxWk4yU1ZVTGlSVV9iYVpEeTdGR2FEbkhydHhvekZ2RkZ5VnJvWWRrbThtR1VaNmd2WG9BT2lGcXJuNTJBUlpRc3hyWkN1bGtKTFp3?oc=5",
+  "published": "2026-08-18",
+  "collected": "2026-09-05",
+  "summary": "Louis Vuitton Engineers A New Material, Silk Tech Prestige Online - Singapore",
+  "content": "Louis Vuitton Engineers A New Material, Silk Tech Prestige Online - Singapore",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
+  ]
+ },
+ {
   "key": "63bf1810942f424a",
   "title": "Shaler Area reaches 5-year agreement with Millvale firm, Under Armour for apparel, uniforms",
   "title_ko": "Shaler Area는 의류, 유니폼 분야 Under Armour인 Millvale 회사와 5년 계약을 체결했습니다.",
@@ -22960,6 +23273,30 @@
   ]
  },
  {
+  "key": "e49915f180e613aa",
+  "title": "'1g'차 다투는 우주로켓, 더 가볍게…해외 독점 깬 K-신소재",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTFAxeXZTSnA4eDY0N05EN2xYX0VvcnVoa0t6YUtiN3gtak9TOV9kaUlmWGtROWFIdlZ6MVZBaW9GZVo1c1dwNTNoeWZONnJlSWVzS2tXOFNaTHJxb01EU05GbklaU3ZwOWtvVUdJOA?oc=5",
+  "published": "2026-08-16",
+  "collected": "2026-09-05",
+  "summary": "'1g'차 다투는 우주로켓, 더 가볍게…해외 독점 깬 K-신소재 비즈워치",
+  "content": "'1g'차 다투는 우주로켓, 더 가볍게…해외 독점 깬 K-신소재 비즈워치",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 국내소재",
+  "region": "국내",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 국내소재"
+  ]
+ },
+ {
   "key": "aca00fb75c4476f1",
   "title": "From a screenless fitness band to cooling apparel: 3 ways I use tech to stay active",
   "title_ko": null,
@@ -23189,6 +23526,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Walmart"
+  ]
+ },
+ {
+  "key": "cb2c93c4217673d2",
+  "title": "American Eagle (AEO) Stock Trades At A Discount On Earnings While Cash Flow Points To Fair Value",
+  "title_ko": "아메리칸 이글(AEO) 주식은 현금 흐름이 공정 가치를 가리키는 동안 수익에 대해 할인된 가격으로 거래됩니다.",
+  "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPdkRBZ2swMVlDckdnQWRmd3lIemhHLUxodlZzYWNVQk1SOUVCdWxJeEo3YW9jSXc5bG9ia2toWVlLOFBGTHFEc3R1U2JpUWljMVJNYVF6d1EzenhHR1RwSG1uVmtsaU9hemVrYWczekZvQVQyaFk4NGVSVDZzNlB0T203NDJwNU1jSG5DN0d6Ml8tWEQyTk5vSS1BZmg?oc=5",
+  "published": "2026-08-15",
+  "collected": "2026-09-05",
+  "summary": "American Eagle (AEO) Stock Trades At A Discount On Earnings While Cash Flow Points To Fair Value Yahoo Finance",
+  "content": "American Eagle (AEO) Stock Trades At A Discount On Earnings While Cash Flow Points To Fair Value Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · American Eagle",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "aeo"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · American Eagle"
   ]
  },
  {
@@ -23630,6 +23993,30 @@
   "hits": 1,
   "sources": [
    "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "4203ea756b30fc44",
+  "title": "스마트 섬유 시장 규모, 점유율, 성장, 분석, 보고서, 2034년",
+  "title_ko": "스마트 섬유 시장 규모, 점유율, 성장, 분석, 보고서, 2034년",
+  "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE0zRjFhSTNMdDlteG8xazg5X1NUYmhXREtHdnNHZzhmRmQ5LXNJaDhrU0ZKalFINWxTVzBHelU4d2tySm9QT3haRUFDM1NUT1EzN3hNZlg4WjRHY2NGdExqNm96QlJtYUVEUkE?oc=5",
+  "published": "2026-08-14",
+  "collected": "2026-09-05",
+  "summary": "스마트 섬유 시장 규모, 점유율, 성장, 분석, 보고서, 2034년 Straits Research",
+  "content": "스마트 섬유 시장 규모, 점유율, 성장, 분석, 보고서, 2034년 Straits Research",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 국내소재",
+  "region": "국내",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 국내소재"
   ]
  },
  {
@@ -24087,6 +24474,34 @@
   ]
  },
  {
+  "key": "b33216c4c79f68ec",
+  "title": "$9.6 Billion Payday: Apple, Nike, Amazon Lead Tariff Refund Windfall Post US Supreme Court Ruling",
+  "title_ko": "96억 달러의 급여일: Apple, Nike, Amazon 선도 관세 환급 횡재 미국 대법원 판결 이후",
+  "link": "https://news.google.com/rss/articles/CBMixwFBVV95cUxOODFKVE9EbThGckVXS1RocXRRbVhYQ2Ftc0J4UGVvQmxHcWJDX3ZfOUZIY2dYa0tES1RqUkZPNVViMTBVQS12b1JveVBaNTNiSDJzdEktbDNZVnlRZXZGWnFUQmRFczFocWJkVGhhZGwxSTViWS1abUc1eWx0STZfNXd1MVZFRi1QS1JZY094UkdFdXR5WExzcEE1MTAtbTNMNnpZN2x4ZExMUnhLWk1OZFlVVkJFQXE2ZXM2TWZpWlp3Y1NGQS1B0gHPAUFVX3lxTE9VUUZCd19PdWVZMXZTZTF0anJxMFBQRWlxRzVGUHgzOGNQREM3SHd1N1Q1OWkzei04SjBTMDhTOXJFcGNqWHliYnVoZ1lwS08zai1ST2huM2RONFVTUjlZdk1qMnhBbURpcEpKaG5JR2hLOEU4WUo2dEt4NkVsMXZEY1Znd242bDJWc2g2ZW5mdDg5ZWhndFN5WUpLMkdjc3pyUnZReklmRGVvekVGc2c2U3ZWakhzLTJYc1lseV8zdmMtRFVPb0UyTk5iOFU4NA?oc=5",
+  "published": "2026-08-13",
+  "collected": "2026-09-05",
+  "summary": "$9.6 Billion Payday: Apple, Nike, Amazon Lead Tariff Refund Windfall Post US Supreme Court Ruling NDTV Profit",
+  "content": "$9.6 Billion Payday: Apple, Nike, Amazon Lead Tariff Refund Windfall Post US Supreme Court Ruling NDTV Profit",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Nike",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "관세"
+  ],
+  "entities": [
+   "nike"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Nike"
+  ]
+ },
+ {
   "key": "b1e0785f19b6c583",
   "title": "Kohl's Q2 earnings outlook weak amid declining store traffic and economic pressures",
   "title_ko": "Kohl's 매장 트래픽 감소와 경제 압박으로 인해 2분기 수익 전망이 약함",
@@ -24432,6 +24847,32 @@
   "hits": 1,
   "sources": [
    "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "061ebf06c8a90899",
+  "title": "PVH Q2 2026 Earnings: EPS of $2.01 Beats Estimates, Stock Edges Up 0.64% - Margin Expansion Trends",
+  "title_ko": "PVH 2026년 2분기 수익: $2.01의 EPS가 추정치를 상회하고 재고 가장자리가 0.64% 증가 - 마진 확장 추세",
+  "link": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNYTdHRVRYbEpmR1Q0R29aakFYVzlVWEwyN0Z5UXExeFlxcXN1dkRpc01tOE9jb1djeWtIN2tsZ3YzVHdUVG5UVHBpSTZ2c0lmUXR3UzRlX1d5Z2FZSnBJdl9ZaXJiOHdIby0yT2FMQmpEZ3g5RDRpOXhnTTdfa256a3JWZkU5dXBtS2V6UjRCVjdOS0plVVdBZC1IRF96NF9sRGdMSi1jb3lfVmJ0?oc=5",
+  "published": "2026-08-13",
+  "collected": "2026-09-05",
+  "summary": "PVH Q2 2026 Earnings: EPS of $2.01 Beats Estimates, Stock Edges Up 0.64% - Margin Expansion Trends vinanet.vn",
+  "content": "PVH Q2 2026 Earnings: EPS of $2.01 Beats Estimates, Stock Edges Up 0.64% - Margin Expansion Trends vinanet.vn",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · PVH",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "pvh"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · PVH"
   ]
  },
  {
@@ -24930,6 +25371,32 @@
   ]
  },
  {
+  "key": "9a80b0d5b3c95dbf",
+  "title": "Barclays reshuffles U.S. apparel retailers, cuts Under Armour, Gap ratings By Investing.com",
+  "title_ko": "Barclays, 미국 의류 소매업체 개편, Under Armour 및 갭 등급 인하 By Investing.com",
+  "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPbFM1c2pCQ2ROaURvenBxRjliRXVNRnN5cDVleFJldmliNVI4Q19KTG5HMklHdEpwYkFDazdBX3VvUXdwZjVFMUtodTVtb0hhWkI1MndUMXh2VWtxb2lFdVlmMTFOVXNscFFMNENUeUxlNkh0WWtacU9ydTVXQ09JbTYyWHNzU3VoNWJNUEtHTFN0ZmozTEdOT25DZmx5MWdac0VkUE9vZ1BFTzgwaDByVVZuaTllNnp1OE9DOWRrQUZRd2hG?oc=5",
+  "published": "2026-08-11",
+  "collected": "2026-09-05",
+  "summary": "Barclays reshuffles U.S. apparel retailers, cuts Under Armour, Gap ratings By Investing.com Investing.com India",
+  "content": "Barclays reshuffles U.S. apparel retailers, cuts Under Armour, Gap ratings By Investing.com Investing.com India",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "ua"
+  ],
+  "score": 3,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
+  ]
+ },
+ {
   "key": "8f3078ee085e5106",
   "title": "RSWM partners with Noize Design Studio to establish Industry 5.0 Green Garment Manufacturing Platform in India",
   "title_ko": null,
@@ -25027,6 +25494,30 @@
   "hits": 1,
   "sources": [
    "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "851ff0b24c5c62ae",
+  "title": "장 건강·혈당까지…'파이버맥싱' 확산",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiTkFVX3lxTFA1TTZfcno1dkg0dHliMEpOOTd1Y1JwUXhNekNoR0dJeUp2cFZzYTNUdkQ0WG80MlNxZWVBVUtTOUJsWVRES0V3MFA0RDl6QQ?oc=5",
+  "published": "2026-08-11",
+  "collected": "2026-09-05",
+  "summary": "장 건강·혈당까지…'파이버맥싱' 확산 mk.co.kr",
+  "content": "장 건강·혈당까지…'파이버맥싱' 확산 mk.co.kr",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 국내소재",
+  "region": "국내",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 국내소재"
   ]
  },
  {
@@ -25347,6 +25838,30 @@
   "hits": 1,
   "sources": [
    "바이어 · Victoria's Secret"
+  ]
+ },
+ {
+  "key": "43d7e9e73e497c40",
+  "title": "Which Apparel And Shoe Brands Are Dominating Tour Golf? We Crunched The Numbers...",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPTzJXZThqMlpTNDhLMkJqdDBLbXctajJhZGQwTkdUMmdPYTNkS2ZsOVVVQU5UOFRQa3hpY0hTSFBlOWcxUElvdkhQbTF3a21razQ1aWRURnU0UTB1Qzl1M2UxVXFiMUIydWlOWHJVZUdUWi15N3pabktZbUFxa3o5NmNoQ3JBSkUwSVNxN1dNSXZyWG4wLTJfdm1QUnZiNERwR1FERS1pOWRuM2JfOVZkTw?oc=5",
+  "published": "2026-08-10",
+  "collected": "2026-09-05",
+  "summary": "Which Apparel And Shoe Brands Are Dominating Tour Golf? We Crunched The Numbers... Golf Monthly",
+  "content": "Which Apparel And Shoe Brands Are Dominating Tour Golf? We Crunched The Numbers... Golf Monthly",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Nike",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Nike"
   ]
  },
  {
@@ -26110,6 +26625,32 @@
   ]
  },
  {
+  "key": "5f1d730b2dbeaf52",
+  "title": "Under Armour Lowers Guidance and Begins Another Product Cull",
+  "title_ko": "Under Armour, 지침을 낮추고 또 다른 제품 선별 시작",
+  "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNR2tsclhwYS0xZTdVd1BuVk5zNkUtWmdkdk85b3gyN1Y5QmYyQ1ROTzZaMURxM2drcnVmUHVOVWxScEIzcnAyaE9TdTQzUnR5WmllTGd3c1FCV1k1OVZNMU5fVVJrS2NlT0U2YjBoV01xNjEtaUVpbGlSdGdIVlU5czdGbF9Gamc3Nlh5UFVGa2xMcWZCeFVUWHZ5UzdBNndZQlpfVl94VDIwQXBMc0hOVXlfVjNmdw?oc=5",
+  "published": "2026-08-07",
+  "collected": "2026-09-05",
+  "summary": "Under Armour Lowers Guidance and Begins Another Product Cull Sportico.com",
+  "content": "Under Armour Lowers Guidance and Begins Another Product Cull Sportico.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "ua"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
+  ]
+ },
+ {
   "key": "59f6efdbef3b02ec",
   "title": "Under Armour forecasts steeper annual sales decline on weak North America demand",
   "title_ko": "Under Armour는 북미 수요 부진으로 연간 매출 감소폭이 더 가파르게 나타날 것으로 예상",
@@ -26119,6 +26660,32 @@
   "summary": "Under Armour forecasts steeper annual sales decline on weak North America demand 1470 & 100.3 WMBD",
   "content": null,
   "image": null,
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "ua"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
+  ]
+ },
+ {
+  "key": "5572ff08981e704e",
+  "title": "Under Armour Shares Slide After Company Lowers Full-Year Revenue Outlook",
+  "title_ko": "회사가 연간 수익 전망을 낮춘 후 Under Armour 주가 하락",
+  "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQMVViZ0VDcklxbzh1c19mM1hRRWtsem1GT0NRQ01HSGxUTFJoTkNFMmlYQzNhMElWazYzbGRBX0ZSYmttQmdFMDQ5UEVxU3dSRlhnZVZwN3hkS2VkNE5DTFIwWmdvOFJDM0l4d1NCWlRaM3MwaEU2c2hqdEFRSzdsR0dRQ3NWaFhaU1UzWmVYOUp4elhZTzd5UVE4d18tQm1uUjg3dWJMdU16ZThya2pJWA?oc=5",
+  "published": "2026-08-07",
+  "collected": "2026-09-05",
+  "summary": "Under Armour Shares Slide After Company Lowers Full-Year Revenue Outlook citybiz",
+  "content": "Under Armour Shares Slide After Company Lowers Full-Year Revenue Outlook citybiz",
+  "image": "",
   "image_tried": null,
   "source": "바이어 · Under Armour",
   "region": "해외",
@@ -26195,6 +26762,32 @@
   "summary": "Under Armour (UAA) Q1 Earnings Top Estimates Yahoo Finance",
   "content": null,
   "image": null,
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "ua"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
+  ]
+ },
+ {
+  "key": "3b4c0d2fd0ec02de",
+  "title": "Under Armour Lowers Full-Year Sales Outlook as Fiscal First-Quarter Revenue Misses Street Views",
+  "title_ko": "Under Armour, 회계 1분기 수익이 스트리트 뷰 누락됨에 따라 연간 판매 전망 하향",
+  "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQNzVta3NuSVg2bE9TQ1Z2SXl3cjdlaEFvdUZEZ2dMSU9NbGdobmxLZnhKQXN0N1o2Y091QlYyQ0R5OVdLbDdDSGp4b1NmbVczODJoOUdXbTZrNDVfZ1pHQ01FbUJXVkZ3OWFDQlZNTnp3aVlvQ25VbWJSSklvLUZhMGZYTjB4a2J3MW1rUTJuRmdrc19FR0xVVmdwcw?oc=5",
+  "published": "2026-08-07",
+  "collected": "2026-09-05",
+  "summary": "Under Armour Lowers Full-Year Sales Outlook as Fiscal First-Quarter Revenue Misses Street Views Yahoo Finance",
+  "content": "Under Armour Lowers Full-Year Sales Outlook as Fiscal First-Quarter Revenue Misses Street Views Yahoo Finance",
+  "image": "",
   "image_tried": null,
   "source": "바이어 · Under Armour",
   "region": "해외",
@@ -26406,9 +26999,10 @@
   "score": 7,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Indian Textile Magazine"
+   "Indian Textile Magazine",
+   "주제검색 · 염색가공"
   ]
  },
  {
@@ -27449,6 +28043,32 @@
   "hits": 1,
   "sources": [
    "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "40878693dd675a57",
+  "title": "Will Urban Outfitters (URBN) Beat Estimates Again in Its Next Earnings Report?",
+  "title_ko": "Urban Outfitters(URBN)가 다음 수익 보고서에서 다시 추정치를 상회할까요?",
+  "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxPU3lkdmx0ZGpqVUtOMDFjclpYYlBJQlNyeUdRQWRSWWxwQ3pnQ1FhWEcxSHdXS3dUYVBrRmlsTHFoYlNGZVo4VFFwNjNFUzNpT1Q5bEhrOU9nRE5LVnFQZV9jdzVhQlRLd0pTTWJHV1h5alBlczdsWHB5ZDZLMlNUS20wNzlqR0RtV3JiWndjcEQ3N1g1YnNTdDB6X1FtQ1hhTE5j?oc=5",
+  "published": "2026-08-04",
+  "collected": "2026-09-05",
+  "summary": "Will Urban Outfitters (URBN) Beat Estimates Again in Its Next Earnings Report? Yahoo Finance",
+  "content": "Will Urban Outfitters (URBN) Beat Estimates Again in Its Next Earnings Report? Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Urban Outfitters",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "urban"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Urban Outfitters"
   ]
  },
  {

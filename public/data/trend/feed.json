@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-09-04T22:38:18+00:00",
+"generated_at": "2026-09-05T22:24:56+00:00",
 "window_days": 120,
-"total": 407,
-"translated": 407,
-"filtered_out": 877,
+"total": 417,
+"translated": 417,
+"filtered_out": 924,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 23,
-"scanned": 699,
-"kept": 240,
-"material": 158
+"scanned": 685,
+"kept": 224,
+"material": 148
 },
 "30": {
-"sources": 25,
-"scanned": 1066,
-"kept": 346,
-"material": 258
+"sources": 24,
+"scanned": 1105,
+"kept": 354,
+"material": 266
 }
 }
 },
@@ -25,23 +25,23 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 132
+"n": 137
+},
+{
+"key": "FABRIC",
+"n": 92
 },
 {
 "key": "RETAIL",
 "n": 89
 },
 {
-"key": "FABRIC",
-"n": 89
-},
-{
 "key": "ETC",
-"n": 49
+"n": 50
 },
 {
 "key": "CHEMICAL",
-"n": 37
+"n": 38
 },
 {
 "key": "YARN",
@@ -55,7 +55,7 @@
 },
 {
 "key": "Fibre2Fashion",
-"n": 57
+"n": 60
 },
 {
 "key": "국제섬유신문",
@@ -67,7 +67,7 @@
 },
 {
 "key": "주제검색 · 국내소재",
-"n": 35
+"n": 37
 },
 {
 "key": "주제검색 · 신소재",
@@ -75,7 +75,7 @@
 },
 {
 "key": "Textile Today",
-"n": 23
+"n": 24
 },
 {
 "key": "Innovation in Textiles",
@@ -91,7 +91,7 @@
 },
 {
 "key": "Textile Focus",
-"n": 11
+"n": 14
 },
 {
 "key": "Knitting Industry",
@@ -102,12 +102,12 @@
 "n": 8
 },
 {
-"key": "주제검색 · 염색가공",
+"key": "Apparel Resources",
 "n": 7
 },
 {
-"key": "Apparel Resources",
-"n": 6
+"key": "주제검색 · 염색가공",
+"n": 7
 },
 {
 "key": "NCTO",
@@ -129,19 +129,19 @@
 "tags": [
 {
 "key": "전시회",
-"n": 20
+"n": 21
 },
 {
 "key": "리사이클",
 "n": 19
 },
 {
-"key": "데님",
-"n": 16
+"key": "방글라데시",
+"n": 17
 },
 {
-"key": "방글라데시",
-"n": 15
+"key": "데님",
+"n": 16
 },
 {
 "key": "바이오소재",
@@ -164,6 +164,10 @@
 "n": 5
 },
 {
+"key": "경편",
+"n": 4
+},
+{
 "key": "울",
 "n": 4
 },
@@ -180,6 +184,10 @@
 "n": 4
 },
 {
+"key": "비스코스",
+"n": 3
+},
+{
 "key": "PFAS",
 "n": 3
 },
@@ -189,10 +197,6 @@
 },
 {
 "key": "관세",
-"n": 3
-},
-{
-"key": "경편",
 "n": 3
 },
 {
@@ -248,10 +252,6 @@
 "n": 2
 },
 {
-"key": "비스코스",
-"n": 2
-},
-{
 "key": "나일론",
 "n": 2
 },
@@ -297,13 +297,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-06",
-"total": 1,
-"by": {
-"ETC": 1
-}
-},
 {
 "date": "2026-08-07",
 "total": 2,
@@ -354,12 +347,12 @@
 },
 {
 "date": "2026-08-14",
-"total": 8,
+"total": 9,
 "by": {
 "FABRIC": 3,
 "ETC": 1,
 "CHEMICAL": 1,
-"MATERIAL": 3
+"MATERIAL": 4
 }
 },
 {
@@ -405,8 +398,9 @@
 },
 {
 "date": "2026-08-20",
-"total": 2,
+"total": 3,
 "by": {
+"MATERIAL": 1,
 "RETAIL": 1,
 "CHEMICAL": 1
 }
@@ -506,10 +500,10 @@
 },
 {
 "date": "2026-08-31",
-"total": 28,
+"total": 29,
 "by": {
 "CHEMICAL": 2,
-"MATERIAL": 6,
+"MATERIAL": 7,
 "RETAIL": 14,
 "YARN": 1,
 "ETC": 1,
@@ -552,13 +546,23 @@
 },
 {
 "date": "2026-09-04",
-"total": 36,
+"total": 37,
 "by": {
 "RETAIL": 16,
-"MATERIAL": 10,
+"MATERIAL": 11,
 "CHEMICAL": 3,
 "YARN": 3,
 "FABRIC": 4
+}
+},
+{
+"date": "2026-09-05",
+"total": 6,
+"by": {
+"FABRIC": 3,
+"CHEMICAL": 1,
+"ETC": 1,
+"MATERIAL": 1
 }
 }
 ],
@@ -566,9 +570,9 @@
 {
 "tag": "전시회",
 "label_en": "performance days",
-"recent": 18,
+"recent": 19,
 "prior": 2,
-"delta": 16,
+"delta": 17,
 "weeks": [
 0,
 0,
@@ -581,7 +585,28 @@
 0,
 4,
 9,
-5
+6
+]
+},
+{
+"tag": "방글라데시",
+"label_en": "bangladesh",
+"recent": 16,
+"prior": 1,
+"delta": 15,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+1,
+0,
+0,
+0,
+0,
+7,
+9
 ]
 },
 {
@@ -603,27 +628,6 @@
 1,
 11,
 4
-]
-},
-{
-"tag": "방글라데시",
-"label_en": "bangladesh",
-"recent": 14,
-"prior": 1,
-"delta": 13,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-1,
-0,
-0,
-0,
-0,
-7,
-7
 ]
 },
 {
@@ -732,6 +736,27 @@
 ]
 },
 {
+"tag": "비스코스",
+"label_en": "viscose",
+"recent": 1,
+"prior": 2,
+"delta": -1,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+2,
+0,
+0,
+0,
+0,
+1
+]
+},
+{
 "tag": "렌징",
 "label_en": "lenzing",
 "recent": 2,
@@ -774,29 +799,8 @@
 ]
 },
 {
-"tag": "관세",
-"label_en": "tariff",
-"recent": 3,
-"prior": 0,
-"delta": 3,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-1,
-0,
-0,
-2
-]
-},
-{
-"tag": "경편",
-"label_en": "warp knit",
+"tag": "PFAS",
+"label_en": "pfas",
 "recent": 3,
 "prior": 0,
 "delta": 3,
@@ -810,8 +814,8 @@
 0,
 0,
 0,
-0,
 1,
+0,
 2
 ]
 }
@@ -834,6 +838,12 @@
 "label_en": "carbon footprint",
 "n": 5,
 "first": "2026-08-25"
+},
+{
+"tag": "경편",
+"label_en": "warp knit",
+"n": 4,
+"first": "2026-08-26"
 },
 {
 "tag": "울",
@@ -864,12 +874,6 @@
 "label_en": "tariff",
 "n": 3,
 "first": "2026-08-14"
-},
-{
-"tag": "경편",
-"label_en": "warp knit",
-"n": 3,
-"first": "2026-08-26"
 },
 {
 "tag": "추적성",
@@ -970,6 +974,141 @@
 ],
 "articles": [
 {
+"id": "ffcc95d102798751",
+"d": "2026-09-05",
+"t": "Bangladesh, 인도는 '하나의 공급망, 두 국가, 하나의 글로벌 야망' 구축을 촉구했습니다.",
+"o": "Bangladesh, India urged to build ‘one supply chain, two countries, one global ambition’",
+"u": "https://textilefocus.com/bangladesh-india-urged-to-build-one-supply-chain-two-countries-one-global-ambition/",
+"s": "A special seminar titled “Advancing Bangladesh-India Textile Value Chains through Seamless Logistics and Trade Facilitation” was held today at the Bangladesh-China Friendship Exhibition Centre (BCFEC), Purbachal, Dhaka, focusing on strengthening cooperation between Bangladesh and India’s textile and",
+"c": "FABRIC",
+"x": "A special seminar titled “Advancing Bangladesh-India Textile Value Chains through Seamless Logistics and Trade Facilitation” was held today at the Bangladesh-China Friendship Exhibition Centre (BCFEC), Purbachal, Dhaka, focusing on strengthening cooperation between Bangladesh and India’s textile and apparel industries and facilitating bilateral trade. The seminar was held from 4:00pm to 5:00pm and was organised by the India-Bangladesh Chamber of Commerce and Industry (IBCCI), in co-association with Conference & Exhibition Management Services (CEMS-Global). The session was moderated by Jabed Ahmed, Chief Consultant of CEMS Limited. The keynote paper was presented by Mustazirul Shovon Islam, Managing Director of Sparrow Group. He said, ‘To sustain Bangladesh’s leadership in the global apparel market, we need to increase the production of value-added and higher-value products. This requires high-quality textiles, and India is one of the most accessible and important sources for these raw materials. Rather than calculating how much India or Bangladesh gains or loses, we need to find ways to work together. Our guiding principle should be – ‘One Supply Chain, Two Countries and One Global Ambition.’ He said stronger cooperation between the two countries could help build an integrated regional textile and apparel supply chain, enabling both Bangladesh and India to enhance their competitiveness in the global market. The speakers included Mr. Amit Kumar Tiwari, Vice President, IBCCI; Mr. A.K.M. Saifur Rahman, Director, IBCCI; Mr. A.T.M. Altaf Hossain Lotus, Director, IBCCI; Mr. Amit Kumar, Country Head, State Bank of India and Director, IBCCI; and Mr. Md. Faizur Rabbee, Deputy Director, Invest Bangladesh. The speakers emphasised the need to improve logistics systems, streamline c",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Bangladesh_India_Textile_Seminar-3.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "ff1d1b56eeadf550",
+"d": "2026-09-05",
+"t": "Palmal Group, 3개 사업부에 대해 사상 최초의 2024년 ESG 보고서 발행",
+"o": "Palmal Group Publishes First-Ever ESG Reports for 2024 for Three Business Units",
+"u": "https://textilefocus.com/palmal-group-publishes-first-ever-esg-reports-for-2024-for-three-business-units/",
+"s": "Palmal Group of Industries has marked a significant milestone in its sustainability journey with the publication of its first-ever Environmental, Social and Governance (ESG) Reports for 2024. The reports cover three companies in the group-Aswad Composite Mills Ltd., Arkay Knit Dyeing Mills Ltd., and",
+"c": "CHEMICAL",
+"x": "Palmal Group of Industries has marked a significant milestone in its sustainability journey with the publication of its first-ever Environmental, Social and Governance (ESG) Reports for 2024. The reports cover three companies in the group-Aswad Composite Mills Ltd., Arkay Knit Dyeing Mills Ltd., and Ayesha Clothing Company Ltd. and follow the Global Reporting Initiative (GRI) Standards. The initiative was undertaken through Swisscontact’s Progress Project, with technical support from SGS Bangladesh. The completed ESG reports were formally handed over to Adnan Imtiaz Majid, Director, Central Management, Palmal Group of Industries, at a recognition ceremony. Marajul Islam, Coordinator, Progress Project, Swisscontact, and Mushfiqur Rabbi Turza, Lead – ESG & Sustainability Services, SGS Bangladesh, presented the reports. The ceremony was attended by senior representatives of Palmal Group, including Director Lt. Col. Nayeem (Retd.), Director Sohel Faruqee, Sarwar Alam Chowdhury, General Manager, Central Management, and Engr. Md. Saiful Islam, Head of Environmental Sustainability, along with other officials and team members involved in the initiative. The publication of the ESG reports represents an important step in Palmal Group’s efforts to strengthen its data-driven sustainability performance, transparency, and accountability. By establishing a structured approach to ESG reporting, the group aims to enhance its understanding and management of environmental, social and governance impacts across its operations. Palmal Group expressed its sincere appreciation to Swisscontact, SGS Bangladesh, and everyone across the group who contributed to the successful completion of this initiative. The group said the publication of the 2024 ESG Reports is only the beginning of its broader ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Palmal-Group.jpeg",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "d36972fa4a87d612",
+"d": "2026-09-05",
+"t": "제25회 Bangladesh 텍스타일 시리즈 전시회, 전 세계의 강력한 참여로 마무리",
+"o": "25th Bangladesh Textile Series Exhibition concludes with strong global participation",
+"u": "https://textiletoday.com.bd/25th-bangladesh-textile-series-exhibition-concludes-with-strong-global-participation",
+"s": "The 25th Bangladesh Edition of the Textile Series of Exhibitions 2026 concludes today in Dhaka, marking 25 years of CEMS-Global USA and CEMS Bangladesh’s engagement with the country’s textile and appa...",
+"c": "ETC",
+"x": "The 25th Bangladesh Edition of the Textile Series of Exhibitions 2026 concludes today in Dhaka, marking 25 years of CEMS-Global USA and CEMS Bangladesh’s engagement with the country’s textile and apparel industry. Held from September 2 at the Bangladesh-China Friendship Exhibition Centre (BCFEC), Purbachal, the four-day international event brought together global manufacturers, technology providers, suppliers, buyers and sourcing professionals, highlighting the latest developments across Bangladesh’s textile and apparel value chain. The 25th Bangladesh Edition featured three major international exhibitions: the 25th Textech Bangladesh 2026 International Expo, the 26th Dhaka International Yarn & Fabric Show 2026 - Summer Edition, and the 53rd DyeChem Bangladesh 2026 International Expo. Together, the exhibitions showcased textile and apparel machinery, automation, advanced production technologies, yarn, fabrics, trims, accessories, dyestuffs, chemicals and a wide range of technology-driven solutions for the textile and apparel manufacturing value chain. According to the organizers, the exhibition brought together around 1,475 companies from 37 countries, with more than 2,245 booths and pavilions. More than 16,000 business visitors participated in the four-day event. Meherun N. Islam, President & Group Managing Director of CEMS-Global USA & Asia-Pacific, said that Bangladesh’s textile and apparel industry has undergone significant transformation over the past 25 years, making notable progress in modern technology, advanced production systems, productivity, international standards, compliance and sustainable manufacturing. She said the Textile Series has evolved from a conventional exhibition into one of Bangladesh’s important annual business gatherings and international B2",
+"i": "/storage/uploads/2026/9/25thbangladeshtext_17886201499010.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "b565982f33c9ba00",
+"d": "2026-09-05",
+"t": "비스코스 직물 구매자",
+"o": "Viscose Fabric Buyers",
+"u": "https://news.google.com/rss/articles/CBMid0FVX3lxTE1ManhPS0p4RVJKZnVabGNxMnZydGczQTRnSTZuaFJMTDFTcXZ4QXJETWlLeU8ycC1KbXpxSEVMTU5fZURseVJTT2FFS19IMlllcWY5MEhWei1KZVRKem9tN2RQR29LZm9ubWdTNy0zRDBzcWFLZlEw?oc=5",
+"s": "Viscose Fabric Buyers Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Viscose Fabric Buyers Fibre2Fashion",
+"i": "",
+"g": [
+"비스코스"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "98b37a080e99dd01",
+"d": "2026-09-05",
+"t": "3단계, 다양한 고객 혜택: ITMA ASIA 2026 중 KARL MAYER",
+"o": "Three Stages, Multiple Customer Benefits: KARL MAYER during ITMA ASIA 2026",
+"u": "https://textilefocus.com/three-stages-multiple-customer-benefits-karl-mayer-during-itma-asia-2026/",
+"s": "Innovations for WARP KNIT, WARP PREP and Technical Textiles at two trade show booths and a product show in Changzhou. At ITMA ASIA in Shanghai, KARL MAYER will once again demonstrate that it understands the challenges facing the Asian textile industry – and will present tailor-made solutions. It wil",
+"c": "FABRIC",
+"x": "Innovations for WARP KNIT, WARP PREP and Technical Textiles at two trade show booths and a product show in Changzhou. At ITMA ASIA in Shanghai, KARL MAYER will once again demonstrate that it understands the challenges facing the Asian textile industry – and will present tailor-made solutions. It will do so across no fewer than three stages: Hall 4.1, Booth C18 for warp knitting Hall 3, Booth A24 for warp preparation An accompanying mega Product Show at the company’s Changzhou site The Asian markets are among the most dynamic and innovative in the world and are a key part of KARL MAYER’s global strategy. Across Asia, rising labour, energy, and financing costs are compounded by continued price pressure from international brands. At the same time, sustainability requirements, shorter lead times, and smaller batch sizes are making the battle for margins even tougher. With its new machines and textile solutions for ITMA ASIA, KARL MAYER will directly address precisely these challenges. “Our closeness to customers in Asia helps us identify market requirements at an early stage and translate them into targeted innovations. That is why, at this trade fair, we will be showcasing solutions that are not only technologically leading but, above all, deliver one key benefit: they create measurable added value and long-term growth opportunities for our customers,” explains Lutz Wolf, CEO of KARL MAYER. The company will present its solutions to the challenges facing its customers at two exhibition booths in Shanghai. This approach will also allow KARL MAYER to engage with customers from both the warp knitting and warp preparation sectors within their own industry environment. In addition, KARL MAYER (CHINA) will host a Product Show at its Changzhou location, featuring further machine p",
+"i": "https://textilefocus.com/wp-content/uploads/2026/07/KARL-MAYER.png",
+"g": [
+"경편",
+"전시회"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 14,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "38114b741f0ecbbf",
+"d": "2026-09-05",
+"t": "하버드 연구원들은 표준 편직기를 사용하여 모양이 바뀌는 스마트 직물을 만듭니다.",
+"o": "Harvard Researchers Use Standard Knitting Machines to Build Shape-Shifting Smart Textiles",
+"u": "https://apparelresources.com/fashion-news/trends/harvard-researchers-use-standard-knitting-machines-build-shape-shifting-smart-textiles/",
+"s": "Researchers at the Harvard John A. Paulson School of Engineering and Applied Sciences (SEAS) have developed knitted fabrics that can switch between stable shapes, sense motion, and function as soft electrical switches, using the same weft-knitting machines already common in garment factories. The fi",
+"c": "FABRIC",
+"x": "Researchers at the Harvard John A. Paulson School of Engineering and Applied Sciences (SEAS) have developed knitted fabrics that can switch between stable shapes, sense motion, and function as soft electrical switches, using the same weft-knitting machines already common in garment factories. The findings point toward a manufacturing-compatible route to programmable textiles. The work was […] The post Harvard Researchers Use Standard Knitting Machines to Build Shape-Shifting Smart Textiles appeared first on Apparel Resources .",
+"i": "https://apparelresources.com/wp-content/uploads/2026/09/Harvard-Researchers-Use-Standard-Knitting-Machines-to-Build-Shape-Shifting-Smart-Textiles.jpg",
+"g": [],
+"m": "Apparel Resources",
+"r": "해외",
+"v": 15,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Apparel Resources"
+]
+},
+{
 "id": "fc2a1302bb62f7b6",
 "d": "2026-09-04",
 "t": "골프웨어, ‘브랜드 양극화’ 더 짙어졌다…지포어 9개점 1위",
@@ -988,6 +1127,27 @@
 "e": [],
 "ms": [
 "한국섬유신문"
+]
+},
+{
+"id": "fad7027f5cb1af8f",
+"d": "2026-09-04",
+"t": "면직물 공급업체",
+"o": "Cotton Fabric Suppliers",
+"u": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPSE12MjloMzVKMUE2YVd5QTZYWmUzRE5FWTlMN1B1VVpoY3lTdlBOZnotQWJ4Nk5Ic3JUcnplaU56V25reV8tdnhzQWp3X0o4Mnd6UnJfbktVZVl1TS03aG1HUTFzVUdOTVVwS2lyR1M4V2VWR0NhYnB0QUsza0IzWHljaU01Z05TN18xazVmYw?oc=5",
+"s": "Cotton Fabric Suppliers Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Cotton Fabric Suppliers Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -5071,6 +5231,27 @@
 ]
 },
 {
+"id": "3fd97405c69b7ab3",
+"d": "2026-08-31",
+"t": "| 인도의 PTA, 폴리에스터 용융물 가격 완화; 중국 공급원료 변동",
+"o": "| India's PTA, polyester melt prices ease; China feedstocks swing",
+"u": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxPRi1Kck5FbE9RWTY0aTVrakRadl85M19PWUtldXNwN25sM213cEt2UFhTbF9SdDN3TldWV0F0NG1oZEtnQVVEcHR1d3Z4dW5INmw0RUViNDJIWE5OUm43Z3lIZnV3ZWtvOHp6WVJmU0dlVWN3d3Y3ZEJvS2p0XzJnS09oOWhtS2NzVGl5MTZiUEFQMFgtd0g0cjFQekRERkpMQzU4ZFg2UmloVGlValpYSGtiTXNaUF9OajY2OWx3MklYempuSHJFaXJUczh3U3VYd1JCUlFQLS1SX2c?oc=5",
+"s": "| India's PTA, polyester melt prices ease; China feedstocks swing Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| India's PTA, polyester melt prices ease; China feedstocks swing Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "37b7f4285ba96ba4",
 "d": "2026-08-31",
 "t": "아이더, 장원영 앞세워 중국 공략 속도",
@@ -6863,12 +7044,13 @@
 "m": "Indian Textile Magazine",
 "r": "해외",
 "v": 7,
-"h": 2,
+"h": 3,
 "w": "material",
 "e": [],
 "ms": [
 "Indian Textile Magazine",
-"주제검색 · 신소재"
+"주제검색 · 신소재",
+"주제검색 · 염색가공"
 ]
 },
 {
@@ -7590,6 +7772,27 @@
 ]
 },
 {
+"id": "f3fb5daaa8ef2649",
+"d": "2026-08-20",
+"t": "전자파 99% 차폐에 적외선 은폐까지···재료연, 초박막 신소재 필름 개발",
+"o": "전자파 99% 차폐에 적외선 은폐까지···재료연, 초박막 신소재 필름 개발",
+"u": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBFckJKVk5BRTI3OU9PMVl6NXBuSFBtbDM4Zi1mUklrWXBET08ydi1peTBTS2lEZFY3X2pvczB5VWNudGoxTG1zZlRrcDFFbldXbWhfSjdnVGZ1N1hKbVZsNFFkX1g3RUJWUWc?oc=5",
+"s": "전자파 99% 차폐에 적외선 은폐까지···재료연, 초박막 신소재 필름 개발 헬로디디",
+"c": "MATERIAL",
+"x": "전자파 99% 차폐에 적외선 은폐까지···재료연, 초박막 신소재 필름 개발 헬로디디",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
+{
 "id": "cfe9243b7732f3ec",
 "d": "2026-08-20",
 "t": "Angel & Rocket, 인도에서 100개 매장, 2억 5천만 루피 매출 목표",
@@ -8142,6 +8345,27 @@
 ]
 },
 {
+"id": "4203ea756b30fc44",
+"d": "2026-08-14",
+"t": "스마트 섬유 시장 규모, 점유율, 성장, 분석, 보고서, 2034년",
+"o": "스마트 섬유 시장 규모, 점유율, 성장, 분석, 보고서, 2034년",
+"u": "https://news.google.com/rss/articles/CBMiakFVX3lxTE0zRjFhSTNMdDlteG8xazg5X1NUYmhXREtHdnNHZzhmRmQ5LXNJaDhrU0ZKalFINWxTVzBHelU4d2tySm9QT3haRUFDM1NUT1EzN3hNZlg4WjRHY2NGdExqNm96QlJtYUVEUkE?oc=5",
+"s": "스마트 섬유 시장 규모, 점유율, 성장, 분석, 보고서, 2034년 Straits Research",
+"c": "MATERIAL",
+"x": "스마트 섬유 시장 규모, 점유율, 성장, 분석, 보고서, 2034년 Straits Research",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
+{
 "id": "2b0fc5292043b5e8",
 "d": "2026-08-14",
 "t": "차세대 디스플레이·광통신용 원편광 제어 신소재 기술 개발",
@@ -8479,11 +8703,12 @@
 "m": "Indian Textile Magazine",
 "r": "해외",
 "v": 7,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Indian Textile Magazine"
+"Indian Textile Magazine",
+"주제검색 · 염색가공"
 ]
 },
 {
@@ -8901,11 +9126,12 @@
 "m": "Indian Textile Magazine",
 "r": "해외",
 "v": 10,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Indian Textile Magazine"
+"Indian Textile Magazine",
+"주제검색 · 염색가공"
 ]
 },
 {

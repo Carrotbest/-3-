@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-04T22:38:18+00:00",
+ "generated_at": "2026-09-05T22:24:56+00:00",
  "sources": [
   {
    "name": "Knitting Industry",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -14,7 +14,7 @@
    "name": "Innovation in Textiles",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -23,7 +23,7 @@
    "name": "Textile World",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -32,7 +32,7 @@
    "name": "Ecotextile News",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -41,7 +41,7 @@
    "name": "Textile Exchange",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -50,7 +50,7 @@
    "name": "The Interline",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -59,7 +59,7 @@
    "name": "EURATEX",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -68,7 +68,7 @@
    "name": "NCTO",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -77,7 +77,7 @@
    "name": "Textile Today",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -86,7 +86,7 @@
    "name": "Textile Focus",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -95,7 +95,7 @@
    "name": "Apparel Insider",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -104,7 +104,7 @@
    "name": "Indian Textile Magazine",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -113,7 +113,7 @@
    "name": "Retail Dive",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -122,7 +122,7 @@
    "name": "McKinsey Insights",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -131,7 +131,7 @@
    "name": "WWD",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -140,7 +140,7 @@
    "name": "한국섬유신문",
    "region": "국내",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -149,7 +149,7 @@
    "name": "국제섬유신문",
    "region": "국내",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -158,7 +158,7 @@
    "name": "Sourcing Journal",
    "region": "해외",
    "via": "googlenews",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -167,7 +167,7 @@
    "name": "Fibre2Fashion",
    "region": "해외",
    "via": "googlenews",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -176,7 +176,7 @@
    "name": "Just Style",
    "region": "해외",
    "via": "googlenews",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -185,7 +185,7 @@
    "name": "Apparel Resources",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -194,7 +194,7 @@
    "name": "주제검색 · 신소재",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -203,7 +203,7 @@
    "name": "주제검색 · 염색가공",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -212,7 +212,7 @@
    "name": "주제검색 · 국내소재",
    "region": "국내",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -221,7 +221,7 @@
    "name": "바이어 · Walmart",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -230,7 +230,7 @@
    "name": "바이어 · Target",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -239,7 +239,7 @@
    "name": "바이어 · Kohl's",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -248,7 +248,7 @@
    "name": "바이어 · Costco",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -257,7 +257,7 @@
    "name": "바이어 · Amazon",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -266,7 +266,7 @@
    "name": "바이어 · Carter's",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -275,7 +275,7 @@
    "name": "바이어 · Under Armour",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -284,7 +284,7 @@
    "name": "바이어 · PVH",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -293,7 +293,7 @@
    "name": "바이어 · Abercrombie & Fitch",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -302,7 +302,7 @@
    "name": "바이어 · American Eagle",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -311,7 +311,7 @@
    "name": "바이어 · Victoria's Secret",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -320,7 +320,7 @@
    "name": "바이어 · Urban Outfitters",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -329,7 +329,7 @@
    "name": "바이어 · Duluth Trading",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -338,7 +338,7 @@
    "name": "바이어 · Nike",
    "region": "해외",
    "via": "googlenews_query",
-   "last_ok": "2026-09-04T22:35:08+00:00",
+   "last_ok": "2026-09-05T22:23:17+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -346,14 +346,9 @@
  ],
  "healthy": 38,
  "source_total": 38,
- "archive_total": 2037,
- "archive_relevant": 414,
+ "archive_total": 2131,
+ "archive_relevant": 424,
  "runs": [
-  {
-   "at": "2026-08-31T05:32:51+00:00",
-   "kind": "kpi",
-   "points": 1486
-  },
   {
    "at": "2026-08-31T05:33:00+00:00",
    "kind": "collect",
@@ -453,6 +448,16 @@
    "kept": 41,
    "hits": 4,
    "translated": 99
+  },
+  {
+   "at": "2026-09-05T22:23:17+00:00",
+   "kind": "collect",
+   "ok": 38,
+   "fail": 0,
+   "new": 94,
+   "kept": 10,
+   "hits": 7,
+   "translated": 40
   }
  ]
 }
