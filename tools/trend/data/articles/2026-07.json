@@ -50,6 +50,30 @@
   ]
  },
  {
+  "key": "de4b92b28141a770",
+  "title": "Cambodia, Sri Lanka to get $450 million ADB resilience package",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOM0pUUGJXbTBfNDZldmkzT2xrX1VtQmZGZWxKWE83VTllSWlSNGNNbURya0pyUEg2V0RGY3FxMWNvaFE0aHBDSUdJMUJNNDB4XzAxaDBLQmloQnhJUXNDSnZfWW1TeWp3WUZOY205NWVPQkkxVE5pQ2NENFNveGZXMDBaMzRfY0pNTkdJNHV2V3RJd2FORHhEdEU3YWxvVnIzM3hLbS01S2xXVlljd2tYU2xENjNkQ0Q0LW9kV29YZ0xXRDZ1cTcza0owYw?oc=5",
+  "published": "2026-07-31",
+  "collected": "2026-09-06",
+  "summary": "Cambodia, Sri Lanka to get $450 million ADB resilience package Fibre2Fashion",
+  "content": "Cambodia, Sri Lanka to get $450 million ADB resilience package Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "d26bcf7b4d827d82",
   "title": "Earnings Flash (CRI) Carter's, Inc. Reports Q2 Revenue $615.5M, vs. FactSet Est of $605.7M",
   "title_ko": "Earnings Flash(CRI) Carter's, Inc., 2분기 매출 6억 1,555만 달러, FactSet 추정치는 6억 5,700만 달러 보고",
@@ -125,6 +149,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Under Armour"
+  ]
+ },
+ {
+  "key": "baef840af876261c",
+  "title": "| South Korea's KRW 73 bn recycling push targets textile exports",
+  "title_ko": "| 한국, 730억 원 규모 재활용 추진, 섬유 수출 겨냥",
+  "link": "https://news.google.com/rss/articles/CBMizgFBVV95cUxOTGhuLU12ZFlBUGlWVFNVd1FUQXJDQVFxOFBJX2pqN0UzcDM2eTBSUzVUODZqRXB0TjZpbTk2a1hBYmJPbHA3T2hrdE9wZHVfWHFISXJ0NWhjRjFDdmtqWWlDYzh0Zk1OdXZkRDNZcDNUVmVGWUhLQU0wT2FneDIyeDhkbW1UREo5SlB3dmxfQW1QUE5CTHJONDg3VWhjZU5uMXN4aHdQNnBuNlBVS0JvVk9UeFRkR0pHR1N3U0RQdy15QXV4U21PMFBTWmR3dw?oc=5",
+  "published": "2026-07-31",
+  "collected": "2026-09-06",
+  "summary": "| South Korea's KRW 73 bn recycling push targets textile exports Fibre2Fashion",
+  "content": "| South Korea's KRW 73 bn recycling push targets textile exports Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "리사이클"
+  ],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -779,6 +829,32 @@
   ]
  },
  {
+  "key": "aaa27a42cb2cda19",
+  "title": "PVH Corp. (PVH) Q2 2026 Earnings: EPS Surprises by 6.23% as Company Navigates Retail Headwinds - Earnings Yield Spread",
+  "title_ko": "PVH Corp.(PVH) 2026년 2분기 수익: 회사가 소매 역풍을 헤쳐나가면서 EPS는 6.23% 증가 - 수익 수익률 스프레드",
+  "link": "https://news.google.com/rss/articles/CBMiywFBVV95cUxNOGJJTUpjWGhDV1ZhTHpkbThBTmVoeGFZeEQyZ1U2Nm80d3VORTBIck9VSlRVYVN1VHVUcU9EUENOZ0M0aWdtLVEzVkkzQzZObkg3OXh4VmpyVUI0VVlVOG1LRURLck9DemREdVN5bHcxdnZPUHRwcVJRY0dIVUpxenBlLUVaVFdvSE9DQU5vYnhNMHVUcmtLVGtma1p0SXNRUHdXQ0dEemtMR25Gazl4MGlpa214b1JWd0tTZ19POFhhb2dFdUJBQlNMRQ?oc=5",
+  "published": "2026-07-30",
+  "collected": "2026-09-06",
+  "summary": "PVH Corp. (PVH) Q2 2026 Earnings: EPS Surprises by 6.23% as Company Navigates Retail Headwinds - Earnings Yield Spread siam.in",
+  "content": "PVH Corp. (PVH) Q2 2026 Earnings: EPS Surprises by 6.23% as Company Navigates Retail Headwinds - Earnings Yield Spread siam.in",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · PVH",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "pvh"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · PVH"
+  ]
+ },
+ {
   "key": "a4c94e1847c79644",
   "title": "Drake x Kevin Durant NOCTA Apparel Collection Releases July 30",
   "title_ko": null,
@@ -1026,6 +1102,30 @@
   "hits": 1,
   "sources": [
    "바이어 · Victoria's Secret"
+  ]
+ },
+ {
+  "key": "46334a2d32446497",
+  "title": "| US cotton quota faces Brazil's cost edge in Asia",
+  "title_ko": "| 미국 면화 쿼터는 아시아에서 브라질의 비용 우위에 직면해 있습니다.",
+  "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNSG1RLTlhakk0aXowZGFSRlE2TWEtelVZMTg1Wk5xc1hmNVRnMkg5M3hHUEh3WmZiTEN2Z3R4OTk1b3RZYkxoYktKN09qOG9nZ2VueGxVNE1JX3R2UU1sX0ZrRi1leE02WlZqVnZXV3RsVmV4YWhLUWpqSXZfZGJ0ZGVld25RNm9uQ25wYlUySkMzTmFaMTdyODg4Y2RTdjFHVGVRdUN1eDZjbkJtenNZNllmMDM0VmpkN2kw?oc=5",
+  "published": "2026-07-30",
+  "collected": "2026-09-06",
+  "summary": "| US cotton quota faces Brazil's cost edge in Asia Fibre2Fashion",
+  "content": "| US cotton quota faces Brazil's cost edge in Asia Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {

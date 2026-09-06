@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-09-05T22:24:56+00:00",
+"generated_at": "2026-09-06T22:29:48+00:00",
 "window_days": 120,
-"total": 417,
-"translated": 417,
-"filtered_out": 924,
+"total": 433,
+"translated": 433,
+"filtered_out": 945,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 23,
-"scanned": 685,
-"kept": 224,
-"material": 148
+"scanned": 684,
+"kept": 225,
+"material": 149
 },
 "30": {
-"sources": 24,
-"scanned": 1105,
-"kept": 354,
-"material": 266
+"sources": 23,
+"scanned": 1124,
+"kept": 365,
+"material": 277
 }
 }
 },
@@ -25,11 +25,11 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 137
+"n": 144
 },
 {
 "key": "FABRIC",
-"n": 92
+"n": 94
 },
 {
 "key": "RETAIL",
@@ -37,15 +37,15 @@
 },
 {
 "key": "ETC",
-"n": 50
+"n": 54
 },
 {
 "key": "CHEMICAL",
-"n": 38
+"n": 40
 },
 {
 "key": "YARN",
-"n": 11
+"n": 12
 }
 ],
 "sources": [
@@ -55,7 +55,7 @@
 },
 {
 "key": "Fibre2Fashion",
-"n": 60
+"n": 67
 },
 {
 "key": "국제섬유신문",
@@ -67,15 +67,19 @@
 },
 {
 "key": "주제검색 · 국내소재",
-"n": 37
+"n": 38
 },
 {
 "key": "주제검색 · 신소재",
-"n": 28
+"n": 29
 },
 {
 "key": "Textile Today",
-"n": 24
+"n": 26
+},
+{
+"key": "Textile Focus",
+"n": 18
 },
 {
 "key": "Innovation in Textiles",
@@ -90,10 +94,6 @@
 "n": 16
 },
 {
-"key": "Textile Focus",
-"n": 14
-},
-{
 "key": "Knitting Industry",
 "n": 11
 },
@@ -102,11 +102,11 @@
 "n": 8
 },
 {
-"key": "Apparel Resources",
-"n": 7
+"key": "주제검색 · 염색가공",
+"n": 8
 },
 {
-"key": "주제검색 · 염색가공",
+"key": "Apparel Resources",
 "n": 7
 },
 {
@@ -128,20 +128,20 @@
 ],
 "tags": [
 {
+"key": "방글라데시",
+"n": 22
+},
+{
 "key": "전시회",
 "n": 21
 },
 {
 "key": "리사이클",
-"n": 19
-},
-{
-"key": "방글라데시",
-"n": 17
+"n": 20
 },
 {
 "key": "데님",
-"n": 16
+"n": 17
 },
 {
 "key": "바이오소재",
@@ -152,15 +152,15 @@
 "n": 8
 },
 {
+"key": "탄소",
+"n": 6
+},
+{
 "key": "제직",
 "n": 6
 },
 {
 "key": "스판덱스",
-"n": 5
-},
-{
-"key": "탄소",
 "n": 5
 },
 {
@@ -184,6 +184,10 @@
 "n": 4
 },
 {
+"key": "폐수",
+"n": 3
+},
+{
 "key": "비스코스",
 "n": 3
 },
@@ -205,6 +209,10 @@
 },
 {
 "key": "효성",
+"n": 3
+},
+{
+"key": "인도네시아",
 "n": 3
 },
 {
@@ -232,14 +240,6 @@
 "n": 2
 },
 {
-"key": "인도네시아",
-"n": 2
-},
-{
-"key": "폐수",
-"n": 2
-},
-{
 "key": "스트레치",
 "n": 2
 },
@@ -258,6 +258,10 @@
 {
 "key": "UFLPA",
 "n": 2
+},
+{
+"key": "ZDHC",
+"n": 1
 },
 {
 "key": "DWR",
@@ -282,10 +286,6 @@
 {
 "key": "냉감",
 "n": 1
-},
-{
-"key": "r-PET",
-"n": 1
 }
 ],
 "entities": [
@@ -297,13 +297,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-07",
-"total": 2,
-"by": {
-"ETC": 2
-}
-},
 {
 "date": "2026-08-08",
 "total": 0,
@@ -423,8 +416,9 @@
 },
 {
 "date": "2026-08-23",
-"total": 1,
+"total": 2,
 "by": {
+"ETC": 1,
 "MATERIAL": 1
 }
 },
@@ -448,10 +442,10 @@
 },
 {
 "date": "2026-08-26",
-"total": 15,
+"total": 16,
 "by": {
 "CHEMICAL": 3,
-"MATERIAL": 6,
+"MATERIAL": 7,
 "ETC": 1,
 "FABRIC": 5
 }
@@ -512,11 +506,11 @@
 },
 {
 "date": "2026-09-01",
-"total": 49,
+"total": 50,
 "by": {
 "FABRIC": 13,
 "RETAIL": 17,
-"ETC": 6,
+"ETC": 7,
 "MATERIAL": 11,
 "CHEMICAL": 2
 }
@@ -534,10 +528,10 @@
 },
 {
 "date": "2026-09-03",
-"total": 38,
+"total": 39,
 "by": {
 "ETC": 5,
-"MATERIAL": 7,
+"MATERIAL": 8,
 "RETAIL": 17,
 "FABRIC": 5,
 "CHEMICAL": 3,
@@ -546,10 +540,10 @@
 },
 {
 "date": "2026-09-04",
-"total": 37,
+"total": 38,
 "by": {
 "RETAIL": 16,
-"MATERIAL": 11,
+"MATERIAL": 12,
 "CHEMICAL": 3,
 "YARN": 3,
 "FABRIC": 4
@@ -564,9 +558,41 @@
 "ETC": 1,
 "MATERIAL": 1
 }
+},
+{
+"date": "2026-09-06",
+"total": 7,
+"by": {
+"ETC": 2,
+"CHEMICAL": 2,
+"YARN": 1,
+"MATERIAL": 1,
+"FABRIC": 1
+}
 }
 ],
 "momentum": [
+{
+"tag": "방글라데시",
+"label_en": "bangladesh",
+"recent": 21,
+"prior": 1,
+"delta": 20,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+1,
+0,
+0,
+0,
+0,
+7,
+14
+]
+},
 {
 "tag": "전시회",
 "label_en": "performance days",
@@ -589,32 +615,11 @@
 ]
 },
 {
-"tag": "방글라데시",
-"label_en": "bangladesh",
-"recent": 16,
-"prior": 1,
-"delta": 15,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-1,
-0,
-0,
-0,
-0,
-7,
-9
-]
-},
-{
 "tag": "리사이클",
 "label_en": "recycled",
 "recent": 16,
-"prior": 3,
-"delta": 13,
+"prior": 4,
+"delta": 12,
 "weeks": [
 0,
 0,
@@ -622,7 +627,7 @@
 0,
 2,
 0,
-1,
+2,
 0,
 0,
 1,
@@ -634,8 +639,8 @@
 "tag": "데님",
 "label_en": "denim",
 "recent": 14,
-"prior": 2,
-"delta": 12,
+"prior": 3,
+"delta": 11,
 "weeks": [
 0,
 0,
@@ -644,7 +649,7 @@
 0,
 0,
 1,
-1,
+2,
 0,
 1,
 4,
@@ -694,6 +699,27 @@
 ]
 },
 {
+"tag": "탄소",
+"label_en": "carbon footprint",
+"recent": 6,
+"prior": 0,
+"delta": 6,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+2,
+4
+]
+},
+{
 "tag": "스판덱스",
 "label_en": "spandex",
 "recent": 5,
@@ -715,11 +741,11 @@
 ]
 },
 {
-"tag": "탄소",
-"label_en": "carbon footprint",
-"recent": 5,
-"prior": 0,
-"delta": 5,
+"tag": "인도네시아",
+"label_en": "indonesia",
+"recent": 1,
+"prior": 2,
+"delta": -1,
 "weeks": [
 0,
 0,
@@ -727,12 +753,12 @@
 0,
 0,
 0,
+1,
+1,
 0,
 0,
 0,
-0,
-2,
-3
+1
 ]
 },
 {
@@ -778,37 +804,12 @@
 ]
 },
 {
-"tag": "부직포",
-"label_en": "nonwoven",
-"recent": 5,
-"prior": 3,
-"delta": 2,
+"tag": "폐수",
+"label_en": "wastewater",
+"recent": 2,
+"prior": 1,
+"delta": 1,
 "weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-3,
-0,
-0,
-0,
-4,
-1
-]
-},
-{
-"tag": "PFAS",
-"label_en": "pfas",
-"recent": 3,
-"prior": 0,
-"delta": 3,
-"weeks": [
-0,
-0,
-0,
-0,
 0,
 0,
 0,
@@ -816,11 +817,21 @@
 0,
 1,
 0,
+0,
+0,
+0,
+0,
 2
 ]
 }
 ],
 "fresh": [
+{
+"tag": "탄소",
+"label_en": "carbon footprint",
+"n": 6,
+"first": "2026-08-25"
+},
 {
 "tag": "제직",
 "label_en": "woven fabric",
@@ -830,12 +841,6 @@
 {
 "tag": "스판덱스",
 "label_en": "spandex",
-"n": 5,
-"first": "2026-08-25"
-},
-{
-"tag": "탄소",
-"label_en": "carbon footprint",
 "n": 5,
 "first": "2026-08-25"
 },
@@ -912,6 +917,12 @@
 "first": "2026-08-26"
 },
 {
+"tag": "ZDHC",
+"label_en": "zdhc",
+"n": 1,
+"first": "2026-09-06"
+},
+{
 "tag": "DWR",
 "label_en": "dwr",
 "n": 1,
@@ -973,6 +984,165 @@
 }
 ],
 "articles": [
+{
+"id": "f5545729d4b7f503",
+"d": "2026-09-06",
+"t": "변화하는 에너지 환경에서 의류 탈탄소화 진전",
+"o": "Advancing Decarbonization for Apparel in a Changing Energy Landscape",
+"u": "https://textilefocus.com/advancing-decarbonization-for-apparel-in-a-changing-energy-landscape/",
+"s": "HSBC Bangladesh, Apparel Impact Institute (Aii), the Embassy of Sweden in Dhaka and the Delegation of the European Union in Bangladesh convened a high-level roundtable on “Advancing Decarbonization for Apparel in a Changing Energy Landscape.” The discussion brought together representatives from gove",
+"c": "ETC",
+"x": "HSBC Bangladesh, Apparel Impact Institute (Aii), the Embassy of Sweden in Dhaka and the Delegation of the European Union in Bangladesh convened a high-level roundtable on “Advancing Decarbonization for Apparel in a Changing Energy Landscape.” The discussion brought together representatives from government, industry, global brands, financial institutions and development partners to explore how Bangladesh can accelerate the transition to reliable and competitive clean energy for its apparel sector. The event featured H.E Michael Miller, Ambassador and Head of Delegation of the European Union to Bangladesh; Olle Lundin, Chargé d’Affaires, Embassy of Sweden; Md Mahbub ur Rahman, CEO, HSBC Bangladesh; Md Sarwar Hossain, Deputy Governor, Bangladesh Bank; and Vidya Khan, Vice President, Bangladesh Garment Manufacturers and Exporters Association (BGMEA). The discussion highlighted the importance of accelerating Bangladesh’s transition to clean energy, both to advance the decarbonization of the apparel sector and to strengthen its competitiveness, resilience and long-term growth. Two keynote presentations were delivered during the event. The first, on “Powering & Financing Bangladesh’s Apparel Transition,” was delivered by Kristina Elinder Liljas, Senior Director for Sustainable Finance and Engagement, Aii, and Kim Hellström, Senior Sustainability Manager, H&M Group. The second keynote, titled “Clean Energy Potential for Bangladesh,” was delivered by Justin Wu, Head of Sustainability and Climate Change, Asia and Middle East, and Randolph Brazier, Global Head of Clean Power Systems, Global Sustainability, HSBC. Olivia Windham Stewart, Apparel and Textile Transformation Initiative (ATTI), moderated the event. Thanks to the Delegation of the European Union to Bangladesh, the Embass",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/HSBC.jpeg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "dcc9a6509cba8846",
+"d": "2026-09-06",
+"t": "ZDHC, 섬유, 의류 및 가죽 산업의 화학물질 및 폐수 관리를 강화하기 위한 이니셔티브 출시",
+"o": "ZDHC launches initiative to strengthen chemical and wastewater management in textile, apparel and leather industries",
+"u": "https://textiletoday.com.bd/zdhc-launches-initiative-to-strengthen-chemical-and-wastewater-management-in-textile-apparel-and-leather-industries",
+"s": "A project to protect biodiversity and water resources through sustainable chemical management and wastewater management in Bangladesh’s textile, apparel, and leather industries was formally launched...",
+"c": "CHEMICAL",
+"x": "A project to protect biodiversity and water resources through sustainable chemical management and wastewater management in Bangladesh’s textile, apparel, and leather industries was formally launched in Dhaka recently. Held at the Lakeshore Grand Hotel, the launching event brought together key representatives from government agencies, development partners, global brands, industry associations, manufacturers, and technical organizations. Figure: Dignitaries and representatives from government agencies, development partners, global brands, industry associations, and implementation partners at the launching event of the ZDHC-AFD initiative. Funded by the Agence Française de Développement (AFD) and led by the Netherlands-based Zero Discharge of Hazardous Chemicals (ZDHC) Foundation, the 36-month initiative will support 100 textile and leather manufacturing facilities across Bangladesh in improving chemical management, wastewater performance, and sustainable production practices. The project's technical and local implementation will be jointly led by Swiss specialized firm ECOPSIS and local solution partner Amin & Jahan Corporation Ltd. During the opening remarks, Mariella Noto, Academia & Multilateral Partnerships Director at the ZDHC Foundation, emphasized that the project will look beyond factory-level compliance to address the broader systemic impacts of industrial pollution on aquatic life, biodiversity, and local communities. “Anything that we do with water will end up in the air, will end up in the soil and will affect different parts of society. It is a holistic system,” Ms. Noto stated. “What we are aiming for is long-term, sustainable, and systemic change — not something that we will do for three or four years, step out, and leave as it is. We are trying to establis",
+"i": "/storage/uploads/2026/9/zdhclaunchesinitia_17887056583222.jpg",
+"g": [
+"폐수",
+"ZDHC",
+"방글라데시"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 9,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "d42a30325e5042fb",
+"d": "2026-09-06",
+"t": "2,200m/분 및 530개의 원사 밀: 현대 방적에서 종이 콘 일관성이 중요한 이유에 대한 데이터",
+"o": "2,200 m/min and 530 Yarn Mills: The Data Behind Why Paper Cone Consistency Matters in Modern Spinning",
+"u": "https://textilefocus.com/2200-m-min-and-530-yarn-mills-the-data-behind-why-paper-cone-consistency-matters-in-modern-spinning/",
+"s": "A data-led look at a small consumable inside a large, high-speed textile production system Jafar Iqbal Bhuiyan, Managing Director, Aziz Packaging Limited, Bangladesh Article Summary: Bangladesh’s textile industry operates at enormous scale, while modern winding equipment can handle yarn at up to 2,2",
+"c": "YARN",
+"x": "A data-led look at a small consumable inside a large, high-speed textile production system Jafar Iqbal Bhuiyan, Managing Director, Aziz Packaging Limited, Bangladesh Article Summary: Bangladesh’s textile industry operates at enormous scale, while modern winding equipment can handle yarn at up to 2,200 metres per minute. This article uses current industry and machinery data to explain why cone taper, dimensions, surface finish, roundness and batch consistency deserve to be treated as process variables—not merely packaging specifications. Figure 1. Kraft paper yarn cones used in spinning and winding applications. Image source: Aziz Packaging Limited. Bangladesh’s textile industry is a story of scale. The Bangladesh Textile Mills Association (BTMA) currently reports 1,883 member mills, including 530 yarn manufacturing mills, and estimates investment in the primary textile sector at around US$32 billion. At the downstream end of the value chain, Bangladesh recorded US$38.70 billion in apparel exports during FY 2025–26, according to Export Promotion Bureau data reported by Textile Focus. But scale also magnifies small inefficiencies. When a mill is running hundreds or thousands of spindles and high-speed winding positions, a component that costs only a few cents or taka per piece can still interact with a production system worth millions of dollars. The paper cone is one of those components. Seven Numbers That Put the Winding Process in Perspective Figure What it represents 1,883 BTMA member mills currently reported 530 Yarn manufacturing mills among BTMA members ~US$32B Investment in Bangladesh’s primary textile sector, per BTMA US$38.70B Bangladesh apparel exports in FY 2025–26 >3 million LMW spindles installed in Bangladesh, reported at its 2026 Dhaka symposium 2,200 m/mi",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/image-7.png",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "c8762632ef1bbc0f",
+"d": "2026-09-06",
+"t": "HOPE/HELP가 아이티의 섬유 부문에 싸울 기회를 줄까요?",
+"o": "Will HOPE/HELP give Haiti's textile sector a fighting chance?",
+"u": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxPb0drbmNOZkZzUTROMVY3amRuS2xWVW9qXy0zZ3g1RWVPZ0hwU2hHdlVKc2lvc2dTUVpPYkZxZnF4b3h0YkVyM2FnMk9oWUdNWlVheExGVFhuTWh5emF1RmNDc2FhRHZSY2xHTGNVbE91aWpNcHdLbXQ5NC1mTVpiTWplZE1tMDk3MG1IR0I3R0hMVUJQMFB4eFNXSmt1WjlVN3lVNzFLSDhfYkVMVjh1Sk1HejRKTENkYkZaUkc2Ym03azdiWlFLSzlkWUxVVkdPYVlMODJVaDNTWnoyZ1E?oc=5",
+"s": "Will HOPE/HELP give Haiti's textile sector a fighting chance? Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Will HOPE/HELP give Haiti's textile sector a fighting chance? Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "aff01ed2bb4f00c4",
+"d": "2026-09-06",
+"t": "BGMEA, NPA는 RMG 인력을 보편적 연금 제도에 포함시키는 방법을 논의합니다.",
+"o": "BGMEA, NPA discuss ways to bring RMG workforce under Universal Pension Scheme",
+"u": "https://textilefocus.com/bgmea-npa-discuss-ways-to-bring-rmg-workforce-under-universal-pension-scheme/",
+"s": "The Bangladesh Garment Manufacturers and Exporters Association, the trade body representing the country’s powerful garments sector, has suggested providing special government incentives for the first two years and setting the pension age limit, when a worker is eligible to cash in on his or her cont",
+"c": "ETC",
+"x": "The Bangladesh Garment Manufacturers and Exporters Association, the trade body representing the country’s powerful garments sector, has suggested providing special government incentives for the first two years and setting the pension age limit, when a worker is eligible to cash in on his or her contributions, for RMG workers at 55, instead of 60. BGMEA President Mahmud Hasan Khan made the demand at a discussion on the Universal Pension Scheme was held on Saturday (September 5) at the Nurul Quader Auditorium of BGMEA Complex in Uttara, Dhaka, bringing together members and relevant stakeholders of the Bangladesh Garment Manufacturers and Exporters Association (BGMEA). Dr. Md. Suratuzzaman, Executive Chairman of the National Pension Authority, presided over the event. The BGMEA president said that to make the scheme more attractive and popular among garment workers, he suggested providing special government incentives for the first two years. Sheikh Kamrul Hasan, Member of the National Pension Authority under the Finance Division of the Ministry of Finance, BGMEA Senior Vice President Inamul Haq Khan, and Vice President Md. Reazwan Selim spoke as special guests. In a keynote presentation, Dr. Md. Suratuzzaman said the government introduced the Universal Pension Scheme to ensure the future financial security of citizens, offering a vital safety net in old age. Citizens aged 18 to 50 can deposit contributions through banks and will receive pension returns upon reaching 60 years of age. If a subscriber dies before turning 60, their nominee will receive the deposited funds along with accrued profits. Provisions have also been made to adjust contribution amounts in case of financial difficulties. Dr. Suratuzzaman highlighted that the government has already decided to invest app",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/image-6.png",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "5a254f86f2539c2c",
+"d": "2026-09-06",
+"t": "Envoy Textiles는 작업 현장 경험을 사내 수세미로 전환합니다.",
+"o": "Envoy Textiles turns shopfloor experience into an in-house scouring machine",
+"u": "https://textiletoday.com.bd/envoy-textiles-turns-shopfloor-experience-in-house-scouring-machine",
+"s": "Envoy Textiles Limited (ETL) has developed and commissioned a fabric scouring machine through its own Engineering Division, taking inspiration from an existing machine already operating on its finishi...",
+"c": "CHEMICAL",
+"x": "Envoy Textiles Limited (ETL) has developed and commissioned a fabric scouring machine through its own Engineering Division, taking inspiration from an existing machine already operating on its finishing floor. The initiative reduced the required investment by around 85 percent compared with purchasing a comparable commercial machine. Figure 1: Envoy Textiles team, led by Chairman Kutubuddin Ahmed, at the inauguration of the new fabric scouring machine. The machine was inaugurated on 13 August 2026 at Envoy Textiles’ factory premises by Kutubuddin Ahmed, Chairman of Envoy Textiles Limited, and Sumayyah Ahmed, Director, along with family members. Rather than starting with an entirely new machine concept, Envoy’s engineers studied the configuration and operating principles of the existing scouring machine on the production floor. They then developed a similar setup using their technical experience, locally sourced materials and available mechanical components. This approach gave the team several practical advantages: The engineering team already understood the machine’s operating principle and production requirements. The production team could operate the new machine without facing a significant learning curve. Existing materials and components could be utilized, helping reduce fabrication cost. Technical risks were comparatively lower because the design was based on a proven operating setup. According to Envoy, the new machine cost approximately 15 percent of the investment required for a comparable purchased unit. Initial trials have also shown no distinguishable difference in performance compared with the existing machine. However, the company plans to assess its performance further during bulk production across different fabric constructions and GSM ranges. Figure 2: E",
+"i": "/storage/uploads/2026/9/envoytextilesturns_17886782781305.jpg",
+"g": [],
+"m": "Textile Today",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "5658dc62e76dbfd3",
+"d": "2026-09-06",
+"t": "Solaric, Anowara Knit Composite와 907kWp 옥상 태양광 발전 계약 체결",
+"o": "Solaric Signs 907 kWp Rooftop Solar Agreement with Anowara Knit Composite",
+"u": "https://textilefocus.com/solaric-signs-907-kwp-rooftop-solar-agreement-with-anowara-knit-composite/",
+"s": "Solaric Limited has signed an agreement with Anowara Knit Composite Ltd. to develop a 907 kWp CAPEX rooftop solar power plant, marking another step toward expanding renewable energy adoption in Bangladesh’s industrial sector. The project is expected to support Anowara Knit Composite Ltd. in strength",
+"c": "FABRIC",
+"x": "Solaric Limited has signed an agreement with Anowara Knit Composite Ltd. to develop a 907 kWp CAPEX rooftop solar power plant , marking another step toward expanding renewable energy adoption in Bangladesh’s industrial sector. The project is expected to support Anowara Knit Composite Ltd. in strengthening its clean energy initiatives while contributing to the broader transition of Bangladesh’s industrial sector toward sustainable and renewable power solutions. The agreement reflects the collaborative efforts of both organisations in advancing the project from planning to implementation. Solaric highlighted the importance of strategic decision-making, technical expertise and sustained coordination in bringing the partnership to fruition. Engr. Naznin Akther, Director – Business Development, Solaric Limited, provided strategic guidance throughout the project’s development. Mehedi Al Mamun, AGM – Business Development, also played an important role in facilitating the collaboration. S.M. Shazib Talukdar Rudra, Assistant Engineer – Design & Optimization, contributed through technical and design-related support. Solaric also expressed its appreciation to the Managing Director and Director of Anowara Group for placing their trust and confidence in the company to develop the rooftop solar project. The 907 kWp rooftop solar plant represents a further move toward integrating renewable energy into Bangladesh’s manufacturing sector, where rooftop solar is increasingly being considered as a means of reducing dependence on conventional energy sources and supporting long-term sustainability goals. Through projects like this, Solaric Limited and industrial partners such as Anowara Knit Composite Ltd. are contributing to the growing adoption of clean energy and the development of a more",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Solaric-01.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 14,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
 {
 "id": "ffcc95d102798751",
 "d": "2026-09-05",
@@ -1861,6 +2031,27 @@
 ]
 },
 {
+"id": "0bcb8a2762580167",
+"d": "2026-09-04",
+"t": "면직물 구매자",
+"o": "Cotton Fabric Buyers",
+"u": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNX0ltVEs5bmFQNkxJXzdCNmYteTZjNGREMDJYRG5XLUUtTVlvaXM1UDVvUlAwUTBUQ2pkWlFST0Z6UkYya20yOGRVQ2lMcmEydU5YNFNQWEMzMERWY2Z4TWJlQUJVcWRGaGQxbm02VTNiRDl1d0lwb3JTQlhkcjlGRURocnZGS2RWZTg3akdYQQ?oc=5",
+"s": "Cotton Fabric Buyers Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Cotton Fabric Buyers Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "0414bb591b80ab9d",
 "d": "2026-09-04",
 "t": "인도 BTTF, Première Vision과 글로벌 섬유 협력 강화를 위한 MOU 체결",
@@ -2179,6 +2370,29 @@
 "e": [],
 "ms": [
 "국제섬유신문"
+]
+},
+{
+"id": "b49ac2fab942d8c6",
+"d": "2026-09-03",
+"t": "꿈의 신소재 '탄소 섬유' 그래핀으로 획기적 향상",
+"o": "꿈의 신소재 '탄소 섬유' 그래핀으로 획기적 향상",
+"u": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5iQUd2ZEJYQkJnYUxhRGVVMFl1Rjh5aThUNUFDb0dHcjFib2pnbzI0Y1NwQllPTnkta0ZUQVhFTkJlbUdJa2ppblliQ0pfZTJwOFFLMmVOQXhrdThBVUlBX2xNOUxWc0FY?oc=5",
+"s": "꿈의 신소재 '탄소 섬유' 그래핀으로 획기적 향상 헬로디디",
+"c": "MATERIAL",
+"x": "꿈의 신소재 '탄소 섬유' 그래핀으로 획기적 향상 헬로디디",
+"i": "",
+"g": [
+"탄소"
+],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
 ]
 },
 {
@@ -4128,6 +4342,27 @@
 "e": [],
 "ms": [
 "Fibre2Fashion"
+]
+},
+{
+"id": "99312237e1d4b6a3",
+"d": "2026-09-01",
+"t": "소재 혁신으로 직물의 형태가 바뀌다",
+"o": "Material Innovation Reshapes Textiles",
+"u": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNU0dIRmM2c1hISDBPWjlfLWRGcy1hMC1ITHdLUlMzYWFiY0VCYnhBWlhFMmlqSVdBR0dFS3ZsWW9ZU2VTeHNJM25qVFFGU0FCY2N6RENjSVNnd255TVo3SGFyLXluWnZUS09pdlROQ3ZoWkY4NkhLd1JsT0ZyQXJKRXh6RG1JUXhPc3N6RmkwWk9NUQ?oc=5",
+"s": "Material Innovation Reshapes Textiles textileexcellence.com",
+"c": "ETC",
+"x": "Material Innovation Reshapes Textiles textileexcellence.com",
+"i": "",
+"g": [],
+"m": "주제검색 · 염색가공",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 염색가공"
 ]
 },
 {
@@ -6894,6 +7129,27 @@
 ]
 },
 {
+"id": "9da5e9be95e0c66b",
+"d": "2026-08-26",
+"t": "장 기린 | 국제 마케팅 관리자 | Kingcason 섬유 그룹",
+"o": "Kylin Zhang | International Marketing Manager | Kingcason Textile Group",
+"u": "https://news.google.com/rss/articles/CBMingFBVV95cUxON2NuRnhUT0EtTkhiNWRYQmtlWnlWbV9iUF9lcU4tcXRpSmxZWlpUWTMzTlkzQldLTVdWSGZzblVBeWR0R1BuMmtoQk9HTVBNRld0LXN2T0lUX2dDMlhvc24wdU5qN0hHcm5VMDhIcXRzZHdOeEVfYTUzTklFbURjZ0wxOUx2V25jajkzUWRoMmRtZTBENnFlckI3YWd0UQ?oc=5",
+"s": "Kylin Zhang | International Marketing Manager | Kingcason Textile Group Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Kylin Zhang | International Marketing Manager | Kingcason Textile Group Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "90b4a9107479952a",
 "d": "2026-08-26",
 "t": "Hyosung는 Première Vision에서 확장 가능한 bio-based 혁신을 선보입니다.",
@@ -7397,11 +7653,12 @@
 "m": "Knitting Industry",
 "r": "해외",
 "v": 8,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Knitting Industry"
+"Knitting Industry",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -7641,6 +7898,27 @@
 "e": [],
 "ms": [
 "Knitting Industry"
+]
+},
+{
+"id": "cf124c97bceeb374",
+"d": "2026-08-23",
+"t": "Shima Seiki 기술로 Drexel의 FutureTEX 기여 강화",
+"o": "Shima Seiki technology strengthens Drexel’s FutureTEX contribution",
+"u": "https://news.google.com/rss/articles/CBMingFBVV95cUxPQ2QzcG9nSHVwaG9zYUVqdXptaHk5cmdCU3JrUm9JSExCellUdVV3YjR0QmljYTFVOXNHTDRNcE8xbFhGcGNsN1FMSUFLN3RnVXJzZVZ4WnhNd2xBeWJWVkhWVXhkcmU4R2pTQWtxaVpiV2dCblNoS3lnSHFBVTdHZmhwaWp0RGxsZVpDY3lNMjhTSERiWHRBZ0ZobDFqZw?oc=5",
+"s": "Shima Seiki technology strengthens Drexel’s FutureTEX contribution Textile Today",
+"c": "ETC",
+"x": "Shima Seiki technology strengthens Drexel’s FutureTEX contribution Textile Today",
+"i": "",
+"g": [],
+"m": "주제검색 · 신소재",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 신소재"
 ]
 },
 {
@@ -8712,6 +8990,29 @@
 ]
 },
 {
+"id": "31030d70db00a09e",
+"d": "2026-08-06",
+"t": "재해석된 데님: 세계에서 가장 내구성이 뛰어난 원단이 계속해서 스스로를 재창조하는 이유",
+"o": "Denim Reimagined: Why the World’s Most Enduring Fabric Keeps Reinventing Itself",
+"u": "https://news.google.com/rss/articles/CBMiywFBVV95cUxQNDFLa2pkMzlrdEZaOElxOU42ZVF6aFVCQkd2Q1k0bjF1Q0hBa3dsWC1xbnp2dkpvSUx0OUI1VTFYUlNNbDV5UWxPeVlmVlpnNlhzdl9ZMmVwN2E2YkZSeFVNNjBDZ0lGcHAxTEFnbzBkUWpPVFkxRFdlSksyOU1mckQwQXVKdlNpd1ZJLUlTSG1FU25sZ1JaazkzN0ljLXNNQmNqNlZtNmc5RklQWE9TQ0doM2FUdF9vZGFMekxMVG91XzU4dzVQX2M5aw?oc=5",
+"s": "Denim Reimagined: Why the World’s Most Enduring Fabric Keeps Reinventing Itself Fibre2Fashion",
+"c": "FABRIC",
+"x": "Denim Reimagined: Why the World’s Most Enduring Fabric Keeps Reinventing Itself Fibre2Fashion",
+"i": "",
+"g": [
+"데님"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "71f4a70f81b646b2",
 "d": "2026-08-05",
 "t": "GBTL, FLO 메모리 스트레치 공개 - 모든 스트레치 원단이 답을 잊어버린 질문에서 탄생한 브랜드",
@@ -8730,6 +9031,29 @@
 "e": [],
 "ms": [
 "Indian Textile Magazine"
+]
+},
+{
+"id": "6bf4ffada76c260c",
+"d": "2026-08-05",
+"t": "인도 의류 및 섬유 엑스포 - 2026(2026년 8월), 자카르타 - 인도네시아 - 무역 박람회",
+"o": "Indo Garment & Textile Expo - 2026 (August 2026), Jakarta - Indonesia - Trade Show",
+"u": "https://news.google.com/rss/articles/CBMihAFBVV95cUxQQUllelJsR2RCUGVkQTltTEd5NHlDSkNPT3ctVWg1YUtiYjZCMEwyaTE5VDFlbmpBU1N0MXpaVUp1VUlBWS1TaFlwQl9yc1RNZVJ4MVVkY1F6NmZaMWk5c2MxbjNWU0YtRjNQTTdYaDNTNklCSzdvSTh5aEcxb3RSeUZybEs?oc=5",
+"s": "Indo Garment & Textile Expo - 2026 (August 2026), Jakarta - Indonesia - Trade Show Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Indo Garment & Textile Expo - 2026 (August 2026), Jakarta - Indonesia - Trade Show Fibre2Fashion",
+"i": "",
+"g": [
+"인도네시아"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -8932,6 +9256,29 @@
 ]
 },
 {
+"id": "baef840af876261c",
+"d": "2026-07-31",
+"t": "| 한국, 730억 원 규모 재활용 추진, 섬유 수출 겨냥",
+"o": "| South Korea's KRW 73 bn recycling push targets textile exports",
+"u": "https://news.google.com/rss/articles/CBMizgFBVV95cUxOTGhuLU12ZFlBUGlWVFNVd1FUQXJDQVFxOFBJX2pqN0UzcDM2eTBSUzVUODZqRXB0TjZpbTk2a1hBYmJPbHA3T2hrdE9wZHVfWHFISXJ0NWhjRjFDdmtqWWlDYzh0Zk1OdXZkRDNZcDNUVmVGWUhLQU0wT2FneDIyeDhkbW1UREo5SlB3dmxfQW1QUE5CTHJONDg3VWhjZU5uMXN4aHdQNnBuNlBVS0JvVk9UeFRkR0pHR1N3U0RQdy15QXV4U21PMFBTWmR3dw?oc=5",
+"s": "| South Korea's KRW 73 bn recycling push targets textile exports Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| South Korea's KRW 73 bn recycling push targets textile exports Fibre2Fashion",
+"i": "",
+"g": [
+"리사이클"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "a49ed35698c07807",
 "d": "2026-07-31",
 "t": "형지I&C, 친환경 소재 확대…국내 협력사와 지속가능 패션 강화",
@@ -9061,6 +9408,27 @@
 "e": [],
 "ms": [
 "Indian Textile Magazine"
+]
+},
+{
+"id": "46334a2d32446497",
+"d": "2026-07-30",
+"t": "| 미국 면화 쿼터는 아시아에서 브라질의 비용 우위에 직면해 있습니다.",
+"o": "| US cotton quota faces Brazil's cost edge in Asia",
+"u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNSG1RLTlhakk0aXowZGFSRlE2TWEtelVZMTg1Wk5xc1hmNVRnMkg5M3hHUEh3WmZiTEN2Z3R4OTk1b3RZYkxoYktKN09qOG9nZ2VueGxVNE1JX3R2UU1sX0ZrRi1leE02WlZqVnZXV3RsVmV4YWhLUWpqSXZfZGJ0ZGVld25RNm9uQ25wYlUySkMzTmFaMTdyODg4Y2RTdjFHVGVRdUN1eDZjbkJtenNZNllmMDM0VmpkN2kw?oc=5",
+"s": "| US cotton quota faces Brazil's cost edge in Asia Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| US cotton quota faces Brazil's cost edge in Asia Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
