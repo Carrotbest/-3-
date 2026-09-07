@@ -728,10 +728,11 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
   const override: FabricLedgerOverride = {
     key: input.fabricKey,
     status: resolvedToStatus,
-    // 입고 대기로 되돌리면 채번을 취소한다. 그 번호는 다시 쓸 수 있게 풀린다.
-    storageNo: input.action === "UNRECEIVE" ? undefined : input.storageNo?.trim() || previous?.storageNo,
-    // 입고 대기로 되돌리면 보유 재고도 비운다. 남겨 두면 입고한 적 없는 행에 재고가 붙어 있게 된다.
-    yds: input.action === "UNRECEIVE" || input.clearYds ? undefined : yds,
+    // 입고 대기로 내려가면 채번을 취소한다. 그 번호는 다시 쓸 수 있게 풀린다.
+    // 되돌리기(UNRECEIVE)든 이력에서의 복구(RESTORE)든 도착 상태가 기준이다.
+    storageNo: resolvedToStatus === "READY" ? undefined : input.storageNo?.trim() || previous?.storageNo,
+    // 같은 이유로 보유 재고도 비운다. 남겨 두면 입고한 적 없는 행에 재고가 붙어 있게 된다.
+    yds: resolvedToStatus === "READY" || input.clearYds ? undefined : yds,
     note: input.note?.trim() || previous?.note,
     // 원단 상세에서 고친 값은 창고 동작(입고·확인·출고 등)과 무관하다. 그대로 물려준다.
     fields: previous?.fields,

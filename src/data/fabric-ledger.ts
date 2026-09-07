@@ -460,9 +460,10 @@ export function buildFabricLedger(
   ;[...fabricEvents].sort((left, right) => eventOrder(left).localeCompare(eventOrder(right))).forEach((event) => {
     const itemKey = resolveStoredKey(event.fabricKey)
     if (!itemKey) return
-    // 입고 대기로 되돌리면 그 원단의 재고 기간이 끝난다. 다음 입고부터 다시 센다.
+    // 입고 대기로 내려가면 그 원단의 재고 기간이 끝난다. 다음 입고부터 다시 센다.
+    // 되돌리기든 이력에서의 복구든 도착 상태가 기준이다.
     // 기록 자체는 지우지 않으므로 원단 상세의 이력에는 그대로 남는다.
-    if (event.action === "UNRECEIVE") {
+    if (event.toStatus === "READY") {
       outboundMap.delete(itemKey)
       intakeMap.delete(itemKey)
     }

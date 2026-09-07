@@ -35,6 +35,13 @@ const ROW_HEADER_WIDTH = 40
 /** 현재 재직 중인 메인 개발 담당(팀장 제외). 본인 개발건 우선 확인용 네임카드에 쓴다. */
 const MAIN_DEVELOPERS: string[] = MEMBERS.filter((member) => member.role !== "팀장").map((member) => member.name)
 
+/** 담당 네임카드 색. 이름 순서가 아니라 조직 순서(MEMBERS)를 따라 고정한다. */
+const OWNER_COLORS = ["#2f6fed", "#8b5cf6", "#0d9488", "#d97706", "#db2777", "#0891b2"]
+const ownerColor = (name: string): string => {
+  const index = MAIN_DEVELOPERS.indexOf(name)
+  return index < 0 ? "var(--muted-foreground)" : OWNER_COLORS[index % OWNER_COLORS.length]
+}
+
 interface CellRef { row: string; col: string }
 type CellMove = "up" | "down" | "left" | "right"
 
@@ -2043,10 +2050,28 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       <div className="flex flex-wrap items-center gap-1.5" aria-label="주요 개발 담당">
         {[{ key: ALL, label: "전체", initial: "전", stat: ownerStats.all }, ...MAIN_DEVELOPERS.map((name) => ({ key: name, label: name, initial: name.charAt(0), stat: ownerStats.byOwner.get(name) ?? { total: 0, active: 0 } }))].map((card) => {
           const on = owner === card.key
-          return <button type="button" key={card.key} aria-pressed={on} title={card.key === ALL ? "담당 필터 해제" : `${card.label} 개발건만 보기`} onClick={() => setOwner(on && card.key !== ALL ? ALL : card.key)} className={`flex h-8 shrink-0 items-center gap-1.5 rounded-[calc(var(--radius)-2px)] border px-2 transition-colors ${on ? "border-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]" : "border-[var(--border)] bg-[var(--card)] hover:bg-[var(--accent)]"}`}>
-            <span className={`flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${on ? "bg-[var(--primary)] text-[var(--primary-foreground)]" : "bg-[var(--muted)] text-[var(--foreground)]"}`}>{card.initial}</span>
-            <span className="text-xs font-semibold text-[var(--foreground)]">{card.label}</span>
-            <span className="text-[11px] tabular-nums text-[var(--muted-foreground)]" title={`진행중 ${card.stat.active} / 전체 ${card.stat.total}`}>{card.stat.active}<span className="opacity-50">/{card.stat.total}</span></span>
+          const isAll = card.key === ALL
+          const color = isAll ? "var(--muted-foreground)" : ownerColor(card.key)
+          return <button
+            type="button"
+            key={card.key}
+            aria-pressed={on}
+            title={isAll ? "전체 미리보기 (수정 불가)" : `${card.label} 개발건만 보기`}
+            onClick={() => setOwner(on && !isAll ? ALL : card.key)}
+            className="flex h-9 shrink-0 items-center gap-2 overflow-hidden rounded-[calc(var(--radius)-2px)] border-l-4 pl-2 pr-2.5 transition-[background-color,box-shadow] hover:shadow-sm"
+            style={{
+              borderLeftColor: color,
+              borderTop: `1px solid ${on ? color : "var(--border)"}`,
+              borderRight: `1px solid ${on ? color : "var(--border)"}`,
+              borderBottom: `1px solid ${on ? color : "var(--border)"}`,
+              background: on ? `color-mix(in srgb, ${color} 12%, var(--card))` : "var(--card)",
+            }}
+          >
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: on ? color : `color-mix(in srgb, ${color} 14%, var(--card))`, color: on ? "#fff" : color }}>{card.initial}</span>
+            <span className="flex min-w-0 flex-col items-start leading-tight">
+              <span className="truncate text-xs font-semibold" style={{ color: on ? color : "var(--foreground)" }}>{isAll ? "전체 미리보기" : card.label}</span>
+              <span className="text-[10px] tabular-nums text-[var(--muted-foreground)]" title={`진행중 ${card.stat.active} / 전체 ${card.stat.total}`}>진행 {card.stat.active}<span className="opacity-60"> / {card.stat.total}</span></span>
+            </span>
           </button>
         })}
         {owner !== ALL && !MAIN_DEVELOPERS.includes(owner) ? <span className="flex h-8 shrink-0 items-center gap-1 rounded-[calc(var(--radius)-2px)] border border-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))] px-2 text-xs text-[var(--foreground)]">{ownerDisplayName(owner)}<button type="button" title="담당 필터 해제" onClick={() => setOwner(ALL)} className="rounded p-0.5 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"><X className="size-3" /></button></span> : null}
@@ -2087,13 +2112,23 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </div>
       </div>
 
+      {!editEnabled ? (
+        <div className="px-4 sm:px-6 lg:px-8">
+          <p role="status" className="relative flex items-center gap-2 rounded-[var(--radius)] border border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_10%,var(--card))] px-3 py-2 text-xs text-[var(--foreground)]">
+            <span aria-hidden="true" className="absolute -top-1.5 left-6 size-3 rotate-45 border-l border-t border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_10%,var(--card))]" />
+            <TriangleAlert className="size-4 shrink-0 text-[var(--warning)]" />
+            <span><strong className="font-semibold">전체 미리보기입니다. 수정할 수 없습니다.</strong> 위에서 담당 카드를 고르면 그 담당의 건만 보이고 셀을 고칠 수 있습니다.</span>
+          </p>
+        </div>
+      ) : null}
+
       <div data-route-scroll-root onContextMenu={(event) => {
         const target = event.target as HTMLElement
         if (target.closest("table[data-dd-master-grid], [role=\"menu\"]")) return
         event.preventDefault()
         setRange(null)
         setMenu({ x: event.clientX, y: event.clientY, kind: "bottom" })
-      }} className="min-h-0 flex-1 overflow-auto">
+      }} className={`min-h-0 flex-1 overflow-auto ${editEnabled ? "" : "bg-[color-mix(in_srgb,var(--muted)_35%,transparent)]"}`}>
         <table data-dd-master-grid onMouseMove={onGridMouseMove} onMouseLeave={() => { if (!moveDragRef.current) setMoveHover(null) }} className="select-none border-separate border-spacing-0 text-left [&_input]:select-text [&_textarea]:select-text">
           <thead className="sticky top-0 z-30 bg-[var(--card)] shadow-sm">
             <tr className="h-6">

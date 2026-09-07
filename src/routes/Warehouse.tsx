@@ -35,6 +35,8 @@ type ActionKind = "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "DISPOSE" | "STOCK" | "O
 interface ActionDialogState {
   kind: ActionKind
   keys: string[]
+  /** 이력에서 되돌릴 때 어느 탭으로 보낼지. RESTORE 에서만 쓴다. */
+  restoreTo?: "READY" | "WAREHOUSE"
 }
 
 const TAB_META: Record<WarehouseTab, { label: string; description: string }> = {
@@ -135,10 +137,10 @@ const TAB_STATUSES: Record<WarehouseTab, readonly FabricLedgerStatus[]> = {
 }
 
 /** 탭·상태별 고정 액센트. 모든 탭에서 열 구성이 같으므로 색으로만 맥락을 구분한다. */
-const TAB_ACCENT: Record<WarehouseTab, { fill: string; dot: string; active: string; badge: string; bar: string; drop: string; rowBar: string; borderTop: string }> = {
-  READY: { fill: "bg-[var(--warning)]", dot: "bg-[var(--warning)]", active: "data-[state=active]:bg-[color-mix(in_srgb,var(--warning)_15%,transparent)] data-[state=active]:text-[var(--warning)]", badge: "bg-[color-mix(in_srgb,var(--warning)_15%,transparent)] text-[var(--warning)]", bar: "bg-[var(--warning)]", drop: "ring-2 ring-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_15%,transparent)]", rowBar: "border-l-[var(--warning)]", borderTop: "border-t-[var(--warning)]" },
-  WAREHOUSE: { fill: "bg-[var(--chart-2)]", dot: "bg-[var(--chart-2)]", active: "data-[state=active]:bg-[color-mix(in_srgb,var(--chart-2)_15%,transparent)] data-[state=active]:text-[var(--chart-2)]", badge: "bg-[color-mix(in_srgb,var(--chart-2)_15%,transparent)] text-[var(--chart-2)]", bar: "bg-[var(--chart-2)]", drop: "ring-2 ring-[var(--chart-2)] bg-[color-mix(in_srgb,var(--chart-2)_15%,transparent)]", rowBar: "border-l-[var(--chart-2)]", borderTop: "border-t-[var(--chart-2)]" },
-  HISTORY: { fill: "bg-[var(--muted-foreground)]", dot: "bg-[var(--muted-foreground)]", active: "data-[state=active]:bg-[color-mix(in_srgb,var(--muted-foreground)_15%,transparent)] data-[state=active]:text-[var(--foreground)]", badge: "bg-[color-mix(in_srgb,var(--muted-foreground)_15%,transparent)] text-[var(--foreground)]", bar: "bg-[var(--muted-foreground)]", drop: "ring-2 ring-[var(--muted-foreground)] bg-[color-mix(in_srgb,var(--muted-foreground)_15%,transparent)]", rowBar: "border-l-[var(--muted-foreground)]", borderTop: "border-t-[var(--muted-foreground)]" },
+const TAB_ACCENT: Record<WarehouseTab, { fill: string; dot: string; active: string; badge: string; bar: string; drop: string; rowBar: string; borderTop: string; headBg: string; toolbarBg: string }> = {
+  READY: { fill: "bg-[var(--warning)]", dot: "bg-[var(--warning)]", active: "data-[state=active]:bg-[var(--warning)] data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:font-semibold", badge: "bg-[color-mix(in_srgb,var(--warning)_15%,transparent)] text-[var(--warning)] group-data-[state=active]/tab:bg-white/25 group-data-[state=active]/tab:text-white", bar: "bg-[var(--warning)]", drop: "ring-2 ring-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_15%,transparent)]", rowBar: "border-l-[var(--warning)]", borderTop: "border-t-[var(--warning)]", headBg: "color-mix(in srgb, var(--warning) 16%, var(--card))", toolbarBg: "color-mix(in srgb, var(--warning) 7%, var(--card))" },
+  WAREHOUSE: { fill: "bg-[var(--chart-2)]", dot: "bg-[var(--chart-2)]", active: "data-[state=active]:bg-[var(--chart-2)] data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:font-semibold", badge: "bg-[color-mix(in_srgb,var(--chart-2)_15%,transparent)] text-[var(--chart-2)] group-data-[state=active]/tab:bg-white/25 group-data-[state=active]/tab:text-white", bar: "bg-[var(--chart-2)]", drop: "ring-2 ring-[var(--chart-2)] bg-[color-mix(in_srgb,var(--chart-2)_15%,transparent)]", rowBar: "border-l-[var(--chart-2)]", borderTop: "border-t-[var(--chart-2)]", headBg: "color-mix(in srgb, var(--chart-2) 16%, var(--card))", toolbarBg: "color-mix(in srgb, var(--chart-2) 7%, var(--card))" },
+  HISTORY: { fill: "bg-[var(--muted-foreground)]", dot: "bg-[var(--muted-foreground)]", active: "data-[state=active]:bg-[var(--muted-foreground)] data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:font-semibold", badge: "bg-[color-mix(in_srgb,var(--muted-foreground)_15%,transparent)] text-[var(--foreground)] group-data-[state=active]/tab:bg-white/25 group-data-[state=active]/tab:text-white", bar: "bg-[var(--muted-foreground)]", drop: "ring-2 ring-[var(--muted-foreground)] bg-[color-mix(in_srgb,var(--muted-foreground)_15%,transparent)]", rowBar: "border-l-[var(--muted-foreground)]", borderTop: "border-t-[var(--muted-foreground)]", headBg: "color-mix(in srgb, var(--muted-foreground) 16%, var(--card))", toolbarBg: "color-mix(in srgb, var(--muted-foreground) 7%, var(--card))" },
 }
 
 const GRIP_WIDTH = 42
@@ -181,6 +183,42 @@ function occupiedStorageNumbers(items: readonly FabricLedgerItem[]): Set<number>
     if (matched) used.add(Number(matched))
   })
   return used
+}
+
+/** R&D No.의 앞 숫자. "1288-1" 같은 표기도 1288로 읽는다. 번호가 없으면 null. */
+function storageNumberOf(item: FabricLedgerItem): number | null {
+  const matched = item.storageNo.trim().match(/^\d{1,4}(?!\d)/)?.[0]
+  return matched ? Number(matched) : null
+}
+
+/**
+ * 창고 보관 목록의 첫 번호.
+ * 채번은 7999 다음에 8000이 아니라 비어 있는 낮은 번호로 되감긴다(8000번대는 타 사업부 대역).
+ * 그래서 단순 오름차순은 가장 최근에 채번한 1000번대를 맨 위로 올려 버린다.
+ * 쓰이고 있는 번호를 원형으로 놓고 가장 큰 빈 구간 다음 번호부터 세우면 선반을 걷는 순서와 같아진다.
+ * 예: 1000~1300과 5000~7999가 쓰이면 5000부터 7999까지 간 뒤 1000으로 넘어간다.
+ */
+function warehouseSequenceStart(numbers: readonly number[]): number {
+  const sorted = [...new Set(numbers)].sort((left, right) => left - right)
+  if (sorted.length < 2) return sorted[0] ?? 1
+  let start = sorted[0]
+  // 되감기 구간(가장 큰 번호에서 가장 작은 번호까지)을 기준으로 두고, 더 큰 빈 구간이 있으면 그쪽을 쓴다.
+  let widest = sorted[0] + STORAGE_NO_MAX - sorted[sorted.length - 1]
+  for (let index = 1; index < sorted.length; index += 1) {
+    const gap = sorted[index] - sorted[index - 1]
+    if (gap > widest) {
+      widest = gap
+      start = sorted[index]
+    }
+  }
+  return start
+}
+
+/** 첫 번호를 0으로 놓고 되감기를 편 위치. 번호가 없으면 맨 뒤로 보낸다. */
+function warehouseOrderKey(item: FabricLedgerItem, start: number): number {
+  const number = storageNumberOf(item)
+  if (number === null) return Number.MAX_SAFE_INTEGER
+  return number >= start ? number - start : number - start + STORAGE_NO_MAX
 }
 
 /** 대장 행 순서가 곧 채번 순서다. 마지막으로 채번된 번호 다음부터 이어 간다. */
@@ -425,6 +463,11 @@ export function Warehouse() {
   const suppressClickRef = useRef(false)
 
   const counts = useMemo(() => Object.fromEntries(TAB_ORDER.map((key) => [key, ledger.filter((item) => TAB_STATUSES[key].includes(item.status)).length])) as Record<WarehouseTab, number>, [ledger])
+  /** 되감기 지점은 검색·필터와 무관하게 창고 보관 전체 번호로 정한다. */
+  const sequenceStart = useMemo(
+    () => warehouseSequenceStart(ledger.filter((item) => item.status === "WAREHOUSE").map(storageNumberOf).filter((value): value is number => value !== null)),
+    [ledger],
+  )
   const rows = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("ko-KR")
     return ledger.filter((item) => TAB_STATUSES[tab].includes(item.status))
@@ -444,11 +487,16 @@ export function Warehouse() {
     const active = Object.entries(columnFilters).filter(([, values]) => values.length > 0)
     const filtered = active.length === 0 ? rows : rows.filter((item) =>
       active.every(([columnId, values]) => values.includes(cellValue(item, columnId as WarehouseColumnId))))
-    if (!sortRule) return filtered
+    if (!sortRule) {
+      // 창고 보관은 채번 순서대로 본다. 되감기(7999 다음 낮은 번호)까지 펴서 선반 순서와 맞춘다.
+      // 대장 시트 순서를 그대로 쓰면 웹에서 새로 입고한 건이 번호와 무관하게 늘 맨 아래로 간다.
+      if (tab !== "WAREHOUSE") return filtered
+      return [...filtered].sort((left, right) => warehouseOrderKey(left, sequenceStart) - warehouseOrderKey(right, sequenceStart))
+    }
     const direction = sortRule.dir === "asc" ? 1 : -1
     return [...filtered].sort((left, right) =>
       direction * cellValue(left, sortRule.col).localeCompare(cellValue(right, sortRule.col), "ko-KR", { numeric: true }))
-  }, [rows, columnFilters, sortRule])
+  }, [rows, columnFilters, sortRule, tab, sequenceStart])
   const divisionSuggestions = useMemo(() => [...new Set(fabricEvents.map((event) => event.division?.trim()).filter((value): value is string => Boolean(value)))].sort((left, right) => left.localeCompare(right, "ko-KR", { numeric: true })), [fabricEvents])
   const visibleGroups = COLUMN_GROUPS.filter((group) => !group.collapsible || openGroups[group.key as keyof typeof openGroups])
   const visibleColumns = visibleGroups.flatMap((group) => group.columns)
@@ -569,9 +617,9 @@ export function Warehouse() {
     setSaving(false)
   }
 
-  const openAction = (kind: ActionKind, items: readonly FabricLedgerItem[]) => {
+  const openAction = (kind: ActionKind, items: readonly FabricLedgerItem[], restoreTo?: "READY" | "WAREHOUSE") => {
     if (!items.length) return
-    setActionDialog({ kind, keys: items.map((item) => item.key) })
+    setActionDialog({ kind, keys: items.map((item) => item.key), restoreTo })
     setFormError("")
     setReceiveYds(Object.fromEntries(items.map((item) => [item.key, item.yds === null ? "" : String(item.yds)])))
     setStockYds(items[0].yds === null ? "" : String(items[0].yds))
@@ -670,12 +718,20 @@ export function Warehouse() {
         setChecked(new Set())
         setTab("HISTORY")
       } else {
-        let restoreStatus: "READY" | "WAREHOUSE" = "WAREHOUSE"
+        // 어디로 되돌릴지는 사용자가 버튼으로 고른다. 고르지 않았으면 폐기 직전 상태를 따른다.
+        let restoreStatus: "READY" | "WAREHOUSE" = actionDialog.restoreTo ?? "WAREHOUSE"
         for (const item of actionItems) {
           if (item.status !== "EXHAUSTED" && item.status !== "DISPOSED") continue
-          const disposedEvent = fabricEvents.find((event) => event.fabricKey === item.key && event.action === "DISPOSE")
-          restoreStatus = item.status === "DISPOSED" && disposedEvent?.fromStatus === "READY" ? "READY" : "WAREHOUSE"
-          await applyFabricAction({ fabricKey: item.key, action: "RESTORE", fromStatus: item.status, toStatus: restoreStatus, storageNo: item.storageNo, note: "상태 복구" })
+          if (!actionDialog.restoreTo) {
+            const disposedEvent = fabricEvents.find((event) => event.fabricKey === item.key && event.action === "DISPOSE")
+            restoreStatus = item.status === "DISPOSED" && disposedEvent?.fromStatus === "READY" ? "READY" : "WAREHOUSE"
+          }
+          // 입고 대기는 채번 전 상태다. 그쪽으로 되돌리면 R&D No.와 재고를 함께 푼다.
+          await applyFabricAction({
+            fabricKey: item.key, action: "RESTORE", fromStatus: item.status, toStatus: restoreStatus,
+            storageNo: restoreStatus === "WAREHOUSE" ? item.storageNo : undefined,
+            note: restoreStatus === "READY" ? "입고 대기로 되돌림" : "창고 보관으로 되돌림",
+          })
         }
         setChecked(new Set())
         setTab(restoreStatus)
@@ -788,6 +844,7 @@ export function Warehouse() {
 
   const actionTitle = actionDialog?.kind === "RECEIVE" ? "선택 입고 등록"
     : actionDialog?.kind === "UNRECEIVE" ? "입고 대기로 되돌리기"
+    : actionDialog?.kind === "RESTORE" ? actionDialog.restoreTo === "READY" ? "입고 대기로 되돌리기" : "창고 보관으로 되돌리기"
     : actionDialog?.kind === "CONFIRM" ? "실물 입고 확인"
     : actionDialog?.kind === "DISPOSE" ? "선택 폐기"
       : actionDialog?.kind === "REMOVE" ? "선택 삭제"
@@ -953,13 +1010,13 @@ export function Warehouse() {
             </colgroup>
             <TableHeader className="sticky top-0 z-30 bg-[var(--card)] shadow-sm">
               <TableRow className="h-8 hover:bg-[var(--card)]">
-                <TableHead rowSpan={2} className="sticky left-0 top-0 z-50 border-b border-r border-[var(--border)] bg-[var(--muted)] px-1.5 text-center"><Checkbox checked={allRowsSelected ? true : someRowsSelected ? "indeterminate" : false} onCheckedChange={toggleAll} aria-label={`${TAB_META[tab].label} 전체 선택`} disabled={tab === "HISTORY"} /></TableHead>
-                {fixedColumns.map((column) => <TableHead key={column.id} rowSpan={2} className="group/head relative sticky top-0 z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] px-1.5 text-center text-xs font-normal text-[var(--muted-foreground)]" style={{ left: fixedLeft(column.id) }} title={column.label}>{column.label}{filterButton(column)}<span aria-hidden="true" title={`${column.label} 너비 조절`} onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></TableHead>)}
+                <TableHead rowSpan={2} className="sticky left-0 top-0 z-50 border-b border-r border-[var(--border)] px-1.5 text-center" style={{ background: accent.headBg }}><Checkbox checked={allRowsSelected ? true : someRowsSelected ? "indeterminate" : false} onCheckedChange={toggleAll} aria-label={`${TAB_META[tab].label} 전체 선택`} /></TableHead>
+                {fixedColumns.map((column) => <TableHead key={column.id} rowSpan={2} className="group/head relative sticky top-0 z-40 border-b border-r border-[var(--border)] px-1.5 text-center text-xs font-semibold text-[var(--foreground)]" style={{ left: fixedLeft(column.id), background: accent.headBg }} title={column.label}>{column.label}{filterButton(column)}<span aria-hidden="true" title={`${column.label} 너비 조절`} onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></TableHead>)}
                 {groupedColumns.map((group) => <TableHead key={group.key} colSpan={group.columns.length} className="relative sticky top-0 z-30 border-b border-r border-[var(--border)] px-2 text-center text-[11px] font-semibold" style={{ color: group.color, background: `color-mix(in srgb, ${group.color} 12%, var(--card))` }}>
                   <span>{group.label}</span>
                   {group.collapsible ? <button type="button" aria-label={`${group.label} 열 접기`} aria-pressed={true} title={`${group.label} 열 접기`} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: false }))} className="absolute right-2 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none hover:bg-[var(--muted)]">-</button> : null}
                 </TableHead>)}
-                <TableHead rowSpan={2} className="relative sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--muted)] px-1.5 text-right text-xs font-normal text-[var(--muted-foreground)]">
+                <TableHead rowSpan={2} className="relative sticky top-0 z-30 border-b border-[var(--border)] px-1.5 text-right text-xs font-normal text-[var(--muted-foreground)]" style={{ background: accent.headBg }}>
                   <span>처리</span>
                   <span className="absolute right-full top-1 flex -translate-y-0 gap-1 pr-2">
                     {COLUMN_GROUPS.filter((group) => group.collapsible && !openGroups[group.key as keyof typeof openGroups]).map((group) => <button key={group.key} type="button" aria-label={`${group.label} 열 펼치기`} aria-pressed={false} title={`${group.label} 열 펼치기`} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: true }))} className="inline-flex h-5 shrink-0 items-center gap-1 rounded border border-[var(--border)] bg-[var(--card)] px-1.5 text-[10px] font-semibold leading-none hover:bg-[var(--muted)]"><span>{group.label}</span><span aria-hidden="true">+</span></button>)}
@@ -967,7 +1024,7 @@ export function Warehouse() {
                 </TableHead>
               </TableRow>
               <TableRow className="h-8 hover:bg-[var(--card)]">
-                {groupedColumns.flatMap((group) => group.columns.map((column) => <TableHead key={column.id} className="group/head relative sticky top-8 z-30 truncate border-b border-r border-[var(--border)] px-1.5 text-xs font-normal text-[var(--muted-foreground)]" style={{ background: `color-mix(in srgb, ${group.color} 7%, var(--muted))` }} title={column.label}>{column.label}{filterButton(column)}<span aria-hidden="true" title={`${column.label} 너비 조절`} onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></TableHead>))}
+                {groupedColumns.flatMap((group) => group.columns.map((column) => <TableHead key={column.id} className="group/head relative sticky top-8 z-30 truncate border-b border-r border-[var(--border)] px-1.5 text-xs font-normal text-[var(--muted-foreground)]" style={{ background: `color-mix(in srgb, ${group.color} 7%, ${accent.headBg})` }} title={column.label}>{column.label}{filterButton(column)}<span aria-hidden="true" title={`${column.label} 너비 조절`} onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></TableHead>))}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -985,7 +1042,7 @@ export function Warehouse() {
                 >
                   <TableCell className="sticky left-0 z-20 h-8 cursor-ns-resize border-b border-r border-[var(--border)] px-1.5 py-0" style={{ background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" }} title="끌어서 여러 행 선택" onMouseDown={(event) => beginRangeSelect(event, index)} onMouseEnter={() => extendRangeSelect(index)} onClick={(event) => event.stopPropagation()}>
                     <div className="flex items-center justify-center gap-0.5">
-                      <Checkbox checked={selected} disabled={tab === "HISTORY"} onCheckedChange={(value) => toggleChecked(item.key, value === true)} aria-label={`${item.styleNo || item.flNo} 선택`} />
+                      <Checkbox checked={selected} onCheckedChange={(value) => toggleChecked(item.key, value === true)} aria-label={`${item.styleNo || item.flNo} 선택`} />
                     </div>
                   </TableCell>
                   {visibleColumns.map((column) => {
@@ -1079,9 +1136,9 @@ export function Warehouse() {
           return <TabsTrigger
             key={key}
             value={key}
-            className={`min-w-0 flex-1 gap-2 transition-[background-color,box-shadow,opacity] duration-200 motion-reduce:transition-none ${TAB_ACCENT[key].active}`}
+            className={`group/tab min-w-0 flex-1 gap-2 transition-[background-color,box-shadow,opacity] duration-200 motion-reduce:transition-none ${TAB_ACCENT[key].active}`}
           >
-            <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${TAB_ACCENT[key].dot}`} />
+            <span aria-hidden="true" className={`size-2 shrink-0 rounded-full group-data-[state=active]/tab:bg-white ${TAB_ACCENT[key].dot}`} />
             <span className="truncate">{TAB_META[key].label}</span>
             <Badge variant="secondary" className={`h-5 min-w-5 justify-center px-1.5 tabular-nums ${TAB_ACCENT[key].badge}`}>{counts[key].toLocaleString("ko-KR")}</Badge>
           </TabsTrigger>
@@ -1089,8 +1146,8 @@ export function Warehouse() {
       </TabsList>
     </Tabs>
 
-    <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-2 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>
-      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2">
+    <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>
+      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2" style={{ background: accent.toolbarBg }}>
         <label className="relative block min-w-52 flex-1"><span className="sr-only">창고 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="R&D No., Style, FL, Buyer 검색" className="pl-9" /></label>
         <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{TAB_META[tab].label} <strong className="text-[var(--foreground)]">{rows.length.toLocaleString("ko-KR")}</strong>건 · 선택 {selectedRows.length}건</span>
         {tab === "READY" ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RECEIVE", selectedRows)}><PackageCheck />선택 입고</Button> : null}
@@ -1101,6 +1158,8 @@ export function Warehouse() {
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("EXHAUST", selectedRows)}><PackageOpen />소진</Button> : null}
         {tab === "READY" || tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("DISPOSE", selectedRows)}><Trash2 />폐기</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("UNRECEIVE", selectedRows)}><PackageOpen />입고 대기로</Button> : null}
+        {tab === "HISTORY" ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "WAREHOUSE")}><PackageCheck />창고 보관으로</Button> : null}
+        {tab === "HISTORY" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "READY")}><PackageOpen />입고 대기로</Button> : null}
         {tab === "WAREHOUSE" && unconfirmedCount > 0 ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setBaselineOpen(true)}>전체 확인 처리</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant={unconfirmedOnly ? "default" : "outline"} aria-pressed={unconfirmedOnly} onClick={() => setUnconfirmedOnly((current) => !current)}>미확인 {unconfirmedCount}건</Button> : null}
       </div>
@@ -1184,6 +1243,12 @@ export function Warehouse() {
             </div>
           </div> : null}
           {actionDialog?.kind === "DISPOSE" ? <div className="space-y-2"><Label htmlFor="warehouse-disposal-reason">폐기 사유</Label><Select value={disposalReason} onValueChange={(value) => setDisposalReason(value as DisposalReason)}><SelectTrigger id="warehouse-disposal-reason"><SelectValue placeholder="사유 선택" /></SelectTrigger><SelectContent>{DISPOSAL_REASONS.map((reason) => <SelectItem key={reason} value={reason}>{reason}</SelectItem>)}</SelectContent></Select><p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건에 같은 사유가 기록됩니다.</p></div> : null}
+          {actionDialog?.kind === "RESTORE" ? <div className="space-y-2">
+            <p className="text-sm">선택한 {actionItems.length}건을 {actionDialog.restoreTo === "READY" ? "입고 대기" : "창고 보관"}로 되돌립니다.</p>
+            <p className="text-xs text-[var(--muted-foreground)]">{actionDialog.restoreTo === "READY"
+              ? "입고 대기는 채번 전 상태입니다. R&D No.가 풀리고 보유 재고와 출고 합계도 초기화됩니다. 지난 기록은 원단 상세의 이력에 남습니다."
+              : "소진·폐기 표시를 지우고 창고 보관으로 되돌립니다. R&D No.와 보유 재고, 출고 이력은 그대로 둡니다."}</p>
+          </div> : null}
           {actionDialog?.kind === "REMOVE" ? <div className="space-y-2"><p className="text-sm">선택한 {actionItems.length}건을 입고 대기 목록에서 숨깁니다.</p><p className="text-xs text-[var(--muted-foreground)]">DD MASTER 원본과 개발 이력은 그대로 남습니다. 창고 화면에서만 감추며 폐기로 기록하지 않습니다. 삭제 기록은 원단 상세의 이력에 남습니다.</p></div> : null}
           {actionDialog?.kind === "STOCK" ? (() => {
             const outboundTotal = actionItems[0]?.outboundTotal ?? 0
