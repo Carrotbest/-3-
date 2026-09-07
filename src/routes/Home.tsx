@@ -153,6 +153,8 @@ const KPI_DETAIL_COPY: Record<HomeKpiDetailKind, {
   },
 }
 
+const ISO_DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
 function KpiDetailSheet({
   kind,
   details,
@@ -639,25 +641,6 @@ function PortfolioPreview({ portfolio, onNavigate }: { portfolio: ChemicalPortfo
   )
 }
 
-const HOME_KPI_RANGE_STORAGE_KEY = "fabric-rnd-home-kpi-ranges-v1"
-const ISO_DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
-
-function loadHomeKpiRanges(): HomeKpiRanges {
-  const fallback = defaultHomeDateRanges()
-  if (typeof window === "undefined") return fallback
-  try {
-    const stored = JSON.parse(window.localStorage.getItem(HOME_KPI_RANGE_STORAGE_KEY) ?? "null") as Partial<HomeKpiRanges> | null
-    const read = (kind: "completed" | "new") => {
-      const candidate = stored?.[kind]
-      return candidate && ISO_DAY_PATTERN.test(candidate.from ?? "") && ISO_DAY_PATTERN.test(candidate.to ?? "") && candidate.from! <= candidate.to!
-        ? { from: candidate.from!, to: candidate.to! }
-        : fallback[kind]
-    }
-    return { completed: read("completed"), new: read("new") }
-  } catch {
-    return fallback
-  }
-}
 
 const RDDA_RANGE_OPTIONS = [
   { months: 6, label: "6개월" },
@@ -797,7 +780,8 @@ function RddaTrendChart({ monthly, reduceMotion }: { monthly: MonthlyDevelopment
 export function Home() {
   const navigate = useNavigate()
   const [kpiDetailKind, setKpiDetailKind] = useState<HomeKpiDetailKind | null>(null)
-  const [kpiRanges, setKpiRanges] = useState<HomeKpiRanges>(loadHomeKpiRanges)
+  // 화면을 열 때는 늘 전주 월요일부터 오늘까지다. 구간을 바꿔도 다음에 열면 다시 이 값이다.
+  const [kpiRanges, setKpiRanges] = useState<HomeKpiRanges>(() => defaultHomeDateRanges())
   const [rddaMonths, setRddaMonths] = useState<number>(loadRddaMonths)
   const today = useMemo(() => new Date(), [])
   const records = useAppStore((state) => state.records)
@@ -826,10 +810,6 @@ export function Home() {
   const tsDeckMaterials = useMemo(() => materialsOf("TS", deriveTsMaterials(ts), materialsManual), [materialsManual, ts])
   const studyDeckMaterials = useMemo(() => materialsOf("STUDY", deriveStudyMaterials(study), materialsManual), [materialsManual, study])
   const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
-
-  useEffect(() => {
-    window.localStorage.setItem(HOME_KPI_RANGE_STORAGE_KEY, JSON.stringify(kpiRanges))
-  }, [kpiRanges])
 
   useEffect(() => {
     window.localStorage.setItem(RDDA_MONTHS_STORAGE_KEY, String(rddaMonths))

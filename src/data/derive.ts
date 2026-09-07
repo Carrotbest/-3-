@@ -804,8 +804,13 @@ export function recentWindow(today = new Date(), days = 7): { start: Date; end: 
   return { start, end }
 }
 
+/**
+ * HOME 신규 접수·완료 카드의 기본 구간. 전주 월요일부터 오늘까지다.
+ * 주간 보고가 월요일 기준이라 화면도 같은 창을 본다. 화면을 열 때마다 이 값으로 시작한다.
+ */
 export function defaultHomeDateRanges(today = new Date()): HomeKpiRanges {
-  const from = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7)
+  const daysSinceMonday = (today.getDay() + 6) % 7
+  const from = new Date(today.getFullYear(), today.getMonth(), today.getDate() - daysSinceMonday - 7)
   const range = { from: localDay(from), to: localDay(today) }
   return { completed: { ...range }, new: { ...range } }
 }
