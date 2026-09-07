@@ -216,8 +216,9 @@ function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
   const record = item.record
   const led = item.sample?.ledger
   const sam = item.sample
-  const first = (...values: Array<unknown>): string => {
-    for (const value of values) {
+  // 창고는 대장 미러다. 호출부는 (DD 값, 대장 값) 순서로 유지하고 여기서 대장 값을 먼저 고른다.
+  const first = (fromRecord: unknown, fromLedger?: unknown): string => {
+    for (const value of [fromLedger, fromRecord]) {
       if (value === undefined || value === null) continue
       const text = String(value).trim()
       if (text) return text
@@ -231,9 +232,9 @@ function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
     case "owner": return item.owner
     case "stock": return item.yds === null ? "" : `${item.balance ?? 0}/${item.yds}`
     case "confirm": return item.status !== "WAREHOUSE" ? "" : item.confirmedAt ? "확인" : "미확인"
-    case "season": return item.season
+    case "season": return first(item.season, led?.seasonRaw)
     case "buyer": return item.buyer
-    case "category": return item.category
+    case "category": return first(item.category, led?.categoryRaw)
     case "requestDate": return item.requestDate ?? ""
     case "completedAt": return item.completedAt
     case "originalRef": return first(record?.tech?.original?.brand, led?.originalRef)
@@ -410,6 +411,7 @@ export function Warehouse() {
   const [viewports, setViewports] = useState<Record<string, { top: number; height: number }>>({})
   const gridRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const [stockYds, setStockYds] = useState("")
+  const [stockBalance, setStockBalance] = useState("")
   const [recipient, setRecipient] = useState("")
   const [division, setDivision] = useState("")
   const [outboundQty, setOutboundQty] = useState("")
@@ -429,6 +431,7 @@ export function Warehouse() {
       .filter((item) => !(unconfirmedOnly && tab === "WAREHOUSE") || !item.confirmedAt)
       .filter((item) => !query || [
       item.storageNo, item.styleNo, item.flNo, item.season, item.category, item.buyer, item.owner,
+      item.sample?.ledger?.seasonRaw, item.sample?.ledger?.categoryRaw, item.sample?.ledger?.originalRef,
       item.construction, item.lastOutbound?.to, item.lastOutbound?.division, item.note,
       item.record?.planner, item.record?.tech?.original?.brand, item.record?.tech?.yarnDetail,
       item.record?.color, item.record?.dyeing, item.record?.dueDate,
@@ -572,6 +575,7 @@ export function Warehouse() {
     setFormError("")
     setReceiveYds(Object.fromEntries(items.map((item) => [item.key, item.yds === null ? "" : String(item.yds)])))
     setStockYds(items[0].yds === null ? "" : String(items[0].yds))
+    setStockBalance(items[0].balance === null ? "" : String(Math.max(0, items[0].balance)))
     setRecipient("")
     setDivision("")
     setOutboundQty("")
@@ -711,7 +715,8 @@ export function Warehouse() {
     if (id === "owner") return <TextCell value={item.owner} />
     if (id === "stock") {
       const balance = item.balance === null ? null : Math.max(0, item.balance)
-      return <button type="button" className={`block h-full w-full truncate text-left tabular-nums ${balance === 0 ? "text-[var(--muted-foreground)]" : ""}`} title={item.yds === null ? "반출 이력" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds`} aria-label={`${item.styleNo || item.flNo || "원단"} 반출 이력`} onClick={(event) => { event.stopPropagation(); setOutboundHistoryKey(item.key) }}>{item.yds === null ? "" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds`}</button>
+      // 한 번 클릭은 셀 선택만 한다. 팝업이 바로 뜨면 더블클릭으로 여는 수정 창이 가려진다.
+      return <span className={`block h-full w-full truncate text-left tabular-nums ${balance === 0 ? "text-[var(--muted-foreground)]" : ""}`} title={item.yds === null ? "더블클릭해서 재고 입력" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds · 더블클릭해서 수정`}>{item.yds === null ? "" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds`}</span>
     }
     if (id === "confirm") {
       if (item.status !== "WAREHOUSE") return <TextCell value="" />
@@ -719,19 +724,19 @@ export function Warehouse() {
         ? <span className="text-[11px] font-medium text-[var(--muted-foreground)]" title={`창고 확인 ${fmtDateFull(item.confirmedAt)}`}>확인</span>
         : <span className="text-[11px] font-medium text-[var(--destructive)]">미확인</span>
     }
-    if (id === "season") return <TextCell value={item.season} />
+    if (id === "season") return <TextCell value={cellValue(item, "season")} />
     if (id === "buyer") return <TextCell value={item.buyer} />
-    if (id === "category") return <TextCell value={item.category} />
+    if (id === "category") return <TextCell value={cellValue(item, "category")} />
     if (id === "requestDate") return <TextCell value={item.requestDate ? fmtDateMd(item.requestDate) : ""} />
     if (id === "completedAt") return <TextCell value={item.completedAt ? fmtDateMd(item.completedAt) : ""} />
 
-    // DD 원본이 있으면 그 값을, 없으면(과거 대장 행) 대장에서 읽은 원본을 그대로 쓴다.
+    // 대장 값이 기준이다. DD는 대장 칸이 비었을 때만 채운다.
     const record = item.record
     const led = item.sample?.ledger
     const sam = item.sample
     const pick = <T,>(fromRecord: T | undefined | null, fromLedger: T | undefined | null): T | undefined =>
-      (fromRecord === undefined || fromRecord === null || fromRecord === "" ? undefined : fromRecord)
-      ?? (fromLedger === undefined || fromLedger === null || fromLedger === "" ? undefined : fromLedger)
+      (fromLedger === undefined || fromLedger === null || fromLedger === "" ? undefined : fromLedger)
+      ?? (fromRecord === undefined || fromRecord === null || fromRecord === "" ? undefined : fromRecord)
       ?? undefined
     if (id === "originalRef") return <TextCell value={pick(record?.tech?.original?.brand, led?.originalRef)} />
     if (id === "planner") return <TextCell value={pick(record?.planner, led?.planner)} />
@@ -999,7 +1004,7 @@ export function Warehouse() {
                     const manualId = item.sample?.sourceSheet === WEB_INTAKE_SHEET ? item.sample.id : undefined
                     const editable = Boolean(manualId) && MANUAL_EDITABLE.has(column.id)
                     const editing = editable && editCell?.row === item.key && editCell.col === column.id
-                    return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)] text-[var(--muted-foreground)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
+                    return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
                       ? <input
                           autoFocus
                           defaultValue={String(cellRawValue(item, column.id) ?? "")}
@@ -1156,7 +1161,7 @@ export function Warehouse() {
     </Dialog>
 
     <Dialog open={Boolean(detailKey)} onOpenChange={(open) => { if (!open) setDetailKey(null) }}>
-      <DialogContent className="max-h-[85vh] max-w-5xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] w-[96vw] max-w-[1600px] overflow-y-auto sm:max-w-[96vw]">
         <DialogHeader><DialogTitle>원단 상세</DialogTitle></DialogHeader>
         <DialogBody>{detailKey ? <FabricDetailBody fabricKey={detailKey} /> : null}</DialogBody>
       </DialogContent>
@@ -1167,7 +1172,7 @@ export function Warehouse() {
         <DialogHeader><DialogTitle>{actionTitle}</DialogTitle><DialogDescription>{actionItems.length === 1 ? `${actionItems[0]?.storageNo || "자동 채번"} · ${actionItems[0]?.styleNo || actionItems[0]?.flNo || "원단"}` : `선택한 ${actionItems.length}건을 처리합니다.`}</DialogDescription></DialogHeader>
         <DialogBody className="space-y-4">
           {actionDialog?.kind === "RECEIVE" ? <div className="space-y-2"><p className="text-xs text-[var(--muted-foreground)]">창고에 없는 가장 낮은 번호부터 채웁니다. 8000번대는 타 사업부 대역이라 쓰지 않습니다. 번호는 직접 고칠 수 있고 yds는 비워 두어도 됩니다.</p>{actionItems.map((item, index) => <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_9rem] items-end gap-3 rounded-[var(--radius)] border border-[var(--border)] p-3"><div className="min-w-0"><div className="flex items-center gap-2"><Input aria-label={`${item.styleNo || item.flNo || "원단"} R&D No.`} className="h-8 w-20 font-mono text-sm" value={storageNoFor(index)} onChange={(event) => setReceiveNos((current) => ({ ...current, [item.key]: event.target.value }))} /><span className="truncate text-sm font-medium">{item.styleNo || item.flNo || "미입력"}</span></div><p className="mt-1 truncate text-xs text-[var(--muted-foreground)]">{item.flNo || "FL No. 없음"}</p></div><div className="space-y-1"><Label htmlFor={`receive-yds-${index}`} className="text-xs">보유 yds (옵션)</Label><Input id={`receive-yds-${index}`} type="number" min="0" step="0.01" value={receiveYds[item.key] ?? ""} onChange={(event) => setReceiveYds((current) => ({ ...current, [item.key]: event.target.value }))} /></div></div>)}</div> : null}
-          {actionDialog?.kind === "UNRECEIVE" ? <p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건을 입고 대기로 되돌립니다. <strong>채번한 R&D No.가 취소되고 그 번호는 다시 쓸 수 있게 풀립니다.</strong> 실물 확인 표시도 함께 해제됩니다. 보유 재고와 반출 이력은 그대로 남습니다.</p> : null}
+          {actionDialog?.kind === "UNRECEIVE" ? <p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건을 입고 대기로 되돌립니다. <strong>채번한 R&D No.가 취소되고 그 번호는 다시 쓸 수 있게 풀립니다.</strong> 실물 확인 표시와 보유 재고도 함께 지워지고, 출고 합계는 0부터 다시 셉니다. 지난 기록은 원단 상세의 이력에 그대로 남습니다.</p> : null}
           {actionDialog?.kind === "CONFIRM" ? <div className="space-y-2">
             <p className="text-xs text-[var(--muted-foreground)]">창고에서 실물을 확인한 건만 체크하세요. 확인된 행은 대장에서 회색으로 칠하던 것과 같게 흐리게 보입니다.</p>
             <div className="max-h-72 space-y-1 overflow-y-auto">
@@ -1180,7 +1185,31 @@ export function Warehouse() {
           </div> : null}
           {actionDialog?.kind === "DISPOSE" ? <div className="space-y-2"><Label htmlFor="warehouse-disposal-reason">폐기 사유</Label><Select value={disposalReason} onValueChange={(value) => setDisposalReason(value as DisposalReason)}><SelectTrigger id="warehouse-disposal-reason"><SelectValue placeholder="사유 선택" /></SelectTrigger><SelectContent>{DISPOSAL_REASONS.map((reason) => <SelectItem key={reason} value={reason}>{reason}</SelectItem>)}</SelectContent></Select><p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건에 같은 사유가 기록됩니다.</p></div> : null}
           {actionDialog?.kind === "REMOVE" ? <div className="space-y-2"><p className="text-sm">선택한 {actionItems.length}건을 입고 대기 목록에서 숨깁니다.</p><p className="text-xs text-[var(--muted-foreground)]">DD MASTER 원본과 개발 이력은 그대로 남습니다. 창고 화면에서만 감추며 폐기로 기록하지 않습니다. 삭제 기록은 원단 상세의 이력에 남습니다.</p></div> : null}
-          {actionDialog?.kind === "STOCK" ? <div className="space-y-2"><Label htmlFor="warehouse-stock-yds">보유 재고 (yds)</Label><Input id="warehouse-stock-yds" type="number" min="0" step="0.01" value={stockYds} onChange={(event) => setStockYds(event.target.value)} /><p className="text-xs text-[var(--muted-foreground)]">기존 출고 합계 {formatYds(actionItems[0]?.outboundTotal ?? 0)} yds를 반영해 잔량을 다시 계산합니다.</p></div> : null}
+          {actionDialog?.kind === "STOCK" ? (() => {
+            const outboundTotal = actionItems[0]?.outboundTotal ?? 0
+            const changeTotal = (value: string) => {
+              setStockYds(value)
+              const next = Number(value)
+              setStockBalance(value.trim() && Number.isFinite(next) ? String(Math.max(0, next - outboundTotal)) : "")
+            }
+            const changeBalance = (value: string) => {
+              setStockBalance(value)
+              const next = Number(value)
+              setStockYds(value.trim() && Number.isFinite(next) ? String(next + outboundTotal) : "")
+            }
+            return <div className="space-y-3">
+              <dl className="grid grid-cols-3 gap-2 rounded-[var(--radius)] border border-[var(--border)] p-3 text-center">
+                <div><dt className="text-xs text-[var(--muted-foreground)]">현재 전체</dt><dd className="mt-0.5 text-sm font-medium tabular-nums">{actionItems[0]?.yds === null || actionItems[0]?.yds === undefined ? "미입력" : `${formatYds(actionItems[0].yds)} yds`}</dd></div>
+                <div><dt className="text-xs text-[var(--muted-foreground)]">출고 합계</dt><dd className="mt-0.5 text-sm font-medium tabular-nums">{formatYds(outboundTotal)} yds</dd></div>
+                <div><dt className="text-xs text-[var(--muted-foreground)]">현재 잔량</dt><dd className="mt-0.5 text-sm font-medium tabular-nums">{actionItems[0]?.balance === null || actionItems[0]?.balance === undefined ? "미입력" : `${formatYds(Math.max(0, actionItems[0].balance))} yds`}</dd></div>
+              </dl>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1"><Label htmlFor="warehouse-stock-yds">전체 수량 (yds)</Label><Input id="warehouse-stock-yds" type="number" min="0" step="0.01" value={stockYds} onChange={(event) => changeTotal(event.target.value)} /></div>
+                <div className="space-y-1"><Label htmlFor="warehouse-stock-balance">잔량 (yds)</Label><Input id="warehouse-stock-balance" type="number" min="0" step="0.01" value={stockBalance} onChange={(event) => changeBalance(event.target.value)} /></div>
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)]">둘 중 아무 칸이나 고치면 나머지가 따라 바뀝니다. 잔량은 전체 수량에서 출고 합계 {formatYds(outboundTotal)} yds를 뺀 값입니다. 출고 이력은 그대로 두고 수량만 고칩니다.</p>
+            </div>
+          })() : null}
           {actionDialog?.kind === "OUTBOUND" ? <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="warehouse-recipient">수령자</Label><Input id="warehouse-recipient" value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="수령자를 자유롭게 입력" /></div><div className="space-y-2"><Label htmlFor="warehouse-division">사업부 (옵션)</Label><Input id="warehouse-division" list="warehouse-division-suggestions" value={division} onChange={(event) => setDivision(event.target.value)} placeholder="사업부를 자유롭게 입력" /><datalist id="warehouse-division-suggestions">{divisionSuggestions.map((value) => <option key={value} value={value} />)}</datalist></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-qty">수량 (yds)</Label><Input id="warehouse-outbound-qty" type="number" min="0.01" max={actionItems[0]?.balance ?? undefined} step="0.01" value={outboundQty} onChange={(event) => setOutboundQty(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-date">출고 날짜</Label><Input id="warehouse-outbound-date" type="date" value={outboundDate} onChange={(event) => setOutboundDate(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><p className="text-xs text-[var(--muted-foreground)]">현재 잔량 {actionItems[0]?.balance === null ? "미기입" : `${formatYds(actionItems[0]?.balance ?? 0)} yds`}</p><label className="flex items-center gap-2 text-xs"><Checkbox checked={exhaustOnZero} onCheckedChange={(value) => setExhaustOnZero(value === true)} aria-label="잔량 0이면 소진 완료" /><span>출고 후 잔량이 0이 되면 소진 완료로 옮깁니다. 체크를 풀면 창고 보관에 남습니다.</span></label></div></div> : null}
           {actionDialog?.kind === "EXHAUST" ? <p className="text-sm">재고 수량과 관계없이 이 원단을 소진 완료로 이동합니다.</p> : null}
           {actionDialog?.kind === "RESTORE" ? <p className="text-sm">{actionItems[0]?.status === "EXHAUSTED" ? "창고 보관 상태로 복구합니다." : "폐기 전 상태로 복구합니다."}</p> : null}

@@ -48,6 +48,72 @@ export interface FabricLedgerItem {
   sourceOrder: number | null
   record: DevRecord | null
   sample: CompletedSample | null
+  /**
+   * 원단 상세가 쓰는 실무 값 묶음. DD tech와 대장 원문에서 끌어오고,
+   * 대장 전용 행은 override.fields로 덮어쓴다. 키 목록은 FABRIC_FIELD_IDS다.
+   */
+  fields: Record<string, string>
+}
+
+/** 원단 상세에서 보고 고치는 값. 앞 15개는 원장 본문 필드, 뒤는 DD tech·대장 원문에서 온 실무 값이다. */
+export const FABRIC_FIELD_IDS = [
+  "styleNo", "flNo", "season", "category", "buyer", "owner", "planner",
+  "construction", "weight", "color", "dyeing", "requestDate", "dueDate", "completedAt", "note",
+  "yarnDetail", "millYarn", "millKnitting", "millDyeing", "millFinishing",
+  "fds", "yds", "review", "passFail", "actualWidth", "actualWeight", "shrinkageLength", "shrinkageWidth",
+] as const
+export type FabricFieldId = (typeof FABRIC_FIELD_IDS)[number]
+
+/** 원장 본문에 그대로 얹히는 필드. 나머지는 fields 안에만 산다. */
+const CORE_FIELD_IDS = new Set<string>([
+  "styleNo", "flNo", "season", "category", "buyer", "owner", "planner",
+  "construction", "weight", "color", "dyeing", "requestDate", "dueDate", "completedAt", "note",
+])
+
+const numberText = (value: number | null | undefined): string =>
+  typeof value === "number" && Number.isFinite(value) ? String(value) : ""
+
+/** DD tech와 대장 원문에서 실무 값을 모은다. DD가 있으면 DD가 먼저다. */
+function deriveFields(item: FabricLedgerItem): Record<string, string> {
+  const tech = item.record?.tech
+  const sample = item.sample
+  const shrinkage = sample?.inhouse?.shrinkagePct
+  const shrinkagePair = shrinkage && typeof shrinkage === "object" ? shrinkage : null
+  const shrinkageFlat = typeof shrinkage === "number" ? shrinkage : null
+  const mills = tech?.mills
+  const ledgerMills = sample?.ledger?.mills
+  return {
+    yarnDetail: tech?.yarnDetail || sample?.ledger?.yarnDetail || "",
+    // 대장의 sample.process는 공정 Status(완료일)다. 업체명이 아니므로 여기에 쓰지 않는다.
+    // 대장 업체명은 ledger.mills에 들어 있다.
+    millYarn: mills?.yarn || ledgerMills?.yarn || "",
+    millKnitting: mills?.knitting || ledgerMills?.knitting || "",
+    millDyeing: mills?.dyeing || ledgerMills?.dyeing || "",
+    millFinishing: mills?.finishing || ledgerMills?.finishing || "",
+    fds: tech?.sampleDates?.fds || "",
+    yds: tech?.sampleDates?.yds || "",
+    review: tech?.review || "",
+    passFail: tech?.passFail || "",
+    actualWidth: numberText(tech?.actual?.width ?? sample?.inhouse?.widthCm),
+    actualWeight: numberText(tech?.actual?.weight ?? sample?.inhouse?.weightGsm),
+    shrinkageLength: numberText(tech?.actual?.shrinkageLength ?? shrinkagePair?.length ?? shrinkageFlat),
+    shrinkageWidth: numberText(tech?.actual?.shrinkageWidth ?? shrinkagePair?.width),
+  }
+}
+
+/** override.fields의 원장 본문 필드를 항목에 얹는다. 대장 전용 행의 수정본이 목록에도 보이게 한다. */
+function applyCoreFieldOverrides(item: FabricLedgerItem, patch: Record<string, string>): FabricLedgerItem {
+  const next: Record<string, unknown> = { ...item }
+  Object.entries(patch).forEach(([id, value]) => {
+    if (!CORE_FIELD_IDS.has(id)) return
+    if (id === "weight") {
+      const parsed = Number(value)
+      next.weight = value.trim() && Number.isFinite(parsed) ? parsed : ""
+      return
+    }
+    next[id] = value
+  })
+  return next as unknown as FabricLedgerItem
 }
 
 export const FABRIC_STATUS_META: Record<FabricLedgerStatus, { label: string; description: string; tone: string }> = {
@@ -107,6 +173,25 @@ function closedHistoryBaseKey(sample: CompletedSample): string {
   return `history:${values.map((value) => `${value.length}:${value}`).join("|")}`
 }
 
+/**
+ * FL이 없는 DD 행의 원장 key.
+ * Style No.로 묶으면 옵션이 다른 별개 원단이 한 항목에 뭉쳐 뒤 행이 통째로 사라진다.
+ * 행 번호를 쓰지 않아 DD를 다시 올려 행이 밀려도 같은 항목을 가리킨다.
+ */
+function ddRowBaseKey(record: DevRecord): string {
+  const values = [
+    record.owner,
+    record.styleNo,
+    record.season,
+    record.color,
+    record.construction,
+    String(record.weight ?? ""),
+    record.dyeing,
+    record.opt,
+  ].map(normalized)
+  return `dd:${values.map((value) => `${value.length}:${value}`).join("|")}`
+}
+
 function recordIdentity(record: DevRecord): string {
   return `${record._src.sheet}::${record._src.row}`
 }
@@ -144,9 +229,9 @@ function sampleFallback(sample: CompletedSample, index: number): string {
   return sample.sourceSheet === WEB_INTAKE_SHEET && sample.id ? sample.id : `${sample.sourceSheet ?? "sample"}::${index}`
 }
 
-function emptyFromRecord(record: DevRecord): FabricLedgerItem {
+function emptyFromRecord(record: DevRecord, key: string): FabricLedgerItem {
   return {
-    key: fabricLedgerKey(record.flNo, record.styleNo, recordIdentity(record)),
+    key,
     styleNo: record.styleNo,
     flNo: record.flNo,
     season: record.season,
@@ -178,6 +263,7 @@ function emptyFromRecord(record: DevRecord): FabricLedgerItem {
     sourceOrder: null,
     record,
     sample: null,
+    fields: {},
   }
 }
 
@@ -190,13 +276,13 @@ function emptyFromSample(sample: CompletedSample, index: number): FabricLedgerIt
     category: sample.category,
     buyer: sample.buyer,
     owner: sample.owner,
-    planner: "",
+    planner: sample.ledger?.planner ?? "",
     construction: sample.construction,
     weight: sample.inhouse.weightGsm ?? "",
-    color: "",
-    dyeing: "",
+    color: sample.ledger?.color ?? "",
+    dyeing: sample.ledger?.dyeingSide ?? "",
     requestDate: sample.requestDate ?? "",
-    dueDate: "",
+    dueDate: sample.ledger?.dueDate ?? "",
     completedAt: sample.completedAt,
     status: statusFromSample(sample),
     storageNo: sample.storageNo ?? "",
@@ -215,6 +301,7 @@ function emptyFromSample(sample: CompletedSample, index: number): FabricLedgerIt
     sourceOrder: index,
     record: null,
     sample,
+    fields: {},
   }
 }
 
@@ -244,26 +331,32 @@ function mergeSample(target: FabricLedgerItem, sample: CompletedSample, index: n
   }
 }
 
+/**
+ * 창고는 샘플관리대장 미러다. 대장 값이 기준이고 DD는 대장 칸이 비었을 때만 채운다.
+ * buildFabricLedger가 target에 record가 없을 때만 이 함수를 부른다. 즉 target은 항상 대장에 먼저 존재한 행이다.
+ * Style/#은 DD의 'Style No.'(record.styleNo)가 아니다. 그 칸에는 원본 FL이 들어 있어
+ * 그대로 쓰면 Style 자리에 FL 번호가 보인다. 대장 Style/#에 대응하는 DD 값은 'GD#/SA#'(gdNo, saNo)다.
+ */
 function mergeRecord(target: FabricLedgerItem, record: DevRecord): FabricLedgerItem {
   const recordStatus = statusFromRecord(record)
   return {
     ...target,
-    styleNo: record.styleNo || target.styleNo,
-    flNo: record.flNo || target.flNo,
-    season: record.season || target.season,
-    category: record.category || target.category,
-    buyer: record.buyer || target.buyer,
-    owner: record.owner || target.owner,
-    planner: record.planner || target.planner,
-    construction: record.construction || target.construction,
-    weight: record.weight || target.weight,
-    color: record.color || target.color,
-    dyeing: record.dyeing || target.dyeing,
-    requestDate: record.requestDate || target.requestDate,
-    dueDate: record.dueDate || target.dueDate,
-    completedAt: record.receivedDate || target.completedAt,
+    styleNo: target.styleNo || record.gdNo || record.saNo,
+    flNo: target.flNo || record.flNo,
+    season: target.season || record.season,
+    category: target.category || record.category,
+    buyer: target.buyer || record.buyer,
+    owner: target.owner || record.owner,
+    planner: target.planner || record.planner,
+    construction: target.construction || record.construction,
+    weight: target.weight || record.weight,
+    color: target.color || record.color,
+    dyeing: target.dyeing || record.dyeing,
+    requestDate: target.requestDate || record.requestDate || "",
+    dueDate: target.dueDate || record.dueDate,
+    completedAt: target.completedAt || record.receivedDate || "",
     status: statusRank[recordStatus] > statusRank[target.status] ? recordStatus : target.status,
-    note: record.note || target.note,
+    note: target.note || record.note,
     record: target.record ?? record,
   }
 }
@@ -274,10 +367,13 @@ export function buildFabricLedger(
   samples: readonly CompletedSample[],
   overrides: readonly FabricLedgerOverride[],
   fabricEvents: readonly FabricLedgerEvent[] = [],
+  /** 목록에서 숨긴(REMOVED) 항목까지 돌려준다. 숨김 기록을 정리하거나 되살릴 때만 쓴다. */
+  options: { includeRemoved?: boolean } = {},
 ): FabricLedgerItem[] {
   const items = new Map<string, FabricLedgerItem>()
   const identityIndex = new Map<string, string>()
   const closedHistoryKeyCounts = new Map<string, number>()
+  const ddRowKeyCounts = new Map<string, number>()
 
   const registerIdentities = (item: FabricLedgerItem, rowIdentities: readonly string[]) => {
     fabricIdentities(item.storageNo, item.flNo, item.styleNo).concat(rowIdentities).forEach((identity) => {
@@ -329,9 +425,20 @@ export function buildFabricLedger(
 
   records.forEach((record) => {
     const fallback = recordIdentity(record)
-    const matchedKey = resolveKey("", record.flNo, record.styleNo, fallback)
+    // DD의 'Style No.'는 대장의 Style/#과 뜻이 다르고 원본 FL이 들어 있어 보조 식별자로 쓰면 다른 행에 붙는다.
+    // 그래서 DD 레코드는 FL로만 대장에 붙인다. FL이 없는 행은 각자 한 항목이며 서로 묶이지 않는다.
+    let matchedKey: string
+    if (normalized(record.flNo)) {
+      matchedKey = resolveKey("", record.flNo, "", fallback)
+    } else {
+      const baseKey = ddRowBaseKey(record)
+      // 값이 완전히 같은 행이 겹칠 때만 #2부터 순번을 붙여 모든 행을 보존한다.
+      const occurrence = (ddRowKeyCounts.get(baseKey) ?? 0) + 1
+      ddRowKeyCounts.set(baseKey, occurrence)
+      matchedKey = occurrence === 1 ? baseKey : `${baseKey}#${occurrence}`
+    }
     const existing = items.get(matchedKey)
-    const item = existing ? (existing.record ? existing : mergeRecord(existing, record)) : emptyFromRecord(record)
+    const item = existing ? (existing.record ? existing : mergeRecord(existing, record)) : emptyFromRecord(record, matchedKey)
     items.set(matchedKey, item)
     registerIdentities(item, fabricIdentities("", record.flNo, record.styleNo))
   })
@@ -346,9 +453,17 @@ export function buildFabricLedger(
   const outboundMap = new Map<string, FabricLedgerOutbound[]>()
   const intakeMap = new Map<string, string>()
   const confirmMap = new Map<string, string>()
-  fabricEvents.forEach((event) => {
+  // fabricEvents는 새 기록을 앞에 붙인다. 재고는 시간 순으로 쌓아야 하므로 오래된 것부터 훑는다.
+  // 출고 날짜는 사용자가 과거로 고를 수 있어 occurredAt이 아니라 기록 순서를 기준으로 삼는다.
+  ;[...fabricEvents].reverse().forEach((event) => {
     const itemKey = resolveStoredKey(event.fabricKey)
     if (!itemKey) return
+    // 입고 대기로 되돌리면 그 원단의 재고 기간이 끝난다. 다음 입고부터 다시 센다.
+    // 기록 자체는 지우지 않으므로 원단 상세의 이력에는 그대로 남는다.
+    if (event.action === "UNRECEIVE") {
+      outboundMap.delete(itemKey)
+      intakeMap.delete(itemKey)
+    }
     if (event.action === "RECEIVE") {
       const previous = intakeMap.get(itemKey) ?? ""
       if (event.occurredAt > previous) intakeMap.set(itemKey, event.occurredAt)
@@ -384,8 +499,11 @@ export function buildFabricLedger(
       updatedAt: override.updatedAt,
       updatedBy: override.updatedBy,
     } : item
-    return { ...merged, yds, outbound, outboundTotal, balance, intakeAt, confirmedAt, lastMovedAt, lastOutbound }
-  }).filter((item) => item.status !== "REMOVED").sort((left, right) => {
+    // 대장 전용 행은 상세에서 고친 값이 override.fields에 쌓인다. 본문 필드에 얹고 실무 값도 덮어쓴다.
+    const patched = override?.fields ? applyCoreFieldOverrides(merged, override.fields) : merged
+    const stocked = { ...patched, yds, outbound, outboundTotal, balance, intakeAt, confirmedAt, lastMovedAt, lastOutbound }
+    return { ...stocked, fields: { ...deriveFields(stocked), ...(override?.fields ?? {}) } }
+  }).filter((item) => options.includeRemoved || item.status !== "REMOVED").sort((left, right) => {
     const statusComparison = statusRank[left.status] - statusRank[right.status]
     if (statusComparison) return statusComparison
 

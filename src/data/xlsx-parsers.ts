@@ -762,6 +762,8 @@ function parseSampleSheet(workbook: XLSX.WorkBook, wanted: string, detectedHeade
       completedAt: isoDate(row[columns.completedAt]),
       // DD 레코드가 없는 과거 행도 창고 화면이 대장과 같게 보이도록 원본 값을 그대로 싣는다.
       ledger: {
+        seasonRaw: text(row[columns.season]),
+        categoryRaw: text(row[columns.category]),
         originalRef: text(row[columns.originalRef]),
         planner: text(row[columns.planner]),
         yarnDetail: text(row[columns.yarnDetail]),

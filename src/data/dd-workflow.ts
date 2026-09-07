@@ -104,7 +104,12 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
       optionProgress: hasStyleNo ? formula?.optionProgress ?? record.tech?.optionProgress : "",
       actual: record.tech?.actual ? { ...record.tech.actual, balance } : record.tech?.actual,
     }
-    return { ...record, opt: hasStyleNo ? formula?.opt ?? record.opt : "", stage, processReached, tech }
+    // FDS 수취 날짜가 들어오면 완료로 올린다. HOLD·DROP·REJECT는 사람이 정한 상태라 유지한다.
+    const currentStatus = normalizedStatus(record)
+    const devStatus = String(record.tech?.sampleDates?.fds ?? "").trim() && (!currentStatus || currentStatus === "진행중")
+      ? "완료"
+      : record.devStatus
+    return { ...record, devStatus, opt: hasStyleNo ? formula?.opt ?? record.opt : "", stage, processReached, tech }
   })
 }
 

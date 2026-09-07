@@ -196,6 +196,9 @@ export interface CompletedSample {
   sourceSheet?: string
   /** DD 레코드가 없는 과거 행을 창고 화면에 대장 그대로 보여주기 위한 원본 값. */
   ledger?: {
+    /** 대장 원문. 창고 화면은 정규화된 값이 아니라 이 값을 보여준다. */
+    seasonRaw?: string
+    categoryRaw?: string
     originalRef?: string
     planner?: string
     yarnDetail?: string
@@ -234,6 +237,11 @@ export interface FabricLedgerOverride {
   storageNo?: string
   yds?: number
   note?: string
+  /**
+   * 원단 상세에서 직접 고친 값. DD 레코드가 없는 샘플관리대장 행의 수정본이다.
+   * DD가 붙은 행은 여기가 아니라 DevRecord에 저장한다(DD MASTER와 같이 움직여야 한다).
+   */
+  fields?: Record<string, string>
   updatedAt: string
   updatedBy: string
 }

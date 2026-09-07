@@ -3,7 +3,7 @@ import { create } from "zustand"
 import { saveCache, saveCacheLocal } from "@/data/cache"
 import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } from "../data/chemical"
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
-import { isFabricBalanceExhausted } from "../data/fabric-ledger"
+import { buildFabricLedger, fabricRecordIdentity, isFabricBalanceExhausted, type FabricLedgerItem } from "../data/fabric-ledger"
 import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type StudyRecord } from "../data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
 import {
@@ -467,11 +467,24 @@ export async function saveDevelopmentIntakeRecords(records: readonly DevRecord[]
 
 /** DD 행(샘플 옵션)을 원장에서 삭제한다. */
 export async function deleteDevelopmentRecord(identity: string): Promise<void> {
-  const current = useAppStore.getState().records
+  const state = useAppStore.getState()
+  const current = state.records
   const next = current.filter((item) => recordIdentity(item) !== identity)
   if (next.length === current.length) return
   setAppState({ records: next })
   scheduleRecordsSave()
+
+  // 창고에서 숨겨 둔 행의 DD 원본을 지우면 숨김 기록도 같이 지운다.
+  // 남겨 두면 같은 내용으로 다시 등록했을 때 원장 key가 겹쳐 또 숨은 채로 나타난다.
+  // 채번·재고·출고 기록(다른 상태의 오버라이드)은 건드리지 않는다.
+  const hidden = buildFabricLedger(current, state.completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true })
+    .find((item) => item.status === "REMOVED" && fabricRecordIdentity(item.record) === identity)
+  if (!hidden) return
+  const fabricOverrides = state.fabricOverrides.filter((item) => item.key !== hidden.key)
+  const fabricEvents = state.fabricEvents.filter((event) => !(event.fabricKey === hidden.key && event.action === "REMOVE"))
+  if (fabricOverrides.length === state.fabricOverrides.length && fabricEvents.length === state.fabricEvents.length) return
+  setAppState({ fabricOverrides, fabricEvents })
+  await Promise.all([saveCache("fabricOverrides", fabricOverrides), saveCache("fabricEvents", fabricEvents)])
 }
 
 /**
@@ -510,6 +523,8 @@ export interface ApplyFabricActionInput {
   storageNo?: string
   autoExhaust?: boolean
   yds?: number
+  /** 보유 재고를 비운다. 값을 지우는 것과 값을 안 건드리는 것을 구분한다. */
+  clearYds?: boolean
   qty?: number
   to?: string
   division?: string
@@ -601,6 +616,81 @@ export async function confirmWarehouseBaseline(entries: ReadonlyArray<{ key: str
   return events.length
 }
 
+const numberOrNull = (value: string): number | null => {
+  const parsed = Number(value)
+  return value.trim() && Number.isFinite(parsed) ? parsed : null
+}
+
+/** 원단 상세에서 고친 값 하나를 DD 레코드에 반영한다. 모르는 필드는 null을 돌려준다. */
+function applyFabricFieldToRecord(record: DevRecord, field: string, value: string): DevRecord | null {
+  const tech = record.tech ?? {}
+  switch (field) {
+    case "styleNo": case "flNo": case "season": case "category": case "buyer":
+    case "owner": case "planner": case "construction": case "color": case "dyeing":
+    case "note": case "requestDate": case "dueDate":
+      return { ...record, [field]: value }
+    case "weight": {
+      const parsed = Number(value)
+      return { ...record, weight: value.trim() && Number.isFinite(parsed) ? parsed : "" }
+    }
+    case "completedAt": return { ...record, receivedDate: value }
+    case "yarnDetail": return { ...record, tech: { ...tech, yarnDetail: value } }
+    case "review": return { ...record, tech: { ...tech, review: value } }
+    case "passFail": return { ...record, tech: { ...tech, passFail: value } }
+    case "millYarn": return { ...record, tech: { ...tech, mills: { ...tech.mills, yarn: value } } }
+    case "millKnitting": return { ...record, tech: { ...tech, mills: { ...tech.mills, knitting: value } } }
+    case "millDyeing": return { ...record, tech: { ...tech, mills: { ...tech.mills, dyeing: value } } }
+    case "millFinishing": return { ...record, tech: { ...tech, mills: { ...tech.mills, finishing: value } } }
+    case "fds": return { ...record, tech: { ...tech, sampleDates: { ...tech.sampleDates, fds: value } } }
+    case "yds": return { ...record, tech: { ...tech, sampleDates: { ...tech.sampleDates, yds: value } } }
+    case "actualWidth": return { ...record, tech: { ...tech, actual: { ...tech.actual, width: numberOrNull(value) } } }
+    case "actualWeight": return { ...record, tech: { ...tech, actual: { ...tech.actual, weight: numberOrNull(value) } } }
+    case "shrinkageLength": return { ...record, tech: { ...tech, actual: { ...tech.actual, shrinkageLength: numberOrNull(value) } } }
+    case "shrinkageWidth": return { ...record, tech: { ...tech, actual: { ...tech.actual, shrinkageWidth: numberOrNull(value) } } }
+    default: return null
+  }
+}
+
+/**
+ * 원단 상세에서 고친 값을 한 번에 저장한다.
+ * DD 레코드가 붙은 행은 DevRecord에 쓴다. 그래야 DD MASTER의 같은 옵션 행이 함께 움직인다.
+ * DD가 없는 샘플관리대장 행은 원장 오버라이드에 수정본을 쌓는다(대장 원본은 그대로 둔다).
+ */
+export async function saveFabricFields(item: FabricLedgerItem, patch: Record<string, string>): Promise<void> {
+  const entries = Object.entries(patch)
+  if (!entries.length) return
+  if (item.record) {
+    // 한 번에 모아 저장한다. 칸마다 저장하면 그때마다 전체 레코드가 중앙으로 올라간다.
+    let next = item.record
+    let changed = false
+    for (const [field, value] of entries) {
+      const applied = applyFabricFieldToRecord(next, field, value)
+      if (!applied) continue
+      next = applied
+      changed = true
+    }
+    if (!changed) return
+    await saveDevelopmentRecord(next, recordIdentity(item.record))
+    await flushDevelopmentRecords()
+    return
+  }
+  const state = useAppStore.getState()
+  const previous = state.fabricOverrides.find((entry) => entry.key === item.key)
+  const override: FabricLedgerOverride = {
+    key: item.key,
+    status: previous?.status ?? item.status,
+    storageNo: previous?.storageNo ?? (item.storageNo || undefined),
+    yds: previous?.yds ?? (item.yds ?? undefined),
+    note: previous?.note,
+    fields: { ...previous?.fields, ...patch },
+    updatedAt: new Date().toISOString(),
+    updatedBy: "관리자",
+  }
+  const fabricOverrides = [override, ...state.fabricOverrides.filter((entry) => entry.key !== item.key)]
+  setAppState({ fabricOverrides })
+  await saveCache("fabricOverrides", fabricOverrides)
+}
+
 export async function applyFabricAction(input: ApplyFabricActionInput): Promise<void> {
   const state = useAppStore.getState()
   const occurredAt = new Date().toISOString()
@@ -639,7 +729,8 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
     status: resolvedToStatus,
     // 입고 대기로 되돌리면 채번을 취소한다. 그 번호는 다시 쓸 수 있게 풀린다.
     storageNo: input.action === "UNRECEIVE" ? undefined : input.storageNo?.trim() || previous?.storageNo,
-    yds,
+    // 입고 대기로 되돌리면 보유 재고도 비운다. 남겨 두면 입고한 적 없는 행에 재고가 붙어 있게 된다.
+    yds: input.action === "UNRECEIVE" || input.clearYds ? undefined : yds,
     note: input.note?.trim() || previous?.note,
     updatedAt: occurredAt,
     updatedBy: actor,
