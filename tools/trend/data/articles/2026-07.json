@@ -372,9 +372,11 @@
   "score": 10,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 3,
   "sources": [
-   "Indian Textile Magazine"
+   "Indian Textile Magazine",
+   "주제검색 · 신소재",
+   "주제검색 · 염색가공"
   ]
  },
  {
@@ -1028,6 +1030,34 @@
   "hits": 1,
   "sources": [
    "Apparel Resources"
+  ]
+ },
+ {
+  "key": "6bc98c86b20d752a",
+  "title": "Nike's Studio Fleece Apparel Line Just Dropped",
+  "title_ko": "Nike의 스튜디오 Fleece 의류 라인이 방금 출시되었습니다",
+  "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPM0dZQnpKWllyNng4ckRzNExCOFNxS19SWjdycTA0S2RaeDRoV18wZEh0dVpUcC1XLUx1RjZybHF0WGdVa1JmenNBSnZ5dnJoX0t1aUNOSXA4T3c3UzZKYzBfcWlCSTFCWkE1dTdEOS1zWjdfSkN3RDMtcTZDYlpuVDZuSXQ?oc=5",
+  "published": "2026-07-30",
+  "collected": "2026-09-07",
+  "summary": "Nike's Studio Fleece Apparel Line Just Dropped Complex",
+  "content": "Nike's Studio Fleece Apparel Line Just Dropped Complex",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Nike",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "플리스"
+  ],
+  "entities": [
+   "nike"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Nike"
   ]
  },
  {
