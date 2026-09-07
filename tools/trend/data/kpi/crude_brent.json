@@ -11,7 +11,7 @@
  "stale_days": null,
  "source_name": "World Bank Commodity Markets (Pink Sheet)",
  "source_url": "https://www.worldbank.org/en/research/commodity-markets",
- "fetched_at": "2026-09-01T03:28:51+00:00",
+ "fetched_at": "2026-09-07T23:39:14+00:00",
  "points": [
   {
    "period": "2021-08",
@@ -252,6 +252,10 @@
   {
    "period": "2026-07",
    "value": 83.4
+  },
+  {
+   "period": "2026-08",
+   "value": 90.9
   }
  ]
 }

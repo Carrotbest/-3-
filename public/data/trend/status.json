@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-07T23:06:00+00:00",
+ "generated_at": "2026-09-07T23:39:15+00:00",
  "sources": [
   {
    "name": "Knitting Industry",
@@ -350,16 +350,6 @@
  "archive_relevant": 502,
  "runs": [
   {
-   "at": "2026-08-31T05:48:55+00:00",
-   "kind": "collect",
-   "ok": 34,
-   "fail": 0,
-   "new": 290,
-   "kept": 0,
-   "hits": 2,
-   "translated": 120
-  },
-  {
    "at": "2026-08-31T08:26:37+00:00",
    "kind": "kpi",
    "points": 300
@@ -458,6 +448,11 @@
    "kept": 62,
    "hits": 10,
    "translated": 49
+  },
+  {
+   "at": "2026-09-07T23:39:15+00:00",
+   "kind": "kpi",
+   "points": 360
   }
  ]
 }

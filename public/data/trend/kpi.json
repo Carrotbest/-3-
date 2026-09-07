@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-07T23:06:00+00:00",
+"generated_at": "2026-09-07T23:39:15+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3899,10 +3899,6 @@
 "source_url": "https://www.worldbank.org/en/research/commodity-markets",
 "points": [
 {
-"period": "2025-07",
-"value": 71.0
-},
-{
 "period": "2025-08",
 "value": 68.2
 },
@@ -3949,13 +3945,17 @@
 {
 "period": "2026-07",
 "value": 83.4
+},
+{
+"period": "2026-08",
+"value": 90.9
 }
 ],
-"value": 83.4,
-"period": "2026-07",
+"value": 90.9,
+"period": "2026-08",
 "period_end": null,
-"prev": -2.3,
-"yoy": 17.5,
+"prev": 9.0,
+"yoy": 33.3,
 "stale": false
 },
 {
@@ -3971,10 +3971,6 @@
 "source_name": "World Bank Commodity Markets (Pink Sheet)",
 "source_url": "https://www.worldbank.org/en/research/commodity-markets",
 "points": [
-{
-"period": "2025-07",
-"value": 1.74
-},
 {
 "period": "2025-08",
 "value": 1.73
@@ -4022,13 +4018,17 @@
 {
 "period": "2026-07",
 "value": 1.96
+},
+{
+"period": "2026-08",
+"value": 2.11
 }
 ],
-"value": 1.96,
-"period": "2026-07",
+"value": 2.11,
+"period": "2026-08",
 "period_end": null,
-"prev": 3.2,
-"yoy": 12.6,
+"prev": 7.7,
+"yoy": 22.0,
 "stale": false
 }
 ],
