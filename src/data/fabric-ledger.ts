@@ -453,9 +453,11 @@ export function buildFabricLedger(
   const outboundMap = new Map<string, FabricLedgerOutbound[]>()
   const intakeMap = new Map<string, string>()
   const confirmMap = new Map<string, string>()
-  // fabricEvents는 새 기록을 앞에 붙인다. 재고는 시간 순으로 쌓아야 하므로 오래된 것부터 훑는다.
-  // 출고 날짜는 사용자가 과거로 고를 수 있어 occurredAt이 아니라 기록 순서를 기준으로 삼는다.
-  ;[...fabricEvents].reverse().forEach((event) => {
+  // 재고는 시간 순으로 쌓아야 하므로 오래된 기록부터 훑는다.
+  // 배열 순서를 쓰면 안 된다. 팀 공유 병합이 새 기록을 배열 끝으로 보내 최신 기록이 가장 오래된 것으로 뒤집힌다.
+  // 출고 날짜는 사용자가 과거로 고를 수 있으므로 표시용 occurredAt이 아니라 기록 시각을 기준으로 한다.
+  const eventOrder = (event: FabricLedgerEvent): string => event.recordedAt || event.occurredAt
+  ;[...fabricEvents].sort((left, right) => eventOrder(left).localeCompare(eventOrder(right))).forEach((event) => {
     const itemKey = resolveStoredKey(event.fabricKey)
     if (!itemKey) return
     // 입고 대기로 되돌리면 그 원단의 재고 기간이 끝난다. 다음 입고부터 다시 센다.

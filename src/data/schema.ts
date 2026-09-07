@@ -253,7 +253,13 @@ export interface FabricLedgerEvent {
   action: FabricLedgerAction
   fromStatus: FabricLedgerStatus
   toStatus: FabricLedgerStatus
+  /** 사용자가 고른 날짜(출고는 과거로 지정할 수 있다). 화면 표시에 쓴다. */
   occurredAt: string
+  /**
+   * 실제로 기록된 시각. 집계 순서는 이 값으로 정한다.
+   * 배열 순서를 쓰면 안 된다. 팀 공유 병합이 새 기록을 배열 끝으로 보낼 수 있다.
+   */
+  recordedAt?: string
   actor: string
   note: string
   storageNo?: string

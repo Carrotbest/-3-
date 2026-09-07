@@ -606,6 +606,7 @@ export async function confirmWarehouseBaseline(entries: ReadonlyArray<{ key: str
     fromStatus: "WAREHOUSE",
     toStatus: "WAREHOUSE",
     occurredAt,
+    recordedAt: occurredAt,
     actor,
     note: "기존 재고 일괄 확인 (엑셀 대장 이관)",
     storageNo: entry.storageNo,
@@ -732,6 +733,8 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
     // 입고 대기로 되돌리면 보유 재고도 비운다. 남겨 두면 입고한 적 없는 행에 재고가 붙어 있게 된다.
     yds: input.action === "UNRECEIVE" || input.clearYds ? undefined : yds,
     note: input.note?.trim() || previous?.note,
+    // 원단 상세에서 고친 값은 창고 동작(입고·확인·출고 등)과 무관하다. 그대로 물려준다.
+    fields: previous?.fields,
     updatedAt: occurredAt,
     updatedBy: actor,
   }
@@ -742,6 +745,7 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
     fromStatus: input.fromStatus,
     toStatus: resolvedToStatus,
     occurredAt: eventOccurredAt,
+    recordedAt: occurredAt,
     actor,
     note: input.note?.trim() || "",
     storageNo: input.storageNo?.trim() || previous?.storageNo,
@@ -790,6 +794,7 @@ export async function removeFabricRows(
       storageNo: previous?.storageNo,
       yds: previous?.yds,
       note: previous?.note,
+      fields: previous?.fields,
       updatedAt: occurredAt,
       updatedBy: actor,
     }
@@ -801,6 +806,7 @@ export async function removeFabricRows(
     fromStatus: entry.fromStatus,
     toStatus: "REMOVED",
     occurredAt,
+    recordedAt: occurredAt,
     actor,
     note: "입고 대기 목록에서 삭제",
   }))
