@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-07T23:39:15+00:00",
+"generated_at": "2026-09-08T23:03:21+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -2903,7 +2903,7 @@
 "period_end": "2026-04-30",
 "prev": -3.1,
 "yoy": 11.4,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_operating_urban",
@@ -2989,7 +2989,7 @@
 "period_end": "2026-04-30",
 "prev": -3.2,
 "yoy": 9.0,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_inventory_urban",
@@ -3075,7 +3075,7 @@
 "period_end": "2026-04-30",
 "prev": 3.7,
 "yoy": 9.5,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_revenue_vsco",
@@ -4126,16 +4126,16 @@
 },
 {
 "d": "2026-07-31",
-"t": "Carter's, Inc., 2026년 7월 4일에 종료된 2분기 및 6개월 동안의 수익 결과 보고",
-"o": "Carter's, Inc. Reports Earnings Results for the Second Quarter and Six Months Ended July 04, 2026",
-"u": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxNYTR3VGhaMHBrYjZlMjNYSU92akNyalZJZXpCZktkQjFtYTg4Nk5XOERjVGx0SDF4TVBsNU80YVFid1hrM1VpLXZfbGJ3eFRBb2dQQmo0RDlEQnN6QmNOUFJlOHN0Y1hDUF9Ydm5iOHJJZnNZMmhsN19kem1TN2gwX1g3OTNfa2Zqd0szdHNJcHFtVGQyX2Nkamptc3F3Y0p6dWNFZTBoTjQzTFpSTXhvYnRGS1pHQnlCZ1htamxfdWhCd0RYM2FfdTNhNVYzalZhSnVXRWhUSjhpdXRZM0I2Mg?oc=5",
+"t": "Carter's, Inc. 2026년 2분기 실적 요약",
+"o": "Carter's, Inc. Q2 2026 Earnings Call Summary",
+"u": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPdVFJRzFoVFI2M00xbGtrUE1VdURXZFlMNGFCcjdsYnN6el9id0d1N2V2Y3NFZkViakpEZ1lzU0VIQWlRZGpfS1BrRTByd1VaeWxCdzJya3FpbkxJUmxiakk2TW15cGotMmR0a3BxYWVEOEVXT1BhUkhKd0RsVXoxbW42QWxBQlRxZzllMVFMeWI4WmYtUmJLWQ?oc=5",
 "m": "바이어 · Carter's"
 },
 {
-"d": "2026-07-28",
-"t": "Carter's Inc 2분기 결과: 7월 31일 실적 발표 예정",
-"o": "Carter's Inc Q2 Results: Earnings call set for July 31",
-"u": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQMm1fTHY0S2pyZ3hyTHM5X18yRW5lUHdqOGNVSDI2V1RKLVZfRVNlUDdKY1oxYnFTSlR3YWF5djJpZlZlcnpVU2h2aktSbUdwLW1DMWlDUXdQSHZTOWpXSVlyZXNvRm1WSHlILXhlUF9XejRSR0VmanEydDZSSDRERUhWNXNxUEdYOGo0cjF6aEZNclRzVUpubDZDdkRNOXBUQkFJZDJjcFM5eVkzUmZR?oc=5",
+"d": "2026-07-31",
+"t": "Carter's, Inc., 2026년 7월 4일에 종료된 2분기 및 6개월 동안의 수익 결과 보고",
+"o": "Carter's, Inc. Reports Earnings Results for the Second Quarter and Six Months Ended July 04, 2026",
+"u": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxNYTR3VGhaMHBrYjZlMjNYSU92akNyalZJZXpCZktkQjFtYTg4Nk5XOERjVGx0SDF4TVBsNU80YVFid1hrM1VpLXZfbGJ3eFRBb2dQQmo0RDlEQnN6QmNOUFJlOHN0Y1hDUF9Ydm5iOHJJZnNZMmhsN19kem1TN2gwX1g3OTNfa2Zqd0szdHNJcHFtVGQyX2Nkamptc3F3Y0p6dWNFZTBoTjQzTFpSTXhvYnRGS1pHQnlCZ1htamxfdWhCd0RYM2FfdTNhNVYzalZhSnVXRWhUSjhpdXRZM0I2Mg?oc=5",
 "m": "바이어 · Carter's"
 }
 ],
@@ -4257,6 +4257,13 @@
 ],
 "urban": [
 {
+"d": "2026-09-08",
+"t": "Urban Outfitters의 주식 수익이 주주들에게 더 큰 의미를 갖는 것",
+"o": "What Urban Outfitters Stock Earnings Beat Means For Shareholders",
+"u": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxOWDJvSTFtY2RUYWpoeXRKbkxXNm1xbjU0d3V3UDFTWktlbWhiQXZnTF9fTjdHS1BCUUV0cFNpelIzMkZ4SnhjOUR1aU5iZFBvbjZQOTNQSFU0VWlqUG14bmVlVHl0bklhT1lmTzMyeWROR21UdHVIY2R4UjhlQ1ZsRXNEZi0wWDF3YTcyOUU2S0JRN3dlZ1FEVG9hMWFFRzZNSzhZczdSNFhBQTBOQTV3blJPZFdZMTNEY25KSGdubEREZU1JcjdCQXNlUWhnNU94UkZ30gHTAUFVX3lxTE5YMm9JMW1jZFRhamh5dEpuTFc2bXFuNTR3dXdQMVNaS2VtaGJBdmdMX19ON0dLUEJRRXRwU2l6UjMyRnhKeGM5RHVpTmJkUG9uNlA5M1BIVTRVaWpQbXhuZWVUeXRuSWFPWWZPMzJ5ZE5HbVR0dUhjZHhSOGVDVmxFc0RmLTBYMXdhNzI5RTZLQlE3d2VnUURUb2ExYUVHNk1LOFlzN1I0WEFBME5BNXduUk9kV1kxM0RjbkpIZ25sRERlTUlyN0JBc2VRaGc1T3hSRnc?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
 "d": "2026-09-06",
 "t": "강력한 2분기 결과와 Nuuly 물류 지출이 Urban Outfitters(URBN)의 상승세를 바꿀까요?",
 "o": "Does Strong Q2 Results And Nuuly Logistics Spend Change The Bull Case For Urban Outfitters (URBN)?",
@@ -4303,13 +4310,6 @@
 "t": "Urban Outfitters(URBN)는 수익이 상회하고 환매가 완료된 후 6.6% 상승했습니다. 상승세가 바뀌었나요?",
 "o": "Urban Outfitters (URBN) Is Up 6.6% After Earnings Beat And Buyback Completion Has The Bull Case Changed?",
 "u": "https://news.google.com/rss/articles/CBMizgFBVV95cUxNTXpXbHZOeU5yTmpPNUdBdHZEWTJaVVZPX3FLMUpqTWJaeG5RYVRUZGZZWnltdDd3R3JBWmpuWEVYM1AyZXp2Q1FsM3lCM21iMmVoUkN3dW1xYWJOdVNPb0JjVS04VmpUcGZhUzRQN0N4alktV3puSzM5R1VLd3NkVUVUSnlidnViY3FUZ21td0ZPN2NDdlJiY0hnVnR4cFpNNEhfNDczaEE5b0NLZnpOdzc3akE3azFjWTU4NWNJazhvX1hFWFJFS2kxS1hSQdIB0wFBVV95cUxPS1U4QUdhdkxzd3JGZmZtUlhNRkVUb3I3dzcyanFTLTlYMV9xbTBOblhNbGJRNExKOUpXSDQ0bTJwMGROU1F0Y0J1aHAtcnRObUpBcnVOY1BiUG9TUGcwZGtuMmxnTGJKbnRIOEJIeHBKakEyWExJblE5dFZ0MEtrRUk3d2xSNU52aWRIX3Fha2JZYzdUM0h4bFFtcFR6REZXSkhlV0xnTnJ0SlIzcXpGcHBxZzZEbVl2Zi03dWJhTWtNZDJ3NDIxTFRFN0ZtWmtUS19R?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-08-31",
-"t": "Nuuly, Urban Outfitters의 기록적인 2분기 매출 견인",
-"o": "Nuuly drives Urban Outfitters’ record second-quarter revenue",
-"u": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPSjhIeVhHMGlodDZ1R3RwOWE3dzRyeDI0TkRndGFFckR2WTRDWjBkYUhIOHdVYkhFRnA3TW1jSGx6RUluVmRZUzh0aXpjbmEyZUlhYVdOcTJjRGNQbXd3Nl9PejBXc0ZTZDktbDdFZEhIMzNDcGtmWW4wR1lxZTBaN1Y2Z3czanN6MTZkQjRDNGY4QnFnZGZtNQ?oc=5",
 "m": "바이어 · Urban Outfitters"
 }
 ],
@@ -4373,6 +4373,13 @@
 ],
 "nike": [
 {
+"d": "2026-09-08",
+"t": "Nike, Simon Property Group, S&P 100에서 하락",
+"o": "Nike, Simon Property Group dropped from S&P 100",
+"u": "https://www.retaildive.com/news/nike-simon-property-group-dropped-sp-100/829760/",
+"m": "Retail Dive"
+},
+{
 "d": "2026-09-07",
 "t": "Nike Stock (NKE) 수익 손실 및 S&P 100 제거에 대한 의견",
 "o": "Nike Stock (NKE) Opinions on Earnings Miss and S&P 100 Removal",
@@ -4420,13 +4427,6 @@
 "o": "Nike Men's Sneakers Just $48 on Amazon (Save $19)",
 "u": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9FZmNsU1pUVjFLNFlpU0VGRjVweUxZYlplNXoyeFFEUEpFLXB3cXp5eVZLTmloR3pPdE1tU1pmcjhYNGhRZGRzdFE1V1NFZG4yYUJvR3BNckZCZlpEdlVneF9CRXBkWTdKQlE?oc=5",
 "m": "바이어 · Amazon"
-},
-{
-"d": "2026-09-01",
-"t": "Nike 세일: 인기 신발, 의류, 가을 스타일 최대 40% 할인",
-"o": "Nike sale: Score up to 40% off trending shoes, apparel, and fall styles",
-"u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxOUzM4NWxxbXliQlBDREtteWhyTWFHWlJaZ1B6b2tVNTFzdzljN1hvb0hYUDdkeFNoMW5KZlpDeGl3aXRzVUpTVWU4T3lxWWR0QklCdF9rMXp3QzBHdVcwSFBmR1M1LWlRdW43U3QyUkhFTUt3SDZXdE1OdFFyZEhsY0JFSlQzTVNRRlE1bUNaeE1PTVZQNUI5ZGhBUE9RaXg5VXc?oc=5",
-"m": "바이어 · Nike"
 }
 ],
 "pvh": [
@@ -4503,6 +4503,13 @@
 "m": "바이어 · Costco"
 },
 {
+"d": "2026-09-07",
+"t": "Costco(COST): 2분기 수익을 구매, 판매 또는 보류하시겠습니까?",
+"o": "Costco (COST): Buy, Sell, or Hold Post Q2 Earnings?",
+"u": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOMnRENVdfYnFJOFVscURpVURxbmpVY0x5RExKZnl5cWRRTWllNUg1VWNMcTZOa19QUkZDU2lrS3dneHFEdF9NRzlMX2h0Q0FHbTk1ZXRNazRpdUIxeXktaUE0X00yS281M25ocWctVTQzT2pLb25fRnVrdE5INDVITF9fV2pVT0RBS0VaLUVnSEV4N29JUkxJVVRkVVFnT243N2NKYlV6MmlkMGVoamtZRDByeFg1VDlST05qa0xrci1VTDEyV1lKOTdB?oc=5",
+"m": "바이어 · Costco"
+},
+{
 "d": "2026-09-04",
 "t": "Cramer는 Costco의 49배 수익이 충성스러운 쇼핑객들이 계속 저지르는 실수라고 말합니다.",
 "o": "Cramer Says Costco at 49 Times Earnings Is the Mistake Loyal Shoppers Keep Making",
@@ -4536,21 +4543,28 @@
 "o": "Costco Quietly Shuts Down a Key Member Service Without Warning - Peak Earnings Alert",
 "u": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNTkthX1B6RHlrMVVvVVlhcDllNlI1ci1FRE1fU2pLSjFYVmFkMWg1RS1XMGNCVW43c19ybUhxZnhxLXZERFBHWGJzRVFSNGIwT1hieVFodjlXdEdKbEkzaDI0al96X1N1LVlkOVcyaDVjZ1k1YUVLQ0c4UU9yWkRiQkR5NTNmYm93b0QxYWh5dHJWTmZmU1pqSDZkcmRIbmtkLTBqZVJyNA?oc=5",
 "m": "바이어 · Costco"
-},
-{
-"d": "2026-09-02",
-"t": "Costco 8월 매출 9.9% 증가",
-"o": "Costco August Sales Rise 9.9%",
-"u": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOWmk2RFVBcmpEZUhJRUFWSlNZSlRuemNDRkZQNHdMaTNFQXpYRHBmYUYtTzVhR1hvRVBQVThkVzNSMzNYWml3T3lhZWxzT3BsTC10Nk1sZmowbWNfd184V1lkMHhZR2FCd19mdWdJY2dPZWhiYXZhN0NuUGlPb00zYkVLX05SXzF6?oc=5",
-"m": "바이어 · Costco"
 }
 ],
 "aeo": [
+{
+"d": "2026-09-08",
+"t": "American Eagle (AEO) Q2 수익 보고서 미리보기: 찾아야 할 사항",
+"o": "American Eagle (AEO) Q2 Earnings Report Preview: What To Look For",
+"u": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxPX0ZDLVMwdmxLQW9RT1hWSVlfZU42cHdYN2pxbEtJVURDOHJyRnNrVjdNSklaQmc3dV9qa2lvaTNkY2lETVQxNThuRnFmQzFWdmVXd1lRU0FIalVadGlQakNkSGwtakxES1EyRlBUbGVfLXhyMnBjUUhPY3VJMlZuZjJKY3BXZEdZbjJtVW5JOFRfYjItVFZFX3RHeDJ5ajQtbHFIZXFkTzZvYzU2UndHUC1pY1FIbVZxSGU3LXdtT1A5U3BKRHYtcVB0ZmQ5YnZfZ2VpQS16alhoQ0huVzVr?oc=5",
+"m": "바이어 · American Eagle"
+},
 {
 "d": "2026-09-05",
 "t": "American Eagle Outfitters(AEO)는 Aerie에 초점을 맞춰 수익에 가까워졌지만 여전히 할인된 가격으로 거래되고 있나요?",
 "o": "American Eagle Outfitters (AEO) Nears Earnings With Aerie In Focus, Is It Still Trading At A Discount?",
 "u": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxNZEV3SFNnR1M1ZEJQTUloTHZPbVVVMTJDcF9VdWVIM0diLTFMcEFUU0lGYmE0cWRlZnBISVRTZEtsdEx1YnZDQzR3am1ieWRSNlc0bUNBVTR4SXRKbkd2eGY3OTRkTUNGSzBwVFloQXhwZ3NfV2ZkMlctemEyWHBOV1Q4QUtjbHQxQXVtelJfNjRnV1NlNlc0X29sd3BlZmVQdVhGZTdCdVpyUXd3UFBjRDR6Z18yOHoxc1BFY3ZwUjd2THpBNy1yLUxFR3FYenhUc2g5aTJLa3pjNU3SAdsBQVVfeXFMTWRFd0hTZ0dTNWRCUE1JaEx2T21VVTEyQ3BfVXVlSDNHYi0xTHBBVFNJRmJhNHFkZWZwSElUU2RLbHRMdWJ2Q0M0d2ptYnlkUjZXNG1DQVU0eEl0Sm5HdnhmNzk0ZE1DRkswcFRZaEF4cGdzX1dmZDJXLXphMlhwTldUOEFLY2x0MUF1bXpSXzY0Z1dTZTZXNF9vbHdwZWZlUHVYRmU3QnVaclF3d1BQY0Q0emdfMjh6MXNQRWN2cFI3dkx6QTctci1MRUdxWHp4VHNoOWkyS2t6YzVN?oc=5",
+"m": "바이어 · American Eagle"
+},
+{
+"d": "2026-09-04",
+"t": "American Eagle Outfitters(AEO) 수익 날짜 및 보고서 2026 $AEO",
+"o": "American Eagle Outfitters (AEO) Earnings Date and Reports 2026 $AEO",
+"u": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE84dndxazNBSEhnMVJYVmJZY04xOFRVZzkwMXhMYlM3VDBSb1VNRy1rUUJFS2FidXhtUW9qNjJEd0o3UGJiU18tamRLQm9rbk5CM25XVy1xU2FFVDBBYUkzWEpn?oc=5",
 "m": "바이어 · American Eagle"
 },
 {
@@ -4586,20 +4600,6 @@
 "t": "아메리칸 이글 아웃피터스(AEO), 수요일에 분기별 실적 발표",
 "o": "American Eagle Outfitters (AEO) to Post Quarterly Earnings on Wednesday",
 "u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOMlp0dUhvdFJpZ2tnc2g5a3BWYk9CQmJTd2FISUZBVjFzRXJmaEtXYVVuUkhqYzU2UkxNeE0yRzgzSXhKZFdnV2tvMG11RDJMN0U1UEg4SG5pQVVqTEsweW9yR2JqZkVjcGxST1pUamI3alpaSkhwYnhGSXJvWXk0OXljdnR2SzFjS0VET3NuaXBMSzZ3d2Y5R0k2ejF1RlFYd1p4Z0Q3VXJVMkZlQ29PT1piXzUwWklXdzR3VGdRR3dMcmJRdV94MGxGMkE?oc=5",
-"m": "바이어 · American Eagle"
-},
-{
-"d": "2026-09-02",
-"t": "American Eagle Outfitters 주식은 수익 보고서에서 13% 움직일 수 있습니다 By Investing.com",
-"o": "American Eagle Outfitters stock may move 13% on earnings report By Investing.com",
-"u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxOaVJDQ3hPZW03Um1UQ01lOUpvb2NWcDVISzNxZHV5WllXX2RyLUhzLVhuV2g1VUZzTEtKRUdNMzNzT2lOS0pjMFRValFqV282cmo0Q042MFhGMTBLb3BUME9nOTdUQnFQa19UcVNzRFlxVEF4NWN3MzZBMnJqQ1BLTmNSMzUxSzRlLUtyUnlEUnVVMzctdTZ5MGRadjBud1hLMkVpZkVoYzhjRDdZRU04SG9nUTNaZWpRUTY2NG0xTmE?oc=5",
-"m": "바이어 · American Eagle"
-},
-{
-"d": "2026-09-01",
-"t": "American Eagle (AEO) 주식은 수익 측면에서는 저렴해 보이지만 현금 흐름 측면에서는 공정합니다.",
-"o": "American Eagle (AEO) Stock Looks Cheap On Earnings Yet Fair On Cash Flow",
-"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOekQwWS1NZHFnS3NCYUZRRmE5UzdoWWtUeHM1azdkY25XVDljamNDM1FUQXV1SVZCS0F1Zm1IdEpNdmpacEtGQkY5TWZCa1V2ZHpKcDMyRHpQS3JfWkNjZUVfc0tUN2VnVmE1T0pYRjZXT0dqa19PeWNyUVdUOExVMmh6UDhFOHc0UHJNUEdPSGVwMVpHM3hhN0VTZw?oc=5",
 "m": "바이어 · American Eagle"
 }
 ],
@@ -4663,6 +4663,13 @@
 ],
 "target": [
 {
+"d": "2026-09-08",
+"t": "강력한 비상품 성장과 2026년 턴어라운드로 Target Corp. 주가 상승",
+"o": "Target Corp. stock gains on strong non-merchandise growth and 2026 turnaround",
+"u": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNYWFLa1ZDemJBUk5MSVlJQy1MWHc3U1FleHNXOTAyUHpNRFd3VFVjbFdZWWVfWFZkTzNuaW9WSHZwVXY1NzVxNFlhbEVWRmVXWnBuVXFYX3dtU1lMSGpsSUNtQnk1WjViVDgxVEszTnpUT0JlOXdFNzg1VmVoT0JBTndILUlCRF9KQ3lkd1JCUjRKUnZvSzl2SnhiRTMySC1sandPTG5LM2tOVkdFa3NKWWFlamMwbmFXeEdNaHcxQWFyOWM4QW9R?oc=5",
+"m": "바이어 · Target"
+},
+{
 "d": "2026-09-07",
 "t": "미미박스 누니, 美 타깃 1778개 매장 입점…오프라인 유통망 확대",
 "o": "미미박스 누니, 美 타깃 1778개 매장 입점…오프라인 유통망 확대",
@@ -4709,13 +4716,6 @@
 "t": "Target는 식료품으로 쇼핑객을 끌어들입니다. 이제 더 많은 판매가 필요합니다",
 "o": "Target draws shoppers with groceries. Now it needs more sales",
 "u": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPc3A3dDFnTDVObV9iSWRjWlhsVV9vNjJzdVRpY193eGhhNDRlZXdQY2V5ZHBzTlhmYVJoOG1HWGR6M2tOQ2RoTklkRm5xTzU1SEFGUUF4dVhwMUpybHpCc1pPbFJDaWMtSHA2eVl3OVBRa2cyOURPTERNMzJLeXVfdEg0bVl1MXM4N1o0dW44VHZFZw?oc=5",
-"m": "바이어 · Target"
-},
-{
-"d": "2026-08-20",
-"t": "Target 2분기 실적 발표, 더 높은 판매 전망과 트래픽 강조",
-"o": "Target Q2 Earnings Call Highlights Higher Sales Outlook and Traffic",
-"u": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxOMllJaFUzdm5VWXEzejBCcVJ3aTE2STlfalprd245dUZhaXJrakRVMGcwR0h0eUYtYUtSY3h1dVVXVmdFdkdpT3ZFdnEyckZmUVJ5REl4dXlhUWlrTkFobk5uRGQwY1dQNFZfWmJWU3RNZkF4UTY5N285VEUtcXItbWUyQVNUWHZHT19MeWh3SjFUWWN6a0RTWUwzaklUQ3d5UUhpZ3pHZzMxLTNQaEhJRk1PZDhUeWFtS1FHTjdKMHh0OVFOMGVsQnFxb19NUEhBUllPb2l1RzIzT2twSTZEdW45QQ?oc=5",
 "m": "바이어 · Target"
 }
 ],
@@ -4779,6 +4779,13 @@
 ],
 "vsco": [
 {
+"d": "2026-09-08",
+"t": "빅토리아 시크릿 주식에 대한 강세 사례가 연간 가이던스 인상에 따라 바뀔 수 있는 이유를 알아보세요",
+"o": "Learn Why The Bull Case For Victoria's Secret Stock Could Change Following Raised Full Year Guidance",
+"u": "https://news.google.com/rss/articles/CBMiywFBVV95cUxQaTk3N2tvbEkxN2tndmU0bDJKWFJHNkNTLXdfSGV1SEV6Z1ZSTzVvMFdzRlAzR0EtRVIxYzByTmdwNmdNZ3Q5VGZrM2ZBcGJIZmNQTG5waXNiNXp6VXhzdGwxU3U4TF9ZQ05UWTRfZ042WkNvZldQa043bWczU2l3U0h4TEpKYmR3VFgtRV9NbnR0dEs1VFhsRzZOQVFmeHIxUnRlb3BwRGVBRDd2ZjE5aUpFZEdpcEpVcm9ONzktUC1LakJ5VTZuRlU5UdIB0AFBVV95cUxQVzJXSF95aW9PZWdDdHFRZkN3Wk00VDEzc0t0UzdGcktHREZOVjAwYXJPZm9kbGo2MFpkZ0xjT2J0UE1kMUpxSzY4MlhEZHBGb3ZoOTJhSUFEYXkxYkgtSE9yTE1HemY3cjh6ZHJKVW9EcFJkeFB1blVCMWFTMzNyVkVTRnFudlFKb1dtRkZDYTRKNWR6cjFRNGtacWZXR19TaFQxbEFJdzBETUVJOEkzcmZNU1hlOXlYY0FybEJwcmhHX1FnaHFfZW90UC1Fcjli?oc=5",
+"m": "바이어 · Victoria's Secret"
+},
+{
 "d": "2026-09-04",
 "t": "관세 환급으로 인해 Victoria's Secret(VSXY) 2분기 이익이 증가합니다. 하지만 얼마나 증가합니까?",
 "o": "Tariff refund lifts Victoria's Secret (VSXY) Q2 profit—but by how much?",
@@ -4825,13 +4832,6 @@
 "t": "빅토리아 시크릿(NYSE:VSXY), 2026년 2분기 수익에서 애널리스트 추정치보다 낮은 매출 보고, 주가 16.4% 하락",
 "o": "Victoria's Secret (NYSE:VSXY) Reports Sales Below Analyst Estimates In Q2 CY2026 Earnings, Stock Drops 16.4%",
 "u": "https://news.google.com/rss/articles/CBMi-AFBVV95cUxPT0t3VVZ0c3BPci1obDE1czNhaVA0Y3FBSkVsalV5dDFXWThua0N6RDlCMmJqVEJXWktRUXFEREVKVkc3Smtjcnh6MlVVU19GUUVqc21VZ2lfSUw5RGRxT2RxN1YySTVUd3lvcVU2NjEwMjdtWDFsaTQzckdrbWdTTzZYOEExeERIdHVRVUE4Y1FxM0w5VXd2S2pJbVlDeDJIYV9EUVRFNVVqc19MTl9xTXZyUnVVYVZtOE9lbF9ZT2xUVE9tam5iT09Iemx6ODdjcUJ3ODNJRlhEeEFKUS1CV2c1V2pGMUtRdkxTczE0Vm9IeVE5bmxUaQ?oc=5",
-"m": "바이어 · Victoria's Secret"
-},
-{
-"d": "2026-09-03",
-"t": "Victoria's Secret & Co.(NYSE:VSXY), 수익 결과 발표",
-"o": "Victoria's Secret & Co. (NYSE:VSXY) Announces Earnings Results",
-"u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNaGJ5VXFUZDJSa1FIUDB3SXJsLXZSLXRIV3NyOUNlZmFVNXBxeHRDMl91d2I0OVBZVDQ4aGstM2lVcEtvQWRHeXVMVEQ4SVZTZl9RTm8zcXVqVUhVV0Y4M3l2dC1KcHZMclM3dnV3c21Ud0lEZFlqVEpKNUhWRk9YYUFZX3dFaVhUR3dVblhMUUh2WTh1ZjBNNFpxeG9HTnNGaWtvSXVHelFBT1d5NG5NN2RtbGw5VVRxWGhF?oc=5",
 "m": "바이어 · Victoria's Secret"
 }
 ],

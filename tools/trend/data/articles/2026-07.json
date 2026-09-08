@@ -633,6 +633,32 @@
   ]
  },
  {
+  "key": "0dedbf835b3f2753",
+  "title": "Carter's, Inc. Q2 2026 Earnings Call Summary",
+  "title_ko": "Carter's, Inc. 2026년 2분기 실적 요약",
+  "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPdVFJRzFoVFI2M00xbGtrUE1VdURXZFlMNGFCcjdsYnN6el9id0d1N2V2Y3NFZkViakpEZ1lzU0VIQWlRZGpfS1BrRTByd1VaeWxCdzJya3FpbkxJUmxiakk2TW15cGotMmR0a3BxYWVEOEVXT1BhUkhKd0RsVXoxbW42QWxBQlRxZzllMVFMeWI4WmYtUmJLWQ?oc=5",
+  "published": "2026-07-31",
+  "collected": "2026-09-08",
+  "summary": "Carter's, Inc. Q2 2026 Earnings Call Summary Yahoo Finance",
+  "content": "Carter's, Inc. Q2 2026 Earnings Call Summary Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Carter's",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "carters"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Carter's"
+  ]
+ },
+ {
   "key": "0761e1ca60b68349",
   "title": "Carter's, Inc. Reports Earnings Results for the Second Quarter and Six Months Ended July 04, 2026",
   "title_ko": "Carter's, Inc., 2026년 7월 4일에 종료된 2분기 및 6개월 동안의 수익 결과 보고",
@@ -854,6 +880,30 @@
   "hits": 1,
   "sources": [
    "바이어 · PVH"
+  ]
+ },
+ {
+  "key": "a71cb6330382f93c",
+  "title": "Photonic Fabric™ Technology | Enabling optical scale-up networks for accelerated computing - Marvell",
+  "title_ko": "Photonic Fabric™ 기술 | 가속화된 컴퓨팅을 위한 광 확장 네트워크 활성화 - Marvell",
+  "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9DLW9uVDdhOTBGek9JSTFwTDYtYXI4bXdTMXFIaEQ2bnU3WlVxTkdIemhkemVia2t0ZHlkTnk3a0lMbjJUaWUtUk5PNUdsSDVFZHFGTXVmcDVwOGxKXzFBUzkzcjYzOEdqX3c?oc=5",
+  "published": "2026-07-30",
+  "collected": "2026-09-08",
+  "summary": "Photonic Fabric™ Technology | Enabling optical scale-up networks for accelerated computing - Marvell Marvell Technology",
+  "content": "Photonic Fabric™ Technology | Enabling optical scale-up networks for accelerated computing - Marvell Marvell Technology",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "FABRIC",
+  "tags": [],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
