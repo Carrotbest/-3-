@@ -869,12 +869,25 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides), [overrides, records, samples])
   const ledgerByRecord = useMemo(() => new Map(ledger.flatMap((item) => item.record ? [[recordIdentity(item.record), item] as const] : [])), [ledger])
   // 펼침/접힘은 개인 브라우저에 남는다. 팀원 화면에는 영향을 주지 않는다.
+  // 전체 미리보기 안내 말풍선. 담당 카드 아래에 떠올랐다가 3초 뒤 서서히 사라진다.
+  // 전용 행을 두면 표가 그만큼 밀리므로 카드에 겹쳐 띄운다.
+  const [hintMounted, setHintMounted] = useState(false)
+  const [hintShown, setHintShown] = useState(false)
   const [openGroups, setOpenGroups] = useState(() => loadViewGroups(OPEN_GROUPS_STORAGE_KEY, DEFAULT_OPEN))
   const [finishingOpen, setFinishingOpen] = useState(() => loadViewFlag(FINISHING_OPEN_STORAGE_KEY, false))
   useEffect(() => { saveViewPref(OPEN_GROUPS_STORAGE_KEY, openGroups) }, [openGroups])
   useEffect(() => { saveViewPref(FINISHING_OPEN_STORAGE_KEY, finishingOpen) }, [finishingOpen])
   const [search, setSearch] = useState("")
   const [owner, setOwner] = useState(ALL)
+  useEffect(() => {
+    if (owner !== ALL) { setHintMounted(false); setHintShown(false); return }
+    setHintMounted(true)
+    // 한 프레임 뒤에 켜야 트랜지션이 처음부터 그려진다. 같은 프레임에 켜면 튀어나오는 느낌이 없다.
+    const raf = requestAnimationFrame(() => setHintShown(true))
+    const fade = window.setTimeout(() => setHintShown(false), 3000)
+    const drop = window.setTimeout(() => setHintMounted(false), 3800)
+    return () => { cancelAnimationFrame(raf); window.clearTimeout(fade); window.clearTimeout(drop) }
+  }, [owner])
   const [status, setStatus] = useState(ALL)
   const [sortBy, setSortBy] = useState<{ col: string; dir: "asc" | "desc" } | null>(null)
   // 담당 탭에서 완료·DROP·REJECT 를 감출지. 전체 탭은 항상 감춘다.
@@ -2117,7 +2130,17 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   return <div className="flex min-h-0 flex-1 flex-col gap-2 -mx-4 sm:-mx-6 lg:-mx-8" style={{ "--grid-selection": "#217346" } as CSSProperties}>
     <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-wrap items-center gap-1.5" aria-label="주요 개발 담당">
+      <div className="relative flex flex-wrap items-center gap-1.5" aria-label="주요 개발 담당">
+        {hintMounted ? (
+          <div
+            role="status"
+            className={`pointer-events-none absolute left-0 top-full z-50 mt-2 flex max-w-[min(560px,88vw)] items-center gap-2 rounded-[var(--radius)] border border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_14%,var(--card))] px-3 py-2 text-xs text-[var(--foreground)] shadow-lg transition-[opacity,transform] ${hintShown ? "translate-y-0 scale-100 opacity-100 duration-200 ease-out" : "-translate-y-1 scale-95 opacity-0 duration-700 ease-in"}`}
+          >
+            <span aria-hidden="true" className="absolute -top-1.5 left-6 size-3 rotate-45 border-l border-t border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_14%,var(--card))]" />
+            <TriangleAlert className="size-4 shrink-0 text-[var(--warning)]" />
+            <span><strong className="font-semibold">전체 미리보기입니다. 수정할 수 없습니다.</strong> 위에서 담당 카드를 고르면 그 담당의 건만 보이고 셀을 고칠 수 있습니다.</span>
+          </div>
+        ) : null}
         {[{ key: ALL, label: "전체", initial: "전", stat: ownerStats.all }, ...MAIN_DEVELOPERS.map((name) => ({ key: name, label: name, initial: name.charAt(0), stat: ownerStats.byOwner.get(name) ?? { total: 0, active: 0 } }))].map((card) => {
           const on = owner === card.key
           const isAll = card.key === ALL
@@ -2140,36 +2163,43 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             <span className="flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: on ? color : `color-mix(in srgb, ${color} 14%, var(--card))`, color: on ? "#fff" : color }}>{card.initial}</span>
             <span className="flex min-w-0 flex-col items-start leading-tight">
               <span className="truncate text-xs font-semibold" style={{ color: on ? color : "var(--foreground)" }}>{isAll ? "전체 미리보기" : card.label}</span>
-              <span className="text-[10px] tabular-nums text-[var(--muted-foreground)]" title={`진행중 ${card.stat.active} / 전체 ${card.stat.total}`}>진행 {card.stat.active}<span className="opacity-60"> / {card.stat.total}</span></span>
+              {/* 명찰에는 진행 건수만 둔다. 전체 건수는 좁은 칸에서 읽히지 않아 툴팁으로 옮겼다. */}
+              <span className="text-[10px] tabular-nums text-[var(--muted-foreground)]" title={`진행중 ${card.stat.active} / 전체 ${card.stat.total}`}>진행 {card.stat.active}</span>
             </span>
           </button>
         })}
         {owner !== ALL && !MAIN_DEVELOPERS.includes(owner) ? <span className="flex h-8 shrink-0 items-center gap-1 rounded-[calc(var(--radius)-2px)] border border-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))] px-2 text-xs text-[var(--foreground)]">{ownerDisplayName(owner)}<button type="button" title="담당 필터 해제" onClick={() => setOwner(ALL)} className="rounded p-0.5 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"><X className="size-3" /></button></span> : null}
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
+        {/* 접수는 이 화면에서 유일하게 데이터를 새로 만드는 동작이라 혼자 채운 버튼으로 둔다. */}
         <Button type="button" size="sm" onClick={openNew}><Plus className="size-4" />신규 작지 접수</Button>
-        <span className="mx-0.5 h-5 w-px bg-[var(--border)]" />
-        <Button type="button" size="sm" variant="outline" onClick={() => applyPreset("core")}>핵심 보기</Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => applyPreset("process")}>공정·결과</Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => applyPreset("all")}><Columns3 className="size-4" />전체 64열</Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
+        {/* 보기 전환 3종. 서로 배타적이라 붙여 놓고 하나의 스위치처럼 보이게 한다. */}
+        <div className="inline-flex shrink-0 overflow-hidden rounded-[calc(var(--radius)-2px)] border border-[var(--border)]" role="group" aria-label="열 보기 전환">
+          <Button type="button" size="sm" variant="ghost" className="rounded-none border-r border-[var(--border)]" onClick={() => applyPreset("core")}>핵심 보기</Button>
+          <Button type="button" size="sm" variant="ghost" className="rounded-none border-r border-[var(--border)]" onClick={() => applyPreset("process")}>공정·결과</Button>
+          <Button type="button" size="sm" variant="ghost" className="rounded-none" onClick={() => applyPreset("all")}><Columns3 className="size-4" />전체 64열</Button>
+        </div>
         {saveState === "idle" ? null : <span role="status" className={`mr-0.5 whitespace-nowrap rounded-full px-2 py-1 text-[11px] font-medium ${saveState === "error" ? "bg-[var(--destructive)] text-white" : "bg-[var(--muted)] text-[var(--muted-foreground)]"}`}>{saveState === "error" ? "저장 실패" : saveState === "saved" ? "저장됨" : "저장 중"}</span>}
-        <Button type="button" size="sm" variant="outline" disabled={!undoStack.length} title={undoStack.length ? "이전 편집 되돌리기 (Ctrl+Z)" : "되돌릴 편집이 없습니다"} onClick={() => void undoLast()}><Undo2 className="size-4" />되돌리기</Button>
-        <Button type="button" size="sm" variant="outline" disabled={!redoStack.length} title={redoStack.length ? "되돌린 편집 다시 실행 (Ctrl+Y)" : "다시 실행할 편집이 없습니다"} onClick={() => void redoLast()}><Redo2 className="size-4" />다시 실행</Button>
-        <Button type="button" size="sm" variant="outline" disabled={!editEnabled} title={editEnabled ? "찾기·바꾸기 (Ctrl+H)" : EDIT_DISABLED_MESSAGE} onClick={() => { setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true) }}><Search className="size-4" />찾기·바꾸기</Button>
-        {sortBy ? <Button type="button" size="sm" variant="outline" onClick={() => setSortBy(null)}><X className="size-4" />정렬 해제</Button> : null}
+        <div className="inline-flex shrink-0 overflow-hidden rounded-[calc(var(--radius)-2px)] border border-[var(--border)]" role="group" aria-label="편집 도구">
+        <Button type="button" size="sm" variant="ghost" className="rounded-none border-r border-[var(--border)]" disabled={!undoStack.length} title={undoStack.length ? "이전 편집 되돌리기 (Ctrl+Z)" : "되돌릴 편집이 없습니다"} onClick={() => void undoLast()}><Undo2 className="size-4" />되돌리기</Button>
+        <Button type="button" size="sm" variant="ghost" className="rounded-none border-r border-[var(--border)]" disabled={!redoStack.length} title={redoStack.length ? "되돌린 편집 다시 실행 (Ctrl+Y)" : "다시 실행할 편집이 없습니다"} onClick={() => void redoLast()}><Redo2 className="size-4" />다시 실행</Button>
+        <Button type="button" size="sm" variant="ghost" className="rounded-none" disabled={!editEnabled} title={editEnabled ? "찾기·바꾸기 (Ctrl+H)" : EDIT_DISABLED_MESSAGE} onClick={() => { setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true) }}><Search className="size-4" />찾기·바꾸기</Button>
+        </div>
+        {sortBy ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setSortBy(null)}><X className="size-4" />정렬 해제</Button> : null}
+        {/* 밖으로 내보내는 동작 둘. 테두리를 남겨 편집 도구와 구분한다. */}
+        <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
         <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
-        <Button type="button" size="sm" variant="outline" onClick={resetColumnWidths}><RotateCcw className="size-4" />열 너비 초기화</Button>
+        <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={resetColumnWidths}><RotateCcw className="size-4" />열 너비 초기화</Button>
       </div>
     </div>
 
     <div className="flex min-h-0 flex-1 flex-col border-y border-[var(--border)] bg-[var(--card)]">
       <div className="flex flex-wrap items-center gap-1.5 border-b border-[var(--border)] p-2">
-        <label className="relative block w-44 shrink-0"><span className="sr-only">DD 전체 열 검색</span><Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="전체 열 검색" className="pl-8" /></label>
-        <Select value={owner} onValueChange={setOwner}><SelectTrigger className="w-28 shrink-0"><SelectValue placeholder="담당" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 담당</SelectItem>{ownerOptions.map((item) => <SelectItem key={item} value={item}>{ownerDisplayName(item)}</SelectItem>)}</SelectContent></Select>
-        <Select value={status} onValueChange={setStatus}><SelectTrigger className="w-28 shrink-0"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
-        <Button type="button" variant="outline" className="shrink-0" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL) }}><RotateCcw className="size-4" />초기화</Button>
-        <Button type="button" variant={hideClosed ? "default" : "outline"} className="shrink-0" aria-pressed={hideClosed} title="완료, DROP, REJECT 건을 감춥니다" onClick={() => setHideClosed((current) => !current)}>{hideClosed ? <EyeOff className="size-4" /> : <Eye className="size-4" />}진행중만</Button>
+        <label className="relative block w-44 shrink-0"><span className="sr-only">DD 전체 열 검색</span><Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="전체 열 검색" className="h-7 pl-8 text-[11px]" /></label>
+        <Select value={owner} onValueChange={setOwner}><SelectTrigger className="h-7 w-28 shrink-0 text-[11px]"><SelectValue placeholder="담당" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 담당</SelectItem>{ownerOptions.map((item) => <SelectItem key={item} value={item}>{ownerDisplayName(item)}</SelectItem>)}</SelectContent></Select>
+        <Select value={status} onValueChange={setStatus}><SelectTrigger className="h-7 w-28 shrink-0 text-[11px]"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
+        <Button type="button" size="sm" variant="outline" className="h-7 shrink-0 px-2 text-[11px]" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL) }}><RotateCcw className="size-3.5" />초기화</Button>
+        <Button type="button" size="sm" variant={hideClosed ? "default" : "outline"} className="h-7 shrink-0 px-2 text-[11px]" aria-pressed={hideClosed} title="완료, DROP, REJECT 건을 감춥니다" onClick={() => setHideClosed((current) => !current)}>{hideClosed ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}완료 제외</Button>
         {!editEnabled ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--background)] px-2.5 py-1 text-[11px] text-[var(--muted-foreground)]">읽기 전용 · 담당을 선택하면 수정할 수 있습니다</span> : null}
         {intakeNotice ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full bg-[var(--muted)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)]">{intakeNotice}</span> : null}
         <div className="ml-auto flex flex-wrap items-center justify-end gap-2 text-xs text-[var(--muted-foreground)]">
@@ -2183,15 +2213,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </div>
       </div>
 
-      {!editEnabled ? (
-        <div className="px-4 sm:px-6 lg:px-8">
-          <p role="status" className="relative flex items-center gap-2 rounded-[var(--radius)] border border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_10%,var(--card))] px-3 py-2 text-xs text-[var(--foreground)]">
-            <span aria-hidden="true" className="absolute -top-1.5 left-6 size-3 rotate-45 border-l border-t border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_10%,var(--card))]" />
-            <TriangleAlert className="size-4 shrink-0 text-[var(--warning)]" />
-            <span><strong className="font-semibold">전체 미리보기입니다. 수정할 수 없습니다.</strong> 위에서 담당 카드를 고르면 그 담당의 건만 보이고 셀을 고칠 수 있습니다.</span>
-          </p>
-        </div>
-      ) : null}
+      
 
       <div data-route-scroll-root onContextMenu={(event) => {
         const target = event.target as HTMLElement

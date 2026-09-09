@@ -123,12 +123,12 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
       optionProgress: hasStyleNo ? formula?.optionProgress ?? record.tech?.optionProgress : "",
       actual: record.tech?.actual ? { ...record.tech.actual, balance } : record.tech?.actual,
     }
-    // 완료 판정 기준은 결과 RESULT의 FL# 하나다. FDS 날짜로 올리던 규칙을 대신한다.
-    // HOLD·DROP·REJECT는 사람이 정한 상태라 손대지 않는다.
+    // 자동으로는 올리기만 한다. 유효한 FL#이 들어오면 완료로 올린다.
+    // **사람이 고른 상태는 절대 내리지 않는다.** FL 없이 YDS만 입고해 두는 경우가 있어
+    // 수동 완료를 그대로 둬야 한다. HOLD·DROP·REJECT도 같은 이유로 유지한다.
     const currentStatus = normalizedStatus(record)
-    const autoStatus = !currentStatus || currentStatus === "진행중" || currentStatus === "완료"
-    const devStatus = autoStatus
-      ? flDone ? "완료" : currentStatus === "완료" ? "진행중" : record.devStatus
+    const devStatus = flDone && (!currentStatus || currentStatus === "진행중")
+      ? "완료"
       : record.devStatus
     return { ...record, devStatus, opt: hasStyleNo ? formula?.opt ?? record.opt : "", stage, processReached, tech }
   })

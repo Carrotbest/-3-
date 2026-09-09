@@ -1,6 +1,7 @@
 import { create } from "zustand"
 
 import { saveCache, saveCacheLocal } from "@/data/cache"
+import { diffDevRecords, diffFabricEvents, diffRequests, diffTsRecords, logAction, planRevert, type AuditAction, type AuditChange, type AuditKind } from "@/data/audit"
 import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } from "../data/chemical"
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
 import { buildFabricLedger, fabricRecordIdentity, isFabricBalanceExhausted, type FabricLedgerItem } from "../data/fabric-ledger"
@@ -200,9 +201,11 @@ export async function saveChemicalLinks(patch: Record<string, string>): Promise<
 }
 
 /** FABRIC REQUEST 원장 저장. IndexedDB 캐시와 팀 공유(Firestore)에 함께 반영한다. */
-export function saveRequests(requests: RequestStyle[]): void {
+export function saveRequests(requests: RequestStyle[], kind: AuditKind = "edit"): void {
+  const before = useAppStore.getState().requests
   setAppState({ requests })
   void saveCache("requests", requests)
+  void logAction({ kind, screen: "request", changes: diffRequests(before, requests) })
 }
 
 export function addTeamEvent(event: CalendarEvent): void {
@@ -244,11 +247,13 @@ const sortTsByDate = (records: readonly TsRecord[]): TsRecord[] =>
  * 소유자로 로그인한 경우 Firestore 중앙 DB로도 반영해 팀원 화면에 실시간 공유된다.
  * localStorage 기록은 이전 버전과의 호환·로컬 백업 용도로만 남긴다(복구 시 사용).
  */
-export function saveTsRecords(records: TsRecord[]): void {
+export function saveTsRecords(records: TsRecord[], kind: AuditKind = "edit"): void {
+  const before = useAppStore.getState().ts
   const sorted = sortTsByDate(records)
   setAppState({ ts: sorted })
   persistTsRecords(sorted)
   void saveCache("ts", sorted)
+  void logAction({ kind, screen: "ts", changes: diffTsRecords(before, sorted) })
 }
 
 /**
@@ -438,7 +443,73 @@ if (typeof window !== "undefined") {
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") void flushDevelopmentRecords() })
 }
 
-export async function saveDevelopmentRecord(record: DevRecord, previousIdentity?: string): Promise<void> {
+/**
+ * 고른 작업을 되돌린다. 관리자 화면에서만 부른다.
+ *
+ * **현재 값이 그 작업의 결과와 다르면 건너뛴다.** 그 사이 다른 사람이 같은 칸을 고쳤다는 뜻이라,
+ * 그냥 덮으면 그 사람 작업이 지워진다. 되돌린 사실 자체도 이력에 남긴다.
+ *
+ * 지금은 DD MASTER만 실제로 되돌린다. 창고 입출고는 이력이 곧 원장이라
+ * 값을 되돌리는 대신 반대 작업(입고 취소·폐기 복구)을 화면에서 하는 것이 맞다.
+ */
+export async function applyAuditRevert(actions: readonly AuditAction[]): Promise<{ applied: number; conflicted: number }> {
+  const records = useAppStore.getState().records
+  const byKey = new Map(records.map((record) => [`${record._src.sheet}::${record._src.row}`, record]))
+  const readCell = (key: string, field: string): string | null => {
+    const record = byKey.get(key)
+    if (!record) return null
+    const value = field.split(".").reduce<unknown>((node, part) =>
+      node && typeof node === "object" ? (node as Record<string, unknown>)[part] : undefined, record)
+    return value === null || value === undefined ? "" : String(value)
+  }
+
+  const plans = planRevert(actions, readCell)
+  const ddPlan = plans.find((plan) => plan.screen === "dd")
+  const conflicted = plans.reduce((sum, plan) => sum + plan.conflicted, 0)
+  if (!ddPlan || ddPlan.applicable === 0) return { applied: 0, conflicted }
+
+  const drafts = new Map<string, DevRecord>()
+  const undone: AuditChange[] = []
+  for (const row of ddPlan.rows) {
+    if (!row.ok) continue
+    const key = row.change.k
+    const base = drafts.get(key) ?? byKey.get(key)
+    if (!base) continue
+    // 되돌리기는 되돌리기다. 되돌린 값이 다시 이력에 "이후 값"으로 남아야 재되돌리기가 된다.
+    drafts.set(key, writeNestedField(base, row.change.c, row.change.b))
+    undone.push({ k: key, c: row.change.c, b: row.change.a, a: row.change.b })
+  }
+  if (!drafts.size) return { applied: 0, conflicted }
+
+  const next = recalculateDevelopmentRecords(records.map((record) => {
+    const key = `${record._src.sheet}::${record._src.row}`
+    return drafts.get(key) ?? record
+  }))
+  setAppState({ records: next })
+  scheduleRecordsSave()
+  await logAction({ kind: "revert", screen: "dd", changes: undone })
+  return { applied: undone.length, conflicted }
+}
+
+/** `tech.actual.weight` 같은 경로에 값을 넣은 사본을 만든다. 원본은 건드리지 않는다. */
+function writeNestedField(record: DevRecord, field: string, value: string): DevRecord {
+  const parts = field.split(".")
+  const clone = structuredClone(record) as unknown as Record<string, unknown>
+  let node: Record<string, unknown> = clone
+  for (let i = 0; i < parts.length - 1; i += 1) {
+    const key = parts[i]
+    const child = node[key]
+    if (!child || typeof child !== "object") node[key] = {}
+    node = node[key] as Record<string, unknown>
+  }
+  const last = parts[parts.length - 1]
+  const previous = node[last]
+  // 원래 숫자였던 칸은 숫자로 되돌린다. 문자열로 넣으면 집계가 어긋난다.
+  node[last] = typeof previous === "number" && value !== "" && Number.isFinite(Number(value)) ? Number(value) : value
+  return clone as unknown as DevRecord
+}
+
+export async function saveDevelopmentRecord(record: DevRecord, previousIdentity?: string, kind: AuditKind = "edit"): Promise<void> {
   const current = useAppStore.getState().records
   const identity = previousIdentity ?? recordIdentity(record)
   const exists = current.some((item) => recordIdentity(item) === identity)
@@ -447,6 +518,7 @@ export async function saveDevelopmentRecord(record: DevRecord, previousIdentity?
     : [record, ...current])
   setAppState({ records: next })
   scheduleRecordsSave()
+  void logAction({ kind, screen: "dd", changes: diffDevRecords(current, next) })
 }
 
 export interface SaveDevelopmentIntakeResult {
@@ -520,10 +592,12 @@ export async function deleteDevelopmentRecord(identity: string): Promise<void> {
  * 여러 행을 한 번에 저장한다(붙여넣기·내용 지우기·되돌리기).
  * recalculate=false 면 값을 그대로 복원한다(되돌리기 전용).
  */
-export async function writeDevelopmentRecords(records: DevRecord[], recalculate = true): Promise<void> {
+export async function writeDevelopmentRecords(records: DevRecord[], recalculate = true, kind: AuditKind = "paste"): Promise<void> {
+  const before = useAppStore.getState().records
   const next = recalculate ? recalculateDevelopmentRecords(records) : records
   setAppState({ records: next })
   scheduleRecordsSave()
+  void logAction({ kind, screen: "dd", changes: diffDevRecords(before, next) })
 }
 
 export async function reorderDevelopmentRecords(orderedIdentities: readonly string[]): Promise<void> {
@@ -717,6 +791,7 @@ export async function saveFabricFields(item: FabricLedgerItem, patch: Record<str
 }
 
 export async function applyFabricAction(input: ApplyFabricActionInput): Promise<void> {
+  const beforeEvents = useAppStore.getState().fabricEvents
   const state = useAppStore.getState()
   const occurredAt = new Date().toISOString()
   const actor = input.actor?.trim() || "관리자"
@@ -795,6 +870,7 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
     saveCache("fabricEvents", fabricEvents),
     records === state.records ? Promise.resolve() : saveCache("records", records),
   ])
+  void logAction({ kind: "warehouse", screen: "warehouse", changes: diffFabricEvents(beforeEvents, useAppStore.getState().fabricEvents) })
 }
 
 /**

@@ -21,7 +21,6 @@ import { PlaceholderPage } from "@/routes/PlaceholderPage"
 import { Rdda } from "@/routes/Rdda"
 import { Setting } from "@/routes/Setting"
 import { Study } from "@/routes/Study"
-import { Sync } from "@/routes/Sync"
 import { TS } from "@/routes/TS"
 import { FabricAnalysis } from "@/routes/FabricAnalysis"
 import { FabricDetail } from "@/routes/FabricDetail"
@@ -33,7 +32,7 @@ import { TrendMacro } from "@/routes/TrendMacro"
 import { ensureTsSeed, migrateLocalTsIntoSync, normalizeLoadedRecords, repairTsData, setAppState, useAppStore } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
-const IMPLEMENTED_ROUTES = new Set(["/", "/request", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/fabric/:key", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
+const IMPLEMENTED_ROUTES = new Set(["/", "/request", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/fabric/:key", "/warehouse", "/calendar", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
 
 function ScreenAccessDenied() {
   return (
@@ -166,8 +165,9 @@ function AppLayout() {
             <Route path="/request" element={<FabricRequest />} />
             <Route path="/warehouse" element={<Warehouse />} />
             <Route path="/calendar" element={<Calendar />} />
-            <Route path="/sync" element={<Sync />} />
-            <Route path="/setting" element={<Setting />} />
+            {/* DATA 화면은 SETTING의 데이터 탭으로 합쳤다. 옛 주소는 그대로 넘겨 준다. */}
+            <Route path="/sync" element={<Navigate to="/setting" replace />} />
+            <Route path="/setting" element={isOwnerRaw ? <Setting /> : <ScreenAccessDenied />} />
             <Route path="/trend/portfolio" element={<Portfolio />} />
             <Route path="/trend/fabric" element={<TrendFabric />} />
             <Route path="/trend/macro" element={<TrendMacro />} />

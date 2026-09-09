@@ -12,7 +12,7 @@ export const SCREEN_PERMISSION_OPTIONS = [
   { key: "portfolio", label: "PORTFOLIO", paths: ["/trend/portfolio"] },
   { key: "processInnovation", label: "PROCESS INNOVATION", paths: ["/process-innovation"] },
   { key: "calendar", label: "CALENDAR", paths: ["/calendar"] },
-  { key: "data", label: "DATA", paths: ["/sync"] },
+  // SETTING은 소유자 전용이다. 목록에 남겨 두되 실제 접근은 App에서 소유자만 통과시킨다.
   { key: "setting", label: "SETTING", paths: ["/setting"] },
 ] as const
 

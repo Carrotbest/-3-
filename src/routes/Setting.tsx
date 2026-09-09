@@ -5,6 +5,9 @@ import { SectionCard } from "@/components/dashboard/SectionCard"
 import { DataTable, type DataTableColumn } from "@/components/data-table/DataTable"
 import { StatusBadge } from "@/components/data-table/StatusBadge"
 import { PageHeader } from "@/components/layout/PageHeader"
+import { AuditLogPanel } from "@/components/settings/AuditLogPanel"
+import { UserApprovalPanel } from "@/components/settings/UserApprovalPanel"
+import { Sync } from "@/routes/Sync"
 import { DataUpload } from "@/components/upload/DataUpload"
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Badge } from "@/components/ui/badge"
@@ -208,52 +211,62 @@ export function Setting() {
     <section className="min-w-0 space-y-6">
       <PageHeader
         title="SETTING"
-        subtitle="기준값, 사용자 권한과 알림 규칙을 관리합니다."
+        subtitle="데이터 연결, 기준값, 사용자 권한을 한곳에서 관리합니다. 관리자 전용 화면입니다."
         actions={<Button type="button" onClick={save}><Save aria-hidden="true" />저장</Button>}
       />
       <p aria-live="polite" className="min-h-5 text-sm font-medium text-[var(--chart-2)]">{saveMessage}</p>
 
-      <SectionCard title="파일 연결 센터" subtitle="열려 있는 Excel 파일도 탐색기에서 각 카드로 끌어다 놓을 수 있습니다. 파일은 한 번에 하나씩 해당 연결 카드에 올려주세요.">
-        <div className="grid gap-4 lg:grid-cols-2">
-          {[
-            { key: "development", title: "개발 현황 (DD)", file: "Development Dashboard.xlsx", targets: "HOME 완료·신규·스케줄 / DEVELOPMENT 전체 현황", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("development", files, ingestDevelopment) },
-            { key: "samples", title: "샘플 관리 대장", file: "샘플 관리 대장.xlsx", targets: "FL 등록 현황 / DEVELOPMENT 완료 샘플 아카이브", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("samples", files, ingestSamples), ownerOnly: true },
-            { key: "study", title: "STUDY 현황", file: "Capability Improvement.xlsx", targets: "STUDY 진행 현황 / HOME 업무 카드", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("study", files, ingestStudyWorkbook) },
-            { key: "ts", title: "TS 관리", file: "Technical survices {연도}.xlsx", targets: "TS 접수·처리 목록 / HOME 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("ts", files, ingestTs) },
-            { key: "rdda", title: "RDDA 리포트", file: "26년 N월 RDDA.xlsx", targets: "RDDA REPORT Meeting·Pickup·월별 스냅샷", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("rdda", files, async (file) => ingestRdda([file])) },
-            { key: "fabric", title: "원단분석", file: "원단분석 export 파일", targets: "FABRIC ANALYSIS / HOME 원단분석 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("fabric", files, ingestFabric) },
-            { key: "materials", title: "자료목록", file: "자료목록.xlsx", targets: "트렌드 자료 목록 엑셀 (MACRO·FABRIC·PORTFOLIO). TS·STUDY는 각 화면 엑셀에서 자동 반영됩니다.", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("materials", files, ingestMaterials) },
-            { key: "chemical", title: "기능성 개발 List", file: "Chemical 개발 List.xlsx", targets: "PORTFOLIO / HOME 포트폴리오 카드", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("chemical", files, ingestChemical) },
-          ].filter((item) => !("ownerOnly" in item && item.ownerOnly) || isOwner).map((item) => (
-            <article key={item.key} className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]">
-              <div className="flex items-start gap-3 border-b border-[var(--border)] p-4">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><Database className="size-4" /></span>
-                <div className="min-w-0 flex-1"><h3 className="text-sm font-semibold text-[var(--foreground)]">{item.title}</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">파일: {item.file}</p><p className="mt-2 text-xs font-medium text-[var(--foreground)]">연결: {item.targets}</p>{item.key === "chemical" ? <p className="mt-2 text-xs text-[var(--muted-foreground)]">초기 이관은 엑셀로 진행하고, 이후 신규 건은 PORTFOLIO 화면에서 직접 등록합니다.</p> : null}{recentUploads[item.key] ? <p className="mt-2 truncate text-[11px] text-[var(--chart-2)]">최근 선택: {recentUploads[item.key]}</p> : null}{item.key === "materials" ? <div className="mt-3 space-y-1 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3 text-xs text-[var(--muted-foreground)]" aria-live="polite"><p><strong className="text-[var(--foreground)]">인식</strong> {materialDiagnostics.recognized.toLocaleString("ko-KR")}건</p><p>TS {materialDiagnostics.byKind.TS.toLocaleString("ko-KR")} · STUDY {materialDiagnostics.byKind.STUDY.toLocaleString("ko-KR")} · MACRO {materialDiagnostics.byKind.MACRO.toLocaleString("ko-KR")} · FABRIC {materialDiagnostics.byKind.FABRIC.toLocaleString("ko-KR")} · PORTFOLIO {materialDiagnostics.byKind.PORTFOLIO.toLocaleString("ko-KR")}</p><p>구분 불명 {materialDiagnostics.unknownKind.toLocaleString("ko-KR")}건 · 링크 없음 {materialDiagnostics.missingLink.toLocaleString("ko-KR")}건</p></div> : null}{item.key === "chemical" && chemical ? <div className="mt-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3 text-xs text-[var(--muted-foreground)]" aria-live="polite"><strong className="text-[var(--foreground)]">인식</strong> 카테고리 {chemical.totals.categories.toLocaleString("ko-KR")} · 항목 {chemical.totals.items.toLocaleString("ko-KR")} · FL {chemical.totals.fl.toLocaleString("ko-KR")} · PASS {chemical.totals.pass.toLocaleString("ko-KR")}</div> : null}</div>
-              </div>
-              <div className="space-y-3 p-3">
-                <DataUpload kind={item.key} label={`${item.title} 파일 놓기`} accept={item.accept} onFiles={item.onFiles} />
-                {item.key === "samples" ? <div className="border-t border-[var(--border)] pt-3"><p className="mb-2 text-xs text-[var(--muted-foreground)]">컷오버 파일 생성: 같은 파서로 읽어 archive.json을 내려받습니다. 현재 앱 데이터와 캐시는 바꾸지 않습니다.</p><DataUpload kind="samples-archive" label="아카이브 JSON 내보내기" accept=".xlsx,.xls" compact onFiles={exportLedgerArchive} />{recentUploads["samples-archive"] ? <p className="mt-2 truncate text-[11px] text-[var(--chart-2)]">최근 선택: {recentUploads["samples-archive"]}</p> : null}</div> : null}
-              </div>
-            </article>
-          ))}
-        </div>
-        <div className="mt-4 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4">
-          <p className="text-sm font-semibold text-[var(--foreground)]">샘플관리대장 FL 파싱 확인</p>
-          <p className="mt-1 text-xs text-[var(--muted-foreground)]">동일 FL 제거 후 {sampleAudit.total.toLocaleString("ko-KR")}건 · FL 2606 {sampleAudit.june.toLocaleString("ko-KR")}건 · FL 2607 {sampleAudit.july.toLocaleString("ko-KR")}건 · 월 형식 불일치 {sampleAudit.invalidMonth.toLocaleString("ko-KR")}건</p>
-          <p className="mt-1 text-xs text-[var(--muted-foreground)]">인식 시트: {sampleAudit.sheets.length ? sampleAudit.sheets.join(" · ") : "기존 캐시 — 샘플관리대장을 다시 올리면 시트별 정보가 표시됩니다."}</p>
-        </div>
-        <div className="mt-4 border-t border-[var(--border)] pt-4">
-          <Button type="button" variant="outline" onClick={() => { void resetCache() }}><Trash2 aria-hidden="true" />캐시 비우기</Button>
-        </div>
-      </SectionCard>
 
-      <Tabs defaultValue="standards" className="min-w-0">
+      <Tabs defaultValue="data" className="min-w-0">
         <TabsList aria-label="SETTING 메뉴">
+          <TabsTrigger value="data">데이터</TabsTrigger>
+          <TabsTrigger value="files">파일 연결</TabsTrigger>
           <TabsTrigger value="standards">기준값</TabsTrigger>
           <TabsTrigger value="users">사용자</TabsTrigger>
           <TabsTrigger value="alerts">알림</TabsTrigger>
           <TabsTrigger value="history">이력</TabsTrigger>
         </TabsList>
+
+        {/* 옛 DATA 화면. 데이터 출처와 대조 결과를 그대로 가져왔다. */}
+        <TabsContent value="data" className="mt-6">
+          <Sync embedded />
+        </TabsContent>
+
+        <TabsContent value="files" className="mt-6 space-y-4">
+        <SectionCard title="파일 연결 센터" subtitle="열려 있는 Excel 파일도 탐색기에서 각 카드로 끌어다 놓을 수 있습니다. 파일은 한 번에 하나씩 해당 연결 카드에 올려주세요.">
+          <div className="grid gap-4 lg:grid-cols-2">
+            {[
+              { key: "development", title: "개발 현황 (DD)", file: "Development Dashboard.xlsx", targets: "HOME 완료·신규·스케줄 / DEVELOPMENT 전체 현황", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("development", files, ingestDevelopment) },
+              { key: "samples", title: "샘플 관리 대장", file: "샘플 관리 대장.xlsx", targets: "FL 등록 현황 / DEVELOPMENT 완료 샘플 아카이브", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("samples", files, ingestSamples), ownerOnly: true },
+              { key: "study", title: "STUDY 현황", file: "Capability Improvement.xlsx", targets: "STUDY 진행 현황 / HOME 업무 카드", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("study", files, ingestStudyWorkbook) },
+              { key: "ts", title: "TS 관리", file: "Technical survices {연도}.xlsx", targets: "TS 접수·처리 목록 / HOME 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("ts", files, ingestTs) },
+              { key: "rdda", title: "RDDA 리포트", file: "26년 N월 RDDA.xlsx", targets: "RDDA REPORT Meeting·Pickup·월별 스냅샷", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("rdda", files, async (file) => ingestRdda([file])) },
+              { key: "fabric", title: "원단분석", file: "원단분석 export 파일", targets: "FABRIC ANALYSIS / HOME 원단분석 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("fabric", files, ingestFabric) },
+              { key: "materials", title: "자료목록", file: "자료목록.xlsx", targets: "트렌드 자료 목록 엑셀 (MACRO·FABRIC·PORTFOLIO). TS·STUDY는 각 화면 엑셀에서 자동 반영됩니다.", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("materials", files, ingestMaterials) },
+              { key: "chemical", title: "기능성 개발 List", file: "Chemical 개발 List.xlsx", targets: "PORTFOLIO / HOME 포트폴리오 카드", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("chemical", files, ingestChemical) },
+            ].filter((item) => !("ownerOnly" in item && item.ownerOnly) || isOwner).map((item) => (
+              <article key={item.key} className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]">
+                <div className="flex items-start gap-3 border-b border-[var(--border)] p-4">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-[var(--foreground)]"><Database className="size-4" /></span>
+                  <div className="min-w-0 flex-1"><h3 className="text-sm font-semibold text-[var(--foreground)]">{item.title}</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">파일: {item.file}</p><p className="mt-2 text-xs font-medium text-[var(--foreground)]">연결: {item.targets}</p>{item.key === "chemical" ? <p className="mt-2 text-xs text-[var(--muted-foreground)]">초기 이관은 엑셀로 진행하고, 이후 신규 건은 PORTFOLIO 화면에서 직접 등록합니다.</p> : null}{recentUploads[item.key] ? <p className="mt-2 truncate text-[11px] text-[var(--chart-2)]">최근 선택: {recentUploads[item.key]}</p> : null}{item.key === "materials" ? <div className="mt-3 space-y-1 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3 text-xs text-[var(--muted-foreground)]" aria-live="polite"><p><strong className="text-[var(--foreground)]">인식</strong> {materialDiagnostics.recognized.toLocaleString("ko-KR")}건</p><p>TS {materialDiagnostics.byKind.TS.toLocaleString("ko-KR")} · STUDY {materialDiagnostics.byKind.STUDY.toLocaleString("ko-KR")} · MACRO {materialDiagnostics.byKind.MACRO.toLocaleString("ko-KR")} · FABRIC {materialDiagnostics.byKind.FABRIC.toLocaleString("ko-KR")} · PORTFOLIO {materialDiagnostics.byKind.PORTFOLIO.toLocaleString("ko-KR")}</p><p>구분 불명 {materialDiagnostics.unknownKind.toLocaleString("ko-KR")}건 · 링크 없음 {materialDiagnostics.missingLink.toLocaleString("ko-KR")}건</p></div> : null}{item.key === "chemical" && chemical ? <div className="mt-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3 text-xs text-[var(--muted-foreground)]" aria-live="polite"><strong className="text-[var(--foreground)]">인식</strong> 카테고리 {chemical.totals.categories.toLocaleString("ko-KR")} · 항목 {chemical.totals.items.toLocaleString("ko-KR")} · FL {chemical.totals.fl.toLocaleString("ko-KR")} · PASS {chemical.totals.pass.toLocaleString("ko-KR")}</div> : null}</div>
+                </div>
+                <div className="space-y-3 p-3">
+                  <DataUpload kind={item.key} label={`${item.title} 파일 놓기`} accept={item.accept} onFiles={item.onFiles} />
+                  {item.key === "samples" ? <div className="border-t border-[var(--border)] pt-3"><p className="mb-2 text-xs text-[var(--muted-foreground)]">컷오버 파일 생성: 같은 파서로 읽어 archive.json을 내려받습니다. 현재 앱 데이터와 캐시는 바꾸지 않습니다.</p><DataUpload kind="samples-archive" label="아카이브 JSON 내보내기" accept=".xlsx,.xls" compact onFiles={exportLedgerArchive} />{recentUploads["samples-archive"] ? <p className="mt-2 truncate text-[11px] text-[var(--chart-2)]">최근 선택: {recentUploads["samples-archive"]}</p> : null}</div> : null}
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-4 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4">
+            <p className="text-sm font-semibold text-[var(--foreground)]">샘플관리대장 FL 파싱 확인</p>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">동일 FL 제거 후 {sampleAudit.total.toLocaleString("ko-KR")}건 · FL 2606 {sampleAudit.june.toLocaleString("ko-KR")}건 · FL 2607 {sampleAudit.july.toLocaleString("ko-KR")}건 · 월 형식 불일치 {sampleAudit.invalidMonth.toLocaleString("ko-KR")}건</p>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">인식 시트: {sampleAudit.sheets.length ? sampleAudit.sheets.join(" · ") : "기존 캐시 — 샘플관리대장을 다시 올리면 시트별 정보가 표시됩니다."}</p>
+          </div>
+          <div className="mt-4 border-t border-[var(--border)] pt-4">
+            <Button type="button" variant="outline" onClick={() => { void resetCache() }}><Trash2 aria-hidden="true" />캐시 비우기</Button>
+          </div>
+        </SectionCard>
+        </TabsContent>
 
         <TabsContent value="standards" className="mt-6 space-y-4">
           <div className="grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
@@ -302,6 +315,8 @@ export function Setting() {
               ))}
             </div>
           </SectionCard>
+          <UserApprovalPanel />
+
           <SectionCard title="사용자 권한" subtitle="권한은 저장 버튼을 눌러 반영합니다.">
             <div className="divide-y divide-[var(--border)]">
               {draft.users.map((user) => (
@@ -344,6 +359,8 @@ export function Setting() {
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">
+          <AuditLogPanel />
+
           <SectionCard title="변경 이력" subtitle={<NumberTicker value={saved.history.length} suffix="건" />} contentClassName="p-0">
             <DataTable columns={historyColumns} rows={saved.history} getRowId={(row) => row.id} pageSize={10} emptyMessage="아직 변경 이력이 없습니다." />
           </SectionCard>

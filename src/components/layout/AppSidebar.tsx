@@ -71,7 +71,8 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
   const visibleNavigationGroups = navigationGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => isOwner || canAccessScreenPath(item.path, screenPermissions)),
+      // ownerOnly 항목은 화면 권한을 주더라도 소유자에게만 보인다.
+      items: group.items.filter((item) => item.ownerOnly ? isOwner : isOwner || canAccessScreenPath(item.path, screenPermissions)),
     }))
     .filter((group) => group.items.length > 0)
 

@@ -4,7 +4,6 @@ import {
   Boxes,
   CalendarDays,
   ClipboardList,
-  Database,
   FlaskConical,
   Globe2,
   Layers3,
@@ -27,6 +26,8 @@ export interface NavigationItem {
   label: string
   path: string
   icon: LucideIcon
+  /** 소유자(관리자)만 보이는 항목. 화면 권한과 무관하게 감춘다. */
+  ownerOnly?: boolean
   children?: Array<Pick<NavigationItem, "label" | "path">>
 }
 
@@ -50,8 +51,7 @@ export const routeDefinitions: RouteDefinition[] = [
   { path: "/fabric-analysis", title: "FABRIC ANALYSIS", subtitle: "원단 분석 화면을 준비하고 있습니다." },
   { path: "/warehouse", title: "WAREHOUSE", subtitle: "완료 샘플의 입고·보관·소진·폐기 이력을 관리합니다." },
   { path: "/calendar", title: "CALENDAR", subtitle: "팀 일정과 주요 납기를 확인합니다." },
-  { path: "/sync", title: "DATA", subtitle: "TDS 데이터 출처와 대조 결과를 확인합니다." },
-  { path: "/setting", title: "SETTING", subtitle: "업무 플랫폼 설정을 관리합니다." },
+  { path: "/setting", title: "SETTING", subtitle: "데이터 연결, 기준값, 사용자 권한을 한곳에서 관리합니다." },
   { path: "/trend/macro", title: "MACRO TREND", subtitle: "바이어 매출과 원자재·정부 통계를 확인합니다." },
   { path: "/trend/fabric", title: "FABRIC TREND", subtitle: "소재·원사·원단·염색가공 개발 기사를 모아 봅니다." },
   { path: "/trend/portfolio", title: "PORTFOLIO", subtitle: "팀이 개발한 기능성 원단 자산입니다." },
@@ -106,8 +106,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     label: "시스템",
     items: [
-      { label: "DATA", path: "/sync", icon: Database },
-      { label: "SETTING", path: "/setting", icon: Settings },
+      { label: "SETTING", path: "/setting", icon: Settings, ownerOnly: true },
     ],
   },
 ]
