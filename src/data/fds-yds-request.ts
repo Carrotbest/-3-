@@ -41,22 +41,33 @@ const EXCLUDED_STATUS = new Set(["DROP", "HOLD", "REJECT"])
 const text = (value: unknown): string => String(value ?? "").trim()
 const dateText = (value: unknown): string => text(value) ? fmtDate(value) : ""
 
-/** 추출 조건을 바꾸려면 여기 한 곳만 고친다. */
+/** 표의 STYLE 칸에 넣는 값. GD#/SA# 한 곳에서만 만든다(추출 조건과 표시가 어긋나면 안 된다). */
+const styleNoOf = (record: DevRecord): string =>
+  text(record.tech?.development?.developmentNo || record.gdNo || record.saNo)
+
+/**
+ * 추출 조건을 바꾸려면 여기 한 곳만 고친다.
+ *
+ * STYLE#과 ARRANGE#가 **둘 다** 있어야 목록에 올린다. 둘 중 하나라도 비면 GD가 그 작지를 찾지 못해
+ * 요청을 보내도 접수가 안 된다. 목록에서 빠졌다면 DD MASTER의 GD#/SA#·Arrange# 를 먼저 채운다.
+ */
 export function collectFdsYdsRows(records: readonly DevRecord[]): FdsYdsRow[] {
   return records.filter((record) => {
     const co = text(record.tech?.development?.co || record.devType).toUpperCase()
     const status = text(record.devStatus || record.stage).toUpperCase()
-    return co === "GD" && !EXCLUDED_STATUS.has(status) && Boolean(text(record.styleNo))
-      && (!text(record.tech?.sampleDates?.fds) || !text(record.tech?.sampleDates?.yds))
+    if (co !== "GD" || EXCLUDED_STATUS.has(status) || !text(record.styleNo)) return false
+    if (!styleNoOf(record) || !text(record.tech?.arrangeNo)) return false
+    return !text(record.tech?.sampleDates?.fds) || !text(record.tech?.sampleDates?.yds)
   }).map((record) => ({
     key: `${record._src.sheet}::${record._src.row}`,
     owner: text(record.owner),
     hmp: text(record.styleNo),
-    style: text(record.tech?.development?.developmentNo || record.gdNo || record.saNo),
+    style: styleNoOf(record),
     arrange: text(record.tech?.arrangeNo),
     body: bodyLabel(record),
     fabrication: text(record.tech?.yarnDetail),
-    request: dateText(record.requestDate),
+    // 요청일은 메일 보내는 날에 맞춰 손으로 적는다. 접수일(requestDate)과 다르다.
+    request: "",
     fds: dateText(record.tech?.sampleDates?.fds),
     yds: dateText(record.tech?.sampleDates?.yds),
     remark: text(record.note),

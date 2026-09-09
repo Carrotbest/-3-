@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
 import { CalendarDays, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
 import { Popover } from "radix-ui"
 import { Link } from "react-router-dom"
@@ -647,6 +647,33 @@ const GD_ONLY_COLUMN_IDS = new Set(["fds", "yds"])
 const isLockedCell = (record: DevRecord, column: MasterColumn): boolean =>
   isFixedColumn(column) || (GD_ONLY_COLUMN_IDS.has(column.id) && !isGdRecord(record))
 
+/**
+ * 인라인 편집기 네 종류(날짜·수기·선택·제안)가 공유하는 키 처리.
+ *
+ * **전파를 멈추는 것이 핵심이다.** 표 단축키는 window 의 keydown 리스너(`onKey`)가 받고,
+ * 그 리스너는 "포커스가 입력칸 안이면 무시"로 편집 중을 피해 간다. 그런데 Enter·Tab 을 받으면
+ * 여기서 `onCommit` 이 편집기를 먼저 닫아 버린다. 이벤트가 window 에 닿을 때는 입력칸이 이미
+ * 사라진 뒤라 그 방어가 통하지 않고, 편집기가 한 칸 표가 또 한 칸을 옮겨 **선택이 두 칸씩 건너뛴다**.
+ * `preventDefault` 는 기본 동작만 막을 뿐 전파는 막지 않으므로 `stopPropagation` 이 따로 필요하다.
+ * Escape 도 같다. 막지 않으면 편집만 취소되는 게 아니라 표의 선택 범위까지 풀린다.
+ *
+ * 네 곳에 같은 코드를 두면 한 곳만 고치고 지나가기 쉬워 함수로 묶는다.
+ */
+function editorKeyHandler<T extends HTMLInputElement | HTMLSelectElement>(
+  onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void,
+  onCancel: () => void,
+) {
+  return (event: ReactKeyboardEvent<T>) => {
+    if (event.key === "Escape" || event.key === "Enter" || event.key === "Tab") event.stopPropagation()
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
+    else if (event.key === "Escape") { event.preventDefault(); onCancel() }
+    else if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault()
+      onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
+    }
+  }
+}
+
 function InlineDateEditor({ initialValue, onCommit, onCancel }: { initialValue: string; onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void; onCancel: () => void }) {
   // 저장된 전체 날짜를 초기값으로 보존하므로, 손대지 않고 Enter를 눌러도 연도가 바뀌지 않는다.
   const [raw, setRaw] = useState(initialValue)
@@ -660,14 +687,7 @@ function InlineDateEditor({ initialValue, onCommit, onCancel }: { initialValue: 
       const next = event.relatedTarget
       if (next instanceof Node && editorRef.current?.contains(next)) return
       onCommit(event.currentTarget.value)
-    }} className="h-8 min-w-0 flex-1 rounded-none border-0 bg-transparent px-1.5 text-xs text-[var(--foreground)] outline-none" onKeyDown={(event) => {
-      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
-      else if (event.key === "Escape") { event.preventDefault(); onCancel() }
-      else if (event.key === "Enter" || event.key === "Tab") {
-        event.preventDefault()
-        onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
-      }
-    }} />
+    }} className="h-8 min-w-0 flex-1 rounded-none border-0 bg-transparent px-1.5 text-xs text-[var(--foreground)] outline-none" onKeyDown={editorKeyHandler(onCommit, onCancel)} />
     <DatePickerPopover value={raw} onChange={chooseDate} iconOnly triggerClassName="h-8 w-8 shrink-0 justify-center border-l border-[var(--border)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]" />
     <DateValuePreview raw={raw} className="absolute left-1 top-[calc(100%+2px)] z-[65] whitespace-nowrap rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 shadow-sm" />
   </div>
@@ -681,38 +701,17 @@ function InlineEditor({ record, column, options, initial, onCommit, onCancel }: 
   const opts = options && options.length ? options : undefined
   if (column.date) return <InlineDateEditor initialValue={initialValue} onCommit={onCommit} onCancel={onCancel} />
   if (initial !== undefined) {
-    return <input autoFocus type={column.number ? "number" : "text"} defaultValue={initialValue} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={(event) => {
-      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
-      else if (event.key === "Escape") { event.preventDefault(); onCancel() }
-      else if (event.key === "Enter" || event.key === "Tab") {
-        event.preventDefault()
-        onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
-      }
-    }} />
+    return <input autoFocus type={column.number ? "number" : "text"} defaultValue={initialValue} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={editorKeyHandler(onCommit, onCancel)} />
   }
   if (opts && !column.suggest) {
-    return <select autoFocus defaultValue={initialValue} className={cls} onChange={(event) => onCommit(event.target.value)} onBlur={onCancel} onKeyDown={(event) => {
-      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
-      else if (event.key === "Escape") { event.preventDefault(); onCancel() }
-      else if (event.key === "Enter" || event.key === "Tab") {
-        event.preventDefault()
-        onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
-      }
-    }}>
+    return <select autoFocus defaultValue={initialValue} className={cls} onChange={(event) => onCommit(event.target.value)} onBlur={onCancel} onKeyDown={editorKeyHandler(onCommit, onCancel)}>
       <option value="">—</option>
       {initialValue && !opts.includes(initialValue) ? <option value={initialValue}>{initialValue}</option> : null}
       {opts.map((option) => <option key={option} value={option}>{option}</option>)}
     </select>
   }
   const listId = `inline-${column.id}`
-  return <><input autoFocus type={column.number ? "number" : "text"} defaultValue={initialValue} list={column.suggest ? listId : undefined} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={(event) => {
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
-    else if (event.key === "Escape") { event.preventDefault(); onCancel() }
-    else if (event.key === "Enter" || event.key === "Tab") {
-      event.preventDefault()
-      onCommit(event.currentTarget.value, event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")
-    }
-  }} />{column.suggest && opts ? <datalist id={listId}>{opts.map((option) => <option key={option} value={option} />)}</datalist> : null}</>
+  return <><input autoFocus type={column.number ? "number" : "text"} defaultValue={initialValue} list={column.suggest ? listId : undefined} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={editorKeyHandler(onCommit, onCancel)} />{column.suggest && opts ? <datalist id={listId}>{opts.map((option) => <option key={option} value={option} />)}</datalist> : null}</>
 }
 
 /** 데이터 셀. 더블클릭 시 인라인 편집(고정값은 음영·수정 불가). */
@@ -2360,6 +2359,10 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <DialogHeader>
           <DialogTitle>FDS/YDS 요청</DialogTitle>
           <DialogDescription>GD 진행분 중 FDS 또는 YDS 미수취 {fdsYdsRows.length}건</DialogDescription>
+          <p className="text-[11px] leading-relaxed text-[var(--destructive)]">
+            STYLE#과 ARRANGE#가 모두 입력된 건만 올라옵니다. 빠진 건이 있으면 DD MASTER에서 두 값을 먼저 채우세요.
+            REQUEST 날짜는 비워 두었습니다. 메일 보내는 날에 맞춰 직접 입력하세요.
+          </p>
         </DialogHeader>
         <DialogBody className="overflow-auto">
           {fdsYdsRows.length ? <table className="w-full table-fixed border-collapse text-xs" style={{ minWidth: 1200 }}>
