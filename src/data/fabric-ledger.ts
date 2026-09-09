@@ -5,6 +5,7 @@ import type {
   FabricLedgerOverride,
   FabricLedgerStatus,
 } from "./schema"
+import { isGdRecord } from "./dd-workflow"
 import { WEB_INTAKE_SHEET } from "./schema"
 
 export interface FabricLedgerOutbound {
@@ -200,8 +201,18 @@ export function fabricRecordIdentity(record: DevRecord | null): string | undefin
   return record ? recordIdentity(record) : undefined
 }
 
+/**
+ * 입고 대기 판정. 개발처에 따라 보는 칸이 다르다.
+ *
+ * - GD 건: YDS 수취일. 원단 yds가 따로 들어오는 공정이 있다.
+ * - 국내 건: Received date. YDS 공정 자체가 없어서 그 칸이 비활성이다.
+ *   실물이 들어와도 YDS만 보면 영영 입고 대기로 안 올라간다.
+ */
 function statusFromRecord(record: DevRecord): FabricLedgerStatus {
-  return String(record.tech?.sampleDates?.yds ?? "").trim() ? "READY" : "DEVELOPING"
+  const arrived = isGdRecord(record)
+    ? record.tech?.sampleDates?.yds
+    : record.receivedDate
+  return String(arrived ?? "").trim() ? "READY" : "DEVELOPING"
 }
 
 export function statusFromSample(sample: CompletedSample): FabricLedgerStatus {
@@ -209,7 +220,7 @@ export function statusFromSample(sample: CompletedSample): FabricLedgerStatus {
   if (sheet.includes("폐기")) return "DISPOSED"
   if (sheet.includes("소진완료") || sheet.includes("소진")) return "EXHAUSTED"
   if (sheet.includes("창고보관") || sheet.includes("창고")) return "WAREHOUSE"
-  // 입고 대기는 DD MASTER 내 YDS 날짜만 만든다(statusFromRecord).
+  // 입고 대기는 DD MASTER가 만든다(statusFromRecord). GD는 YDS, 국내는 Received date다.
   // 대장 '현황' 시트 행은 여기로 올리지 않는다. 창고에서 직접 추가한 행만 예외다.
   if (sample.sourceSheet === WEB_INTAKE_SHEET) return "READY"
   return "DEVELOPING"

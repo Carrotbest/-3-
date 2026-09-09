@@ -48,6 +48,14 @@ export const DD_PASS_FAIL_OPTIONS = ["PASS", "FAIL"] as const
  * "확인중", "FL 대기" 같은 메모가 들어간 칸을 완료로 올리지 않기 위한 것이다.
  * 채번 규칙(`FL+YY+MM+4자리`)과 자릿수가 같다. RDDA 집계 기준은 건드리지 않는다.
  */
+/**
+ * 개발처가 GD인가. `Co` 값이 비어 있으면 `devType`으로 본다.
+ * FDS·YDS 공정과 창고 입고 대기 판정이 이 값으로 갈린다.
+ */
+export function isGdRecord(record: DevRecord): boolean {
+  return String(record.tech?.development?.co || record.devType || "").trim().toUpperCase() === "GD"
+}
+
 export function isCompletedFlNo(flNo: string | undefined): boolean {
   return /^FL\d{8}$/.test(String(flNo ?? "").replace(/\s+/g, "").toUpperCase())
 }

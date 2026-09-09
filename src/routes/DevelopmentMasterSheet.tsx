@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataUpload } from "@/components/upload/DataUpload"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo } from "@/data/dd-workflow"
+import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
 import { fmtDateMd, normalizeDateInput, toDate } from "@/data/format"
@@ -102,10 +102,6 @@ interface MasterGroup {
   /** 에디터 전용 레이아웃. schedule=공정별 라벨 좌측+축소 카드, data=한 줄 배열+라벨 상단. */
   editorLayout?: "schedule" | "data"
 }
-
-/** 개발처가 GD인가. FDS·YDS는 GD 생산분에만 있는 공정이다. */
-const isGdRecord = (record: DevRecord): boolean =>
-  String(record.tech?.development?.co || record.devType || "").trim().toUpperCase() === "GD"
 
 const text = (value: CellValue): string => value === null || value === undefined || value === "" ? "" : String(value)
 const dateText = (value: CellValue): string => value ? fmtDateMd(String(value)) : ""
@@ -231,7 +227,7 @@ const GROUPS: MasterGroup[] = [
   },
   {
     key: "result", label: "결과 RESULT", color: "var(--chart-2)", columns: [
-      { id: "receivedDate", label: "Hanger", width: 80, date: true, value: (row) => row.receivedDate, render: receiptDateRender((row) => row.receivedDate) },
+      { id: "receivedDate", label: "Received date", width: 96, date: true, value: (row) => row.receivedDate, render: receiptDateRender((row) => row.receivedDate) },
       { id: "fds", label: "FDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.fds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.fds) },
       { id: "yds", label: "YDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.yds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.yds) },
       { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo.trim() ? <span className={`font-mono ${isCompletedFlNo(row.flNo) ? "" : "text-[var(--destructive)]"}`} title={isCompletedFlNo(row.flNo) ? undefined : "FL + 숫자 8자리 형식만 완료로 인정합니다"}>{row.flNo}</span> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미입력</span> : "" },

@@ -35,7 +35,7 @@
 
 ## 창고 (`src/routes/Warehouse.tsx`, `src/data/fabric-ledger.ts`)
 - DD+대장 FL 우선·Style 보조 병합. 개발진행→입고대기(READY)→창고보관→소진/폐기. 입고 시 R&D No. 자동 채번. 웹상태=IDB `fabricOverrides`, 이력=`fabricEvents`.
-- **입고 대기 소스는 DD의 YDS 날짜뿐이다**(`statusFromRecord`). 대장 '현황' 시트는 READY로 올리지 않는다. 창고에서 '직접 추가'한 웹 등록 행만 예외.
+- **입고 대기 판정은 개발처로 갈린다**(`statusFromRecord`). GD는 YDS 수취일, 국내·생산은 Received date다. 국내는 YDS 공정이 없어 그 칸이 비활성이라 YDS만 보면 영영 안 올라온다. 대장 '현황' 시트는 READY로 올리지 않는다. 창고에서 '직접 추가'한 웹 등록 행만 예외.
 - 목록에서 빼는 '선택 삭제'는 `REMOVED` 오버라이드로 감추는 것이다. 원본은 지우지 않는다. 폐기와 다르다.
 - 웹 등록 행 key는 `sample.id` 기준이다. 배열 인덱스로 되돌리면 대장 재업로드 때 채번이 어긋난다.
 - 창고팀(정산관리팀) 보고 자료 내보내기: `src/data/warehouse-export.ts`. 시트 = `요약` + 일자별 `MM.DD` + `LIST`.
@@ -70,9 +70,10 @@
 | 화면 | 원본 | 기준 |
 |---|---|---|
 | HOME 완료/접수 | DD | Received/Request Date + 기간 |
+| HOME 스케줄 임박·지연 | DD | Due Date로 계산, **완료 판정은 Received date**(`isScheduleOpen`). FL#은 등록 번호일 뿐이라 실물 도착 기준으로 본다 |
 | RDDA 등록 | ~2026-07 대장 FL.# YYMM / 08~ DD Received | 동일 FL 1건(대장 우선) `mergedFlRegistrations` |
 | DEVELOPMENT | DD+대장 | `fabric-rnd-fl-ledger` |
-| 창고 입고대기 | DD YDS 날짜 | 대장 현황 시트 제외 |
+| 창고 입고대기 | GD=DD YDS / 국내=Received date | 대장 현황 시트 제외 |
 | STUDY/TS | 엑셀+웹입력 | 주차별 / 중복제외 |
 | TREND | RSS 24곳, SEC 공시, World Bank, US Census | 사전 점수 채택, 공개 자료만 |
 | RDDA REPORT | 월별 파일 | YTD 스냅샷, 합산 금지(미착수) |

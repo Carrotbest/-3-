@@ -297,6 +297,21 @@ export const isInProgress = (record: DevRecord): boolean => {
   return statusOf(record) !== "done"
 }
 
+/**
+ * 납기 임박·지연 계산에 남길 건인가.
+ *
+ * 여기서만 완료 기준이 다르다. **Hanger 수취일(receivedDate)이 있으면 끝난 것으로 본다.**
+ * `isInProgress`는 Status(=FL# 기반 완료 판정)를 따르는데, FL#은 등록 번호일 뿐이라
+ * 실물 행거가 아직 안 온 건이 임박·지연 목록에서 빠져 버린다. 일정 관리는 실물 도착이 기준이다.
+ *
+ * HOLD·DROP·REJECT는 사람이 멈춘 건이라 일정에서 뺀다.
+ */
+const isScheduleOpen = (record: DevRecord): boolean => {
+  if (String(record.receivedDate ?? "").trim()) return false
+  const status = String(record.devStatus ?? "").trim().toLowerCase().replace(/\s+/g, "")
+  return !/^(hold|보류|drop|reject)$/.test(status)
+}
+
 /** 접수 현황은 GD 개발 건에 한정한다(국내개발 제외). GD#가 legacy 개발번호 형식으로 기재되면 접수된 것으로 본다. */
 export function receiptStatus(records: readonly DevRecord[]): ReceiptSummary {
   const active = records.filter((record) => isInProgress(record) && devTypeOf(record) === "GD")
@@ -842,8 +857,9 @@ export function homeKpiRecordDetails(
     .filter((record) => inDateRange(record.requestDate, ranges.new))
     .map((record) => ({ record, date: record.requestDate ?? "", dayOffset: null }))
     .sort((a, b) => b.date.localeCompare(a.date))
+  // 임박·지연은 Due Date로 재고, 완료 여부는 Hanger 수취일로 가른다.
   const schedule = records
-    .filter(isInProgress)
+    .filter(isScheduleOpen)
     .map((record) => ({ record, remaining: daysLeft(record.dueDate, today) }))
     .filter((item): item is { record: DevRecord; remaining: number } => item.remaining !== null)
   const due = schedule
