@@ -23,6 +23,11 @@ export interface DevTechnical {
   /** Finishing A~D의 빈 칸 위치까지 유지하기 위한 원본 슬롯. */
   finishingSlots?: { a?: string; b?: string; c?: string; d?: string }
   sampleDates?: { fds?: string; yds?: string }
+  /**
+   * FDS/YDS 요청서의 BODY 값. 비어 있으면 `opt`에서 만든다(B01, B02...).
+   * GD가 작지 접수 순서를 바꾼 경우에만 사람이 채운다. 채워지면 `opt`보다 우선한다.
+   */
+  bodyNo?: string
   optionProgress?: string
   review?: string
   // ORIGINAL 분석
@@ -94,6 +99,72 @@ export interface DevRecord {
   sortOrder?: number
   tech?: DevTechnical
   _src: DevRecordSource
+}
+
+/**
+ * 1팀 소싱 차트의 스타일 1건. 엑셀 27열 중 스타일 단위로 공통인 값만 담는다.
+ * 옵션별로 갈리는 값은 RequestOption이 갖는다.
+ */
+export interface RequestStyle {
+  /** 내부 식별자. crypto.randomUUID 기반. 화면 표시는 chart + seq로 한다. */
+  reqId: string
+  /** 소속 차트명. 예: "26.FEB EU MARKET" */
+  chart: string
+  /** 진행 단계. 엑셀의 시트 두 개를 이 값 하나로 대신한다. */
+  stage: "분석" | "개발"
+  /** 차트 내 순번(엑셀 A열) */
+  seq: number
+  // ORIGINAL — 엑셀 B~G
+  /** Storage 오브젝트 경로. 예: "requests/<reqId>/full.webp" */
+  imagePath?: string
+  /** 목록용 썸네일 경로 */
+  imageThumbPath?: string
+  /** 엑셀 C열. EU MARKET·SEASON 건은 DD의 Style No.와 같은 값을 쓰는 것이 관행이다. */
+  garmentNo: string
+  brand: string
+  contents: string
+  origConstruction: string
+  origWeight: number | ""
+  // 분석 — 엑셀 H~M
+  yarnAnalysis: string
+  devConstruction: string
+  comment: string
+  analyst: string
+  // 의뢰 — 엑셀 N~Q
+  urgent: boolean
+  /** 1팀 의뢰 담당(엑셀 O열) */
+  requester: string
+  /** R&D 개발 담당(엑셀 P열) */
+  developer: string
+  /** 엑셀 Q열 "개발" */
+  devPlan: string
+  options: RequestOption[]
+  createdAt: string
+  updatedAt: string
+}
+
+/**
+ * 스타일에서 파생된 옵션 라인 1건. DD MASTER 행과 1대1로 연결한다.
+ * 개발처·Yarn ETA·READY DATE·FL#은 연결된 DD 행에서 읽어 표시하므로 여기 저장하지 않는다.
+ */
+export interface RequestOption {
+  /** `${reqId}#${no}` */
+  optId: string
+  /** 옵션 번호. 1부터 */
+  no: number
+  /** 엑셀 S열 */
+  yarnDetail: string
+  /** 엑셀 T열 */
+  color: string
+  /** 엑셀 U열 */
+  dyeingMethod: string
+  /** 엑셀 Z열. 수기 유지 */
+  remark: string
+  /**
+   * DD 행 연결. 값 기반 키라 DD 엑셀 재업로드 후에도 살아남는다.
+   * R104에서 DD 쪽에도 optId를 심어 양방향으로 만든다.
+   */
+  ddLink?: { styleNo: string; opt: string }
 }
 
 export interface FabricAnalysisRow {

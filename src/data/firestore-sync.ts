@@ -11,7 +11,7 @@ import { db, auth } from "./firebase"
 import { CACHE_KEYS, saveCacheLocal, setFirestorePush, type CacheKey } from "./cache"
 import { currentUserIsOwner, currentUserCanWrite } from "./auth"
 import { mergeKeyed } from "./sync-merge"
-import { setAppState, useAppStore, type AppState, type AppStatePatch } from "../store/useAppStore"
+import { normalizeLoadedRecords, setAppState, useAppStore, type AppState, type AppStatePatch } from "../store/useAppStore"
 import type { TsRecord } from "./sample"
 import { isTsWellFormed } from "./ts-health"
 
@@ -25,6 +25,7 @@ const MERGE_IDS: Record<string, (item: never) => string> = {
   records: (item: { _src: { sheet: string; row: number } }) => `${item._src.sheet}::${item._src.row}`,
   fabricOverrides: (item: { key: string }) => item.key,
   fabricEvents: (item: { id: string }) => item.id,
+  requests: (item: { reqId: string }) => item.reqId,
 }
 
 /** 이 클라이언트가 마지막으로 본 원격 값. 병합 기준선이다. */
@@ -102,7 +103,7 @@ async function pushCacheNow<K extends CacheKey>(key: K, value: AppState[K]): Pro
     }
     // 병합 결과가 내 화면과 다르면(팀원의 변경이 섞였으면) 화면에도 반영한다.
     if (merged !== value) {
-      setAppState({ [key]: merged } as AppStatePatch)
+      setAppState(normalizeLoadedRecords({ [key]: merged } as AppStatePatch))
       void saveCacheLocal(key, merged)
     }
   } catch (error) {
@@ -199,7 +200,7 @@ function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }
     }
   })
 
-  if (changed) setAppState(patch)
+  if (changed) setAppState(normalizeLoadedRecords(patch))
   return new Set(metas.keys())
 }
 

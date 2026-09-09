@@ -19,11 +19,30 @@
 - 작지 첨부 자동 채움: `src/data/zaji.ts`(GD `Fabric sample request report.xlsx`만, 국내 2종 미지원). 회귀규칙(조직명 최장일치·Part+Color dedup·시즌변환) 유지.
 - 드롭다운=정규목록 ∪ 실데이터. Season `SS'26`.
 
+## FABRIC REQUEST (`src/routes/FabricRequest.tsx`, `src/data/request-template.ts`, `src/data/request-image.ts`)
+- `/request` = 통합원단부 1팀(유관부서) 소싱 의뢰 원장. **DD MASTER보다 먼저다.** 차트 작성 → 작지 → DD 행 생성 순서.
+- 저장은 `requests` CACHE_KEY. 스타일 1건에 옵션 라인 N개. 옵션 라인 1개가 DD 행 1개와 짝이 될 예정(연결은 미구현).
+- 엑셀에서 한 셀에 "1./2./3."으로 눌러 담던 옵션을 라인으로 푼 것이 이 화면의 핵심이다.
+- 행 높이 고정(스타일 112px, 옵션 40px). 넘치면 셀 안에서만 스크롤한다. 엑셀처럼 행을 늘리지 않는다.
+- 셀 더블클릭 인라인 편집. 사진과 옵션 번호는 자동 값이라 편집 불가. URGENT는 더블클릭으로 바로 뒤집는다.
+- 밴드 4개(ORIGINAL·분석·의뢰·옵션)는 상단 칩으로 접고 편다. 열 머리와 밴드 머리 오른쪽 끝을 끌어 너비를 조절한다.
+  밴드 손잡이는 그 밴드 열을 비율대로 함께 조절한다. 저장은 localStorage `fabric.request.colWidths`, `fabric.request.openGroups`.
+- **양식과 파서는 `request-template.ts`의 `TEMPLATE_COLUMNS` 하나를 공유한다. 열 순서를 바꾸면 기존 양식 파일이 깨진다.**
+- 업로드 병합 키는 `차트 + Garment No.`다. 기존 건은 `reqId`와 사진 경로를 지킨다. 안 지키면 재업로드마다 사진이 날아간다.
+- 사진은 Firebase Storage(`requests/{reqId}/full.webp`, `thumb.webp`). 원본 1200px, 썸네일 400px webp로 줄여 올린다.
+- **`getStorage`는 지연 초기화다**(`firebase.ts`의 `appStorage()`). 최상단에서 만들면 Storage 실패가 앱 전체 부팅을 막는다.
+- 양식에 사진 열은 없다. 엑셀 이미지 셀은 원본 차트에서도 깨져 있었다. 사진은 웹에서만 올린다.
+
 ## 창고 (`src/routes/Warehouse.tsx`, `src/data/fabric-ledger.ts`)
 - DD+대장 FL 우선·Style 보조 병합. 개발진행→입고대기(READY)→창고보관→소진/폐기. 입고 시 R&D No. 자동 채번. 웹상태=IDB `fabricOverrides`, 이력=`fabricEvents`.
 - **입고 대기 소스는 DD의 YDS 날짜뿐이다**(`statusFromRecord`). 대장 '현황' 시트는 READY로 올리지 않는다. 창고에서 '직접 추가'한 웹 등록 행만 예외.
 - 목록에서 빼는 '선택 삭제'는 `REMOVED` 오버라이드로 감추는 것이다. 원본은 지우지 않는다. 폐기와 다르다.
 - 웹 등록 행 key는 `sample.id` 기준이다. 배열 인덱스로 되돌리면 대장 재업로드 때 채번이 어긋난다.
+- 창고팀(정산관리팀) 보고 자료 내보내기: `src/data/warehouse-export.ts`. 시트 = `요약` + 일자별 `MM.DD` + `LIST`.
+  **원본 양식을 행 단위로 재현한다.** 입고 목록과 출고완료 블록 사이 빈 줄이 일자별 2줄, 요약 1줄이다. 창고팀이 시트째 복사해 붙인다.
+  입출고 시트 날짜는 날짜값+numFmt, LIST 요청일은 `8/31` 텍스트다. 서로 다르다.
+  **LIST의 `Style No.` 열에는 `storageNo`(R&D No.)를 넣는다.** 원본 값이 그렇다. 실제 Style No.를 넣으면 창고팀 파일이 어긋난다.
+  소진(EXHAUST)과 폐기(DISPOSE)는 `RND 출고 완료 현황` 한 목록으로 합친다. 전사 부서별 집계 시트는 만들지 않는다(3팀 데이터로는 못 만든다).
 
 ## TREND REPORT (`tools/trend`, `src/routes/TrendFabric.tsx`, `src/routes/TrendMacro.tsx`)
 - 파이썬 수집기가 `public/data/trend/{feed,kpi,status}.json`을 만들고 두 화면이 그 파일만 fetch한다. 서버·DB·AI 호출 없다.
@@ -39,6 +58,13 @@
 - 그리드 셀 드래그는 `mousedown`에서 `preventDefault`를 건다. 안 걸면 브라우저 기본 선택이 같이 시작돼 화면 전체가 반투명 사본으로 끌려다닌다. 버튼·입력칸 위에서는 걸지 않는다.
 - **실데이터·캐시 내용을 로그·git·공개 파일에 넣지 말 것.**
 - TS 실시간공유 데이터 손실 이력 있음 — 동기화 손대기 전 `fabric-rnd-ts` 필독.
+
+## 보기 설정 (`src/data/view-prefs.ts`)
+- 열 너비와 그룹 펼침/접힘은 **개인 브라우저(localStorage)에만** 남는다. `CACHE_KEYS`에 없어 Firestore로 안 올라간다. 한 사람이 바꿔도 팀원 화면은 그대로다.
+- 계정이 아니라 브라우저에 붙는다. 공용 PC에서는 앞사람 설정이 보이고, 다른 PC로 가면 기본값에서 시작한다.
+- 키: `dd-col-widths-v2`, `dd-open-groups-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`.
+- 검색·필터·정렬·탭·선택은 일부러 저장하지 않는다. 남아 있으면 다음에 열었을 때 행이 왜 안 보이는지 헷갈린다.
+- **예외: DD MASTER 행 드래그 순서(`sortOrder`)는 레코드에 저장돼 팀 전체가 공유한다.** 보기 설정이 아니다.
 
 ## 데이터 소스 규칙
 | 화면 | 원본 | 기준 |

@@ -1,5 +1,6 @@
 export const SCREEN_PERMISSION_OPTIONS = [
   { key: "home", label: "HOME", paths: ["/"] },
+  { key: "fabricRequest", label: "FABRIC REQUEST", paths: ["/request"] },
   { key: "development", label: "DEVELOPMENT", paths: ["/development"] },
   { key: "ddMaster", label: "DD MASTER", prefixes: ["/development/"] },
   { key: "warehouse", label: "WAREHOUSE", paths: ["/warehouse"], prefixes: ["/fabric/"] },

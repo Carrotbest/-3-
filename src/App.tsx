@@ -25,14 +25,15 @@ import { Sync } from "@/routes/Sync"
 import { TS } from "@/routes/TS"
 import { FabricAnalysis } from "@/routes/FabricAnalysis"
 import { FabricDetail } from "@/routes/FabricDetail"
+import { FabricRequest } from "@/routes/FabricRequest"
 import { Warehouse } from "@/routes/Warehouse"
 import { Portfolio } from "@/routes/Portfolio"
 import { TrendFabric } from "@/routes/TrendFabric"
 import { TrendMacro } from "@/routes/TrendMacro"
-import { ensureTsSeed, migrateLocalTsIntoSync, repairTsData, setAppState, useAppStore } from "@/store/useAppStore"
+import { ensureTsSeed, migrateLocalTsIntoSync, normalizeLoadedRecords, repairTsData, setAppState, useAppStore } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
-const IMPLEMENTED_ROUTES = new Set(["/", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/fabric/:key", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
+const IMPLEMENTED_ROUTES = new Set(["/", "/request", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/fabric/:key", "/warehouse", "/calendar", "/sync", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
 
 function ScreenAccessDenied() {
   return (
@@ -60,7 +61,7 @@ function AppLayout() {
   const canViewCurrentPath = isOwner || canAccessScreenPath(pathname, screenPermissions)
   // DD 마스터는 엑셀 작업공간처럼 좌우 빈칸 없이 콘텐츠 폭 전체를 쓴다(폭 제약·패딩 해제).
   // 창고도 DD MASTER 처럼 화면 높이를 꽉 채운다. 그래야 헤더가 붙어 있고 가로 스크롤바가 하단에 온다.
-  const fullBleed = (pathname === "/development/workspace" || pathname === "/warehouse") && canViewCurrentPath
+  const fullBleed = (pathname === "/development/workspace" || pathname === "/warehouse" || pathname === "/request") && canViewCurrentPath
 
   // 네비게이션으로 화면이 바뀔 때 이전 화면의 스크롤 위치를 이어받지 않는다.
   // 일반 페이지(window)와 전체화면 작업공간의 내부 스크롤 루트를 함께 초기화한다.
@@ -98,7 +99,7 @@ function AppLayout() {
       if (!current) return
       if (embedded) {
         const next = { ...cached, ...embedded.patch }
-        setAppState(next)
+        setAppState(normalizeLoadedRecords(next))
         // 데모/내장 데이터는 로컬 캐시에만 저장한다(Firestore로 올리지 않음).
         await Promise.allSettled([
           saveCacheLocal("records", embedded.patch.records),
@@ -107,7 +108,7 @@ function AppLayout() {
         ])
         markEmbeddedAppDataApplied(embedded.signature)
       } else if (Object.keys(cached).length) {
-        setAppState(cached)
+        setAppState(normalizeLoadedRecords(cached))
       }
       // 샘플관리대장 아카이브는 "비었을 때만 채우는 씨앗"이다. 이미 값이 있으면 건드리지 않는다.
       // 배포할 때마다 웹에서 쌓은 데이터가 되돌아가면 안 된다. 갱신은 화면에서 엑셀을 올려서 하고,
@@ -162,6 +163,7 @@ function AppLayout() {
             <Route path="/study" element={<Study />} />
             <Route path="/fabric-analysis" element={<FabricAnalysis />} />
             <Route path="/fabric/:key" element={<FabricDetail />} />
+            <Route path="/request" element={<FabricRequest />} />
             <Route path="/warehouse" element={<Warehouse />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/sync" element={<Sync />} />

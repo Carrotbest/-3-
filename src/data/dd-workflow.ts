@@ -43,6 +43,15 @@ export const DD_COMPANY_OPTIONS = ["GD", "국내", "생산"] as const
 export const DD_DYEING_OPTIONS = ["SD", "DD", "PSD", "YD", "SOAP", "PFD", "기타"] as const
 export const DD_PASS_FAIL_OPTIONS = ["PASS", "FAIL"] as const
 
+/**
+ * 완료로 인정하는 FL 번호인지 본다. 공백을 걷고 대문자로 맞춘 뒤 FL + 숫자 8자리만 통과시킨다.
+ * "확인중", "FL 대기" 같은 메모가 들어간 칸을 완료로 올리지 않기 위한 것이다.
+ * 채번 규칙(`FL+YY+MM+4자리`)과 자릿수가 같다. RDDA 집계 기준은 건드리지 않는다.
+ */
+export function isCompletedFlNo(flNo: string | undefined): boolean {
+  return /^FL\d{8}$/.test(String(flNo ?? "").replace(/\s+/g, "").toUpperCase())
+}
+
 const normalizedStatus = (record: DevRecord): string => String(record.devStatus ?? "").trim().toUpperCase()
 const identity = (record: DevRecord): string => `${record._src.sheet}::${record._src.row}`
 
@@ -80,15 +89,17 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
 
   return records.map((record) => {
     const hasStyleNo = Boolean(record.styleNo.normalize("NFKC").trim())
+    // 완료 판정은 결과 RESULT의 FL#이 형식에 맞을 때만이다. 메모가 적힌 칸은 완료가 아니다.
+    const flDone = isCompletedFlNo(record.flNo)
     const processDates = record.tech?.processDates
     const processReached = {
-      yarn: Boolean(record.flNo) || reached(processDates?.yarn, today),
-      knitting: Boolean(record.flNo) || reached(processDates?.knitting, today),
-      dyeing: Boolean(record.flNo) || reached(processDates?.dyeing, today),
-      finishing: Boolean(record.flNo) || reached(processDates?.finishing, today),
+      yarn: flDone || reached(processDates?.yarn, today),
+      knitting: flDone || reached(processDates?.knitting, today),
+      dyeing: flDone || reached(processDates?.dyeing, today),
+      finishing: flDone || reached(processDates?.finishing, today),
     }
     const stage = hasStyleNo
-      ? record.flNo
+      ? flDone
         ? "완료"
         : processReached.finishing ? "가공"
           : processReached.dyeing ? "염색"
@@ -104,10 +115,12 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
       optionProgress: hasStyleNo ? formula?.optionProgress ?? record.tech?.optionProgress : "",
       actual: record.tech?.actual ? { ...record.tech.actual, balance } : record.tech?.actual,
     }
-    // FDS 수취 날짜가 들어오면 완료로 올린다. HOLD·DROP·REJECT는 사람이 정한 상태라 유지한다.
+    // 완료 판정 기준은 결과 RESULT의 FL# 하나다. FDS 날짜로 올리던 규칙을 대신한다.
+    // HOLD·DROP·REJECT는 사람이 정한 상태라 손대지 않는다.
     const currentStatus = normalizedStatus(record)
-    const devStatus = String(record.tech?.sampleDates?.fds ?? "").trim() && (!currentStatus || currentStatus === "진행중")
-      ? "완료"
+    const autoStatus = !currentStatus || currentStatus === "진행중" || currentStatus === "완료"
+    const devStatus = autoStatus
+      ? flDone ? "완료" : currentStatus === "완료" ? "진행중" : record.devStatus
       : record.devStatus
     return { ...record, devStatus, opt: hasStyleNo ? formula?.opt ?? record.opt : "", stage, processReached, tech }
   })
@@ -125,7 +138,9 @@ export function ddWarnings(record: DevRecord, today = new Date()): DdWarning[] {
   const due = toDate(record.dueDate)
   if (record.receivedDate && !["완료", "REJECT"].includes(status)) warnings.push({ key: "status", label: "완료일 입력 · Status 확인" })
   if (due && dayValue(due) < dayValue(today) && status !== "완료") warnings.push({ key: "due", label: "Due Date 경과" })
-  if (record.receivedDate && !record.flNo.trim() && status !== "DROP") warnings.push({ key: "fl", label: "FL 미입력" })
+  if (record.receivedDate && !isCompletedFlNo(record.flNo) && status !== "DROP") {
+    warnings.push({ key: "fl", label: record.flNo.trim() ? "FL 형식 확인" : "FL 미입력" })
+  }
   if (record.tech?.arrangeNo && record.tech?.development?.co && record.tech.development.co !== "GD") warnings.push({ key: "arrange", label: "Arrange#는 GD만 입력" })
   if (record.tech?.passFail === "FAIL" && !record.tech.failReason) warnings.push({ key: "fail", label: "Fail 사유 미입력" })
 

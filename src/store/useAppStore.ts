@@ -4,7 +4,7 @@ import { saveCache, saveCacheLocal } from "@/data/cache"
 import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } from "../data/chemical"
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
 import { buildFabricLedger, fabricRecordIdentity, isFabricBalanceExhausted, type FabricLedgerItem } from "../data/fabric-ledger"
-import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type StudyRecord } from "../data/schema"
+import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type RequestStyle, type StudyRecord } from "../data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
 import {
   sampleCompleted,
@@ -67,6 +67,7 @@ export interface AppState {
   materialDiagnostics: MaterialDiagnostics
   fabricOverrides: FabricLedgerOverride[]
   fabricEvents: FabricLedgerEvent[]
+  requests: RequestStyle[]
   trends: TrendItem[]
   chemical: ChemicalPortfolio | null
   chemicalManual: ChemicalItem[]
@@ -79,6 +80,22 @@ export interface AppState {
 }
 
 export type AppStatePatch = Partial<Omit<AppState, "sensitiveUnlocked">>
+
+/**
+ * 캐시·Firestore에서 들어온 레코드에 파생값을 다시 입힌다.
+ *
+ * `recalculateDevelopmentRecords`는 업로드와 저장 때만 돈다. 그래서 `stage`·`devStatus` 같은
+ * 파생값이 "저장하던 시점의 규칙"으로 굳은 채 캐시에 남는다. 판정 규칙을 바꿔도(예: 완료를
+ * FL# 형식 기준으로) 이미 저장된 행에는 영영 반영되지 않는다. 불러오는 길목에서 한 번 다시 계산해
+ * 화면·집계·내보내기가 같은 기준을 보게 한다.
+ *
+ * 되돌리기 경로(`writeDevelopmentRecords(records, false)`)는 여기를 거치지 않는다. 그쪽은
+ * 값을 그대로 복원해야 하므로 손대지 않는다.
+ */
+export function normalizeLoadedRecords(patch: AppStatePatch): AppStatePatch {
+  if (!Array.isArray(patch.records)) return patch
+  return { ...patch, records: recalculateDevelopmentRecords(patch.records) }
+}
 
 const sensitiveFrom = (meta: DataMeta): boolean => meta.mode === "tds" && meta.passed
 
@@ -119,6 +136,7 @@ export function createInitialAppState(): AppState {
     },
     fabricOverrides: [],
     fabricEvents: [],
+    requests: [],
     trends,
     chemical,
     chemicalManual: [],
@@ -179,6 +197,12 @@ export async function saveChemicalLinks(patch: Record<string, string>): Promise<
   })
   setAppState({ chemicalLinks: next })
   await saveCache("chemicalLinks", next)
+}
+
+/** FABRIC REQUEST 원장 저장. IndexedDB 캐시와 팀 공유(Firestore)에 함께 반영한다. */
+export function saveRequests(requests: RequestStyle[]): void {
+  setAppState({ requests })
+  void saveCache("requests", requests)
 }
 
 export function addTeamEvent(event: CalendarEvent): void {

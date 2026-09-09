@@ -4,7 +4,7 @@ const DB_NAME = "fabric-rnd-cache"
 const DB_VERSION = 2
 const STORE_NAME = "parsed"
 export const ATTACHMENT_STORE_NAME = "attachments"
-export const CACHE_KEYS = ["records", "completed", "meta", "study", "studyFiles", "events", "rdda", "fabricAnalysis", "ts", "orgMembers", "materials", "materialsManual", "materialDiagnostics", "fabricOverrides", "fabricEvents", "chemical", "chemicalManual", "chemicalLinks"] as const
+export const CACHE_KEYS = ["records", "completed", "meta", "study", "studyFiles", "events", "rdda", "fabricAnalysis", "ts", "orgMembers", "materials", "materialsManual", "materialDiagnostics", "fabricOverrides", "fabricEvents", "chemical", "chemicalManual", "chemicalLinks", "requests"] as const
 export type CacheKey = (typeof CACHE_KEYS)[number]
 
 export function openCacheDatabase(): Promise<IDBDatabase> {

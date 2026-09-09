@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode , type CSSProperties } from "react"
 import * as Popover from "@radix-ui/react-popover"
-import { ArchiveRestore, Copy, Info, ListX, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
+import { ArchiveRestore, Copy, FileDown, Info, ListX, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Badge } from "@/components/ui/badge"
@@ -21,6 +21,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { buildFabricLedger, fabricRecordIdentity, type FabricLedgerItem } from "@/data/fabric-ledger"
+import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
+import { downloadBlob } from "@/data/dd-export"
+import { buildWarehouseWorkbook, collectWarehouseExport, warehouseExportFileName } from "@/data/warehouse-export"
 import { FabricDetailBody } from "@/routes/FabricDetail"
 import { fmtDateFull, fmtDateMd } from "@/data/format"
 import type { FabricLedgerStatus } from "@/data/schema"
@@ -29,7 +32,7 @@ import { useInView } from "@/lib/useInView"
 import { addManualIntake, updateManualIntake, applyFabricAction, confirmWarehouseBaseline, removeFabricRows, useAppStore } from "@/store/useAppStore"
 
 type WarehouseTab = "READY" | "WAREHOUSE" | "HISTORY"
-type DisposalReason = "용량 초과" | "품질 불량"
+type DisposalReason = "용량 초과" | "품질 불량" | "개발 중단"
 type ActionKind = "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "DISPOSE" | "STOCK" | "OUTBOUND" | "EXHAUST" | "RESTORE" | "REMOVE"
 
 interface ActionDialogState {
@@ -120,6 +123,7 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
 ]
 
 const WH_COL_WIDTHS_KEY = "warehouse-col-widths-v1"
+const WH_OPEN_GROUPS_KEY = "warehouse-open-groups-v1"
 const MIN_COL_WIDTH = 48
 
 /** 행 높이가 h-8 로 고정이라 보이는 구간만 그리면 된다. 이력 탭은 4,400행이 넘는다. */
@@ -128,7 +132,7 @@ const MANUAL_EDITABLE = new Set(["styleNo", "flNo", "buyer", "season", "category
 const ROW_HEIGHT = 32
 const ROW_OVERSCAN = 12
 
-const DISPOSAL_REASONS: DisposalReason[] = ["용량 초과", "품질 불량"]
+const DISPOSAL_REASONS: DisposalReason[] = ["용량 초과", "품질 불량", "개발 중단"]
 const TAB_ORDER: WarehouseTab[] = ["READY", "WAREHOUSE", "HISTORY"]
 const TAB_STATUSES: Record<WarehouseTab, readonly FabricLedgerStatus[]> = {
   READY: ["READY"],
@@ -162,6 +166,42 @@ function localDateValue(date = new Date()): string {
   const month = String(date.getMonth() + 1).padStart(2, "0")
   const day = String(date.getDate()).padStart(2, "0")
   return `${year}-${month}-${day}`
+}
+
+const EXPORT_RANGE_KEY = "warehouse-export-range"
+const EXPORT_PRESETS = ["어제", "오늘", "이번 주", "지난 주", "직접 지정"] as const
+type ExportPreset = typeof EXPORT_PRESETS[number]
+interface ExportRange { preset: ExportPreset; from: string; to: string }
+
+function exportPresetDates(preset: ExportPreset): { from: string; to: string } {
+  const start = new Date()
+  start.setHours(0, 0, 0, 0)
+  if (preset === "어제") start.setDate(start.getDate() - 1)
+  if (preset === "이번 주" || preset === "지난 주") {
+    start.setDate(start.getDate() - (start.getDay() + 6) % 7 - (preset === "지난 주" ? 7 : 0))
+  }
+  const end = new Date(start)
+  if (preset === "이번 주" || preset === "지난 주") end.setDate(end.getDate() + 6)
+  return { from: localDateValue(start), to: localDateValue(end) }
+}
+
+function isExportDate(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(`${value}T00:00:00Z`)
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value
+}
+
+function loadExportRange(): ExportRange {
+  const fallback: ExportRange = { preset: "지난 주", ...exportPresetDates("지난 주") }
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(EXPORT_RANGE_KEY) ?? "null") as Partial<ExportRange> | null
+    if (!stored || !EXPORT_PRESETS.includes(stored.preset as ExportPreset)) return fallback
+    return {
+      preset: stored.preset as ExportPreset,
+      from: isExportDate(stored.from) ? stored.from : fallback.from,
+      to: isExportDate(stored.to) ? stored.to : fallback.to,
+    }
+  } catch { return fallback }
 }
 
 function formatYds(value: number): string {
@@ -379,8 +419,35 @@ export function Warehouse() {
   const overrides = useAppStore((state) => state.fabricOverrides)
   const fabricEvents = useAppStore((state) => state.fabricEvents)
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents), [fabricEvents, overrides, records, samples])
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exportRange, setExportRange] = useState(loadExportRange)
+  const [exportBusy, setExportBusy] = useState(false)
+  const [exportError, setExportError] = useState("")
+  useEffect(() => { saveViewPref(EXPORT_RANGE_KEY, exportRange) }, [exportRange])
+  useEffect(() => { if (exportOpen) setExportError("") }, [exportOpen, exportRange])
+  const exportDates = exportRange.preset === "직접 지정" ? exportRange : exportPresetDates(exportRange.preset)
+  const exportDayCount = isExportDate(exportDates.from) && isExportDate(exportDates.to)
+    ? (Date.parse(`${exportDates.to}T00:00:00Z`) - Date.parse(`${exportDates.from}T00:00:00Z`)) / 86400000 + 1 : 0
+  const exportRangeError = exportDayCount > 31 ? "기간이 너무 깁니다. 31일 이내로 좁혀 주세요."
+    : exportDayCount <= 0 ? "시작일과 종료일을 올바르게 지정해 주세요." : ""
+  const exportData = useMemo(() => exportOpen && !exportRangeError
+    ? collectWarehouseExport(fabricEvents, ledger, exportDates.from, exportDates.to) : null,
+  [exportOpen, exportRangeError, fabricEvents, ledger, exportDates.from, exportDates.to])
+  const runExport = async () => {
+    if (!exportData || exportBusy) return
+    setExportBusy(true)
+    setExportError("")
+    try {
+      const blob = await buildWarehouseWorkbook(exportData)
+      downloadBlob(blob, warehouseExportFileName(exportData.from, exportData.to))
+    } catch {
+      setExportError("엑셀 내려받기에 실패했습니다. 다시 시도해 주세요.")
+    } finally { setExportBusy(false) }
+  }
   const [tab, setTab] = useState<WarehouseTab>("READY")
-  const [openGroups, setOpenGroups] = useState({ process: true })
+  // 펼침/접힘은 개인 브라우저에 남는다. 팀원 화면에는 영향을 주지 않는다.
+  const [openGroups, setOpenGroups] = useState(() => loadViewGroups(WH_OPEN_GROUPS_KEY, { process: true }))
+  useEffect(() => { saveViewPref(WH_OPEN_GROUPS_KEY, openGroups) }, [openGroups])
   // 열 너비는 사용자가 끌어 조절하고 브라우저에 남는다. 기본값을 바꾸면 키를 올려야 반영된다.
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
     const defaults = Object.fromEntries(COLUMN_GROUPS.flatMap((group) => group.columns).map((column) => [column.id, column.width]))
@@ -1130,7 +1197,8 @@ export function Warehouse() {
       </KpiTile>
     </div>
 
-    <Tabs value={tab} onValueChange={(value) => changeTab(value as WarehouseTab)} className="min-w-0 shrink-0">
+    <div className="flex shrink-0 items-center gap-2">
+    <Tabs value={tab} onValueChange={(value) => changeTab(value as WarehouseTab)} className="min-w-0 flex-1">
       <TabsList className="flex w-full justify-start gap-1 overflow-x-auto">
         {TAB_ORDER.map((key) => {
           return <TabsTrigger
@@ -1145,6 +1213,10 @@ export function Warehouse() {
         })}
       </TabsList>
     </Tabs>
+    <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setExportOpen(true)}>
+      <FileDown className="size-4" />창고팀 자료
+    </Button>
+    </div>
 
     <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>
       <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2" style={{ background: accent.toolbarBg }}>
@@ -1178,6 +1250,33 @@ export function Warehouse() {
         <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--muted-foreground)] hover:bg-[var(--muted)]" onClick={() => { setCellRange(null); setCellMenu(null) }}>선택 해제</button>
       </div>
     </> : null}
+
+    <Dialog open={exportOpen} onOpenChange={(open) => { if (!exportBusy) setExportOpen(open) }}>
+      <DialogContent className="max-w-lg" showCloseButton={false}>
+        <DialogHeader>
+          <DialogTitle>창고팀 자료</DialogTitle>
+          <DialogDescription>선택한 기간의 입출고 자료를 엑셀 한 파일로 내려받습니다.</DialogDescription>
+        </DialogHeader>
+        <DialogBody className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {EXPORT_PRESETS.map((preset) => <Button key={preset} type="button" size="sm"
+              variant={exportRange.preset === preset ? "default" : "outline"}
+              aria-pressed={exportRange.preset === preset} disabled={exportBusy}
+              onClick={() => setExportRange((current) => ({ ...current, preset }))}>{preset}</Button>)}
+          </div>
+          {exportRange.preset === "직접 지정" ? <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2"><Label htmlFor="warehouse-export-from">시작일</Label><Input id="warehouse-export-from" type="date" value={exportRange.from} disabled={exportBusy} onChange={(event) => setExportRange((current) => ({ ...current, from: event.target.value }))} /></div>
+            <div className="space-y-2"><Label htmlFor="warehouse-export-to">종료일</Label><Input id="warehouse-export-to" type="date" value={exportRange.to} disabled={exportBusy} onChange={(event) => setExportRange((current) => ({ ...current, to: event.target.value }))} /></div>
+          </div> : <p className="text-sm text-[var(--muted-foreground)]">{exportDates.from} ~ {exportDates.to}</p>}
+          {exportData ? <p className="text-sm" aria-live="polite">입고 {exportData.totals.inbound}건 · 출고완료 {exportData.totals.outboundDone}건 · 출고요청 {exportData.totals.listCount}건</p> : null}
+          {exportRangeError || exportError ? <p role="alert" className="text-sm text-[var(--destructive)]">{exportRangeError || exportError}</p> : null}
+        </DialogBody>
+        <DialogFooter>
+          <Button type="button" disabled={exportBusy || !exportData} onClick={() => void runExport()}>{exportBusy ? "생성 중…" : "엑셀 내려받기"}</Button>
+          <Button type="button" variant="outline" disabled={exportBusy} onClick={() => setExportOpen(false)}>닫기</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     <Dialog open={baselineOpen} onOpenChange={(open) => { if (!open && !saving) setBaselineOpen(false) }}>
       <DialogContent className="max-w-lg">

@@ -37,6 +37,7 @@ export interface NavigationGroup {
 
 export const routeDefinitions: RouteDefinition[] = [
   { path: "/", title: "HOME", subtitle: "원단 개발 업무 현황을 한눈에 확인합니다." },
+  { path: "/request", title: "FABRIC REQUEST", subtitle: "1팀 의뢰 건의 접수와 개발 현황을 한 원장에서 관리합니다." },
   { path: "/development", title: "DEVELOPMENT", subtitle: "개발 건의 전체 진행 현황을 확인합니다." },
   { path: "/development/workspace", title: "DD MASTER", subtitle: "Development Dashboard 전체 열과 샘플 관리 상태를 한 시트에서 관리합니다." },
   { path: "/development/eu", title: "DD MASTER · EU", subtitle: "EU 개발 건을 확인합니다." },
@@ -67,6 +68,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     label: "개발",
     items: [
+      { label: "FABRIC REQUEST", path: "/request", icon: ClipboardList },
       { label: "DEVELOPMENT", path: "/development", icon: FlaskConical },
       {
         label: "DD MASTER",

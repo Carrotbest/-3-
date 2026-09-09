@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
-import { CalendarDays, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, Loader2, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
+import { CalendarDays, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
 import { Popover } from "radix-ui"
 import { Link } from "react-router-dom"
 
@@ -11,9 +11,11 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataUpload } from "@/components/upload/DataUpload"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings } from "@/data/dd-workflow"
+import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
+import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
 import { fmtDateMd, normalizeDateInput, toDate } from "@/data/format"
+import { loadViewFlag, loadViewGroups, saveViewPref } from "@/data/view-prefs"
 import { dayToneText, holidayName } from "@/data/holidays"
 import { ingestDevelopment } from "@/data/upload"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
@@ -23,6 +25,8 @@ import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, useAppStore, flush
 const ALL = "__all__"
 const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니다."
 const COL_WIDTHS_STORAGE_KEY = "dd-col-widths-v2"
+const OPEN_GROUPS_STORAGE_KEY = "dd-open-groups-v1"
+const FINISHING_OPEN_STORAGE_KEY = "dd-finishing-open-v1"
 const MIN_COLUMN_WIDTH = 56
 /** 더 이상 진행하지 않는 상태. 전체 탭에서는 감추고, 담당 탭에서는 위로 올려 흐리게 보여 준다. */
 const CLOSED_STATUSES = new Set(["완료", "DROP", "REJECT"])
@@ -99,8 +103,22 @@ interface MasterGroup {
   editorLayout?: "schedule" | "data"
 }
 
+/** 개발처가 GD인가. FDS·YDS는 GD 생산분에만 있는 공정이다. */
+const isGdRecord = (record: DevRecord): boolean =>
+  String(record.tech?.development?.co || record.devType || "").trim().toUpperCase() === "GD"
+
 const text = (value: CellValue): string => value === null || value === undefined || value === "" ? "" : String(value)
 const dateText = (value: CellValue): string => value ? fmtDateMd(String(value)) : ""
+/**
+ * FDS·YDS 전용. 국내 작업은 이 공정 자체가 없으므로 미수취로 몰아세우지 않고 해당 없음으로 비운다.
+ * 셀 편집도 `isLockedCell`에서 함께 막는다.
+ */
+const gdReceiptDateRender = (value: (record: DevRecord) => CellValue): NonNullable<MasterColumn["render"]> => (record) => {
+  if (!isGdRecord(record)) return <span className="text-[var(--muted-foreground)]">해당 없음</span>
+  const date = value(record)
+  return date ? dateText(date) : <span className="text-[var(--destructive)]">미수취</span>
+}
+
 const receiptDateRender = (value: (record: DevRecord) => CellValue): NonNullable<MasterColumn["render"]> => (record) => {
   const date = value(record)
   return date ? dateText(date) : <span className="text-[var(--destructive)]">미수취</span>
@@ -214,9 +232,9 @@ const GROUPS: MasterGroup[] = [
   {
     key: "result", label: "결과 RESULT", color: "var(--chart-2)", columns: [
       { id: "receivedDate", label: "Hanger", width: 80, date: true, value: (row) => row.receivedDate, render: receiptDateRender((row) => row.receivedDate) },
-      { id: "fds", label: "FDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.fds, render: receiptDateRender((row) => row.tech?.sampleDates?.fds) },
-      { id: "yds", label: "YDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.yds, render: receiptDateRender((row) => row.tech?.sampleDates?.yds) },
-      { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo ? <span className="font-mono">{row.flNo}</span> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미입력</span> : "" },
+      { id: "fds", label: "FDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.fds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.fds) },
+      { id: "yds", label: "YDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.yds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.yds) },
+      { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo.trim() ? <span className={`font-mono ${isCompletedFlNo(row.flNo) ? "" : "text-[var(--destructive)]"}`} title={isCompletedFlNo(row.flNo) ? undefined : "FL + 숫자 8자리 형식만 완료로 인정합니다"}>{row.flNo}</span> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미입력</span> : "" },
       { id: "optionProgress", label: "옵션 완료", width: 67, align: "center", value: (row) => row.tech?.optionProgress },
       { id: "review", label: "Review", width: 123, value: (row) => row.tech?.review },
     ],
@@ -264,6 +282,15 @@ const GROUPS: MasterGroup[] = [
 const DEFAULT_OPEN: Record<GroupKey, boolean> = { request: true, original: false, detail: true, schedule: false, result: true, data: false, history: false, ledger: false }
 const FINISHING_COLUMN_IDS = new Set(["finishingA", "finishingB", "finishingC", "finishingD", "remark"])
 const COMPANY_COLOR_COLUMN_IDS = new Set(["co", "yarnMill", "knittingMill", "dyeingMill", "finishingMill"])
+/** 공정 SCHEDULE 완료일 열. 오늘보다 이전이면 지나간 공정으로 보고 셀을 회색으로 덮는다. */
+const SCHEDULE_DATE_COLUMN_IDS = new Set(["yarnStatus", "knittingStatus", "dyeingStatus", "finishingStatus"])
+/** 회색 농도 50%. 30행 DIMMED_ROW_BG(24%)보다 진하다. 글자는 그대로 두고 배경만 덮는다. */
+const PAST_SCHEDULE_BG = "color-mix(in srgb, var(--muted-foreground) 50%, var(--card))"
+/**
+ * 자정 기준 일 단위 값. `toDate`는 값이 이미 Date면 원본을 그대로 돌려주므로
+ * `setHours`로 비교하면 레코드의 날짜를 자정으로 덮어쓴다. 복사본으로 계산한다.
+ */
+const dayStamp = (date: Date): number => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 const GROUP_COLUMNS = GROUPS.flatMap((group) => group.columns)
 const GROUP_COLUMN_IDS = new Set(GROUP_COLUMNS.map((column) => column.id))
 // 핀 고정 열도 그룹(고정 핵심)처럼 너비 조절·저장 대상에 포함한다.
@@ -618,6 +645,14 @@ function StatusChip({ record, disabled }: { record: DevRecord; disabled?: boolea
 const LEDGER_COL_IDS = new Set(["ledgerStatus", "storageNo", "sourceSheet", "ledgerUpdated"])
 /** 고정값(수식·샘플대장 연결)은 그리드에서 직접 수정하지 않는다. */
 const isFixedColumn = (column: MasterColumn): boolean => COMPUTED_COLUMN_IDS.has(column.id) || LEDGER_COL_IDS.has(column.id)
+/** GD 생산분에만 있는 열. 국내 건에서는 값도 편집도 막는다. */
+const GD_ONLY_COLUMN_IDS = new Set(["fds", "yds"])
+/**
+ * 이 셀을 고칠 수 없는가. 열 자체가 수식·대장 연결이거나, GD 전용 열인데 국내 건인 경우다.
+ * 붙여넣기·채우기·지우기까지 같은 판정을 쓴다. 한 곳만 막으면 다른 경로로 값이 들어간다.
+ */
+const isLockedCell = (record: DevRecord, column: MasterColumn): boolean =>
+  isFixedColumn(column) || (GD_ONLY_COLUMN_IDS.has(column.id) && !isGdRecord(record))
 
 function InlineDateEditor({ initialValue, onCommit, onCancel }: { initialValue: string; onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void; onCancel: () => void }) {
   // 저장된 전체 날짜를 초기값으로 보존하므로, 손대지 않고 Enter를 눌러도 연도가 바뀌지 않는다.
@@ -737,7 +772,7 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const onCancel = () => actions.cancel()
   const onContextMenu = (event: ReactMouseEvent<HTMLTableCellElement>) => actions.contextMenu(event, rowId, column.id)
   const onFillStart = actions.fillStart
-  const fixed = isFixedColumn(column)
+  const fixed = isLockedCell(record, column)
   const align = `${alignOf(column) === "center" ? "text-center" : "text-left"} ${column.number ? "tabular-nums" : ""}`
   const highlight = sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""
   // 종료된 행의 회색은 클래스로는 다른 배경 클래스에 밀리므로 인라인으로 덮는다. 글자색은 건드리지 않는다.
@@ -747,7 +782,12 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const companyColorStyle = companyValue && !sel.inRange
     ? { backgroundColor: `color-mix(in srgb, ${/gd/i.test(companyValue) ? "#a78bfa" : "#6ee7b7"} 18%, var(--card))` }
     : null
-  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...companyColorStyle, ...dimStyle }
+  // 공정 완료일이 오늘보다 이전이면 지나간 공정이다. 남은 공정만 눈에 들어오게 회색으로 덮는다.
+  const scheduleDate = SCHEDULE_DATE_COLUMN_IDS.has(column.id) ? toDate(column.value(record, ledger)) : null
+  const pastScheduleStyle = scheduleDate && !sel.inRange && dayStamp(scheduleDate) < dayStamp(new Date())
+    ? { backgroundColor: PAST_SCHEDULE_BG }
+    : null
+  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...companyColorStyle, ...pastScheduleStyle, ...dimStyle }
   if (editEnabled && active && !fixed) {
     return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
   }
@@ -796,13 +836,47 @@ function EditorGroup({ label, color, columns, draft, onChange, optionsById, layo
 
 export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope?: string | null }) {
   const records = useAppStore((state) => state.records)
+  const [fdsYdsOpen, setFdsYdsOpen] = useState(false)
+  const [fdsYdsNotice, setFdsYdsNotice] = useState<string | null>(null)
+  const [fdsYdsExporting, setFdsYdsExporting] = useState(false)
+  const fdsYdsRows = useMemo(() => fdsYdsOpen ? collectFdsYdsRows(records) : [], [fdsYdsOpen, records])
+  useEffect(() => {
+    if (!fdsYdsNotice) return
+    const timer = window.setTimeout(() => setFdsYdsNotice(null), 3000)
+    return () => window.clearTimeout(timer)
+  }, [fdsYdsNotice])
+  const saveFdsYdsBody = (key: string, bodyNo: string) => {
+    const record = useAppStore.getState().records.find((item) => recordIdentity(item) === key)
+    if (!record) return
+    void saveDevelopmentRecord({ ...record, tech: { ...record.tech, bodyNo } }, key)
+      .catch(() => setFdsYdsNotice("BODY 저장에 실패했습니다. 다시 시도해 주세요."))
+  }
+  const copyFdsYds = () => {
+    // 중간 await 없이 호출해 ClipboardItem을 클릭 흐름 안에서 생성한다.
+    void copyFdsYdsTable(fdsYdsRows)
+      .then((result) => setFdsYdsNotice(result === "html" ? "아웃룩에 붙여넣으세요" : "표 서식 없이 복사했습니다"))
+      .catch(() => setFdsYdsNotice("복사에 실패했습니다. 브라우저의 클립보드 권한을 확인해 주세요."))
+  }
+  const exportFdsYds = async () => {
+    setFdsYdsExporting(true)
+    try {
+      downloadBlob(await buildFdsYdsWorkbook(fdsYdsRows), fdsYdsFileName())
+    } catch {
+      setFdsYdsNotice("엑셀 내려받기에 실패했습니다. 다시 시도해 주세요.")
+    } finally {
+      setFdsYdsExporting(false)
+    }
+  }
   const saveState = useAppStore((state) => state.recordsSaveState)
   const samples = useAppStore((state) => state.completed)
   const overrides = useAppStore((state) => state.fabricOverrides)
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides), [overrides, records, samples])
   const ledgerByRecord = useMemo(() => new Map(ledger.flatMap((item) => item.record ? [[recordIdentity(item.record), item] as const] : [])), [ledger])
-  const [openGroups, setOpenGroups] = useState(DEFAULT_OPEN)
-  const [finishingOpen, setFinishingOpen] = useState(false)
+  // 펼침/접힘은 개인 브라우저에 남는다. 팀원 화면에는 영향을 주지 않는다.
+  const [openGroups, setOpenGroups] = useState(() => loadViewGroups(OPEN_GROUPS_STORAGE_KEY, DEFAULT_OPEN))
+  const [finishingOpen, setFinishingOpen] = useState(() => loadViewFlag(FINISHING_OPEN_STORAGE_KEY, false))
+  useEffect(() => { saveViewPref(OPEN_GROUPS_STORAGE_KEY, openGroups) }, [openGroups])
+  useEffect(() => { saveViewPref(FINISHING_OPEN_STORAGE_KEY, finishingOpen) }, [finishingOpen])
   const [search, setSearch] = useState("")
   const [owner, setOwner] = useState(ALL)
   const [status, setStatus] = useState(ALL)
@@ -1397,7 +1471,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const rowIndex = rowIndexOf.get(cellRef.row)
     const colIndex = colIndexOf.get(cellRef.col)
     const column = colIndex === undefined ? undefined : displayedColumns[colIndex]
-    if (rowIndex === undefined || !filtered[rowIndex] || !column || isFixedColumn(column)) return
+    if (rowIndex === undefined || !filtered[rowIndex] || !column || isLockedCell(filtered[rowIndex], column)) return
     setEditSeed(initial)
     setEditCell(cellRef)
   }
@@ -1496,7 +1570,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       for (let col = source.left; col <= source.right; col += 1) {
         const sourceColumn = displayedColumns[col]
         const targetColumn = displayedColumns[target.left + col - source.left]
-        if (!sourceColumn || !targetColumn || isFixedColumn(sourceColumn) || isFixedColumn(targetColumn)) continue
+        if (!sourceColumn || !targetColumn || isFixedColumn(sourceColumn) || isLockedCell(targetRecord, targetColumn)) continue
         moves.push({ sourceRecord, sourceColumn, targetRecord, targetColumn, value: rawCellText(sourceRecord, sourceColumn) })
       }
     }
@@ -1530,7 +1604,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       const fromRecord = filtered[sourceRow]
       const column = displayedColumns[colIndex]
       const fromColumn = displayedColumns[sourceCol]
-      if (!record || !fromRecord || !column || !fromColumn || isFixedColumn(column)) return
+      if (!record || !fromRecord || !column || !fromColumn || isLockedCell(record, column)) return
       const identity = recordIdentity(record)
       const draft = edits.get(identity) ?? record
       const next = updateRecordCell(draft, column, rawCellText(fromRecord, fromColumn))
@@ -1577,7 +1651,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       let draft = record
       for (let col = rect.left; col <= rect.right; col += 1) {
         const column = displayedColumns[col]
-        if (!column || isFixedColumn(column)) continue
+        if (!column || isLockedCell(record, column)) continue
         const next = updateRecordCell(draft, column, rawCellText(fromRecord, column))
         if (next !== draft) { draft = next; changed += 1 }
       }
@@ -1594,7 +1668,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const edits = new Map<string, DevRecord>()
     let changed = 0
     const replaceCell = (record: DevRecord, column: MasterColumn) => {
-      if (isFixedColumn(column)) return
+      if (isLockedCell(record, column)) return
       const identity = recordIdentity(record)
       const draft = edits.get(identity) ?? record
       const linked = ledgerByRecord.get(identity) ?? null
@@ -1731,7 +1805,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       let draft = edits.get(recordIdentity(record)) ?? record
       for (let c = rect.left; c <= rect.right; c += 1) {
         const column = displayedColumns[c]
-        if (!column || isFixedColumn(column)) continue
+        if (!column || isLockedCell(record, column)) continue
         draft = updateRecordCell(draft, column, "")
       }
       if (draft !== record) edits.set(recordIdentity(record), draft)
@@ -1762,7 +1836,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         let draft = edits.get(recordIdentity(record)) ?? record
         for (let c = cut.left; c <= cut.right; c += 1) {
           const column = displayedColumns[c]
-          if (!column || isFixedColumn(column)) continue
+          if (!column || isLockedCell(record, column)) continue
           draft = updateRecordCell(draft, column, "")
         }
         put(record, draft)
@@ -1777,7 +1851,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       for (let c = 0; c < grid[r].length; c += 1) {
         const column = displayedColumns[rect.left + c]
         if (!column) break
-        if (isFixedColumn(column)) { skipped += 1; continue }
+        if (isLockedCell(record, column)) { skipped += 1; continue }
         draft = updateRecordCell(draft, column, grid[r][c])
       }
       put(record, draft)
@@ -1955,7 +2029,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         let draft = target
         for (let col = rect.left; col <= rect.right; col += 1) {
           const targetColumn = displayedColumns[col]
-          if (!targetColumn || isFixedColumn(targetColumn)) continue
+          if (!targetColumn || isLockedCell(target, targetColumn)) continue
           const next = updateRecordCell(draft, targetColumn, raw)
           if (next !== draft) { draft = next; changed += 1 }
         }
@@ -2082,6 +2156,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <Button type="button" size="sm" variant="outline" onClick={() => applyPreset("core")}>핵심 보기</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => applyPreset("process")}>공정·결과</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => applyPreset("all")}><Columns3 className="size-4" />전체 64열</Button>
+        <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
         {saveState === "idle" ? null : <span role="status" className={`mr-0.5 whitespace-nowrap rounded-full px-2 py-1 text-[11px] font-medium ${saveState === "error" ? "bg-[var(--destructive)] text-white" : "bg-[var(--muted)] text-[var(--muted-foreground)]"}`}>{saveState === "error" ? "저장 실패" : saveState === "saved" ? "저장됨" : "저장 중"}</span>}
         <Button type="button" size="sm" variant="outline" disabled={!undoStack.length} title={undoStack.length ? "이전 편집 되돌리기 (Ctrl+Z)" : "되돌릴 편집이 없습니다"} onClick={() => void undoLast()}><Undo2 className="size-4" />되돌리기</Button>
         <Button type="button" size="sm" variant="outline" disabled={!redoStack.length} title={redoStack.length ? "되돌린 편집 다시 실행 (Ctrl+Y)" : "다시 실행할 편집이 없습니다"} onClick={() => void redoLast()}><Redo2 className="size-4" />다시 실행</Button>
@@ -2264,6 +2339,41 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </div>
       </> : null}
     </div>
+
+    <Dialog open={fdsYdsOpen} onOpenChange={setFdsYdsOpen}>
+      <DialogContent className="w-[97vw] max-w-none xl:w-[1490px]">
+        <DialogHeader>
+          <DialogTitle>FDS/YDS 요청</DialogTitle>
+          <DialogDescription>GD 진행분 중 FDS 또는 YDS 미수취 {fdsYdsRows.length}건</DialogDescription>
+        </DialogHeader>
+        <DialogBody className="overflow-auto">
+          {fdsYdsRows.length ? <table className="w-full table-fixed border-collapse text-xs" style={{ minWidth: 1200 }}>
+            <colgroup>{FDS_YDS_COLUMNS.map((column) => <col key={column.key} style={{ width: `${column.width}ch` }} />)}</colgroup>
+            <thead><tr>{FDS_YDS_COLUMNS.map((column) => <th key={column.key} className="border border-[#bfbfbf] bg-[#d6e4f0] px-2 py-2 text-center font-bold text-black">{column.head}</th>)}</tr></thead>
+            <tbody>{fdsYdsRows.map((row) => <tr key={row.key}>
+              {FDS_YDS_COLUMNS.map((column) => <td key={column.key} className="whitespace-pre-wrap break-words border border-[#bfbfbf] px-2 py-1 align-top">
+                {column.key === "body" ? <input
+                  aria-label={`${row.hmp} BODY`}
+                  defaultValue={row.body}
+                  className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-[var(--card-foreground)]"
+                  onChange={(event) => saveFdsYdsBody(row.key, event.target.value)}
+                  onBlur={(event) => {
+                    const record = useAppStore.getState().records.find((item) => recordIdentity(item) === row.key)
+                    if (record) event.target.value = bodyLabel(record)
+                  }}
+                /> : row[column.key]}
+              </td>)}
+            </tr>)}</tbody>
+          </table> : <p className="py-8 text-center text-sm">요청할 건이 없습니다.</p>}
+        </DialogBody>
+        <DialogFooter>
+          {fdsYdsNotice && <span role="status" className="mr-auto text-sm">{fdsYdsNotice}</span>}
+          <Button type="button" size="sm" variant="outline" disabled={!fdsYdsRows.length} onClick={copyFdsYds}><Copy className="size-4" />표 복사</Button>
+          <Button type="button" size="sm" variant="outline" disabled={!fdsYdsRows.length || fdsYdsExporting} onClick={() => void exportFdsYds()}><Download className="size-4" />엑셀 내려받기</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => setFdsYdsOpen(false)}>닫기</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     <Dialog open={replaceOpen} onOpenChange={setReplaceOpen}>
       <DialogContent className="w-[92vw] max-w-lg">

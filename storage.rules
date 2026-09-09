@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// Fabric R&D 이미지 접근 규칙
+// - 승인된 사용자만 읽고 쓴다. 판정 기준은 firestore.rules와 같다.
+// - 소유자를 바꾸려면 firestore.rules와 src/data/app-config.ts의 OWNER_EMAIL을 함께 고친다.
+// - 3MB 상한은 src/data/request-image.ts의 MAX_SOURCE_SIZE와 같은 값이다. 함께 고친다.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() == 'hkpark@hansoll.com';
+    }
+    function isApproved() {
+      return isOwner()
+        || (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+            && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.status == 'approved');
+    }
+
+    match /requests/{reqId}/{file} {
+      allow read: if isApproved();
+      allow write: if isApproved()
+                   && request.resource.size < 3 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
