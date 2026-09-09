@@ -20,6 +20,7 @@
 - FDS/YDS 요청 팝업(`src/data/fds-yds-request.ts`): GD 진행분 중 FDS 또는 YDS 미수취분. DROP·HOLD·REJECT 제외.
   **STYLE#(GD#/SA#)과 ARRANGE#가 둘 다 있어야 올린다.** 하나라도 비면 GD가 작지를 못 찾아 요청해도 접수가 안 된다.
   REQUEST 열은 **일부러 비워 보낸다**. 메일 쓰는 날에 맞춰 손으로 적는 값이라 접수일(requestDate)과 다르다.
+- 경고 아이콘(`ddWarnings`)의 FL 경고는 **Style History에 뭐라도 적혀 있으면 끈다.** "Matching RIB으로 등록 불필요"처럼 FL을 안 딴 사유를 남긴 건이라, 계속 띄우면 진짜 누락 건과 구분이 안 된다. FL# 열의 붉은 "FL 미입력" 표기도 같은 판정을 쓰므로 함께 사라진다.
 - 작지 첨부 자동 채움: `src/data/zaji.ts`(GD `Fabric sample request report.xlsx`만, 국내 2종 미지원). 회귀규칙(조직명 최장일치·Part+Color dedup·시즌변환) 유지.
 - 드롭다운=정규목록 ∪ 실데이터. Season `SS'26`.
 

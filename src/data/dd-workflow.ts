@@ -146,7 +146,11 @@ export function ddWarnings(record: DevRecord, today = new Date()): DdWarning[] {
   const due = toDate(record.dueDate)
   if (record.receivedDate && !["완료", "REJECT"].includes(status)) warnings.push({ key: "status", label: "완료일 입력 · Status 확인" })
   if (due && dayValue(due) < dayValue(today) && status !== "완료") warnings.push({ key: "due", label: "Due Date 경과" })
-  if (record.receivedDate && !isCompletedFlNo(record.flNo) && status !== "DROP") {
+  // Style History에 사유를 적었으면 FL 경고를 끈다.
+  // "Matching RIB으로 등록 불필요"처럼 FL을 안 딴 이유가 기록된 건이다. 담당이 이미 판단을 남겼는데
+  // 경고를 계속 띄우면 진짜로 빠뜨린 건과 구분이 안 돼 표 전체가 경고투성이가 된다.
+  const explained = String(record.tech?.styleHistory ?? "").trim().length > 0
+  if (record.receivedDate && !isCompletedFlNo(record.flNo) && status !== "DROP" && !explained) {
     warnings.push({ key: "fl", label: record.flNo.trim() ? "FL 형식 확인" : "FL 미입력" })
   }
   if (record.tech?.arrangeNo && record.tech?.development?.co && record.tech.development.co !== "GD") warnings.push({ key: "arrange", label: "Arrange#는 GD만 입력" })
