@@ -19,12 +19,28 @@ export interface WarehouseListRow {
   weight: number | ""
 }
 
+/** 창고보관 전체 목록 1행. 기간과 무관한 현재 시점 스냅샷이다. */
+export interface WarehouseStockRow {
+  storageNo: string
+  styleNo: string
+  flNo: string
+  season: string
+  buyer: string
+  owner: string
+  fabric: string
+  construction: string
+  color: string
+  weight: number | ""
+  balance: number | ""
+}
+
 export interface WarehouseExportData {
   from: string
   to: string
   days: WarehouseDayRows[]
   list: WarehouseListRow[]
-  totals: { inbound: number; outboundDone: number; listCount: number }
+  stock: WarehouseStockRow[]
+  totals: { inbound: number; outboundDone: number; listCount: number; stockCount: number }
 }
 
 /** 입고 쪽 이력. UNRECEIVE(입고 취소)가 마지막이면 입고로 보지 않는다. */
@@ -104,10 +120,32 @@ export function collectWarehouseExport(
       }
     })
 
-  return { from, to, days, list, totals: {
+  // 창고보관 전체는 기간과 무관하다. 지금 창고에 있는 것만 담는다.
+  const stock: WarehouseStockRow[] = ledger
+    .filter((item) => item.status === "WAREHOUSE")
+    .map((item) => {
+      const tech = item.record?.tech
+      return {
+        storageNo: item.storageNo ?? "",
+        styleNo: item.record?.styleNo ?? item.sample?.styleNo ?? "",
+        flNo: item.record?.flNo ?? item.sample?.flNo ?? "",
+        season: item.record?.season ?? "",
+        buyer: item.record?.buyer ?? "",
+        owner: item.record?.owner ?? "",
+        fabric: tech?.yarnDetail ?? "",
+        construction: item.record?.construction ?? "",
+        color: item.record?.color ?? "",
+        weight: typeof item.record?.weight === "number" ? item.record.weight : ("" as const),
+        balance: typeof item.balance === "number" ? item.balance : ("" as const),
+      }
+    })
+    .sort((a, b) => a.storageNo.localeCompare(b.storageNo, undefined, { numeric: true }))
+
+  return { from, to, days, list, stock, totals: {
     inbound: days.reduce((sum, day) => sum + day.inbound.length, 0),
     outboundDone: days.reduce((sum, day) => sum + day.outboundDone.length, 0),
     listCount: list.length,
+    stockCount: stock.length,
   } }
 }
 
@@ -211,8 +249,170 @@ export async function buildWarehouseWorkbook(data: WarehouseExportData): Promise
     list.getRow(3 + i).height = 13.6
   })
 
+  buildRequestSummarySheet(workbook, data)
+  buildLookupSheet(workbook, data)
+  buildStockSheet(workbook, data)
+
   const buffer = await workbook.xlsx.writeBuffer()
   return new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+}
+
+/** exceljs를 동적 import 하므로 정적 타입이 없다. 패키지 타입에서 끌어 쓴다. */
+type ExcelWorkbook = InstanceType<typeof import("exceljs")["Workbook"]>
+
+/** 원본 주차 시트의 청록 머리. */
+const TEAL = "FF008080"
+/** 통합원단부 줄 강조색. 원본이 노랑이다. */
+const OUR_ROW = "FFFFFF00"
+
+/** 좌측 부서 목록. 원본 순서를 그대로 쓴다. 우리 부서만 값이 찬다. */
+const DEPARTMENTS = ["사업1부", "사업2부", "사업3부", "사업4부", "사업6부", "사업7부", "OBM", "사업10부", "사업11부", "통합원단부"] as const
+/** 우측 팀별 목록. Buyer 문구는 원본 파일이 관리하므로 팀 이름만 채운다. */
+const TEAMS = [
+  "사업1부1팀", "사업1부2팀", "사업2부1팀", "사업2부2팀", "사업2부3팀",
+  "사업3부1팀", "사업3부2팀", "사업3부3팀", "사업3부4팀",
+  "사업4부1팀", "사업4부2팀", "사업4부3팀", "사업4부4팀",
+  "사업6부1팀", "사업6부2팀", "사업6부3팀", "사업6부4팀",
+  "사업7부1팀", "사업7부2팀", "사업7부3팀", "사업7부4팀",
+  "OBM", "사업10부1팀", "사업10부2팀", "사업11부1팀", "사업11부2팀", "통합원단부",
+] as const
+
+const OURS = "통합원단부"
+
+/**
+ * 전산출고요청 현황표의 주차 시트. 부서별·팀별 집계 틀을 원본 그대로 만든다.
+ *
+ * **다른 부서 숫자는 우리가 알 수 없어 0으로 둔다.** 창고팀이 각 부서 것을 합치는 자리다.
+ * 틀을 맞춰 두면 통합원단부 줄만 옮겨 붙이면 된다.
+ */
+function buildRequestSummarySheet(workbook: ExcelWorkbook, data: WarehouseExportData): void {
+  const ws = workbook.addWorksheet("주차 집계")
+  ;[4, 12.25, 13.5, 12, 6, 11.38, 11.62, 45.88, 8.88].forEach((width, i) => { ws.getColumn(i + 1).width = width })
+
+  const put = (row: number, col: number, value: unknown, o: { bold?: boolean; fill?: string; size?: number; numFmt?: string; left?: boolean } = {}) => {
+    const cell = ws.getCell(row, col)
+    if (value !== undefined) cell.value = value as never
+    cell.font = { name: MALGUN, size: o.size ?? 11, bold: o.bold ?? false }
+    cell.alignment = { horizontal: o.left ? "left" : "center", vertical: "middle" }
+    if (o.fill) cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: o.fill } }
+    if (o.numFmt) cell.numFmt = o.numFmt
+    cell.border = BOX
+  }
+
+  ws.mergeCells(2, 2, 2, 4)
+  const title = ws.getCell(2, 2)
+  title.value = `${data.from.replace(/-/g, ".")} ~ ${data.to.replace(/-/g, ".")} 전산출고 요청`
+  title.font = { name: MALGUN, size: 12, bold: true }
+  title.alignment = { horizontal: "center", vertical: "middle" }
+  ws.getRow(2).height = 20.3
+
+  const total = data.totals.listCount
+  ;["부서명", "전산출고 요청", "출고 비율"].forEach((label, i) => put(3, i + 2, label, { bold: true, fill: TEAL }))
+  ;["부서팀명", "전산출고 요청", "Buyer"].forEach((label, i) => put(3, i + 6, label, { bold: true, fill: TEAL }))
+  ws.getRow(3).height = 16.6
+
+  DEPARTMENTS.forEach((name, i) => {
+    const row = 4 + i
+    const mine = name === OURS
+    put(row, 2, name, { fill: mine ? OUR_ROW : "FFFFFFFF" })
+    put(row, 3, mine ? total : 0)
+    put(row, 4, mine && total ? 1 : 0, { numFmt: "0%" })
+    ws.getRow(row).height = 16.6
+  })
+  const sumRow = 4 + DEPARTMENTS.length
+  put(sumRow, 2, "합계", { bold: true, fill: TEAL })
+  put(sumRow, 3, total, { bold: true, fill: TEAL })
+  put(sumRow, 4, total ? 1 : 0, { bold: true, fill: TEAL, numFmt: "0%" })
+
+  TEAMS.forEach((name, i) => {
+    const row = 4 + i
+    const mine = name === OURS
+    put(row, 6, name, { fill: mine ? OUR_ROW : "FFFFFFFF" })
+    put(row, 7, mine ? total : 0)
+    put(row, 8, undefined, { size: 9, left: true })
+  })
+  const teamSum = 4 + TEAMS.length
+  put(teamSum, 6, "합계", { bold: true, fill: TEAL })
+  put(teamSum, 7, total, { bold: true, fill: TEAL })
+  put(teamSum, 8, undefined, { size: 9, left: true })
+}
+
+/** 원본 `데이터` 시트. LIST에서 R&D No.로 원단명을 끌어 쓰는 참조표다. */
+function buildLookupSheet(workbook: ExcelWorkbook, data: WarehouseExportData): void {
+  const ws = workbook.addWorksheet("데이터")
+  ws.getColumn(1).width = 4
+  ws.getColumn(2).width = 12
+  ws.getColumn(3).width = 60
+  ;["Style No.", "원단명"].forEach((label, i) => {
+    const cell = ws.getCell(2, i + 2)
+    cell.value = label
+    cell.font = { name: MALGUN, size: 9, bold: true }
+    cell.alignment = { horizontal: "center", vertical: "middle" }
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEAD_LIME } }
+    cell.border = BOX
+  })
+  data.stock.forEach((row, i) => {
+    const at = 3 + i
+    const no = ws.getCell(at, 2)
+    no.value = storageCell(row.storageNo)
+    no.font = { name: MALGUN, size: 9 }
+    no.alignment = { horizontal: "center", vertical: "middle" }
+    no.border = BOX
+    const name = ws.getCell(at, 3)
+    name.value = row.fabric || null
+    name.font = { name: MALGUN, size: 9 }
+    name.alignment = { horizontal: "left", vertical: "middle" }
+    name.border = BOX
+  })
+}
+
+const STOCK_COLUMNS: readonly { key: keyof WarehouseStockRow; head: string; width: number; left?: boolean }[] = [
+  { key: "storageNo", head: "R&D No.", width: 10 },
+  { key: "styleNo", head: "Style/#", width: 14 },
+  { key: "flNo", head: "FL.#", width: 13 },
+  { key: "season", head: "Season", width: 9 },
+  { key: "buyer", head: "Buyer", width: 12 },
+  { key: "owner", head: "Developer", width: 10 },
+  { key: "fabric", head: "Yarn", width: 46, left: true },
+  { key: "construction", head: "Cons.", width: 16, left: true },
+  { key: "color", head: "Color", width: 14, left: true },
+  { key: "weight", head: "중량", width: 8 },
+  { key: "balance", head: "재고(yds)", width: 10 },
+]
+
+/** 창고보관 전체 목록. 기간과 무관한 현재 시점 스냅샷이다. */
+function buildStockSheet(workbook: ExcelWorkbook, data: WarehouseExportData): void {
+  const ws = workbook.addWorksheet("창고보관 현황")
+  ws.getColumn(1).width = 4
+  STOCK_COLUMNS.forEach((column, i) => { ws.getColumn(i + 2).width = column.width })
+
+  const title = ws.getCell(1, 2)
+  title.value = `창고보관 ${data.stock.length.toLocaleString("ko-KR")}건 · ${new Date().toISOString().slice(0, 10)} 기준`
+  title.font = { name: MALGUN, size: 11, bold: true }
+
+  STOCK_COLUMNS.forEach((column, i) => {
+    const cell = ws.getCell(2, i + 2)
+    cell.value = column.head
+    cell.font = { name: MALGUN, size: 9, bold: true }
+    cell.alignment = { horizontal: "center", vertical: "middle" }
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEAD_GREEN } }
+    cell.border = BOX
+  })
+  ws.getRow(2).height = 16.6
+
+  data.stock.forEach((row, i) => {
+    STOCK_COLUMNS.forEach((column, c) => {
+      const cell = ws.getCell(3 + i, c + 2)
+      const value = column.key === "storageNo" ? storageCell(row.storageNo) : row[column.key]
+      cell.value = (value === "" ? null : value) as never
+      cell.font = { name: MALGUN, size: 9 }
+      cell.alignment = { horizontal: column.left ? "left" : "center", vertical: "middle" }
+      cell.border = BOX
+    })
+  })
+  if (data.stock.length) {
+    ws.autoFilter = { from: { row: 2, column: 2 }, to: { row: 2 + data.stock.length, column: 1 + STOCK_COLUMNS.length } }
+  }
 }
 
 export function warehouseExportFileName(from: string, to: string): string {

@@ -1268,7 +1268,7 @@ export function Warehouse() {
             <div className="space-y-2"><Label htmlFor="warehouse-export-from">시작일</Label><Input id="warehouse-export-from" type="date" value={exportRange.from} disabled={exportBusy} onChange={(event) => setExportRange((current) => ({ ...current, from: event.target.value }))} /></div>
             <div className="space-y-2"><Label htmlFor="warehouse-export-to">종료일</Label><Input id="warehouse-export-to" type="date" value={exportRange.to} disabled={exportBusy} onChange={(event) => setExportRange((current) => ({ ...current, to: event.target.value }))} /></div>
           </div> : <p className="text-sm text-[var(--muted-foreground)]">{exportDates.from} ~ {exportDates.to}</p>}
-          {exportData ? <p className="text-sm" aria-live="polite">입고 {exportData.totals.inbound}건 · 출고완료 {exportData.totals.outboundDone}건 · 출고요청 {exportData.totals.listCount}건</p> : null}
+          {exportData ? <p className="text-sm" aria-live="polite">입고 {exportData.totals.inbound}건 · 출고완료 {exportData.totals.outboundDone}건 · 출고요청 {exportData.totals.listCount}건 · 창고보관 {exportData.totals.stockCount}건</p> : null}
           {exportRangeError || exportError ? <p role="alert" className="text-sm text-[var(--destructive)]">{exportRangeError || exportError}</p> : null}
         </DialogBody>
         <DialogFooter>
