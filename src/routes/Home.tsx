@@ -27,6 +27,7 @@ import {
   defaultHomeDateRanges,
   isInProgress,
   materialsOf,
+  optionSequenceText,
   monthlyDevelopmentTrend,
   studyMaterials as deriveStudyMaterials,
   tsMaterials as deriveTsMaterials,
@@ -207,7 +208,7 @@ function KpiDetailSheet({
                       <TableRow className="hover:bg-transparent">
                         <TableHead className="whitespace-nowrap px-4">개발 담당</TableHead>
                         <TableHead className="whitespace-nowrap px-4">플래너</TableHead>
-                        <TableHead className="whitespace-nowrap px-4">Style No.</TableHead>
+                        <TableHead className="whitespace-nowrap px-4">Style No. / Opt</TableHead>
                         <TableHead className="whitespace-nowrap px-4">{copy.dateLabel}</TableHead>
                         {kind === "schedule" ? <><TableHead className="whitespace-nowrap px-4">구분</TableHead><TableHead className="whitespace-nowrap px-4 text-right">Schedule</TableHead></> : null}
                       </TableRow>
@@ -217,7 +218,12 @@ function KpiDetailSheet({
                         <TableRow key={`${item.record._src.sheet}-${item.record._src.row}`}>
                           <TableCell className="whitespace-nowrap px-4 font-medium text-[var(--foreground)]">{item.record.owner || "—"}</TableCell>
                           <TableCell className="whitespace-nowrap px-4 text-[var(--foreground)]">{item.record.planner || "—"}</TableCell>
-                          <TableCell className="whitespace-nowrap px-4 font-mono text-[var(--foreground)]">{item.record.styleNo || "—"}</TableCell>
+                          <TableCell className="whitespace-nowrap px-4 font-mono text-[var(--foreground)]">
+                            {item.record.styleNo || "—"}
+                            {optionSequenceText(item.record) ? (
+                              <span className="ml-1.5 rounded-[3px] bg-[var(--muted)] px-1 py-px text-[11px] font-semibold text-[var(--muted-foreground)]">OPT {optionSequenceText(item.record)}</span>
+                            ) : null}
+                          </TableCell>
                           <TableCell className="whitespace-nowrap px-4 text-[var(--foreground)]">{fmtDateFull(item.date)}</TableCell>
                           {kind === "schedule" ? <>
                             <TableCell className="whitespace-nowrap px-4"><Badge className={item.scheduleState === "late" ? "border-transparent bg-[var(--destructive)] text-[var(--destructive-foreground)]" : "border-transparent bg-[var(--warning)] text-[var(--warning-foreground)]"}>{item.scheduleState === "late" ? "납기지연" : "납기임박"}</Badge></TableCell>

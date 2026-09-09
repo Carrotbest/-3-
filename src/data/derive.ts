@@ -289,6 +289,20 @@ export function devTypeSplit(records: readonly DevRecord[]): DevTypeSummary {
 }
 
 /** 진행중 개발 중 GD#/SA#가 legacy 개발번호 형식으로 기재된 접수 현황. */
+/**
+ * 옵션 순번을 "2/4" 분수로 보여준다. 전체 개수는 수식 열 optionProgress("완료 / 전체")의 분모를 쓴다.
+ * 분모를 모르면 순번만 준다. 값이 없으면 빈 문자열이라 호출부에서 그대로 숨기면 된다.
+ *
+ * DD MASTER의 `# of Opt` 열과 HOME 스케줄 상세가 같은 표기를 쓰도록 여기 둔다.
+ * 같은 Style No.가 옵션 수만큼 반복되므로, 순번 없이는 상세 목록에서 같은 줄로 보인다.
+ */
+export function optionSequenceText(row: DevRecord): string {
+  const sequence = String(row.opt ?? "").trim()
+  if (!sequence) return ""
+  const total = String(row.tech?.optionProgress ?? "").split("/")[1]?.trim()
+  return total ? `${sequence}/${total}` : sequence
+}
+
 /** DD Status 컬럼(devStatus)="진행중"인 건. DD 주간요약의 "진행중(전체)" 정의와 동일(완료·HOLD·DROP·REJECT 제외).
  *  Status 값이 없는 레코드(데모 등)는 stage/flNo 기반 statusOf 로 폴백한다. */
 export const isInProgress = (record: DevRecord): boolean => {

@@ -13,6 +13,7 @@ import { DataUpload } from "@/components/upload/DataUpload"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
+import { optionSequenceText } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
 import { fmtDateMd, normalizeDateInput, toDate } from "@/data/format"
 import { loadViewFlag, loadViewGroups, saveViewPref } from "@/data/view-prefs"
@@ -155,17 +156,6 @@ function ledgerStatus(ledger: FabricLedgerItem | null): ReactNode {
   if (!ledger) return <span className="text-[var(--muted-foreground)]">미연결</span>
   const meta = FABRIC_STATUS_META[ledger.status]
   return <Badge variant="outline" className="gap-1.5 whitespace-nowrap bg-[var(--background)] font-normal"><span className={`size-2 rounded-full ${meta.tone}`} />{meta.label}</Badge>
-}
-
-/**
- * 옵션 순번을 "2/4" 분수로 보여준다. 전체 개수는 수식 열 optionProgress("완료 / 전체")의 분모를 쓴다.
- * 표시만 바꾸고 value 는 순번 그대로라 복사·붙여넣기 값은 달라지지 않는다.
- */
-function optionSequenceText(row: DevRecord): string {
-  const sequence = String(row.opt ?? "").trim()
-  if (!sequence) return ""
-  const total = String(row.tech?.optionProgress ?? "").split("/")[1]?.trim()
-  return total ? `${sequence}/${total}` : sequence
 }
 
 const PINNED_COLUMNS: MasterColumn[] = [
@@ -372,7 +362,14 @@ const groupByKey = (key: GroupKey) => GROUPS.find((group) => group.key === key)!
 const INTAKE_CORE = PINNED_COLUMNS.filter((column) => column.id !== "status") // 담당·Style No.
 const INTAKE_REQUEST = groupByKey("request").columns.filter((column) => column.id !== "opt")
 const INTAKE_ORIGINAL = groupByKey("original").columns
-const INTAKE_REQUIRED_IDS = new Set(["owner", "styleNo", "season", "category", "buyer", "planner"])
+/**
+ * 신규 접수에서 반드시 받아야 하는 항목. 라벨의 `*`, 빈 칸 붉은 테두리, 저장 차단이 모두 이 목록을 본다.
+ *
+ * Due Date가 비면 HOME 스케줄의 임박·지연 집계에서 그 건이 통째로 빠진다(daysLeft가 null).
+ * 어디에도 안 뜨는 건을 만들지 않으려고 접수 단계에서 막는다.
+ * 엑셀 업로드는 과거 시트를 그대로 들여오는 길목이라 여기에 걸지 않는다.
+ */
+const INTAKE_REQUIRED_IDS = new Set(["owner", "styleNo", "season", "category", "buyer", "planner", "dueDate"])
 const DETAIL_GROUP = groupByKey("detail")
 const SCHEDULE_GROUP = groupByKey("schedule")
 
