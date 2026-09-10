@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom"
 
+import { RouteErrorBoundary } from "@/components/RouteErrorBoundary"
+
 import { AppSidebar } from "@/components/layout/AppSidebar"
 import { Topbar } from "@/components/layout/Topbar"
 import { UpdateBanner } from "@/components/layout/UpdateBanner"
@@ -153,7 +155,9 @@ function AppLayout() {
       <div className={cn("transition-[padding] duration-500 [transition-timing-function:cubic-bezier(0.83,0,0.17,1)] motion-reduce:transition-none", sidebarCollapsed ? "lg:pl-20" : "lg:pl-72", fullBleed ? "flex h-screen flex-col overflow-hidden" : "min-h-screen")}>
         <Topbar onToggleSidebar={handleSidebarToggle} />
         <main ref={mainRef} className={cn("w-full", fullBleed ? "flex min-h-0 flex-1 flex-col overflow-hidden max-w-none p-0" : "mx-auto w-full max-w-[2200px] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6")}>
-          {canViewCurrentPath ? <Routes>
+          {/* 렌더 예외를 여기서 막는다. 없으면 React 가 루트를 언마운트해 화면 전체가 백지가 된다.
+              key 를 경로로 두어 다른 화면으로 옮기면 저절로 풀린다. */}
+          {canViewCurrentPath ? <RouteErrorBoundary key={pathname}><Routes>
             <Route path="/" element={<Home />} />
             <Route path="/development" element={<Development />} />
             <Route path="/development/:sub" element={<Development />} />
@@ -179,7 +183,7 @@ function AppLayout() {
               />
             ))}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes> : <ScreenAccessDenied />}
+          </Routes></RouteErrorBoundary> : <ScreenAccessDenied />}
         </main>
       </div>
       <ParsingOverlay />

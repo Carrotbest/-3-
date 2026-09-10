@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode , type CSSProperties } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode , type CSSProperties } from "react"
 import * as Popover from "@radix-ui/react-popover"
 import { ArchiveRestore, Copy, FileDown, Info, ListX, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
 
@@ -398,21 +398,6 @@ function StatusMixBar({ counts, total, onPick }: { counts: Record<WarehouseTab, 
   )
 }
 
-/** 탭 전환 시 짧은 페이드+슬라이드. */
-function TabFade({ tabKey, children }: { tabKey: string; children: ReactNode }) {
-  const [shown, setShown] = useState(false)
-  useEffect(() => {
-    setShown(false)
-    const frame = window.requestAnimationFrame(() => setShown(true))
-    return () => window.cancelAnimationFrame(frame)
-  }, [tabKey])
-  return (
-    <div className={`flex min-h-0 flex-1 flex-col transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none motion-reduce:transform-none ${shown ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"}`}>
-      {children}
-    </div>
-  )
-}
-
 export function Warehouse() {
   const records = useAppStore((state) => state.records)
   const samples = useAppStore((state) => state.completed)
@@ -515,6 +500,19 @@ export function Warehouse() {
   const [cellMenu, setCellMenu] = useState<{ x: number; y: number } | null>(null)
   const [viewports, setViewports] = useState<Record<string, { top: number; height: number }>>({})
   const gridRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  /**
+   * 그리드 스크롤 상자의 ref.
+   *
+   * **여기서 setState 를 하면 안 된다.** 렌더마다 새로 만든 ref 콜백은 React 가 커밋마다 떼었다 붙인다.
+   * 그 안에서 상태를 바꾸면 커밋과 렌더가 끝없이 이어져 "Maximum update depth exceeded" 로 트리가 통째로 죽는다.
+   * 화면 전체가 백지가 되고 콘솔 말고는 단서가 남지 않는다(2026-09-10 창고 탭 전환 사고).
+   * 값이 같으면 같은 객체를 돌려주는 방어로는 못 막는다. 렌더가 연달아 도는 중에는 React 의 조기 탈출이 걸리지 않는다.
+   *
+   * 높이 측정은 아래 ResizeObserver 와 탭 전환 useLayoutEffect 가 맡는다.
+   */
+  const attachGrid = useCallback((element: HTMLDivElement | null) => {
+    gridRefs.current[tab] = element
+  }, [tab])
   const [stockYds, setStockYds] = useState("")
   const [stockBalance, setStockBalance] = useState("")
   const [recipient, setRecipient] = useState("")
@@ -616,6 +614,8 @@ export function Warehouse() {
     setChecked(new Set())
     setColumnFilters({})
     setSortRule(null)
+    // 탭마다 스크롤 상자가 새로 생긴다. 남아 있던 top 을 그대로 쓰면 첫 렌더가 빈 여백만 그린다.
+    setViewports((current) => ({ ...current, [next]: { top: 0, height: current[next]?.height ?? current[tab]?.height ?? 900 } }))
   }
 
   const toggleChecked = (key: string, selected: boolean) => {
@@ -946,16 +946,28 @@ export function Warehouse() {
     }
   })
 
-  // 최근 등록한 것이 맨 아래에 온다. 탭을 열면 그 끝을 먼저 보여 준다.
-  useEffect(() => {
+  // 최근 등록한 것이 맨 아래에 온다. 탭을 열면 그 끝을 먼저 보여 준다. 세 탭 모두 같다.
+  // 페인트 전에 scrollTop 과 viewports 를 같은 값으로 맞춘다.
+  // rAF 로 미루면 그 사이 topPad 빈 줄만 화면에 잡혀 표가 통째로 비어 보인다.
+  useLayoutEffect(() => {
     const element = gridRefs.current[tab]
     if (!element) return
-    const frame = window.requestAnimationFrame(() => {
-      element.scrollTop = element.scrollHeight
-      setViewports((current) => ({ ...current, [tab]: { top: element.scrollTop, height: element.clientHeight } }))
-    })
-    return () => window.cancelAnimationFrame(frame)
+    element.scrollTop = element.scrollHeight
+    setViewports((current) => ({ ...current, [tab]: { top: element.scrollTop, height: element.clientHeight } }))
   }, [tab, visibleRows.length])
+
+  // 창을 줄이면 보이는 줄 수가 달라진다. ResizeObserver 는 실제로 크기가 변할 때만 부르므로
+  // ref 콜백에서 재던 것과 달리 렌더를 되먹이지 않는다. observe 직후 한 번 불러 첫 높이도 여기서 잡는다.
+  useEffect(() => {
+    const element = gridRefs.current[tab]
+    if (!element || typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver(() => {
+      const height = element.clientHeight
+      setViewports((current) => current[tab]?.height === height ? current : { ...current, [tab]: { top: element.scrollTop, height } })
+    })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [tab])
 
   const columnIndexById = useMemo(() => new Map(visibleColumns.map((column, index) => [column.id, index])), [visibleColumns])
 
@@ -1052,14 +1064,8 @@ export function Warehouse() {
     const windowRows = gridRows.slice(start, end)
     const topPad = start * ROW_HEIGHT
     const bottomPad = Math.max(0, (total - end) * ROW_HEIGHT)
-    const measure = (element: HTMLDivElement | null) => {
-      gridRefs.current[gridId] = element
-      if (!element) return
-      const height = element.clientHeight
-      setViewports((current) => current[gridId]?.height === height ? current : { ...current, [gridId]: { top: element.scrollTop, height } })
-    }
     return (
-        <div className="min-h-0 flex-1 overflow-auto" ref={measure} onDragStart={(event) => event.preventDefault()} onScroll={(event) => {
+        <div key={gridId} className="min-h-0 flex-1 overflow-auto" ref={attachGrid} onDragStart={(event) => event.preventDefault()} onScroll={(event) => {
               const el = event.currentTarget
               setViewports((current) => {
                 const previous = current[gridId]
@@ -1236,9 +1242,7 @@ export function Warehouse() {
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant={unconfirmedOnly ? "default" : "outline"} aria-pressed={unconfirmedOnly} onClick={() => setUnconfirmedOnly((current) => !current)}>미확인 {unconfirmedCount}건</Button> : null}
       </div>
 
-      <TabFade tabKey={tab}>
-        {renderGrid(tab, visibleRows, `${TAB_META[tab].label} 항목이 없습니다.`)}
-      </TabFade>
+      {renderGrid(tab, visibleRows, `${TAB_META[tab].label} 항목이 없습니다.`)}
       <div className="shrink-0 border-t border-[var(--border)] px-3 py-2 text-xs text-[var(--muted-foreground)]">체크박스로 여러 건을 고른 뒤 위 버튼으로 처리합니다. · {TAB_META[tab].description}</div>
     </div>
 

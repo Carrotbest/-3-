@@ -22,6 +22,7 @@
   REQUEST 열은 **일부러 비워 보낸다**. 메일 쓰는 날에 맞춰 손으로 적는 값이라 접수일(requestDate)과 다르다.
 - 경고 아이콘(`ddWarnings`)의 FL 경고는 **Style History에 뭐라도 적혀 있으면 끈다.** "Matching RIB으로 등록 불필요"처럼 FL을 안 딴 사유를 남긴 건이라, 계속 띄우면 진짜 누락 건과 구분이 안 된다. FL# 열의 붉은 "FL 미입력" 표기도 같은 판정을 쓰므로 함께 사라진다.
 - 작지 첨부 자동 채움: `src/data/zaji.ts`(GD `Fabric sample request report.xlsx`만, 국내 2종 미지원). 회귀규칙(조직명 최장일치·Part+Color dedup·시즌변환) 유지.
+  **옵션 단위는 Part+Color 다.** 색상 번호(No)로 접으면 BODY 6개 x 2색이 2건으로 줄어든다(R114). 원본 `zaji/parser.py` 와 다르게 만들지 말 것.
 - 드롭다운=정규목록 ∪ 실데이터. Season `SS'26`.
 
 ## FABRIC REQUEST (`src/routes/FabricRequest.tsx`, `src/data/request-template.ts`, `src/data/request-image.ts`)
@@ -66,6 +67,8 @@
 - TREND의 HIT는 조회수가 아니라 같은 dedup_key를 다룬 매체 수다. RSS에 조회수가 없다.
 - **인라인 편집기의 키 처리는 `stopPropagation`이 필수다**(`editorKeyHandler`). 표 단축키는 window 의 keydown 이 받고 "포커스가 입력칸이면 무시"로 편집 중을 피하는데, Enter·Tab 은 편집기가 먼저 편집기를 닫아 버려 window 에 닿을 때는 그 방어가 이미 무너져 있다. 막지 않으면 선택이 두 칸씩 건너뛴다. `preventDefault`로는 안 막힌다.
 - 그리드 셀 드래그는 `mousedown`에서 `preventDefault`를 건다. 안 걸면 브라우저 기본 선택이 같이 시작돼 화면 전체가 반투명 사본으로 끌려다닌다. 버튼·입력칸 위에서는 걸지 않는다.
+- **ref 콜백 안에서 setState 하지 말 것.** 인라인 ref 는 렌더마다 새 함수라 React 가 커밋마다 떼었다 붙인다. 그 안의 setState 는 무한 렌더가 되고 `Maximum update depth exceeded` 로 **화면 전체가 백지**가 된다. 값 비교로 막아도 소용없다(R119 창고 탭 전환 사고). 크기 측정은 `ResizeObserver` 나 layout effect 로 한다.
+- **렌더 예외는 `RouteErrorBoundary` 가 잡는다**(`src/App.tsx`). 없애지 말 것. 없으면 백지만 남고 원인 단서가 사라진다.
 - **실데이터·캐시 내용을 로그·git·공개 파일에 넣지 말 것.**
 - TS 실시간공유 데이터 손실 이력 있음 — 동기화 손대기 전 `fabric-rnd-ts` 필독.
 
