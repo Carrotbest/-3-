@@ -438,20 +438,25 @@ export function buildFabricLedger(
     const fallback = recordIdentity(record)
     // DD의 'Style No.'는 대장의 Style/#과 뜻이 다르고 원본 FL이 들어 있어 보조 식별자로 쓰면 다른 행에 붙는다.
     // 그래서 DD 레코드는 FL로만 대장에 붙인다. FL이 없는 행은 각자 한 항목이며 서로 묶이지 않는다.
+    // FL 유무와 상관없이 DD 행 key 를 만들어 둔다.
+    // FL 을 나중에 적으면 항목 key 가 dd: 에서 fl: 로 바뀌는데, 그때 예전 dd: key 로 저장된
+    // 입고 기록(override·이력)을 못 찾으면 창고 보관 건이 R&D No.를 잃고 입고 대기로 되돌아간다.
+    const ddBaseKey = ddRowBaseKey(record)
     let matchedKey: string
     if (normalized(record.flNo)) {
       matchedKey = resolveKey("", record.flNo, "", fallback)
     } else {
-      const baseKey = ddRowBaseKey(record)
       // 값이 완전히 같은 행이 겹칠 때만 #2부터 순번을 붙여 모든 행을 보존한다.
-      const occurrence = (ddRowKeyCounts.get(baseKey) ?? 0) + 1
-      ddRowKeyCounts.set(baseKey, occurrence)
-      matchedKey = occurrence === 1 ? baseKey : `${baseKey}#${occurrence}`
+      const occurrence = (ddRowKeyCounts.get(ddBaseKey) ?? 0) + 1
+      ddRowKeyCounts.set(ddBaseKey, occurrence)
+      matchedKey = occurrence === 1 ? ddBaseKey : `${ddBaseKey}#${occurrence}`
     }
     const existing = items.get(matchedKey)
     const item = existing ? (existing.record ? existing : mergeRecord(existing, record)) : emptyFromRecord(record, matchedKey)
     items.set(matchedKey, item)
-    registerIdentities(item, fabricIdentities("", record.flNo, record.styleNo))
+    // 색인은 살아 있는 항목 key 보다 뒤에 본다(resolveStoredKey). 그래서 dd: key 를 남겨도
+    // 실제로 그 key 를 쓰는 다른 행이 있으면 그쪽이 이긴다.
+    registerIdentities(item, [...fabricIdentities("", record.flNo, record.styleNo), ddBaseKey])
   })
 
   // 현재 key가 아니면 예전 fl:/style: key를 색인으로 해석해 기존 웹 기록을 이어 붙인다.
@@ -459,7 +464,13 @@ export function buildFabricLedger(
   const overrideMap = new Map<string, FabricLedgerOverride>()
   overrides.forEach((override) => {
     const itemKey = resolveStoredKey(override.key)
-    if (itemKey) overrideMap.set(itemKey, override)
+    if (!itemKey) return
+    // 한 항목에 여러 key 의 기록이 붙을 수 있다. FL 을 나중에 적어 key 가 바뀐 뒤 손으로 다시 입고하면
+    // 예전 dd: 기록과 새 fl: 기록이 둘 다 살아 있다. 배열 순서는 팀 공유 병합에 따라 흔들리므로
+    // 저장 시각이 늦은 것을 쓴다. 마지막에 사람이 한 처리가 이긴다.
+    const current = overrideMap.get(itemKey)
+    if (current && (current.updatedAt || "") > (override.updatedAt || "")) return
+    overrideMap.set(itemKey, override)
   })
   const outboundMap = new Map<string, FabricLedgerOutbound[]>()
   const intakeMap = new Map<string, string>()
