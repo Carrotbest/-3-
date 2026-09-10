@@ -383,6 +383,133 @@ function applySharedFields(from: DevRecord, to: DevRecord): DevRecord {
   }
 }
 
+// ─────────────────────────────────────────────── 신규 작지 접수: 옵션 그리드
+const INTAKE_GRID_ROW_H = 32
+const INTAKE_GRID_HEAD_H = 26
+/** 기본으로 보이는 옵션 줄 수. 이보다 많으면 표 안에서만 스크롤한다. 팝업 높이는 옵션 수와 무관하게 고정된다. */
+const INTAKE_GRID_ROWS = 8
+const INTAKE_GRID_HEIGHT = INTAKE_GRID_HEAD_H * 2 + INTAKE_GRID_ROW_H * INTAKE_GRID_ROWS
+const INTAKE_NO_WIDTH = 34
+const INTAKE_DEL_WIDTH = 36
+
+/**
+ * 옵션 그리드 열 순서. 앞의 여섯 개와 공정 여덟 개가 가로 스크롤 없이 들어간다.
+ * 나머지(Co, GD#/SA#, Arrange#, Finishing, Remark)는 오른쪽으로 밀어 두고 필요할 때 끌어서 본다.
+ */
+const INTAKE_GRID_ORDER = [
+  "yarnDetail", "construction", "targetWeight", "color", "dyeing",
+  "yarnMill", "yarnStatus", "knittingMill", "knittingStatus",
+  "dyeingMill", "dyeingStatus", "finishingMill", "finishingStatus",
+  "co", "developmentNo", "arrangeNo", "finishingA", "finishingB", "finishingC", "finishingD", "remark",
+]
+const INTAKE_GRID_WIDTHS: Record<string, number> = {
+  yarnDetail: 200, construction: 118, targetWeight: 76, color: 120, dyeing: 96,
+  yarnMill: 70, yarnStatus: 100, knittingMill: 70, knittingStatus: 100,
+  dyeingMill: 70, dyeingStatus: 100, finishingMill: 70, finishingStatus: 100,
+  co: 66, developmentNo: 110, arrangeNo: 100,
+  finishingA: 84, finishingB: 84, finishingC: 84, finishingD: 84, remark: 200,
+}
+const INTAKE_GRID_LABELS: Record<string, string> = { yarnDetail: "Yarn", targetWeight: "Target wt'" }
+/**
+ * 맨 윗줄에 적으면 아래 옵션까지 같이 채우는 열. 한 작지의 옵션은 대개 같은 날 같은 공정을 끝낸다.
+ * 아래 줄에서 따로 고친 값은 건드리지 않는다. 윗줄의 예전 값과 같은 줄만 따라 내려간다.
+ */
+const INTAKE_FILLDOWN_IDS = new Set(["yarnStatus", "knittingStatus", "dyeingStatus", "finishingStatus"])
+
+/** Body 는 DD 열에 없다. FDS/YDS 요청서의 BODY 와 같은 값(tech.bodyNo)이고, 비면 opt 로 만든다. */
+const INTAKE_BODY_COLUMN: MasterColumn = {
+  id: "bodyNo", label: "Body", width: 62, mono: true, align: "center", value: (record) => bodyLabel(record),
+}
+
+const INTAKE_OPTION_COLUMNS: MasterColumn[] = [
+  INTAKE_BODY_COLUMN,
+  ...INTAKE_GRID_ORDER
+    .map((id) => [...DETAIL_GROUP.columns, ...SCHEDULE_GROUP.columns].find((column) => column.id === id))
+    .filter((column): column is MasterColumn => Boolean(column))
+    .map((column) => ({ ...column, width: INTAKE_GRID_WIDTHS[column.id] ?? column.width, label: INTAKE_GRID_LABELS[column.id] ?? column.label })),
+]
+
+/** 옵션 그리드의 한 칸. 라벨 없이 입력만 넣는다. 항상 편집 상태라 더블클릭이 필요 없다. */
+function IntakeCell({ column, record, optionsById, onChange }: { column: MasterColumn; record: DevRecord; optionsById: Record<string, readonly string[]>; onChange: (next: DevRecord) => void }) {
+  const value = String(column.value(record, null) ?? "")
+  const disabled = COMPUTED_COLUMN_IDS.has(column.id)
+  const set = (raw: string) => onChange(updateRecordCell(record, column, raw))
+  const baseOptions = optionsById[column.id] ?? column.options
+  // 작지 자동 채움 값이 정규 목록에 없어도 드롭다운에 보이도록 앞에 끼워 넣는다. EditorField 와 같은 규칙이다.
+  const options = baseOptions && value && !baseOptions.includes(value) ? [value, ...baseOptions] : baseOptions
+  const box = `h-7 w-full min-w-0 rounded border border-[var(--border)] bg-[var(--background)] px-1.5 text-xs outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:bg-[var(--muted)] disabled:opacity-60 ${column.mono ? "font-mono" : ""} ${column.number || column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : ""}`
+  if (column.date) return <DateInput value={value} disabled={disabled} onChange={set} compact />
+  if (options && options.length && !column.suggest) return <Select value={value || ALL} onValueChange={(next) => set(next === ALL ? "" : next)} disabled={disabled}>
+    <SelectTrigger className="h-7 min-w-0 px-1.5 text-xs"><SelectValue placeholder="선택" /></SelectTrigger>
+    <SelectContent><SelectItem value={ALL}>미입력</SelectItem>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
+  </Select>
+  if (column.suggest) return <>
+    <input list={`dl-intake-${column.id}`} value={value} disabled={disabled} onChange={(event) => set(event.target.value)} className={box} />
+    <datalist id={`dl-intake-${column.id}`}>{(options ?? []).map((option) => <option key={option} value={option} />)}</datalist>
+  </>
+  return <input type={column.number ? "number" : "text"} value={value} disabled={disabled} onChange={(event) => set(event.target.value)} className={box} />
+}
+
+/**
+ * 접수 옵션 전체 목록. 창고 그리드와 같은 표 형태다.
+ * 탭으로 한 건씩 보던 것을 바꿨다. 12건이면 12줄이 한눈에 보여야 색상과 공정을 비교할 수 있다.
+ */
+function IntakeOptionGrid({ records, optionsById, onChangeRow, onRemoveRow }: { records: DevRecord[]; optionsById: Record<string, readonly string[]>; onChangeRow: (index: number, next: DevRecord, column: MasterColumn) => void; onRemoveRow: (index: number) => void }) {
+  const columns = INTAKE_OPTION_COLUMNS
+  const runs = subRuns(columns)
+  const tableWidth = INTAKE_NO_WIDTH + columns.reduce((sum, column) => sum + column.width, 0) + INTAKE_DEL_WIDTH
+  const headCell = "border-b border-r border-[var(--border)] px-1.5 text-[11px] font-normal text-[var(--muted-foreground)]"
+  // 상단 헤더는 배열로 먼저 만든다. map 안에서 배열을 되돌리면 key 경고가 난다.
+  const headTop: ReactNode[] = []
+  let cursor = 0
+  for (const run of runs) {
+    const start = cursor
+    cursor += run.span
+    if (!run.key) {
+      columns.slice(start, start + run.span).forEach((column) => headTop.push(
+        <th key={column.id} rowSpan={2} title={column.label} className={`sticky top-0 z-30 truncate bg-[var(--muted)] ${headCell}`}>{column.label}</th>,
+      ))
+      continue
+    }
+    headTop.push(<th key={`sub-${run.key}-${start}`} colSpan={run.span} className={`sticky top-0 z-30 bg-[var(--muted)] text-center ${headCell}`}>{run.label}</th>)
+  }
+  return <div className="overflow-auto rounded-[var(--radius)] border border-[var(--border)]" style={{ height: INTAKE_GRID_HEIGHT }}>
+    <table className="table-fixed border-separate border-spacing-0" style={{ width: tableWidth, minWidth: tableWidth }}>
+      <colgroup>
+        <col style={{ width: INTAKE_NO_WIDTH }} />
+        {columns.map((column) => <col key={column.id} style={{ width: column.width }} />)}
+        <col style={{ width: INTAKE_DEL_WIDTH }} />
+      </colgroup>
+      <thead>
+        <tr style={{ height: INTAKE_GRID_HEAD_H }}>
+          <th rowSpan={2} className={`sticky left-0 top-0 z-40 bg-[var(--muted)] ${headCell}`}>#</th>
+          {headTop}
+          <th rowSpan={2} className={`sticky right-0 top-0 z-40 bg-[var(--muted)] ${headCell}`}><span className="sr-only">옵션 삭제</span></th>
+        </tr>
+        <tr style={{ height: INTAKE_GRID_HEAD_H }}>
+          {columns.filter((column) => column.sub).map((column) => (
+            <th key={column.id} title={column.label} style={{ top: INTAKE_GRID_HEAD_H }} className={`sticky z-30 truncate bg-[var(--muted)] ${headCell}`}>{column.label}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {records.map((record, index) => <tr key={index} style={{ height: INTAKE_GRID_ROW_H }}>
+          <td className="sticky left-0 z-20 border-b border-r border-[var(--border)] bg-[var(--card)] text-center text-[11px] tabular-nums text-[var(--muted-foreground)]">{index + 1}</td>
+          {columns.map((column) => {
+            const fillsDown = index === 0 && INTAKE_FILLDOWN_IDS.has(column.id)
+            return <td key={column.id} title={fillsDown ? "여기 적으면 아래 옵션에도 같이 채워집니다. 아래에서 따로 고친 값은 그대로 둡니다." : undefined} className={`border-b border-r border-[var(--border)] p-0.5 align-middle ${fillsDown ? "bg-[color-mix(in_srgb,var(--warning)_8%,transparent)]" : ""}`}>
+              <IntakeCell column={column} record={record} optionsById={optionsById} onChange={(next) => onChangeRow(index, next, column)} />
+            </td>
+          })}
+          <td className="sticky right-0 z-20 border-b border-[var(--border)] bg-[var(--card)] p-0 text-center">
+            <button type="button" title="옵션 삭제" aria-label={`옵션 ${index + 1} 삭제`} disabled={records.length <= 1} onClick={() => onRemoveRow(index)} className="mx-auto flex size-6 items-center justify-center rounded text-[var(--muted-foreground)] transition-colors hover:bg-[var(--destructive)] hover:text-white disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-[var(--muted-foreground)]"><X className="size-3.5" /></button>
+          </td>
+        </tr>)}
+      </tbody>
+    </table>
+  </div>
+}
+
 /** 연속된 같은 sub 를 하나의 병합 헤더로 묶는다(엑셀 상위 열머리 병합 재현). */
 function subRuns(columns: MasterColumn[]): { key: string; label: string; span: number }[] {
   const runs: { key: string; label: string; span: number }[] = []
@@ -420,7 +547,7 @@ const COMPUTED_COLUMN_IDS = new Set(["opt", "optionProgress", "actualBalance"])
 
 const TECH_PATHS: Record<string, string[]> = {
   origBrand: ["original", "brand"], origContents: ["original", "contents"], origConstruction: ["original", "construction"], origWeight: ["original", "weight"], origYarn: ["original", "yarn"], origComments: ["original", "comments"],
-  developer: ["development", "developer"], co: ["development", "co"], developmentNo: ["development", "developmentNo"], arrangeNo: ["arrangeNo"], yarnDetail: ["yarnDetail"],
+  developer: ["development", "developer"], co: ["development", "co"], developmentNo: ["development", "developmentNo"], arrangeNo: ["arrangeNo"], yarnDetail: ["yarnDetail"], bodyNo: ["bodyNo"],
   finishingA: ["finishingSlots", "a"], finishingB: ["finishingSlots", "b"], finishingC: ["finishingSlots", "c"], finishingD: ["finishingSlots", "d"],
   yarnMill: ["mills", "yarn"], yarnStatus: ["processDates", "yarn"], knittingMill: ["mills", "knitting"], knittingStatus: ["processDates", "knitting"], dyeingMill: ["mills", "dyeing"], dyeingStatus: ["processDates", "dyeing"], finishingMill: ["mills", "finishing"], finishingStatus: ["processDates", "finishing"],
   fds: ["sampleDates", "fds"], yds: ["sampleDates", "yds"], optionProgress: ["optionProgress"], review: ["review"], actualWidth: ["actual", "width"], actualWeight: ["actual", "weight"], actualBalance: ["actual", "balance"], shrinkageLength: ["actual", "shrinkageLength"], shrinkageWidth: ["actual", "shrinkageWidth"],
@@ -578,7 +705,7 @@ function DateValuePreview({ raw, className = "" }: { raw: string; className?: st
 }
 
 /** 모달 날짜 필드도 수기 입력, 포털 캘린더, 저장값 미리보기를 함께 제공한다. */
-function DateInput({ value, disabled, invalid, onChange }: { value: string; disabled?: boolean; invalid?: boolean; onChange: (raw: string) => void }) {
+function DateInput({ value, disabled, invalid, onChange, compact = false }: { value: string; disabled?: boolean; invalid?: boolean; onChange: (raw: string) => void; compact?: boolean }) {
   // 저장된 YYYY-MM-DD를 그대로 초기화해야 과거 연도가 Enter만으로 올해로 바뀌지 않는다.
   const [raw, setRaw] = useState(value)
   useEffect(() => {
@@ -588,6 +715,11 @@ function DateInput({ value, disabled, invalid, onChange }: { value: string; disa
     setRaw(next)
     onChange(next)
   }
+  // 접수 옵션 그리드용 압축형. 행 높이 32px 안에 들어가야 해서 미리보기 줄을 뺀다.
+  if (compact) return <div className={`flex h-7 min-w-0 items-stretch rounded border border-[var(--border)] bg-[var(--background)] focus-within:ring-2 focus-within:ring-[var(--ring)] ${invalid ? "ring-1 ring-[var(--destructive)]" : ""}`}>
+    <input type="text" value={raw} disabled={disabled} onChange={(event) => change(event.target.value)} className="min-w-0 flex-1 bg-transparent px-1.5 text-xs text-[var(--foreground)] outline-none disabled:cursor-not-allowed disabled:opacity-40" />
+    <DatePickerPopover value={raw} disabled={disabled} invalid={invalid} onChange={change} iconOnly triggerClassName="h-full w-6 shrink-0 justify-center border-l border-[var(--border)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]" />
+  </div>
   return <div className="grid min-w-0 gap-1">
     <div className={`flex h-9 min-w-0 rounded-md border border-[var(--border)] bg-[var(--background)] transition-colors focus-within:ring-2 focus-within:ring-[var(--ring)] ${invalid ? "ring-1 ring-[var(--destructive)]" : ""}`}>
       <input type="text" value={raw} disabled={disabled} aria-invalid={invalid} onChange={(event) => change(event.target.value)} className="min-w-0 flex-1 bg-transparent px-3 text-sm text-[var(--foreground)] outline-none disabled:cursor-not-allowed disabled:opacity-40" />
@@ -1958,7 +2090,21 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const sharedDraft = intake ? intake[0] : null
   const optionDraft = intake ? intake[Math.min(intakeOpt, intake.length - 1)] : null
   const changeShared = (next: DevRecord) => setIntake((recs) => (recs ? recs.map((r) => applySharedFields(next, r)) : recs))
-  const changeOption = (next: DevRecord) => setIntake((recs) => (recs ? recs.map((r, i) => (i === Math.min(intakeOpt, recs.length - 1) ? next : r)) : recs))
+  const changeOptionAt = (index: number, next: DevRecord, column?: MasterColumn) => setIntake((recs) => {
+    if (!recs) return recs
+    const current = recs[index]
+    // 맨 윗줄의 공정 완료일은 아래 줄로 함께 내려간다. 한 작지의 옵션은 대개 같은 날 끝난다.
+    // 아래에서 따로 고친 줄은 건드리지 않는다. 윗줄의 예전 값을 그대로 들고 있던 줄만 따라간다.
+    if (index === 0 && current && column && INTAKE_FILLDOWN_IDS.has(column.id)) {
+      const before = String(column.value(current, null) ?? "")
+      const after = String(column.value(next, null) ?? "")
+      if (before !== after) return recs.map((record, i) => {
+        if (i === 0) return next
+        return String(column.value(record, null) ?? "") === before ? updateRecordCell(record, column, after) : record
+      })
+    }
+    return recs.map((record, i) => (i === index ? next : record))
+  })
   const addOption = () => setIntake((recs) => {
     if (!recs) return recs
     const next = [...recs, applySharedFields(recs[0], createBlankDevRecord())]
@@ -2439,18 +2585,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               <EditorGroup label="ORIGINAL 분석 (옵션 공통)" color={groupByKey("original").color} columns={INTAKE_ORIGINAL} draft={sharedDraft} onChange={changeShared} optionsById={optionsById} requiredIds={INTAKE_REQUIRED_IDS} />
             </div>
             <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] p-2.5">
-              <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
-                <span className="mr-1 text-xs font-semibold text-[var(--muted-foreground)]">옵션(색상)별 개발·공정</span>
-                {intake.map((record, index) => <span key={index} className="inline-flex items-center">
-                  <button type="button" onClick={() => setIntakeOpt(index)} className={`rounded-l-full border py-0.5 pl-2.5 pr-2 text-[11px] transition-colors ${index === intakeOpt ? "border-transparent bg-[var(--primary)] text-[var(--primary-foreground)]" : "border-[var(--border)] text-[var(--muted-foreground)] hover:bg-[var(--accent)]"} ${intake.length > 1 ? "" : "rounded-r-full pr-2.5"}`}>{index + 1}. {record.color || "색상 미지정"}</button>
-                  {intake.length > 1 ? <button type="button" title="옵션 삭제" onClick={() => removeOption(index)} className={`rounded-r-full border border-l-0 px-1 py-0.5 transition-colors ${index === intakeOpt ? "border-transparent bg-[var(--primary)] text-[var(--primary-foreground)]" : "border-[var(--border)] text-[var(--muted-foreground)] hover:bg-[var(--destructive)] hover:text-white"}`}><X className="size-3" /></button> : null}
-                </span>)}
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold text-[var(--muted-foreground)]">옵션(색상)별 개발 · 공정</span>
+                <Badge variant="outline" className="font-normal">{intake.length}건</Badge>
                 <Button type="button" size="sm" variant="outline" className="h-6 px-2 text-[11px]" onClick={addOption}><Plus className="size-3.5" />옵션 추가</Button>
+                <span className="text-[11px] text-[var(--muted-foreground)]">칸을 눌러 바로 고칩니다. 맨 윗줄 공정 완료일은 아래 옵션에도 같이 채워집니다. {INTAKE_GRID_ROWS}줄까지 보이고 그 아래는 표 안에서 스크롤합니다.</span>
               </div>
-              <div className="space-y-2.5">
-                <EditorGroup label={`개발 DETAIL · 옵션 ${intakeOpt + 1}`} color={DETAIL_GROUP.color} columns={DETAIL_GROUP.columns} draft={optionDraft} onChange={changeOption} optionsById={optionsById} />
-                <EditorGroup label={`공정 SCHEDULE · 옵션 ${intakeOpt + 1}`} color={SCHEDULE_GROUP.color} columns={SCHEDULE_GROUP.columns} draft={optionDraft} onChange={changeOption} optionsById={optionsById} layout={SCHEDULE_GROUP.editorLayout} />
-              </div>
+              <IntakeOptionGrid records={intake} optionsById={optionsById} onChangeRow={changeOptionAt} onRemoveRow={removeOption} />
             </div>
           </DialogBody>
           <DialogFooter className="gap-1.5 py-2.5">

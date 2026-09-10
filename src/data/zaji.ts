@@ -265,31 +265,21 @@ function parseGd(rows: Grid): Zaji {
     if (header !== null) {
       const cols = g.headerMap(header)
       const limit = notePos ? notePos[0] : rows.length
-      // 색상 번호(No)가 옵션 단위. 병합 셀 때문에 한 색상이 여러 Part 하위행으로 나뉘어도(예: DD·SD 염색 변형)
-      // 하나의 옵션으로 접는다. 대표 Part 는 수량이 찍힌 것 우선, 없으면 색상 염색과 맞는 것, 그것도 없으면 첫 Part.
-      const groups: { color: string; remark: string; parts: { code: string; hasQty: boolean }[] }[] = []
-      let current: (typeof groups)[number] | null = null
+      // 옵션 단위는 Part+Color 다. 원본 파이썬 변환기(zaji/parser.py)와 같게 둔다.
+      // 색상 번호(No)로 접으면 한 색상에 걸린 Part 가 통째로 1건이 된다.
+      // FSR260901105 는 BODY 6개 x 2색이라 12건이 맞는데 2건으로 줄던 사고가 있었다.
+      // 병합 셀로 같은 Part+Color 가 여러 행에 반복되는 것만 1건으로 합친다.
+      const seen = new Set<string>()
       let lastColor = ""
       for (let r = header + 1; r < limit; r++) {
-        const no = g.at(r, cols["No"])
         const color = g.at(r, cols["Color"])
         if (color) lastColor = color
         const part = g.at(r, cols["Part"])
-        // No 값이 새로 나오면 새 색상(옵션) 시작. 병합으로 빈 No·Color 는 직전 값을 잇는다.
-        if (no) { current = { color: lastColor, remark: g.at(r, cols["Remark"]), parts: [] }; groups.push(current) }
         if (!part) continue
-        if (!current) { current = { color: lastColor, remark: g.at(r, cols["Remark"]), parts: [] }; groups.push(current) }
-        if (current.parts.some((pp) => pp.code === part)) { z.dupRemoved += 1; continue }
-        current.parts.push({ code: part, hasQty: Boolean(g.at(r, cols["Quantity"])) })
-      }
-      for (const group of groups) {
-        if (!group.parts.length) continue
-        const wantDye = matchDyeing(group.color, "")
-        const byQty = group.parts.find((pp) => pp.hasQty)
-        const byDye = wantDye ? group.parts.find((pp) => matchDyeing("", parts[pp.code]?.dyeing || "") === wantDye) : undefined
-        const chosen = byQty ?? byDye ?? group.parts[0]
-        if (group.parts.length > 1) z.dupRemoved += group.parts.length - 1
-        rawOpts.push({ part: chosen.code, color: group.color, remark: group.remark })
+        const key = `${part}::${lastColor}`
+        if (seen.has(key)) { z.dupRemoved += 1; continue }
+        seen.add(key)
+        rawOpts.push({ part, color: lastColor, remark: g.at(r, cols["Remark"]) })
       }
     }
   }
@@ -375,6 +365,8 @@ export function applyZajiOption(record: DevRecord, z: Zaji, index: number): DevR
   const tech: DevTechnical = {
     ...record.tech,
     intakeSource: { kind: "zaji", requestKey, optionKey },
+    // 작지의 Part(B01, B02...)가 곧 BODY 다. opt 순번으로 만들면 색상이 둘 이상일 때 B07 처럼 엉뚱해진다.
+    bodyNo: o.part || record.tech?.bodyNo,
     yarnDetail: o.yarn || record.tech?.yarnDetail,
     mills: { ...record.tech?.mills, yarn: o.mills.yarn, knitting: o.mills.knit, dyeing: o.mills.dye, finishing: o.mills.finish },
   }
