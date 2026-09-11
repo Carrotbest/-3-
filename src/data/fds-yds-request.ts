@@ -1,9 +1,13 @@
-import type { DevRecord } from "@/data/schema"
+import { ownerDisplayName, type DevRecord } from "@/data/schema"
+import { isCompletedFlNo } from "@/data/dd-workflow"
+import { isInProgress } from "@/data/derive"
 import { fmtDate } from "@/data/format"
 
 export interface FdsYdsRow {
   /** DD 행 식별자. `${_src.sheet}::${_src.row}` — BODY 수정 저장에 쓴다. */
   key: string
+  /** STYLE#(GD#/SA#) 또는 ARRANGE#가 비어 있다. 그대로 보내면 GD가 작지를 못 찾는다. */
+  missing: boolean
   owner: string
   hmp: string
   style: string
@@ -16,7 +20,8 @@ export interface FdsYdsRow {
   remark: string
 }
 
-export const FDS_YDS_COLUMNS: readonly { key: keyof Omit<FdsYdsRow, "key">; head: string; width: number }[] = [
+/** 표에 실제로 찍는 열. `key`와 `missing`은 화면 동작용 값이라 열에서 뺀다. */
+export const FDS_YDS_COLUMNS: readonly { key: keyof Omit<FdsYdsRow, "key" | "missing">; head: string; width: number }[] = [
   { key: "owner", head: "담당", width: 10 },
   { key: "hmp", head: "HMP", width: 14 },
   { key: "style", head: "STYLE", width: 12 },
@@ -37,7 +42,6 @@ export function bodyLabel(record: DevRecord): string {
   return Number.isFinite(opt) && opt > 0 ? `B${String(opt).padStart(2, "0")}` : ""
 }
 
-const EXCLUDED_STATUS = new Set(["DROP", "HOLD", "REJECT"])
 const text = (value: unknown): string => String(value ?? "").trim()
 const dateText = (value: unknown): string => text(value) ? fmtDate(value) : ""
 
@@ -48,19 +52,33 @@ const styleNoOf = (record: DevRecord): string =>
 /**
  * 추출 조건을 바꾸려면 여기 한 곳만 고친다.
  *
- * STYLE#과 ARRANGE#가 **둘 다** 있어야 목록에 올린다. 둘 중 하나라도 비면 GD가 그 작지를 찾지 못해
- * 요청을 보내도 접수가 안 된다. 목록에서 빠졌다면 DD MASTER의 GD#/SA#·Arrange# 를 먼저 채운다.
+ * 올리는 건은 **진행중인 GD 샘플 가운데 Received date가 있고 FDS 또는 YDS가 비어 있는 것**이다.
+ *
+ * **Received date가 없으면 올리지 않는다.** 원단 실물을 받은 뒤에 FDS를 따라가는 순서라
+ * 아직 받지도 않은 건을 요청 목록에 올리면 GD에 보낼 수 없는 줄이 섞인다.
+ *
+ * **STYLE#(GD#/SA#)과 ARRANGE#가 비어도 올린다.** 예전에는 둘 다 있어야 올렸는데,
+ * 그렇게 하면 번호를 아직 안 채운 건이 화면에서 조용히 사라져 요청 자체가 누락됐다.
+ * 지금은 올리고 `missing`으로 표시해 맨 위에 세운다. 비어 있으면 GD가 작지를 못 찾으므로
+ * 보내기 전에 DD MASTER에서 채워야 한다. 그 판단은 사람이 한다.
  */
 export function collectFdsYdsRows(records: readonly DevRecord[]): FdsYdsRow[] {
   return records.filter((record) => {
     const co = text(record.tech?.development?.co || record.devType).toUpperCase()
-    const status = text(record.devStatus || record.stage).toUpperCase()
-    if (co !== "GD" || EXCLUDED_STATUS.has(status) || !text(record.styleNo)) return false
-    if (!styleNoOf(record) || !text(record.tech?.arrangeNo)) return false
+    if (co !== "GD" || !text(record.styleNo)) return false
+    // 진행중 판정은 `isInProgress` 하나를 쓴다. Status 값이 있으면 "진행중"일 때만,
+    // 비어 있으면 완료 판정으로 가른다. 화면의 진행중 건수와 같은 기준이라야 숫자가 어긋나지 않는다.
+    if (!isInProgress(record)) return false
+    // 실물을 받은 건만 올린다. 원단을 받고 나서 FDS를 따라가는 순서다.
+    if (!text(record.receivedDate)) return false
+    // FL#이 등록된 건은 FDS를 이미 받은 것이다. 요청할 이유가 없다.
+    if (isCompletedFlNo(record.flNo)) return false
     return !text(record.tech?.sampleDates?.fds) || !text(record.tech?.sampleDates?.yds)
   }).map((record) => ({
     key: `${record._src.sheet}::${record._src.row}`,
-    owner: text(record.owner),
+    missing: !styleNoOf(record) || !text(record.tech?.arrangeNo),
+    // 퇴사자는 이니셜로 익명 표기한다. GD로 나가는 자료라 실명을 그대로 싣지 않는다.
+    owner: ownerDisplayName(text(record.owner)),
     hmp: text(record.styleNo),
     style: styleNoOf(record),
     arrange: text(record.tech?.arrangeNo),
@@ -71,7 +89,9 @@ export function collectFdsYdsRows(records: readonly DevRecord[]): FdsYdsRow[] {
     fds: dateText(record.tech?.sampleDates?.fds),
     yds: dateText(record.tech?.sampleDates?.yds),
     remark: text(record.note),
-  })).sort((a, b) => a.owner.localeCompare(b.owner, "ko-KR", { numeric: true })
+    // 번호가 빈 건을 맨 위에 세운다. 그대로 보내면 접수가 안 되니 먼저 눈에 걸려야 한다.
+  })).sort((a, b) => Number(b.missing) - Number(a.missing)
+    || a.owner.localeCompare(b.owner, "ko-KR", { numeric: true })
     || a.hmp.localeCompare(b.hmp, "ko-KR", { numeric: true })
     || a.body.localeCompare(b.body, "ko-KR", { numeric: true }))
 }

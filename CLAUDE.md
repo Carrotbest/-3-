@@ -17,13 +17,20 @@
 - 인라인 편집(셀 더블클릭, 타입별). 수식·대장연결 열은 수정 불가. 담당 칸 ⤢ → 64열 수정 모달.
 - 신규 작지 접수 팝업: REQUEST·ORIGINAL·담당·Style=옵션 공통(`changeShared`), DETAIL·SCHEDULE=옵션별(`changeOption`). 저장=옵션 수만큼 행(`saveIntake`, `_src.sheet="웹 접수"`).
 - 접수 필수 항목=`INTAKE_REQUIRED_IDS`(담당·Style No.·Season·Category·Buyer·Planner·**Due Date**). 라벨 `*`·빈 칸 붉은 테두리·저장 차단이 모두 이 목록을 본다. Due Date가 비면 HOME 스케줄에서 그 건이 통째로 빠지므로 접수에서 막는다. 엑셀 업로드는 과거 시트를 그대로 들여오는 길목이라 걸지 않는다.
-- FDS/YDS 요청 팝업(`src/data/fds-yds-request.ts`): GD 진행분 중 FDS 또는 YDS 미수취분. DROP·HOLD·REJECT 제외.
-  **STYLE#(GD#/SA#)과 ARRANGE#가 둘 다 있어야 올린다.** 하나라도 비면 GD가 작지를 못 찾아 요청해도 접수가 안 된다.
+- FDS/YDS 요청 팝업(`src/data/fds-yds-request.ts`): **진행중인 GD 원단 중 `Received date`가 있고 FDS 또는 YDS가 빈 건.** 진행중 판정은 `isInProgress` 하나를 쓴다. **Received date가 없으면 올리지 않는다.** 원단을 받은 뒤에 FDS를 따라가는 순서라 아직 안 받은 건은 요청할 것이 없다. FL#이 유효한 건도 제외한다(FDS를 이미 받았다는 뜻).
+  **STYLE#(GD#/SA#)과 ARRANGE#가 비어도 올린다.** 예전에는 둘 다 있어야 올렸는데 그러면 번호를 안 채운 건이 화면에서 조용히 사라져 요청 자체가 누락됐다. 지금은 올리고 `missing`으로 표시해 맨 위에 세우고 붉은 "미기재"를 찍는다. 비어 있으면 GD가 작지를 못 찾아 접수가 안 되니 보내기 전에 채워야 한다. 그 판단은 사람이 한다. 표 복사와 엑셀 내려받기는 `rows`로 만들어서 "미기재" 글자는 화면에만 남고 파일에는 빈 칸으로 나간다.
+  담당 칸은 `ownerDisplayName`을 거친다. GD로 나가는 자료라 퇴사자 실명을 싣지 않는다.
+  **FDS·YDS 날짜는 웹에서만 산다.** `xlsx-parsers.ts`가 그 두 열을 읽지 않고 `dd-export.ts`도 내보내지 않는다. 엑셀에 적은 날짜는 업로드해도 안 들어오고, 웹에 적은 날짜는 내보내도 안 나간다. 그래서 업로드로만 들어온 행은 날짜를 채워 두었어도 미수취로 보인다. 열 이름을 확인한 뒤 양쪽에 더해야 한다(미착수).
   REQUEST 열은 **일부러 비워 보낸다**. 메일 쓰는 날에 맞춰 손으로 적는 값이라 접수일(requestDate)과 다르다.
 - 경고 아이콘(`ddWarnings`)의 FL 경고는 **Style History에 뭐라도 적혀 있으면 끈다.** "Matching RIB으로 등록 불필요"처럼 FL을 안 딴 사유를 남긴 건이라, 계속 띄우면 진짜 누락 건과 구분이 안 된다. FL# 열의 붉은 "FL 미입력" 표기도 같은 판정을 쓰므로 함께 사라진다.
 - 작지 첨부 자동 채움: `src/data/zaji.ts`(GD `Fabric sample request report.xlsx`만, 국내 2종 미지원). 회귀규칙(조직명 최장일치·Part+Color dedup·시즌변환) 유지.
   **옵션 단위는 Part+Color 다.** 색상 번호(No)로 접으면 BODY 6개 x 2색이 2건으로 줄어든다(R114). 원본 `zaji/parser.py` 와 다르게 만들지 말 것.
 - 드롭다운=정규목록 ∪ 실데이터. Season `SS'26`.
+- 주간 보고 버튼(`src/data/weekly-report.ts`): 보고 양식 `1. Total Sample Status Summary` 문장을 만들어 팝업에 띄운다. 손질해서 복사만 한다. 엑셀로 내보내지 않는다.
+  **여기서만 완료 기준이 화면과 다르다. 보고 완료는 `Received date`고 화면 완료는 FL#이다.** 리뷰용 원단 받는 날과 FL 등록에 필요한 FDS 받는 날 간격이 커서, 이번 주에 원단 받아 리뷰까지 끝냈는데 FDS가 늦어 FL은 다음 주에 등록되는 일이 흔하다. 팀은 실물 기준으로 보고한다. **두 기준을 하나로 합치지 말 것.** 합치면 화면 현황이나 보고 숫자 중 하나가 반드시 틀어진다.
+  팝업은 전체 탭과 담당 탭, 그리고 요약·상세 토글로 갈린다. 담당 탭은 요약 아래에 데이터가 있는 카테고리를 2번부터 번호를 달아 잇는다. **요약은 개발 건 이름(Style No.)으로 묶는다. FL#으로 묶지 말 것.** FL#은 스타일과 조직 조합마다 따로 나가서 그것으로 묶으면 같은 개발 건이 열 줄로 흩어진다(Purepress 5줄, 우리에프씨 4줄). 상세는 FL#과 조직까지 상태마다 한 줄씩 적는다. 요약은 카테고리 안에서 **완료 묶음을 진행 묶음과 갈라 앞에 세운다.** 한 줄에 섞으면 그 주에 끝낸 것과 남은 것이 붙어 버린다. 완료 줄은 상태가 하나뿐이라 건수만 적는다. 한쪽만 있으면 `[완료]`·`[진행]` 머리를 붙이지 않는다. 상태 문장은 공정일로 만든다. 지나간 날짜는 완료, 미래 날짜는 예정이다. **협의 내용과 판단(재가공 요청, as is ok 등)은 DD에 없어 만들 수 없다.** 뼈대만 뽑고 나머지는 사람이 채운다.
+  보고 기준 진행 중 = `Received date`가 빈 건. 신규 = 그중 구간 안에 접수된 건, 공정 중 = 나머지. 그래서 `전체 진행 = 신규 + 공정 중`이 항상 맞는다.
+  카테고리 분류는 `normalizeCategory`를 거친다. 네 값에 안 맞는 건은 "분류 미기재"로 따로 적는다. 그 줄이 0이 아니면 카테고리 합이 전체와 안 맞으므로 DD Category를 손봐야 한다.
 
 ## FABRIC REQUEST (`src/routes/FabricRequest.tsx`, `src/data/request-template.ts`, `src/data/request-image.ts`)
 - `/request` = 통합원단부 1팀(유관부서) 소싱 의뢰 원장. **DD MASTER보다 먼저다.** 차트 작성 → 작지 → DD 행 생성 순서.
@@ -71,12 +78,13 @@
 - **렌더 예외는 `RouteErrorBoundary` 가 잡는다**(`src/App.tsx`). 없애지 말 것. 없으면 백지만 남고 원인 단서가 사라진다.
 - **실데이터·캐시 내용을 로그·git·공개 파일에 넣지 말 것.**
 - **동기화 쓰기 경로에서 `mergeForKey`를 그대로 부르지 말 것.** 병합 대상이 아닌 키(`MERGE_IDS` 네 개 외 전부)는 `theirs`가 돌아오는데, 쓰기 방향에서 그건 원격 값이다. 방금 저장한 것이 빠진 옛 값을 다시 올리고 스냅샷이 화면을 덮어 저장이 사라진다(R121). `pushCacheNow`는 병합 키일 때만 원격과 합친다.
+- **공정 도달 비율(`도달 ÷ 진행 중`)에 주간 증감을 붙이지 말 것.** 분모가 움직이는 집단이라 신규 접수가 들어오면 내려가고, 완료 건이 진행 중에서 빠질 때도 내려간다. 완료 건은 네 공정 모두 도달로 세어졌으므로 분자와 분모가 같이 1씩 줄고, 비율이 100%가 아닌 이상 `(a-1)/(b-1)`은 늘 `a/b`보다 작다. 결과적으로 **접수도 완료도 활발한 주에 지표가 나빠 보인다.** 신호가 반대다. 주간 변화는 `processWeeklyFlow`(그 주에 공정을 통과한 건수)와 `weeklyIntakeBalance`(접수 대비 완료)로 본다. 비율은 현황 스냅샷으로만 쓴다.
 - TS 실시간공유 데이터 손실 이력 있음 — 동기화 손대기 전 `fabric-rnd-ts` 필독.
 
 ## 보기 설정 (`src/data/view-prefs.ts`)
 - 열 너비와 그룹 펼침/접힘은 **개인 브라우저(localStorage)에만** 남는다. `CACHE_KEYS`에 없어 Firestore로 안 올라간다. 한 사람이 바꿔도 팀원 화면은 그대로다.
 - 계정이 아니라 브라우저에 붙는다. 공용 PC에서는 앞사람 설정이 보이고, 다른 PC로 가면 기본값에서 시작한다.
-- 키: `dd-col-widths-v2`, `dd-open-groups-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`.
+- 키: `dd-col-widths-v2`, `dd-open-groups-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `home-today-briefing-hidden-v1`.
 - 검색·필터·정렬·탭·선택은 일부러 저장하지 않는다. 남아 있으면 다음에 열었을 때 행이 왜 안 보이는지 헷갈린다.
 - **예외: DD MASTER 행 드래그 순서(`sortOrder`)는 레코드에 저장돼 팀 전체가 공유한다.** 보기 설정이 아니다.
 
@@ -93,6 +101,8 @@
 | 화면 | 원본 | 기준 |
 |---|---|---|
 | HOME 완료/접수 | DD | Received/Request Date + 기간 |
+| 주간 보고 문장 | DD | **완료=Received date**(FL# 아님), 진행=Received date 빈 건, 최근 7일. DROP·HOLD·REJECT 제외 |
+| HOME Overall status 주간 변화 | DD | 공정 통과는 월~일 주 기준(`processWeeklyFlow`), 접수·완료 균형은 **오늘에서 7일 전까지**(`weeklyIntakeBalance`, `recentWindow`). 창 기준이 서로 다르다. **공정 도달 비율의 주간 증감은 쓰지 않는다.** 아래 주의 항목 참조 |
 | HOME 스케줄 임박·지연 | DD | Due Date로 계산, **완료 판정은 Received date**(`isScheduleOpen`). FL#은 등록 번호일 뿐이라 실물 도착 기준으로 본다. **Due Date가 비면 임박·지연 어느 쪽에도 안 뜬다**(`daysLeft`=null이라 필터에서 제거) |
 | RDDA 등록 | ~2026-07 대장 FL.# YYMM / 08~ DD Received | 동일 FL 1건(대장 우선) `mergedFlRegistrations` |
 | DEVELOPMENT | DD+대장 | `fabric-rnd-fl-ledger` |

@@ -247,12 +247,21 @@ function findHeaderStart(sheet: XLSX.WorkSheet, sample = false): number | null {
   return null
 }
 
-const normalizeCategory = (value: unknown): string => {
-  const key = compact(value)
-  if (key === "seasondev" || key === "season") return "SEASON"
-  if (key === "coreupdate" || key === "core") return "CORE"
-  if (key === "eumarket") return "EU MARKET"
-  if (key === "project") return "PROJECT"
+/**
+ * Category 값을 `CATEGORIES` 네 값 중 하나로 맞춘다.
+ *
+ * DD의 Category 칸은 드롭다운이지만 인라인 편집과 과거 시트 업로드를 거치며 "EU", "Season Dev.",
+ * "CORE ITEM" 처럼 여러 표기가 섞인다. 하위 폴더(EU·SEASON·CORE·PROJECT)는 이 값을 그대로
+ * 비교해 걸러내므로, 표기가 하나만 어긋나도 그 건이 DD MASTER에는 있고 하위 폴더에는 없게 된다.
+ * 그래서 공백과 기호를 지운 뒤 접두사로 판정한다. 어디에도 안 걸리면 대문자로만 올려 원문을 남긴다.
+ */
+export const normalizeCategory = (value: unknown): string => {
+  const key = compact(value).replace(/[^a-z0-9가-힣]/g, "")
+  if (!key) return ""
+  if (key.startsWith("season")) return "SEASON"
+  if (key.startsWith("core")) return "CORE"
+  if (key.startsWith("eu")) return "EU MARKET"
+  if (key.startsWith("project")) return "PROJECT"
   return text(value).toUpperCase()
 }
 

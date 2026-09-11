@@ -61,6 +61,7 @@ import {
   categoryStyleList,
   completedLibrary,
   devTypeSplit,
+  isDoneThisYear,
   isInProgress,
   kpis,
   ownerFlSourceBreakdown,
@@ -94,6 +95,7 @@ import {
 } from "@/data/schema"
 import { useAppStore } from "@/store/useAppStore"
 import { ingestDevelopment } from "@/data/upload"
+import { normalizeCategory } from "@/data/xlsx-parsers"
 import { hoverLift } from "@/lib/motion"
 import { useInView } from "@/lib/useInView"
 import { DevelopmentMasterSheet } from "@/routes/DevelopmentMasterSheet"
@@ -125,7 +127,18 @@ const CATEGORY_BAR_CLASS = [
   "bg-[var(--chart-3)]",
   "bg-[var(--chart-4)]",
 ]
-type StatusFilter = "all" | "progress" | "due" | "late"
+type StatusFilter = "all" | "progress" | "done" | "due" | "late"
+
+/**
+ * 상단 카드 필터 판정. 카드 숫자와 목록 길이가 늘 같아야 하므로 판정은 여기 하나뿐이다.
+ * 완료만 성격이 다르다. `statusOf`의 완료는 지난 해 건까지 포함하는데, 카드는
+ * **당해년도 완료**만 센다. 그래서 `isDoneThisYear`를 따로 쓴다.
+ */
+const matchesStatusFilter = (row: DevRecord, filter: StatusFilter, today: Date): boolean => {
+  if (filter === "all") return true
+  if (filter === "done") return isDoneThisYear(row, today)
+  return statusOf(row, today) === filter
+}
 
 const MINI_MIX_CLASS = [
   "bg-[var(--chart-1)]",
@@ -1369,8 +1382,10 @@ function DevelopmentList() {
   const today = useMemo(() => new Date(), [])
 
   const routeCategory = SUB_CATEGORY[sub ?? "overview"] ?? null
+  // 저장된 표기를 그대로 비교하지 않는다. "EU", "Season Dev." 처럼 표기가 어긋난 건이
+  // DD MASTER에는 보이고 하위 폴더에서는 빠지는 일을 막는다(normalizeCategory).
   const scopedRecords = useMemo(
-    () => routeCategory ? records.filter((row) => row.category === routeCategory) : records,
+    () => routeCategory ? records.filter((row) => normalizeCategory(row.category) === routeCategory) : records,
     [records, routeCategory],
   )
   const options = useMemo(() => ({
@@ -1396,8 +1411,10 @@ function DevelopmentList() {
 
   const summary = useMemo(() => kpis(scopedFiltered, today), [scopedFiltered, today])
   const cardStats = useMemo(() => subpageCardStats(scopedFiltered, today), [scopedFiltered, today])
+  // 상단 완료 카드는 당해년도만 센다. 해가 바뀌면 저절로 0에서 다시 쌓인다.
+  const doneThisYear = useMemo(() => scopedFiltered.filter((row) => isDoneThisYear(row, today)).length, [scopedFiltered, today])
   const visibleRows = useMemo(
-    () => statusFilter === "all" ? scopedFiltered : scopedFiltered.filter((row) => statusOf(row, today) === statusFilter),
+    () => statusFilter === "all" ? scopedFiltered : scopedFiltered.filter((row) => matchesStatusFilter(row, statusFilter, today)),
     [scopedFiltered, statusFilter, today],
   )
   const boardRows = useMemo(() => visibleRows.filter((row) => isInProgress(row) && row.stage !== "시험"), [visibleRows])
@@ -1436,7 +1453,7 @@ function DevelopmentList() {
   }
 
   const openStatusPopup = (filter: StatusFilter, title: string) => {
-    const popupRows = filter === "all" ? scopedFiltered : scopedFiltered.filter((row) => statusOf(row, today) === filter)
+    const popupRows = filter === "all" ? scopedFiltered : scopedFiltered.filter((row) => matchesStatusFilter(row, filter, today))
     setStatusFilter(filter)
     setListPopup({ title, description: `현재 검색·선택 필터 기준 ${popupRows.length.toLocaleString("ko-KR")}건`, rows: popupRows })
   }
@@ -1476,8 +1493,8 @@ function DevelopmentList() {
 
       {view !== "completed" ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard icon={<Shapes aria-hidden="true" className="size-4" />} label="전체" value={summary.total} caption="현재 검색·선택 필터 기준" info="상태 필터 적용 전 전체 건수입니다." revealDelay={0} pressed={statusFilter === "all"} onClick={() => openStatusPopup("all", "전체 개발 목록")} visual={<CategoryMiniVisual items={cardStats.categoryMix} />} />
-          <StatCard icon={<Workflow aria-hidden="true" className="size-4" />} label="진행" value={summary.progress} caption="완료 전 개발 건" info="클릭하면 진행중 목록을 확인합니다." revealDelay={75} pressed={statusFilter === "progress"} onClick={() => openStatusPopup("progress", "진행 개발 목록")} visual={<ProcessMiniVisual items={cardStats.processMix} />} />
+          <StatCard icon={<Workflow aria-hidden="true" className="size-4" />} label="진행" value={summary.progress} caption="완료 전 개발 건" info="클릭하면 진행중 목록을 확인합니다." revealDelay={0} pressed={statusFilter === "progress"} onClick={() => openStatusPopup("progress", "진행 개발 목록")} visual={<ProcessMiniVisual items={cardStats.processMix} />} />
+          <StatCard icon={<CheckCircle2 aria-hidden="true" className="size-4" />} label="완료" value={doneThisYear} caption={`${today.getFullYear()}년 완료 건`} info="Received date 기준입니다. 비어 있으면 FL 번호의 등록월로 연도를 봅니다. 지난 해 완료 건은 세지 않습니다." revealDelay={75} pressed={statusFilter === "done"} onClick={() => openStatusPopup("done", `${today.getFullYear()}년 완료 개발 목록`)} visual={<CategoryMiniVisual items={cardStats.categoryMix} />} />
           <StatCard icon={<TimerReset aria-hidden="true" className="size-4" />} label="임박" value={summary.dueSoon} caption="납기까지 3일 이내" info="D-7 일정 분포와 임박 상태 건을 함께 확인합니다." tone="warning" revealDelay={150} pressed={statusFilter === "due"} onClick={() => openStatusPopup("due", "납기 임박 개발 목록")} visual={<BucketMiniVisual items={cardStats.dueBuckets} tone="warning" />} />
           <StatCard icon={<TriangleAlert aria-hidden="true" className="size-4" />} label="지연" value={summary.late} caption="납기일 경과" info="지연 일수 구간별 건수입니다." tone="destructive" revealDelay={200} pressed={statusFilter === "late"} onClick={() => openStatusPopup("late", "지연 개발 목록")} visual={<BucketMiniVisual items={cardStats.lateBuckets} tone="destructive" />} />
         </div>

@@ -52,18 +52,83 @@ const SheetOverlay = React.forwardRef<
 ))
 SheetOverlay.displayName = "SheetOverlay"
 
+/** 패널 최소 크기. 이보다 좁으면 입력칸 라벨이 겹친다. */
+const SHEET_MIN = 280
+
+/**
+ * 붙어 있는 쪽 반대편 가장자리를 끌어 패널 크기를 바꾼다.
+ *
+ * 패널은 화면 가장자리에 붙는 것이 제 성질이라 자유롭게 옮기지 않는다. 옮기는 창은 Dialog 다.
+ * 여기서는 폭(또는 높이)만 사용자 손에 넘긴다. 손대기 전에는 화면마다 준 클래스가 그대로 산다.
+ */
+function useSheetSize(side: "top" | "right" | "bottom" | "left", nodeRef: React.RefObject<HTMLDivElement | null>) {
+  const [size, setSize] = React.useState<number | null>(null)
+  const drag = React.useRef<{ pointerId: number; start: number; origin: number } | null>(null)
+  const vertical = side === "top" || side === "bottom"
+
+  const begin = (event: React.PointerEvent<HTMLElement>) => {
+    if (event.button !== 0) return
+    const node = nodeRef.current
+    if (!node) return
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    const rect = node.getBoundingClientRect()
+    const origin = size ?? (vertical ? rect.height : rect.width)
+    drag.current = { pointerId: event.pointerId, start: vertical ? event.clientY : event.clientX, origin }
+    setSize(origin)
+  }
+
+  const move = (event: React.PointerEvent<HTMLElement>) => {
+    const current = drag.current
+    if (!current || current.pointerId !== event.pointerId) return
+    const delta = (vertical ? event.clientY : event.clientX) - current.start
+    // 붙은 방향에 따라 끌는 방향과 커지는 방향이 반대다.
+    const grow = side === "right" || side === "bottom" ? -delta : delta
+    const limit = vertical ? window.innerHeight : window.innerWidth
+    setSize(Math.min(limit - 24, Math.max(SHEET_MIN, current.origin + grow)))
+  }
+
+  const end = (event: React.PointerEvent<HTMLElement>) => {
+    const current = drag.current
+    if (!current || current.pointerId !== event.pointerId) return
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+    drag.current = null
+  }
+
+  return { size, reset: () => setSize(null), begin, move, end, vertical }
+}
+
+const SHEET_HANDLE: Record<"top" | "right" | "bottom" | "left", string> = {
+  right: "inset-y-0 left-0 w-1.5 cursor-ew-resize",
+  left: "inset-y-0 right-0 w-1.5 cursor-ew-resize",
+  top: "inset-x-0 bottom-0 h-1.5 cursor-ns-resize",
+  bottom: "inset-x-0 top-0 h-1.5 cursor-ns-resize",
+}
+
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> & {
     side?: "top" | "right" | "bottom" | "left"
     showCloseButton?: boolean
   }
->(({ className, children, side = "right", showCloseButton = true, ...props }, ref) => (
+>(({ className, children, side = "right", showCloseButton = true, ...props }, forwardedRef) => {
+  const nodeRef = React.useRef<HTMLDivElement | null>(null)
+  const { size, reset, begin, move, end, vertical } = useSheetSize(side, nodeRef)
+  const setRefs = React.useCallback((node: HTMLDivElement | null) => {
+    nodeRef.current = node
+    if (typeof forwardedRef === "function") forwardedRef(node)
+    else if (forwardedRef) (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+  }, [forwardedRef])
+
+  return (
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content
-      ref={ref}
+      ref={setRefs}
       data-slot="sheet-content"
+      style={size === null ? undefined : vertical ? { height: size, maxHeight: "none" } : { width: size, maxWidth: "none" }}
+      onCloseAutoFocus={(event) => { reset(); props.onCloseAutoFocus?.(event) }}
       className={cn(
         // 닫힘 애니메이션 제거(위 SheetOverlay 주석 참고): Presence 가 즉시 언마운트되게 한다.
         "fixed z-50 flex flex-col gap-4 bg-background shadow-lg data-[state=open]:animate-in data-[state=open]:duration-300",
@@ -79,6 +144,15 @@ const SheetContent = React.forwardRef<
       )}
       {...props}
     >
+      {/* 안쪽 가장자리 손잡이. 보이지 않고 커서로만 알린다. */}
+      <div
+        aria-hidden="true"
+        className={cn("absolute z-10 select-none", SHEET_HANDLE[side])}
+        onPointerDown={begin}
+        onPointerMove={move}
+        onPointerUp={end}
+        onPointerCancel={end}
+      />
       {children}
       {showCloseButton && (
         <SheetPrimitive.Close className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary">
@@ -88,7 +162,8 @@ const SheetContent = React.forwardRef<
       )}
     </SheetPrimitive.Content>
   </SheetPortal>
-))
+  )
+})
 SheetContent.displayName = "SheetContent"
 
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {

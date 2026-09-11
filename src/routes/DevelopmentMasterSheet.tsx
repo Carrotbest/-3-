@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
-import { CalendarDays, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
+import { CalendarDays, ClipboardList, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
 import { Popover } from "radix-ui"
 import { Link } from "react-router-dom"
 
@@ -21,6 +21,7 @@ import { dayToneText, holidayName } from "@/data/holidays"
 import { ingestDevelopment } from "@/data/upload"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
 import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical } from "@/data/schema"
+import { buildWeeklyReport, reportOwnerNames as reportOwnersOf, weeklyReportText, type ReportDetailLevel } from "@/data/weekly-report"
 import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
 
 const ALL = "__all__"
@@ -31,6 +32,8 @@ const FINISHING_OPEN_STORAGE_KEY = "dd-finishing-open-v1"
 const MIN_COLUMN_WIDTH = 56
 /** 더 이상 진행하지 않는 상태. 전체 탭에서는 감추고, 담당 탭에서는 위로 올려 흐리게 보여 준다. */
 const CLOSED_STATUSES = new Set(["완료", "DROP", "REJECT"])
+/** 더 진행되지 않는 행. 받을 것이 없으니 미수취로 몰아세우지 않는다. 완료는 여기 넣지 않는다. */
+const DEAD_STATUSES = new Set(["DROP", "REJECT", "HOLD"])
 /** 종료된 행의 회색. DD MASTER 에서 쓰는 회색 중 가장 진하다. */
 const DIMMED_ROW_BG = "color-mix(in srgb, var(--foreground) 24%, var(--card))"
 const isClosedRecord = (record: DevRecord): boolean => CLOSED_STATUSES.has(String(record.devStatus || record.stage || "").trim())
@@ -116,9 +119,20 @@ const gdReceiptDateRender = (value: (record: DevRecord) => CellValue): NonNullab
   return date ? dateText(date) : <span className="text-[var(--destructive)]">미수취</span>
 }
 
+/**
+ * Received date 전용.
+ *
+ * DROP·REJECT·HOLD 는 받을 것이 없는 행이다. 붉은 미수취로 칠하면 아직 기다리는 건과 섞여
+ * 진짜 미수취 건이 안 보인다. GD·국내 모두 실물을 받는 공정이라 개발처로는 가르지 않는다.
+ * 국내 입고 판정이 이 날짜를 쓰는 것과 같은 이유다(CLAUDE.md 창고 입고 대기).
+ */
 const receiptDateRender = (value: (record: DevRecord) => CellValue): NonNullable<MasterColumn["render"]> => (record) => {
   const date = value(record)
-  return date ? dateText(date) : <span className="text-[var(--destructive)]">미수취</span>
+  if (date) return dateText(date)
+  if (DEAD_STATUSES.has(String(record.devStatus || record.stage || "").trim().toUpperCase())) {
+    return <span className="text-[var(--muted-foreground)]">해당 없음</span>
+  }
+  return <span className="text-[var(--destructive)]">미수취</span>
 }
 
 function selectionShadow(sel: CellSel): string | undefined {
@@ -961,9 +975,19 @@ function EditorGroup({ label, color, columns, draft, onChange, optionsById, layo
 export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope?: string | null }) {
   const records = useAppStore((state) => state.records)
   const [fdsYdsOpen, setFdsYdsOpen] = useState(false)
+  // 주간 보고 팝업. 전체와 담당별 탭을 두고, 탭마다 손질한 문장을 따로 들고 있는다.
+  // 한 탭에서 고친 것이 다른 탭으로 넘어가면 안 되니 문장은 탭별로 보관한다.
+  const [reportOpen, setReportOpen] = useState(false)
+  const [reportTab, setReportTab] = useState(ALL)
+  const [reportOwnerNames, setReportOwnerNames] = useState<string[]>([])
+  const [reportLevel, setReportLevel] = useState<ReportDetailLevel>("summary")
+  // 키는 `탭|수준` 이다. 요약과 상세를 따로 보관해야 수준을 바꿔도 손질한 문장이 안 날아간다.
+  const [reportTexts, setReportTexts] = useState<Record<string, string>>({})
+  const [reportNotice, setReportNotice] = useState<string | null>(null)
   const [fdsYdsNotice, setFdsYdsNotice] = useState<string | null>(null)
   const [fdsYdsExporting, setFdsYdsExporting] = useState(false)
   const fdsYdsRows = useMemo(() => fdsYdsOpen ? collectFdsYdsRows(records) : [], [fdsYdsOpen, records])
+  const fdsYdsMissing = useMemo(() => fdsYdsRows.filter((row) => row.missing).length, [fdsYdsRows])
   useEffect(() => {
     if (!fdsYdsNotice) return
     const timer = window.setTimeout(() => setFdsYdsNotice(null), 3000)
@@ -975,6 +999,40 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     void saveDevelopmentRecord({ ...record, tech: { ...record.tech, bodyNo } }, key)
       .catch(() => setFdsYdsNotice("BODY 저장에 실패했습니다. 다시 시도해 주세요."))
   }
+  /**
+   * 보고용 숫자를 만들어 팝업을 띄운다.
+   *
+   * 완료 판정이 화면과 다르다. 화면은 FL#, 보고는 실물 도착일(Received date)이다.
+   * FDS가 늦어 FL이 다음 주로 넘어가는 건이 흔해서 팀은 실물 기준으로 보고한다.
+   * 자세한 이유는 `src/data/weekly-report.ts` 머리말에 적어 두었다.
+   */
+  const openWeeklyReport = () => {
+    const total = buildWeeklyReport(records)
+    const names = reportOwnersOf(total)
+    const texts: Record<string, string> = {
+      [`${ALL}|summary`]: weeklyReportText(total, "summary"),
+      [`${ALL}|detail`]: weeklyReportText(total, "detail"),
+    }
+    names.forEach((name) => {
+      const report = buildWeeklyReport(records, new Date(), 7, name)
+      texts[`${name}|summary`] = weeklyReportText(report, "summary")
+      texts[`${name}|detail`] = weeklyReportText(report, "detail")
+    })
+    setReportOwnerNames(names)
+    setReportTexts(texts)
+    setReportTab((current) => names.includes(current) ? current : ALL)
+    setReportNotice(null)
+    setReportOpen(true)
+  }
+
+  const reportKey = `${reportTab}|${reportLevel}`
+
+  const copyWeeklyReport = () => {
+    void navigator.clipboard.writeText(reportTexts[reportKey] ?? "")
+      .then(() => setReportNotice(`${reportTab === ALL ? "전체" : reportTab} 문장을 복사했습니다.`))
+      .catch(() => setReportNotice("복사에 실패했습니다. 브라우저의 클립보드 권한을 확인해 주세요."))
+  }
+
   const copyFdsYds = () => {
     // 중간 await 없이 호출해 ClipboardItem을 클릭 흐름 안에서 생성한다.
     void copyFdsYdsTable(fdsYdsRows)
@@ -997,7 +1055,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides), [overrides, records, samples])
   const ledgerByRecord = useMemo(() => new Map(ledger.flatMap((item) => item.record ? [[recordIdentity(item.record), item] as const] : [])), [ledger])
   // 펼침/접힘은 개인 브라우저에 남는다. 팀원 화면에는 영향을 주지 않는다.
-  // 전체 미리보기 안내 말풍선. 담당 카드 아래에 떠올랐다가 3초 뒤 서서히 사라진다.
+  // 전체 미리보기 안내 말풍선. 담당 카드 아래에 떠올랐다가 1초 뒤 서서히 사라진다.
   // 전용 행을 두면 표가 그만큼 밀리므로 카드에 겹쳐 띄운다.
   const [hintMounted, setHintMounted] = useState(false)
   const [hintShown, setHintShown] = useState(false)
@@ -1012,8 +1070,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     setHintMounted(true)
     // 한 프레임 뒤에 켜야 트랜지션이 처음부터 그려진다. 같은 프레임에 켜면 튀어나오는 느낌이 없다.
     const raf = requestAnimationFrame(() => setHintShown(true))
-    const fade = window.setTimeout(() => setHintShown(false), 3000)
-    const drop = window.setTimeout(() => setHintMounted(false), 3800)
+    const fade = window.setTimeout(() => setHintShown(false), 1000)
+    const drop = window.setTimeout(() => setHintMounted(false), 1800)
     return () => { cancelAnimationFrame(raf); window.clearTimeout(fade); window.clearTimeout(drop) }
   }, [owner])
   const [status, setStatus] = useState(ALL)
@@ -2329,6 +2387,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </div>
         {sortBy ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setSortBy(null)}><X className="size-4" />정렬 해제</Button> : null}
         {/* 밖으로 내보내는 동작 둘. 테두리를 남겨 편집 도구와 구분한다. */}
+        <Button type="button" size="sm" variant="outline" title="주간 업무 보고에 붙일 현황 문장을 만듭니다. 완료는 Received date 기준입니다" onClick={openWeeklyReport}><ClipboardList className="size-4" />주간 보고</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
         <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
         <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={resetColumnWidths}><RotateCcw className="size-4" />열 너비 초기화</Button>
@@ -2500,13 +2559,85 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       </> : null}
     </div>
 
+    <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>주간 보고 문장</DialogTitle>
+          <DialogDescription>최근 7일 기준입니다. 탭을 골라 고친 뒤 복사하세요.</DialogDescription>
+          <p className="text-[11px] leading-relaxed text-[var(--muted-foreground)]">
+            <strong className="font-semibold text-[var(--foreground)]">완료는 Received date 기준입니다.</strong> FL# 기준이 아닙니다.
+            FDS가 늦어 FL 등록이 다음 주로 넘어가는 건도 원단을 받았으면 완료로 셉니다.
+            화면의 진행·완료 숫자와 다른 것이 정상입니다. DROP·HOLD·REJECT는 양쪽 모두에서 뺍니다.
+            담당 탭의 카테고리 항목은 DD에 적힌 공정일로 만든 뼈대입니다. 협의 내용과 판단은 직접 채우세요.
+            요약은 개발 건 이름으로 묶고, 상세는 FL#과 조직까지 한 줄씩 적습니다.
+          </p>
+        </DialogHeader>
+        <DialogBody className="space-y-3">
+          <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="보고 대상">
+            {[ALL, ...reportOwnerNames].map((name) => (
+              <button
+                key={name}
+                type="button"
+                role="tab"
+                aria-selected={reportTab === name}
+                onClick={() => { setReportTab(name); setReportNotice(null) }}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${reportTab === name
+                  ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]"
+                  : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]"}`}
+              >
+                {name === ALL ? "전체" : name}
+              </button>
+            ))}
+            {/* 요약은 개발 건 이름으로 묶고, 상세는 FL#과 조직까지 적는다. 담당 탭에서만 차이가 난다. */}
+            <div className="ml-auto inline-flex overflow-hidden rounded-full border border-[var(--border)]" role="group" aria-label="상세 수준">
+              {([["summary", "요약"], ["detail", "상세"]] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={reportLevel === value}
+                  onClick={() => { setReportLevel(value); setReportNotice(null) }}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${reportLevel === value
+                    ? "bg-[var(--muted)] text-[var(--foreground)]"
+                    : "bg-[var(--card)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <label className="sr-only" htmlFor="weekly-report-text">주간 보고 문장</label>
+          <textarea
+            id="weekly-report-text"
+            value={reportTexts[reportKey] ?? ""}
+            onChange={(event) => setReportTexts((current) => ({ ...current, [reportKey]: event.target.value }))}
+            spellCheck={false}
+            rows={16}
+            className="w-full resize-y rounded-[calc(var(--radius)-2px)] border border-[var(--border)] bg-[var(--card)] px-4 py-3 text-[13px] font-normal leading-[1.75] tracking-[-0.005em] text-[var(--card-foreground)] tabular-nums outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+            style={{ fontFamily: "var(--font-sans)" }}
+          />
+        </DialogBody>
+        <DialogFooter>
+          {reportNotice && <span role="status" className="mr-auto text-sm">{reportNotice}</span>}
+          <Button type="button" size="sm" variant="outline" onClick={openWeeklyReport}><RotateCcw className="size-4" />다시 계산</Button>
+          <Button type="button" size="sm" onClick={copyWeeklyReport}><Copy className="size-4" />복사</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => setReportOpen(false)}>닫기</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
     <Dialog open={fdsYdsOpen} onOpenChange={setFdsYdsOpen}>
       <DialogContent className="w-[97vw] max-w-none xl:w-[1490px]">
         <DialogHeader>
           <DialogTitle>FDS/YDS 요청</DialogTitle>
-          <DialogDescription>GD 진행분 중 FDS 또는 YDS 미수취 {fdsYdsRows.length}건</DialogDescription>
+          <DialogDescription>
+            진행중인 GD 원단 중 Received date가 있고 FDS 또는 YDS 미수취 {fdsYdsRows.length}건
+            {fdsYdsMissing ? ` · 번호 미기재 ${fdsYdsMissing}건` : ""}
+          </DialogDescription>
           <p className="text-[11px] leading-relaxed text-[var(--destructive)]">
-            STYLE#과 ARRANGE#가 모두 입력된 건만 올라옵니다. 빠진 건이 있으면 DD MASTER에서 두 값을 먼저 채우세요.
+            STYLE#이나 ARRANGE#가 비어도 목록에는 올립니다. 요청이 조용히 누락되지 않게 하려는 것입니다.
+            다만 <strong className="font-semibold">비어 있는 건은 그대로 보내면 GD가 작지를 찾지 못해 접수가 안 됩니다.</strong>
+            붉은 미기재 표시가 붙은 행은 맨 위에 모아 두었습니다. 보내기 전에 DD MASTER에서 채우세요.
+            Received date가 없는 건(원단 미수취)과 FL#이 등록된 건(FDS 이미 수취)은 제외합니다.
             REQUEST 날짜는 비워 두었습니다. 메일 보내는 날에 맞춰 직접 입력하세요.
           </p>
         </DialogHeader>
@@ -2514,7 +2645,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           {fdsYdsRows.length ? <table className="w-full table-fixed border-collapse text-xs" style={{ minWidth: 1200 }}>
             <colgroup>{FDS_YDS_COLUMNS.map((column) => <col key={column.key} style={{ width: `${column.width}ch` }} />)}</colgroup>
             <thead><tr>{FDS_YDS_COLUMNS.map((column) => <th key={column.key} className="border border-[#bfbfbf] bg-[#d6e4f0] px-2 py-2 text-center font-bold text-black">{column.head}</th>)}</tr></thead>
-            <tbody>{fdsYdsRows.map((row) => <tr key={row.key}>
+            <tbody>{fdsYdsRows.map((row) => <tr key={row.key} className={row.missing ? "bg-[color-mix(in_srgb,var(--destructive)_7%,transparent)]" : ""}>
               {FDS_YDS_COLUMNS.map((column) => <td key={column.key} className="whitespace-pre-wrap break-words border border-[#bfbfbf] px-2 py-1 align-top">
                 {column.key === "body" ? <input
                   aria-label={`${row.hmp} BODY`}
@@ -2525,7 +2656,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                     const record = useAppStore.getState().records.find((item) => recordIdentity(item) === row.key)
                     if (record) event.target.value = bodyLabel(record)
                   }}
-                /> : row[column.key]}
+                /> : (column.key === "style" || column.key === "arrange") && !row[column.key]
+                  ? <span className="font-semibold text-[var(--destructive)]">미기재</span>
+                  : row[column.key]}
               </td>)}
             </tr>)}</tbody>
           </table> : <p className="py-8 text-center text-sm">요청할 건이 없습니다.</p>}

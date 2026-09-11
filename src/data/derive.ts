@@ -458,6 +458,26 @@ export function statusOf(rec: DevRecord, today = new Date()): StatusKey {
   return "progress"
 }
 
+/**
+ * 완료 건이 끝난 해.
+ *
+ * 실물 도착일(Received date)이 기준이다. 비어 있으면 FL 번호의 등록월에서 읽는다.
+ * FL#은 `FL + YY + MM + 4자리`라 연·월까지는 믿을 수 있다. 둘 다 없으면 어느 해에
+ * 끝난 건지 알 수 없어 `null`이다. 그런 건은 연도 집계에서 빠진다.
+ */
+export function completedYearOf(record: DevRecord): number | null {
+  const received = toDate(record.receivedDate)
+  if (received) return received.getFullYear()
+  const month = record.flNo ? rddaMonthFromFlNo(record.flNo) : null
+  return month ? Number(month.slice(0, 4)) : null
+}
+
+/** 당해년도 완료 건인가. DD MASTER 하위 폴더 상단 완료 카드가 이 판정을 쓴다. */
+export function isDoneThisYear(record: DevRecord, today = new Date()): boolean {
+  if (statusOf(record, today) !== "done") return false
+  return completedYearOf(record) === today.getFullYear()
+}
+
 /** 진행 중 레코드의 현재 위치를 접수→원사→편직→염색→가공 5단계로 환산한다. */
 export function boardStagePosition(row: DevRecord): number {
   if (row.processReached) {
@@ -899,6 +919,89 @@ export function scheduleAlerts(
 ): { due: HomeKpiDetailRow[]; late: HomeKpiDetailRow[]; all: HomeKpiDetailRow[] } {
   const { due, late } = homeKpiRecordDetails(records, today)
   return { due, late, all: [...late, ...due] }
+}
+
+export interface ProcessFlowDatum {
+  key: ProcessFunnelKey
+  label: string
+  /** 이번 주(월~일)에 이 공정을 새로 통과한 건수 */
+  thisWeek: number
+  /** 지난주 같은 기간에 통과한 건수 */
+  lastWeek: number
+}
+
+const FLOW_DEFINITIONS: Array<{ key: ProcessFunnelKey; label: string }> = [
+  { key: "yarn", label: "원사" },
+  { key: "knitting", label: "편직" },
+  { key: "dyeing", label: "염색" },
+  { key: "finishing", label: "가공" },
+]
+
+/**
+ * 공정별 주간 통과 건수.
+ *
+ * **분모를 두지 않는다.** 도달률(도달 ÷ 진행 중)은 신규 접수가 들어오거나 완료 건이 진행 중에서
+ * 빠질 때마다 내려간다. 완료 건은 네 공정 모두 도달로 세어졌으므로 분자와 분모가 같이 1씩 줄고,
+ * 비율이 100%가 아닌 이상 `(a-1)/(b-1)`은 늘 `a/b`보다 작다. 그래서 접수도 완료도 활발한 주에
+ * 지표가 나빠 보였다. 신호가 반대였다. 여기서는 "그 주에 몇 건이 이 공정을 지나갔나"만 센다.
+ *
+ * 기준은 `tech.processDates`의 공정별 완료일이다. 이미 완료된 건도 그 주에 지나간 것은 그대로 센다.
+ * 주는 월요일에 시작한다(`weekStart`).
+ */
+export function processWeeklyFlow(records: readonly DevRecord[], today = new Date()): ProcessFlowDatum[] {
+  const thisFrom = localDay(weekStart(today))
+  const nextFrom = localDay(addLocalDays(weekStart(today), 7))
+  const lastFrom = localDay(weekStart(today, -1))
+  return FLOW_DEFINITIONS.map((definition) => {
+    let thisWeek = 0
+    let lastWeek = 0
+    for (const record of records) {
+      const date = toDate(record.tech?.processDates?.[definition.key])
+      if (!date) continue
+      const day = localDay(date)
+      if (day >= thisFrom && day < nextFrom) thisWeek += 1
+      else if (day >= lastFrom && day < thisFrom) lastWeek += 1
+    }
+    return { key: definition.key, label: definition.label, thisWeek, lastWeek }
+  })
+}
+
+export interface WeeklyBalance {
+  /** 최근 7일 접수(Request Date) */
+  intake: number
+  /** 최근 7일 완료(Received date) */
+  completed: number
+  /** 접수 - 완료. 플러스면 재공이 쌓인 구간이다. */
+  net: number
+}
+
+/**
+ * 최근 7일 유입과 완료의 균형.
+ *
+ * 공정 비율이 흔들리던 원인을 정면으로 보여주는 숫자다. 접수는 Request Date,
+ * 완료는 Received date 기준이다. 데이터 소스 규칙의 HOME 완료·접수 카드와 같은 기준이다.
+ *
+ * 구간은 **오늘에서 7일 전부터 오늘까지**다(`recentWindow`). 월요일 기준 주가 아니다.
+ * 달력 주로 끊으면 월요일 아침에는 집계가 거의 비어 보인다. 언제 봐도 같은 길이의
+ * 창을 보는 것이 유입과 완료를 비교하는 데 맞다.
+ */
+export function weeklyIntakeBalance(records: readonly DevRecord[], today = new Date()): WeeklyBalance {
+  const window = recentWindow(today, 7)
+  const from = localDay(window.start)
+  const to = localDay(window.end)
+  const inWeek = (value: string | undefined): boolean => {
+    const date = toDate(value)
+    if (!date) return false
+    const day = localDay(date)
+    return day >= from && day < to
+  }
+  let intake = 0
+  let completed = 0
+  for (const record of records) {
+    if (inWeek(record.requestDate)) intake += 1
+    if (inWeek(record.receivedDate)) completed += 1
+  }
+  return { intake, completed, net: intake - completed }
 }
 
 export function homeSectionCards(

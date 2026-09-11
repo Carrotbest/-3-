@@ -9,6 +9,7 @@ import { Bar, CartesianGrid, ComposedChart, LabelList, Line, ResponsiveContainer
 import { MaterialDeck, MaterialDetailSheet, MaterialFormSheet } from "@/components/cards/MaterialDeck"
 import { OwnerLaneBoard } from "@/components/charts/OwnerLaneBoard"
 import { HomeTrendSection } from "@/components/dashboard/HomeTrendSection"
+import { TodayBriefing } from "@/components/dashboard/TodayBriefing"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Reveal } from "@/components/motion/Reveal"
@@ -29,12 +30,15 @@ import {
   materialsOf,
   optionSequenceText,
   monthlyDevelopmentTrend,
+  processWeeklyFlow,
   studyMaterials as deriveStudyMaterials,
   tsMaterials as deriveTsMaterials,
+  weeklyIntakeBalance,
   type HomeKpiDetailGroups,
   type HomeKpiDetailKind,
   type HomeKpiRanges,
   type MonthlyDevelopmentDatum,
+  type ProcessFlowDatum,
   type ProcessFunnelKey,
 } from "@/data/derive"
 import { fmtDateFull } from "@/data/format"
@@ -261,54 +265,77 @@ const PROCESS_GRADIENT: Record<string, string> = {
   finishing: "from-[#F5DFA6] to-[#BE8D1F]",
 }
 
-interface PendingStyleSummary {
-  styleNo: string
-  optCount: number
+/**
+ * 최근 7일 유입과 완료의 균형.
+ *
+ * 공정 비율이 흔들리던 원인을 정면으로 보여주는 줄이다. 접수가 완료보다 많으면 진행 중 건수가
+ * 늘어난 구간이고, 그런 구간에는 공정 도달 비율이 내려간다. 비율만 보면 일이 안 된 것처럼
+ * 보이지만 실제로는 일이 들어온 것이다.
+ *
+ * **부호나 "순증" 같은 말을 쓰지 않는다.** 한 번에 읽혀야 하는 줄이라 늘었는지 줄었는지를
+ * 그대로 적는다. 기간도 날짜로 적어 마우스를 올리지 않아도 알 수 있게 한다.
+ */
+function WeeklyFlowBar({ balance, rangeLabel }: {
+  balance: { intake: number; completed: number; net: number }
+  rangeLabel: string
+}) {
+  const wipText = balance.net > 0
+    ? `진행 중 ${balance.net}건 늘어남`
+    : balance.net < 0
+      ? `진행 중 ${Math.abs(balance.net)}건 줄어듦`
+      : "진행 중 건수 그대로"
+  return (
+    <div
+      className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-[10px] border border-white/60 bg-white/42 px-3.5 py-2 text-xs backdrop-blur"
+      title="접수는 Request Date, 완료는 Received date 기준입니다."
+    >
+      <span className="font-medium tracking-[0.02em] text-[color-mix(in_oklab,var(--muted-foreground)_80%,transparent)]">최근 7일 ({rangeLabel})</span>
+      <span className="tabular-nums text-[var(--muted-foreground)]">새로 접수 <strong className="font-semibold text-[var(--foreground)]">{balance.intake}</strong>건</span>
+      <span className="tabular-nums text-[var(--muted-foreground)]">개발 완료 <strong className="font-semibold text-[var(--foreground)]">{balance.completed}</strong>건</span>
+      <span className={`tabular-nums font-semibold ${deltaToneClass(balance.net)}`}>{wipText}</span>
+    </div>
+  )
 }
 
-type PendingProcessStyles = Record<ProcessFunnelKey, PendingStyleSummary[]>
+/** 증가는 붉은색, 감소는 파란색. 주말 표기와 같은 계열을 쓴다. */
+const deltaToneClass = (value: number): string =>
+  value > 0 ? "text-rose-500" : value < 0 ? "text-sky-500" : "text-[var(--muted-foreground)]"
 
-const PROCESS_KEYS = ["yarn", "knitting", "dyeing", "finishing"] as const satisfies readonly ProcessFunnelKey[]
-const PROCESS_MINIMUM: Record<ProcessFunnelKey, number> = { yarn: 0, knitting: 1, dyeing: 2, finishing: 3 }
-
-function pendingStylesByProcess(records: readonly DevRecord[]): PendingProcessStyles {
-  const active = records.filter(isInProgress)
-  const stageOrder = ["원사", "편직", "염색", "가공", "시험", "완료"]
-  const result: PendingProcessStyles = { yarn: [], knitting: [], dyeing: [], finishing: [] }
-
-  for (const processKey of PROCESS_KEYS) {
-    const grouped = new Map<string, { opts: Set<string>; rows: number }>()
-    for (const record of active) {
-      const reached = record.processReached
-        ? record.processReached[processKey]
-        : stageOrder.indexOf(record.stage) >= PROCESS_MINIMUM[processKey]
-      if (reached) continue
-      const styleNo = record.styleNo.trim() || "Style 미기재"
-      const bucket = grouped.get(styleNo) ?? { opts: new Set<string>(), rows: 0 }
-      if (record.opt.trim()) bucket.opts.add(record.opt.trim())
-      bucket.rows += 1
-      grouped.set(styleNo, bucket)
-    }
-    result[processKey] = [...grouped.entries()]
-      .map(([styleNo, bucket]) => ({ styleNo, optCount: bucket.opts.size || bucket.rows }))
-      .sort((left, right) => right.optCount - left.optCount || left.styleNo.localeCompare(right.styleNo, "ko-KR", { numeric: true }))
-  }
-  return result
+/**
+ * "통과"는 무엇을 통과했는지가 안 드러난다. 공정마다 실제 작업 이름으로 적는다.
+ * 원사는 입고가 그 공정의 끝이고, 나머지는 공정 완료다.
+ */
+const PROCESS_FLOW_LABEL: Record<ProcessFunnelKey, string> = {
+  yarn: "원사 입고",
+  knitting: "편직 완료",
+  dyeing: "염색 완료",
+  finishing: "가공 완료",
 }
 
-function ProcessFunnel({ process, pendingStyles, reduceMotion, onNavigate }: {
+/** 지난주 대비를 부호가 아니라 말로 적는다. 숫자만 두면 무엇과 비교한 값인지 알 수 없다. */
+const flowCompareText = (thisWeek: number, lastWeek: number): string => {
+  const diff = thisWeek - lastWeek
+  if (diff > 0) return `지난주 ${lastWeek}건보다 ${diff}건 많음`
+  if (diff < 0) return `지난주 ${lastWeek}건보다 ${Math.abs(diff)}건 적음`
+  return `지난주와 같음 (${lastWeek}건)`
+}
+
+const flowSpeech = (key: ProcessFunnelKey, flow: { thisWeek: number; lastWeek: number } | undefined): string =>
+  flow ? `, 이번 주 ${PROCESS_FLOW_LABEL[key]} ${flow.thisWeek}건, ${flowCompareText(flow.thisWeek, flow.lastWeek)}` : ""
+
+function ProcessFunnel({ process, flow, reduceMotion, onNavigate }: {
   process: readonly { key: ProcessFunnelKey; label: string; pct: number; done: number; total: number }[]
-  pendingStyles: PendingProcessStyles
+  flow: readonly ProcessFlowDatum[]
   reduceMotion: boolean
   onNavigate: () => void
 }) {
   return (
-    <div className="relative mt-7" role="group" aria-label={`공정 누적 도달률 — ${process.map((item) => `${PROCESS_LABEL_EN[item.key] ?? item.label} ${item.done}건 ${item.pct}%`).join(", ")}`}>
+    <div className="relative mt-7" role="group" aria-label={`공정 누적 도달률 — ${process.map((item) => `${PROCESS_LABEL_EN[item.key] ?? item.label} ${item.done}건 ${item.pct}%${flowSpeech(item.key, flow.find((entry) => entry.key === item.key))}`).join(", ")}`}>
       <div className="relative grid grid-cols-2 gap-px overflow-hidden rounded-[11px] border border-white/58 bg-[color-mix(in_oklab,var(--border)_56%,transparent)] sm:grid-cols-4">
         {process.map((item, index) => (
-          <div key={item.key} className="group/card h-[10.5rem] min-w-0 bg-[var(--card)]/88 [perspective:1000px]">
+          <div key={item.key} className="group/card h-[12rem] min-w-0 bg-[var(--card)]/88 [perspective:1000px]">
             <button type="button" onClick={onNavigate} className="block size-full cursor-pointer text-left outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--ring)]">
-              <span className="sr-only">{PROCESS_LABEL_EN[item.key] ?? item.label} 미완료 대표 스타일 확인 후 개발 현황으로 이동</span>
+              <span className="sr-only">{PROCESS_LABEL_EN[item.key] ?? item.label} 주간 흐름 확인 후 개발 현황으로 이동</span>
               <div className="relative size-full transition-transform duration-500 ease-[cubic-bezier(.2,.7,.2,1)] [transform-style:preserve-3d] group-hover/card:[transform:rotateY(180deg)] group-focus-within/card:[transform:rotateY(180deg)] motion-reduce:duration-0">
                 <div className="absolute inset-0 flex flex-col bg-[color-mix(in_oklab,var(--card)_94%,transparent)] p-5 [backface-visibility:hidden]">
                   <div className="min-w-0">
@@ -319,27 +346,40 @@ function ProcessFunnel({ process, pendingStyles, reduceMotion, onNavigate }: {
                   <div className="mt-3 h-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--muted)_60%,transparent)]">
                     <div className={`h-full rounded-full bg-gradient-to-r ${PROCESS_GRADIENT[item.key] ?? ""}`} style={{ width: `${item.pct}%`, animation: reduceMotion ? undefined : `gaugeGrow 1000ms cubic-bezier(.22,.61,.36,1) ${index * 80}ms backwards` }} />
                   </div>
+                  {/* 비율은 현황 스냅샷이고, 주간 변화는 통과 건수로 본다. 비율의 주간 증감은
+                      신규 접수와 완료 이탈에 끌려 거꾸로 읽혀서 뺐다. NumberTicker 도 쓰지 않는다. */}
+                  {(() => {
+                    const pass = flow.find((entry) => entry.key === item.key)
+                    if (!pass) return null
+                    return (
+                      /* 카드가 hover 에 뒤집힌다. 앞면에 title 을 달아도 뜰 새가 없어
+                         지난주 비교는 뒷면에 말로 적는다. 앞면은 이번 주 건수만 둔다. */
+                      <p className="mt-2.5 flex items-center justify-between gap-1 text-[11px] tabular-nums">
+                        <span className="truncate text-[color-mix(in_oklab,var(--muted-foreground)_78%,transparent)]">이번 주 {PROCESS_FLOW_LABEL[item.key]}</span>
+                        <span className="shrink-0 font-semibold text-[var(--foreground)]">{pass.thisWeek}건</span>
+                      </p>
+                    )
+                  })()}
                 </div>
 
-                <div className="absolute inset-0 flex flex-col bg-[color-mix(in_oklab,var(--card)_97%,var(--muted))] p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                  <div className="flex items-center justify-between gap-2 border-b border-[var(--border)]/70 pb-2">
-                    <p className="text-xs font-medium text-[var(--foreground)]">미완료 대표 스타일</p>
-                    <span className="text-[10px] tabular-nums text-[var(--muted-foreground)]">{Math.max(0, item.total - item.done)} OPT</span>
+                <div className="absolute inset-0 flex flex-col overflow-hidden bg-[color-mix(in_oklab,var(--card)_97%,var(--muted))] p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                  <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[var(--border)]/70 pb-2">
+                    <p className="truncate text-xs font-medium text-[var(--foreground)]">주간 흐름</p>
+                    <span className="shrink-0 text-[10px] text-[var(--muted-foreground)]">{PROCESS_LABEL_EN[item.key] ?? item.label}</span>
                   </div>
-                  <div className="mt-2 min-h-0 flex-1">
-                    {pendingStyles[item.key].length ? (
-                      <ul className="space-y-1.5">
-                        {pendingStyles[item.key].slice(0, 3).map((style) => (
-                          <li key={style.styleNo} className="flex items-center justify-between gap-3 text-xs">
-                            <span className="truncate font-medium text-[color-mix(in_oklab,var(--foreground)_84%,transparent)]">{style.styleNo}</span>
-                            <span className="shrink-0 tabular-nums text-[var(--muted-foreground)]">OPT {style.optCount}</span>
-                          </li>
-                        ))}
-                        {pendingStyles[item.key].length > 3 ? <li className="text-[10px] text-[var(--muted-foreground)]">외 {pendingStyles[item.key].length - 3}개 스타일</li> : null}
-                      </ul>
-                    ) : <p className="pt-3 text-xs text-[var(--muted-foreground)]">미완료 스타일이 없습니다.</p>}
-                  </div>
-                  <p className="mt-2 text-[10px] font-medium text-[var(--muted-foreground)]">클릭하여 개발 현황에서 확인 →</p>
+                  {(() => {
+                    const pass = flow.find((entry) => entry.key === item.key)
+                    if (!pass) return <p className="mt-3 min-h-0 flex-1 text-xs text-[var(--muted-foreground)]">주간 집계가 없습니다.</p>
+                    const diff = pass.thisWeek - pass.lastWeek
+                    return (
+                      <div className="mt-3 min-h-0 flex-1">
+                        <p className="truncate text-[11px] text-[var(--muted-foreground)]">이번 주 {PROCESS_FLOW_LABEL[item.key]}</p>
+                        <p className="mt-0.5 text-xl font-semibold tabular-nums tracking-[-0.02em] text-[var(--foreground)]">{pass.thisWeek}건</p>
+                        <p className={`mt-1.5 text-[11px] font-medium tabular-nums ${deltaToneClass(diff)}`}>{flowCompareText(pass.thisWeek, pass.lastWeek)}</p>
+                      </div>
+                    )
+                  })()}
+                  <p className="mt-1.5 shrink-0 truncate text-[10px] font-medium text-[var(--muted-foreground)]">클릭하여 개발 현황에서 확인 →</p>
                 </div>
               </div>
             </button>
@@ -803,7 +843,14 @@ export function Home() {
   const [trendKpi, setTrendKpi] = useState<TrendKpi | null>(null)
   const [trendLoading, setTrendLoading] = useState(true)
   const sections = useMemo(() => homeSectionCards(records, today, kpiRanges), [records, today, kpiRanges])
-  const processPendingStyles = useMemo(() => pendingStylesByProcess(records), [records])
+  // Overall status 의 주간 변화. 비율의 증감이 아니라 실제로 몇 건이 움직였는지로 본다.
+  const processFlow = useMemo(() => processWeeklyFlow(records, today), [records, today])
+  const weekBalance = useMemo(() => weeklyIntakeBalance(records, today), [records, today])
+  // 기간을 날짜로 적어 둔다. 마우스를 올리지 않아도 어느 구간인지 알아야 한다.
+  const weekRangeLabel = useMemo(() => {
+    const from = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7)
+    return `${from.getMonth() + 1}.${from.getDate()}~${today.getMonth() + 1}.${today.getDate()}`
+  }, [today])
   const kpiDetails = useMemo(() => homeKpiRecordDetails(records, today, kpiRanges), [records, today, kpiRanges])
   const monthly = useMemo(() => monthlyDevelopmentTrend(records, completed, today, rddaMonths), [records, completed, today, rddaMonths])
   const monthlyKpis = useMemo(() => monthly.reduce((summary, item) => ({
@@ -879,7 +926,8 @@ export function Home() {
                 </div>
                 <Badge variant="outline" className="border-white/65 bg-white/32 text-[10px] font-medium text-[var(--muted-foreground)] backdrop-blur">DD 전체현황</Badge>
               </div>
-              <ProcessFunnel process={sections.progress.process} pendingStyles={processPendingStyles} reduceMotion={reduceMotion} onNavigate={() => navigate("/development")} />
+              <WeeklyFlowBar balance={weekBalance} rangeLabel={weekRangeLabel} />
+              <ProcessFunnel process={sections.progress.process} flow={processFlow} reduceMotion={reduceMotion} onNavigate={() => navigate("/development")} />
             </CardContent>
           </Card>
         </div>
@@ -984,6 +1032,7 @@ export function Home() {
 
       <MaterialDetailSheet item={selectedMaterial} onOpenChange={(open) => { if (!open) setSelectedMaterial(null) }} onEdit={(item) => openMaterialForm(item.kind, item)} onNavigate={selectedMaterial && ["TS", "STUDY", "PORTFOLIO"].includes(selectedMaterial.kind) ? (item) => navigate(item.kind === "TS" ? "/ts" : item.kind === "STUDY" ? "/study" : "/trend/portfolio") : undefined} />
       <MaterialFormSheet open={materialFormKind !== null} defaultKind={materialFormKind ?? "MACRO"} item={editingMaterial} onOpenChange={(open) => { if (!open) { setMaterialFormKind(null); setEditingMaterial(null) } }} />
+      <TodayBriefing />
     </section>
   )
 }

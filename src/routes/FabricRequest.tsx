@@ -79,7 +79,9 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
   ] },
 ]
 
-const ACTION_WIDTH = 76
+const ACTION_WIDTH = 104
+/** 엑셀 행 머리처럼 왼쪽 끝에 붙는 행 번호 칸. 너비 조절 대상이 아니라 상수로 둔다. */
+const ROW_NO_WIDTH = 44
 const STYLE_ROW_HEIGHT = 112
 const OPTION_ROW_HEIGHT = 40
 const MIN_COLUMN_WIDTH = 56
@@ -586,6 +588,8 @@ export function FabricRequest() {
   const [preview, setPreview] = useState<RequestStyle | null>(null)
   /** 편집 중인 셀 키. 행키:열id 하나만 열린다. */
   const [editCell, setEditCell] = useState<string | null>(null)
+  /** 행 우클릭 메뉴. 좌표와 대상 라인을 함께 들고 있는다. */
+  const [rowMenu, setRowMenu] = useState<{ x: number; y: number; line: Line } | null>(null)
   const [colWidths, setColWidths] = useState<Record<string, number>>(loadColumnWidths)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(loadOpenGroups)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
@@ -641,16 +645,41 @@ export function FabricRequest() {
     saveRequests(requests.filter((item) => item.reqId !== style.reqId))
     // 사진은 없으면 조용히 넘어간다. 실패해도 원장 삭제는 그대로 둔다.
     void deleteRequestImage(style.reqId).catch(() => undefined)
+    setRowMenu(null)
+  }
+
+  /** 스타일 맨 아래에 옵션 라인을 한 줄 붙인다. 편집 팝업을 열지 않고 표에서 바로 만든다. */
+  const addOption = (style: RequestStyle) => {
+    patchStyle(style.reqId, {
+      options: renumber(style.reqId, [...style.options, blankOption(style.reqId, style.options.length + 1)]),
+    })
+    setRowMenu(null)
+  }
+
+  /**
+   * 옵션 라인 한 줄을 지운다.
+   *
+   * 지운 뒤 `renumber`로 번호를 1부터 다시 매긴다. `optId`가 번호를 따라가므로
+   * 인덱스로 지우면 뒤 옵션의 식별자가 밀린다. 반드시 `optId`로 찾아 지운다.
+   * 내용이 하나라도 적힌 줄만 되묻는다. 빈 줄까지 확인창을 띄우면 성가시다.
+   */
+  const removeOption = (style: RequestStyle, option: RequestOption) => {
+    const filled = [option.yarnDetail, option.color, option.dyeingMethod, option.remark].some((value) => text(value).trim())
+    if (filled && !window.confirm(`옵션 ${option.no}번을 삭제할까요?`)) return
+    patchStyle(style.reqId, {
+      options: renumber(style.reqId, style.options.filter((item) => item.optId !== option.optId)),
+    })
+    setRowMenu(null)
   }
 
   const widthOf = (column: RequestColumn): number => colWidths[column.id] ?? column.width
   const visibleGroups = COLUMN_GROUPS.filter((group) => openGroups[group.key])
   const visibleColumns = [...FIXED_COLUMNS, ...visibleGroups.flatMap((group) => group.columns)]
-  const tableWidth = visibleColumns.reduce((sum, column) => sum + widthOf(column), 0) + ACTION_WIDTH
+  const tableWidth = visibleColumns.reduce((sum, column) => sum + widthOf(column), 0) + ACTION_WIDTH + ROW_NO_WIDTH
 
-  /** 좌측 고정 열의 누적 left 값. 조절된 너비를 따라간다. */
+  /** 좌측 고정 열의 누적 left 값. 조절된 너비를 따라간다. 행 번호 칸이 맨 왼쪽에 먼저 붙는다. */
   const fixedLeft = (id: string): number => {
-    let left = 0
+    let left = ROW_NO_WIDTH
     for (const column of FIXED_COLUMNS) {
       if (column.id === id) return left
       left += widthOf(column)
@@ -932,6 +961,14 @@ export function FabricRequest() {
           >
             <TableHeader className="sticky top-0 z-30">
               <TableRow>
+                <TableHead
+                  rowSpan={2}
+                  title="행 번호. 행을 우클릭하면 옵션 추가와 삭제를 할 수 있습니다."
+                  className="sticky left-0 top-0 z-50 border-b border-r border-[var(--border)] bg-[var(--muted)] p-0 text-center text-[10px] font-bold text-[var(--muted-foreground)]"
+                  style={{ width: ROW_NO_WIDTH }}
+                >
+                  #
+                </TableHead>
                 {FIXED_COLUMNS.map((column) => (
                   <TableHead
                     key={column.id}
@@ -1000,12 +1037,24 @@ export function FabricRequest() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {lines.map((line) => {
+              {lines.map((line, rowIndex) => {
                 const isStyle = line.kind === "style"
                 const height = isStyle ? STYLE_ROW_HEIGHT : OPTION_ROW_HEIGHT
                 const key = isStyle ? `s:${line.style.reqId}` : `o:${line.option.optId}`
                 return (
-                  <TableRow key={key} className={isStyle ? "border-l-2 border-l-[var(--primary)]" : ""}>
+                  <TableRow
+                    key={key}
+                    className={isStyle ? "border-l-2 border-l-[var(--primary)]" : ""}
+                    onContextMenu={(event) => { event.preventDefault(); setRowMenu({ x: event.clientX, y: event.clientY, line }) }}
+                  >
+                    {/* 엑셀 행 머리. 스타일 행과 옵션 행을 통틀어 위에서부터 센다. */}
+                    <TableCell
+                      className={`sticky left-0 z-20 select-none border-b border-r border-[var(--border)] bg-[var(--muted)] p-0 text-center align-top text-[10px] tabular-nums ${isStyle ? "font-bold text-[var(--foreground)]" : "text-[var(--muted-foreground)]"}`}
+                      style={{ width: ROW_NO_WIDTH, height }}
+                      title="우클릭: 옵션 추가·삭제"
+                    >
+                      <div className="py-1">{rowIndex + 1}</div>
+                    </TableCell>
                     {visibleColumns.map((column) => {
                       const fixed = FIXED_COLUMNS.some((item) => item.id === column.id)
                       const kind = editKindOf(column.id)
@@ -1050,14 +1099,23 @@ export function FabricRequest() {
                     <TableCell className="border-b border-[var(--border)] p-0 align-top" style={{ height, width: ACTION_WIDTH }}>
                       {isStyle ? (
                         <div className="flex items-start justify-center gap-0.5 py-1">
-                          <Button type="button" size="sm" variant="ghost" aria-label={`${line.style.garmentNo || "의뢰"} 수정`} onClick={() => setDraft(line.style)}>
+                          <Button type="button" size="sm" variant="ghost" aria-label={`${line.style.garmentNo || "의뢰"} 수정`} title="수정" onClick={() => setDraft(line.style)}>
                             <Pencil className="size-3.5" />
                           </Button>
-                          <Button type="button" size="sm" variant="ghost" aria-label={`${line.style.garmentNo || "의뢰"} 삭제`} onClick={() => remove(line.style)}>
+                          <Button type="button" size="sm" variant="ghost" aria-label={`${line.style.garmentNo || "의뢰"} 옵션 추가`} title="옵션 추가" onClick={() => addOption(line.style)}>
+                            <Plus className="size-3.5" />
+                          </Button>
+                          <Button type="button" size="sm" variant="ghost" aria-label={`${line.style.garmentNo || "의뢰"} 삭제`} title="스타일 삭제" onClick={() => remove(line.style)}>
                             <Trash2 className="size-3.5" />
                           </Button>
                         </div>
-                      ) : null}
+                      ) : (
+                        <div className="flex items-center justify-center py-1">
+                          <Button type="button" size="sm" variant="ghost" aria-label={`옵션 ${line.option.no} 삭제`} title="옵션 삭제" onClick={() => removeOption(line.style, line.option)}>
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 )
@@ -1066,6 +1124,37 @@ export function FabricRequest() {
           </table>
         </Card>
       )}
+
+      {rowMenu ? <>
+        {/* 덮개가 먼저 클릭을 받아 메뉴를 닫는다. 우클릭으로도 닫힌다. */}
+        <div className="fixed inset-0 z-[85]" onMouseDown={() => setRowMenu(null)} onContextMenu={(event) => { event.preventDefault(); setRowMenu(null) }} />
+        <div
+          role="menu"
+          className="fixed z-[90] w-44 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-1 text-xs shadow-lg"
+          style={{ left: Math.min(rowMenu.x, window.innerWidth - 192), top: Math.min(rowMenu.y, window.innerHeight - 140) }}
+        >
+          <p className="truncate px-2 py-1 text-[10px] text-[var(--muted-foreground)]">
+            {rowMenu.line.kind === "style"
+              ? rowMenu.line.style.garmentNo || "의뢰"
+              : `${rowMenu.line.style.garmentNo || "의뢰"} 옵션 ${rowMenu.line.option.no}`}
+          </p>
+          <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => addOption(rowMenu.line.style)}>
+            <Plus className="size-3.5" />옵션 추가
+          </button>
+          {rowMenu.line.kind === "option" ? (
+            <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { if (rowMenu.line.kind === "option") removeOption(rowMenu.line.style, rowMenu.line.option) }}>
+              <Trash2 className="size-3.5" />이 옵션 삭제
+            </button>
+          ) : (
+            <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setDraft(rowMenu.line.style); setRowMenu(null) }}>
+              <Pencil className="size-3.5" />스타일 수정
+            </button>
+          )}
+          <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--destructive)] hover:bg-[var(--muted)]" onClick={() => remove(rowMenu.line.style)}>
+            <Trash2 className="size-3.5" />스타일 삭제
+          </button>
+        </div>
+      </> : null}
 
       <RequestEditor
         open={draft !== null}

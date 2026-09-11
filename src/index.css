@@ -334,6 +334,43 @@ input.dd-date::-webkit-calendar-picker-indicator {
   50% { box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--ring) 38%, transparent); }
 }
 
+@keyframes briefing-pop-in {
+  from { opacity: 0; transform: translateY(18px) scale(.92) rotate(-1.5deg); }
+  to { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+@keyframes briefing-item-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes briefing-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes briefing-ring {
+  0% { opacity: .32; transform: scale(1); }
+  70%, 100% { opacity: 0; transform: scale(1.18); }
+}
+
+.briefing-pop-in {
+  animation: briefing-pop-in 420ms cubic-bezier(.16,1,.3,1) both;
+}
+
+.briefing-item-in {
+  opacity: 0;
+  animation: briefing-item-in 240ms ease-out both;
+}
+
+.briefing-float {
+  animation: briefing-float 3s ease-in-out infinite;
+}
+
+.briefing-ring {
+  animation: briefing-ring 2.4s ease-out infinite;
+}
+
 .calendar-diary-lines {
   background-image: repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in srgb, var(--border) 35%, transparent) 31px 32px);
 }
@@ -355,7 +392,74 @@ input.dd-date::-webkit-calendar-picker-indicator {
   animation: diary-today-pulse 2s ease-in-out infinite;
 }
 
+/* ── 팝업 창: Windows 11 모션과 얇은 스크롤바 ───────────────────────────
+   뜰 때는 살짝 아래에서 밀어 올리며 확대되고, 닫을 때는 줄어들며 들어간다.
+
+   **`translate` 속성은 절대 건드리지 말 것.** Tailwind v4 의 `-translate-x-1/2 -translate-y-1/2`
+   는 `transform` 이 아니라 **`translate` 속성**으로 컴파일된다. 그래서 키프레임에서 `translate`
+   를 쓰면 `animation-fill-mode: both` 때문에 마지막 값이 그대로 남아 가운데 정렬이 풀리고
+   팝업이 오른쪽 아래로 절반만큼 밀린다. 실제로 그렇게 깨뜨렸다가 되돌렸다.
+   밀어 올리는 느낌은 비어 있는 `transform` 으로 낸다. 두 속성은 따로 곱해진다. */
+@keyframes win11-window-in {
+  from { opacity: 0; scale: .94; transform: translateY(10px); }
+  to { opacity: 1; scale: 1; transform: translateY(0); }
+}
+
+@keyframes win11-window-out {
+  from { opacity: 1; scale: 1; transform: translateY(0); }
+  to { opacity: 0; scale: .96; transform: translateY(6px); }
+}
+
+@keyframes win11-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes win11-overlay-out { from { opacity: 1; } to { opacity: 0; } }
+
+.win11-window[data-state="open"] { animation: win11-window-in 200ms cubic-bezier(.1, .9, .2, 1) both; }
+.win11-window[data-state="closed"] { animation: win11-window-out 140ms cubic-bezier(.4, 0, .9, 1) both; }
+.win11-overlay[data-state="open"] { animation: win11-overlay-in 180ms ease-out both; }
+.win11-overlay[data-state="closed"] { animation: win11-overlay-out 140ms ease-in both; }
+
+/* 안전장치. 닫히는 중이거나 혹시 언마운트가 늦어도 클릭을 먹지 않게 한다.
+   이 저장소에는 오버레이가 화면을 덮은 채 남아 클릭을 막은 이력이 있다(sheet.tsx 주석). */
+.win11-overlay[data-state="closed"],
+.win11-window[data-state="closed"] { pointer-events: none; }
+
+/* 오른쪽 아래 크기 조절 표식. 사선 두 줄로만 알린다. 브라우저 기본 손잡이는 투박하다. */
+.win11-resize-grip {
+  background-image:
+    linear-gradient(135deg, transparent 46%, color-mix(in srgb, var(--muted-foreground) 45%, transparent) 46% 54%, transparent 54%),
+    linear-gradient(135deg, transparent 72%, color-mix(in srgb, var(--muted-foreground) 45%, transparent) 72% 80%, transparent 80%);
+}
+
+/* 스크롤바를 얇게. 창을 줄여서 생기는 것까지 전부 여기 규칙을 따른다.
+   thumb 에 투명 테두리를 두르고 content-box 로 칠해서 실제로 보이는 두께는 4px 다. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted-foreground) 30%, transparent) transparent;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--muted-foreground) 28%, transparent);
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover { background-color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); }
+::-webkit-scrollbar-corner { background: transparent; }
+
 @media (prefers-reduced-motion: reduce) {
+  .win11-window,
+  .win11-overlay {
+    animation: none;
+    opacity: 1;
+    scale: 1;
+    /* 여기서도 `translate` 는 건드리지 않는다. 가운데 정렬이 그 속성으로 잡혀 있다. */
+    transform: none;
+  }
+
   .trend-hit-badge {
     animation: none;
     background-color: color-mix(in oklab, var(--warning) 16%, var(--card));
@@ -382,6 +486,15 @@ input.dd-date::-webkit-calendar-picker-indicator {
   .diary-leave-pop,
   .diary-today-pulse {
     animation: none;
+    transform: none;
+  }
+
+  .briefing-pop-in,
+  .briefing-item-in,
+  .briefing-float,
+  .briefing-ring {
+    animation: none;
+    opacity: 1;
     transform: none;
   }
 }
