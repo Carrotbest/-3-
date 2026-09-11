@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-10T22:51:39+00:00",
+"generated_at": "2026-09-11T22:51:36+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -1375,7 +1375,7 @@
 "period_end": "2026-05-03",
 "prev": -14.2,
 "yoy": -4.0,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_operating_duluth",
@@ -1461,7 +1461,7 @@
 "period_end": "2026-05-03",
 "prev": -4.5,
 "yoy": 25.8,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_inventory_duluth",
@@ -1547,7 +1547,7 @@
 "period_end": "2026-05-03",
 "prev": 0.8,
 "yoy": -24.8,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_revenue_kohls",
@@ -2149,7 +2149,7 @@
 "period_end": "2026-05-03",
 "prev": -19.2,
 "yoy": 2.1,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_operating_pvh",
@@ -2235,7 +2235,7 @@
 "period_end": "2026-05-03",
 "prev": -50.0,
 "yoy": 137.4,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_inventory_pvh",
@@ -2321,7 +2321,7 @@
 "period_end": "2026-05-03",
 "prev": -4.6,
 "yoy": -5.4,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_revenue_target",
@@ -4285,6 +4285,13 @@
 "m": "바이어 · Urban Outfitters"
 },
 {
+"d": "2026-09-08",
+"t": "의류 Van Gogh 스웨트셔츠 Urban Outfitters 탑 Van Gogh 스웨트셔츠 Urban Outfitters 2026 Van Gogh Sunflowers",
+"o": "Apparel Van Gogh Sweatshirt Urban Outfitters Top Van Gogh Sweatshirt Urban Outfitters 2026 Van Gogh Sunflowers",
+"u": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE0xYV9FY2wwNjZIdVFSQ0otTDhSQ2E1TGpfQVczS3hvU3VnN0Mtd29VR3lBZkIxdWlHbDlEZFpJUmR0clpIeXdXUmJLNm1CZjh6RjFic29DZVY?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
 "d": "2026-09-06",
 "t": "강력한 2분기 결과와 Nuuly 물류 지출이 Urban Outfitters(URBN)의 상승세를 바꿀까요?",
 "o": "Does Strong Q2 Results And Nuuly Logistics Spend Change The Bull Case For Urban Outfitters (URBN)?",
@@ -4303,13 +4310,6 @@
 "t": "Urban Outfitters: 강력한 판매 실적에 대한 높은 가치 평가(NASDAQ:URBN)",
 "o": "Urban Outfitters: Great Valuation For Strong Sales Performance (NASDAQ:URBN)",
 "u": "https://news.google.com/rss/articles/CBMipAFBVV95cUxQbHNfUlltd2xfSVoycHVfaUUwR2E5Vms0UkFIZ0FhQy1PNmNzQ1FudkdDNWtmclhfZTN4bUJObGJweG9BcTVSa29WdUJuLXBBMmhaaV9ibkk3eDktRnBYNElJaEtlX2tfYkFtSjBaQXJLRElidjJlYXlxU0N1ZWlmMFFjdjRMZlpPSHk2UnNuSHh0emFVdldDRGwzNzktSzczWmM3Nw?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-09-01",
-"t": "Urban Outfitters(URBN)는 기록적인 2분기 결과에서 공정 가치보다 7% 낮을 수 있습니다.",
-"o": "Urban Outfitters (URBN) Could Be 7% Below Fair Value On Record Q2 Results",
-"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOdkxWMXlzQVlodzdjTW5WU01ybmhwNEF4c1hzc0lJVDA4QXJMSUR0cS1fWXBJejRubk1XSEZKazc5ZzFMN1dsLURqTXQ4UGVDaWd3RE5QRTBMVEFQRDNoN0pUdTU2amQ1b0U2amJwdmVwTXRRRlFwWkRLX1B5eU5VdmpjYVNFNUNuamcxZFFhUGtYeTlsVUZBYUItMDk0VW05SEoxVWRrLTJWSkdCUFppTWlrMG5MOTFTQ3ozR0M3VGVwMmlmNktQTWZkMW7SAdIBQVVfeXFMT0FySmx1UzhEMXY3TzlvVmNuRWxNQlNmQW1GNERMNEw0Z283Rm5xNFFPT1R4QkFzWFZtd080TU83QzdCZ3ZxMnpGMkdDcW00Z0lIRlFkQjlxT043S0NhdlRTd1FCOEFWUDY5ZzlQb0VsNXViazZpOENKNGlJeU9RMXRuTWR6LUhwR251MjVEME9ZZ3l4empoM1p0NVhkQjNnTHZOb0ZVVXRDN2M5WFlOX1pyRVNvWGFBVldHRlhVX19XV25mcmwzdnB6RFZkV1BaRFRR?oc=5",
 "m": "바이어 · Urban Outfitters"
 }
 ],
@@ -4373,6 +4373,13 @@
 ],
 "nike": [
 {
+"d": "2026-09-11",
+"t": "Nike 투자자들은 기후 투명성 제안을 거부합니다.",
+"o": "Nike investors reject climate transparency proposal",
+"u": "https://www.ecotextile.com/2026091165542/news/shows-events/nike-investors-reject-climate-transparency-proposal/",
+"m": "Ecotextile News"
+},
+{
 "d": "2026-09-10",
 "t": "Morgan Stanley, 실적 우려로 비중축소 등급으로 Nike 주식 보도 재개",
 "o": "Morgan Stanley resumes Nike stock coverage with underweight rating on earnings concerns",
@@ -4420,16 +4427,16 @@
 "o": "한세MK, ‘플레이키즈 클럽’ 론칭…아베크롬비 키즈 국내 첫선",
 "u": "http://www.ktnews.com/news/articleView.html?idxno=148292",
 "m": "한국섬유신문"
-},
-{
-"d": "2026-09-07",
-"t": "나이키, S&P 100서 퇴출된다…주가 12년 전 수준",
-"o": "나이키, S&P 100서 퇴출된다…주가 12년 전 수준",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148324",
-"m": "한국섬유신문"
 }
 ],
 "pvh": [
+{
+"d": "2026-09-11",
+"t": "타미 힐피거×피너츠, 새 학기 모던 프레피 제안",
+"o": "타미 힐피거×피너츠, 새 학기 모던 프레피 제안",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148500",
+"m": "한국섬유신문"
+},
 {
 "d": "2026-09-04",
 "t": "PVH (PVH) 2027년 1분기 실적 통화 기록",
@@ -4478,16 +4485,16 @@
 "o": "Tommy Hilfiger and Calvin Klein owner reports sales drop",
 "u": "https://www.ecotextile.com/2026090365343/radar/tommy-hilfiger-and-calvin-klein-owner-reports-sales-drop/",
 "m": "Ecotextile News"
-},
-{
-"d": "2026-09-03",
-"t": "PVH 수입: PVH+ 진행 상황은 마케팅 및 소프트 소비자 지출로 인해 모호해졌습니다. 매력적인 주식",
-"o": "PVH Earnings: PVH+ Progress Obscured by Marketing and Soft Consumer Spending; Shares Attractive",
-"u": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxOY0UtbEJhWWZnS3pEQnJpQ1kxR1ZPOEd0U3pfLXVDZGRUNUpXTmlrcjRnTG9YUkhoS2FvT05iWGlkSFZEU3F0YWwwSlBSMHBUdWNtR0dWa3FsRnlnU09XRFQ4d3J6NEFjMFhxdW1GdUJyWG02Y0FxZktFbC05Qy1INDRtLWtXM1pjNWVqYndUNUlFRjBKalo0SGpNaGdsVWFLOUJJd0VsdF9Tbk5pTFZvdXdDMGZhNk8xeTlnNXdXVTdCR3NnWDdFMmNuMVNPYTN2Y2ptTTZTTHRYMmdaNnRFbE5mRUd2TndWcVROMHNsV1M1ZTBHNkE?oc=5",
-"m": "바이어 · PVH"
 }
 ],
 "costco": [
+{
+"d": "2026-09-11",
+"t": "Costco: 가치 평가 재평가는 이제 막 시작되었습니다(4분기 실적 미리보기)",
+"o": "Costco: The Valuation Re-Rating Is Just Getting Started (Q4 Earnings Preview)",
+"u": "https://news.google.com/rss/articles/CBMitwFBVV95cUxQVTNXWG1GYzY2ZFpvOTJoaVFFcjdSY2Fycy12NlZrYUp1aDlOYXM0eDdOSzZnTUNyWm1MS0liaGg0S2ZqcFNnUTRCdTFFaV9IcU5kNEdKOWtmcjhYTkdrVnR6eEkxb3hsNWxhRzY3d3ZOeU94cVAtbGx1eWprdU4yNTVCRGZEU19GNmZ1cHdqY0V4M0JTb1dYc3pVN3ByZjYtQmFteWM0cUlhNkhUZDAwT3IxdHE4b3c?oc=5",
+"m": "바이어 · Costco"
+},
 {
 "d": "2026-09-08",
 "t": "Costco 좌절로 인해 음료 브랜드가 11장 구조 조정에 돌입 - 고성장 수익",
@@ -4536,13 +4543,6 @@
 "o": "Costco's August Sales Rise 9.9% as Digital Growth Stays Strong",
 "u": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxORVhDYUZ1ZEk0QTNaeXl5aWFPYU1BaHBvdF9PRHRYbUNiV3B5WW8xU01ZSzFjY2xOVElTbTZrZGJQcTQ1QldzOEJNdnpwUDVsa29HVkk1TXRseXJSZWpTdjBJZHljRTdObHo0Z25JMHJwam1CZDZxYlB5dTV5V2JXWUEyZTZsdjF4T2dPVTJVTldQLVlBQ3o3aU0tS19TRUdFeDJTMHN6cWM3S1BRUk9sVmIyVnlLM1ZS?oc=5",
 "m": "바이어 · Costco"
-},
-{
-"d": "2026-09-03",
-"t": "Costco 2026년 8월 매출이 거의 10% 증가함에 따라 도매 재고는 하락",
-"o": "Costco Wholesale stock edges lower as August 2026 sales rise nearly 10 percent",
-"u": "https://news.google.com/rss/articles/CBMizgFBVV95cUxNZGxRRjFSTDFNcGZZQlktRGJXdXlsQTlPV0pQRDhPblJYbEFhNjdzek9ENjhuUzRSdFJIQnl6MGRibXAzLUlNSnQxYm9QLU93UVdLYkdscHdLUVU3U1NDazl6aGgtRlE3b0lVc2xRNFo4MDBmdHhYa1BibkhLOXhRX0l0NW9XMEdNcmlJNXhod0h0U25VZ21keTJ2dnF2UVo3NGtRQzVrdHN2VEk4MmNOZFlhSVR4cUl2ZGZ5bEQ1Zm9Rc0hPV080cnlPSnVwdw?oc=5",
-"m": "바이어 · Costco"
 }
 ],
 "aeo": [
@@ -4559,6 +4559,20 @@
 "o": "American Eagle Outfitters Sinks 13% as $161M Tariff Refund Flatters Beat; Urban Outfitters Drops 3%, Abercrombie & Fitch Slips",
 "u": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxQeW5qcVdqd1pTaXk0ei1DRDF0VHQyUjBoVkttcFFlaUpPMjh4WVE1N3ZjMFdhY3dFNUZjUF9NMnlnZTFRd184eUdTZXYyVFYtT3pUUVdYajVacnVuQVowSVB0ZzRlQy1lSGhTVXNhZVFTVFVMam50YVFheHhVVFg3OHhrQkFGRF8yWjBYNF8tR1l6S3ZGSHl6eG4xbkFUY2hCSk8tU0N5bU5kZmhoajZVS3ZuaVZfRGpKVkh2OUZvZG1qeFVqRGZ6bjlfdG5OS1ZtSnd3MjdqOXRySE9HUEJpMzFaQ3ZUdHNBMFJpaHRQcVdpTF94aVE?oc=5",
 "m": "바이어 · Abercrombie & Fitch"
+},
+{
+"d": "2026-09-10",
+"t": "American Eagle (AEO) 2026년 2분기 실적 통화 기록",
+"o": "American Eagle (AEO) Q2 2026 Earnings Call Transcript",
+"u": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxPU2RuWUlHZzNVb1FHUU85UW9yOW1oSDJMYnNjWnN1Z19CamZNVkdUTXJ3TUJ6cGw2SHZHREd6aGx1clVSOWxMXzFyQk9LLWdjcmhxeS1RUFRlV0pfRElaLWdvU3Y4ajNONi1jTzRUcE1naF8yd2F5RktrdWlDeGRUdDhUbXZvbHZybFJYMnpvdjVTRFFrYkh0aGtFLXBxS2hjbWY1YndKbHBGMlFVOXNZU2RQT3dQandLMml0RWdqaXcxRUFzZ0dERVhsLWlHTkFMU3dv?oc=5",
+"m": "바이어 · American Eagle"
+},
+{
+"d": "2026-09-10",
+"t": "American Eagle Outfitters Inc(AEO)(2026년 2분기) 실적 발표 하이라이트: Aerie의 25% 급증 및 ...",
+"o": "American Eagle Outfitters Inc (AEO) (Q2 2026) Earnings Call Highlights: Aerie's 25% Surge and ...",
+"u": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQcUpPU2hsWkFJeWJfblRvWUpyVWFOZGs1MVJMYVBHOEgxNXNQWkhSUEszRVlTUEpVallHaXNZX2pITVZycnpjNDJIakp1cUxJV3ExU0dXUjAzVmJZdmtOV2tMbldrLUZIWU00amVaeEVyN1VuYVVwNkJVdThuU2UxNkNxZkM4WUxMcGlxeTNVbXUwa3c2OUxOaFl0Z2dVMlE?oc=5",
+"m": "바이어 · American Eagle"
 },
 {
 "d": "2026-09-10",
@@ -4587,20 +4601,6 @@
 "o": "American Eagle reports second quarter sales growth",
 "u": "https://www.ecotextile.com/2026091065499/radar/american-eagle-reports-second-quarter-sales-growth/",
 "m": "Ecotextile News"
-},
-{
-"d": "2026-09-10",
-"t": "American Eagle Outfitters, Inc.의 주가는 2분기 실적이 상회했음에도 불구하고 약세를 유지합니다.",
-"o": "American Eagle Outfitters, Inc. stock stays bearish despite Q2 earnings beat",
-"u": "https://news.google.com/rss/articles/CBMiswFBVV95cUxNMGQ3d1VlN0E0ZjhmN0sxTGdraXEyN3VXWHpxYkZDU25XZ2NDTy1za1JGMDVpOGJlRTc3UUJPR1ozMEwzcHI2QWtzTFJTQTlzcHp0Z0g2cGxvLXFGT0dYQkdGM2h5WFRYeUNVNDNGMEU5amtYOGNndWlBZlNrZEVPQ0c4aWpzbkFQTHY2cHVDa3BMdTVBOS1HVWdFWVBMbDZfbzlRVWhYYUZpby1KWUEwZ2QwUQ?oc=5",
-"m": "바이어 · American Eagle"
-},
-{
-"d": "2026-09-10",
-"t": "American Eagle Outfitters는 재고 문제로 인해 바위 같은 지형에 직면해 있습니다.",
-"o": "American Eagle Outfitters Faces Rocky Terrain Amid Inventory Woes",
-"u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPdXFLNzdwaU5wdFBqV1JrSkI5RGJrNDFiV01qMVo0SEhrVURPa2dER3pXeFloRUc3c3M1YWJEcTdUTVJIVUZGYzU3TmhBcmNhcVlhMEN6TDBhWjFsV09kZVZWeS11VHVZRGUwS0txLUx1VXNrNzViSFROMlJCblpWVGdIN2FjdDg0aV81ODlnX3RWMHhWSFVIdVVSNlMtVWxYWXBqSTBFcGVDREVNTVdLQV9jSFZfeXdpdTF30gHAAUFVX3lxTFBqZjZkTnJnNTdmMXdlUzc3bzVZSUptNUVCQXY2MUJZMTBvM1JtRloxNndKcDlvaDJWQ2FPMXNIZ1lQaDM2Q2NIcEJXWGl2emI1UUFSZDB6bnc0WWRYTjhqMlZCSm9BLVA2bUhkWTdiNUZIbVJ3TEJYb1hCaXlnbVc4NmkxQ3lTSnZ1Y1RMbThYSmVWQ0x0RHZmaWtPekw3YlYzVGREc19HN3pBczgyNkFHUnlOZzYyVEN1SkZWOEpUaA?oc=5",
-"m": "바이어 · American Eagle"
 }
 ],
 "kohls": [
@@ -4721,6 +4721,20 @@
 ],
 "walmart": [
 {
+"d": "2026-09-11",
+"t": "Flipkart는 독립형 Minutes 앱으로 빠른 상거래 추진을 강화합니다.",
+"o": "Flipkart Sharpens Quick Commerce Push With Standalone Minutes App",
+"u": "https://apparelresources.com/business-news/retail/flipkart-sharpens-quick-commerce-push-standalone-minutes-app/",
+"m": "Apparel Resources"
+},
+{
+"d": "2026-09-10",
+"t": "Walmart(WMT)이 280가지 패션 아이템을 추가하는 것이 자사 브랜드 추진에 어떤 의미가 있나요?",
+"o": "What Does Walmart (WMT) Adding 280 Fashion Items Mean For Its Private Label Push?",
+"u": "https://news.google.com/rss/articles/CBMizwFBVV95cUxPc2t4dHpfT0pRUDNQZk1BX3ZmUG5uMHhUNlg4UncwUjhoRnNxUzEyX3BtTlVUVVd3WXVRQ24wWUtNQTdWUHI5cFp0ZW04SE05ODI4eHFYRzdFREE3WEFjX3BHUnU1UWJ4dGZQQjF6SU15WkxfdlljaVdZVUlwNURrVXJHQWNoMk5Ndm5JZnlBN1EtdUFwRFMtYWx5MDNDWF9QR1pmVlZkV0x2UzU4Tm1GWmNsdE40MnViSF9yMDlaWDN2Rk9uTWk2VVNGeVJMM3fSAdQBQVVfeXFMT2ZLMFM4ZmtHcEI3NWs3U3E0aEpIMUNYa2JFWXJuVnl5NFhGME1SZENqREdSOERtY3R0NXdXRG53QjFJNFhHZ3o5V1c0Y2RrZTJzeXpmRk12NWhPN1Jac2l6SnMxYjFyZXhOT25GOUtRQ0JjZjVzeWVuZ2FXUGRTOGpFWkJfY0tLNUczamQtd0lzME9SNWt0cXhSSG9zT0tKbEFsemhsamRLSjdWdGVLcEZSRVRZankyYl9NeDJ5cnFWNnhOTXhpY25MN2g0VTdTTzJRaEk?oc=5",
+"m": "바이어 · Walmart"
+},
+{
 "d": "2026-09-07",
 "t": "월마트, 25달러 패션으로 젊은층 공략",
 "o": "월마트, 25달러 패션으로 젊은층 공략",
@@ -4761,20 +4775,6 @@
 "o": "Kohl's names Walmart veteran Ryan Waymire chief merchandising officer",
 "u": "https://news.google.com/rss/articles/CBMivAFBVV95cUxPY0E1WWFHaGtfNHFtYTFKMU9RM3p2alo1ak1mOGM0ZDRaanBoX1J2SzFYaW1NTGV3V21LZm5IeTV5LWZUVlhGOFVGYkJwb0lheGVoRWlnWDhyR092a0UtR0hoMXNMSVp6ek9Fcmp3LVpSVVlJSmdRY2ZqdFZGMHNYRkJMNmxNYjEyVWtCRUlIY3hCT1ZYSnBmMENnX1cxMk9Ja2JtbnptVTM3Q0tCM2NrR2I5Y2p4WXNPcnpReg?oc=5",
 "m": "바이어 · Kohl's"
-},
-{
-"d": "2026-09-01",
-"t": "Kohl의 최고 상품화 책임자(CMO) 직위는 전직 Walmart 패션 임원으로 이동합니다.",
-"o": "Kohl’s Chief Merchandising Officer Post Goes to Former Walmart Fashion Exec",
-"u": "https://news.google.com/rss/articles/CBMivAFBVV95cUxQXzZuT01mWFd5eVpaaXpxVU5pV3F5cWxuZEQySjVOTDRDSXhCOGZtT1E0YTRTYWJ1RlhEN2ZYV0dTY28zX0VlMEh6cEMzbHJlemJsbVFBVnlmcXd5b1Q4Y2ZDcldpYk5oMHo4T2ZlaUNaZVN0UndheTlxNi1BaXpkSGIwelM2WlZHVVNDWFppVm9QeUdTWW52SEVGOWM3SmJiM1VCanhOdXdKeGlVRXNrWXNBN3prMG9HMXN4VA?oc=5",
-"m": "바이어 · Kohl's"
-},
-{
-"d": "2026-09-01",
-"t": "Walmart의 관세 지원 가격 인하 및 오피오이드 합의로 WMT의 강세 사례가 바뀌나요?",
-"o": "Does Walmart’s Tariff-Funded Price Cuts and Opioid Settlement Shift the Bull Case for WMT?",
-"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxQVnBIYnZSM0tiaDBjZV9PSkFMdDFLWk9MU0NVWm82SWJ3Sk1wTHc1Q3Vnb3N0ajZvSklENHVEc3RxaEhuNTJNeUNSdmxEbmdZRmxkQlJ0dFprd1J4Z3kwSmNaRnNqemIxVEhnWWUwZm96WHdZeWRFZ0lRQThqMDhDTUs2RGNRcG1STWhHVWkxR3NiZmJkanVqdWpJWW5nVnRCcXM4TjlLRE5oUnB5ZTlicWlQNXlLbEdYcEJjbmRWYzlRTFBHQnQ4ZkdlQmctZkw20gHWAUFVX3lxTE5hTjRnOXA1WVQwdzBTaWhfNDI1VFpEa1RDOVdVZzR1VFB0V1VYRGd2S1hSNkxEdjQxdGV1dmNYQ19RV0oxQ1hBWWxxZWNpWHhBc0JjN0FndnAyck91aDdHZ05zbm42X3F0SDFfT21CcnhkQWJfbnM5UUtkZ3pNTVc4MHh1UWhMU0RacmZfcG9QWWpRLTBwTXV0aVdpY3R1WWlLVmxma2xQSEdpUV9XYmFiVmdnTEEtYzQ3TkpZU3VqWEE0emRGaElJSl9xX2FBdUdBTjRISlE?oc=5",
-"m": "바이어 · Walmart"
 }
 ],
 "vsco": [

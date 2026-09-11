@@ -6512,9 +6512,10 @@
   "score": 0,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "바이어 · Walmart"
+   "바이어 · Walmart",
+   "바이어 · Costco"
   ]
  },
  {
@@ -12363,6 +12364,32 @@
   "hits": 1,
   "sources": [
    "Just Style"
+  ]
+ },
+ {
+  "key": "3ce9efb220c1fd7d",
+  "title": "Abercrombie & Fitch Q3 EPS, Sales Projections Beat Estimates",
+  "title_ko": "Abercrombie & Fitch 3분기 EPS, 매출 예상이 예상치를 상회",
+  "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOVUphNlhoREpDSmRETVJYSEctZW9TMld0VmZBdVZrQWlkRjI5WG12S0dCM0YxekpJXzhrc2doYUluN2xZdERWOE9JcjVOXzNyWmRnTTQzTUJjU095X2Nqa1JTSXExd3VfcXZ1NUVncVN6MGk4R3JmWV8zOG1HNl9pRUF2UGdnZU5ZTF9UVHdQcVZmZVlGeC1leXJnQTRkU3pqTW1maENvNWhycHZsdEZRcVV5c28?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-09-11",
+  "summary": "Abercrombie & Fitch Q3 EPS, Sales Projections Beat Estimates scanx.trade",
+  "content": "Abercrombie & Fitch Q3 EPS, Sales Projections Beat Estimates scanx.trade",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
   ]
  },
  {
@@ -28144,6 +28171,32 @@
   ]
  },
  {
+  "key": "940108ea2e203232",
+  "title": "Under Armour C earnings beat by $0.03, revenue fell short of estimates",
+  "title_ko": "Under Armour C 수익은 0.03달러 상회, 수익은 예상치에 미치지 못함",
+  "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNRDNfTEtvVWF2T0RJMUZhMDB4NmtJdnZ1Tk0zQmV4TkkxQlk5c2lQUlV6X2RIRGhZbmZNanV0NlNXYklkaEE3anVZb3NZN1pZN1VBSDBuSXFUWWVWRlZGRVpydFpmR2NQM1NYSUlHQW9MR25qZzVtSjJuQjFyN2xNc3pJcnRuSTR0c2ZSTVZ0LXpGZVJudXIxVTk0N2c4d3B6SVg4bHlxRFd0YThDd1lnbmhlTjRIUQ?oc=5",
+  "published": "2026-08-07",
+  "collected": "2026-09-11",
+  "summary": "Under Armour C earnings beat by $0.03, revenue fell short of estimates Investing.com",
+  "content": "Under Armour C earnings beat by $0.03, revenue fell short of estimates Investing.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "ua"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
+  ]
+ },
+ {
   "key": "8d04f84dd853fa47",
   "title": "July jobs report, Earnings from Take-Two, Under Armour, & Wendy's: What to watch on Friday",
   "title_ko": "7월 채용 보고서, Take-Two, Under Armour, Wendy's의 수익: 금요일에 볼만한 동영상",
@@ -28729,6 +28782,32 @@
   "hits": 1,
   "sources": [
    "Indian Textile Magazine"
+  ]
+ },
+ {
+  "key": "ff89ea2e62e4c4fd",
+  "title": "Under Armour faces earnings test as turnaround effort unfolds",
+  "title_ko": "Under Armour은 턴어라운드 노력이 진행되면서 수익 테스트에 직면해 있습니다.",
+  "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQd3VHRUhKZGlEQXJ5Y1oyTGVXeDlJRzFnYkdWSm1oQjc4M2MtTlVlUDBnMXZBUkwwOFIzSFAxLXBmNEszWXU1WlhMaUVUbThIUzBHbHl6TDl1MWIwME0zSlRLT002NHdWSmFodUJTN0wwRXFJdWhwNmQwZDlJVkYwNHVBWkVrVkNlSGpJWm9MQ2V2UmpBTDdJbnVUZTgwc2ROXzBBLS1FbHFzMG96QllyWTlEYTU?oc=5",
+  "published": "2026-08-06",
+  "collected": "2026-09-11",
+  "summary": "Under Armour faces earnings test as turnaround effort unfolds Investing.com",
+  "content": "Under Armour faces earnings test as turnaround effort unfolds Investing.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "ua"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
   ]
  },
  {
@@ -29775,6 +29854,30 @@
   ]
  },
  {
+  "key": "cbc4b592ec061c5b",
+  "title": "Hugo Boss maintains guidance despite Q2 sales and profit drop",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQd0ZncUNZYUJ2bVhWbS1xU2xldlpQMWhGeGlZV3ZkcVduY29qOXJkZ0YtNnFTdEZlZEphNVJIWmIzR3JWNWhWQ0hvRzV2OEtMZDI0cHVsMWd3ZU40cmF6NTJ1UHNWNkJLZ1FyUmpDYUdaaUVPOEtaWWlDc3ZSWVNWTEZ3bzU0QWxhdUlNUjdtU0J1Y3RKS3drOWJR?oc=5",
+  "published": "2026-08-04",
+  "collected": "2026-09-11",
+  "summary": "Hugo Boss maintains guidance despite Q2 sales and profit drop Just Style",
+  "content": "Hugo Boss maintains guidance despite Q2 sales and profit drop Just Style",
+  "image": "",
+  "image_tried": null,
+  "source": "Just Style",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Just Style"
+  ]
+ },
+ {
   "key": "b69918e120dd9c0f",
   "title": "Photonic Fabric™ Technology: How Optical Connectivity Enables the Next Generation of AI Infrastructure",
   "title_ko": "Photonic Fabric™ 기술: 광학 연결을 통해 차세대 AI 인프라를 구현하는 방법",
@@ -29875,6 +29978,54 @@
   ]
  },
  {
+  "key": "86fe8483eab3481f",
+  "title": "BCI and Uzstandard partner to boost cotton standards in Uzbekistan",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE84OVliWkxOQkF5MGRmVGlzbzVYbnhySnlhYUhFVExGc3A2YW11bWtIaHBqREtPOE5ScW95cWxNYXd6VFNxSHY5eXFyVlVfblZFaVVJOXRNa1AwcWJwcmp2YXlLS0Z0N0QwMXkzWklvUXQ?oc=5",
+  "published": "2026-08-04",
+  "collected": "2026-09-11",
+  "summary": "BCI and Uzstandard partner to boost cotton standards in Uzbekistan Just Style",
+  "content": "BCI and Uzstandard partner to boost cotton standards in Uzbekistan Just Style",
+  "image": "",
+  "image_tried": null,
+  "source": "Just Style",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 3,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Just Style"
+  ]
+ },
+ {
+  "key": "7b2d45e49c5cd282",
+  "title": "'매출 18% 성장' 코앤컴, 자체 생산기지·신소재 개발로 성장 가속",
+  "title_ko": "'매출 18% 성장' 코앤컴, 자체 생산기지·신소재 개발로 성장 가속",
+  "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE90MkpoTGFQZFFlRmM2VnotN3FySkhlb2VxbzBmNzJKbUtQNkQ0a0ZoWjFlNG1rYkV4b2RKd2xKRU9EdGd1Vl83NGJZUWFFUE52?oc=5",
+  "published": "2026-08-04",
+  "collected": "2026-09-11",
+  "summary": "'매출 18% 성장' 코앤컴, 자체 생산기지·신소재 개발로 성장 가속 패션비즈",
+  "content": "'매출 18% 성장' 코앤컴, 자체 생산기지·신소재 개발로 성장 가속 패션비즈",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 국내소재",
+  "region": "국내",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 국내소재"
+  ]
+ },
+ {
   "key": "61195cc5f40a7af4",
   "title": "Ingredients & Components Forum at ISPO 2026",
   "title_ko": null,
@@ -29972,6 +30123,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Victoria's Secret"
+  ]
+ },
+ {
+  "key": "2df400a6405460a3",
+  "title": "Anwar Textile Mill Week 2026 kicks off, showcasing innovation, linen leadership and next-generation fabric development",
+  "title_ko": "Anwar Textile Mill Week 2026이 시작되어 혁신, 리넨 리더십 및 차세대 직물 개발을 선보입니다.",
+  "link": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxOYVZZakpqcy12V0pzelFJRE5xeDY1blpGa3BFdkpCVmtJMVFMRDlsaEN6YXpxcVZENVdZcEd0TjN0Y1JvUkZZd0QxSDBGblQ1eVp6azkyNG0xdDQtQi1XdEhkWENMTXk5Vm1GUENvN0wxc21nVjZkci1tSFpVYXFsVzFSSDdqUVdOVXcyd2ZiX1RSQU9Kd0FaR3IxM0pUbkNHbDM2NWI4YUtfbC1Rbk9xdGV5aFlVUDd4bEVkTmxucnlScHhRb0ZzdnpuNTFod2ZuZ0lFX2RrMHRpcHZQNTJqNkpR?oc=5",
+  "published": "2026-08-04",
+  "collected": "2026-09-11",
+  "summary": "Anwar Textile Mill Week 2026 kicks off, showcasing innovation, linen leadership and next-generation fabric development Textile Today",
+  "content": "Anwar Textile Mill Week 2026 kicks off, showcasing innovation, linen leadership and next-generation fabric development Textile Today",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "FABRIC",
+  "tags": [
+   "리넨"
+  ],
+  "entities": [],
+  "score": 13,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -30542,6 +30719,32 @@
   "hits": 1,
   "sources": [
    "Apparel Resources"
+  ]
+ },
+ {
+  "key": "8e2a6994b74eec6a",
+  "title": "COST Q2 2026 Earnings: EPS Misses by 1.9% as Costco Shares Edge Lower - Positive Surprise Momentum",
+  "title_ko": "비용 2026년 2분기 수익: Costco가 Edge Lower - Positive Surprise Momentum을 공유함에 따라 EPS가 1.9% 하락",
+  "link": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNM29LRURjMlBESlBRcUVLdmctX25iMjVnRHdLZEppV0U4dEZ0c09zM0lGb3JQTXZialdoYjd4OWFnOHpFRjZFSFE0VWlFcEFFZ3RJVGlodV9VdVptM3RwUXlyZXlwZmg5Mmk0MlBKclpsVTE2XzlWV2o1dlBMZHNIMHkyaTQzbDVtdDBTX293Q2F3MXFqZHMwdlZ4NUZNcE9VZGxwV0tUS2tiTms?oc=5",
+  "published": "2026-08-01",
+  "collected": "2026-09-11",
+  "summary": "COST Q2 2026 Earnings: EPS Misses by 1.9% as Costco Shares Edge Lower - Positive Surprise Momentum vinanet.vn",
+  "content": "COST Q2 2026 Earnings: EPS Misses by 1.9% as Costco Shares Edge Lower - Positive Surprise Momentum vinanet.vn",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
   ]
  },
  {
