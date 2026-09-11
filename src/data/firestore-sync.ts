@@ -79,7 +79,13 @@ async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promis
 
 async function pushCacheNow<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
   // 쓰기 직전의 최신 원격 값과 합친다. 팀원이 방금 고친 행을 내 화면 값으로 덮지 않는다.
-  const remote = lastRemote.get(key)
+  //
+  // **병합 키가 아니면 합치지 않고 내 값을 그대로 올린다.**
+  // mergeForKey 는 병합 대상이 아닐 때 theirs 를 돌려주는데, 쓰기 방향에서 theirs 는 원격 값이다.
+  // 그대로 쓰면 방금 저장한 것이 빠진 예전 원격 값을 다시 올리고, 그 스냅샷이 내 화면을 덮어
+  // 저장이 통째로 사라진다(2026-09-10 TROUBLE SHOOTING 신규 등록이 목록에 안 뜨던 사고).
+  // 병합 대상은 MERGE_IDS 네 개뿐이라 ts·study·events·rdda 등 나머지 키가 전부 이 경로였다.
+  const remote = mergeIdOf(key) ? lastRemote.get(key) : undefined
   const merged = (remote === undefined ? value : mergeForKey(key, value, remote)) as AppState[K]
   const json = JSON.stringify(merged ?? null)
   const chunks = splitChunks(json)

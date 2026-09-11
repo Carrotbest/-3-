@@ -359,7 +359,7 @@ export function sampleStudy(): StudyRecord[] {
   return rows
 }
 
-export type EventType = "meeting" | "due" | "external" | "leave" | "trip"
+export type EventType = "meeting" | "external" | "leave" | "trip"
 
 export interface CalendarEvent {
   id?: string
@@ -368,20 +368,25 @@ export interface CalendarEvent {
   type: EventType
   title: string
   time?: string
+  endTime?: string
   place?: string
   owner?: string
+  note?: string
+  /** 휴가 반차. 달력에서 라인을 하루의 절반만 그린다. */
+  half?: boolean
+  /** 반복 규칙. 원본 1건만 저장하고 화면에서 펼친다. */
+  repeat?: "weekly" | "biweekly" | "monthly"
+  /** 반복 종료일(YYYY-MM-DD). 비면 보고 있는 기간까지 계속 펼친다. */
+  repeatUntil?: string
 }
 
 export function sampleEvents(): CalendarEvent[] {
   return [
     { id: "demo-team-meeting-weekly", date: shift(0), type: "meeting", title: "팀 주간 점검 미팅", time: "10:00", place: "회의실 A", owner: MEMBERS[0].name },
-    { date: shift(0), type: "due", title: "GD26-1042 납기" },
     { id: "demo-team-external-review", date: shift(1), type: "external", title: "EU Sample Review", time: "15:00", owner: MEMBERS[1].name },
     { id: "demo-team-leave", date: shift(2), type: "leave", title: "연차", owner: MEMBERS[2].name },
-    { date: shift(3), type: "due", title: "GD26-1057 납기" },
     { id: "demo-team-trip", date: shift(5), type: "trip", title: "협력사 출장", time: "09:00", place: "데모 협력사", owner: MEMBERS[3].name },
     { id: "demo-team-meeting-rnd", date: shift(8), type: "meeting", title: "R&D 미팅", time: "14:00", owner: MEMBERS[0].name },
-    { date: shift(9), type: "due", title: "EU-026 납기" },
     { id: "demo-team-trip-range", date: shift(12), endDate: shift(14), type: "trip", title: "협력사 출장", time: "09:00", place: "데모 협력사", owner: MEMBERS[1].name },
     { id: "demo-team-leave-range", date: shift(16), endDate: shift(17), type: "leave", title: "연차", owner: MEMBERS[2].name },
   ]

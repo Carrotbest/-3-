@@ -314,6 +314,47 @@ input.dd-date::-webkit-calendar-picker-indicator {
   animation: landing-intro-status 3s ease forwards;
 }
 
+@keyframes diary-cell-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes diary-trip-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes diary-leave-pop {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+@keyframes diary-today-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ring) 18%, transparent); }
+  50% { box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--ring) 38%, transparent); }
+}
+
+.calendar-diary-lines {
+  background-image: repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in srgb, var(--border) 35%, transparent) 31px 32px);
+}
+
+.diary-cell-in {
+  animation: diary-cell-in 260ms ease-out both;
+}
+
+.diary-trip-draw {
+  animation: diary-trip-draw 320ms ease-out both;
+  transform-origin: left center;
+}
+
+.diary-leave-pop {
+  animation: diary-leave-pop 240ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.diary-today-pulse {
+  animation: diary-today-pulse 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .trend-hit-badge {
     animation: none;
@@ -334,5 +375,13 @@ input.dd-date::-webkit-calendar-picker-indicator {
   .landing-intro-progress,
   .landing-intro-status {
     display: none;
+  }
+
+  .diary-cell-in,
+  .diary-trip-draw,
+  .diary-leave-pop,
+  .diary-today-pulse {
+    animation: none;
+    transform: none;
   }
 }

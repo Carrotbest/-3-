@@ -1044,8 +1044,6 @@ function BucketMiniVisual({ items, tone }: { items: Array<{ label: string; count
   )
 }
 
-const completedLibraryRowId = (item: CompletedLibraryItem) => item.key
-
 function completedOptions(
   items: readonly CompletedLibraryItem[],
   accessor: (item: CompletedLibraryItem) => string,
@@ -1119,16 +1117,6 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
     })
   }, [calendarMonth, filteredItems])
 
-  const columns = useMemo<DataTableColumn<CompletedLibraryItem>[]>(() => [
-    { id: "styleNo", header: "Style No.", accessor: (item) => item.styleNo, cell: (item) => <span className="font-mono font-semibold">{item.styleNo || "—"}</span> },
-    { id: "flNo", header: "FL No.", accessor: (item) => item.flNo, cell: (item) => <span className="font-mono">{item.flNo || "—"}</span> },
-    { id: "season", header: "시즌", accessor: (item) => item.season },
-    { id: "category", header: "카테고리", accessor: (item) => item.category },
-    { id: "buyer", header: "Buyer", accessor: (item) => item.buyer },
-    { id: "owner", header: "담당", accessor: (item) => ownerDisplayName(item.owner) },
-    { id: "construction", header: "조직", accessor: (item) => item.construction },
-  ], [])
-
   const resetFilters = () => {
     setSearch("")
     setSeason(ALL)
@@ -1153,6 +1141,7 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
   return (
     <div className="space-y-6">
       <SectionCard title="완료 캘린더" subtitle="DD 완료건과 샘플대장 아카이브를 완료일 기준으로 통합했습니다." contentClassName="p-0">
+        <div className="border-b border-[var(--border)] p-4">{toolbar}</div>
         <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
           <Button type="button" variant="outline" size="icon" onClick={() => setCalendarMonth((month) => shiftMonth(month || latestMonth, -1))} aria-label="이전 달"><ChevronLeft aria-hidden="true" /></Button>
           <div className="text-center"><p className="font-semibold text-[var(--foreground)]">{calendarMonth ? monthLabel(calendarMonth) : "—"}</p><p className="mt-1 text-xs text-[var(--muted-foreground)]">검색 조건과 연동 · 날짜 카드를 눌러 상세 보기</p></div>
@@ -1186,10 +1175,6 @@ function CompletedSampleLibrary({ records, samples }: { records: readonly DevRec
             </div>
           ))}
         </div>
-      </SectionCard>
-
-      <SectionCard title="전체 완료 샘플" subtitle={`전체 ${library.length.toLocaleString("ko-KR")}건 · 검색 결과 ${filteredItems.length.toLocaleString("ko-KR")}건 · DD 우선 병합`} contentClassName="p-0">
-        <DataTable columns={columns} rows={filteredItems} getRowId={completedLibraryRowId} pageSize={20} toolbar={toolbar} onRowClick={setSelectedItem} emptyMessage="조건에 맞는 완료 샘플이 없습니다." />
       </SectionCard>
 
       <DevelopmentDetailDialog libraryItem={selectedItem} onOpenChange={(open) => { if (!open) setSelectedItem(null) }} />

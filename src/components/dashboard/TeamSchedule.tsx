@@ -10,20 +10,12 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { dayToneText, holidayName } from "@/data/holidays"
-import type { CalendarEvent, EventType } from "@/data/sample"
+import { TEAM_EVENT_META as CATEGORY_META, TEAM_EVENT_TYPES, isTeamEventType, type TeamEventType } from "@/data/calendar-events"
+import type { CalendarEvent } from "@/data/sample"
 import { MEMBERS } from "@/data/schema"
 import { addTeamEvent, deleteTeamEvent, useAppStore } from "@/store/useAppStore"
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"] as const
-const TEAM_EVENT_TYPES = ["meeting", "leave", "external", "trip"] as const
-type TeamEventType = (typeof TEAM_EVENT_TYPES)[number]
-
-const CATEGORY_META: Record<TeamEventType, { label: string; dot: string; chip: string }> = {
-  meeting: { label: "미팅", dot: "bg-[var(--chart-2)]", chip: "border-[var(--chart-2)] text-[var(--chart-2)]" },
-  leave: { label: "연차", dot: "bg-[var(--chart-4)]", chip: "border-[var(--chart-4)] text-[var(--chart-4)]" },
-  external: { label: "외근", dot: "bg-[var(--chart-1)]", chip: "border-[var(--chart-1)] text-[var(--chart-1)]" },
-  trip: { label: "출장", dot: "bg-[var(--chart-3)]", chip: "border-[var(--chart-3)] text-[var(--chart-3)]" },
-}
 
 interface TeamEvent extends CalendarEvent {
   type: TeamEventType
@@ -76,9 +68,6 @@ function monthDays(cursor: Date): Date[] {
   const count = Math.ceil((first.getDay() + lastDay) / 7) * 7
   return Array.from({ length: count }, (_, index) => addDays(first, index - first.getDay()))
 }
-
-const isTeamEventType = (type: EventType): type is TeamEventType =>
-  TEAM_EVENT_TYPES.includes(type as TeamEventType)
 
 const formStateFor = (date: string): EventFormState => ({
   date,

@@ -70,6 +70,7 @@
 - **ref 콜백 안에서 setState 하지 말 것.** 인라인 ref 는 렌더마다 새 함수라 React 가 커밋마다 떼었다 붙인다. 그 안의 setState 는 무한 렌더가 되고 `Maximum update depth exceeded` 로 **화면 전체가 백지**가 된다. 값 비교로 막아도 소용없다(R119 창고 탭 전환 사고). 크기 측정은 `ResizeObserver` 나 layout effect 로 한다.
 - **렌더 예외는 `RouteErrorBoundary` 가 잡는다**(`src/App.tsx`). 없애지 말 것. 없으면 백지만 남고 원인 단서가 사라진다.
 - **실데이터·캐시 내용을 로그·git·공개 파일에 넣지 말 것.**
+- **동기화 쓰기 경로에서 `mergeForKey`를 그대로 부르지 말 것.** 병합 대상이 아닌 키(`MERGE_IDS` 네 개 외 전부)는 `theirs`가 돌아오는데, 쓰기 방향에서 그건 원격 값이다. 방금 저장한 것이 빠진 옛 값을 다시 올리고 스냅샷이 화면을 덮어 저장이 사라진다(R121). `pushCacheNow`는 병합 키일 때만 원격과 합친다.
 - TS 실시간공유 데이터 손실 이력 있음 — 동기화 손대기 전 `fabric-rnd-ts` 필독.
 
 ## 보기 설정 (`src/data/view-prefs.ts`)

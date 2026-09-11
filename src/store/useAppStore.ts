@@ -221,6 +221,13 @@ export function deleteTeamEvent(id: string): void {
   void saveCache("events", next)
 }
 
+export function updateTeamEvent(event: CalendarEvent): void {
+  if (!event.id) return
+  const next = useAppStore.getState().events.map((item) => item.id === event.id ? { ...item, ...event } : item)
+  setAppState({ events: next })
+  void saveCache("events", next)
+}
+
 function persistTsRecords(records: readonly TsRecord[]): void {
   try {
     window.localStorage.setItem(TS_STORAGE_KEY, JSON.stringify(records))
