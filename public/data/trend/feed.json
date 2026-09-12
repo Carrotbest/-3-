@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-09-11T22:51:36+00:00",
+"generated_at": "2026-09-12T22:41:08+00:00",
 "window_days": 120,
-"total": 731,
-"translated": 731,
-"filtered_out": 1322,
+"total": 739,
+"translated": 739,
+"filtered_out": 1344,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 21,
-"scanned": 827,
-"kept": 339,
-"material": 260
+"scanned": 725,
+"kept": 308,
+"material": 245
 },
 "30": {
 "sources": 23,
-"scanned": 1757,
-"kept": 650,
-"material": 497
+"scanned": 1773,
+"kept": 655,
+"material": 502
 }
 }
 },
@@ -25,7 +25,7 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 257
+"n": 258
 },
 {
 "key": "RETAIL",
@@ -33,11 +33,11 @@
 },
 {
 "key": "FABRIC",
-"n": 152
+"n": 153
 },
 {
 "key": "ETC",
-"n": 85
+"n": 91
 },
 {
 "key": "CHEMICAL",
@@ -51,11 +51,11 @@
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 177
+"n": 178
 },
 {
 "key": "Fibre2Fashion",
-"n": 132
+"n": 133
 },
 {
 "key": "국제섬유신문",
@@ -71,11 +71,15 @@
 },
 {
 "key": "주제검색 · 신소재",
-"n": 39
+"n": 40
 },
 {
 "key": "Textile Today",
 "n": 38
+},
+{
+"key": "Textile Focus",
+"n": 37
 },
 {
 "key": "Ecotextile News",
@@ -84,10 +88,6 @@
 {
 "key": "Innovation in Textiles",
 "n": 34
-},
-{
-"key": "Textile Focus",
-"n": 32
 },
 {
 "key": "Textile World",
@@ -137,11 +137,11 @@
 },
 {
 "key": "전시회",
-"n": 40
+"n": 41
 },
 {
 "key": "방글라데시",
-"n": 37
+"n": 38
 },
 {
 "key": "데님",
@@ -316,14 +316,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-13",
-"total": 2,
-"by": {
-"FABRIC": 1,
-"YARN": 1
-}
-},
 {
 "date": "2026-08-14",
 "total": 9,
@@ -606,14 +598,22 @@
 },
 {
 "date": "2026-09-11",
-"total": 41,
+"total": 42,
 "by": {
 "RETAIL": 10,
 "ETC": 6,
 "CHEMICAL": 5,
 "YARN": 2,
-"MATERIAL": 11,
+"MATERIAL": 12,
 "FABRIC": 7
+}
+},
+{
+"date": "2026-09-12",
+"total": 6,
+"by": {
+"ETC": 5,
+"FABRIC": 1
 }
 }
 ],
@@ -622,8 +622,8 @@
 "tag": "리사이클",
 "label_en": "recycled",
 "recent": 43,
-"prior": 3,
-"delta": 40,
+"prior": 2,
+"delta": 41,
 "weeks": [
 0,
 0,
@@ -642,9 +642,9 @@
 {
 "tag": "전시회",
 "label_en": "performance days",
-"recent": 38,
+"recent": 39,
 "prior": 2,
-"delta": 36,
+"delta": 37,
 "weeks": [
 0,
 0,
@@ -657,15 +657,15 @@
 4,
 9,
 6,
-19
+20
 ]
 },
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 36,
+"recent": 37,
 "prior": 1,
-"delta": 35,
+"delta": 36,
 "weeks": [
 0,
 0,
@@ -678,7 +678,7 @@
 0,
 7,
 14,
-15
+16
 ]
 },
 {
@@ -787,27 +787,6 @@
 ]
 },
 {
-"tag": "렌징",
-"label_en": "lenzing",
-"recent": 3,
-"prior": 2,
-"delta": 1,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-2,
-0,
-0,
-1,
-1,
-0,
-1
-]
-},
-{
 "tag": "인도네시아",
 "label_en": "indonesia",
 "recent": 3,
@@ -826,6 +805,27 @@
 0,
 1,
 2
+]
+},
+{
+"tag": "렌징",
+"label_en": "lenzing",
+"recent": 3,
+"prior": 2,
+"delta": 1,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+2,
+0,
+0,
+1,
+1,
+0,
+1
 ]
 },
 {
@@ -1036,6 +1036,136 @@
 }
 ],
 "articles": [
+{
+"id": "e4f34aec904b2a97",
+"d": "2026-09-12",
+"t": "Intertextile 상하이 홈 텍스타일 – 2026년 가을 에디션, 트렌드 주도 혁신을 위한 아시아 최고의 허브로 마무리",
+"o": "Intertextile Shanghai Home Textiles – Autumn Edition 2026 concludes as Asia’s premier hub for trend-led innovation",
+"u": "https://textilefocus.com/intertextile-shanghai-home-textiles-autumn-edition-2026-concludes-as-asias-premier-hub-for-trend-led-innovation/",
+"s": "Shanghai, 8 September 2026. Intertextile Shanghai Home Textiles – Autumn Edition 2026 wrapped up on 20 August having brought the global home textiles community together in Shanghai. Over 900 exhibitors from 19 countries and regions attracted nearly 36,000 visitors from 113 represented markets to the",
+"c": "ETC",
+"x": "Shanghai, 8 September 2026. Intertextile Shanghai Home Textiles – Autumn Edition 2026 wrapped up on 20 August having brought the global home textiles community together in Shanghai. Over 900 exhibitors from 19 countries and regions attracted nearly 36,000 visitors from 113 represented markets to the National Exhibition and Convention Center (Shanghai). This edition further strengthened the fair’s status as a strategic gateway to the wider Asian buyer market, with strongly represented regions including Greater China, Southeast Asia, and increasingly Central Asia. Beyond sourcing, the fair connected trend-led, sustainability-driven and value-added product innovation with real-world business needs. Visitors combined premium sourcing objectives with an appetite for market intelligence and industry insights from the fringe programme – underscoring the fair’s role as Asia’s leading home textiles show and the sector’s core manufacturing base. Crowds fill the 100,000+ sqm exhibition space at Intertextile Shanghai Home Textiles – Autumn Edition 2026, underscoring the event’s position as the sector’s core manufacturing and sourcing platform in Asia. [Photo: Messe Frankfurt] At the show’s conclusion, Ms Wilmet Shea, General Manager of Messe Frankfurt (HK) Ltd, reflected on the fair’s – and China’s – role as a nexus for the Asian home textiles industry: “This edition brought together a truly multinational and high-quality exhibitor and buyer base. The strong performance of the fair underscores the resilience of China’s industrial supply chain and reinforces confidence in the industry’s long-term growth. Exhibitors and visitors alike highlighted how sustainability and new technologies are accelerating product development, improving operational efficiency and enhancing supply chain t",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/unnamed.png",
+"g": [
+"전시회"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "c52427703ebf49bc",
+"d": "2026-09-12",
+"t": "300개 브랜드, 지속적인 근로자 건강 및 안전을 위한 국제 협약에 서명",
+"o": "300 Brands Sign the International Accord for Continued Worker Health and Safety",
+"u": "https://textilefocus.com/300-brands-sign-the-international-accord-for-continued-worker-health-and-safety/",
+"s": "300 global garment brands and retailers have signed the International Accord for Health and Safety in the Textile and Garment Industry (International Accord) with global unions, IndustriALL and UNI, marking the highest number of signatories for any Accord agreement to date. These signatory brands ar",
+"c": "ETC",
+"x": "300 global garment brands and retailers have signed the International Accord for Health and Safety in the Textile and Garment Industry (International Accord) with global unions, IndustriALL and UNI, marking the highest number of signatories for any Accord agreement to date. These signatory brands are headquartered across 26 countries and annually source goods worth approximately USD $26 billion from Bangladesh and Pakistan. Collectively, the Accord brands source from over 2,000 factories with over 3.4 million workers in Bangladesh and Pakistan. The International Accord was renewed in 2023 as a framework agreement for a three-year term, with automatic renewal for an additional three years, making it the longest commitment in the Accord’s history. It builds upon the 2013 and 2018 Accords on Fire and Building Safety in Bangladesh, as well as the 2021 International Accord, each of which progressively expanded its scope and commitments. The International Accord is a legally binding agreement between global brands and trade unions, to create and maintain garment factories where no worker fears fires, building collapses or other accidents that can be prevented with reasonable health and safety measures. It promotes worker health and safety through factory inspections to identify risks; remediation to implement life-saving improvements; worker safety training to raise awareness of workers’ rights, responsibilities, and health and safety risks; and a trusted Complaints Mechanism for workers to raise health and safety concerns. The Accord Secretariat thanks all brands, trade unions and civil society organisations who have made this milestone possible. We look forward to welcoming even more brands as we continue working together towards a safer textile and garment industry. Watch ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Cover-2-2048x1363-1.jpg",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "b80d1afbaebb0436",
+"d": "2026-09-12",
+"t": "미래의 섬유 산업을 위한 효율성 향상",
+"o": "Greater efficiency for tomorrow’s textile industry",
+"u": "https://textilefocus.com/greater-efficiency-for-tomorrows-textile-industry/",
+"s": "From September 24 to 27, 2026, Barmag, together with BB Engineering (BBE), will present innovative solutions for the efficient and sustainable production of synthetic yarns at the Egy Stitch & Tex Expo in Cairo, Egypt. Under the motto “A New Era. Powered by Innovation.,” experts from Barmag and BBE ",
+"c": "ETC",
+"x": "From September 24 to 27, 2026, Barmag, together with BB Engineering (BBE), will present innovative solutions for the efficient and sustainable production of synthetic yarns at the Egy Stitch & Tex Expo in Cairo, Egypt. Under the motto “A New Era. Powered by Innovation.,” experts from Barmag and BBE will present technologies spanning the entire textile value chain — from melt to yarn — at the ATAG Ltd. booth (Hall 1, Booth C1). The focus is on solutions for continuous polycondensation and extrusion, the production of POY, FDY, and IDY yarns, as well as texturing technologies for DTY, ATY, effect yarns, and specialty yarns. The portfolio is complemented by technologies for BCF carpet yarns, staple fibers, and nonwovens, as well as innovative recycling concepts for a sustainable textile industry of the future. Photo: Barmag’s eAFK Big-V texturing machine enables the cost-effective production of high-quality, high-titer yarns for demanding carpet and home textile applications. Barmag at Egy Stitch & Tex Expo 2026 Egypt is increasingly emerging as a strategic hub for the manmade fiber industry. The growing demand for high-quality textiles in the Middle East and North Africa is creating attractive growth opportunities for regional producers and processors. The manmade fiber market is benefiting from rising investments in the textile industry and the increasing integration of regional value chains. Polycondensation and sustainability High-quality polymers start with a homogeneous melt. Barmag Huitong Engineering’s homogenization technology supports the thermomechanical recycling of post-industrial polyester waste, such as bottle flakes and film material, and lays the groundwork for high-quality rPET products. By specifically increasing viscosity, it is possible to produce defi",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Barmag-01.jpg",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 13,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "974cf43d90776dc1",
+"d": "2026-09-12",
+"t": "전통의 색과 손맛을 현대적으로 풀다, 부천대 섬유패션비즈니스과",
+"o": "전통의 색과 손맛을 현대적으로 풀다, 부천대 섬유패션비즈니스과",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148517",
+"s": "부천대학교 섬유패션비즈니스과는 디자인하우스가 주최한 마곡 전시에 참여해 학생들이 직접 기획하고 제작한 다양한 섬유패션 작품을 전시했다. 전시는 9일부터 13일까지다.이번 전시에서는 전통적인 색감과 문양을 현대적인 생활소품에 접목한 작품들이 눈길을 끌었다. 오방색을 연상시키는 강렬한 색상의 스트라이프 원단을 활용한 주머니와 가방을 비롯해 노리개 형태의 참 장식품과 뜨개 인형, 생활소품 등 학생들의 개성이 담긴 작품들이 다양하게 전시됐다.특히 전통적인 직물의 분위기에 현대적인 색채와 디자인을 더한 패션소품은 전통과 현대가 자연스럽게 어",
+"c": "FABRIC",
+"x": "부천대학교 섬유패션비즈니스과는 디자인하우스가 주최한 마곡 전시에 참여해 학생들이 직접 기획하고 제작한 다양한 섬유패션 작품을 전시했다. 전시는 9일부터 13일까지다.이번 전시에서는 전통적인 색감과 문양을 현대적인 생활소품에 접목한 작품들이 눈길을 끌었다. 오방색을 연상시키는 강렬한 색상의 스트라이프 원단을 활용한 주머니와 가방을 비롯해 노리개 형태의 참 장식품과 뜨개 인형, 생활소품 등 학생들의 개성이 담긴 작품들이 다양하게 전시됐다.특히 전통적인 직물의 분위기에 현대적인 색채와 디자인을 더한 패션소품은 전통과 현대가 자연스럽게 어",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148517_130285_3457_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "5397e9d5d450c68c",
+"d": "2026-09-12",
+"t": "재생 가능 에너지 없이는 앞으로 나아갈 길이 없습니다: 에너지 주권은 Bangladesh의 장기 산업 탄력성 전략의 기반이 되어야 합니다",
+"o": "No way forward without renewables: Energy sovereignty must anchor Bangladesh’s long-term industrial resilience strategy",
+"u": "https://textilefocus.com/no-way-forward-without-renewables-energy-sovereignty-must-anchor-bangladeshs-long-term-industrial-resilience-strategy/",
+"s": "On Monday, 7 September 2026, RMG leaders and energy experts stressed that Bangladesh must place renewable-energy transition and energy sovereignty at the centre of its long-term industrial strategy as the continuing energy crisis, rising fuel-import dependence and unreliable supply increasingly thre",
+"c": "ETC",
+"x": "On Monday, 7 September 2026, RMG leaders and energy experts stressed that Bangladesh must place renewable-energy transition and energy sovereignty at the centre of its long-term industrial strategy as the continuing energy crisis, rising fuel-import dependence and unreliable supply increasingly threaten RMG’s sustainability. The call came at the “Rapid Energy Transition Conference: Powering Security, Sustainability and Growth in Bangladesh RMG,” convened by Ethical Trading Initiative (ETI) Bangladesh, which brought together 108 representatives from RMG factories. Speakers included representatives from BGMEA, BKMEA and BSREA, alongside international brands, financial institutions, renewable-energy companies and technical organisations. The conference featured three working sessions examining the urgency of renewable-energy transition, available financing and technology pathways, and the role of business associations in supporting industry-wide implementation, respectively. In his opening speech, Abil Bin Amin, Executive Director of ETI Bangladesh , called for a just and collaborative energy transition, stressing that factories and workers should not bear the costs of meeting international climate targets and transitioning to renewables, without collective stakeholder engagement and support. Eng. Imran Kader Turjo, Director of BKMEA , warned that Bangladesh could not secure the RMG sector’s energy future through rooftop solar alone. “We are already late; these renewable-energy and infrastructure initiatives should have been implemented 10 to 12 years ago. Our priority now must be rapid and focused implementation,” he said. Turjo called for a hybrid approach combining factory rooftop solar, reliable grid electricity, larger renewable-energy facilities on suitable land and ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/eti.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "436235ccda0cb3d8",
+"d": "2026-09-12",
+"t": "80년대가 돌아왔습니다. 하지만 글로벌 공급망이 실제로 수익을 창출할 수 있는 부분은 무엇입니까?",
+"o": "THE ’80s ARE BACK, But Which Parts Can the Global Supply Chain Actually Monetize?",
+"u": "https://textilefocus.com/the-80s-are-back-but-which-parts-can-the-global-supply-chain-actually-monetize/",
+"s": "Standfirst: A visual nostalgia wave becomes economically relevant to the industrial apparel sector only when it structurally alters product design, processing chemistry and manufacturing lead times. For manufacturers, the commercial question is whether additional design complexity can be converted i",
+"c": "ETC",
+"x": "Standfirst: A visual nostalgia wave becomes economically relevant to the industrial apparel sector only when it structurally alters product design, processing chemistry and manufacturing lead times. For manufacturers, the commercial question is whether additional design complexity can be converted into value capture rather than absorbed as uncompensated operational cost. THE LONG-TERM MACRO REVIVAL: A 7-YEAR SYSTEMIC EVOLUTION The global apparel architecture is consolidating a major revival of 1980s shapes, proportions and design attitudes —a direction that has been building for several years rather than appearing as a single-season trend. To understand its significance, the timeline matters. Bangladesh has operated at global garment-manufacturing scale since the late 1970s, building its competitive position around agility, adaptability and high-volume execution. The return of stronger, more structured and volume-led product therefore does not represent an entirely foreign manufacturing challenge. The opportunity is to apply that established production base to a more technically demanding product cycle. According to WGSN Fashion Vision , wide-leg jeans—the clearest denim manifestation of the current ’80s direction—recorded a 9.4 percentage-point increase in catwalk mix compared with previous cycles, reaching a 32% share of the tracked denim mix. Historical collection tracking referenced through McKinsey Apparel Intelligence and Vogue Business also indicates that the shift away from ultra-minimal, skin-tight proportions has been developing for approximately seven to eight years . What appeared initially as experimentation with relaxed denim and subverted corporate silhouettes has progressively moved into broader commercial fashion. The direction is therefore bigger than ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/80S.jpeg",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
 {
 "id": "ef8eb70ee875a904",
 "d": "2026-09-11",
@@ -1555,11 +1685,12 @@
 "m": "주제검색 · 염색가공",
 "r": "해외",
 "v": 10,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"주제검색 · 염색가공"
+"주제검색 · 염색가공",
+"Textile Focus"
 ]
 },
 {
@@ -1865,6 +1996,27 @@
 "e": [],
 "ms": [
 "Innovation in Textiles"
+]
+},
+{
+"id": "1ed7dc1c410c4efd",
+"d": "2026-09-11",
+"t": "미국 면화 수출은 급격히 감소했지만, 고지대 수출은 증가하고 있습니다.",
+"o": "US cotton exports sharply dip but Upland shipments on rise",
+"u": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxPb2xlaDRYT0NueTlfcDM3anVYYk8ybmJpc1ZDVHBzUTA2emJlaEw3LXNRYTZleDNqNWdHaVI4VDlCRVhoUFRlVU50UlkzUzdqcHJicGNwMmk2N0hyZEpKMFFJTjlNQ1pSMURUc2xGMUJzdWhmaXdVdU1nN3lPdmMwNkstVVJ0ZGFxSUY5U0xuOVJ3UzB6OWRDbnV3amtNcGprTjlQdzA2SkdMc0ZVVHhsRjYxLTBhT0ZiMWVQRjJ2cFpBMnBjWkZEQzUxbWMzTl9nRWc?oc=5",
+"s": "US cotton exports sharply dip but Upland shipments on rise Fibre2Fashion",
+"c": "MATERIAL",
+"x": "US cotton exports sharply dip but Upland shipments on rise Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -3979,11 +4131,12 @@
 "m": "Ecotextile News",
 "r": "해외",
 "v": 8,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Ecotextile News"
+"Ecotextile News",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -5884,12 +6037,13 @@
 "m": "Textile Today",
 "r": "해외",
 "v": 8,
-"h": 2,
+"h": 3,
 "w": "material",
 "e": [],
 "ms": [
 "Textile Today",
-"Indian Textile Magazine"
+"Indian Textile Magazine",
+"Textile Focus"
 ]
 },
 {
@@ -5929,11 +6083,12 @@
 "m": "Innovation in Textiles",
 "r": "해외",
 "v": 12,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Innovation in Textiles"
+"Innovation in Textiles",
+"Textile Focus"
 ]
 },
 {
@@ -15964,6 +16119,27 @@
 "e": [],
 "ms": [
 "Indian Textile Magazine"
+]
+},
+{
+"id": "1d97d2054d2a292e",
+"d": "2026-07-31",
+"t": "양조폐기물에서 섬유소재를 탐색하는 연구",
+"o": "Research to explore textile materials from brewing waste",
+"u": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxPQ0ZOdFdwR3J1UEEzMnh5b0dfR1p5ZjZQOUF0UjE2VDU2dVBOMW1EZUlGSkszanpmWmpuWmo5dmh5c2c3bTRicnRiZDBVS3N3c2prcDd3VGxwYTJac3EzTmlJQTN2S25pRjhBWmVRc1pqeWNFZWtUTERXZTFoMWVkSWFVWm9Odi01UHVncUM1bi1tNlB5ZHRRelBsZVYzeWkwQTAyRVRIaC1Mekg4VGJXZGZERHpZYzBLR0h3UTFfeVpfSkpmeUtOTw?oc=5",
+"s": "Research to explore textile materials from brewing waste Ecotextile News",
+"c": "ETC",
+"x": "Research to explore textile materials from brewing waste Ecotextile News",
+"i": "",
+"g": [],
+"m": "주제검색 · 신소재",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 신소재"
 ]
 },
 {
