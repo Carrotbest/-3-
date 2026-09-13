@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-09-12T22:41:08+00:00",
+"generated_at": "2026-09-13T22:42:17+00:00",
 "window_days": 120,
-"total": 739,
-"translated": 739,
-"filtered_out": 1344,
+"total": 749,
+"translated": 749,
+"filtered_out": 1365,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 21,
-"scanned": 725,
-"kept": 308,
-"material": 245
+"scanned": 719,
+"kept": 312,
+"material": 248
 },
 "30": {
 "sources": 23,
-"scanned": 1773,
-"kept": 655,
-"material": 502
+"scanned": 1795,
+"kept": 663,
+"material": 509
 }
 }
 },
@@ -25,19 +25,19 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 258
+"n": 261
 },
 {
 "key": "RETAIL",
-"n": 154
+"n": 155
 },
 {
 "key": "FABRIC",
-"n": 153
+"n": 155
 },
 {
 "key": "ETC",
-"n": 91
+"n": 94
 },
 {
 "key": "CHEMICAL",
@@ -45,17 +45,17 @@
 },
 {
 "key": "YARN",
-"n": 20
+"n": 21
 }
 ],
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 178
+"n": 181
 },
 {
 "key": "Fibre2Fashion",
-"n": 133
+"n": 134
 },
 {
 "key": "국제섬유신문",
@@ -70,16 +70,16 @@
 "n": 43
 },
 {
+"key": "Textile Focus",
+"n": 42
+},
+{
 "key": "주제검색 · 신소재",
 "n": 40
 },
 {
 "key": "Textile Today",
 "n": 38
-},
-{
-"key": "Textile Focus",
-"n": 37
 },
 {
 "key": "Ecotextile News",
@@ -102,11 +102,11 @@
 "n": 14
 },
 {
-"key": "주제검색 · 염색가공",
-"n": 12
+"key": "Apparel Insider",
+"n": 13
 },
 {
-"key": "Apparel Insider",
+"key": "주제검색 · 염색가공",
 "n": 12
 },
 {
@@ -133,15 +133,15 @@
 "tags": [
 {
 "key": "리사이클",
-"n": 47
+"n": 48
+},
+{
+"key": "방글라데시",
+"n": 45
 },
 {
 "key": "전시회",
 "n": 41
-},
-{
-"key": "방글라데시",
-"n": 38
 },
 {
 "key": "데님",
@@ -299,6 +299,11 @@
 "label": "Target"
 },
 {
+"key": "pvh",
+"n": 1,
+"label": "PVH"
+},
+{
 "key": "kohls",
 "n": 1,
 "label": "Kohl's"
@@ -316,16 +321,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-14",
-"total": 9,
-"by": {
-"FABRIC": 3,
-"ETC": 1,
-"CHEMICAL": 1,
-"MATERIAL": 4
-}
-},
 {
 "date": "2026-08-15",
 "total": 1,
@@ -610,20 +605,52 @@
 },
 {
 "date": "2026-09-12",
-"total": 6,
+"total": 8,
 "by": {
 "ETC": 5,
+"FABRIC": 2,
+"YARN": 1
+}
+},
+{
+"date": "2026-09-13",
+"total": 8,
+"by": {
+"MATERIAL": 3,
+"ETC": 3,
+"RETAIL": 1,
 "FABRIC": 1
 }
 }
 ],
 "momentum": [
 {
+"tag": "방글라데시",
+"label_en": "bangladesh",
+"recent": 44,
+"prior": 1,
+"delta": 43,
+"weeks": [
+0,
+0,
+0,
+0,
+1,
+0,
+0,
+0,
+0,
+7,
+14,
+23
+]
+},
+{
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 43,
+"recent": 44,
 "prior": 2,
-"delta": 41,
+"delta": 42,
 "weeks": [
 0,
 0,
@@ -636,7 +663,7 @@
 1,
 11,
 4,
-27
+28
 ]
 },
 {
@@ -658,27 +685,6 @@
 9,
 6,
 20
-]
-},
-{
-"tag": "방글라데시",
-"label_en": "bangladesh",
-"recent": 37,
-"prior": 1,
-"delta": 36,
-"weeks": [
-0,
-0,
-0,
-0,
-1,
-0,
-0,
-0,
-0,
-7,
-14,
-16
 ]
 },
 {
@@ -1037,6 +1043,190 @@
 ],
 "articles": [
 {
+"id": "ff5b66cfb5e55f01",
+"d": "2026-09-13",
+"t": "11월 Ctg에 미국 면화 창고 개장",
+"o": "US cotton warehouse to open in Ctg in Nov",
+"u": "https://textilefocus.com/us-cotton-warehouse-to-open-in-ctg-in-nov/",
+"s": "The country’s textile mills would be able to buy US cotton locally from November, as the first privately operated US cotton warehouse in Bangladesh is set to open at Anwara in Chattogram, reducing sourcing lead times and potentially lowering procurement costs. The AmeriBangla US Cotton Warehouse is ",
+"c": "MATERIAL",
+"x": "The country’s textile mills would be able to buy US cotton locally from November, as the first privately operated US cotton warehouse in Bangladesh is set to open at Anwara in Chattogram, reducing sourcing lead times and potentially lowering procurement costs. The AmeriBangla US Cotton Warehouse is scheduled to begin operations on November 18 at a leased facility near the government-designated Free Trade Zone, with an initial inventory of 80-100 tonnes. AmeriBangla Corporation, led by Bangladeshi-American entrepreneur Aswar Rahman, is establishing the warehouse as part of a broader initiative to strengthen the supply chain between US cotton producers and Bangladesh’s textile and apparel industry. ‘We are planning to launch operations on 18 November. Around 100 tonnes of cotton have already left a US port for Bangladesh,’ Aswar, chief executive officer of AmeriBangla, said in an interview with New Age. He also said that the company planned to start with three shipments of US cotton and gradually increase inventory according to demand. The initiative is being implemented with a local partner. The warehouse would allow spinning mills to purchase cotton from locally held stocks instead of arranging individual imports and waiting for shipments to arrive. US cotton imports have already been rising. Bangladesh imported US cotton worth $346 million in financial year 2024-25, up from $278 million in FY24, accounting for about 10 percent of the country’s total cotton imports. Aswar Rahman said that the industry leaders believed imports of US cotton could eventually reach $2 billion a year if the country can take advantage of emerging trade opportunities with the United States. He also said that direct sourcing from US farmers and ginners would allow it to offer cotton at competit",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/US-Cotton.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "fc44081fdb49f725",
+"d": "2026-09-13",
+"t": "BCCCI는 중국에서 훈련할 NITER 학생들을 위한 출발 전 리셉션을 주최합니다.",
+"o": "BCCCI hosts pre-departure reception for NITER students set to train in China",
+"u": "https://textilefocus.com/bccci-hosts-pre-departure-reception-for-niter-students-set-to-train-in-china/",
+"s": "The Bangladesh China Chamber of Commerce & Industry (BCCCI) hosted a pre-departure reception on 12 September 2026 at its Gulshan office for eight students of the National Institute of Textile Engineering and Research (NITER), selected for a technical training programme at Zhejiang Agricultural Busin",
+"c": "ETC",
+"x": "The Bangladesh China Chamber of Commerce & Industry (BCCCI) hosted a pre-departure reception on 12 September 2026 at its Gulshan office for eight students of the National Institute of Textile Engineering and Research (NITER), selected for a technical training programme at Zhejiang Agricultural Business College in China. Commerce Secretary Mr. Md. Ataur Rahman Khan, ndc, attended the programme as the chief guest and commended BCCCI President Mohd. Khorshed Alam for taking what he described as a timely and exemplary initiative to develop skilled manpower for Bangladesh’s textile sector. He said the initiative, undertaken personally by BCCCI President Mohd. Khorshed Alam, is a commendable and timely effort that could play a significant role in the development of Bangladesh and its textile sector. He said such initiatives by private-sector leaders create valuable opportunities for practical learning and should inspire other business leaders to undertake similar programmes in the national interest. The commerce secretary thanked BCCCI for organising the programme and expressed hope that the initiative would serve as a model for strengthening industry-academia collaboration and providing Bangladeshi students with greater international technical exposure. He also described the programme as a practical step towards bridging the gap between policy discussions and implementation, saying that Bangladesh’s future industrial competitiveness would increasingly depend on skilled human resources, hands-on learning and a more business-friendly environment. Speaking at the programme, BCCCI President Mr. Mohd. Khorshed Alam said the initiative reflects the chamber’s commitment to developing Bangladesh’s future textile professionals through international exposure and hands-on learning. Dra",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/bcci.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "83eb66a94401af6b",
+"d": "2026-09-13",
+"t": "K-뷰티, '모래 위의 집 되나' …더마 경쟁 ‘기술력’ 시험대",
+"o": "K-뷰티, '모래 위의 집 되나' …더마 경쟁 ‘기술력’ 시험대",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148525",
+"s": "K-뷰티가 글로벌 시장에서 전례 없는 성장세를 이어가고 있다. 수출은 연이어 역대 최대치를 경신하고 있으며 미국과 유럽 등 주요 시장에서는 신흥 한국 브랜드들이 빠르게 유통망을 넓히고 있다. 일부 브랜드와 제품에 국한됐던 K-뷰티는 이제 글로벌 시장에서 하나의 독립적인 뷰티 카테고리로 자리 잡고 있다.산업의 외형이 빠르게 커진 만큼 성장의 지속 가능성도 점검할 시점이다. K-뷰티는 새로운 성분과 제형을 빠르게 제품에 적용하고 발달한 OEM·ODM 생태계를 활용해 단기간에 제품을 출시하는 ‘속도’를 핵심 경쟁력으로 성장해왔다.대규모",
+"c": "RETAIL",
+"x": "K-뷰티가 글로벌 시장에서 전례 없는 성장세를 이어가고 있다. 수출은 연이어 역대 최대치를 경신하고 있으며 미국과 유럽 등 주요 시장에서는 신흥 한국 브랜드들이 빠르게 유통망을 넓히고 있다. 일부 브랜드와 제품에 국한됐던 K-뷰티는 이제 글로벌 시장에서 하나의 독립적인 뷰티 카테고리로 자리 잡고 있다.산업의 외형이 빠르게 커진 만큼 성장의 지속 가능성도 점검할 시점이다. K-뷰티는 새로운 성분과 제형을 빠르게 제품에 적용하고 발달한 OEM·ODM 생태계를 활용해 단기간에 제품을 출시하는 ‘속도’를 핵심 경쟁력으로 성장해왔다.대규모",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148525_130309_350_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 8,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "7b6093c98e6789bb",
+"d": "2026-09-13",
+"t": "‘안전협약’ 서명한 글로벌 패션기업, 300개 넘어섰다",
+"o": "‘안전협약’ 서명한 글로벌 패션기업, 300개 넘어섰다",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148523",
+"s": "글로벌 패션업계의 공급망 안전 기준이 한 단계 높아지고 있다. ‘섬유·의류산업 보건·안전을 위한 국제협약(International Accord for Health and Safety in the Textile and Garment Industry·이하 국제안전협약)’에 참여한 글로벌 브랜드와 유통기업이 누적 300개사에 도달했다. 현재 서명사에는 H&M그룹, 인디텍스, 아디다스그룹, 마크&스펜서, PVH, C&A, 베스트셀러, 부후그룹 등 글로벌 패션·유통기업들이 포함돼 있다. 이들 기업은 26개국에 본사를 두고 있으며 방글라데시와",
+"c": "MATERIAL",
+"x": "글로벌 패션업계의 공급망 안전 기준이 한 단계 높아지고 있다. ‘섬유·의류산업 보건·안전을 위한 국제협약(International Accord for Health and Safety in the Textile and Garment Industry·이하 국제안전협약)’에 참여한 글로벌 브랜드와 유통기업이 누적 300개사에 도달했다. 현재 서명사에는 H&M그룹, 인디텍스, 아디다스그룹, 마크&스펜서, PVH, C&A, 베스트셀러, 부후그룹 등 글로벌 패션·유통기업들이 포함돼 있다. 이들 기업은 26개국에 본사를 두고 있으며 방글라데시와",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148523_130307_014_v150.jpg",
+"g": [
+"방글라데시"
+],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [
+"pvh"
+],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "79321024972827c9",
+"d": "2026-09-13",
+"t": "남동대학교의 스마트 의료 조끼가 2026년 Bangladesh 혁신 박람회에서 상위 50대 혁신에 선정되었습니다.",
+"o": "Southeast University’s Smart Medical Vest Selected Among Top 50 Innovations at Bangladesh Innovation Fair 2026",
+"u": "https://textilefocus.com/southeast-universitys-smart-medical-vest-selected-among-top-50-innovations-at-bangladesh-innovation-fair-2026/",
+"s": "Md. Eanamul Haque Nizam, Assistant Professor in the Department of Textile Engineering at Southeast University, is participating in the Bangladesh Innovation Fair 2026 with an innovative Smart Medical Vest developed by a university research team. Among approximately 600 ideas submitted from across Ba",
+"c": "ETC",
+"x": "Md. Eanamul Haque Nizam, Assistant Professor in the Department of Textile Engineering at Southeast University, is participating in the Bangladesh Innovation Fair 2026 with an innovative Smart Medical Vest developed by a university research team. Among approximately 600 ideas submitted from across Bangladesh, the Smart Medical Vest was selected as one of the Top 50 Innovations after reviewers evaluated it. The research team led by Md. Eanamul Haque Nizam, with Mr. Md. Abir Abbas, an alumnus of the Department of Textile Engineering, and Jannatul Naima, an alumna of the department. The vest is designed to provide continuous patient monitoring, supporting telemedicine, remote treatment, and home-based patient care. MDPI’s journal Textiles has already accepted the concept for publication, and the innovation is currently in the provisional patent stage. The achievement highlights the growing potential of textile engineering and smart textile research in healthcare and demonstrates Southeast University’s commitment to innovation. With continued research and development, Southeast University could emerge as a leading textile research and innovation hub for Bangladesh’s future. The post Southeast University’s Smart Medical Vest Selected Among Top 50 Innovations at Bangladesh Innovation Fair 2026 appeared first on Textile Focus .",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/WhatsApp-Image-2026-09-13-at-6.58.26-PM-1-1.jpeg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "28219a429404256b",
+"d": "2026-09-13",
+"t": "Solaric, IRIS 패브릭과 550kWp 옥상 태양광 발전소 계약 체결",
+"o": "Solaric Signs Agreement for 550 kWp Rooftop Solar Plant with IRIS Fabrics",
+"u": "https://textilefocus.com/solaric-signs-agreement-for-550-kwp-rooftop-solar-plant-with-iris-fabrics/",
+"s": "Solaric Limited has signed an agreement with IRIS Fabrics Ltd., a concern of IRIS Group, to develop a 550 kWp CapEx rooftop solar power plant, marking another step toward renewable energy adoption and sustainable industrial development in Bangladesh. The project is expected to help IRIS Fabrics redu",
+"c": "FABRIC",
+"x": "Solaric Limited has signed an agreement with IRIS Fabrics Ltd., a concern of IRIS Group, to develop a 550 kWp CapEx rooftop solar power plant , marking another step toward renewable energy adoption and sustainable industrial development in Bangladesh. The project is expected to help IRIS Fabrics reduce energy costs, improve operational efficiency and strengthen its use of renewable energy for greener manufacturing. The rooftop solar installation will contribute to the company’s efforts to adopt more sustainable and cost-effective energy solutions. The agreement was supported by the strategic leadership of Engr. Naznin Akther, Director – Business Development, Solaric Limited, and Nasir Ahmed, Director & CTO, Solaric Limited , whose direction continues to support the company’s industrial solar initiatives. Istiak Islam, Manager – Business Development, Solaric Limited , played a key role in leading the engagement and developing the collaboration with IRIS Fabrics Ltd. Solaric’s engineering team, including Md. Sayed Mortoza, Assistant Manager – Design & Optimization; Minhaz Ahmed, Engineer – Design & Optimization; and Hisabur Fahim, Assistant Engineer – Design & Optimization , also supported the project’s technical development and design. The collaboration reflects the growing interest among Bangladesh’s textile and manufacturing industries in rooftop solar solutions as companies seek to manage energy costs while improving their environmental performance. For energy-intensive industries such as textiles and garments, reliable and cost-efficient electricity is increasingly important for maintaining uninterrupted production and international competitiveness. Rooftop solar gives manufacturers an opportunity to reduce daytime electricity costs while supporting their sustainabil",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Solaric-Group.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 14,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "19e9e6e2b41e2811",
+"d": "2026-09-13",
+"t": "아르. Md. Mahamudur Rahman Papon은 특히 산업 부문에서 지속 가능한 건축 및 건설에 필요한 포괄적인 서비스를 제공합니다.",
+"o": "Ar. Md. Mahamudur Rahman Papon provides comprehensive services required for sustainable Architecture and construction specially in the Industrial Sector",
+"u": "https://textilefocus.com/ar-md-mahamudur-rahman-papon-provides-comprehensive-services-required-for-sustainable-architecture-and-construction-specially-in-the-industrial-sector/",
+"s": "‘Built Environment’. Alongside his architectural practice, he has built a strong foundation in practical and research-based solutions by earning Master’s Degrees in Environmental Science and Disaster Management. He has also completed postgraduate-level training in Policy Analysis and Strategic Manag",
+"c": "ETC",
+"x": "‘Built Environment’. Alongside his architectural practice, he has built a strong foundation in practical and research-based solutions by earning Master’s Degrees in Environmental Science and Disaster Management. He has also completed postgraduate-level training in Policy Analysis and Strategic Management. He is a regular “Member” of the Institute of Architects Bangladesh (IAB) for more than 13 years. In an exclusive conversation with Textile Focus, Architect Md. Mahamudur Rahman Papan shares his insights on Bangladesh’s growing green transformation in the industrial sector, the evolution of sustainable architecture in the textile and RMG industry, and the role of eco-friendly design in reducing environmental impact. He also discusses EDCBD’s experience in developing sustainable industrial projects, its specialized architectural and environmental consultancy services, and his vision of advancing Bangladesh’s built environment toward net-zero emissions, biodiversity conservation, and climate-resilient development. Textile Focus: Bangladesh currently has over 300 LEED-certified factories. How do you view this ‘green transformation’ or eco-friendly shift within Bangladesh’s Industrial Sector? Md. Mahamudur Rahman Papan: Bangladesh’s industrial sector is moving beyond regulatory compliance toward global environmental leadership. With over 300 LEED-certified factories, sustainability is now seen as a competitive advantage rather than a burden. Adopting passive architecture, efficient infrastructure, and advanced cooling technologies is reducing carbon emissions and operational costs while improving worker health and productivity. This green transformation positions Bangladesh as a global benchmark for sustainable industrialization. Textile Focus: How many projects have you co",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Architect-Md.-Mahamudur-Rahman-Papon.jpeg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "18dc869484cc5cf7",
+"d": "2026-09-13",
+"t": "새로운 시스템 등급의 재활용 면 섬유",
+"o": "New system grades recycled cotton fibres",
+"u": "https://apparelinsider.com/new-system-grades-recycled-cotton-fibres/",
+"s": "USTER – Textile technology specialist Uster has developed a new assessment system which gives an A to D grading for recycled cotton fibres. The tool is designed to help recyclers, spinners and brands determine how mechanically recycled cotton can be used in yarn production. The post New system grade",
+"c": "MATERIAL",
+"x": "USTER – Textile technology specialist Uster has developed a new assessment system which gives an A to D grading for recycled cotton fibres. The tool is designed to help recyclers, spinners and brands determine how mechanically recycled cotton can be used in yarn production. This is Premium Content Only users with Online and Print subscription can access this. If you are a Free Subscriber, click here to upgrade. If you already have Online or Print subscription Login To Unlock The Content! Remember Me Lost your password? Don't have an account? Register The post New system grades recycled cotton fibres appeared first on Apparel Insider .",
+"i": "https://apparelinsider.com/wp-content/uploads/2024/09/shutterstock_2282512163-1-1-scaled.jpg",
+"g": [
+"리사이클"
+],
+"m": "Apparel Insider",
+"r": "해외",
+"v": 16,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Apparel Insider"
+]
+},
+{
 "id": "e4f34aec904b2a97",
 "d": "2026-09-12",
 "t": "Intertextile 상하이 홈 텍스타일 – 2026년 가을 에디션, 트렌드 주도 혁신을 위한 아시아 최고의 허브로 마무리",
@@ -1106,6 +1296,50 @@
 "d": "2026-09-12",
 "t": "전통의 색과 손맛을 현대적으로 풀다, 부천대 섬유패션비즈니스과",
 "o": "전통의 색과 손맛을 현대적으로 풀다, 부천대 섬유패션비즈니스과",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148517",
+"s": "부천대학교 섬유패션비즈니스과는 디자인하우스가 주최한 마곡 전시에 참여해 학생들이 직접 기획하고 제작한 다양한 섬유패션 작품을 전시했다. 전시는 9일부터 13일까지다.이번 전시에서는 전통적인 색감과 문양을 현대적인 생활소품에 접목한 작품들이 눈길을 끌었다. 오방색을 연상시키는 강렬한 색상의 스트라이프 원단을 활용한 주머니와 가방을 비롯해 노리개 형태의 참 장식품과 뜨개 인형, 생활소품 등 학생들의 개성이 담긴 작품들이 다양하게 전시됐다.특히 전통적인 직물의 분위기에 현대적인 색채와 디자인을 더한 패션소품은 전통과 현대가 자연스럽게 어",
+"c": "FABRIC",
+"x": "부천대학교 섬유패션비즈니스과는 디자인하우스가 주최한 마곡 전시에 참여해 학생들이 직접 기획하고 제작한 다양한 섬유패션 작품을 전시했다. 전시는 9일부터 13일까지다.이번 전시에서는 전통적인 색감과 문양을 현대적인 생활소품에 접목한 작품들이 눈길을 끌었다. 오방색을 연상시키는 강렬한 색상의 스트라이프 원단을 활용한 주머니와 가방을 비롯해 노리개 형태의 참 장식품과 뜨개 인형, 생활소품 등 학생들의 개성이 담긴 작품들이 다양하게 전시됐다.특히 전통적인 직물의 분위기에 현대적인 색채와 디자인을 더한 패션소품은 전통과 현대가 자연스럽게 어",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148517_130285_3457_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "937a23cf41c9b7af",
+"d": "2026-09-12",
+"t": "Bangladesh의 원사가 어떻게 날카로운 산업 단층을 노출시켰는가",
+"o": "How Bangladesh’s yarn curbs exposed sharp industry fault lines",
+"u": "https://news.google.com/rss/articles/CBMiswFBVV95cUxOV3NiT25xUmFrbXpLbm5kd3JGQmpNaHp4cm1wMk56VG5EWFJBQ3ZNVHVvZThiQVNRYVcydXNnclVRc2szaTFrb05yTlhvZ05admJMWVZzSTlzMjBlczlOcjNlX256SXhGUVpSYjVNVmx5RTByc3BxSXg4M0FsUWF5TzdpNUtfdGtRZTl1LWF1QVBuY3pVbkFGRXBLUlQzeUdGOTF3VEVtUTVvaWprdUQxSkRvQQ?oc=5",
+"s": "How Bangladesh’s yarn curbs exposed sharp industry fault lines fibre2fashion.com",
+"c": "YARN",
+"x": "How Bangladesh’s yarn curbs exposed sharp industry fault lines fibre2fashion.com",
+"i": "",
+"g": [
+"방글라데시"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "935b71fcc8a79910",
+"d": "2026-09-12",
+"t": "부천대 섬유패션비즈니스과, 전통의 색과 손맛을 현대적으로 풀다",
+"o": "부천대 섬유패션비즈니스과, 전통의 색과 손맛을 현대적으로 풀다",
 "u": "http://www.ktnews.com/news/articleView.html?idxno=148517",
 "s": "부천대학교 섬유패션비즈니스과는 디자인하우스가 주최한 마곡 전시에 참여해 학생들이 직접 기획하고 제작한 다양한 섬유패션 작품을 전시했다. 전시는 9일부터 13일까지다.이번 전시에서는 전통적인 색감과 문양을 현대적인 생활소품에 접목한 작품들이 눈길을 끌었다. 오방색을 연상시키는 강렬한 색상의 스트라이프 원단을 활용한 주머니와 가방을 비롯해 노리개 형태의 참 장식품과 뜨개 인형, 생활소품 등 학생들의 개성이 담긴 작품들이 다양하게 전시됐다.특히 전통적인 직물의 분위기에 현대적인 색채와 디자인을 더한 패션소품은 전통과 현대가 자연스럽게 어",
 "c": "FABRIC",
@@ -1664,11 +1898,12 @@
 "m": "한국섬유신문",
 "r": "국내",
 "v": 8,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"한국섬유신문"
+"한국섬유신문",
+"주제검색 · 국내소재"
 ]
 },
 {
