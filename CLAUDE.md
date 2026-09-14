@@ -71,6 +71,8 @@
 - DD+대장 FL 우선·Style 보조 병합. 개발진행→입고대기(READY)→창고보관→소진/폐기. 입고 시 R&D No. 자동 채번. 웹상태=IDB `fabricOverrides`, 이력=`fabricEvents`.
 - **입고 대기 판정은 개발처로 갈린다**(`statusFromRecord`). GD는 YDS 수취일, 국내·생산은 Received date다. 국내는 YDS 공정이 없어 그 칸이 비활성이라 YDS만 보면 영영 안 올라온다. 대장 '현황' 시트는 READY로 올리지 않는다. 창고에서 '직접 추가'한 웹 등록 행만 예외.
 - 목록에서 빼는 '선택 삭제'는 `REMOVED` 오버라이드로 감추는 것이다. 원본은 지우지 않는다. 폐기와 다르다.
+- Rack No.(`src/data/warehouse-rack.ts`): 창고팀 선반배치도 기준 통합원단부 전용 rack은 K열 9개, L열 10개, rack당 3칸(위에서부터 1~3)이고 형식은 `K-1-1`이다. 원단을 입고 순서가 아니라 빈 칸에 넣기 위한 번호라 같은 칸을 여러 원단이 쓸 수 있다. 원단별 상태(`FabricLedgerOverride.rackNo`)에만 저장한다. `applyFabricAction`은 도착 상태가 창고보관이면 이전 값을 물려주고 창고를 떠나면(폐기, 소진, 입고 취소) 비운다. `saveFabricFields`도 값을 물려준다. **override를 새로 만드는 곳에 rackNo를 빠뜨리면 창고 동작마다 번호가 지워진다.** 창고보관 탭에서만 열이 보이고 더블클릭으로 입력한다. 지우기는 두 가지다. Rack No. 칸을 선택하고 Delete·Backspace(여러 영역 포함, `saveFabricRackNos`로 한 번에 저장), 또는 추천 목록 맨 위 `선택 안함`(`RACK_NONE_LABEL`)을 고르고 확정한다. 여러 원단을 원단마다 따로 저장하면 앞 저장을 뒤 저장이 덮어쓰므로 묶어서 저장한다. 입고대기 탭은 R&D No., 재고, 입고확인 고정 열을 숨긴다.
+- 출고 요청 메일(C형, `OutboundRequestMailDialog`, `src/data/outbound-request-mail.ts`): 창고보관 탭에서 체크한 원단의 요청 수량·사업부·요청자·희망 컷팅일로 표를 클립보드에 복사하고 받는 사람 없는 Outlook 새 메일(`mailto:`)을 연다. **자동 발송이 아니다.** 받는 사람 주소는 공개 저장소라 코드·데이터에 넣지 않고 사람이 입력한다. 요청 상태는 저장하지 않으며 실제 출고 기록은 정산관리팀 회신 뒤 기존 출고 버튼으로 남긴다. 회사 M365 메일 발송 권한(A안)은 2026-09-14 사내 보안 공지로 보류했다.
 - 웹 등록 행 key는 `sample.id` 기준이다. 배열 인덱스로 되돌리면 대장 재업로드 때 채번이 어긋난다.
 - 창고팀(정산관리팀) 보고 자료 내보내기: `src/data/warehouse-export.ts`. 시트 = `요약` + 일자별 `MM.DD` + `LIST`.
   **원본 양식을 행 단위로 재현한다.** 입고 목록과 출고완료 블록 사이 빈 줄이 일자별 2줄, 요약 1줄이다. 창고팀이 시트째 복사해 붙인다.
@@ -85,6 +87,12 @@
 ## TREND REPORT (`tools/trend`, `src/routes/TrendFabric.tsx`, `src/routes/TrendMacro.tsx`)
 - 파이썬 수집기가 `public/data/trend/{feed,kpi,status}.json`을 만들고 두 화면이 그 파일만 fetch한다. 서버·DB·AI 호출 없다.
 - 자동 실행, Secrets, 점수 튜닝, 제목 번역, 바이어 소스 등 **운영 상세는 전부 `tools/trend/README.md`에 있다.** 여기 옮겨 적지 말 것.
+
+## 계정 설정 (`src/components/auth/AccountSettingsDialog.tsx`, `src/data/auth.ts`)
+- 상단 바 계정 설정 버튼에서 비밀번호 변경과 로그인 이메일 변경을 한다. 둘 다 현재 비밀번호로 재인증(`reauthenticateWithCredential`)한 뒤 처리해 오래된 세션에서도 막히지 않는다.
+- 로그인 이메일 변경은 `verifyBeforeUpdateEmail`로 새 주소에 확인 링크를 보내고, 링크를 누른 뒤에 바뀐다. uid가 그대로라 승인 상태와 화면 권한이 유지된다.
+- 사내 보안 공지(2026-09-14, 외부 서비스는 개인 메일로 가입)에 따라 새 이메일로 회사 도메인은 막고, 회사 메일 계정 팀원에게 권고 문구와 알림 점을 띄운다. **소유자 계정은 이메일 변경을 잠근다.** 소유자 판정이 이메일 문자열(`OWNER_EMAIL`, firestore/storage rules)이라 바꾸면 소유자 권한이 사라진다.
+- `firestore.rules`는 `users/{uid}` 수정을 소유자만 허용한다. 팀원이 이메일을 바꿔도 사용자 목록의 이메일 필드는 옛 값이 남으므로 소유자가 갱신한다. 규칙은 바꾸지 않았다.
 
 ## 주간 백업 (`tools/backup`)
 - PC 작업 스케줄러가 매주 Firestore `state`를 앱 로그인 계정(Firebase Auth REST, 비밀번호는 Windows 자격 증명 관리자)으로 읽어 저장소 밖 폴더에 JSON·엑셀·zip을 남기고 Outlook으로 메일을 보낸다.

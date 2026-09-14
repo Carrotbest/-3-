@@ -1,11 +1,14 @@
 import { create } from "zustand"
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   signInWithEmailAndPassword,
   signOut,
   updatePassword,
   updateProfile,
+  verifyBeforeUpdateEmail,
   type User,
 } from "firebase/auth"
 import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore"
@@ -123,6 +126,32 @@ function friendlyAuthError(code: string): string {
   }
 }
 
+/** 계정 설정(비밀번호·로그인 이메일 변경) 창에서 쓰는 한글 오류 문구. */
+function accountActionError(code: string): string {
+  switch (code) {
+    case "auth/wrong-password":
+    case "auth/invalid-credential":
+    case "auth/invalid-login-credentials":
+      return "현재 비밀번호가 맞지 않습니다."
+    case "auth/weak-password":
+      return "새 비밀번호가 너무 약합니다. 8자 이상으로 입력하세요."
+    case "auth/invalid-email":
+      return "이메일 형식이 올바르지 않습니다."
+    case "auth/email-already-in-use":
+      return "이미 다른 계정이 쓰는 이메일입니다."
+    case "auth/too-many-requests":
+      return "시도가 너무 많습니다. 잠시 후 다시 시도하세요."
+    case "auth/network-request-failed":
+      return "네트워크 연결을 확인한 뒤 다시 시도하세요."
+    case "auth/requires-recent-login":
+      return "보안을 위해 로그아웃 후 다시 로그인한 뒤 시도하세요."
+    case "auth/operation-not-allowed":
+      return "이 작업은 현재 허용되지 않습니다. 관리자에게 문의하세요."
+    default:
+      return "요청을 처리하지 못했습니다. 잠시 후 다시 시도하세요."
+  }
+}
+
 export async function signIn(email: string, password: string): Promise<void> {
   useAuthStore.setState({ error: null })
   try {
@@ -161,8 +190,36 @@ export async function signOutUser(): Promise<void> {
   await signOut(auth)
 }
 
-/** 로그인한 사용자가 자신의 비밀번호를 변경한다. */
-export async function changeOwnPassword(newPassword: string): Promise<void> {
-  if (!auth.currentUser) throw new Error("로그인이 필요합니다.")
-  await updatePassword(auth.currentUser, newPassword)
+/** 민감한 계정 변경 전에 현재 비밀번호로 다시 확인한다. 오래된 로그인 세션에서도 막히지 않게 한다. */
+async function reauthenticate(currentPassword: string): Promise<User> {
+  const user = auth.currentUser
+  if (!user?.email) throw new Error("로그인이 필요합니다.")
+  await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, currentPassword))
+  return user
+}
+
+/** 로그인한 사용자가 자신의 비밀번호를 변경한다. 현재 비밀번호 확인 후 바꾼다. */
+export async function changeOwnPassword(currentPassword: string, newPassword: string): Promise<void> {
+  try {
+    const user = await reauthenticate(currentPassword)
+    await updatePassword(user, newPassword)
+  } catch (error) {
+    const code = (error as { code?: string }).code
+    throw new Error(code ? accountActionError(code) : (error as Error).message)
+  }
+}
+
+/**
+ * 로그인 이메일 변경을 요청한다. 새 주소로 확인 링크가 가고, 링크를 누른 뒤에 실제로 바뀐다.
+ * 계정 uid는 그대로라 승인 상태와 화면 권한이 유지된다. 확인 메일은 새(개인) 주소로만 간다.
+ * 소유자 판정은 이메일 문자열이라 소유자 계정은 화면에서 이 기능을 잠근다.
+ */
+export async function requestLoginEmailChange(currentPassword: string, newEmail: string): Promise<void> {
+  try {
+    const user = await reauthenticate(currentPassword)
+    await verifyBeforeUpdateEmail(user, newEmail.trim())
+  } catch (error) {
+    const code = (error as { code?: string }).code
+    throw new Error(code ? accountActionError(code) : (error as Error).message)
+  }
 }

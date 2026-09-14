@@ -44,6 +44,8 @@ export interface FabricLedgerItem {
   intakeAt: string
   /** 창고팀이 실물을 확인한 시각. 대장에서 셀을 회색으로 칠하던 표시를 기록으로 남긴 것이다. */
   confirmedAt: string
+  /** 창고 rack 칸 번호(K-1-1 형식). 원단별 상태(override)에만 저장한다. */
+  rackNo?: string
   lastMovedAt: string
   lastOutbound: FabricLedgerOutbound | null
   sourceOrder: number | null
@@ -520,6 +522,7 @@ export function buildFabricLedger(
       ...item,
       status: override.status,
       storageNo: override.storageNo ?? item.storageNo,
+      rackNo: override.rackNo,
       note: override.note ?? item.note,
       updatedAt: override.updatedAt,
       updatedBy: override.updatedBy,

@@ -791,6 +791,7 @@ export async function saveFabricFields(item: FabricLedgerItem, patch: Record<str
     status: previous?.status ?? item.status,
     storageNo: previous?.storageNo ?? (item.storageNo || undefined),
     yds: previous?.yds ?? (item.yds ?? undefined),
+    rackNo: previous?.rackNo,
     note: previous?.note,
     fields: { ...previous?.fields, ...patch },
     updatedAt: new Date().toISOString(),
@@ -799,6 +800,52 @@ export async function saveFabricFields(item: FabricLedgerItem, patch: Record<str
   const fabricOverrides = [override, ...state.fabricOverrides.filter((entry) => entry.key !== item.key)]
   setAppState({ fabricOverrides })
   await saveCache("fabricOverrides", fabricOverrides)
+}
+
+/**
+ * 창고보관 원단의 rack 칸 번호를 저장한다. 빈 문자열이면 지정 해제다.
+ * 형식 검사는 호출부(`normalizeRackNo`)가 한다. 원단별 상태 한 건만 바꾸고 다른 값은 그대로 물려준다.
+ */
+export async function saveFabricRackNo(item: FabricLedgerItem, rackNo: string): Promise<void> {
+  await saveFabricRackNos([{ item, rackNo }])
+}
+
+/**
+ * 여러 원단의 rack 번호를 한 번에 저장한다(Delete로 여러 칸 지우기 등).
+ * 원단마다 따로 저장하면 앞 저장을 뒤 저장이 덮어쓸 수 있어 새 배열을 한 번만 만든다.
+ */
+export async function saveFabricRackNos(entries: ReadonlyArray<{ item: FabricLedgerItem; rackNo: string }>): Promise<number> {
+  const state = useAppStore.getState()
+  const byKey = new Map(state.fabricOverrides.map((entry) => [entry.key, entry]))
+  const updatedAt = new Date().toISOString()
+  let changed = 0
+  for (const { item, rackNo } of entries) {
+    const previous = byKey.get(item.key)
+    const nextRack = rackNo.trim() || undefined
+    if (previous ? previous.rackNo === nextRack : !nextRack) continue
+    byKey.set(item.key, {
+      key: item.key,
+      status: previous?.status ?? item.status,
+      storageNo: previous?.storageNo ?? (item.storageNo || undefined),
+      yds: previous?.yds ?? (item.yds ?? undefined),
+      rackNo: nextRack,
+      note: previous?.note,
+      fields: previous?.fields,
+      updatedAt,
+      updatedBy: "관리자",
+    })
+    changed += 1
+  }
+  if (!changed) return 0
+  const touched = new Set(entries.map((entry) => entry.item.key))
+  const fabricOverrides = [
+    ...state.fabricOverrides.filter((entry) => touched.has(entry.key)).map((entry) => byKey.get(entry.key) ?? entry),
+    ...[...byKey.values()].filter((entry) => touched.has(entry.key) && !state.fabricOverrides.some((existing) => existing.key === entry.key)),
+    ...state.fabricOverrides.filter((entry) => !touched.has(entry.key)),
+  ]
+  setAppState({ fabricOverrides })
+  await saveCache("fabricOverrides", fabricOverrides)
+  return changed
 }
 
 export async function applyFabricAction(input: ApplyFabricActionInput): Promise<void> {
@@ -843,6 +890,8 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
     storageNo: resolvedToStatus === "READY" ? undefined : input.storageNo?.trim() || previous?.storageNo,
     // 같은 이유로 보유 재고도 비운다. 남겨 두면 입고한 적 없는 행에 재고가 붙어 있게 된다.
     yds: resolvedToStatus === "READY" || input.clearYds ? undefined : yds,
+    // rack 칸은 창고보관 상태에서만 차지한다. 입고확인·재고수정·출고는 그대로 두고, 창고를 떠나면(폐기·소진·입고 취소) 칸을 비운다.
+    rackNo: resolvedToStatus === "WAREHOUSE" ? previous?.rackNo : undefined,
     note: input.note?.trim() || previous?.note,
     // 원단 상세에서 고친 값은 창고 동작(입고·확인·출고 등)과 무관하다. 그대로 물려준다.
     fields: previous?.fields,

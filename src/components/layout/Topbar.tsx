@@ -1,6 +1,8 @@
-import { LogOut, Menu } from "lucide-react"
+import { useState } from "react"
+import { LogOut, Menu, UserCog } from "lucide-react"
 import { useLocation } from "react-router-dom"
 
+import { AccountSettingsDialog, COMPANY_EMAIL_DOMAIN } from "@/components/auth/AccountSettingsDialog"
 import { Button } from "@/components/ui/button"
 import { routeDefinitions } from "@/routes/route-config"
 import { signOutUser, useAuthStore } from "@/data/auth"
@@ -14,7 +16,10 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
   const user = useAuthStore((state) => state.user)
   const isOwner = useAuthStore((state) => state.isOwner)
   const approval = useAuthStore((state) => state.approval)
+  const [accountOpen, setAccountOpen] = useState(false)
   const canWrite = isOwner || approval === "approved"
+  // 사내 보안 공지(2026-09-14): 외부 서비스는 개인 메일 사용 권장. 소유자 외 회사 메일 계정에 알림 점을 띄운다.
+  const suggestPersonalEmail = !isOwner && COMPANY_EMAIL_DOMAIN.test(user?.email ?? "")
   const currentRoute = routeDefinitions.find((definition) => definition.path === pathname)
     ?? [...routeDefinitions]
       .sort((left, right) => right.path.length - left.path.length)
@@ -66,12 +71,25 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
             type="button"
             variant="ghost"
             size="icon"
+            aria-label="계정 설정"
+            title={suggestPersonalEmail ? "계정 설정 · 개인 메일 전환 권장" : "계정 설정"}
+            className="relative"
+            onClick={() => setAccountOpen(true)}
+          >
+            <UserCog aria-hidden="true" />
+            {suggestPersonalEmail ? <span aria-hidden="true" className="absolute right-1.5 top-1.5 size-2 rounded-full bg-[var(--warning)]" /> : null}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
             aria-label="로그아웃"
             title="로그아웃"
             onClick={() => { void signOutUser() }}
           >
             <LogOut aria-hidden="true" />
           </Button>
+          <AccountSettingsDialog open={accountOpen} onOpenChange={setAccountOpen} />
         </div>
       ) : null}
     </header>

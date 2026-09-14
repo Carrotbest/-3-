@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode , type CSSProperties } from "react"
 import * as Popover from "@radix-ui/react-popover"
-import { ArchiveRestore, Copy, DatabaseBackup, FileDown, Info, ListX, Loader2, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
+import { ArchiveRestore, Copy, DatabaseBackup, FileDown, Info, ListX, Loader2, Mail, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
+import { OutboundRequestMailDialog } from "@/components/warehouse/OutboundRequestMailDialog"
+import { normalizeRackNo, RACK_FORMAT_HINT, RACK_NONE_LABEL, RACK_POSITIONS } from "@/data/warehouse-rack"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Badge } from "@/components/ui/badge"
@@ -32,7 +34,7 @@ import { fmtDateFull, fmtDateMd } from "@/data/format"
 import type { FabricLedgerStatus } from "@/data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
 import { useInView } from "@/lib/useInView"
-import { addManualIntake, updateManualIntake, applyFabricAction, confirmWarehouseBaseline, removeFabricRows, useAppStore } from "@/store/useAppStore"
+import { addManualIntake, updateManualIntake, applyFabricAction, confirmWarehouseBaseline, removeFabricRows, saveFabricRackNo, saveFabricRackNos, useAppStore } from "@/store/useAppStore"
 
 type WarehouseTab = "READY" | "WAREHOUSE" | "HISTORY"
 type DisposalReason = "용량 초과" | "품질 불량" | "개발 중단"
@@ -51,7 +53,7 @@ const TAB_META: Record<WarehouseTab, { label: string; description: string }> = {
   HISTORY: { label: "이력", description: "전량 소진 또는 폐기된 원단" },
 }
 
-type WarehouseColumnId = "storageNo" | "styleNo" | "flNo" | "owner" | "stock" | "confirm"
+type WarehouseColumnId = "storageNo" | "styleNo" | "flNo" | "owner" | "stock" | "confirm" | "rackNo"
   | "season" | "buyer" | "category" | "requestDate" | "completedAt"
   | "originalRef" | "planner" | "yarnDetail" | "construction" | "weight" | "color" | "dyeing" | "dueDate"
   | "yarnMill" | "yarnDate" | "knittingMill" | "knittingDate" | "dyeingMill" | "dyeingDate" | "finishingMill" | "finishingDate"
@@ -79,6 +81,8 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
     { id: "storageNo", label: "R&D No.", width: 86 },
     { id: "stock", label: "재고", width: 96 },
     { id: "confirm", label: "입고확인", width: 76 },
+    // 빈 칸을 찾아 넣는 rack 관리(창고팀 협의 2026-09-14). 창고보관 탭에서만 보인다.
+    { id: "rackNo", label: "Rack No.", width: 84 },
   ] },
   { key: "ledger", label: "대장", color: "var(--chart-1)", columns: [
     { id: "season", label: "Season", width: 72 },
@@ -313,6 +317,7 @@ function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
     case "owner": return item.owner
     case "stock": return item.yds === null ? "" : `${item.balance ?? 0}/${item.yds}`
     case "confirm": return item.status !== "WAREHOUSE" ? "" : item.confirmedAt ? "확인" : "미확인"
+    case "rackNo": return item.rackNo ?? ""
     case "season": return first(item.season, led?.seasonRaw)
     case "buyer": return item.buyer
     case "category": return first(item.category, led?.categoryRaw)
@@ -403,6 +408,9 @@ function StatusMixBar({ counts, total, onPick }: { counts: Record<WarehouseTab, 
 
 export function Warehouse() {
   const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
+  // 출고 요청 메일 초안(C형). 요청자 기본값은 로그인 표시 이름, 없으면 이메일 앞부분이다.
+  const [outboundMailOpen, setOutboundMailOpen] = useState(false)
+  const defaultRequester = useAuthStore((state) => state.user?.displayName || state.user?.email?.split("@")[0] || "")
   const records = useAppStore((state) => state.records)
   const samples = useAppStore((state) => state.completed)
   const overrides = useAppStore((state) => state.fabricOverrides)
@@ -582,7 +590,11 @@ export function Warehouse() {
       direction * cellValue(left, sortRule.col).localeCompare(cellValue(right, sortRule.col), "ko-KR", { numeric: true }))
   }, [rows, columnFilters, sortRule, tab, sequenceStart])
   const divisionSuggestions = useMemo(() => [...new Set(fabricEvents.map((event) => event.division?.trim()).filter((value): value is string => Boolean(value)))].sort((left, right) => left.localeCompare(right, "ko-KR", { numeric: true })), [fabricEvents])
-  const visibleGroups = COLUMN_GROUPS.filter((group) => !group.collapsible || openGroups[group.key as keyof typeof openGroups])
+  // 입고 대기에서는 R&D No., 재고, 입고확인이 아직 의미가 없어 고정 열을 숨긴다. Rack No.는 창고보관 탭에서만 보인다.
+  const visibleGroups = COLUMN_GROUPS
+    .filter((group) => !group.collapsible || openGroups[group.key as keyof typeof openGroups])
+    .map((group) => group.key !== "fixed" ? group : { ...group, columns: group.columns.filter((column) => tab !== "READY" && (column.id !== "rackNo" || tab === "WAREHOUSE")) })
+    .filter((group) => group.columns.length > 0)
   const visibleColumns = visibleGroups.flatMap((group) => group.columns)
   const fixedColumns = visibleColumns.filter((column) => COLUMN_GROUPS[0].columns.some((fixed) => fixed.id === column.id))
   const groupedColumns = visibleGroups.filter((group) => group.key !== "fixed")
@@ -833,6 +845,7 @@ export function Warehouse() {
   const cellRawValue = (item: FabricLedgerItem, id: WarehouseColumnId): string => {
     const led = item.sample?.ledger
     switch (id) {
+      case "rackNo": return item.rackNo ?? ""
       case "styleNo": return item.styleNo
       case "flNo": return item.flNo
       case "buyer": return item.buyer
@@ -852,6 +865,9 @@ export function Warehouse() {
 
   const coreCell = (item: FabricLedgerItem, id: WarehouseColumnId): ReactNode => {
     if (id === "storageNo") return <TextCell value={item.storageNo} mono />
+    if (id === "rackNo") return item.rackNo
+      ? <TextCell value={item.rackNo} mono />
+      : <span className="text-[10px] text-[var(--muted-foreground)]" title="더블클릭해서 Rack No. 입력">미지정</span>
     if (id === "styleNo") return <TextCell value={item.styleNo} mono />
     if (id === "flNo") return <TextCell value={item.flNo} mono />
     if (id === "owner") return <TextCell value={item.owner} />
@@ -950,10 +966,30 @@ export function Warehouse() {
   useEffect(() => {
     const stop = () => { cellDragRef.current = false }
     const onCopy = (event: globalThis.KeyboardEvent) => {
+      const active = document.activeElement
+      if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) return
+      // 팝업 창 안의 키는 표에 넘기지 않는다(다른 창에서 글자를 지우다 rack 번호가 지워지지 않게).
+      if (active instanceof HTMLElement && active.closest("[role=dialog]")) return
+      // Delete·Backspace: 창고보관 탭에서 선택 영역이 걸친 Rack No. 칸을 지운다. Ctrl+클릭으로 더한 영역도 포함한다.
+      if ((event.key === "Delete" || event.key === "Backspace") && tab === "WAREHOUSE" && allRangeRects.length) {
+        const rackCol = visibleColumns.findIndex((column) => column.id === "rackNo")
+        if (rackCol < 0) return
+        const targets = new Map<string, FabricLedgerItem>()
+        for (const area of allRangeRects) {
+          if (rackCol < area.left || rackCol > area.right) continue
+          for (let r = area.top; r <= area.bottom; r += 1) {
+            const target = visibleRows[r]
+            if (target?.rackNo && target.status === "WAREHOUSE") targets.set(target.key, target)
+          }
+        }
+        if (!targets.size) return
+        event.preventDefault()
+        void saveFabricRackNos([...targets.values()].map((target) => ({ item: target, rackNo: "" })))
+          .then((count) => { if (count) setSelectionNotice(`Rack No. ${count}건을 지웠습니다.`) })
+        return
+      }
       if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "c") return
       if (!rangeRect) return
-      const active = document.activeElement
-      if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return
       event.preventDefault()
       void copyRange()
     }
@@ -1199,20 +1235,34 @@ export function Warehouse() {
                     const cellActive = selectedCell?.row === item.key && selectedCell.col === column.id
                     const confirmed = Boolean(item.confirmedAt)
                     const manualId = item.sample?.sourceSheet === WEB_INTAKE_SHEET ? item.sample.id : undefined
-                    const editable = Boolean(manualId) && MANUAL_EDITABLE.has(column.id)
+                    // Rack No.는 대장 행이든 DD 행이든 창고보관 원단이면 모두 편집한다(원단별 상태에만 저장).
+                    const rackEditable = column.id === "rackNo" && item.status === "WAREHOUSE"
+                    const editable = rackEditable || (Boolean(manualId) && MANUAL_EDITABLE.has(column.id))
                     const editing = editable && editCell?.row === item.key && editCell.col === column.id
                     return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; if (event.ctrlKey || event.metaKey) { if (cellRange) setExtraCellRanges((current) => [...current, cellRange]) } else setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) { setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }) } setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
                       ? <input
                           autoFocus
                           defaultValue={String(cellRawValue(item, column.id) ?? "")}
                           className="h-7 w-full rounded-none border-0 bg-[var(--card)] px-1 text-xs text-[var(--foreground)] outline-none ring-2 ring-inset ring-[var(--ring)]"
-                          onBlur={(event) => { void updateManualIntake(manualId as string, column.id, event.target.value); setEditCell(null) }}
+                          list={rackEditable ? "warehouse-rack-positions" : undefined}
+                          onBlur={(event) => {
+                            if (rackEditable) {
+                              // 형식이 틀리면 저장하지 않고 알린다. 빈 값은 지정 해제다.
+                              const normalized = normalizeRackNo(event.target.value)
+                              if (normalized === null) setSelectionNotice(RACK_FORMAT_HINT)
+                              else void saveFabricRackNo(item, normalized)
+                            } else void updateManualIntake(manualId as string, column.id, event.target.value)
+                            setEditCell(null)
+                          }}
                           onKeyDown={(event) => {
+                            // 편집기 키가 표 단축키로 번지지 않게 막는다(CLAUDE.md 인라인 편집기 주의).
+                            if (event.key === "Escape" || event.key === "Enter" || event.key === "Tab") event.stopPropagation()
                             if (event.key === "Escape") { event.preventDefault(); setEditCell(null) }
-                            else if (event.key === "Enter" || event.key === "Tab") { event.preventDefault(); void updateManualIntake(manualId as string, column.id, event.currentTarget.value); setEditCell(null) }
+                            else if (event.key === "Enter" || event.key === "Tab") { event.preventDefault(); event.currentTarget.blur() }
                           }}
                         />
-                      : coreCell(item, column.id)}</TableCell>
+                      : coreCell(item, column.id)}
+                    {editing && rackEditable ? <datalist id="warehouse-rack-positions"><option value={RACK_NONE_LABEL} />{RACK_POSITIONS.map((position) => <option key={position} value={position} />)}</datalist> : null}</TableCell>
                   })}
                   <TableCell className="h-8 border-b border-[var(--border)] px-1.5 py-0 text-right" data-no-range onClick={(event) => event.stopPropagation()}>{actionCell(item)}</TableCell>
                 </TableRow>
@@ -1301,6 +1351,7 @@ export function Warehouse() {
         {tab === "READY" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("REMOVE", selectedRows)}><ListX />선택 삭제</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("CONFIRM", selectedRows)} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-600/40 dark:bg-emerald-500 dark:hover:bg-emerald-600"><PackageCheck />입고 확인</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" disabled={selectedRows.length !== 1} title={selectedRows.length === 1 ? undefined : "출고는 한 건씩 등록합니다."} onClick={() => openAction("OUTBOUND", selectedRows)}><Send />출고</Button> : null}
+        {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} title={selectedRows.length ? "선택한 원단의 컷팅·출고 요청 메일 초안을 만듭니다" : "요청할 원단을 먼저 선택하세요."} onClick={() => setOutboundMailOpen(true)}><Mail />출고 요청 메일</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("EXHAUST", selectedRows)}><PackageOpen />소진</Button> : null}
         {tab === "READY" || tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("DISPOSE", selectedRows)}><Trash2 />폐기</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("UNRECEIVE", selectedRows)}><PackageOpen />입고 대기로</Button> : null}
@@ -1333,6 +1384,8 @@ export function Warehouse() {
         <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--muted-foreground)] hover:bg-[var(--muted)]" onClick={() => { setExtraCellRanges([]); setCellRange(null); setCellMenu(null) }}>선택 해제</button>
       </div>
     </> : null}
+
+    <OutboundRequestMailDialog open={outboundMailOpen} onOpenChange={setOutboundMailOpen} items={selectedRows} defaultRequester={defaultRequester} />
 
     <Dialog open={exportOpen} onOpenChange={(open) => { if (!exportBusy) setExportOpen(open) }}>
       <DialogContent className="max-w-lg" showCloseButton={false}>
