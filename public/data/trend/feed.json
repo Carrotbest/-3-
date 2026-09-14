@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-14T23:35:14+00:00",
+"generated_at": "2026-09-14T23:56:46+00:00",
 "window_days": 120,
 "total": 802,
 "translated": 802,
@@ -777,8 +777,8 @@
 ]
 },
 {
-"tag": "T2T",
-"label_en": "textile-to-textile",
+"tag": "베트남",
+"label_en": "vietnam",
 "recent": 8,
 "prior": 0,
 "delta": 8,
@@ -791,9 +791,9 @@
 0,
 0,
 0,
-1,
 0,
-6,
+2,
+5,
 1
 ]
 },

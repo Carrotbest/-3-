@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-14T23:35:14+00:00",
+"generated_at": "2026-09-14T23:56:46+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3607,10 +3607,6 @@
 "source_url": "https://fred.stlouisfed.org/series/DEXKOUS",
 "points": [
 {
-"period": "2025-08",
-"value": 1388.999
-},
-{
 "period": "2025-09",
 "value": 1392.905
 },
@@ -3656,14 +3652,18 @@
 },
 {
 "period": "2026-08",
-"value": 1404.967
+"value": 1403.219
+},
+{
+"period": "2026-09",
+"value": 1350.121
 }
 ],
-"value": 1404.967,
-"period": "2026-08",
+"value": 1350.121,
+"period": "2026-09",
 "period_end": null,
-"prev": -5.5,
-"yoy": 1.1,
+"prev": -3.8,
+"yoy": -3.1,
 "stale": false
 },
 {
@@ -3753,10 +3753,6 @@
 "source_url": "https://fred.stlouisfed.org/series/CPIAPPSL",
 "points": [
 {
-"period": "2025-06",
-"value": 131.214
-},
-{
 "period": "2025-07",
 "value": 131.354
 },
@@ -3803,13 +3799,17 @@
 {
 "period": "2026-07",
 "value": 136.434
+},
+{
+"period": "2026-08",
+"value": 136.457
 }
 ],
-"value": 136.434,
-"period": "2026-07",
+"value": 136.457,
+"period": "2026-08",
 "period_end": null,
-"prev": 0.1,
-"yoy": 3.9,
+"prev": 0.0,
+"yoy": 3.6,
 "stale": false
 },
 {
