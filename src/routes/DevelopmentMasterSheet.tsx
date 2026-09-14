@@ -1,7 +1,7 @@
 import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
-import { CalendarDays, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
+import { CalendarDays, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, Link2, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, Unlink, X } from "lucide-react"
 import { Popover } from "radix-ui"
-import { Link } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,9 @@ import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
 import { fmtDate, fmtDateMd, normalizeDateInput, toDate } from "@/data/format"
 import { loadViewFlag, loadViewGroups, saveViewPref } from "@/data/view-prefs"
-import { ensureRequestLineIds, requestCandidates, requestToIntakeRecords } from "@/data/request-link"
+import { applyRequestLinks, buildLinkHelperGroups, defaultLinkPairs, ensureRequestLineIds, removeRequestLinks, requestCandidates, requestLinkIndex, requestToIntakeRecords, resolveRequestLink, type HelperGroup, type LinkPair } from "@/data/request-link"
+import { RequestLinkHelperDialog } from "@/components/dd/RequestLinkHelperDialog"
+import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED } from "@/data/range-tsv"
 import { dayToneText, holidayName } from "@/data/holidays"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
 import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical, type RequestOption, type RequestStyle } from "@/data/schema"
@@ -977,8 +979,10 @@ function EditorGroup({ label, color, columns, draft, onChange, optionsById, layo
 }
 
 export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope?: string | null }) {
+  const navigate = useNavigate()
   const records = useAppStore((state) => state.records)
   const requests = useAppStore((state) => state.requests)
+  const requestIndex = useMemo(() => requestLinkIndex(requests), [requests])
   const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
   const [fdsYdsOpen, setFdsYdsOpen] = useState(false)
   // 주간 보고 팝업. 전체와 담당별 탭을 두고, 탭마다 손질한 문장을 따로 들고 있는다.
@@ -1097,6 +1101,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [intakeError, setIntakeError] = useState<string | null>(null)
   const [requestPickerOpen, setRequestPickerOpen] = useState(false)
   const [requestPickerInitialReqId, setRequestPickerInitialReqId] = useState<string | undefined>()
+  const [linkRows, setLinkRows] = useState<DevRecord[] | null>(null)
   const [intakeRequest, setIntakeRequest] = useState<{ reqId: string; chart: string; garmentNo: string } | null>(null)
   const [attached, setAttached] = useState<Zaji | null>(null)
   const [attachError, setAttachError] = useState<string | null>(null)
@@ -1106,7 +1111,17 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [recentIntakeRows, setRecentIntakeRows] = useState<Set<string>>(() => new Set())
   const [editCell, setEditCell] = useState<{ row: string; col: string } | null>(null)
   const [editSeed, setEditSeed] = useState<string | undefined>(undefined)
-  const [range, setRange] = useState<{ anchor: CellRef; focus: CellRef } | null>(null)
+  type SelectionRange = { anchor: CellRef; focus: CellRef }
+  const [range, setRangeState] = useState<SelectionRange | null>(null)
+  // Ctrl+클릭으로 더한 영역. 활성 영역(range)은 마지막에 잡은 것이다.
+  const [extraRanges, setExtraRanges] = useState<SelectionRange[]>([])
+  // Ctrl+mousedown 뒤 이어지는 셀 click이 선택을 새로 잡아 추가 영역을 지우지 않게 한 번 건너뛴다.
+  const additiveClickRef = useRef(false)
+  // 새 선택을 잡는 모든 경로는 추가 영역을 비운다. 넓히기(extendTo)와 Ctrl 추가만 setRangeState를 직접 쓴다.
+  const setRange = (value: SelectionRange | null | ((current: SelectionRange | null) => SelectionRange | null)) => {
+    setExtraRanges((current) => current.length ? [] : current)
+    setRangeState(value)
+  }
   const [menu, setMenu] = useState<{ x: number; y: number; kind: "cells" | "bottom" } | null>(null)          // 우클릭 메뉴 위치
   const [undoStack, setUndoStack] = useState<DevRecord[][]>([])
   const [redoStack, setRedoStack] = useState<DevRecord[][]>([])
@@ -1126,6 +1141,10 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const dragAutoScrollFrameRef = useRef<number | null>(null)
   const [colWidths, setColWidths] = useState<Record<string, number>>(loadColumnWidths)
   const [confirmDelete, setConfirmDelete] = useState<DevRecord[] | null>(null)  // 행 삭제 확인
+  const blockedRequestLineIds = useMemo(() => {
+    const targets = new Set((linkRows ?? []).map(recordIdentity))
+    return new Set(records.flatMap((record) => !targets.has(recordIdentity(record)) && record.tech?.requestLink?.lineId ? [record.tech.requestLink.lineId] : []))
+  }, [linkRows, records])
   const zajiInputRef = useRef<HTMLInputElement>(null)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
   const gridScrollRef = useRef<HTMLDivElement>(null)
@@ -1425,7 +1444,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const colId = cell?.getAttribute("data-col-id") ?? null
     if (!colId) return
     if (event.shiftKey) extendTo(rowId, colId)
-    else setCellAnchor(rowId, colId)
+    else if (event.ctrlKey || event.metaKey) addCellAnchor(rowId, colId)
+    else { additiveClickRef.current = false; setCellAnchor(rowId, colId) }
     selectingRef.current = true
     startDragAutoScroll(event.clientX, event.clientY)
     setMenu(null)
@@ -1489,6 +1509,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const onUp = () => {
     // mouseup 에서 rAF를 먼저 취소해 포인터를 놓은 뒤 스크롤이 남지 않게 한다.
     stopDragAutoScroll()
+    // Ctrl+클릭 뒤 click 이벤트가 지나간 다음에 건너뛰기 표시를 푼다(드래그로 click이 안 온 경우 포함).
+    window.setTimeout(() => { additiveClickRef.current = false }, 0)
     const moveDrag = moveDragRef.current
     const moveTarget = movePreviewRef.current
     if (moveDrag) {
@@ -1531,14 +1553,45 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const rowIndexOf = useMemo(() => new Map(filtered.map((record, index) => [recordIdentity(record), index])), [filtered])
   const colIndexOf = useMemo(() => new Map(displayedColumns.map((column, index) => [column.id, index])), [displayedColumns])
 
-  /** 선택 사각형(행·열 인덱스). 앵커와 포커스 사이를 모두 포함한다. */
-  const rect = useMemo(() => {
-    if (!range) return null
-    const r1 = rowIndexOf.get(range.anchor.row), r2 = rowIndexOf.get(range.focus.row)
-    const c1 = colIndexOf.get(range.anchor.col), c2 = colIndexOf.get(range.focus.col)
+  /** 앵커·포커스를 행·열 인덱스 사각형으로 바꾼다. 필터로 행이 사라졌으면 null. */
+  const rangeToRect = (value: SelectionRange | null): CellRect | null => {
+    if (!value) return null
+    const r1 = rowIndexOf.get(value.anchor.row), r2 = rowIndexOf.get(value.focus.row)
+    const c1 = colIndexOf.get(value.anchor.col), c2 = colIndexOf.get(value.focus.col)
     if (r1 === undefined || r2 === undefined || c1 === undefined || c2 === undefined) return null
-    return { top: Math.min(r1, r2), bottom: Math.max(r1, r2), left: Math.min(c1, c2), right: Math.max(c1, c2) } satisfies CellRect
-  }, [colIndexOf, range, rowIndexOf])
+    return { top: Math.min(r1, r2), bottom: Math.max(r1, r2), left: Math.min(c1, c2), right: Math.max(c1, c2) }
+  }
+  /** 선택 사각형(행·열 인덱스). 앵커와 포커스 사이를 모두 포함한다. */
+  const rect = useMemo(() => rangeToRect(range), [colIndexOf, range, rowIndexOf])
+  /** Ctrl+클릭으로 더한 영역들. 표시·지우기·채우기·일괄 입력은 rect와 함께 모두에 적용한다. */
+  const extraRects = useMemo(() => extraRanges.map(rangeToRect).filter((item): item is CellRect => item !== null), [colIndexOf, extraRanges, rowIndexOf])
+  const allRects = useMemo(() => rect ? [...extraRects, rect] : extraRects, [extraRects, rect])
+
+  /** 엑셀 상태 표시줄처럼 선택 셀의 개수·합계·평균. 두 칸 이상일 때만 보인다. 겹친 칸은 한 번만 센다. */
+  const selectionStats = useMemo(() => {
+    const seen = new Set<string>()
+    let cells = 0, count = 0, numeric = 0, sum = 0
+    for (const area of allRects) {
+      for (let r = area.top; r <= area.bottom; r += 1) {
+        const record = filtered[r]
+        if (!record) continue
+        const linked = ledgerByRecord.get(recordIdentity(record)) ?? null
+        for (let c = area.left; c <= area.right; c += 1) {
+          const key = `${r}:${c}`
+          if (seen.has(key)) continue
+          seen.add(key)
+          cells += 1
+          const column = displayedColumns[c]
+          const value = String((column ? column.value(record, linked) : "") ?? "").trim()
+          if (!value) continue
+          count += 1
+          const number = Number(value.replace(/,/g, ""))
+          if (Number.isFinite(number)) { numeric += 1; sum += number }
+        }
+      }
+    }
+    return cells > 1 ? { count, numeric, sum } : null
+  }, [allRects, displayedColumns, filtered, ledgerByRecord])
 
   const wholeRowSelection = rect !== null && rect.left === 0 && rect.right === displayedColumns.length - 1
 
@@ -1631,9 +1684,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 헤더 강조용 — 선택 사각형의 열 범위에 드는지. */
   const colInRange = (colId: string): boolean => {
-    if (!rect) return false
     const index = colIndexOf.get(colId)
-    return index !== undefined && index >= rect.left && index <= rect.right
+    return index !== undefined && allRects.some((area) => index >= area.left && index <= area.right)
   }
 
   const toggleColumnSort = (col: string) => setSortBy((current) => {
@@ -1655,8 +1707,19 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       : { anchor: { row: rowId, col: first.id }, focus: { row: rowId, col: last.id } })
   }
 
-  const setCellAnchor = (row: string, col: string) => setRange({ anchor: { row, col }, focus: { row, col } })
-  const extendTo = (row: string, col: string) => setRange((current) => current ? { anchor: current.anchor, focus: { row, col } } : { anchor: { row, col }, focus: { row, col } })
+  const setCellAnchor = (row: string, col: string) => {
+    // Ctrl+mousedown 직후 이어지는 셀 click은 선택을 새로 잡지 않는다(추가 영역을 지키기 위해).
+    if (additiveClickRef.current) return
+    setRange({ anchor: { row, col }, focus: { row, col } })
+  }
+  /** Ctrl+클릭: 지금 영역을 추가 영역으로 넘기고 새 영역을 시작한다. */
+  const addCellAnchor = (row: string, col: string) => {
+    additiveClickRef.current = true
+    if (range) setExtraRanges((current) => [...current, range])
+    setRangeState({ anchor: { row, col }, focus: { row, col } })
+  }
+  // 넓히기는 추가 영역을 유지한다(setRange가 아니라 setRangeState).
+  const extendTo = (row: string, col: string) => setRangeState((current) => current ? { anchor: current.anchor, focus: { row, col } } : { anchor: { row, col }, focus: { row, col } })
 
   const scrollCellIntoView = (cellRef: CellRef) => {
     window.requestAnimationFrame(() => {
@@ -1673,6 +1736,35 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       if (cellBox.left < stickyEdge) scroller.scrollLeft -= stickyEdge - cellBox.left
     })
   }
+
+  // FABRIC REQUEST의 DD 상태 칩에서 넘어온 행(?focus=rowId)을 보이게 하고 선택한다.
+  const [focusParams, setFocusParams] = useSearchParams()
+  const focusRowId = focusParams.get("focus")
+  useEffect(() => {
+    if (!focusRowId) return
+    // 동기화로 행이 아직 안 들어왔으면 기다린다.
+    if (!records.length) return
+    const clearFocus = () => setFocusParams((current) => {
+      const next = new URLSearchParams(current)
+      next.delete("focus")
+      return next
+    }, { replace: true })
+    const target = scoped.find((record) => recordIdentity(record) === focusRowId)
+    if (!target) {
+      notify("연결된 DD 행을 찾을 수 없습니다.")
+      clearFocus()
+      return
+    }
+    setSearch("")
+    setStatus(ALL)
+    setColumnFilters({})
+    setHideClosed(false)
+    // 전체 탭은 완료·DROP·REJECT를 감추므로, 닫힌 행이면 그 담당 탭으로 연다.
+    setOwner(isClosedRecord(target) && target.owner ? target.owner : ALL)
+    setCellAnchor(focusRowId, "styleNo")
+    window.requestAnimationFrame(() => scrollCellIntoView({ row: focusRowId, col: "styleNo" }))
+    clearFocus()
+  }, [focusRowId, records.length, scoped])
 
   /** 방향키는 가장자리에서 멈추고, Tab만 행 끝에서 다음/이전 행으로 순환한다. */
   const moveSelection = (direction: CellMove, extend = false, wrap = false, origin?: CellRef) => {
@@ -1878,26 +1970,35 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   /** Ctrl+D: 첫 행을 아래로 복사하고, 단일 셀은 바로 위 값을 가져온다. */
   const fillDown = async () => {
     if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
-    if (!rect) return
-    const single = rect.top === rect.bottom && rect.left === rect.right
-    const sourceRow = single ? rect.top - 1 : rect.top
-    const startRow = single ? rect.top : rect.top + 1
-    if (sourceRow < 0 || startRow > rect.bottom) { notify("위에서 가져올 값이 없습니다."); return }
+    if (!allRects.length) return
     const edits = new Map<string, DevRecord>()
     let changed = 0
-    for (let row = startRow; row <= rect.bottom; row += 1) {
-      const record = filtered[row]
-      const fromRecord = filtered[sourceRow]
-      if (!record || !fromRecord) continue
-      let draft = record
-      for (let col = rect.left; col <= rect.right; col += 1) {
-        const column = displayedColumns[col]
-        if (!column || isLockedCell(record, column)) continue
-        const next = updateRecordCell(draft, column, rawCellText(fromRecord, column))
-        if (next !== draft) { draft = next; changed += 1 }
+    let hasSource = false
+    // Ctrl+클릭으로 더한 영역도 영역마다 같은 규칙으로 채운다.
+    for (const area of allRects) {
+      const single = area.top === area.bottom && area.left === area.right
+      const sourceRow = single ? area.top - 1 : area.top
+      const startRow = single ? area.top : area.top + 1
+      if (sourceRow < 0 || startRow > area.bottom) continue
+      hasSource = true
+      for (let row = startRow; row <= area.bottom; row += 1) {
+        const record = filtered[row]
+        const fromRecord = filtered[sourceRow]
+        if (!record || !fromRecord) continue
+        const identity = recordIdentity(record)
+        const base = edits.get(identity) ?? record
+        let draft = base
+        for (let col = area.left; col <= area.right; col += 1) {
+          const column = displayedColumns[col]
+          if (!column || isLockedCell(record, column)) continue
+          const source = edits.get(recordIdentity(fromRecord)) ?? fromRecord
+          const next = updateRecordCell(draft, column, rawCellText(source, column))
+          if (next !== draft) { draft = next; changed += 1 }
+        }
+        if (draft !== base) edits.set(identity, draft)
       }
-      if (draft !== record) edits.set(recordIdentity(record), draft)
     }
+    if (!hasSource) { notify("위에서 가져올 값이 없습니다."); return }
     if (!edits.size) return
     await commitRecords((records) => records.map((record) => edits.get(recordIdentity(record)) ?? record))
     notify(`${changed}개 셀을 아래로 채웠습니다.`)
@@ -1976,6 +2077,84 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   const selectedRows = (): DevRecord[] => rect ? filtered.slice(rect.top, rect.bottom + 1) : []
 
+  const linkTargetRows = (): DevRecord[] => {
+    const rows = selectedRows()
+    if (!rect || !range || rect.top !== rect.bottom || rect.left !== rect.right || range.focus.col !== "styleNo") return rows
+    const styleNo = rows[0]?.styleNo.trim()
+    return styleNo ? filtered.filter((record) => record.styleNo.trim() === styleNo) : rows
+  }
+
+  const openRequestLink = () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    const rows = linkTargetRows()
+    if (!rows.length) return
+    const counts = new Map<string, number>()
+    rows.forEach((row) => { const reqId = row.tech?.requestLink?.reqId; if (reqId) counts.set(reqId, (counts.get(reqId) ?? 0) + 1) })
+    setRequestPickerInitialReqId([...counts].sort((a, b) => b[1] - a[1])[0]?.[0])
+    setLinkRows(rows)
+  }
+
+  const confirmRequestLink = async (style: RequestStyle, pairs: LinkPair[], fillEmpty: boolean) => {
+    const { next: nextRequests, changed } = ensureRequestLineIds(requests)
+    if (changed) saveRequests(nextRequests)
+    const freshStyle = nextRequests.find((item) => item.reqId === style.reqId)
+    if (!freshStyle) return
+    const before = useAppStore.getState().records
+    pushUndoSnapshot(before)
+    const { next, linked } = applyRequestLinks(before, freshStyle, pairs, fillEmpty)
+    await writeDevelopmentRecords(next, false, "edit")
+    setLinkRows(null)
+    notify(`${linked}행을 FABRIC REQUEST에 연결했습니다.`)
+  }
+
+  // 요청 연결 도우미. 짝 규칙은 defaultLinkPairs 하나를 쓰고, 여러 스타일을 모아 스냅샷·쓰기를 한 번만 한다.
+  const [linkHelperOpen, setLinkHelperOpen] = useState(false)
+  const linkHelperPending = useMemo(() => buildLinkHelperGroups(records, requests).reduce((sum, group) => sum + group.rows.length, 0), [records, requests])
+  const linkHelperAuto = async (groups: HelperGroup[]) => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!groups.length) return
+    const { next: nextRequests, changed } = ensureRequestLineIds(requests)
+    if (changed) saveRequests(nextRequests)
+    const before = useAppStore.getState().records
+    let acc: DevRecord[] = before
+    let linkedRows = 0
+    let linkedStyles = 0
+    for (const group of groups) {
+      const style = nextRequests.find((item) => item.reqId === group.candidates[0]?.reqId)
+      if (!style) continue
+      const targets = new Set(group.rows.map(recordIdentity))
+      // 앞 그룹이 방금 연결한 옵션도 막아야 하므로 누적 배열에서 매번 다시 계산한다.
+      const blocked = new Set(acc.flatMap((record) => !targets.has(recordIdentity(record)) && record.tech?.requestLink?.lineId ? [record.tech.requestLink.lineId] : []))
+      const current = new Map(acc.map((record) => [recordIdentity(record), record]))
+      const rows = group.rows.map((row) => current.get(recordIdentity(row)) ?? row)
+      const result = applyRequestLinks(acc, style, defaultLinkPairs(rows, style, blocked), false)
+      if (!result.linked) continue
+      acc = result.next
+      linkedRows += result.linked
+      linkedStyles += 1
+    }
+    if (!linkedRows) { notify("연결할 행이 없습니다."); return }
+    pushUndoSnapshot(before)
+    await writeDevelopmentRecords(acc, false, "edit")
+    notify(`${linkedStyles}개 스타일 · ${linkedRows}행을 연결했습니다.`)
+  }
+  const reviewLinkHelperGroup = (group: HelperGroup) => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    setRequestPickerInitialReqId(group.candidates.length === 1 ? group.candidates[0].reqId : undefined)
+    setLinkRows(group.rows)
+  }
+
+  const unlinkSelectedRequests = async () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    const rows = linkTargetRows().filter((row) => row.tech?.requestLink)
+    if (!rows.length || !window.confirm(`선택한 ${rows.length}행의 FABRIC REQUEST 연결을 해제할까요? 입력한 값은 그대로 둡니다.`)) return
+    const before = useAppStore.getState().records
+    pushUndoSnapshot(before)
+    const { next, removed } = removeRequestLinks(before, new Set(rows.map(recordIdentity)))
+    await writeDevelopmentRecords(next, false, "edit")
+    notify(`${removed}행 연결을 해제했습니다.`)
+  }
+
   const insertBlankRows = async (position: "above" | "below") => {
     if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
@@ -2027,29 +2206,35 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const copyRange = async (cut = false) => {
     if (cut && !editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
-    const text = rangeToTsv(rect)
+    // Ctrl+클릭으로 더한 영역이 있으면 엑셀 규칙(같은 열은 위아래, 같은 행은 좌우)으로 합친다. 잘라내기는 한 영역만.
+    if (extraRects.length && cut) { notify("여러 영역은 잘라낼 수 없습니다. 복사를 쓰세요."); return }
+    const text = extraRects.length ? combineRangeTsv(allRects, rangeToTsv) : rangeToTsv(rect)
+    if (text === null) { notify(MULTI_RANGE_COPY_BLOCKED); return }
     clipRef.current = { text, cut }
     cutRangeRef.current = cut ? { ...rect } : null
     try { await navigator.clipboard.writeText(text) } catch { /* 클립보드 권한이 없어도 앱 내부 붙여넣기는 동작한다. */ }
-    const count = (rect.bottom - rect.top + 1) * (rect.right - rect.left + 1)
+    const count = allRects.reduce((sum, area) => sum + (area.bottom - area.top + 1) * (area.right - area.left + 1), 0)
     notify(cut ? `${count}개 셀 잘라내기` : `${count}개 셀 복사`)
   }
 
-  /** 선택 영역의 편집 가능한 셀을 비운다(수식·대장연결 열은 건너뛴다). */
+  /** 선택 영역의 편집 가능한 셀을 비운다(수식·대장연결 열은 건너뛴다). Ctrl+클릭으로 더한 영역도 함께 비운다. */
   const clearRange = async () => {
     if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
-    if (!rect) return
+    if (!allRects.length) return
     const edits = new Map<string, DevRecord>()
-    for (let r = rect.top; r <= rect.bottom; r += 1) {
-      const record = filtered[r]
-      if (!record) continue
-      let draft = edits.get(recordIdentity(record)) ?? record
-      for (let c = rect.left; c <= rect.right; c += 1) {
-        const column = displayedColumns[c]
-        if (!column || isLockedCell(record, column)) continue
-        draft = updateRecordCell(draft, column, "")
+    for (const area of allRects) {
+      for (let r = area.top; r <= area.bottom; r += 1) {
+        const record = filtered[r]
+        if (!record) continue
+        const identity = recordIdentity(record)
+        let draft = edits.get(identity) ?? record
+        for (let c = area.left; c <= area.right; c += 1) {
+          const column = displayedColumns[c]
+          if (!column || isLockedCell(record, column)) continue
+          draft = updateRecordCell(draft, column, "")
+        }
+        if (draft !== record) edits.set(identity, draft)
       }
-      if (draft !== record) edits.set(recordIdentity(record), draft)
     }
     if (!edits.size) return
     await commitRecords((records) => records.map((record) => edits.get(recordIdentity(record)) ?? record))
@@ -2065,6 +2250,33 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!text) { notify("붙여넣을 내용이 없습니다.") ; return }
 
     const grid = text.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n").map((line) => line.split("\t"))
+    // 여러 영역에는 한 칸 값만 붙인다. 모든 선택 칸에 같은 값을 채운다(엑셀과 같다).
+    if (extraRects.length) {
+      if (grid.length !== 1 || grid[0].length !== 1) { notify("여러 영역에는 한 칸 값만 붙여넣을 수 있습니다."); return }
+      const value = grid[0][0]
+      const multiEdits = new Map<string, DevRecord>()
+      let filled = 0
+      for (const area of allRects) {
+        for (let r = area.top; r <= area.bottom; r += 1) {
+          const record = filtered[r]
+          if (!record) continue
+          const identity = recordIdentity(record)
+          const base = multiEdits.get(identity) ?? record
+          let draft = base
+          for (let c = area.left; c <= area.right; c += 1) {
+            const column = displayedColumns[c]
+            if (!column || isLockedCell(record, column)) continue
+            const next = updateRecordCell(draft, column, value)
+            if (next !== draft) { draft = next; filled += 1 }
+          }
+          if (draft !== base) multiEdits.set(identity, draft)
+        }
+      }
+      if (!multiEdits.size) { notify("붙여넣을 수 있는 셀이 없습니다."); return }
+      await commitRecords((records) => records.map((record) => multiEdits.get(recordIdentity(record)) ?? record))
+      notify(`${filled}개 셀에 붙여넣었습니다.`)
+      return
+    }
     const cut = clipRef.current?.cut ? cutRangeRef.current : null
     const edits = new Map<string, DevRecord>()
     const put = (record: DevRecord, draft: DevRecord) => { if (draft !== record) edits.set(recordIdentity(record), draft) }
@@ -2295,20 +2507,25 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const origin = { row: recordIdentity(record), col: column.id }
     cancelCellEdit()
-    if (fillRange && rect) {
+    if (fillRange && allRects.length) {
       const edits = new Map<string, DevRecord>()
       let changed = 0
-      for (let row = rect.top; row <= rect.bottom; row += 1) {
-        const target = filtered[row]
-        if (!target) continue
-        let draft = target
-        for (let col = rect.left; col <= rect.right; col += 1) {
-          const targetColumn = displayedColumns[col]
-          if (!targetColumn || isLockedCell(target, targetColumn)) continue
-          const next = updateRecordCell(draft, targetColumn, raw)
-          if (next !== draft) { draft = next; changed += 1 }
+      // Ctrl+Enter는 Ctrl+클릭으로 더한 영역까지 모든 선택 칸에 같은 값을 넣는다.
+      for (const area of allRects) {
+        for (let row = area.top; row <= area.bottom; row += 1) {
+          const target = filtered[row]
+          if (!target) continue
+          const identity = recordIdentity(target)
+          const base = edits.get(identity) ?? target
+          let draft = base
+          for (let col = area.left; col <= area.right; col += 1) {
+            const targetColumn = displayedColumns[col]
+            if (!targetColumn || isLockedCell(target, targetColumn)) continue
+            const next = updateRecordCell(draft, targetColumn, raw)
+            if (next !== draft) { draft = next; changed += 1 }
+          }
+          if (draft !== base) edits.set(identity, draft)
         }
-        if (draft !== target) edits.set(recordIdentity(target), draft)
       }
       if (edits.size) await commitRecords((records) => records.map((item) => edits.get(recordIdentity(item)) ?? item))
       notify(`${changed}개 셀에 같은 값을 입력했습니다.`)
@@ -2469,6 +2686,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <Button type="button" size="sm" variant="outline" title="주간 업무 보고에 붙일 현황 문장을 만듭니다. 완료는 Received date 기준입니다" onClick={openWeeklyReport}><ClipboardList className="size-4" />주간 보고</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
         <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
+        <Button type="button" size="sm" variant="outline" title="미연결 DD 행을 같은 Garment No. 요청과 묶어 한 번에 연결합니다" onClick={() => setLinkHelperOpen(true)}><Link2 className="size-4" />요청 연결 도우미{linkHelperPending ? <span className="ml-0.5 rounded-full bg-[var(--muted)] px-1.5 text-[10px] tabular-nums text-[var(--muted-foreground)]">{linkHelperPending}</span> : null}</Button>
         {canBackup ? <Button type="button" size="sm" variant="outline" disabled={backupExporting} title="DD 전체와 창고 상태·이력, 샘플대장을 필드 그대로 엑셀로 내려받습니다" onClick={() => void exportBackup()}>{backupExporting ? <Loader2 className="size-4 animate-spin" /> : <DatabaseBackup className="size-4" />}엑셀 백업</Button> : null}
         <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={resetColumnWidths}><RotateCcw className="size-4" />열 너비 초기화</Button>
       </div>
@@ -2528,17 +2746,23 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               const wholeRowSelected = rect !== null && rect.left === 0 && rect.right === displayedColumns.length - 1
               const cellSel = (colId: string): CellSel => {
                 const empty = { inRange: false, isActive: false, top: false, bottom: false, left: false, right: false, handle: false, moveEdge: false }
-                if (!rect || rowIdx === undefined || rowIdx < rect.top || rowIdx > rect.bottom) return empty
                 const colIdx = colIndexOf.get(colId)
-                if (colIdx === undefined || colIdx < rect.left || colIdx > rect.right) return empty
+                if (rowIdx === undefined || colIdx === undefined) return empty
+                // 활성 영역을 먼저 보고, 없으면 Ctrl+클릭으로 더한 영역에서 이 칸이 든 영역을 찾는다.
+                const containsCell = (area: CellRect) => rowIdx >= area.top && rowIdx <= area.bottom && colIdx >= area.left && colIdx <= area.right
+                const hit = rect && containsCell(rect) ? rect : extraRects.find(containsCell)
+                if (!hit) return empty
+                const primary = hit === rect
+                const hitWholeRow = hit.left === 0 && hit.right === displayedColumns.length - 1
                 return {
                   inRange: true,
-                  isActive: range?.focus.row === rowId && range.focus.col === colId,
-                  top: rowIdx === rect.top,
-                  bottom: rowIdx === rect.bottom,
-                  left: colIdx === rect.left && !wholeRowSelected,
-                  right: colIdx === rect.right,
-                  handle: rowIdx === rect.bottom && colIdx === rect.right,
+                  // 활성 칸 표시와 채우기 핸들은 활성 영역에만 둔다(핸들 드래그는 활성 영역 기준이다).
+                  isActive: primary && range?.focus.row === rowId && range.focus.col === colId,
+                  top: rowIdx === hit.top,
+                  bottom: rowIdx === hit.bottom,
+                  left: colIdx === hit.left && !(primary ? wholeRowSelected : hitWholeRow),
+                  right: colIdx === hit.right,
+                  handle: primary && rowIdx === hit.bottom && colIdx === hit.right,
                   moveEdge: moveHover?.row === rowId && moveHover.col === colId,
                 }
               }
@@ -2604,7 +2828,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                           </div>
                         </>
                       : column.id === "styleNo"
-                        ? <span className="flex items-center gap-1 truncate" title={warnings.map((warning) => warning.label).join(" · ") || undefined}>{isRecent ? <span className="shrink-0 rounded-full bg-[linear-gradient(110deg,#06b6d4,#2563eb_55%,#7c3aed)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.04em] text-white">신규</span> : null}<span className="truncate">{text(record.styleNo)}</span>{warnings.length ? <TriangleAlert className="size-3.5 shrink-0 text-[var(--destructive)]" /> : null}</span>
+                        ? (() => { const target = resolveRequestLink(requestIndex, record); return <span className="flex items-center gap-1 truncate" title={warnings.map((warning) => warning.label).join(" · ") || undefined}>{isRecent ? <span className="shrink-0 rounded-full bg-[linear-gradient(110deg,#06b6d4,#2563eb_55%,#7c3aed)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.04em] text-white">신규</span> : null}<span className="truncate">{text(record.styleNo)}</span>{target === "missing" ? <span title="연결된 요청 스타일 또는 옵션을 찾을 수 없습니다. 우클릭 > 요청 연결 해제로 정리하세요." className="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold tracking-wide text-[var(--destructive)] bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)]">REQ?</span> : target ? <button type="button" title={`FABRIC REQUEST · ${target.style.chart} · #${target.style.seq} · Opt ${target.option.no} · 클릭해서 열기`} onMouseDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); navigate(`/request?focus=${target.style.reqId}`) }} className="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold tracking-wide text-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--primary)_22%,transparent)]">REQ</button> : null}{warnings.length ? <TriangleAlert className="size-3.5 shrink-0 text-[var(--destructive)]" /> : null}</span> })()
                         : <span className="truncate">{text(column.value(record, linked))}</span>}
                     <FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} />
                   </td>
@@ -2625,6 +2849,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <div data-grid-bottom-area aria-hidden="true" className="h-28 min-w-full" />
       </div>
 
+      {selectionStats ? <div role="status" aria-label="선택 셀 요약" className="pointer-events-none fixed bottom-4 right-6 z-[75] flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--muted-foreground)] shadow-md">
+        <span>개수 <strong className="tabular-nums text-[var(--foreground)]">{selectionStats.count.toLocaleString("ko-KR")}</strong></span>
+        {selectionStats.numeric ? <>
+          <span>합계 <strong className="tabular-nums text-[var(--foreground)]">{formatStatNumber(selectionStats.sum)}</strong></span>
+          <span>평균 <strong className="tabular-nums text-[var(--foreground)]">{formatStatNumber(selectionStats.sum / selectionStats.numeric)}</strong></span>
+        </> : null}
+      </div> : null}
       {clipNotice ? <div role="status" className="pointer-events-none fixed bottom-6 left-1/2 z-[80] -translate-x-1/2 rounded-full bg-[var(--foreground)] px-4 py-2 text-xs font-medium text-[var(--background)] shadow-lg">{clipNotice}</div> : null}
 
       {menu ? <>
@@ -2649,6 +2880,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             <span className="text-[11px] text-[var(--muted-foreground)]">{item.hint}</span>
           </button>)}
           {menu.kind === "cells" ? <><div className="my-1 h-px bg-[var(--border)]" />
+          <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); openRequestLink() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Link2 className="size-3.5" /></span><span className="flex-1">FABRIC REQUEST 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
+          <button type="button" role="menuitem" disabled={!editEnabled || !linkTargetRows().some((row) => row.tech?.requestLink)} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); void unlinkSelectedRequests() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Unlink className="size-3.5" /></span><span className="flex-1">요청 연결 해제</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
+          <div className="my-1 h-px bg-[var(--border)]" />
           <button type="button" role="menuitem" disabled={!undoStack.length} onClick={() => { setMenu(null); void undoLast() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40">
             <span className="text-[var(--muted-foreground)]"><Undo2 className="size-3.5" /></span>
             <span className="flex-1">되돌리기</span>
@@ -2850,6 +3084,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     </Dialog>
 
     <RequestPickerDialog open={requestPickerOpen} onOpenChange={setRequestPickerOpen} requests={requests} records={records} styleNo={sharedDraft?.styleNo ?? ""} initialReqId={requestPickerInitialReqId} onConfirm={importRequest} />
+    <RequestLinkHelperDialog open={linkHelperOpen} onOpenChange={setLinkHelperOpen} records={records} requests={requests} editEnabled={editEnabled} disabledMessage={EDIT_DISABLED_MESSAGE} onLinkAuto={linkHelperAuto} onReview={reviewLinkHelperGroup} />
+    <RequestPickerDialog open={Boolean(linkRows)} onOpenChange={(open) => { if (!open) setLinkRows(null) }} requests={requests} records={records} styleNo={linkRows?.[0]?.styleNo ?? ""} initialReqId={requestPickerInitialReqId} mode="link" linkRows={linkRows ?? []} blockedLineIds={blockedRequestLineIds} onConfirmLink={(style, pairs, fillEmpty) => void confirmRequestLink(style, pairs, fillEmpty)} />
 
     {/* 전체 항목 수정(64열) — 담당 칸의 확대 아이콘으로 진입. 데이터 입력 화면. */}
     <Dialog open={Boolean(editing)} onOpenChange={(open) => { if (!open) closeEditor() }}>

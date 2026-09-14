@@ -11,6 +11,9 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { ChevronDown, ChevronRight, ClipboardPaste, Copy, Download, Eraser, Flame, ImagePlus, Loader2, Pencil, Plus, Redo2, RotateCcw, Rows3, Scissors, Trash2, Undo2, Upload } from "lucide-react"
 import * as XLSX from "xlsx"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { buildFabricLedger } from "@/data/fabric-ledger"
+import { ddRecordsByLineId, requestDdStatus, type RequestDdStatus } from "@/data/request-link"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -78,6 +81,8 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
     { id: "color", label: "Color", width: 120, scope: "option" },
     { id: "dyeingMethod", label: "Dyeing", width: 90, scope: "option" },
     { id: "remark", label: "Remark", width: 180, scope: "option" },
+    // 보기 전용. DD 행의 tech.requestLink를 읽어 계산하며 요청 데이터나 엑셀 양식에는 없다.
+    { id: "ddStatus", label: "DD 상태", width: 170, scope: "option" },
   ] },
 ]
 
@@ -596,6 +601,41 @@ function CellEditor({ kind, initial, members, onCommit, onCancel }: CellEditorPr
 
 export function FabricRequest() {
   const requests = useAppStore((state) => state.requests)
+  const [searchParams, setSearchParams] = useSearchParams()
+  // DD 상태 열(R146). 요청에 저장하지 않고 DD 행의 tech.requestLink를 읽어 매번 계산한다.
+  const navigate = useNavigate()
+  const ddRecords = useAppStore((state) => state.records)
+  const ddCompletedSamples = useAppStore((state) => state.completed)
+  const ddFabricOverrides = useAppStore((state) => state.fabricOverrides)
+  const ddByLine = useMemo(() => ddRecordsByLineId(ddRecords), [ddRecords])
+  // 원단 상세 링크 키는 DD MASTER(ledgerByRecord)와 같은 원장 구성으로 만든다.
+  const ddLedgerKeyByRow = useMemo(() => new Map<string, string>(
+    buildFabricLedger(ddRecords, ddCompletedSamples, ddFabricOverrides)
+      .flatMap((item) => item.record ? [[`${item.record._src.sheet}::${item.record._src.row}`, item.key] as const] : []),
+  ), [ddCompletedSamples, ddFabricOverrides, ddRecords])
+  const DD_TONE_CLASS: Record<RequestDdStatus["tone"], string> = {
+    none: "bg-[var(--muted)] text-[var(--muted-foreground)]",
+    progress: "bg-[color-mix(in_srgb,var(--chart-1)_14%,transparent)] text-[var(--chart-1)]",
+    late: "bg-[color-mix(in_srgb,var(--destructive)_14%,transparent)] text-[var(--destructive)]",
+    received: "bg-[color-mix(in_srgb,var(--chart-2)_12%,transparent)] text-[var(--chart-2)]",
+    done: "bg-[color-mix(in_srgb,var(--chart-2)_26%,transparent)] font-semibold text-[var(--chart-2)]",
+    hold: "bg-[color-mix(in_srgb,var(--warning)_16%,transparent)] text-[var(--warning)]",
+    drop: "bg-[var(--muted)] text-[var(--muted-foreground)] line-through",
+  }
+  const renderDdStatus = (option: RequestOption): ReactNode => {
+    const status = requestDdStatus(ddByLine, option)
+    const chip = "whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+    if (status.tone === "none") return <span className={`${chip} ${DD_TONE_CLASS.none}`}>미연결</span>
+    // 버튼 누름이 셀 선택·편집으로 번지지 않게 막는다.
+    const stop = (event: React.MouseEvent) => event.stopPropagation()
+    const openDd = () => navigate(`/development/workspace?focus=${encodeURIComponent(status.rowId ?? "")}`)
+    const ledgerKey = status.rowId ? ddLedgerKeyByRow.get(status.rowId) : undefined
+    return <span className="inline-flex flex-wrap items-center gap-1">
+      <button type="button" title="DD MASTER에서 열기" onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); openDd() }} className={`${chip} ${DD_TONE_CLASS[status.tone]} hover:opacity-80`}>{status.label}</button>
+      {status.flNo ? <button type="button" title="원단 상세 열기" onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); if (ledgerKey) navigate(`/fabric/${encodeURIComponent(ledgerKey)}`); else openDd() }} className="font-mono text-[11px] text-[var(--primary)] underline-offset-2 hover:underline">{status.flNo}</button> : null}
+      {status.extra > 0 ? <span title={`같은 옵션에 연결된 DD 행이 ${status.extra}개 더 있습니다`} className="text-[10px] text-[var(--muted-foreground)]">+{status.extra}</span> : null}
+    </span>
+  }
 
   const [stage, setStage] = useState<StageFilter>("전체")
   const [sortKey, setSortKey] = useState<SortKey>("seq")
@@ -622,6 +662,7 @@ export function FabricRequest() {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(loadOpenGroups)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
+  const [focusedReqId, setFocusedReqId] = useState<string | null>(null)
   const uploadRef = useRef<HTMLInputElement | null>(null)
 
   const chartOptions = useMemo(
@@ -693,6 +734,33 @@ export function FabricRequest() {
   const visibleColumns = [...FIXED_COLUMNS, ...visibleGroups.flatMap((group) => group.columns)]
   const tableWidth = visibleColumns.reduce((sum, column) => sum + widthOf(column), 0) + ACTION_WIDTH + ROW_NO_WIDTH
   const slots = visible.flatMap((style) => Array.from({ length: Math.max(1, style.options.length) }, (_, optionIndex) => ({ style, optionIndex, option: style.options[optionIndex] })))
+
+  useEffect(() => {
+    const reqId = searchParams.get("focus")
+    if (!reqId) return
+    const style = requests.find((item) => item.reqId === reqId)
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete("focus")
+    if (!style) {
+      setNotice({ kind: "error", text: "연결된 요청 스타일을 찾을 수 없습니다." })
+      setSearchParams(nextParams, { replace: true })
+      return
+    }
+    if (stage !== "전체") setStage("전체")
+    if (chart !== "전체") setChart("전체")
+    if (urgentOnly) setUrgentOnly(false)
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      const row = [...document.querySelectorAll<HTMLElement>("tr[data-req-id]")].find((item) => item.dataset.reqId === reqId)
+      const cell = row?.querySelector<HTMLElement>('td[data-col-id="garmentNo"]')
+      const slotIndex = Number(cell?.dataset.slotIndex)
+      setSearchParams(nextParams, { replace: true })
+      if (!cell || !Number.isInteger(slotIndex)) return
+      setRange({ anchor: { row: slotIndex, col: "garmentNo" }, focus: { row: slotIndex, col: "garmentNo" } })
+      cell.scrollIntoView({ block: "center", inline: "nearest" })
+      setFocusedReqId(reqId)
+      window.setTimeout(() => setFocusedReqId(null), 1200)
+    }))
+  }, [searchParams, setSearchParams])
   const colIndexOf = new Map(visibleColumns.map((column, index) => [column.id, index]))
   const rect = useMemo(() => {
     if (!range) return null
@@ -877,6 +945,12 @@ export function FabricRequest() {
 
   /** 편집기에 넣을 원본 문자열. 열 id가 필드명과 같아 그대로 집는다. */
   const rawValue = (line: Line, columnId: string): string => {
+    // 보기 전용 계산 열. 복사하면 상태 문구와 FL#이 텍스트로 나간다.
+    if (columnId === "ddStatus") {
+      if (line.kind !== "option") return ""
+      const status = requestDdStatus(ddByLine, line.option)
+      return [status.label, status.flNo].filter(Boolean).join(" ")
+    }
     const source = (line.kind === "style" ? line.style : line.option) as unknown as Record<string, unknown>
     const value = source[columnId]
     return value === undefined || value === null || value === "" ? "" : String(value)
@@ -1091,6 +1165,7 @@ export function FabricRequest() {
     }
     if (column.scope === "style") return null
     const option = line.option
+    if (column.id === "ddStatus") return renderDdStatus(option)
     switch (column.id) {
       case "optNo": return <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--muted)] px-1.5 text-[10px] font-medium tabular-nums text-[var(--foreground)]">{option.no}</span>
       case "yarnDetail": return option.yarnDetail
@@ -1383,13 +1458,19 @@ export function FabricRequest() {
                     <TableCell
                       rowSpan={rowSpan}
                       className="relative sticky left-0 z-20 select-none border-b border-r border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] bg-[var(--muted)] p-0 text-center align-top text-[10px] font-medium tabular-nums text-[var(--muted-foreground)]"
-                      style={{ width: ROW_NO_WIDTH, height: blockHeight }}
+                      style={{ width: ROW_NO_WIDTH, height: blockHeight, ...(focusedReqId === style.reqId ? { outline: "2px solid var(--primary)", outlineOffset: "-2px" } : null) }}
                       title="우클릭: 옵션 추가·삭제"
                       onMouseDown={(event) => { if ((event.target as HTMLElement).closest("button,input")) return; event.preventDefault(); dragRef.current = true; selectWholeRow(styleStart, event.shiftKey) }}
                       onMouseEnter={() => { if (dragRef.current) selectWholeRow(styleStart, true) }}
                       onContextMenu={(event) => { event.preventDefault(); selectWholeRow(styleStart); setRowMenu({ x: event.clientX, y: event.clientY, cell: { row: styleStart, col: visibleColumns[0].id } }) }}
                     >
                       <div className="pt-1.5">{styleIndex + 1}</div>
+                      {style.options.length ? (() => {
+                        const statuses = style.options.map((option) => requestDdStatus(ddByLine, option))
+                        const linkedCount = statuses.filter((status) => status.tone !== "none").length
+                        const allDone = statuses.every((status) => status.tone === "done")
+                        return <div title="DD에 연결된 옵션 수 / 전체 옵션 수" className={`mt-0.5 text-[9px] tabular-nums ${allDone ? "text-[var(--chart-2)]" : "text-[var(--muted-foreground)]"}`}>DD {linkedCount}/{style.options.length}</div>
+                      })() : null}
                       <span
                         aria-hidden="true"
                         title="끌어서 행 높이 조절 · 더블클릭: 기본 높이"

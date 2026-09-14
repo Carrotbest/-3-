@@ -158,7 +158,8 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
                   }
 
                   const isParentActive = location.pathname === item.path || item.children.some((child) => location.pathname === child.path)
-                  const isOpen = openMap[item.path] ?? isParentActive
+                  // 하위 메뉴는 화살표를 눌렀을 때만 연다. 현재 경로에 맞춰 자동으로 펼치지 않는다(사용자 요청).
+                  const isOpen = openMap[item.path] ?? false
 
                   return (
                     <Fragment key={item.path}>

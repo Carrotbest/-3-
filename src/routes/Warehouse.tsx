@@ -25,6 +25,7 @@ import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { useAuthStore } from "@/data/auth"
 import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
 import { downloadBlob } from "@/data/dd-export"
+import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED, type IndexRect } from "@/data/range-tsv"
 import { buildWarehouseWorkbook, collectWarehouseExport, warehouseExportFileName } from "@/data/warehouse-export"
 import { FabricDetailBody } from "@/routes/FabricDetail"
 import { fmtDateFull, fmtDateMd } from "@/data/format"
@@ -511,6 +512,9 @@ export function Warehouse() {
   const [baselineOpen, setBaselineOpen] = useState(false)
   // 셀 범위 선택. 행은 visibleRows 인덱스, 열은 visibleColumns 인덱스다.
   const [cellRange, setCellRange] = useState<{ ar: number; ac: number; fr: number; fc: number } | null>(null)
+  // Ctrl+클릭으로 더한 영역. cellRange는 마지막에 잡은 활성 영역이다.
+  const [extraCellRanges, setExtraCellRanges] = useState<{ ar: number; ac: number; fr: number; fc: number }[]>([])
+  const [selectionNotice, setSelectionNotice] = useState<string | null>(null)
   const cellDragRef = useRef(false)
   const [cellMenu, setCellMenu] = useState<{ x: number; y: number } | null>(null)
   const [viewports, setViewports] = useState<Record<string, { top: number; height: number }>>({})
@@ -986,30 +990,75 @@ export function Warehouse() {
 
   const columnIndexById = useMemo(() => new Map(visibleColumns.map((column, index) => [column.id, index])), [visibleColumns])
 
-  const rangeRect = cellRange ? {
-    top: Math.min(cellRange.ar, cellRange.fr),
-    bottom: Math.max(cellRange.ar, cellRange.fr),
-    left: Math.min(cellRange.ac, cellRange.fc),
-    right: Math.max(cellRange.ac, cellRange.fc),
-  } : null
+  const toRangeRect = (value: { ar: number; ac: number; fr: number; fc: number }): IndexRect => ({
+    top: Math.min(value.ar, value.fr),
+    bottom: Math.max(value.ar, value.fr),
+    left: Math.min(value.ac, value.fc),
+    right: Math.max(value.ac, value.fc),
+  })
+  const rangeRect = cellRange ? toRangeRect(cellRange) : null
+  // Ctrl+클릭으로 더한 영역까지 포함한 전체 선택. 표시·복사·개수 합계가 모두 이 목록을 본다.
+  const extraRangeRects = extraCellRanges.map(toRangeRect)
+  const allRangeRects = rangeRect ? [...extraRangeRects, rangeRect] : extraRangeRects
 
-  const copyRange = async (): Promise<void> => {
-    if (!rangeRect) return
+  const rectTsv = (area: IndexRect): string => {
     const lines: string[] = []
-    for (let r = rangeRect.top; r <= rangeRect.bottom; r += 1) {
+    for (let r = area.top; r <= area.bottom; r += 1) {
       const item = visibleRows[r]
       if (!item) continue
       const cells: string[] = []
-      for (let c = rangeRect.left; c <= rangeRect.right; c += 1) {
+      for (let c = area.left; c <= area.right; c += 1) {
         const column = visibleColumns[c]
         cells.push(column ? cellValue(item, column.id) : "")
       }
       lines.push(cells.join("\t"))
     }
+    return lines.join("\n")
+  }
+
+  const copyRange = async (): Promise<void> => {
+    if (!rangeRect) return
+    const text = combineRangeTsv(allRangeRects, rectTsv)
+    if (text === null) { setSelectionNotice(MULTI_RANGE_COPY_BLOCKED); setCellMenu(null); return }
     // 엑셀과 같은 탭 구분 텍스트라 그대로 붙여넣을 수 있다.
-    try { await navigator.clipboard.writeText(lines.join("\n")) } catch { /* 클립보드를 못 쓰면 조용히 넘긴다. */ }
+    try { await navigator.clipboard.writeText(text) } catch { /* 클립보드를 못 쓰면 조용히 넘긴다. */ }
+    if (extraRangeRects.length) setSelectionNotice(`${allRangeRects.length}개 영역을 복사했습니다.`)
     setCellMenu(null)
   }
+
+  /** 엑셀 상태 표시줄처럼 선택 셀의 개수·합계·평균. 두 칸 이상일 때만 보인다. 겹친 칸은 한 번만 센다. */
+  const selectionStats = (() => {
+    if (!allRangeRects.length) return null
+    const seen = new Set<string>()
+    let cells = 0, count = 0, numeric = 0, sum = 0
+    for (const area of allRangeRects) {
+      for (let r = area.top; r <= area.bottom; r += 1) {
+        const item = visibleRows[r]
+        if (!item) continue
+        for (let c = area.left; c <= area.right; c += 1) {
+          const key = `${r}:${c}`
+          if (seen.has(key)) continue
+          seen.add(key)
+          cells += 1
+          const column = visibleColumns[c]
+          const value = (column ? cellValue(item, column.id) : "").trim()
+          if (!value) continue
+          count += 1
+          const number = Number(value.replace(/,/g, ""))
+          if (Number.isFinite(number)) { numeric += 1; sum += number }
+        }
+      }
+    }
+    return cells > 1 ? { count, numeric, sum } : null
+  })()
+
+  useEffect(() => {
+    if (!selectionNotice) return
+    const timer = window.setTimeout(() => setSelectionNotice(null), 2500)
+    return () => window.clearTimeout(timer)
+  }, [selectionNotice])
+  // 탭이나 목록이 바뀌면 인덱스가 달라지므로 추가 영역을 버린다.
+  useEffect(() => { setExtraCellRanges([]) }, [tab, visibleRows])
 
   const filterButton = (column: WarehouseColumn) => {
     const selected = columnFilters[column.id] ?? []
@@ -1136,20 +1185,23 @@ export function Warehouse() {
                   {visibleColumns.map((column) => {
                     const fixed = fixedColumns.some((candidate) => candidate.id === column.id)
                     const colIndex = columnIndexById.get(column.id) ?? 0
-                    const inRange = Boolean(rangeRect && index >= rangeRect.top && index <= rangeRect.bottom && colIndex >= rangeRect.left && colIndex <= rangeRect.right)
+                    // 활성 영역을 먼저 보고, 없으면 Ctrl+클릭으로 더한 영역에서 이 칸이 든 영역을 찾는다.
+                    const containsCell = (area: IndexRect) => index >= area.top && index <= area.bottom && colIndex >= area.left && colIndex <= area.right
+                    const hitRect = rangeRect && containsCell(rangeRect) ? rangeRect : extraRangeRects.find(containsCell)
+                    const inRange = Boolean(hitRect)
                     // DD MASTER 와 같은 방식이다. 범위 가장자리에만 선을 그어 사각형으로 보이게 한다.
-                    const edges = inRange && rangeRect ? [
-                      index === rangeRect.top ? "inset 0 1.5px 0 0 var(--grid-selection)" : "",
-                      index === rangeRect.bottom ? "inset 0 -1.5px 0 0 var(--grid-selection)" : "",
-                      colIndex === rangeRect.left ? "inset 1.5px 0 0 0 var(--grid-selection)" : "",
-                      colIndex === rangeRect.right ? "inset -1.5px 0 0 0 var(--grid-selection)" : "",
+                    const edges = hitRect ? [
+                      index === hitRect.top ? "inset 0 1.5px 0 0 var(--grid-selection)" : "",
+                      index === hitRect.bottom ? "inset 0 -1.5px 0 0 var(--grid-selection)" : "",
+                      colIndex === hitRect.left ? "inset 1.5px 0 0 0 var(--grid-selection)" : "",
+                      colIndex === hitRect.right ? "inset -1.5px 0 0 0 var(--grid-selection)" : "",
                     ].filter(Boolean).join(", ") : ""
                     const cellActive = selectedCell?.row === item.key && selectedCell.col === column.id
                     const confirmed = Boolean(item.confirmedAt)
                     const manualId = item.sample?.sourceSheet === WEB_INTAKE_SHEET ? item.sample.id : undefined
                     const editable = Boolean(manualId) && MANUAL_EDITABLE.has(column.id)
                     const editing = editable && editCell?.row === item.key && editCell.col === column.id
-                    return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
+                    return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; if (event.ctrlKey || event.metaKey) { if (cellRange) setExtraCellRanges((current) => [...current, cellRange]) } else setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) { setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }) } setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
                       ? <input
                           autoFocus
                           defaultValue={String(cellRawValue(item, column.id) ?? "")}
@@ -1262,12 +1314,23 @@ export function Warehouse() {
       <div className="shrink-0 border-t border-[var(--border)] px-3 py-2 text-xs text-[var(--muted-foreground)]">체크박스로 여러 건을 고른 뒤 위 버튼으로 처리합니다. · {TAB_META[tab].description}</div>
     </div>
 
+    {selectionStats || selectionNotice ? <div role="status" className="pointer-events-none fixed bottom-4 right-6 z-[75] flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--muted-foreground)] shadow-md">
+      {selectionNotice ? <span className="text-[var(--foreground)]">{selectionNotice}</span> : null}
+      {selectionStats ? <>
+        <span>개수 <strong className="tabular-nums text-[var(--foreground)]">{selectionStats.count.toLocaleString("ko-KR")}</strong></span>
+        {selectionStats.numeric ? <>
+          <span>합계 <strong className="tabular-nums text-[var(--foreground)]">{formatStatNumber(selectionStats.sum)}</strong></span>
+          <span>평균 <strong className="tabular-nums text-[var(--foreground)]">{formatStatNumber(selectionStats.sum / selectionStats.numeric)}</strong></span>
+        </> : null}
+      </> : null}
+    </div> : null}
+
     {cellMenu ? <>
       <div className="fixed inset-0 z-[85]" onMouseDown={() => setCellMenu(null)} onContextMenu={(event) => { event.preventDefault(); setCellMenu(null) }} />
       <div role="menu" className="fixed z-[90] w-40 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-1 text-xs shadow-lg" style={{ left: Math.min(cellMenu.x, window.innerWidth - 176), top: Math.min(cellMenu.y, window.innerHeight - 120) }}>
         <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => void copyRange()}><Copy className="size-3.5" />복사 (Ctrl+C)</button>
-        <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { if (rangeRect) setCellRange({ ar: rangeRect.top, ac: 0, fr: rangeRect.bottom, fc: visibleColumns.length - 1 }); setCellMenu(null) }}><Rows3 className="size-3.5" />행 전체 선택</button>
-        <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--muted-foreground)] hover:bg-[var(--muted)]" onClick={() => { setCellRange(null); setCellMenu(null) }}>선택 해제</button>
+        <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { if (rangeRect) { setExtraCellRanges([]); setCellRange({ ar: rangeRect.top, ac: 0, fr: rangeRect.bottom, fc: visibleColumns.length - 1 }) } setCellMenu(null) }}><Rows3 className="size-3.5" />행 전체 선택</button>
+        <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--muted-foreground)] hover:bg-[var(--muted)]" onClick={() => { setExtraCellRanges([]); setCellRange(null); setCellMenu(null) }}>선택 해제</button>
       </div>
     </> : null}
 

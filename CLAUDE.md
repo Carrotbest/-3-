@@ -35,6 +35,13 @@
   보고 기준 진행 중 = `Received date`가 빈 건. 신규 = 그중 구간 안에 접수된 건, 공정 중 = 나머지. 그래서 `전체 진행 = 신규 + 공정 중`이 항상 맞는다.
   카테고리 분류는 `normalizeCategory`를 거친다. 네 값에 안 맞는 건은 "분류 미기재"로 따로 적는다. 그 줄이 0이 아니면 카테고리 합이 전체와 안 맞으므로 DD Category를 손봐야 한다.
 - Style No. 칸 호버는 `StyleHoverLayer`가 스크롤 영역 위 오버레이로 같은 스타일 행 묶음(연속 구간마다 하나)을 그린다. 색은 `styleTimeline` 상태 톤이다. 호버를 부모 state로 올리지 말 것(64열 전체 재렌더). 행·셀에 transform을 걸지 말 것(sticky 깨짐).
+- Style No. 칸 `REQ`는 `tech.requestLink`를 요청에서 찾은 표시다. 누르면 `/request?focus=reqId`로 가며, 대상을 찾지 못하면 `REQ?`로 표시한다.
+- 우클릭 `FABRIC REQUEST 연결…`은 선택 행(Style No. 한 칸이면 같은 스타일 전체)을 요청 옵션과 짝 표로 연결한다. 기본은 연결만 하고 값을 덮지 않으며, 빈 칸 채우기에서도 `styleNo`·`owner`는 제외한다.
+- 다른 DD 행에 연결된 요청 옵션은 선택할 수 없다. 연결·해제는 스냅샷 뒤 `writeDevelopmentRecords` 한 번으로 저장해 Ctrl+Z로 되돌린다.
+- 다중 선택: Ctrl(⌘)+클릭·드래그로 영역을 더한다(`extraRanges`, 활성은 `range`). `setRange` 래퍼가 새 선택마다 추가 영역을 비우고, 넓히기(`extendTo`)와 Ctrl 추가만 `setRangeState`를 직접 쓴다. Ctrl+mousedown 뒤 셀 click이 선택을 다시 잡지 않게 `additiveClickRef`로 한 번 건너뛴다. 지우기·아래로 채우기·Ctrl+Enter·한 칸 붙여넣기는 모든 영역에 적용하고, 복사는 `range-tsv.ts` `combineRangeTsv`(같은 열은 위아래, 같은 행은 좌우, 아니면 막음) 규칙이다. 잘라내기·행 삽입/삭제·요청 연결은 활성 영역만. 두 칸 이상 선택하면 오른쪽 아래에 개수·합계·평균을 보인다. WAREHOUSE도 같은 규칙이다(`extraCellRanges`).
+- `?focus=rowId`(FABRIC REQUEST DD 상태 칩에서 진입)는 검색·Status·열 필터·완료 제외를 풀고, 닫힌 행이면 그 담당 탭으로 연 뒤 Style No. 칸을 선택·스크롤하고 파라미터를 지운다. 행이 아직 동기화 전이면 기다린다.
+- 사이드바 하위 메뉴(DD MASTER의 EU·SEASON·CORE·PROJECT)는 화살표를 눌렀을 때만 연다. 현재 경로로 자동 펼치지 않는다(`AppSidebar` `openMap ?? false`).
+- 요청 연결 도우미(`RequestLinkHelperDialog`, `buildLinkHelperGroups`): 미연결 DD 행을 Style No.로 묶어 Garment No. 일치 후보로 auto·review·none을 가른다. auto는 후보 1개이고 미연결 옵션 수=행 수일 때만이며 값을 채우지 않는다. 짝 규칙은 `defaultLinkPairs` 하나다. 일괄 연결은 그룹 결과를 누적해 앞 그룹이 연결한 옵션을 막고, 스냅샷·쓰기는 한 번이다.
 
 ## FABRIC REQUEST (`src/routes/FabricRequest.tsx`, `src/data/request-template.ts`, `src/data/request-image.ts`)
 - 표 편집은 DD MASTER와 같은 선택·키보드·클립보드·되돌리기 단축키를 쓴다.
@@ -43,6 +50,7 @@
 - `/request` = 통합원단부 1팀(유관부서) 소싱 의뢰 원장. **DD MASTER보다 먼저다.** 차트 작성 → 작지 → DD 행 생성 순서.
 - 저장은 `requests` CACHE_KEY. 스타일 1건에 옵션 라인 N개. 옵션 라인 1개가 DD 행 1개와 짝이 될 예정(연결은 미구현).
 - 옵션 연결 키는 번호 변경에도 유지되는 `RequestOption.lineId`다. DD 연결은 FABRIC REQUEST가 아니라 DD 행에만 저장한다.
+- 옵션 그룹 끝 "DD 상태" 열(`ddStatus`)은 `records`의 `tech.requestLink`를 읽어 `requestDdStatus`로 계산하는 보기 전용 열이다. 요청 데이터에도 엑셀 양식(`TEMPLATE_COLUMNS`)에도 없다. 판정 순서는 DROP·REJECT, HOLD, 유효 FL#(완료), Received date(원단 수취), 지연, 진행이다. **FL# 완료와 원단 수취를 합치지 않고** 완료여도 수취일을 함께 적는다. 칩은 DD MASTER `?focus=rowId`로, FL#은 `/fabric/:key`(DD MASTER와 같은 원장 키)로 간다. 행 머리에 `DD 연결/옵션` 수를 보인다.
 - 엑셀에서 한 셀에 "1./2./3."으로 눌러 담던 옵션을 라인으로 푼 것이 이 화면의 핵심이다.
 - 스타일은 병합 블럭이다. style 열과 행 머리, 액션은 rowSpan으로 세로 병합하고, 옵션 칸만 옵션 수만큼 줄로 나눈다. 블럭은 최소 84px, 옵션 줄은 최소 28px이고 마지막에 24px "옵션 추가" 줄이 붙는다. 모든 셀은 줄바꿈하고 넘치면 세로 스크롤만 둔다(가로 스크롤 없음). 행 번호는 스타일 단위다. 옵션을 스타일과 분리된 행처럼 그리지 말 것.
 - 톤앤매너는 WAREHOUSE(탭+상단 강조 카드)와 DD MASTER(헤더·칩·h-7 컨트롤)를 따른다.
@@ -55,6 +63,7 @@
 - **양식과 파서는 `request-template.ts`의 `TEMPLATE_COLUMNS` 하나를 공유한다. 열 순서를 바꾸면 기존 양식 파일이 깨진다.**
 - 업로드 병합 키는 `차트 + Garment No.`다. 기존 건은 `reqId`와 사진 경로를 지킨다. 안 지키면 재업로드마다 사진이 날아간다.
 - 사진은 Firebase Storage(`requests/{reqId}/full.webp`, `thumb.webp`). 원본 1200px, 썸네일 400px webp로 줄여 올린다.
+- `/request?focus=reqId`는 필터를 풀고 해당 스타일의 Garment No. 셀을 선택·스크롤·강조한 뒤 `focus` 파라미터를 지운다.
 - **`getStorage`는 지연 초기화다**(`firebase.ts`의 `appStorage()`). 최상단에서 만들면 Storage 실패가 앱 전체 부팅을 막는다.
 - 양식에 사진 열은 없다. 엑셀 이미지 셀은 원본 차트에서도 깨져 있었다. 사진은 웹에서만 올린다.
 
