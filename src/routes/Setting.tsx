@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { Database, Save, Settings2, Trash2 } from "lucide-react"
+import { Database, DatabaseBackup, Save, Settings2, Trash2 } from "lucide-react"
 
 import { SectionCard } from "@/components/dashboard/SectionCard"
 import { DataTable, type DataTableColumn } from "@/components/data-table/DataTable"
@@ -18,6 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { checkStyleNo, fmtDateFull, fmtTime, normalizeSeason } from "@/data/format"
 import { clearCache } from "@/data/cache"
+import { backupFileName, buildJsonBackup } from "@/data/backup-export"
+import { downloadBlob } from "@/data/dd-export"
 import { currentUserIsOwner } from "@/data/auth"
 import { downloadLedgerArchive } from "@/data/ledger-archive"
 import { ingestChemical, ingestDevelopment, ingestFabric, ingestMaterials, ingestRdda, ingestSamples, ingestStudyWorkbook, ingestTs } from "@/data/upload"
@@ -102,6 +104,15 @@ export function Setting() {
     await clearCache()
     useAppStore.setState(createInitialAppState())
     setSaveMessage("파싱 캐시를 비우고 예시 데이터로 돌아갔습니다.")
+  }
+
+  const exportJsonBackup = async () => {
+    try {
+      downloadBlob(await buildJsonBackup(), backupFileName("json"))
+      setSaveMessage("JSON 백업을 내려받았습니다.")
+    } catch {
+      setSaveMessage("JSON 백업에 실패했습니다.")
+    }
   }
 
   useEffect(() => {
@@ -236,7 +247,7 @@ export function Setting() {
         <SectionCard title="파일 연결 센터" subtitle="열려 있는 Excel 파일도 탐색기에서 각 카드로 끌어다 놓을 수 있습니다. 파일은 한 번에 하나씩 해당 연결 카드에 올려주세요.">
           <div className="grid gap-4 lg:grid-cols-2">
             {[
-              { key: "development", title: "개발 현황 (DD)", file: "Development Dashboard.xlsx", targets: "HOME 완료·신규·스케줄 / DEVELOPMENT 전체 현황", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("development", files, ingestDevelopment) },
+              { key: "development", title: "개발 현황 (DD) · 비상용", file: "Development Dashboard.xlsx", targets: "웹에서 작성한 DD 전체가 파일 내용으로 바뀝니다.", accept: ".xlsx,.xls", onFiles: (files: File[]) => { if (window.confirm("DD 엑셀을 올리면 웹에서 작성한 DD 전체가 파일 내용으로 바뀝니다. JSON 백업을 먼저 내려받으셨습니까? 계속할까요?")) void deliverOne("development", files, ingestDevelopment) }, ownerOnly: true },
               { key: "samples", title: "샘플 관리 대장", file: "샘플 관리 대장.xlsx", targets: "FL 등록 현황 / DEVELOPMENT 완료 샘플 아카이브", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("samples", files, ingestSamples), ownerOnly: true },
               { key: "study", title: "STUDY 현황", file: "Capability Improvement.xlsx", targets: "STUDY 진행 현황 / HOME 업무 카드", accept: ".xlsx,.xls", onFiles: (files: File[]) => deliverOne("study", files, ingestStudyWorkbook) },
               { key: "ts", title: "TS 관리", file: "Technical survices {연도}.xlsx", targets: "TS 접수·처리 목록 / HOME 업무 카드", accept: ".xlsx,.xls,.csv", onFiles: (files: File[]) => deliverOne("ts", files, ingestTs) },
@@ -262,7 +273,9 @@ export function Setting() {
             <p className="mt-1 text-xs text-[var(--muted-foreground)]">동일 FL 제거 후 {sampleAudit.total.toLocaleString("ko-KR")}건 · FL 2606 {sampleAudit.june.toLocaleString("ko-KR")}건 · FL 2607 {sampleAudit.july.toLocaleString("ko-KR")}건 · 월 형식 불일치 {sampleAudit.invalidMonth.toLocaleString("ko-KR")}건</p>
             <p className="mt-1 text-xs text-[var(--muted-foreground)]">인식 시트: {sampleAudit.sheets.length ? sampleAudit.sheets.join(" · ") : "기존 캐시 — 샘플관리대장을 다시 올리면 시트별 정보가 표시됩니다."}</p>
           </div>
-          <div className="mt-4 border-t border-[var(--border)] pt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[var(--border)] pt-4">
+            <Button type="button" variant="outline" onClick={() => { void exportJsonBackup() }}><DatabaseBackup aria-hidden="true" />JSON 백업 내려받기</Button>
+            <p className="w-full text-xs text-[var(--muted-foreground)]">전체 데이터를 복원용 JSON 한 파일로 내려받습니다. 복원 기능은 아직 없습니다.</p>
             <Button type="button" variant="outline" onClick={() => { void resetCache() }}><Trash2 aria-hidden="true" />캐시 비우기</Button>
           </div>
         </SectionCard>

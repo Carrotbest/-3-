@@ -1,24 +1,25 @@
-import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
-import { CalendarDays, ClipboardList, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
+import { Fragment, memo, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
+import { CalendarDays, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
 import { Popover } from "radix-ui"
 import { Link } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ColumnFilterMenu } from "@/components/data-table/ColumnFilterMenu"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DataUpload } from "@/components/upload/DataUpload"
+import { backupFileName, buildExcelBackup } from "@/data/backup-export"
+import { useAuthStore } from "@/data/auth"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
-import { fmtDateMd, normalizeDateInput, toDate } from "@/data/format"
+import { fmtDate, fmtDateMd, normalizeDateInput, toDate } from "@/data/format"
 import { loadViewFlag, loadViewGroups, saveViewPref } from "@/data/view-prefs"
 import { dayToneText, holidayName } from "@/data/holidays"
-import { ingestDevelopment } from "@/data/upload"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
 import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical } from "@/data/schema"
 import { buildWeeklyReport, reportOwnerNames as reportOwnersOf, weeklyReportText, type ReportDetailLevel } from "@/data/weekly-report"
@@ -974,6 +975,7 @@ function EditorGroup({ label, color, columns, draft, onChange, optionsById, layo
 
 export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope?: string | null }) {
   const records = useAppStore((state) => state.records)
+  const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
   const [fdsYdsOpen, setFdsYdsOpen] = useState(false)
   // 주간 보고 팝업. 전체와 담당별 탭을 두고, 탭마다 손질한 문장을 따로 들고 있는다.
   // 한 탭에서 고친 것이 다른 탭으로 넘어가면 안 되니 문장은 탭별로 보관한다.
@@ -988,6 +990,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [fdsYdsExporting, setFdsYdsExporting] = useState(false)
   const fdsYdsRows = useMemo(() => fdsYdsOpen ? collectFdsYdsRows(records) : [], [fdsYdsOpen, records])
   const fdsYdsMissing = useMemo(() => fdsYdsRows.filter((row) => row.missing).length, [fdsYdsRows])
+  const fdsYdsFlRegistered = useMemo(() => fdsYdsRows.filter((row) => row.flRegistered).length, [fdsYdsRows])
   useEffect(() => {
     if (!fdsYdsNotice) return
     const timer = window.setTimeout(() => setFdsYdsNotice(null), 3000)
@@ -1076,6 +1079,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }, [owner])
   const [status, setStatus] = useState(ALL)
   const [sortBy, setSortBy] = useState<{ col: string; dir: "asc" | "desc" } | null>(null)
+  const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({})
   // 담당 탭에서 완료·DROP·REJECT 를 감출지. 전체 탭은 항상 감춘다.
   const [hideClosed, setHideClosed] = useState(false)
   const [replaceOpen, setReplaceOpen] = useState(false)
@@ -1203,19 +1207,37 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     return String(leftValue).localeCompare(String(rightValue), "ko-KR", { numeric: true })
   }
 
+  const passesBaseFilters = (record: DevRecord, exceptColumnId?: string): boolean => {
+    if (owner !== ALL && record.owner !== owner) return false
+    // 전체 탭은 진행 중인 건만 본다. 담당 탭은 숨김을 켰을 때만 감춘다.
+    if ((owner === ALL || hideClosed) && status === ALL && isClosedRecord(record)) return false
+    if (status !== ALL && (record.devStatus || record.stage) !== status) return false
+    const query = search.trim().toLocaleLowerCase("ko-KR")
+    const linked = ledgerByRecord.get(recordIdentity(record)) ?? null
+    if (query && !allColumns.some((column) => String(column.value(record, linked) ?? "").toLocaleLowerCase("ko-KR").includes(query))
+      && !String(record.tech?.development?.developer ?? "").toLocaleLowerCase("ko-KR").includes(query)) return false
+    return Object.entries(columnFilters).every(([columnId, selected]) => {
+      if (columnId === exceptColumnId) return true
+      const column = allColumns.find((candidate) => candidate.id === columnId)
+      return !column || selected.includes(String(column.value(record, linked) ?? "").trim())
+    })
+  }
+
+  const loadColumnOptions = (column: MasterColumn) => {
+    const recordsByKey = new Map<string, DevRecord>()
+    for (const record of scoped) {
+      if (!passesBaseFilters(record, column.id)) continue
+      const key = String(column.value(record, ledgerByRecord.get(recordIdentity(record)) ?? null) ?? "").trim()
+      if (!recordsByKey.has(key)) recordsByKey.set(key, record)
+    }
+    return Array.from(recordsByKey, ([key, record]) => ({ key, record }))
+      .sort((left, right) => compareColumnRows(left.record, right.record, column))
+      .map(({ key }) => ({ key, label: key === "" ? "(빈 칸)" : column.date ? fmtDate(key) : key }))
+  }
+
   // 기본 순서(수동 순서 → 접수일 오래된 순). 방금 접수한 행 강조는 여기에 반영하지 않는다.
   const ordered = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase("ko-KR")
-    const rows = scoped.filter((record) => {
-      if (owner !== ALL && record.owner !== owner) return false
-      // 전체 탭은 진행 중인 건만 본다. 담당 탭은 숨김을 켰을 때만 감춘다.
-      if ((owner === ALL || hideClosed) && status === ALL && isClosedRecord(record)) return false
-      if (status !== ALL && (record.devStatus || record.stage) !== status) return false
-      if (!query) return true
-      const linked = ledgerByRecord.get(recordIdentity(record)) ?? null
-      return allColumns.some((column) => String(column.value(record, linked) ?? "").toLocaleLowerCase("ko-KR").includes(query))
-        || String(record.tech?.development?.developer ?? "").toLocaleLowerCase("ko-KR").includes(query)
-    }).map((record, index) => ({ record, index }))
+    const rows = scoped.filter((record) => passesBaseFilters(record)).map((record, index) => ({ record, index }))
     const sortColumn = sortBy ? allColumns.find((column) => column.id === sortBy.col) : undefined
     return rows
       .sort((a, b) => {
@@ -1236,7 +1258,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         return Number(isClosedRecord(b.record)) - Number(isClosedRecord(a.record))
       })
       .map(({ record }) => record)
-  }, [allColumns, hideClosed, ledgerByRecord, owner, scoped, search, sortBy, status])
+  }, [allColumns, columnFilters, hideClosed, ledgerByRecord, owner, scoped, search, sortBy, status])
 
   // 필터를 걷어낸 전체 순서. 담당별 재배치를 저장할 때 다른 담당 행의 자리를 지키는 기준이 된다.
   const globalOrdered = useMemo(() => scoped
@@ -2256,6 +2278,18 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (move) moveSelection(move, false, move === "left" || move === "right", origin)
   }
   const [exporting, setExporting] = useState(false)
+  const [backupExporting, setBackupExporting] = useState(false)
+  const exportBackup = async () => {
+    if (backupExporting) return
+    setBackupExporting(true)
+    try {
+      downloadBlob(await buildExcelBackup(), backupFileName("xlsx"))
+    } catch {
+      notify("엑셀 백업에 실패했습니다.")
+    } finally {
+      setBackupExporting(false)
+    }
+  }
   /**
    * 화면에서 보고 있는 순서 그대로 DD 엑셀 양식으로 내보낸다.
    * 시트는 전체현황과 담당별로 나눈다. 접혀 있는 열도 포함해 64열 전부를 쓴다.
@@ -2386,10 +2420,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <Button type="button" size="sm" variant="ghost" className="rounded-none" disabled={!editEnabled} title={editEnabled ? "찾기·바꾸기 (Ctrl+H)" : EDIT_DISABLED_MESSAGE} onClick={() => { setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true) }}><Search className="size-4" />찾기·바꾸기</Button>
         </div>
         {sortBy ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setSortBy(null)}><X className="size-4" />정렬 해제</Button> : null}
+        {Object.keys(columnFilters).length ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setColumnFilters({})}><FilterX className="size-4" />필터 해제 ({Object.keys(columnFilters).length})</Button> : null}
         {/* 밖으로 내보내는 동작 둘. 테두리를 남겨 편집 도구와 구분한다. */}
         <Button type="button" size="sm" variant="outline" title="주간 업무 보고에 붙일 현황 문장을 만듭니다. 완료는 Received date 기준입니다" onClick={openWeeklyReport}><ClipboardList className="size-4" />주간 보고</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
         <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
+        {canBackup ? <Button type="button" size="sm" variant="outline" disabled={backupExporting} title="DD 전체와 창고 상태·이력, 샘플대장을 필드 그대로 엑셀로 내려받습니다" onClick={() => void exportBackup()}>{backupExporting ? <Loader2 className="size-4 animate-spin" /> : <DatabaseBackup className="size-4" />}엑셀 백업</Button> : null}
         <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={resetColumnWidths}><RotateCcw className="size-4" />열 너비 초기화</Button>
       </div>
     </div>
@@ -2399,7 +2435,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <label className="relative block w-44 shrink-0"><span className="sr-only">DD 전체 열 검색</span><Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="전체 열 검색" className="h-7 pl-8 text-[11px]" /></label>
         <Select value={owner} onValueChange={setOwner}><SelectTrigger className="h-7 w-28 shrink-0 text-[11px]"><SelectValue placeholder="담당" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 담당</SelectItem>{ownerOptions.map((item) => <SelectItem key={item} value={item}>{ownerDisplayName(item)}</SelectItem>)}</SelectContent></Select>
         <Select value={status} onValueChange={setStatus}><SelectTrigger className="h-7 w-28 shrink-0 text-[11px]"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
-        <Button type="button" size="sm" variant="outline" className="h-7 shrink-0 px-2 text-[11px]" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL) }}><RotateCcw className="size-3.5" />초기화</Button>
+        <Button type="button" size="sm" variant="outline" className="h-7 shrink-0 px-2 text-[11px]" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL); setColumnFilters({}) }}><RotateCcw className="size-3.5" />초기화</Button>
         <Button type="button" size="sm" variant={hideClosed ? "default" : "outline"} className="h-7 shrink-0 px-2 text-[11px]" aria-pressed={hideClosed} title="완료, DROP, REJECT 건을 감춥니다" onClick={() => setHideClosed((current) => !current)}>{hideClosed ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}완료 제외</Button>
         {!editEnabled ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--background)] px-2.5 py-1 text-[11px] text-[var(--muted-foreground)]">읽기 전용 · 담당을 선택하면 수정할 수 있습니다</span> : null}
         {intakeNotice ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full bg-[var(--muted)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)]">{intakeNotice}</span> : null}
@@ -2408,9 +2444,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             {GROUPS.map((group) => <button type="button" key={group.key} aria-pressed={openGroups[group.key]} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: !current[group.key] }))} className={`flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full border px-1.5 py-0.5 text-[11px] font-normal transition-colors ${openGroups[group.key] ? "border-transparent text-white" : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)]"}`} style={openGroups[group.key] ? { backgroundColor: group.color } : undefined}>{openGroups[group.key] ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}{group.label}<span className="opacity-75">{group.columns.length}</span></button>)}
           </div>
           <p className="shrink-0 whitespace-nowrap">{filtered.length.toLocaleString("ko-KR")} / {scoped.length.toLocaleString("ko-KR")}행</p>
-          <div className="flex shrink-0 items-center gap-2">
-            <DataUpload kind="development-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} />
-          </div>
         </div>
       </div>
 
@@ -2427,14 +2460,14 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           <thead className="sticky top-0 z-30 bg-[var(--card)] shadow-sm">
             <tr className="h-6">
               <th rowSpan={3} className="sticky left-0 z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] text-center text-[10px] font-normal text-[var(--muted-foreground)]" style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH }} />
-              {PINNED_COLUMNS.map((column, index) => { const width = widthOf(column); return <th key={column.id} rowSpan={3} onClick={() => toggleColumnSort(column.id)} className={`relative sticky z-40 cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width, left: pinnedLeft(index) }}><span className="inline-flex items-center gap-1">{column.label}{sortIcon(column.id)}</span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> })}
+              {PINNED_COLUMNS.map((column, index) => { const width = widthOf(column), active = Boolean(columnFilters[column.id]); return <th key={column.id} rowSpan={3} onClick={() => toggleColumnSort(column.id)} className={`relative sticky z-40 cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width, left: pinnedLeft(index) }}><span className="flex items-center gap-1"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> })}
               {visibleGroups.map((group) => <th key={group.key} colSpan={group.columns.length} rowSpan={group.columns.some((column) => column.sub) ? 1 : 2} className="relative border-b border-r border-[var(--border)] px-2 text-center text-[11px] font-semibold" style={{ color: group.color, background: `color-mix(in srgb, ${group.color} 12%, var(--card))` }}><span>{group.label}</span>{group.key === "detail" ? <button type="button" aria-label={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} aria-pressed={finishingOpen} title={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} onClick={(event) => { event.stopPropagation(); setFinishingOpen((current) => !current) }} className="absolute right-3 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none hover:bg-[var(--muted)]">{finishingOpen ? "-" : "+"}</button> : null}<span aria-hidden="true" title={`${group.label} 너비 조절`} onMouseDown={(event) => startGroupResize(group.columns, event)} className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th>)}
             </tr>
             <tr className="h-6">
               {visibleGroups.filter((group) => group.columns.some((column) => column.sub)).flatMap((group) => subRuns(group.columns).map((run, index) => <th key={`${group.key}-sub-${index}`} colSpan={run.span} className="border-b border-r border-[var(--border)] px-2 text-center text-[10px] font-semibold" style={{ color: run.label ? group.color : "transparent", background: `color-mix(in srgb, ${group.color} ${run.label ? 18 : 12}%, var(--card))` }}>{run.label || "·"}</th>))}
             </tr>
             <tr className="h-8">
-              {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column); return <th key={`${group.key}-${column.id}`} onClick={() => toggleColumnSort(column.id)} className={`relative cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal text-[var(--muted-foreground)] ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${alignOf(column) === "center" ? "text-center" : "text-left"}`} style={{ width, minWidth: width }}><span className="inline-flex items-center gap-1">{column.label}{sortIcon(column.id)}</span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
+              {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column), active = Boolean(columnFilters[column.id]); return <th key={`${group.key}-${column.id}`} onClick={() => toggleColumnSort(column.id)} className={`relative cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${alignOf(column) === "center" ? "text-center" : "text-left"}`} style={{ width, minWidth: width }}><span className="flex items-center gap-1"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
             </tr>
           </thead>
           <tbody>
@@ -2630,14 +2663,15 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <DialogHeader>
           <DialogTitle>FDS/YDS 요청</DialogTitle>
           <DialogDescription>
-            진행중인 GD 원단 중 Received date가 있고 FDS 또는 YDS 미수취 {fdsYdsRows.length}건
+            진행중인 GD 원단 중 Received date가 있고 FDS 또는 YDS 미수취 {fdsYdsRows.length - fdsYdsFlRegistered}건
             {fdsYdsMissing ? ` · 번호 미기재 ${fdsYdsMissing}건` : ""}
+            {fdsYdsFlRegistered ? ` · FL 등록·FDS 미수취 ${fdsYdsFlRegistered}건` : ""}
           </DialogDescription>
           <p className="text-[11px] leading-relaxed text-[var(--destructive)]">
             STYLE#이나 ARRANGE#가 비어도 목록에는 올립니다. 요청이 조용히 누락되지 않게 하려는 것입니다.
             다만 <strong className="font-semibold">비어 있는 건은 그대로 보내면 GD가 작지를 찾지 못해 접수가 안 됩니다.</strong>
             붉은 미기재 표시가 붙은 행은 맨 위에 모아 두었습니다. 보내기 전에 DD MASTER에서 채우세요.
-            Received date가 없는 건(원단 미수취)과 FL#이 등록된 건(FDS 이미 수취)은 제외합니다.
+            FL#이 등록된 건은 FDS를 이미 받은 것으로 보고 제외합니다. 다만 이번 달과 지난달에 FL을 등록했는데 FDS가 빈 건은 표 아래에 따로 모으고 REMARK에 FL#을 적어 보냅니다.
             REQUEST 날짜는 비워 두었습니다. 메일 보내는 날에 맞춰 직접 입력하세요.
           </p>
         </DialogHeader>
@@ -2645,7 +2679,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           {fdsYdsRows.length ? <table className="w-full table-fixed border-collapse text-xs" style={{ minWidth: 1200 }}>
             <colgroup>{FDS_YDS_COLUMNS.map((column) => <col key={column.key} style={{ width: `${column.width}ch` }} />)}</colgroup>
             <thead><tr>{FDS_YDS_COLUMNS.map((column) => <th key={column.key} className="border border-[#bfbfbf] bg-[#d6e4f0] px-2 py-2 text-center font-bold text-black">{column.head}</th>)}</tr></thead>
-            <tbody>{fdsYdsRows.map((row) => <tr key={row.key} className={row.missing ? "bg-[color-mix(in_srgb,var(--destructive)_7%,transparent)]" : ""}>
+            <tbody>{fdsYdsRows.map((row, index) => <Fragment key={row.key}>
+              {row.flRegistered && !fdsYdsRows[index - 1]?.flRegistered ? <tr className="bg-amber-500/10">
+                <td colSpan={FDS_YDS_COLUMNS.length} className="border border-[#bfbfbf] px-2 py-2 font-bold">FL 등록 · FDS 미수취 {fdsYdsFlRegistered}건</td>
+              </tr> : null}
+              <tr className={row.missing ? "bg-[color-mix(in_srgb,var(--destructive)_7%,transparent)]" : row.flRegistered ? "bg-amber-500/10" : ""}>
               {FDS_YDS_COLUMNS.map((column) => <td key={column.key} className="whitespace-pre-wrap break-words border border-[#bfbfbf] px-2 py-1 align-top">
                 {column.key === "body" ? <input
                   aria-label={`${row.hmp} BODY`}
@@ -2660,7 +2698,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   ? <span className="font-semibold text-[var(--destructive)]">미기재</span>
                   : row[column.key]}
               </td>)}
-            </tr>)}</tbody>
+              </tr>
+            </Fragment>)}</tbody>
           </table> : <p className="py-8 text-center text-sm">요청할 건이 없습니다.</p>}
         </DialogBody>
         <DialogFooter>

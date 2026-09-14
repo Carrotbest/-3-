@@ -37,7 +37,6 @@ import { DataTable, type DataTableColumn } from "@/components/data-table/DataTab
 import { RecordListDialog } from "@/components/data-table/RecordListDialog"
 import { StatusBadge } from "@/components/data-table/StatusBadge"
 import { PageHeader } from "@/components/layout/PageHeader"
-import { DataUpload } from "@/components/upload/DataUpload"
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Reveal } from "@/components/motion/Reveal"
 import { Tilt3D } from "@/components/motion/Tilt3D"
@@ -94,7 +93,6 @@ import {
   type FieldDefinition,
 } from "@/data/schema"
 import { useAppStore } from "@/store/useAppStore"
-import { ingestDevelopment } from "@/data/upload"
 import { normalizeCategory } from "@/data/xlsx-parsers"
 import { hoverLift } from "@/lib/motion"
 import { useInView } from "@/lib/useInView"
@@ -711,7 +709,6 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
       <PageHeader
         title="DEVELOPMENT"
         subtitle="샘플 개발 유형과 공정 도달률, 담당자별 현황을 한눈에 확인합니다."
-        actions={<DataUpload kind="development-dd-overview" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} />}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -1488,7 +1485,6 @@ function DevelopmentList() {
           : routeCategory
             ? `${routeCategory} 카테고리 개발 현황입니다.`
             : "개발 건의 전체 진행 현황을 확인합니다."}
-        actions={<DataUpload kind="development-dd" label="DD 업로드" accept=".xlsx,.xls" compact onFiles={(files) => { if (files[0]) void ingestDevelopment(files[0]) }} />}
       />
 
       {view !== "completed" ? (

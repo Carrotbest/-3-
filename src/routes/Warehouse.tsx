@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode , type CSSProperties } from "react"
 import * as Popover from "@radix-ui/react-popover"
-import { ArchiveRestore, Copy, FileDown, Info, ListX, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
+import { ArchiveRestore, Copy, DatabaseBackup, FileDown, Info, ListX, Loader2, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Badge } from "@/components/ui/badge"
@@ -21,6 +21,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { buildFabricLedger, fabricRecordIdentity, type FabricLedgerItem } from "@/data/fabric-ledger"
+import { backupFileName, buildExcelBackup } from "@/data/backup-export"
+import { useAuthStore } from "@/data/auth"
 import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
 import { downloadBlob } from "@/data/dd-export"
 import { buildWarehouseWorkbook, collectWarehouseExport, warehouseExportFileName } from "@/data/warehouse-export"
@@ -399,6 +401,7 @@ function StatusMixBar({ counts, total, onPick }: { counts: Record<WarehouseTab, 
 }
 
 export function Warehouse() {
+  const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
   const records = useAppStore((state) => state.records)
   const samples = useAppStore((state) => state.completed)
   const overrides = useAppStore((state) => state.fabricOverrides)
@@ -408,6 +411,18 @@ export function Warehouse() {
   const [exportRange, setExportRange] = useState(loadExportRange)
   const [exportBusy, setExportBusy] = useState(false)
   const [exportError, setExportError] = useState("")
+  const [backupExporting, setBackupExporting] = useState(false)
+  const exportBackup = async () => {
+    if (backupExporting) return
+    setBackupExporting(true)
+    try {
+      downloadBlob(await buildExcelBackup(), backupFileName("xlsx"))
+    } catch {
+      window.alert("엑셀 백업에 실패했습니다.")
+    } finally {
+      setBackupExporting(false)
+    }
+  }
   useEffect(() => { saveViewPref(EXPORT_RANGE_KEY, exportRange) }, [exportRange])
   useEffect(() => { if (exportOpen) setExportError("") }, [exportOpen, exportRange])
   const exportDates = exportRange.preset === "직접 지정" ? exportRange : exportPresetDates(exportRange.preset)
@@ -1222,6 +1237,7 @@ export function Warehouse() {
     <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setExportOpen(true)}>
       <FileDown className="size-4" />창고팀 자료
     </Button>
+    {canBackup ? <Button type="button" size="sm" variant="outline" className="shrink-0" disabled={backupExporting} title="DD 전체와 창고 상태·이력, 샘플대장을 필드 그대로 엑셀로 내려받습니다" onClick={() => void exportBackup()}>{backupExporting ? <Loader2 className="size-4 animate-spin" /> : <DatabaseBackup className="size-4" />}엑셀 백업</Button> : null}
     </div>
 
     <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>

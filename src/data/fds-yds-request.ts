@@ -8,6 +8,8 @@ export interface FdsYdsRow {
   key: string
   /** STYLE#(GD#/SA#) 또는 ARRANGE#가 비어 있다. 그대로 보내면 GD가 작지를 못 찾는다. */
   missing: boolean
+  /** 최근 2개월 안에 FL#은 등록됐지만 FDS 날짜가 비어 있는 건이다. */
+  flRegistered: boolean
   owner: string
   hmp: string
   style: string
@@ -20,8 +22,8 @@ export interface FdsYdsRow {
   remark: string
 }
 
-/** 표에 실제로 찍는 열. `key`와 `missing`은 화면 동작용 값이라 열에서 뺀다. */
-export const FDS_YDS_COLUMNS: readonly { key: keyof Omit<FdsYdsRow, "key" | "missing">; head: string; width: number }[] = [
+/** 표에 실제로 찍는 열. `key`, `missing`, `flRegistered`는 화면 동작용 값이라 열에서 뺀다. */
+export const FDS_YDS_COLUMNS: readonly { key: keyof Omit<FdsYdsRow, "key" | "missing" | "flRegistered">; head: string; width: number }[] = [
   { key: "owner", head: "담당", width: 10 },
   { key: "hmp", head: "HMP", width: 14 },
   { key: "style", head: "STYLE", width: 12 },
@@ -61,9 +63,13 @@ const styleNoOf = (record: DevRecord): string =>
  * 그렇게 하면 번호를 아직 안 채운 건이 화면에서 조용히 사라져 요청 자체가 누락됐다.
  * 지금은 올리고 `missing`으로 표시해 맨 위에 세운다. 비어 있으면 GD가 작지를 못 찾으므로
  * 보내기 전에 DD MASTER에서 채워야 한다. 그 판단은 사람이 한다.
+ *
+ * 최근 2개월의 **FL 등록·FDS 미수취** 건도 별도 분기로 올린다. FL#이 있으면 Status가 자동으로
+ * 완료되어 `isInProgress`에서 빠지고, FDS 날짜는 웹 전용이라 기간 제한 없이는 과거 건이 섞인다.
  */
-export function collectFdsYdsRows(records: readonly DevRecord[]): FdsYdsRow[] {
-  return records.filter((record) => {
+export function collectFdsYdsRows(records: readonly DevRecord[], today = new Date()): FdsYdsRow[] {
+  const currentMonth = today.getFullYear() * 12 + today.getMonth()
+  const existing = records.filter((record) => {
     const co = text(record.tech?.development?.co || record.devType).toUpperCase()
     if (co !== "GD" || !text(record.styleNo)) return false
     // 진행중 판정은 `isInProgress` 하나를 쓴다. Status 값이 있으면 "진행중"일 때만,
@@ -74,9 +80,26 @@ export function collectFdsYdsRows(records: readonly DevRecord[]): FdsYdsRow[] {
     // FL#이 등록된 건은 FDS를 이미 받은 것이다. 요청할 이유가 없다.
     if (isCompletedFlNo(record.flNo)) return false
     return !text(record.tech?.sampleDates?.fds) || !text(record.tech?.sampleDates?.yds)
-  }).map((record) => ({
+  })
+  const flRegistered = records.filter((record) => {
+    const co = text(record.tech?.development?.co || record.devType).toUpperCase()
+    if (co !== "GD" || !text(record.styleNo) || !text(record.receivedDate)) return false
+    if (!isCompletedFlNo(record.flNo) || text(record.tech?.sampleDates?.fds)) return false
+    if (["DROP", "HOLD", "REJECT"].includes(text(record.devStatus).replace(/\s+/g, "").toUpperCase())) return false
+    const match = text(record.flNo).replace(/\s+/g, "").toUpperCase().match(/^FL(\d{2})(\d{2})\d{4}$/)
+    if (!match) return false
+    const year = Number(match[1])
+    const month = Number(match[2])
+    if (month < 1 || month > 12) return false
+    const registeredMonth = (2000 + year) * 12 + (month - 1)
+    const monthDiff = currentMonth - registeredMonth
+    return monthDiff === 0 || monthDiff === 1
+  })
+
+  return [...existing.map((record) => ({ record, flRegistered: false })), ...flRegistered.map((record) => ({ record, flRegistered: true }))].map(({ record, flRegistered }) => ({
     key: `${record._src.sheet}::${record._src.row}`,
     missing: !styleNoOf(record) || !text(record.tech?.arrangeNo),
+    flRegistered,
     // 퇴사자는 이니셜로 익명 표기한다. GD로 나가는 자료라 실명을 그대로 싣지 않는다.
     owner: ownerDisplayName(text(record.owner)),
     hmp: text(record.styleNo),
@@ -88,9 +111,12 @@ export function collectFdsYdsRows(records: readonly DevRecord[]): FdsYdsRow[] {
     request: "",
     fds: dateText(record.tech?.sampleDates?.fds),
     yds: dateText(record.tech?.sampleDates?.yds),
-    remark: text(record.note),
+    remark: flRegistered
+      ? `${text(record.flNo).replace(/\s+/g, "").toUpperCase()} 등록, FDS 미수취${text(record.note) ? ` / ${text(record.note)}` : ""}`
+      : text(record.note),
     // 번호가 빈 건을 맨 위에 세운다. 그대로 보내면 접수가 안 되니 먼저 눈에 걸려야 한다.
-  })).sort((a, b) => Number(b.missing) - Number(a.missing)
+  })).sort((a, b) => Number(a.flRegistered) - Number(b.flRegistered)
+    || Number(b.missing) - Number(a.missing)
     || a.owner.localeCompare(b.owner, "ko-KR", { numeric: true })
     || a.hmp.localeCompare(b.hmp, "ko-KR", { numeric: true })
     || a.body.localeCompare(b.body, "ko-KR", { numeric: true }))

@@ -14,6 +14,8 @@ export const SCREEN_PERMISSION_OPTIONS = [
   { key: "calendar", label: "CALENDAR", paths: ["/calendar"] },
   // SETTING은 소유자 전용이다. 목록에 남겨 두되 실제 접근은 App에서 소유자만 통과시킨다.
   { key: "setting", label: "SETTING", paths: ["/setting"] },
+  // 화면이 아니라 기능 권한이다. 경로가 없어 라우팅에는 영향을 주지 않는다.
+  { key: "excelBackup", label: "엑셀 백업" },
 ] as const
 
 export type ScreenPermissionKey = (typeof SCREEN_PERMISSION_OPTIONS)[number]["key"]
