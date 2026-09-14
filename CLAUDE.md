@@ -16,6 +16,7 @@
 - `/development/workspace` = 살아있는 현황판(64열·7그룹, 담당·Status·Style 좌측 고정). 이 라우트만 `App.tsx`에서 폭 제약 해제.
 - 인라인 편집(셀 더블클릭, 타입별). 수식·대장연결 열은 수정 불가. 담당 칸 ⤢ → 64열 수정 모달.
 - 신규 작지 접수 팝업: REQUEST·ORIGINAL·담당·Style=옵션 공통(`changeShared`), DETAIL·SCHEDULE=옵션별(`changeOption`). 저장=옵션 수만큼 행(`saveIntake`, `_src.sheet="웹 접수"`).
+- 신규 접수 창의 "FABRIC REQUEST에서 불러오기"는 요청 스타일의 옵션을 DD 접수 행으로 채운다. 연결은 DD 행 `tech.requestLink { reqId, lineId }`에만 저장한다. `optId`는 삭제 시 번호가 바뀌므로 연결 키로 쓰지 않고 `RequestOption.lineId`를 쓰며, 엑셀 재업로드 병합은 같은 위치의 `lineId`를 이어받는다. 차트명으로 Category·Season을 채우지 않으며, Garment No.=Style No. 일치를 추천하되 예외가 있어 사람이 선택한다.
 - 접수 필수 항목=`INTAKE_REQUIRED_IDS`(담당·Style No.·Season·Category·Buyer·Planner·**Due Date**). 라벨 `*`·빈 칸 붉은 테두리·저장 차단이 모두 이 목록을 본다. Due Date가 비면 HOME 스케줄에서 그 건이 통째로 빠지므로 접수에서 막는다. 엑셀 업로드는 과거 시트를 그대로 들여오는 길목이라 걸지 않는다.
 - FDS/YDS 요청 팝업(`src/data/fds-yds-request.ts`): **진행중인 GD 원단 중 `Received date`가 있고 FDS 또는 YDS가 빈 건.** 진행중 판정은 `isInProgress` 하나를 쓴다. **Received date가 없으면 올리지 않는다.** 원단을 받은 뒤에 FDS를 따라가는 순서라 아직 안 받은 건은 요청할 것이 없다. FL#이 유효한 건도 제외한다(FDS를 이미 받았다는 뜻).
   **STYLE#(GD#/SA#)과 ARRANGE#가 비어도 올린다.** 예전에는 둘 다 있어야 올렸는데 그러면 번호를 안 채운 건이 화면에서 조용히 사라져 요청 자체가 누락됐다. 지금은 올리고 `missing`으로 표시해 맨 위에 세우고 붉은 "미기재"를 찍는다. 비어 있으면 GD가 작지를 못 찾아 접수가 안 되니 보내기 전에 채워야 한다. 그 판단은 사람이 한다. 표 복사와 엑셀 내려받기는 `rows`로 만들어서 "미기재" 글자는 화면에만 남고 파일에는 빈 칸으로 나간다.
@@ -33,15 +34,24 @@
   팝업은 전체 탭과 담당 탭, 그리고 요약·상세 토글로 갈린다. 담당 탭은 요약 아래에 데이터가 있는 카테고리를 2번부터 번호를 달아 잇는다. **요약은 개발 건 이름(Style No.)으로 묶는다. FL#으로 묶지 말 것.** FL#은 스타일과 조직 조합마다 따로 나가서 그것으로 묶으면 같은 개발 건이 열 줄로 흩어진다(Purepress 5줄, 우리에프씨 4줄). 상세는 FL#과 조직까지 상태마다 한 줄씩 적는다. 요약은 카테고리 안에서 **완료 묶음을 진행 묶음과 갈라 앞에 세운다.** 한 줄에 섞으면 그 주에 끝낸 것과 남은 것이 붙어 버린다. 완료 줄은 상태가 하나뿐이라 건수만 적는다. 한쪽만 있으면 `[완료]`·`[진행]` 머리를 붙이지 않는다. 상태 문장은 공정일로 만든다. 지나간 날짜는 완료, 미래 날짜는 예정이다. **협의 내용과 판단(재가공 요청, as is ok 등)은 DD에 없어 만들 수 없다.** 뼈대만 뽑고 나머지는 사람이 채운다.
   보고 기준 진행 중 = `Received date`가 빈 건. 신규 = 그중 구간 안에 접수된 건, 공정 중 = 나머지. 그래서 `전체 진행 = 신규 + 공정 중`이 항상 맞는다.
   카테고리 분류는 `normalizeCategory`를 거친다. 네 값에 안 맞는 건은 "분류 미기재"로 따로 적는다. 그 줄이 0이 아니면 카테고리 합이 전체와 안 맞으므로 DD Category를 손봐야 한다.
+- Style No. 칸 호버는 `StyleHoverLayer`가 스크롤 영역 위 오버레이로 같은 스타일 행 묶음(연속 구간마다 하나)을 그린다. 색은 `styleTimeline` 상태 톤이다. 호버를 부모 state로 올리지 말 것(64열 전체 재렌더). 행·셀에 transform을 걸지 말 것(sticky 깨짐).
 
 ## FABRIC REQUEST (`src/routes/FabricRequest.tsx`, `src/data/request-template.ts`, `src/data/request-image.ts`)
+- 표 편집은 DD MASTER와 같은 선택·키보드·클립보드·되돌리기 단축키를 쓴다.
+- 격자는 slot(블럭당 `max(1, 옵션 수)`) × `visibleColumns`다. style 열은 블럭 병합 셀이며 복사는 첫 slot에만 값을 쓰고, 붙여넣기는 옵션을 자동으로 늘리지 않는다.
+- 여러 셀 작업은 새 `requests` 배열을 한 번 만든 뒤 `saveRequests`를 한 번만 부른다.
 - `/request` = 통합원단부 1팀(유관부서) 소싱 의뢰 원장. **DD MASTER보다 먼저다.** 차트 작성 → 작지 → DD 행 생성 순서.
 - 저장은 `requests` CACHE_KEY. 스타일 1건에 옵션 라인 N개. 옵션 라인 1개가 DD 행 1개와 짝이 될 예정(연결은 미구현).
+- 옵션 연결 키는 번호 변경에도 유지되는 `RequestOption.lineId`다. DD 연결은 FABRIC REQUEST가 아니라 DD 행에만 저장한다.
 - 엑셀에서 한 셀에 "1./2./3."으로 눌러 담던 옵션을 라인으로 푼 것이 이 화면의 핵심이다.
-- 행 높이 고정(스타일 112px, 옵션 40px). 넘치면 셀 안에서만 스크롤한다. 엑셀처럼 행을 늘리지 않는다.
+- 스타일은 병합 블럭이다. style 열과 행 머리, 액션은 rowSpan으로 세로 병합하고, 옵션 칸만 옵션 수만큼 줄로 나눈다. 블럭은 최소 84px, 옵션 줄은 최소 28px이고 마지막에 24px "옵션 추가" 줄이 붙는다. 모든 셀은 줄바꿈하고 넘치면 세로 스크롤만 둔다(가로 스크롤 없음). 행 번호는 스타일 단위다. 옵션을 스타일과 분리된 행처럼 그리지 말 것.
+- 톤앤매너는 WAREHOUSE(탭+상단 강조 카드)와 DD MASTER(헤더·칩·h-7 컨트롤)를 따른다.
 - 셀 더블클릭 인라인 편집. 사진과 옵션 번호는 자동 값이라 편집 불가. URGENT는 더블클릭으로 바로 뒤집는다.
 - 밴드 4개(ORIGINAL·분석·의뢰·옵션)는 상단 칩으로 접고 편다. 열 머리와 밴드 머리 오른쪽 끝을 끌어 너비를 조절한다.
   밴드 손잡이는 그 밴드 열을 비율대로 함께 조절한다. 저장은 localStorage `fabric.request.colWidths`, `fabric.request.openGroups`.
+- 표의 `<colgroup>`을 지우지 말 것. 첫 헤더 줄이 병합 칸이라 없으면 개별 열 너비가 무시되고 전체 폭만 퍼진다.
+- 행 머리 아래 손잡이로 블럭 높이를 조절하며 `fabric.request.rowHeights`에 저장한다. 더블클릭하면 초기화하고 기본 높이보다 작게 줄일 수 없다.
+- 표 아래 빈 곳 우클릭 추가는 현재 차트·단계 필터 값을 넣고, 같은 차트의 최대 seq+1부터 매기며 빈 옵션 1개를 붙인다. 필터에 가려지지 않게 URGENT만 보기는 해제한다.
 - **양식과 파서는 `request-template.ts`의 `TEMPLATE_COLUMNS` 하나를 공유한다. 열 순서를 바꾸면 기존 양식 파일이 깨진다.**
 - 업로드 병합 키는 `차트 + Garment No.`다. 기존 건은 `reqId`와 사진 경로를 지킨다. 안 지키면 재업로드마다 사진이 날아간다.
 - 사진은 Firebase Storage(`requests/{reqId}/full.webp`, `thumb.webp`). 원본 1200px, 썸네일 400px webp로 줄여 올린다.
@@ -66,6 +76,11 @@
 ## TREND REPORT (`tools/trend`, `src/routes/TrendFabric.tsx`, `src/routes/TrendMacro.tsx`)
 - 파이썬 수집기가 `public/data/trend/{feed,kpi,status}.json`을 만들고 두 화면이 그 파일만 fetch한다. 서버·DB·AI 호출 없다.
 - 자동 실행, Secrets, 점수 튜닝, 제목 번역, 바이어 소스 등 **운영 상세는 전부 `tools/trend/README.md`에 있다.** 여기 옮겨 적지 말 것.
+
+## 주간 백업 (`tools/backup`)
+- PC 작업 스케줄러가 매주 Firestore `state`를 앱 로그인 계정(Firebase Auth REST, 비밀번호는 Windows 자격 증명 관리자)으로 읽어 저장소 밖 폴더에 JSON·엑셀·zip을 남기고 Outlook으로 메일을 보낸다.
+- 서비스 계정 키 방식은 조직 정책 `iam.disableServiceAccountKeyCreation`으로 막혀 있다. 되살리지 말 것.
+- `KEYS`는 `src/data/cache.ts`의 `CACHE_KEYS`와 같이 고친다. 운영 상세는 `tools/backup/README.md`.
 
 ## 주의(반복 실수 방지)
 - **KPI가 0으로 보이면 버그 아닐 수 있음**: `NumberTicker`·`RadialKpi`는 rAF로만 오름 → 탭 비활성이면 0. 실값은 `aria-label`에서 확인.
@@ -92,7 +107,7 @@
 ## 보기 설정 (`src/data/view-prefs.ts`)
 - 열 너비와 그룹 펼침/접힘은 **개인 브라우저(localStorage)에만** 남는다. `CACHE_KEYS`에 없어 Firestore로 안 올라간다. 한 사람이 바꿔도 팀원 화면은 그대로다.
 - 계정이 아니라 브라우저에 붙는다. 공용 PC에서는 앞사람 설정이 보이고, 다른 PC로 가면 기본값에서 시작한다.
-- 키: `dd-col-widths-v2`, `dd-open-groups-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `home-today-briefing-hidden-v1`.
+- 키: `dd-col-widths-v2`, `dd-open-groups-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `fabric.request.rowHeights`, `home-today-briefing-hidden-v1`.
 - 검색·필터·정렬·탭·선택은 일부러 저장하지 않는다. 남아 있으면 다음에 열었을 때 행이 왜 안 보이는지 헷갈린다.
 - **예외: DD MASTER 행 드래그 순서(`sortOrder`)는 레코드에 저장돼 팀 전체가 공유한다.** 보기 설정이 아니다.
 
@@ -114,6 +129,7 @@
 | HOME 스케줄 임박·지연 | DD | Due Date로 계산, **완료 판정은 Received date**(`isScheduleOpen`). FL#은 등록 번호일 뿐이라 실물 도착 기준으로 본다. **Due Date가 비면 임박·지연 어느 쪽에도 안 뜬다**(`daysLeft`=null이라 필터에서 제거) |
 | RDDA 등록 | ~2026-07 대장 FL.# YYMM / 08~ DD Received | 동일 FL 1건(대장 우선) `mergedFlRegistrations` |
 | DEVELOPMENT | DD+대장 | `fabric-rnd-fl-ledger` |
+| DEVELOPMENT 스타일 타임라인 | DD | Style No. 묶음, **완료=Received date**, HOLD·DROP·REJECT 제외, 스타일 상태=옵션 중 최악 |
 | 창고 입고대기 | GD=DD YDS / 국내=Received date | 대장 현황 시트 제외 |
 | STUDY/TS | 엑셀+웹입력 | 주차별 / 중복제외 |
 | TREND | RSS 24곳, SEC 공시, World Bank, US Census | 사전 점수 채택, 공개 자료만 |

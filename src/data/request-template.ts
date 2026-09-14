@@ -318,6 +318,7 @@ function readOption(
 ): RequestOption {
   return {
     optId: `${reqId}#${no}`,
+    lineId: crypto.randomUUID(),
     no,
     yarnDetail: asText(at(row, "yarnDetail")),
     color: asText(at(row, "color")),
@@ -358,8 +359,14 @@ export function mergeRequestStyles(existing: readonly RequestStyle[], incoming: 
       imageThumbPath: previous.imageThumbPath,
       createdAt: previous.createdAt,
       updatedAt: new Date().toISOString(),
-      // optId는 살아남은 reqId를 따라간다.
-      options: style.options.map((option, index) => ({ ...option, no: index + 1, optId: `${previous.reqId}#${index + 1}` })),
+      // 같은 위치의 lineId를 이어받아 재업로드 뒤에도 DD 연결을 지킨다.
+      // 엑셀에서 옵션 순서를 바꾸면 연결도 그 위치의 다른 옵션으로 옮겨가는 한계가 있다.
+      options: style.options.map((option, index) => ({
+        ...option,
+        no: index + 1,
+        optId: `${previous.reqId}#${index + 1}`,
+        lineId: previous.options[index]?.lineId ?? option.lineId,
+      })),
     }
     merged[merged.indexOf(previous)] = next
     updated += 1

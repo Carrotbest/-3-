@@ -12,6 +12,8 @@ export interface DevTechnical {
   development?: { developer?: string; co?: string; developmentNo?: string }
   /** 첨부 작업지시서에서 생성된 행의 중복 등록 방지용 원본 식별값. */
   intakeSource?: { kind: "zaji"; requestKey: string; optionKey: string }
+  /** FABRIC REQUEST 옵션과의 연결. 연결 정보는 DD 행 한쪽에만 저장한다. */
+  requestLink?: { reqId: string; lineId: string }
   // 공정 작업처 (DD 공정 SCHEDULE 그룹의 Mill 컬럼)
   mills?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
   // 공정별 완료일 (기존 processReached 판정에 쓰는 Status 원본값)
@@ -150,6 +152,8 @@ export interface RequestStyle {
 export interface RequestOption {
   /** `${reqId}#${no}` */
   optId: string
+  /** 번호가 바뀌어도 변하지 않는 옵션 고유 ID. DD 연결 키. */
+  lineId?: string
   /** 옵션 번호. 1부터 */
   no: number
   /** 엑셀 S열 */
@@ -160,10 +164,7 @@ export interface RequestOption {
   dyeingMethod: string
   /** 엑셀 Z열. 수기 유지 */
   remark: string
-  /**
-   * DD 행 연결. 값 기반 키라 DD 엑셀 재업로드 후에도 살아남는다.
-   * R104에서 DD 쪽에도 optId를 심어 양방향으로 만든다.
-   */
+  /** 미사용. DD 쪽 requestLink로 대체. */
   ddLink?: { styleNo: string; opt: string }
 }
 

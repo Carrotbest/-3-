@@ -374,8 +374,12 @@ function normalizedIntakePart(value: unknown): string {
 
 function intakeSourceKey(record: DevRecord): string | null {
   const source = record.tech?.intakeSource
-  if (!source?.requestKey || !source.optionKey) return null
-  return [source.kind, source.requestKey, source.optionKey].map(normalizedIntakePart).join("::")
+  if (source?.requestKey && source.optionKey) {
+    return [source.kind, source.requestKey, source.optionKey].map(normalizedIntakePart).join("::")
+  }
+  const requestLink = record.tech?.requestLink
+  if (!requestLink?.reqId || !requestLink.lineId) return null
+  return ["request", requestLink.reqId, requestLink.lineId].map(normalizedIntakePart).join("::")
 }
 
 /** 원본 식별값이 없던 기존 웹 접수 행과 비교하기 위한 보수적인 대체 키. */

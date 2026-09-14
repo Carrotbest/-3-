@@ -29,8 +29,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { RadialKpi, type RadialKpiTone } from "@/components/charts/RadialKpi"
-import { LeadTimeGantt } from "@/components/charts/LeadTimeGantt"
 import { OwnerLaneBoard } from "@/components/charts/OwnerLaneBoard"
+import { StyleTimeline } from "@/components/charts/StyleTimeline"
 import { SectionCard } from "@/components/dashboard/SectionCard"
 import { StatCard } from "@/components/dashboard/StatCard"
 import { DataTable, type DataTableColumn } from "@/components/data-table/DataTable"
@@ -67,7 +67,6 @@ import {
   ownerMonthlyFlTrend,
   processFunnel,
   receiptStatus,
-  sampleLeadTimeline,
   statusOf,
   subpageCardStats,
   type CategoryOverviewDatum,
@@ -888,6 +887,10 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
         </div>
       </SectionCard>
 
+      <SectionCard title="스타일 타임라인" subtitle="팀 전체 개발 스타일의 접수부터 완료·납기까지 기간입니다. 완료는 Received date 기준입니다." contentClassName="p-0">
+        <StyleTimeline records={records} today={today} onSelect={setSelectedRecord} />
+      </SectionCard>
+
       <CompletedSampleLibrary records={records} samples={completed} />
 
       <CategoryStyleDialog category={categoryDetail} styles={categoryStyles} onOpenChange={(open) => { if (!open) setCategoryDetail(null) }} />
@@ -1415,7 +1418,6 @@ function DevelopmentList() {
     [scopedFiltered, statusFilter, today],
   )
   const boardRows = useMemo(() => visibleRows.filter((row) => isInProgress(row) && row.stage !== "시험"), [visibleRows])
-  const timeline = useMemo(() => sampleLeadTimeline(visibleRows, today), [today, visibleRows])
   const columns = useMemo<DataTableColumn<DevRecord>[]>(() => {
     const base = DEFAULT_COLUMNS.map((key) => {
       const field = FIELDS.find((item) => item.key === key) as FieldDefinition
@@ -1526,9 +1528,9 @@ function DevelopmentList() {
           </SectionCard>
         </TabsContent>
         <TabsContent value="timeline" className="mt-6">
-          <SectionCard title="샘플 리드타임" subtitle={`필터 결과 ${visibleRows.length.toLocaleString("ko-KR")}건 · 접수일부터 완료일/납기일까지`} contentClassName="p-0">
+          <SectionCard title="스타일 타임라인" subtitle={`필터 결과 ${visibleRows.length.toLocaleString("ko-KR")}건 · 접수일부터 완료일/납기일까지`} contentClassName="p-0">
             <div className="border-b border-[var(--border)] p-4">{toolbar}</div>
-            <LeadTimeGantt rows={timeline.rows} minDate={timeline.minDate} maxDate={timeline.maxDate} todayPct={timeline.todayPct} today={today} onSelect={setSelectedRecord} />
+            <StyleTimeline records={visibleRows} today={today} onSelect={setSelectedRecord} hideOwnerCategoryFilters />
           </SectionCard>
         </TabsContent>
       </Tabs>

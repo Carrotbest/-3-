@@ -39,6 +39,22 @@ export function loadViewFlag(key: string, fallback: boolean): boolean {
   }
 }
 
+/** 숫자 맵 보기 설정. 범위를 벗어나거나 손상된 항목은 버린다. */
+export function loadViewNumbers(key: string, minimum: number, maximum: number): Record<string, number> {
+  if (typeof window === "undefined") return {}
+  try {
+    const raw = window.localStorage.getItem(key)
+    if (!raw) return {}
+    const stored = JSON.parse(raw) as unknown
+    if (!stored || typeof stored !== "object" || Array.isArray(stored)) return {}
+    return Object.fromEntries(Object.entries(stored as Record<string, unknown>).filter(([, value]) =>
+      typeof value === "number" && Number.isFinite(value) && value >= minimum && value <= maximum,
+    )) as Record<string, number>
+  } catch {
+    return {}
+  }
+}
+
 export function saveViewPref(key: string, value: unknown): void {
   if (typeof window === "undefined") return
   try {

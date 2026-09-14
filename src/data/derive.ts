@@ -747,6 +747,104 @@ export function sampleLeadTimeline(
   }
 }
 
+export interface StyleTimelineOption {
+  record: DevRecord
+  start: string
+  end: string
+  state: "progress" | "due" | "late" | "done"
+  progressPct: number
+}
+
+export interface StyleTimelineRow {
+  styleNo: string
+  owner: string
+  category: string
+  buyer: string
+  start: string
+  end: string
+  state: StyleTimelineOption["state"]
+  options: StyleTimelineOption[]
+  doneCount: number
+  progressPct: number
+}
+
+/** DD 옵션을 Style No.로 묶어 팀 단위 개발 타임라인을 만든다. */
+export function styleTimeline(records: readonly DevRecord[], today = new Date()): StyleTimelineRow[] {
+  const groups = new Map<string, DevRecord[]>()
+
+  records.forEach((record) => {
+    const styleNo = record.styleNo.trim()
+    const status = String(record.devStatus ?? "").trim().toLowerCase().replace(/\s+/g, "")
+    if (!styleNo || /^(hold|보류|drop|reject)$/.test(status)) return
+    const group = groups.get(styleNo)
+    if (group) group.push(record)
+    else groups.set(styleNo, [record])
+  })
+
+  const mostFrequent = (rows: readonly DevRecord[], field: "owner" | "category" | "buyer"): string => {
+    const counts = new Map<string, { count: number; first: number }>()
+    rows.forEach((row, index) => {
+      const value = row[field].trim()
+      if (!value) return
+      const current = counts.get(value)
+      if (current) current.count += 1
+      else counts.set(value, { count: 1, first: index })
+    })
+    return [...counts.entries()]
+      .sort((left, right) => right[1].count - left[1].count || left[1].first - right[1].first)[0]?.[0] ?? ""
+  }
+
+  const stateRank: Record<StyleTimelineOption["state"], number> = { done: 0, progress: 1, due: 2, late: 3 }
+
+  return [...groups.entries()]
+    .map<StyleTimelineRow>(([styleNo, group]) => {
+      const options = group.map<StyleTimelineOption>((record) => {
+        const due = toDate(record.dueDate)
+        const received = toDate(record.receivedDate)
+        const requested = toDate(record.requestDate)
+        const fallbackStart = due ? addLocalDays(due, -14) : startOfLocalDay(today)
+        const start = startOfLocalDay(requested ?? received ?? fallbackStart)
+        const remaining = daysLeft(record.dueDate, today)
+        const state: StyleTimelineOption["state"] = String(record.receivedDate ?? "").trim()
+          ? "done"
+          : remaining === null
+            ? "progress"
+            : remaining < 0
+              ? "late"
+              : remaining <= 3
+                ? "due"
+                : "progress"
+        const preferredEnd = state === "done" ? (received ?? due) : due
+        const endCandidate = startOfLocalDay(preferredEnd ?? received ?? addLocalDays(start, 14))
+        const end = endCandidate.getTime() < start.getTime() ? start : endCandidate
+        const progressPct = state === "done" ? 100 : (fiveStageIndex(record, today) + 1) * 20
+        return { record, start: localDay(start), end: localDay(end), state, progressPct }
+      }).sort((left, right) => left.start.localeCompare(right.start) || left.record.opt.localeCompare(right.record.opt, "ko-KR", { numeric: true }))
+
+      const state = options.reduce<StyleTimelineOption["state"]>(
+        (worst, option) => stateRank[option.state] > stateRank[worst] ? option.state : worst,
+        "done",
+      )
+      return {
+        styleNo,
+        owner: mostFrequent(group, "owner"),
+        category: mostFrequent(group, "category"),
+        buyer: mostFrequent(group, "buyer"),
+        start: options[0].start,
+        end: options.reduce((latest, option) => option.end > latest ? option.end : latest, options[0].end),
+        state,
+        options,
+        doneCount: options.filter((option) => option.state === "done").length,
+        progressPct: Math.round(options.reduce((sum, option) => sum + option.progressPct, 0) / options.length),
+      }
+    })
+    .sort((left, right) =>
+      ownerDisplayName(left.owner).localeCompare(ownerDisplayName(right.owner), "ko-KR")
+      || left.start.localeCompare(right.start)
+      || left.styleNo.localeCompare(right.styleNo, "ko-KR", { numeric: true }),
+    )
+}
+
 /** DD 완료건의 delivery date. */
 export function completionDate(record: DevRecord): string {
   return record.receivedDate || record.dueDate

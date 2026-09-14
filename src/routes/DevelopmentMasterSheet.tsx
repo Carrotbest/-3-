@@ -1,4 +1,4 @@
-import { Fragment, memo, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
+import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
 import { CalendarDays, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, X } from "lucide-react"
 import { Popover } from "radix-ui"
 import { Link } from "react-router-dom"
@@ -6,6 +6,8 @@ import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ColumnFilterMenu } from "@/components/data-table/ColumnFilterMenu"
+import { RequestPickerDialog } from "@/components/dd/RequestPickerDialog"
+import { StyleHoverLayer, type StyleHoverLayerHandle } from "@/components/data-table/StyleHoverLayer"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,15 +17,16 @@ import { useAuthStore } from "@/data/auth"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
-import { optionSequenceText } from "@/data/derive"
+import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
 import { fmtDate, fmtDateMd, normalizeDateInput, toDate } from "@/data/format"
 import { loadViewFlag, loadViewGroups, saveViewPref } from "@/data/view-prefs"
+import { ensureRequestLineIds, requestCandidates, requestToIntakeRecords } from "@/data/request-link"
 import { dayToneText, holidayName } from "@/data/holidays"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
-import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical } from "@/data/schema"
+import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical, type RequestOption, type RequestStyle } from "@/data/schema"
 import { buildWeeklyReport, reportOwnerNames as reportOwnersOf, weeklyReportText, type ReportDetailLevel } from "@/data/weekly-report"
-import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
+import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, saveRequests, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
 
 const ALL = "__all__"
 const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니다."
@@ -975,6 +978,7 @@ function EditorGroup({ label, color, columns, draft, onChange, optionsById, layo
 
 export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope?: string | null }) {
   const records = useAppStore((state) => state.records)
+  const requests = useAppStore((state) => state.requests)
   const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
   const [fdsYdsOpen, setFdsYdsOpen] = useState(false)
   // 주간 보고 팝업. 전체와 담당별 탭을 두고, 탭마다 손질한 문장을 따로 들고 있는다.
@@ -1091,6 +1095,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [intake, setIntake] = useState<DevRecord[] | null>(null)      // 신규 접수 모드(옵션별 레코드)
   const [intakeOpt, setIntakeOpt] = useState(0)
   const [intakeError, setIntakeError] = useState<string | null>(null)
+  const [requestPickerOpen, setRequestPickerOpen] = useState(false)
+  const [requestPickerInitialReqId, setRequestPickerInitialReqId] = useState<string | undefined>()
+  const [intakeRequest, setIntakeRequest] = useState<{ reqId: string; chart: string; garmentNo: string } | null>(null)
   const [attached, setAttached] = useState<Zaji | null>(null)
   const [attachError, setAttachError] = useState<string | null>(null)
   const [attaching, setAttaching] = useState(false)
@@ -1121,6 +1128,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [confirmDelete, setConfirmDelete] = useState<DevRecord[] | null>(null)  // 행 삭제 확인
   const zajiInputRef = useRef<HTMLInputElement>(null)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
+  const gridScrollRef = useRef<HTMLDivElement>(null)
+  const styleHoverRef = useRef<StyleHoverLayerHandle>(null)
+  const hoverTimerRef = useRef<number | null>(null)
 
   const pushUndoSnapshot = (snapshot: DevRecord[]) => {
     setUndoStack((current) => [...current, snapshot].slice(-50))
@@ -1281,6 +1291,20 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     for (const record of ordered) (recentIntakeRows.has(recordIdentity(record)) ? recent : rest).push(record)
     return [...recent, ...rest]
   }, [ordered, recentIntakeRows])
+
+  const styleToneByKey = useMemo(() => new Map(styleTimeline(records, new Date()).map((row) => [row.styleNo, row.state])), [records])
+  const styleToneOf = useCallback((key: string) => styleToneByKey.get(key) ?? null, [styleToneByKey])
+
+  useEffect(() => {
+    if (hoverTimerRef.current !== null) {
+      window.clearTimeout(hoverTimerRef.current)
+      hoverTimerRef.current = null
+    }
+    styleHoverRef.current?.hide()
+  }, [filtered])
+  useEffect(() => () => {
+    if (hoverTimerRef.current !== null) window.clearTimeout(hoverTimerRef.current)
+  }, [])
 
   const widthOf = (column: MasterColumn) => colWidths[column.id] ?? column.width
   const startColumnResize = (column: MasterColumn, event: ReactMouseEvent<HTMLSpanElement>) => {
@@ -2162,13 +2186,16 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   const resetAttach = () => { setAttached(null); setAttachError(null); setAttaching(false) }
   const openEditor = (record: DevRecord) => { setEditing(structuredClone(record)); cancelCellEdit() }
-  const openNew = () => { setIntake([createBlankDevRecord()]); setIntakeOpt(0); setIntakeError(null); setIntakeNotice(null); resetAttach() }
+  const openNew = () => { setIntake([createBlankDevRecord()]); setIntakeOpt(0); setIntakeError(null); setIntakeNotice(null); setIntakeRequest(null); resetAttach() }
   const closeEditor = () => { setEditing(null) }
-  const closeIntake = () => { setIntake(null); setIntakeOpt(0); setIntakeError(null); resetAttach() }
+  const closeIntake = () => { setIntake(null); setIntakeOpt(0); setIntakeError(null); setIntakeRequest(null); setRequestPickerOpen(false); resetAttach() }
 
   // 접수 모드: REQUEST·ORIGINAL·담당·Style 은 옵션 공통, DETAIL·SCHEDULE 은 옵션별.
   const sharedDraft = intake ? intake[0] : null
   const optionDraft = intake ? intake[Math.min(intakeOpt, intake.length - 1)] : null
+  const requestSuggestion = useMemo(() => intakeRequest || !sharedDraft?.styleNo ? null
+    : requestCandidates(requests, records, sharedDraft.styleNo, "", false).find((candidate) => candidate.exact && candidate.unlinked > 0) ?? null,
+  [intakeRequest, records, requests, sharedDraft?.styleNo])
   const changeShared = (next: DevRecord) => setIntake((recs) => (recs ? recs.map((r) => applySharedFields(next, r)) : recs))
   const changeOptionAt = (index: number, next: DevRecord, column?: MasterColumn) => setIntake((recs) => {
     if (!recs) return recs
@@ -2204,13 +2231,30 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     try {
       const z = await parseZaji(file)
       const recs = z.options.length ? z.options.map((_, index) => zajiToRecord(z, index)) : [applyZajiHeader(createBlankDevRecord(), z)]
-      setAttached(z); setIntake(recs); setIntakeOpt(0); setIntakeError(null)
+      setAttached(z); setIntake(recs); setIntakeOpt(0); setIntakeRequest(null)
+      setIntakeError("작업지시서를 첨부해 FABRIC REQUEST 연결을 해제했습니다.")
     } catch (err) {
       setAttachError(err instanceof Error ? err.message : "작지 파싱에 실패했습니다.")
     } finally {
       setAttaching(false)
       if (zajiInputRef.current) zajiInputRef.current.value = ""
     }
+  }
+  const importRequest = (style: RequestStyle, selectedOptions: RequestOption[]) => {
+    const { next, changed } = ensureRequestLineIds(requests)
+    if (changed) saveRequests(next)
+    const nextStyle = next.find((item) => item.reqId === style.reqId)
+    if (!nextStyle) return
+    const selectedIds = new Set(selectedOptions.map((option) => option.optId))
+    const options = nextStyle.options.filter((option) => selectedIds.has(option.optId))
+    const recs = requestToIntakeRecords(nextStyle, options)
+    setIntake(recs); setIntakeOpt(0); setIntakeError(null); resetAttach()
+    setIntakeRequest({ reqId: nextStyle.reqId, chart: nextStyle.chart, garmentNo: nextStyle.garmentNo })
+    setRequestPickerOpen(false)
+  }
+  const unlinkRequest = () => {
+    setIntake((current) => current?.map((record) => ({ ...record, tech: { ...record.tech, requestLink: undefined } })) ?? current)
+    setIntakeRequest(null)
   }
   const saveIntake = async () => {
     if (!intake || !sharedDraft || savingIntake) return
@@ -2449,25 +2493,25 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
       
 
-      <div data-route-scroll-root onContextMenu={(event) => {
+      <div ref={gridScrollRef} data-route-scroll-root onContextMenu={(event) => {
         const target = event.target as HTMLElement
         if (target.closest("table[data-dd-master-grid], [role=\"menu\"]")) return
         event.preventDefault()
         setRange(null)
         setMenu({ x: event.clientX, y: event.clientY, kind: "bottom" })
-      }} className={`min-h-0 flex-1 overflow-auto ${editEnabled ? "" : "bg-[color-mix(in_srgb,var(--muted)_35%,transparent)]"}`}>
+      }} className={`relative min-h-0 flex-1 overflow-auto ${editEnabled ? "" : "bg-[color-mix(in_srgb,var(--muted)_35%,transparent)]"}`}>
         <table data-dd-master-grid onMouseMove={onGridMouseMove} onMouseLeave={() => { if (!moveDragRef.current) setMoveHover(null) }} className="select-none border-separate border-spacing-0 text-left [&_input]:select-text [&_textarea]:select-text">
           <thead className="sticky top-0 z-30 bg-[var(--card)] shadow-sm">
             <tr className="h-6">
               <th rowSpan={3} className="sticky left-0 z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] text-center text-[10px] font-normal text-[var(--muted-foreground)]" style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH }} />
-              {PINNED_COLUMNS.map((column, index) => { const width = widthOf(column), active = Boolean(columnFilters[column.id]); return <th key={column.id} rowSpan={3} onClick={() => toggleColumnSort(column.id)} className={`relative sticky z-40 cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width, left: pinnedLeft(index) }}><span className="flex items-center gap-1"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> })}
+              {PINNED_COLUMNS.map((column, index) => { const width = widthOf(column), active = Boolean(columnFilters[column.id]); return <th key={column.id} rowSpan={3} onClick={() => toggleColumnSort(column.id)} className={`relative sticky z-40 cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width, left: pinnedLeft(index) }}><span className="flex items-center justify-center gap-1 px-3"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> })}
               {visibleGroups.map((group) => <th key={group.key} colSpan={group.columns.length} rowSpan={group.columns.some((column) => column.sub) ? 1 : 2} className="relative border-b border-r border-[var(--border)] px-2 text-center text-[11px] font-semibold" style={{ color: group.color, background: `color-mix(in srgb, ${group.color} 12%, var(--card))` }}><span>{group.label}</span>{group.key === "detail" ? <button type="button" aria-label={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} aria-pressed={finishingOpen} title={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} onClick={(event) => { event.stopPropagation(); setFinishingOpen((current) => !current) }} className="absolute right-3 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none hover:bg-[var(--muted)]">{finishingOpen ? "-" : "+"}</button> : null}<span aria-hidden="true" title={`${group.label} 너비 조절`} onMouseDown={(event) => startGroupResize(group.columns, event)} className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th>)}
             </tr>
             <tr className="h-6">
               {visibleGroups.filter((group) => group.columns.some((column) => column.sub)).flatMap((group) => subRuns(group.columns).map((run, index) => <th key={`${group.key}-sub-${index}`} colSpan={run.span} className="border-b border-r border-[var(--border)] px-2 text-center text-[10px] font-semibold" style={{ color: run.label ? group.color : "transparent", background: `color-mix(in srgb, ${group.color} ${run.label ? 18 : 12}%, var(--card))` }}>{run.label || "·"}</th>))}
             </tr>
             <tr className="h-8">
-              {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column), active = Boolean(columnFilters[column.id]); return <th key={`${group.key}-${column.id}`} onClick={() => toggleColumnSort(column.id)} className={`relative cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} ${alignOf(column) === "center" ? "text-center" : "text-left"}`} style={{ width, minWidth: width }}><span className="flex items-center gap-1"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
+              {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column), active = Boolean(columnFilters[column.id]); return <th key={`${group.key}-${column.id}`} onClick={() => toggleColumnSort(column.id)} className={`relative cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width }}><span className="flex items-center justify-center gap-1 px-3"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
             </tr>
           </thead>
           <tbody>
@@ -2511,7 +2555,15 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               }
               return <tr key={rowId}
                 data-row-id={rowId}
-                onMouseDown={(event) => onRowMouseDown(rowId, event)}
+                data-style-key={record.styleNo.trim() || undefined}
+                onMouseDown={(event) => {
+                  if (hoverTimerRef.current !== null) {
+                    window.clearTimeout(hoverTimerRef.current)
+                    hoverTimerRef.current = null
+                  }
+                  styleHoverRef.current?.hide()
+                  onRowMouseDown(rowId, event)
+                }}
                 className="group bg-[var(--card)] transition-colors hover:bg-[var(--accent)]">
                 <td data-row-header onContextMenu={(event) => { event.preventDefault(); if (!rowSelected) selectWholeRow(rowId); setMenu({ x: event.clientX, y: event.clientY, kind: "cells" }) }} title="클릭: 행 전체 선택 · 끌기: 여러 행 선택" className={`sticky left-0 z-20 h-8 cursor-pointer select-none border-b border-r border-[var(--border)] text-center text-[10px] tabular-nums ${rowHeaderSel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)] text-[var(--foreground)]" : "bg-[var(--muted)] text-[var(--muted-foreground)] group-hover:bg-[var(--accent)]"}`} style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH, boxShadow: selectionShadow(rowHeaderSel), cursor: rowHeaderSel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, -1, true), ...(rowDimmed && !rowHeaderSel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null) }}>{(rowIdx ?? 0) + 1}</td>
                 {PINNED_COLUMNS.map((column, index) => {
@@ -2524,7 +2576,25 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   const active = isActive(column.id)
                   if (editEnabled && active) return <td key={column.id} data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} className={`${stickyBase} p-0`} style={cellStyle}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} initial={editSeed} onCommit={(raw, move, fillRange) => void commitCell(record, column, raw, move, fillRange)} onCancel={cancelCellEdit} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} /></td>
                   if (column.id === "status") return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined} className={`${stickyBase} px-1.5`} style={cellStyle}><StatusChip record={record} disabled={!editEnabled} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} /></td>
-                  return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined} className={`${stickyBase} max-w-0 px-2 text-xs font-normal ${editEnabled ? "cursor-cell" : ""} ${column.mono ? "font-mono" : ""}`} style={cellStyle}>
+                  return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined}
+                     onMouseEnter={column.id === "styleNo" ? (event) => {
+                       if (event.buttons !== 0 || moveDragRef.current || editCell) return
+                       const key = record.styleNo.trim()
+                       if (!key) return
+                       if (hoverTimerRef.current !== null) window.clearTimeout(hoverTimerRef.current)
+                       hoverTimerRef.current = window.setTimeout(() => {
+                         hoverTimerRef.current = null
+                         styleHoverRef.current?.show(key)
+                       }, 120)
+                     } : undefined}
+                     onMouseLeave={column.id === "styleNo" ? () => {
+                       if (hoverTimerRef.current !== null) {
+                         window.clearTimeout(hoverTimerRef.current)
+                         hoverTimerRef.current = null
+                       }
+                       styleHoverRef.current?.hide()
+                     } : undefined}
+                     className={`${stickyBase} max-w-0 px-2 text-xs font-normal ${editEnabled ? "cursor-cell" : ""} ${column.mono ? "font-mono" : ""}`} style={cellStyle}>
                     {column.id === "owner"
                       ? <>
                           <span className="block w-full truncate text-center">{text(ownerDisplayName(record.owner))}</span>
@@ -2550,6 +2620,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             })}
           </tbody>
         </table>
+        <StyleHoverLayer ref={styleHoverRef} containerRef={gridScrollRef} toneOf={styleToneOf} />
         {!filtered.length ? <div className="p-12 text-center text-sm text-[var(--muted-foreground)]">{scoped.length ? "조건에 맞는 DD 행이 없습니다." : "DD를 업로드하거나 신규 작지를 접수해 현황판을 시작하세요."}</div> : null}
         <div data-grid-bottom-area aria-hidden="true" className="h-28 min-w-full" />
       </div>
@@ -2739,15 +2810,18 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               <DialogTitle>신규 작지 접수</DialogTitle>
               <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] ${ddStatusStyle("진행중").block}`}><span className="size-1.5 rounded-full bg-sky-500" />진행중</span>
               <Badge variant="outline" className="font-normal">옵션 {intake.length}건</Badge>
+              {intakeRequest ? <><Badge variant="outline" className="font-normal">REQUEST · {intakeRequest.chart} · {intakeRequest.garmentNo}</Badge><Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={unlinkRequest}>연결 해제</Button></> : null}
             </div>
             <DialogDescription>REQUEST·ORIGINAL 분석은 옵션 공통, 개발 DETAIL·공정 SCHEDULE은 옵션(색상)별로 입력합니다. 작업지시서를 첨부하면 자동으로 채워집니다.</DialogDescription>
             <div className="mt-1.5 flex flex-col gap-1.5">
               <div className="flex flex-wrap items-center gap-2">
                 <input ref={zajiInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={(event) => void onAttachFile(event.target.files?.[0])} />
                 <Button type="button" size="sm" variant="outline" onClick={() => zajiInputRef.current?.click()} disabled={attaching}>{attaching ? <Loader2 className="size-4 animate-spin" /> : <Paperclip className="size-4" />}작업지시서 첨부</Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => { setRequestPickerInitialReqId(undefined); setRequestPickerOpen(true) }}><ClipboardList className="size-4" />FABRIC REQUEST에서 불러오기</Button>
                 {attached ? <span className="font-mono text-xs text-[var(--muted-foreground)]">{attached.subFmt} · {attached.number} · 옵션 {attached.options.length}건{attached.dupRemoved ? ` · 중복 ${attached.dupRemoved} 제거` : ""}</span> : <span className="text-xs text-[var(--muted-foreground)]">GD 작지(Fabric sample request report .xlsx)를 지원합니다.</span>}
               </div>
               {attachError ? <p className="text-xs text-[var(--destructive)]">{attachError}</p> : null}
+              {requestSuggestion ? <div className="flex items-center gap-2 rounded-md bg-[color-mix(in_srgb,var(--primary)_8%,transparent)] px-2 py-1 text-xs"><span className="min-w-0 flex-1 truncate">FABRIC REQUEST에 같은 Garment No.가 있습니다 · {requestSuggestion.style.chart} · {requestSuggestion.style.garmentNo} · 미연결 옵션 {requestSuggestion.unlinked}건</span><Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={() => { setRequestPickerInitialReqId(requestSuggestion.style.reqId); setRequestPickerOpen(true) }}>불러오기</Button></div> : null}
             </div>
           </DialogHeader>
           <DialogBody className="space-y-3">
@@ -2774,6 +2848,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </> : null}
       </DialogContent>
     </Dialog>
+
+    <RequestPickerDialog open={requestPickerOpen} onOpenChange={setRequestPickerOpen} requests={requests} records={records} styleNo={sharedDraft?.styleNo ?? ""} initialReqId={requestPickerInitialReqId} onConfirm={importRequest} />
 
     {/* 전체 항목 수정(64열) — 담당 칸의 확대 아이콘으로 진입. 데이터 입력 화면. */}
     <Dialog open={Boolean(editing)} onOpenChange={(open) => { if (!open) closeEditor() }}>

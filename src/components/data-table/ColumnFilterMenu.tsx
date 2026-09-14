@@ -68,7 +68,7 @@ export function ColumnFilterMenu({ label, active, sortDir, loadOptions, selected
           aria-label={`${label} 필터`}
           onMouseDown={(event) => event.stopPropagation()}
           onClick={(event) => event.stopPropagation()}
-          className={`ml-auto inline-flex size-3.5 shrink-0 items-center justify-center rounded-sm hover:bg-[var(--background)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"}`}
+          className={`absolute right-1.5 top-1/2 inline-flex size-3.5 shrink-0 -translate-y-1/2 items-center justify-center rounded-sm hover:bg-[var(--background)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"}`}
         >
           {active ? <ListFilter className="size-3.5" /> : <ChevronDown className="size-3.5" />}
         </button>

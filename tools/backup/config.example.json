@@ -1,0 +1,9 @@
+{
+  "project_id": "fabric-rnd-20a6b",
+  "api_key": "<src/data/firebase.ts의 apiKey>",
+  "login_email": "admin@example.com",
+  "output_dir": "C:\\Users\\<사용자>\\OneDrive\\FabricRnD_백업",
+  "mail_to": "admin@example.com",
+  "keep_weeks": 12,
+  "attach_limit_mb": 20
+}
