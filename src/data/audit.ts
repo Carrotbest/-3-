@@ -15,7 +15,7 @@ import { addDoc, collection, getDocs, limit as fsLimit, orderBy, query, where } 
 
 import { db, auth } from "./firebase"
 import { currentUserCanWrite } from "./auth"
-import type { DevRecord, FabricLedgerEvent, RequestStyle } from "./schema"
+import type { DevRecord, FabricLedgerEvent, RequestBoard, RequestStyle } from "./schema"
 import type { TsRecord } from "./sample"
 
 const COLLECTION = "auditLog"
@@ -137,6 +137,8 @@ export const diffTsRecords = (before: readonly TsRecord[], after: readonly TsRec
   diffByKey(before, after, (item) => item.id)
 export const diffRequests = (before: readonly RequestStyle[], after: readonly RequestStyle[]): AuditChange[] =>
   diffByKey(before, after, (item) => item.reqId)
+export const diffRequestBoards = (before: readonly RequestBoard[], after: readonly RequestBoard[]): AuditChange[] =>
+  diffByKey(before, after, (item) => item.boardId)
 export const diffFabricEvents = (before: readonly FabricLedgerEvent[], after: readonly FabricLedgerEvent[]): AuditChange[] =>
   diffByKey(before, after, (item) => item.id)
 

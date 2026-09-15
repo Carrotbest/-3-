@@ -9,12 +9,23 @@
  * 넘치는 셀 안에서만 세로 스크롤한다.
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
-import { ChevronDown, ChevronRight, ClipboardPaste, Copy, Download, Eraser, Flame, ImagePlus, Loader2, Pencil, Plus, Redo2, RotateCcw, Rows3, Scissors, Trash2, Undo2, Upload } from "lucide-react"
+import { Archive, ChevronDown, ChevronRight, ClipboardPaste, Copy, Download, Eraser, Flame, ImagePlus, Loader2, Pencil, Plus, Redo2, RotateCcw, Rows3, Scissors, Trash2, Undo2, Upload } from "lucide-react"
 import * as XLSX from "xlsx"
 import { useNavigate, useSearchParams } from "react-router-dom"
+import { CONSTRUCTIONS, matchConstruction } from "@/data/constructions"
+import { currentUserCanWrite, useAuthStore } from "@/data/auth"
 import { buildFabricLedger } from "@/data/fabric-ledger"
 import { ddRecordsByLineId, requestDdStatus, type RequestDdStatus } from "@/data/request-link"
+import { requestProcessStage, type ProcessStage } from "@/data/request-process-stage"
+import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindColor, buildBoardArchive, canDeleteBoard, canManageBoard, closeBoard, migrateChartsToBoards, nextBoardSeq, reopenBoard, resultOf } from "@/data/request-board"
+import type { AuditKind } from "@/data/audit"
 
+import { ProcessStageChip } from "@/components/request/ProcessStageChip"
+import { ProcessStageDialog } from "@/components/request/ProcessStageDialog"
+import { RequestBoardHeader } from "@/components/request/RequestBoardHeader"
+import { RequestBoardCloseDialog } from "@/components/request/RequestBoardCloseDialog"
+import { RequestArchiveView } from "@/components/request/RequestArchiveView"
+import { MoveStyleDialog, RequestBoardDialog, type RequestBoardValues } from "@/components/request/RequestBoardDialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -27,9 +38,9 @@ import { FillHandle, selectionShadow, type CellMove, type CellRect, type CellRef
 import { downloadBlob } from "@/data/dd-export"
 import { deleteRequestImage, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
 import { buildRequestWorkbook, mergeRequestStyles, parseRequestWorkbook, requestTemplateFileName } from "@/data/request-template"
-import { MEMBERS, type RequestOption, type RequestStyle } from "@/data/schema"
+import { MEMBERS, REQUEST_RESULTS, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
 import { loadViewNumbers, saveViewPref } from "@/data/view-prefs"
-import { saveRequests, useAppStore } from "@/store/useAppStore"
+import { saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore } from "@/store/useAppStore"
 
 // ─────────────────────────────────────────────── 열 정의
 
@@ -70,6 +81,7 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
     { id: "analyst", label: "분석 담당", width: 90, scope: "style" },
   ] },
   { key: "request", label: "의뢰", color: "var(--chart-3)", columns: [
+    { id: "result", label: "결과", width: 76, scope: "style", align: "center" },
     { id: "urgent", label: "URGENT", width: 64, scope: "style", align: "center" },
     { id: "requester", label: "의뢰자", width: 90, scope: "style" },
     { id: "developer", label: "개발 담당", width: 90, scope: "style" },
@@ -77,12 +89,16 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
   ] },
   { key: "option", label: "옵션", color: "var(--warning)", columns: [
     { id: "optNo", label: "Opt", width: 50, scope: "option", align: "center" },
-    { id: "yarnDetail", label: "Yarn Detail", width: 200, scope: "option" },
+    { id: "yarnDetail", label: "Yarn Detail", width: 180, scope: "option" },
+    // 원단 FULL DETAIL을 원사, 조직, 중량으로 나눈 열. 조직은 목록에서만 고른다.
+    { id: "construction", label: "Cons.", width: 130, scope: "option" },
+    { id: "weight", label: "W'T", width: 64, scope: "option", align: "right" },
     { id: "color", label: "Color", width: 120, scope: "option" },
     { id: "dyeingMethod", label: "Dyeing", width: 90, scope: "option" },
     { id: "remark", label: "Remark", width: 180, scope: "option" },
-    // 보기 전용. DD 행의 tech.requestLink를 읽어 계산하며 요청 데이터나 엑셀 양식에는 없다.
-    { id: "ddStatus", label: "DD 상태", width: 170, scope: "option" },
+    // 보기 전용 두 열. DD 행의 tech.requestLink를 읽어 계산하며 요청 데이터나 엑셀 양식에는 없다.
+    { id: "ddStage", label: "공정", width: 96, scope: "option", align: "center" },
+    { id: "ddLink", label: "Link", width: 150, scope: "option" },
   ] },
 ]
 
@@ -198,6 +214,8 @@ const blankOption = (reqId: string, no: number): RequestOption => ({
   lineId: crypto.randomUUID(),
   no,
   yarnDetail: "",
+  construction: "",
+  weight: "",
   color: "",
   dyeingMethod: "",
   remark: "",
@@ -312,12 +330,12 @@ interface EditorProps {
   open: boolean
   draft: RequestStyle | null
   ownerOptions: string[]
-  chartOptions: string[]
+  boardName: string
   onClose: () => void
   onSave: (style: RequestStyle) => void
 }
 
-function RequestEditor({ open, draft, ownerOptions, chartOptions, onClose, onSave }: EditorProps) {
+function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }: EditorProps) {
   const [value, setValue] = useState<RequestStyle | null>(draft)
 
   useEffect(() => {
@@ -329,10 +347,16 @@ function RequestEditor({ open, draft, ownerOptions, chartOptions, onClose, onSav
   const set = <K extends keyof RequestStyle>(key: K, next: RequestStyle[K]) =>
     setValue((current) => (current ? { ...current, [key]: next } : current))
 
-  const setOption = (index: number, key: "yarnDetail" | "color" | "dyeingMethod" | "remark", next: string) =>
+  const setOption = (index: number, key: "yarnDetail" | "construction" | "color" | "dyeingMethod" | "remark", next: string) =>
     setValue((current) => {
       if (!current) return current
       return { ...current, options: current.options.map((option, i) => (i === index ? { ...option, [key]: next } : option)) }
+    })
+  const setOptionWeight = (index: number, raw: string) =>
+    setValue((current) => {
+      if (!current) return current
+      const weight: number | "" = raw === "" ? "" : Number(raw)
+      return { ...current, options: current.options.map((option, i) => (i === index ? { ...option, weight } : option)) }
     })
 
   const field = (label: string, node: ReactNode) => (
@@ -363,15 +387,7 @@ function RequestEditor({ open, draft, ownerOptions, chartOptions, onClose, onSav
         </DialogHeader>
         <DialogBody className="max-h-[70vh] overflow-y-auto">
           <div className="grid grid-cols-4 gap-3">
-            {field("차트", (
-              <Input
-                className="h-8 text-xs"
-                list="fabric-request-charts"
-                value={value.chart}
-                onChange={(event) => set("chart", event.target.value)}
-                placeholder="26.FEB EU MARKET"
-              />
-            ))}
+            {field("보드", <Input className="h-8 text-xs" value={boardName} readOnly />)}
             {field("단계", (
               <Select value={value.stage} onValueChange={(next) => set("stage", next as RequestStyle["stage"])}>
                 <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
@@ -399,9 +415,6 @@ function RequestEditor({ open, draft, ownerOptions, chartOptions, onClose, onSav
               />
             ))}
           </div>
-          <datalist id="fabric-request-charts">
-            {chartOptions.map((chart) => <option key={chart} value={chart} />)}
-          </datalist>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
             {field("Yarn analysis", <textarea className={areaClass} value={value.yarnAnalysis} onChange={(event) => set("yarnAnalysis", event.target.value)} />)}
@@ -444,9 +457,18 @@ function RequestEditor({ open, draft, ownerOptions, chartOptions, onClose, onSav
             ) : (
               <div className="divide-y divide-[var(--border)]">
                 {value.options.map((option, index) => (
-                  <div key={option.optId} className="grid grid-cols-[36px_1fr_1fr_100px_1fr_44px] items-center gap-2 px-3 py-2">
+                  <div key={option.optId} className="grid grid-cols-[36px_minmax(0,1.4fr)_140px_64px_minmax(0,1fr)_90px_minmax(0,1fr)_44px] items-center gap-2 px-3 py-2">
                     <span className="text-center text-xs font-semibold text-[var(--muted-foreground)]">{option.no}</span>
                     <Input className="h-8 text-xs" placeholder="Yarn Detail" value={option.yarnDetail} onChange={(event) => setOption(index, "yarnDetail", event.target.value)} />
+                    <Select value={option.construction || "__none"} onValueChange={(next) => setOption(index, "construction", next === "__none" ? "" : next)}>
+                      <SelectTrigger className="h-8 text-xs" aria-label={`옵션 ${option.no} Cons.`}><SelectValue placeholder="Cons." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none">선택 안함</SelectItem>
+                        {option.construction && !CONSTRUCTIONS.includes(option.construction) ? <SelectItem value={option.construction}>(목록 외) {option.construction}</SelectItem> : null}
+                        {CONSTRUCTIONS.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Input className="h-8 text-right text-xs" type="number" min="0" placeholder="W'T" aria-label={`옵션 ${option.no} W'T`} value={option.weight ?? ""} onChange={(event) => setOptionWeight(index, event.target.value)} />
                     <Input className="h-8 text-xs" placeholder="Color" value={option.color} onChange={(event) => setOption(index, "color", event.target.value)} />
                     <Input className="h-8 text-xs" placeholder="Dyeing" value={option.dyeingMethod} onChange={(event) => setOption(index, "dyeingMethod", event.target.value)} />
                     <Input className="h-8 text-xs" placeholder="Remark" value={option.remark} onChange={(event) => setOption(index, "remark", event.target.value)} />
@@ -500,7 +522,7 @@ function PreviewDialog({ style, onClose }: { style: RequestStyle | null; onClose
 
 // ─────────────────────────────────────────────── 셀 편집
 
-type EditKind = "text" | "area" | "number" | "member" | "toggle" | null
+type EditKind = "text" | "area" | "number" | "member" | "construction" | "result" | "toggle" | null
 
 /** 더블클릭으로 고칠 수 있는 열과 그 입력 방식. 사진과 옵션 번호는 자동 값이라 막는다. */
 function editKindOf(columnId: string): EditKind {
@@ -511,10 +533,14 @@ function editKindOf(columnId: string): EditKind {
     case "contents": case "yarnAnalysis": case "comment":
     case "devPlan": case "yarnDetail": case "remark":
       return "area"
-    case "origWeight":
+    case "origWeight": case "weight":
       return "number"
     case "analyst": case "developer":
       return "member"
+    case "construction":
+      return "construction"
+    case "result":
+      return "result"
     case "urgent":
       return "toggle"
     default:
@@ -562,6 +588,28 @@ function CellEditor({ kind, initial, members, onCommit, onCancel }: CellEditorPr
     )
   }
 
+  if (kind === "construction") {
+    // 표기 통일용 목록이라 자유 입력을 받지 않는다. 목록 밖 옛 값은 보이게만 남긴다.
+    return (
+      <Select
+        defaultOpen
+        value={value || "__none"}
+        onValueChange={(next) => { done.current = true; onCommit(next === "__none" ? "" : next) }}
+      >
+        <SelectTrigger className="h-7 w-full text-xs"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__none">선택 안함</SelectItem>
+          {value && !CONSTRUCTIONS.includes(value) ? <SelectItem value={value}>(목록 외) {value}</SelectItem> : null}
+          {CONSTRUCTIONS.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    )
+  }
+
+  if (kind === "result") {
+    return <Select defaultOpen value={value || "진행중"} onValueChange={(next) => { done.current = true; onCommit(next) }}><SelectTrigger className="h-7 w-full text-xs"><SelectValue /></SelectTrigger><SelectContent>{REQUEST_RESULTS.map((result) => <SelectItem key={result} value={result}>{result}</SelectItem>)}</SelectContent></Select>
+  }
+
   const shared = {
     autoFocus: true,
     value,
@@ -601,8 +649,28 @@ function CellEditor({ kind, initial, members, onCommit, onCancel }: CellEditorPr
 
 export function FabricRequest() {
   const requests = useAppStore((state) => state.requests)
+  const requestBoards = useAppStore((state) => state.requestBoards)
+  const requestArchive = useAppStore((state) => state.requestArchive)
+  const authUser = useAuthStore((state) => state.user)
+  const isOwner = useAuthStore((state) => state.isOwner)
+  const boardMigrationRef = useRef(false)
+  useEffect(() => {
+    if (boardMigrationRef.current || !currentUserCanWrite() || requests.length === 0 || requests.every((request) => request.boardId)) return
+    const actor = {
+      email: authUser?.email ?? authUser?.uid ?? "unknown",
+      name: authUser?.displayName?.trim() || authUser?.email?.split("@")[0] || "알 수 없음",
+    }
+    const result = migrateChartsToBoards(requests, requestBoards, actor)
+    if (!result.changed) return
+    boardMigrationRef.current = true
+    try {
+      saveRequestsAndBoards(result.requests, result.boards, "edit")
+    } finally {
+      boardMigrationRef.current = false
+    }
+  }, [authUser, requestBoards, requests])
   const [searchParams, setSearchParams] = useSearchParams()
-  // DD 상태 열(R146). 요청에 저장하지 않고 DD 행의 tech.requestLink를 읽어 매번 계산한다.
+  // DD 공정과 Link 열. 요청에 저장하지 않고 DD 행의 tech.requestLink를 읽어 매번 계산한다.
   const navigate = useNavigate()
   const ddRecords = useAppStore((state) => state.records)
   const ddCompletedSamples = useAppStore((state) => state.completed)
@@ -613,6 +681,7 @@ export function FabricRequest() {
     buildFabricLedger(ddRecords, ddCompletedSamples, ddFabricOverrides)
       .flatMap((item) => item.record ? [[`${item.record._src.sheet}::${item.record._src.row}`, item.key] as const] : []),
   ), [ddCompletedSamples, ddFabricOverrides, ddRecords])
+  const [stageTarget, setStageTarget] = useState<{ stage: ProcessStage; title: string; rowId?: string } | null>(null)
   const DD_TONE_CLASS: Record<RequestDdStatus["tone"], string> = {
     none: "bg-[var(--muted)] text-[var(--muted-foreground)]",
     progress: "bg-[color-mix(in_srgb,var(--chart-1)_14%,transparent)] text-[var(--chart-1)]",
@@ -622,7 +691,7 @@ export function FabricRequest() {
     hold: "bg-[color-mix(in_srgb,var(--warning)_16%,transparent)] text-[var(--warning)]",
     drop: "bg-[var(--muted)] text-[var(--muted-foreground)] line-through",
   }
-  const renderDdStatus = (option: RequestOption): ReactNode => {
+  const renderDdLink = (option: RequestOption): ReactNode => {
     const status = requestDdStatus(ddByLine, option)
     const chip = "whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-medium"
     if (status.tone === "none") return <span className={`${chip} ${DD_TONE_CLASS.none}`}>미연결</span>
@@ -630,17 +699,30 @@ export function FabricRequest() {
     const stop = (event: React.MouseEvent) => event.stopPropagation()
     const openDd = () => navigate(`/development/workspace?focus=${encodeURIComponent(status.rowId ?? "")}`)
     const ledgerKey = status.rowId ? ddLedgerKeyByRow.get(status.rowId) : undefined
+    const linkTone: RequestDdStatus["tone"] = status.tone === "hold" || status.tone === "drop" || status.tone === "done" ? status.tone : "progress"
     return <span className="inline-flex flex-wrap items-center gap-1">
-      <button type="button" title="DD MASTER에서 열기" onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); openDd() }} className={`${chip} ${DD_TONE_CLASS[status.tone]} hover:opacity-80`}>{status.label}</button>
+      <button type="button" title="DD MASTER에서 열기" onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); openDd() }} className={`${chip} ${DD_TONE_CLASS[linkTone]} hover:opacity-80`}>연결</button>
       {status.flNo ? <button type="button" title="원단 상세 열기" onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); if (ledgerKey) navigate(`/fabric/${encodeURIComponent(ledgerKey)}`); else openDd() }} className="font-mono text-[11px] text-[var(--primary)] underline-offset-2 hover:underline">{status.flNo}</button> : null}
       {status.extra > 0 ? <span title={`같은 옵션에 연결된 DD 행이 ${status.extra}개 더 있습니다`} className="text-[10px] text-[var(--muted-foreground)]">+{status.extra}</span> : null}
     </span>
+  }
+  const renderDdStage = (style: RequestStyle, option: RequestOption): ReactNode => {
+    const stage = requestProcessStage(ddByLine, option)
+    const status = requestDdStatus(ddByLine, option)
+    return <ProcessStageChip
+      stage={stage}
+      onOpen={() => setStageTarget({ stage, title: `${style.garmentNo || "스타일"} Opt ${option.no}`, rowId: status.rowId })}
+    />
   }
 
   const [stage, setStage] = useState<StageFilter>("전체")
   const [sortKey, setSortKey] = useState<SortKey>("seq")
   const [urgentOnly, setUrgentOnly] = useState(false)
-  const [chart, setChart] = useState("전체")
+  const [activeBoard, setActiveBoard] = useState<string>(() => { try { return window.localStorage.getItem("fabric.request.activeBoard") || ALL_BOARDS } catch { return ALL_BOARDS } })
+  const [boardDialog, setBoardDialog] = useState<"create" | "edit" | null>(null)
+  const [closeOpen, setCloseOpen] = useState(false)
+  const [archiveSelected, setArchiveSelected] = useState<string | null>(null)
+  const [moveStyle, setMoveStyle] = useState<RequestStyle | null>(null)
   const [draft, setDraft] = useState<RequestStyle | null>(null)
   const [preview, setPreview] = useState<RequestStyle | null>(null)
   const [editCell, setEditCell] = useState<(CellRef & { seed?: string }) | null>(null)
@@ -665,10 +747,13 @@ export function FabricRequest() {
   const [focusedReqId, setFocusedReqId] = useState<string | null>(null)
   const uploadRef = useRef<HTMLInputElement | null>(null)
 
-  const chartOptions = useMemo(
-    () => [...new Set(requests.map((item) => item.chart).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko-KR")),
-    [requests],
-  )
+  const openBoards = useMemo(() => requestBoards.filter((board) => board.status === "진행").sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "ko-KR")), [requestBoards])
+  const activeBoardInfo = activeBoard === ALL_BOARDS || activeBoard === ARCHIVE_VIEW ? null : openBoards.find((board) => board.boardId === activeBoard) ?? null
+  const readOnly = activeBoard === ALL_BOARDS || activeBoard === ARCHIVE_VIEW
+  // 보드 목록이 캐시나 동기화로 들어오기 전(빈 배열)에는 되돌리지 않는다. 되돌리면 새로고침마다 마지막 탭 기억이 전체로 덮인다.
+  useEffect(() => { if (requestBoards.length > 0 && activeBoard !== ALL_BOARDS && activeBoard !== ARCHIVE_VIEW && !activeBoardInfo) setActiveBoard(ALL_BOARDS) }, [activeBoard, activeBoardInfo, requestBoards.length])
+  useEffect(() => { try { window.localStorage.setItem("fabric.request.activeBoard", activeBoard) } catch { /* 현재 세션만 유지한다. */ } }, [activeBoard])
+  const scoped = useMemo(() => activeBoard === ALL_BOARDS ? requests : requests.filter((item) => item.boardId === activeBoard), [activeBoard, requests])
 
   const ownerOptions = useMemo(() => {
     const fromData = requests.flatMap((item) => [item.analyst, item.developer]).filter(Boolean)
@@ -676,10 +761,9 @@ export function FabricRequest() {
   }, [requests])
 
   const visible = useMemo(() => {
-    const filtered = requests.filter((item) => {
+    const filtered = scoped.filter((item) => {
       if (stage !== "전체" && item.stage !== stage) return false
       if (urgentOnly && !item.urgent) return false
-      if (chart !== "전체" && item.chart !== chart) return false
       return true
     })
     // 정렬은 스타일 단위다. 옵션 라인은 부모에 붙어 함께 움직인다.
@@ -687,23 +771,34 @@ export function FabricRequest() {
       if (sortKey === "seq") return a.seq - b.seq || a.garmentNo.localeCompare(b.garmentNo, "ko-KR")
       return (a[sortKey] || "").localeCompare(b[sortKey] || "", "ko-KR") || a.seq - b.seq
     })
-  }, [requests, stage, urgentOnly, chart, sortKey])
+  }, [scoped, stage, urgentOnly, sortKey])
 
   const optionCount = visible.reduce((sum, style) => sum + style.options.length, 0)
 
+  const actor = { email: authUser?.email ?? authUser?.uid ?? "unknown", name: authUser?.displayName?.trim() || authUser?.email?.split("@")[0] || "알 수 없음" }
+  function commitRequests(next: RequestStyle[], kind: AuditKind = "edit"): boolean {
+    if (readOnly) { setNotice({ kind: "error", text: "전체 탭은 보기 전용입니다. 보드 탭에서 수정하세요." }); return false }
+    if (next === requests) return false
+    const history = appendRequestHistory(requests, next, requestBoards, actor)
+    if (history.changed) saveRequestsAndBoards(next, history.boards, kind); else saveRequests(next, kind)
+    return true
+  }
+  function saveMutation(next: RequestStyle[]) { if (next === requests || readOnly) { if (readOnly) commitRequests(next); return } pushSnapshot(); commitRequests(next) }
+
   const upsert = (next: RequestStyle) => {
     const exists = requests.some((item) => item.reqId === next.reqId)
-    saveRequests(exists ? requests.map((item) => (item.reqId === next.reqId ? next : item)) : [...requests, next])
+    const prepared = exists ? next : { ...next, boardId: activeBoard, chart: activeBoardInfo?.name ?? "", seq: next.seq || nextBoardSeq(requests, activeBoard) }
+    commitRequests(exists ? requests.map((item) => (item.reqId === next.reqId ? prepared : item)) : [...requests, prepared])
     setDraft(null)
   }
 
   const patchStyle = (reqId: string, patch: Partial<RequestStyle>) => {
-    saveRequests(requests.map((item) => (item.reqId === reqId ? { ...item, ...patch, updatedAt: new Date().toISOString() } : item)))
+    commitRequests(requests.map((item) => (item.reqId === reqId ? { ...item, ...patch, updatedAt: new Date().toISOString() } : item)))
   }
 
   const remove = (style: RequestStyle) => {
     if (!window.confirm(`${style.garmentNo || "이 의뢰"} 건을 삭제할까요? 옵션 ${style.options.length}건이 함께 지워집니다.`)) return
-    saveRequests(requests.filter((item) => item.reqId !== style.reqId))
+    commitRequests(requests.filter((item) => item.reqId !== style.reqId))
     // 사진은 없으면 조용히 넘어간다. 실패해도 원장 삭제는 그대로 둔다.
     void deleteRequestImage(style.reqId).catch(() => undefined)
     setRowMenu(null)
@@ -723,7 +818,7 @@ export function FabricRequest() {
    * 내용이 하나라도 적힌 줄만 되묻는다. 빈 줄까지 확인창을 띄우면 성가시다.
    */
   const removeOption = (style: RequestStyle, option: RequestOption) => {
-    const filled = [option.yarnDetail, option.color, option.dyeingMethod, option.remark].some((value) => text(value).trim())
+    const filled = [option.yarnDetail, option.construction, option.weight, option.color, option.dyeingMethod, option.remark].some((value) => text(value).trim())
     if (filled && !window.confirm(`옵션 ${option.no}번을 삭제할까요?`)) return
     saveMutation(requests.map((item) => item.reqId === style.reqId ? { ...item, options: renumber(style.reqId, style.options.filter((item) => item.optId !== option.optId)), updatedAt: new Date().toISOString() } : item))
     setRowMenu(null)
@@ -731,7 +826,8 @@ export function FabricRequest() {
 
   const widthOf = (column: RequestColumn): number => colWidths[column.id] ?? column.width
   const visibleGroups = COLUMN_GROUPS.filter((group) => openGroups[group.key])
-  const visibleColumns = [...FIXED_COLUMNS, ...visibleGroups.flatMap((group) => group.columns)]
+  const boardColumn: RequestColumn = { id: "boardName", label: "보드", width: 120, scope: "style" }
+  const visibleColumns = readOnly ? [...FIXED_COLUMNS, boardColumn, ...visibleGroups.flatMap((group) => group.columns)] : [...FIXED_COLUMNS, ...visibleGroups.flatMap((group) => group.columns)]
   const tableWidth = visibleColumns.reduce((sum, column) => sum + widthOf(column), 0) + ACTION_WIDTH + ROW_NO_WIDTH
   const slots = visible.flatMap((style) => Array.from({ length: Math.max(1, style.options.length) }, (_, optionIndex) => ({ style, optionIndex, option: style.options[optionIndex] })))
 
@@ -747,7 +843,8 @@ export function FabricRequest() {
       return
     }
     if (stage !== "전체") setStage("전체")
-    if (chart !== "전체") setChart("전체")
+    const board = style.boardId ? requestBoards.find((item) => item.boardId === style.boardId && item.status === "진행") : undefined
+    setActiveBoard(board?.boardId ?? ALL_BOARDS)
     if (urgentOnly) setUrgentOnly(false)
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       const row = [...document.querySelectorAll<HTMLElement>("tr[data-req-id]")].find((item) => item.dataset.reqId === reqId)
@@ -770,14 +867,14 @@ export function FabricRequest() {
   }, [range, visibleColumns, visible])
 
   const pushSnapshot = () => { setUndoStack((stack) => [...stack, requests].slice(-50)); setRedoStack([]) }
-  const saveMutation = (next: RequestStyle[]) => { if (next === requests) return; pushSnapshot(); saveRequests(next) }
   const appendBlankStyles = (count: number) => {
-    const nextChart = chart === "전체" ? "" : chart
+    if (readOnly || !activeBoardInfo) { commitRequests(requests); return }
+    const nextChart = activeBoardInfo.name
     const nextStage = stage === "전체" ? "분석" : stage
-    const firstSeq = requests.reduce((maximum, item) => item.chart === nextChart ? Math.max(maximum, item.seq) : maximum, 0) + 1
+    const firstSeq = nextBoardSeq(requests, activeBoard)
     const added = Array.from({ length: count }, (_, index) => {
       const style = blankStyle()
-      return { ...style, chart: nextChart, stage: nextStage, seq: firstSeq + index, options: renumber(style.reqId, [blankOption(style.reqId, 1)]) }
+      return { ...style, boardId: activeBoard, chart: nextChart, stage: nextStage, seq: firstSeq + index, options: renumber(style.reqId, [blankOption(style.reqId, 1)]) }
     })
     saveMutation([...requests, ...added])
     setBottomMenu(null)
@@ -796,8 +893,8 @@ export function FabricRequest() {
       cell.scrollIntoView({ block: "nearest", inline: "nearest" })
     }))
   }
-  const undoLast = () => { const snapshot = undoStack.at(-1); if (!snapshot) return; setUndoStack((s) => s.slice(0, -1)); setRedoStack((s) => [...s, requests].slice(-50)); saveRequests(snapshot) }
-  const redoLast = () => { const snapshot = redoStack.at(-1); if (!snapshot) return; setRedoStack((s) => s.slice(0, -1)); setUndoStack((s) => [...s, requests].slice(-50)); saveRequests(snapshot) }
+  const undoLast = () => { const snapshot = undoStack.at(-1); if (!snapshot) return; setUndoStack((s) => s.slice(0, -1)); setRedoStack((s) => [...s, requests].slice(-50)); commitRequests(snapshot) }
+  const redoLast = () => { const snapshot = redoStack.at(-1); if (!snapshot) return; setRedoStack((s) => s.slice(0, -1)); setUndoStack((s) => [...s, requests].slice(-50)); commitRequests(snapshot) }
 
   const cellLine = (cell: CellRef): Line | null => {
     const slot = slots[cell.row], column = visibleColumns[colIndexOf.get(cell.col) ?? -1]
@@ -826,14 +923,100 @@ export function FabricRequest() {
     const isActive = Boolean(inRange && range && c === (colIndexOf.get(range.focus.col) ?? -2) && (column.scope === "style" ? activeSlot?.style.reqId === slot?.style.reqId : range.focus.row === row))
     return { inRange, isActive, top: inRange && top <= rect.top, bottom: inRange && bottom >= rect.bottom, left: inRange && c === rect.left, right: inRange && c === rect.right, handle: isActive }
   }
+  // 드래그 중 표 가장자리에 가까이 가면 DD MASTER처럼 표를 굴린다(`DevelopmentMasterSheet` startDragAutoScroll과 같은 규칙).
+  // 마우스가 멈춰도 매 프레임 포인터 아래 칸을 다시 찾아 선택을 넓힌다.
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const rowDragRef = useRef(false)
+  const pointerRef = useRef<{ x: number; y: number } | null>(null)
+  const autoScrollFrameRef = useRef<number | null>(null)
+  const lastExtendRef = useRef("")
+  const extendAtPointerRef = useRef<(x: number, y: number) => void>(() => undefined)
   const onCellMouseDown = (event: React.MouseEvent, cell: CellRef) => {
     if ((event.target as HTMLElement).closest("button,input,textarea,select,[role=menu]")) return
-    event.preventDefault(); dragRef.current = true; setCellAnchor(cell, event.shiftKey)
+    event.preventDefault(); dragRef.current = true; rowDragRef.current = false; lastExtendRef.current = ""; setCellAnchor(cell, event.shiftKey)
   }
   const onCellEnter = (cell: CellRef) => { if (dragRef.current) setRange((current) => current ? { ...current, focus: cell } : current) }
-  useEffect(() => { const up = () => { dragRef.current = false; if (fillRef.current) { fillRef.current = null } }; window.addEventListener("mouseup", up); return () => window.removeEventListener("mouseup", up) }, [])
+  // 렌더마다 최신 slots·선택 함수를 쓰도록 ref에 다시 담는다. 프레임 루프는 한 번만 등록한다.
+  extendAtPointerRef.current = (x, y) => {
+    const target = document.elementFromPoint(x, y)
+    if (!(target instanceof Element) || !scrollRef.current?.contains(target)) return
+    const cellEl = target.closest<HTMLElement>("[data-slot-index][data-col-id]")
+    if (rowDragRef.current) {
+      const rowHead = target.closest<HTMLElement>("[data-row-start]")
+      const slotIndex = cellEl ? Number(cellEl.dataset.slotIndex) : -1
+      const start = rowHead ? Number(rowHead.dataset.rowStart) : slotIndex >= 0 ? slots.findIndex((slot) => slot.style.reqId === slots[slotIndex]?.style.reqId) : -1
+      const key = `row:${start}`
+      if (start < 0 || lastExtendRef.current === key) return
+      lastExtendRef.current = key
+      selectWholeRow(start, true)
+      return
+    }
+    if (!cellEl) return
+    const cell = { row: Number(cellEl.dataset.slotIndex), col: cellEl.dataset.colId ?? "" } as CellRef
+    const key = `cell:${cell.row}:${cell.col}`
+    if (lastExtendRef.current === key) return
+    lastExtendRef.current = key
+    onCellEnter(cell)
+  }
+  useEffect(() => {
+    const stopAutoScroll = () => {
+      if (autoScrollFrameRef.current !== null) window.cancelAnimationFrame(autoScrollFrameRef.current)
+      autoScrollFrameRef.current = null
+      pointerRef.current = null
+      lastExtendRef.current = ""
+    }
+    const tick = () => {
+      autoScrollFrameRef.current = null
+      const pointer = pointerRef.current
+      const scroller = scrollRef.current
+      if (!pointer || !scroller || !dragRef.current) return
+      const box = scroller.getBoundingClientRect()
+      // 머리글은 sticky라 표 위쪽 가장자리는 머리글 아래 선으로 본다.
+      const headBottom = Math.max(box.top, scroller.querySelector("thead")?.getBoundingClientRect().bottom ?? box.top)
+      if (pointer.y < headBottom + 24) scroller.scrollTop -= 16
+      else if (pointer.y > box.bottom - 48) scroller.scrollTop += 16
+      if (!rowDragRef.current) {
+        if (pointer.x < box.left + 80) scroller.scrollLeft -= 16
+        else if (pointer.x > box.right - 48) scroller.scrollLeft += 16
+      }
+      // 포인터가 표 밖으로 나가도 가장 가까운 안쪽 칸으로 선택을 넓힌다. 스크롤바 폭만큼 안으로 당긴다.
+      const x = Math.min(Math.max(pointer.x, box.left + 2), box.right - 14)
+      const y = Math.min(Math.max(pointer.y, headBottom + 2), box.bottom - 14)
+      extendAtPointerRef.current(x, y)
+      autoScrollFrameRef.current = window.requestAnimationFrame(tick)
+    }
+    const move = (event: MouseEvent) => {
+      if (!dragRef.current) return
+      pointerRef.current = { x: event.clientX, y: event.clientY }
+      if (autoScrollFrameRef.current === null) autoScrollFrameRef.current = window.requestAnimationFrame(tick)
+    }
+    const up = () => {
+      dragRef.current = false
+      rowDragRef.current = false
+      fillRef.current = null
+      stopAutoScroll()
+    }
+    window.addEventListener("mousemove", move)
+    window.addEventListener("mouseup", up)
+    return () => {
+      window.removeEventListener("mousemove", move)
+      window.removeEventListener("mouseup", up)
+      stopAutoScroll()
+    }
+  }, [])
 
-  const updateCell = (list: RequestStyle[], cell: CellRef, raw: string): { next: RequestStyle[]; skipped: boolean } => {
+  type SkipReason = false | "number" | "construction" | "result"
+  type SkipCounts = { number: number; construction: number; result: number }
+  const countSkip = (counts: SkipCounts, reason: SkipReason) => { if (reason) counts[reason] += 1 }
+  const noticeSkips = (counts: SkipCounts) => {
+    const parts = [
+      counts.number ? `숫자로 바꿀 수 없는 ${counts.number}칸` : "",
+      counts.construction ? `조직 목록에 없는 ${counts.construction}칸` : "",
+      counts.result ? `결과 목록에 없는 ${counts.result}칸` : "",
+    ].filter(Boolean)
+    if (parts.length) setNotice({ kind: "error", text: `${parts.join(", ")}을 건너뛰었습니다.` })
+  }
+  const updateCell = (list: RequestStyle[], cell: CellRef, raw: string): { next: RequestStyle[]; skipped: SkipReason } => {
     const slot = slots[cell.row], column = visibleColumns[colIndexOf.get(cell.col) ?? -1]
     if (!slot || !column || column.id === "image" || editKindOf(column.id) === null) return { next: list, skipped: false }
     const index = list.findIndex((item) => item.reqId === slot.style.reqId)
@@ -842,21 +1025,35 @@ export function FabricRequest() {
     let nextStyle = current
     if (column.scope === "style") {
       let value: string | number | boolean = raw
+      if (column.id === "result") { if (!REQUEST_RESULTS.includes(raw as (typeof REQUEST_RESULTS)[number])) return { next: list, skipped: "result" }; nextStyle = { ...current, result: raw as (typeof REQUEST_RESULTS)[number], resultAt: new Date().toISOString(), updatedAt: new Date().toISOString() }; const next = [...list]; next[index] = nextStyle; return { next, skipped: false } }
       if (column.id === "urgent") value = /^(y|yes|true|1|urgent|o)$/i.test(raw.trim())
-      if (column.id === "origWeight") { const trimmed = raw.trim(); value = trimmed === "" ? "" : Number(trimmed); if (value !== "" && !Number.isFinite(value)) return { next: list, skipped: true } }
+      if (column.id === "origWeight") { const trimmed = raw.trim(); value = trimmed === "" ? "" : Number(trimmed); if (value !== "" && !Number.isFinite(value)) return { next: list, skipped: "number" } }
       nextStyle = { ...current, [column.id]: value, updatedAt: new Date().toISOString() }
     } else {
+      let optionValue: string | number = raw
+      if (column.id === "weight") {
+        // 붙여넣기에 단위가 섞여 와도 숫자만 받는다.
+        const trimmed = raw.trim().replace(/\s*(g\/m2|gsm|g)$/i, "")
+        const parsed = trimmed === "" ? "" : Number(trimmed)
+        if (parsed !== "" && !Number.isFinite(parsed)) return { next: list, skipped: "number" }
+        optionValue = parsed
+      }
+      if (column.id === "construction") {
+        const matched = matchConstruction(raw)
+        if (matched === null) return { next: list, skipped: "construction" }
+        optionValue = matched
+      }
       let options = current.options
       if (!options[slot.optionIndex]) {
         if (options.length !== 0 || slot.optionIndex !== 0) return { next: list, skipped: false }
         options = [blankOption(current.reqId, 1)]
       }
-      options = options.map((option, i) => i === slot.optionIndex ? { ...option, [column.id]: raw } : option)
+      options = options.map((option, i) => i === slot.optionIndex ? { ...option, [column.id]: optionValue } : option)
       nextStyle = { ...current, options: renumber(current.reqId, options), updatedAt: new Date().toISOString() }
     }
     const next = [...list]; next[index] = nextStyle; return { next, skipped: false }
   }
-  const applyCells = (cells: CellRef[], raw: string) => { let next = requests, skipped = 0; cells.forEach((cell) => { const result = updateCell(next, cell, raw); next = result.next; if (result.skipped) skipped += 1 }); if (next !== requests) saveMutation(next); if (skipped) setNotice({ kind: "error", text: `숫자로 바꿀 수 없는 ${skipped}칸을 건너뛰었습니다.` }) }
+  const applyCells = (cells: CellRef[], raw: string) => { let next = requests; const skipCounts: SkipCounts = { number: 0, construction: 0, result: 0 }; cells.forEach((cell) => { const result = updateCell(next, cell, raw); next = result.next; countSkip(skipCounts, result.skipped) }); if (next !== requests) saveMutation(next); noticeSkips(skipCounts) }
   const cellsInRect = (area = rect) => { const cells: CellRef[] = []; if (!area) return cells; for (let r = area.top; r <= area.bottom; r += 1) for (let c = area.left; c <= area.right; c += 1) cells.push({ row: r, col: visibleColumns[c].id }); return cells }
   const clearRange = () => { if (!rect) return; let next = requests; cellsInRect().forEach((cell) => { if (!editableCell(cell)) return; next = updateCell(next, cell, "").next }); if (next !== requests) saveMutation(next) }
   const fillDown = () => { if (!rect || rect.bottom <= rect.top) return; let next = requests; for (let r = rect.top + 1; r <= rect.bottom; r += 1) for (let c = rect.left; c <= rect.right; c += 1) { const source = cellLine({ row: rect.top, col: visibleColumns[c].id }); if (source) next = updateCell(next, { row: r, col: visibleColumns[c].id }, rawValue(source, visibleColumns[c].id)).next } if (next !== requests) saveMutation(next) }
@@ -945,11 +1142,16 @@ export function FabricRequest() {
 
   /** 편집기에 넣을 원본 문자열. 열 id가 필드명과 같아 그대로 집는다. */
   const rawValue = (line: Line, columnId: string): string => {
-    // 보기 전용 계산 열. 복사하면 상태 문구와 FL#이 텍스트로 나간다.
-    if (columnId === "ddStatus") {
+    // 보기 전용 계산 열. 복사할 때도 DD 행의 현재 값으로 만든다.
+    if (columnId === "ddStage") {
+      if (line.kind !== "option") return ""
+      const stage = requestProcessStage(ddByLine, line.option)
+      return stage.linked ? stage.label : ""
+    }
+    if (columnId === "ddLink") {
       if (line.kind !== "option") return ""
       const status = requestDdStatus(ddByLine, line.option)
-      return [status.label, status.flNo].filter(Boolean).join(" ")
+      return status.tone === "none" ? "" : ["연결", status.flNo].filter(Boolean).join(" ")
     }
     const source = (line.kind === "style" ? line.style : line.option) as unknown as Record<string, unknown>
     const value = source[columnId]
@@ -969,9 +1171,21 @@ export function FabricRequest() {
       return
     }
     const { style, option } = line
-    saveRequests(requests.map((item) => item.reqId !== style.reqId ? item : {
+    let optionValue: string | number = raw
+    if (columnId === "weight") {
+      const trimmed = raw.trim()
+      const parsed = trimmed === "" ? "" : Number(trimmed)
+      if (parsed !== "" && !Number.isFinite(parsed)) return
+      optionValue = parsed
+    }
+    if (columnId === "construction") {
+      const matched = matchConstruction(raw)
+      if (matched === null) return
+      optionValue = matched
+    }
+    commitRequests(requests.map((item) => item.reqId !== style.reqId ? item : {
       ...item,
-      options: item.options.map((current) => current.optId === option.optId ? { ...current, [columnId]: raw } : current),
+      options: item.options.map((current) => current.optId === option.optId ? { ...current, [columnId]: optionValue } : current),
       updatedAt: new Date().toISOString(),
     }))
   }
@@ -1043,7 +1257,7 @@ export function FabricRequest() {
     row = Math.max(0, Math.min(slots.length - 1, row)); col = Math.max(0, Math.min(visibleColumns.length - 1, col))
     setCellAnchor({ row, col: visibleColumns[col].id }, extend)
   }
-  const beginCellEdit = (cell: CellRef, seed?: string) => { if (editableCell(cell)) setEditCell({ ...cell, seed }) }
+  const beginCellEdit = (cell: CellRef, seed?: string) => { if (readOnly) { commitRequests(requests); return } if (editableCell(cell)) setEditCell({ ...cell, seed }) }
   const copyRange = async (cut = false) => {
     if (!rect) return
     const lines: string[] = []
@@ -1063,14 +1277,15 @@ export function FabricRequest() {
     if (!rect) return
     let value = ""; try { value = await navigator.clipboard.readText() } catch { value = "" }
     if (!value) value = clipRef.current?.text ?? ""; if (!value) return
-    let next = requests, skipped = 0
+    let next = requests
+    const skipCounts: SkipCounts = { number: 0, construction: 0, result: 0 }
     if (clipRef.current?.cut) cellsInRect(clipRef.current.rect).forEach((cell) => { if (editableCell(cell)) next = updateCell(next, cell, "").next })
     const grid = value.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n").map((line) => line.split("\t"))
     const singleFill = grid.length === 1 && grid[0].length === 1 && (rect.top !== rect.bottom || rect.left !== rect.right)
-    if (singleFill) cellsInRect().forEach((cell) => { const result = updateCell(next, cell, grid[0][0]); next = result.next; skipped += Number(result.skipped) })
-    else grid.forEach((line, r) => line.forEach((raw, c) => { const row = rect.top + r, column = visibleColumns[rect.left + c]; if (!column || !slots[row]) return; const slot = slots[row]; if (column.scope === "style" && row > 0 && slots[row - 1]?.style.reqId === slot.style.reqId) return; const result = updateCell(next, { row, col: column.id }, raw); next = result.next; skipped += Number(result.skipped) }))
+    if (singleFill) cellsInRect().forEach((cell) => { const result = updateCell(next, cell, grid[0][0]); next = result.next; countSkip(skipCounts, result.skipped) })
+    else grid.forEach((line, r) => line.forEach((raw, c) => { const row = rect.top + r, column = visibleColumns[rect.left + c]; if (!column || !slots[row]) return; const slot = slots[row]; if (column.scope === "style" && row > 0 && slots[row - 1]?.style.reqId === slot.style.reqId) return; const result = updateCell(next, { row, col: column.id }, raw); next = result.next; countSkip(skipCounts, result.skipped) }))
     if (next !== requests) saveMutation(next); if (clipRef.current) clipRef.current.cut = false
-    if (skipped) setNotice({ kind: "error", text: `숫자로 바꿀 수 없는 ${skipped}칸을 건너뛰었습니다.` })
+    noticeSkips(skipCounts)
   }
   const changeOptions = (mode: "above" | "below" | "delete") => {
     if (!rect) return
@@ -1125,14 +1340,17 @@ export function FabricRequest() {
 
   const ingest = async (file: File | undefined) => {
     if (!file) return
+    if (readOnly || !activeBoardInfo) { commitRequests(requests); return }
     setNotice(null)
     try {
       const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true })
       const parsed = parseRequestWorkbook(workbook)
-      const { merged, added, updated } = mergeRequestStyles(requests, parsed.styles)
-      saveRequests(merged)
-      const skipped = parsed.warnings.length ? ` 건너뛴 행 ${parsed.warnings.length}개.` : ""
-      setNotice({ kind: "ok", text: `추가 ${added}건, 갱신 ${updated}건을 반영했습니다.${skipped}` })
+      const ignored = parsed.styles.filter((style) => style.chart.trim() && style.chart.trim() !== activeBoardInfo.name).length
+      const incoming = parsed.styles.map((style) => ({ ...style, boardId: activeBoard, chart: activeBoardInfo.name }))
+      const { merged, added, updated } = mergeRequestStyles(requests, incoming)
+      commitRequests(merged, "upload")
+      const skipped = parsed.warnings.length ? ` 확인할 내용 ${parsed.warnings.length}건: ${parsed.warnings.slice(0, 3).join(" / ")}${parsed.warnings.length > 3 ? " 외" : ""}` : ""
+      setNotice({ kind: "ok", text: `추가 ${added}건, 갱신 ${updated}건을 반영했습니다.${skipped}${ignored ? ` 차트 열 값 ${ignored}건은 무시하고 현재 보드로 올렸습니다.` : ""}` })
     } catch (error) {
       setNotice({ kind: "error", text: error instanceof Error ? error.message : "파일을 읽지 못했습니다." })
     }
@@ -1146,6 +1364,10 @@ export function FabricRequest() {
         case "image":
           return <ImageCell style={style} onUploaded={(paths) => patchStyle(style.reqId, paths)} onOpen={() => setPreview(style)} />
         case "garmentNo": return <span className="font-mono">{style.garmentNo}</span>
+        case "boardName": {
+          const board = requestBoards.find((item) => item.boardId === style.boardId)
+          return board ? <button type="button" className="inline-flex items-center gap-1 rounded-full bg-[var(--muted)] px-1.5 py-0.5 text-[10px]" onClick={(event) => { event.stopPropagation(); if (board.status === "종결") { setArchiveSelected(requestArchive.filter((archive) => archive.boardId === board.boardId).sort((a, b) => b.closedAt.localeCompare(a.closedAt))[0]?.archiveId ?? null); setActiveBoard(ARCHIVE_VIEW) } else setActiveBoard(board.boardId) }}><span className="size-1.5 rounded-full" style={{ backgroundColor: boardKindColor(board.kind) }} />{board.name}{board.status === "종결" ? <span className="text-[var(--muted-foreground)]">종결</span> : null}</button> : <span className="text-[var(--muted-foreground)]">미분류</span>
+        }
         case "brand": return style.brand
         case "contents": return style.contents
         case "origConstruction": return style.origConstruction
@@ -1154,6 +1376,11 @@ export function FabricRequest() {
         case "devConstruction": return style.devConstruction
         case "comment": return style.comment
         case "analyst": return style.analyst
+        case "result": {
+          const result = resultOf(style)
+          const tone = result === "진행중" ? "bg-[color-mix(in_srgb,var(--chart-1)_14%,transparent)] text-[var(--chart-1)]" : result === "완료" ? "bg-[color-mix(in_srgb,var(--chart-2)_16%,transparent)] text-[var(--chart-2)]" : result === "드롭" ? "bg-[var(--muted)] text-[var(--muted-foreground)] line-through" : "bg-[color-mix(in_srgb,var(--warning)_16%,transparent)] text-[var(--warning)]"
+          return <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${tone}`}>{result}</span>
+        }
         case "urgent": return style.urgent
           ? <span className="rounded-full bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--destructive)]">URGENT</span>
           : null
@@ -1165,10 +1392,13 @@ export function FabricRequest() {
     }
     if (column.scope === "style") return null
     const option = line.option
-    if (column.id === "ddStatus") return renderDdStatus(option)
+    if (column.id === "ddStage") return renderDdStage(line.style, option)
+    if (column.id === "ddLink") return renderDdLink(option)
     switch (column.id) {
       case "optNo": return <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--muted)] px-1.5 text-[10px] font-medium tabular-nums text-[var(--foreground)]">{option.no}</span>
       case "yarnDetail": return option.yarnDetail
+      case "construction": return option.construction ?? ""
+      case "weight": return text(option.weight)
       case "color": return option.color
       case "dyeingMethod": return option.dyeingMethod
       case "remark": return option.remark
@@ -1244,25 +1474,62 @@ export function FabricRequest() {
     )
   }
 
+  const submitBoard = (values: RequestBoardValues) => {
+    const now = new Date().toISOString()
+    if (boardDialog === "create") {
+      const board: RequestBoard = { ...values, boardId: crypto.randomUUID(), status: "진행", order: openBoards.reduce((max, item) => Math.max(max, item.order), 0) + 1, createdAt: now, updatedAt: now, createdBy: actor.email, createdByName: actor.name, history: [boardEvent(actor, "create", { to: values.name }, now)] }
+      saveRequestBoards([...requestBoards, board]); setActiveBoard(board.boardId)
+    } else if (activeBoardInfo) {
+      const fields = ["name", "kind", "team", "note", "createdBy", "createdByName"] as const
+      const history = fields.filter((field) => activeBoardInfo[field] !== values[field]).map((field) => boardEvent(actor, "update", { target: field, from: String(activeBoardInfo[field]), to: String(values[field]) }, now))
+      const nextBoard = { ...activeBoardInfo, ...values, updatedAt: now, history: [...activeBoardInfo.history, ...history] }
+      const boards = requestBoards.map((item) => item.boardId === nextBoard.boardId ? nextBoard : item)
+      if (values.name !== activeBoardInfo.name) saveRequestsAndBoards(requests.map((style) => style.boardId === nextBoard.boardId ? { ...style, chart: values.name, updatedAt: now } : style), boards)
+      else saveRequestBoards(boards)
+    }
+    setBoardDialog(null)
+  }
+  const deleteBoard = () => { if (!activeBoardInfo) return; saveRequestBoards(requestBoards.filter((item) => item.boardId !== activeBoardInfo.boardId)); setActiveBoard(ALL_BOARDS); setBoardDialog(null) }
+  const closeActiveBoard = ({ memo, fillResult }: { memo: string; fillResult?: Exclude<RequestResult, "진행중"> }) => {
+    if (!activeBoardInfo || !canManageBoard(activeBoardInfo, authUser?.email, isOwner)) return
+    const now = new Date().toISOString()
+    const nextRequests = requests.map((style) => style.boardId === activeBoardInfo.boardId && resultOf(style) === "진행중" && fillResult ? { ...style, result: fillResult, resultAt: now, updatedAt: now } : style)
+    const history = appendRequestHistory(requests, nextRequests, requestBoards, actor, now)
+    const boards = closeBoard(history.boards, activeBoardInfo.boardId, actor, memo, now)
+    const closed = boards.find((board) => board.boardId === activeBoardInfo.boardId)
+    if (!closed) return
+    const archive = buildBoardArchive(closed, nextRequests.filter((style) => style.boardId === closed.boardId), (option) => requestProcessStage(ddByLine, option), (option) => requestDdStatus(ddByLine, option).flNo)
+    saveRequestsAndBoards(nextRequests, boards, "edit")
+    saveRequestArchive([...requestArchive, archive])
+    setUndoStack([]); setRedoStack([]); setCloseOpen(false); setArchiveSelected(archive.archiveId); setActiveBoard(ARCHIVE_VIEW)
+  }
+  const reopenArchivedBoard = (boardId: string) => { saveRequestBoards(reopenBoard(requestBoards, boardId, actor)); setActiveBoard(boardId) }
+  const downloadArchive = async (archive: RequestArchive) => {
+    try { downloadBlob(await buildRequestWorkbook(archive.styles), requestTemplateFileName()) }
+    catch (error) { setNotice({ kind: "error", text: error instanceof Error ? error.message : "엑셀을 만들지 못했습니다." }) }
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-4">
-      <div className="flex shrink-0 items-center gap-2">
-        <Tabs value={stage} onValueChange={(next) => setStage(next as StageFilter)}>
-          <TabsList className="flex justify-start gap-1">
-            {(["전체", "분석", "개발"] as StageFilter[]).map((key) => {
-              const color = key === "전체" ? "var(--primary)" : key === "분석" ? COLUMN_GROUPS[1].color : COLUMN_GROUPS[2].color
-              const count = key === "전체" ? requests.length : requests.filter((item) => item.stage === key).length
-              return (
-                <TabsTrigger key={key} value={key} className="gap-1.5">
-                  <span className="size-2 rounded-full" style={{ backgroundColor: color }} />
-                  {key}
-                  <Badge variant="secondary" className="h-5 min-w-5 justify-center px-1.5 tabular-nums">{count.toLocaleString("ko-KR")}</Badge>
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
-        </Tabs>
-        <div className="ml-auto flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2 overflow-x-auto">
+        {/* 보드 탭 레일. 전체와 보드 묶음을 구분선으로 가르고, 보드마다 종류 색 막대와 건수 배지로 구분한다. */}
+        <div className="flex min-w-0 items-center gap-1 overflow-x-auto rounded-xl border border-[var(--border)] bg-[color-mix(in_srgb,var(--muted)_55%,transparent)] p-1">
+          <button type="button" title="모든 보드의 스타일을 모아 봅니다(보기 전용)" onClick={() => setActiveBoard(ALL_BOARDS)} className={`flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-xs transition-[background-color,box-shadow,color] duration-150 ${activeBoard === ALL_BOARDS ? "bg-[var(--card)] font-semibold text-[var(--foreground)] shadow-sm ring-1 ring-[var(--border)]" : "text-[var(--muted-foreground)] hover:bg-[color-mix(in_srgb,var(--card)_70%,transparent)]"}`} style={activeBoard === ALL_BOARDS ? { boxShadow: "inset 0 -2px 0 var(--primary)" } : undefined}><span className="size-2 rounded-full bg-[var(--primary)]" />전체<Badge variant="secondary" className="h-5 px-1.5 tabular-nums">{requests.length}</Badge><span className="text-[10px] font-normal text-[var(--muted-foreground)]">보기 전용</span></button>
+          {openBoards.length ? <span aria-hidden="true" className="mx-1 h-5 w-px shrink-0 bg-[var(--border)]" /> : null}
+          {openBoards.map((board) => {
+            const color = boardKindColor(board.kind)
+            const active = activeBoard === board.boardId
+            return <button key={board.boardId} type="button" title={`${board.name}, ${board.kind}${board.team ? `, ${board.team}` : ""}`} onClick={() => setActiveBoard(board.boardId)}
+              className={`flex h-8 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-[background-color,box-shadow,color,border-color] duration-150 ${active ? "border-[var(--border)] bg-[var(--card)] font-semibold text-[var(--foreground)] shadow-sm" : "border-transparent text-[var(--muted-foreground)] hover:border-[var(--border)] hover:bg-[color-mix(in_srgb,var(--card)_70%,transparent)]"}`}
+              style={{ boxShadow: active ? `inset 3px 0 0 ${color}, inset 0 -2px 0 ${color}` : `inset 3px 0 0 color-mix(in srgb, ${color} 55%, transparent)` }}>
+              <span className="max-w-40 truncate">{board.name}</span>
+              <span className="h-5 min-w-5 rounded-full px-1.5 text-[10px] font-semibold leading-5 tabular-nums" style={{ color, background: `color-mix(in srgb, ${color} ${active ? 18 : 12}%, transparent)` }}>{requests.filter((style) => style.boardId === board.boardId).length}</span>
+            </button>
+          })}
+        </div>
+        <Button type="button" size="sm" disabled={!currentUserCanWrite()} onClick={() => setBoardDialog("create")} className="shrink-0 gap-1 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition-transform active:translate-y-px"><Plus className="size-4" />새 보드</Button>
+        <Button type="button" size="sm" variant={activeBoard === ARCHIVE_VIEW ? "secondary" : "outline"} className="shrink-0 rounded-lg" onClick={() => setActiveBoard(ARCHIVE_VIEW)}><Archive className="size-3.5" />보관함<Badge variant="secondary" className="h-5 px-1.5 tabular-nums">{requestBoards.filter((board) => board.status === "종결").length}</Badge></Button>
+        {activeBoard !== ARCHIVE_VIEW ? <div className="ml-auto flex items-center gap-2">
           <input
             ref={uploadRef}
             type="file"
@@ -1273,18 +1540,21 @@ export function FabricRequest() {
           <Button type="button" size="sm" variant="outline" onClick={() => void downloadTemplate()}>
             <Download className="size-4" />양식 내려받기
           </Button>
-          <Button type="button" size="sm" variant="outline" onClick={() => uploadRef.current?.click()}>
+          {!readOnly ? <Button type="button" size="sm" variant="outline" onClick={() => uploadRef.current?.click()}>
             <Upload className="size-4" />업로드
-          </Button>
-          <Button type="button" size="sm" onClick={() => setDraft(blankStyle())}>
+          </Button> : null}
+          {!readOnly ? <Button type="button" size="sm" onClick={() => setDraft(blankStyle())}>
             <Plus className="size-4" />신규 의뢰
-          </Button>
-        </div>
+          </Button> : null}
+        </div> : null}
       </div>
+
+      {activeBoard === ARCHIVE_VIEW ? <RequestArchiveView archives={requestArchive} boards={requestBoards} selectedId={archiveSelected} onSelect={setArchiveSelected} canManage={(board) => canManageBoard(board, authUser?.email, isOwner)} onReopen={reopenArchivedBoard} onDownload={(archive) => void downloadArchive(archive)} /> : <>
+      {activeBoardInfo ? <RequestBoardHeader board={activeBoardInfo} styles={scoped} stageOf={(option) => requestProcessStage(ddByLine, option)} canManage={canManageBoard(activeBoardInfo, authUser?.email, isOwner)} onEdit={() => setBoardDialog("edit")} onCloseBoard={() => setCloseOpen(true)} /> : null}
 
       <div
         className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)]"
-        style={{ borderTopColor: stage === "전체" ? "var(--primary)" : stage === "분석" ? COLUMN_GROUPS[1].color : COLUMN_GROUPS[2].color }}
+        style={{ borderTopColor: activeBoardInfo ? boardKindColor(activeBoardInfo.kind) : "var(--primary)" }}
       >
         <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2">
           <Select value={sortKey} onValueChange={(next) => setSortKey(next as SortKey)}>
@@ -1295,13 +1565,7 @@ export function FabricRequest() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={chart} onValueChange={setChart}>
-            <SelectTrigger className="h-7 w-44 text-[11px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="전체">차트 전체</SelectItem>
-              {chartOptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <Tabs value={stage} onValueChange={(next) => setStage(next as StageFilter)}><TabsList>{(["전체", "분석", "개발"] as StageFilter[]).map((key) => <TabsTrigger key={key} value={key} className="h-6 px-2 text-[10px]">{key} {key === "전체" ? scoped.length : scoped.filter((item) => item.stage === key).length}</TabsTrigger>)}</TabsList></Tabs>
           <Button type="button" size="sm" variant={urgentOnly ? "default" : "outline"} className="h-7 shrink-0 px-2 text-[11px]" aria-pressed={urgentOnly} onClick={() => setUrgentOnly(!urgentOnly)}>
             <Flame className="size-3.5" />URGENT만
           </Button>
@@ -1340,16 +1604,16 @@ export function FabricRequest() {
             <button type="button" className="ml-2 underline underline-offset-2" onClick={() => setNotice(null)}>닫기</button>
           </div>
         ) : null}
-        {requests.length === 0 ? (
-          <div onContextMenu={(event) => { event.preventDefault(); setRowMenu(null); setBottomMenu({ x: event.clientX, y: event.clientY }) }} className="flex flex-1 items-center justify-center p-10">
+        {scoped.length === 0 ? (
+          <div onContextMenu={(event) => { if (readOnly) return; event.preventDefault(); setRowMenu(null); setBottomMenu({ x: event.clientX, y: event.clientY }) }} className="flex flex-1 items-center justify-center p-10">
           <p className="text-center text-sm text-[var(--muted-foreground)]">
-            아직 등록된 의뢰가 없습니다.
+            {readOnly ? "아직 등록된 의뢰가 없습니다. 보드 탭에서 추가하세요." : "이 보드에 아직 스타일이 없습니다. 신규 의뢰나 빈 곳 우클릭으로 추가하세요."}
             <br />
-            &quot;양식 내려받기&quot;로 엑셀을 받아 채운 뒤 &quot;업로드&quot;하거나, &quot;신규 의뢰&quot;로 한 건씩 넣어 주세요.
+            {!readOnly ? "양식 내려받기로 엑셀을 받아 채운 뒤 업로드할 수 있습니다." : null}
           </p>
           </div>
       ) : (
-        <div onContextMenu={(event) => { if ((event.target as HTMLElement).closest("table")) return; event.preventDefault(); setRowMenu(null); setBottomMenu({ x: event.clientX, y: event.clientY }) }} className="min-h-0 flex-1 overflow-auto">
+        <div ref={scrollRef} onContextMenu={(event) => { if (readOnly || (event.target as HTMLElement).closest("table")) return; event.preventDefault(); setRowMenu(null); setBottomMenu({ x: event.clientX, y: event.clientY }) }} className="min-h-0 flex-1 overflow-auto">
           <table
             className="table-fixed border-separate border-spacing-0 text-xs"
             style={{ width: tableWidth, minWidth: tableWidth }}
@@ -1460,7 +1724,8 @@ export function FabricRequest() {
                       className="relative sticky left-0 z-20 select-none border-b border-r border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] bg-[var(--muted)] p-0 text-center align-top text-[10px] font-medium tabular-nums text-[var(--muted-foreground)]"
                       style={{ width: ROW_NO_WIDTH, height: blockHeight, ...(focusedReqId === style.reqId ? { outline: "2px solid var(--primary)", outlineOffset: "-2px" } : null) }}
                       title="우클릭: 옵션 추가·삭제"
-                      onMouseDown={(event) => { if ((event.target as HTMLElement).closest("button,input")) return; event.preventDefault(); dragRef.current = true; selectWholeRow(styleStart, event.shiftKey) }}
+                      data-row-start={styleStart}
+                      onMouseDown={(event) => { if ((event.target as HTMLElement).closest("button,input")) return; event.preventDefault(); dragRef.current = true; rowDragRef.current = true; lastExtendRef.current = ""; selectWholeRow(styleStart, event.shiftKey) }}
                       onMouseEnter={() => { if (dragRef.current) selectWholeRow(styleStart, true) }}
                       onContextMenu={(event) => { event.preventDefault(); selectWholeRow(styleStart); setRowMenu({ x: event.clientX, y: event.clientY, cell: { row: styleStart, col: visibleColumns[0].id } }) }}
                     >
@@ -1526,6 +1791,7 @@ export function FabricRequest() {
         </div>
       )}
       </div>
+      </>}
 
       {rowMenu ? <>
         {/* 덮개가 먼저 클릭을 받아 메뉴를 닫는다. 우클릭으로도 닫힌다. */}
@@ -1545,11 +1811,17 @@ export function FabricRequest() {
             { key: "below", label: "옵션 아래에 삽입", hint: "", icon: <Plus className="size-3.5" />, run: () => changeOptions("below") },
             { key: "delete-option", label: "옵션 삭제", hint: "", icon: <Trash2 className="size-3.5" />, run: () => changeOptions("delete") },
             { key: "row", label: "줄 전체 선택", hint: "Shift+Space", icon: <Rows3 className="size-3.5" />, run: () => selectWholeRow(rowMenu.cell.row) },
-          ].map((item) => <button key={item.key} type="button" role="menuitem" onClick={() => { setRowMenu(null); item.run() }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]"><span className="text-[var(--muted-foreground)]">{item.icon}</span><span className="flex-1">{item.label}</span><span className="text-[10px] text-[var(--muted-foreground)]">{item.hint}</span></button>)}
+          ].filter((item) => !readOnly || item.key === "copy" || item.key === "row").map((item) => <button key={item.key} type="button" role="menuitem" onClick={() => { setRowMenu(null); item.run() }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]"><span className="text-[var(--muted-foreground)]">{item.icon}</span><span className="flex-1">{item.label}</span><span className="text-[10px] text-[var(--muted-foreground)]">{item.hint}</span></button>)}
           <div className="my-1 h-px bg-[var(--border)]" />
+          {readOnly ? (() => {
+            // 전체 탭은 보기 전용이라 편집 항목 대신 그 스타일의 보드 탭으로 보내는 길만 둔다.
+            const targetBoard = menuLine ? openBoards.find((board) => board.boardId === menuLine.style.boardId) : undefined
+            return <button type="button" role="menuitem" disabled={!targetBoard} title={targetBoard ? undefined : "진행 중인 보드가 없는 스타일입니다."} onClick={() => { if (targetBoard) setActiveBoard(targetBoard.boardId); setRowMenu(null) }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)] disabled:opacity-40"><Pencil className="size-3.5" /><span className="flex-1">보드 탭에서 열기</span>{targetBoard ? <span className="max-w-20 truncate text-[10px] text-[var(--muted-foreground)]">{targetBoard.name}</span> : null}</button>
+          })() : <>
           <button type="button" role="menuitem" disabled={!undoStack.length} onClick={() => { setRowMenu(null); undoLast() }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)] disabled:opacity-40"><Undo2 className="size-3.5" /><span className="flex-1">되돌리기</span><span className="text-[10px]">Ctrl+Z</span></button>
           <button type="button" role="menuitem" disabled={!redoStack.length} onClick={() => { setRowMenu(null); redoLast() }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)] disabled:opacity-40"><Redo2 className="size-3.5" /><span className="flex-1">다시 실행</span><span className="text-[10px]">Ctrl+Y</span></button>
-          {menuLine ? <><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setDraft(menuLine.style); setRowMenu(null) }}><Pencil className="size-3.5" />스타일 수정</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--destructive)] hover:bg-[var(--muted)]" onClick={() => remove(menuLine.style)}><Trash2 className="size-3.5" />스타일 삭제</button></> : null}
+          </>}
+          {menuLine && !readOnly ? <><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setMoveStyle(menuLine.style); setRowMenu(null) }}><Rows3 className="size-3.5" />다른 보드로 옮기기</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setDraft(menuLine.style); setRowMenu(null) }}><Pencil className="size-3.5" />스타일 수정</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--destructive)] hover:bg-[var(--muted)]" onClick={() => remove(menuLine.style)}><Trash2 className="size-3.5" />스타일 삭제</button></> : null}
         </div>
       </> : null}
 
@@ -1577,14 +1849,30 @@ export function FabricRequest() {
         </DialogContent>
       </Dialog>
 
+      <ProcessStageDialog
+        open={stageTarget !== null}
+        onOpenChange={(open) => { if (!open) setStageTarget(null) }}
+        stage={stageTarget?.stage ?? null}
+        title={stageTarget?.title ?? ""}
+        onOpenDd={() => {
+          if (!stageTarget?.rowId) return
+          navigate(`/development/workspace?focus=${encodeURIComponent(stageTarget.rowId)}`)
+          setStageTarget(null)
+        }}
+      />
+
       <RequestEditor
         open={draft !== null}
         draft={draft}
         ownerOptions={ownerOptions}
-        chartOptions={chartOptions}
+        boardName={activeBoardInfo?.name ?? "전체"}
         onClose={() => setDraft(null)}
         onSave={upsert}
       />
+
+      <RequestBoardDialog open={boardDialog !== null} mode={boardDialog ?? "create"} board={boardDialog === "edit" ? activeBoardInfo ?? undefined : undefined} boards={requestBoards} teams={[...new Set(requestBoards.map((board) => board.team).filter(Boolean))]} isOwner={isOwner} canDelete={Boolean(activeBoardInfo && canDeleteBoard(activeBoardInfo, requests, isOwner))} onSubmit={submitBoard} onDelete={deleteBoard} onOpenChange={(open) => { if (!open) setBoardDialog(null) }} />
+      <RequestBoardCloseDialog open={closeOpen} board={activeBoardInfo} styles={scoped} onConfirm={closeActiveBoard} onOpenChange={setCloseOpen} />
+      <MoveStyleDialog open={moveStyle !== null} boards={openBoards.filter((board) => board.boardId !== activeBoard)} onOpenChange={(open) => { if (!open) setMoveStyle(null) }} onMove={(boardId) => { if (!moveStyle) return; const board = openBoards.find((item) => item.boardId === boardId); if (!board) return; saveMutation(requests.map((style) => style.reqId === moveStyle.reqId ? { ...style, boardId, chart: board.name, seq: nextBoardSeq(requests, boardId), updatedAt: new Date().toISOString() } : style)); setMoveStyle(null) }} />
 
       <PreviewDialog style={preview} onClose={() => setPreview(null)} />
     </div>

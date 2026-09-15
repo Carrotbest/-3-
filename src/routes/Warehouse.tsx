@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode , type CSSProperties } from "react"
 import * as Popover from "@radix-ui/react-popover"
-import { ArchiveRestore, Copy, DatabaseBackup, FileDown, Info, ListX, Loader2, Mail, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
+import { ArchiveRestore, ClipboardList, Copy, DatabaseBackup, FileDown, Info, LayoutGrid, ListX, Loader2, Mail, Rows3, PackageCheck, PackageOpen, Pencil, Search, Send, Trash2 } from "lucide-react"
+import { InboundRequestMailDialog } from "@/components/warehouse/InboundRequestMailDialog"
+import { RackMap } from "@/components/warehouse/RackMap"
+import { DisposalRoundPanel } from "@/components/warehouse/DisposalRoundPanel"
 import { OutboundRequestMailDialog } from "@/components/warehouse/OutboundRequestMailDialog"
 import { normalizeRackNo, RACK_FORMAT_HINT, RACK_NONE_LABEL, RACK_POSITIONS } from "@/data/warehouse-rack"
 
@@ -22,9 +25,9 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { buildFabricLedger, fabricRecordIdentity, type FabricLedgerItem } from "@/data/fabric-ledger"
+import { buildFabricLedger, fabricRecordIdentity, STORAGE_NO_MAX, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
-import { useAuthStore } from "@/data/auth"
+import { currentUserCanWrite, useAuthStore } from "@/data/auth"
 import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
 import { downloadBlob } from "@/data/dd-export"
 import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED, type IndexRect } from "@/data/range-tsv"
@@ -34,7 +37,7 @@ import { fmtDateFull, fmtDateMd } from "@/data/format"
 import type { FabricLedgerStatus } from "@/data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
 import { useInView } from "@/lib/useInView"
-import { addManualIntake, updateManualIntake, applyFabricAction, confirmWarehouseBaseline, removeFabricRows, saveFabricRackNo, saveFabricRackNos, useAppStore } from "@/store/useAppStore"
+import { addManualIntake, updateManualIntake, applyFabricAction, confirmWarehouseBaseline, removeFabricRows, saveDisposalRounds, saveFabricRackNo, saveFabricRackNos, useAppStore } from "@/store/useAppStore"
 
 type WarehouseTab = "READY" | "WAREHOUSE" | "HISTORY"
 type DisposalReason = "용량 초과" | "품질 불량" | "개발 중단"
@@ -220,8 +223,6 @@ function formatYds(value: number): string {
  * 폐기·소진으로 풀린 번호를 다시 쓰는 운영이라, 창고에 지금 있는 번호를 피해
  * 가장 낮은 빈 번호부터 채운다. 부여된 번호는 화면에서 고칠 수 있다.
  */
-const STORAGE_NO_MAX = 7999
-
 function occupiedStorageNumbers(items: readonly FabricLedgerItem[]): Set<number> {
   const used = new Set<number>()
   items.forEach((item) => {
@@ -230,42 +231,6 @@ function occupiedStorageNumbers(items: readonly FabricLedgerItem[]): Set<number>
     if (matched) used.add(Number(matched))
   })
   return used
-}
-
-/** R&D No.의 앞 숫자. "1288-1" 같은 표기도 1288로 읽는다. 번호가 없으면 null. */
-function storageNumberOf(item: FabricLedgerItem): number | null {
-  const matched = item.storageNo.trim().match(/^\d{1,4}(?!\d)/)?.[0]
-  return matched ? Number(matched) : null
-}
-
-/**
- * 창고 보관 목록의 첫 번호.
- * 채번은 7999 다음에 8000이 아니라 비어 있는 낮은 번호로 되감긴다(8000번대는 타 사업부 대역).
- * 그래서 단순 오름차순은 가장 최근에 채번한 1000번대를 맨 위로 올려 버린다.
- * 쓰이고 있는 번호를 원형으로 놓고 가장 큰 빈 구간 다음 번호부터 세우면 선반을 걷는 순서와 같아진다.
- * 예: 1000~1300과 5000~7999가 쓰이면 5000부터 7999까지 간 뒤 1000으로 넘어간다.
- */
-function warehouseSequenceStart(numbers: readonly number[]): number {
-  const sorted = [...new Set(numbers)].sort((left, right) => left - right)
-  if (sorted.length < 2) return sorted[0] ?? 1
-  let start = sorted[0]
-  // 되감기 구간(가장 큰 번호에서 가장 작은 번호까지)을 기준으로 두고, 더 큰 빈 구간이 있으면 그쪽을 쓴다.
-  let widest = sorted[0] + STORAGE_NO_MAX - sorted[sorted.length - 1]
-  for (let index = 1; index < sorted.length; index += 1) {
-    const gap = sorted[index] - sorted[index - 1]
-    if (gap > widest) {
-      widest = gap
-      start = sorted[index]
-    }
-  }
-  return start
-}
-
-/** 첫 번호를 0으로 놓고 되감기를 편 위치. 번호가 없으면 맨 뒤로 보낸다. */
-function warehouseOrderKey(item: FabricLedgerItem, start: number): number {
-  const number = storageNumberOf(item)
-  if (number === null) return Number.MAX_SAFE_INTEGER
-  return number >= start ? number - start : number - start + STORAGE_NO_MAX
 }
 
 /** 대장 행 순서가 곧 채번 순서다. 마지막으로 채번된 번호 다음부터 이어 간다. */
@@ -410,11 +375,19 @@ export function Warehouse() {
   const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
   // 출고 요청 메일 초안(C형). 요청자 기본값은 로그인 표시 이름, 없으면 이메일 앞부분이다.
   const [outboundMailOpen, setOutboundMailOpen] = useState(false)
+  // 선택 입고 뒤 입고 요청 메일을 만들 원단 key. 입고 등록이 끝난 원장 값(R&D No.)으로 표를 채운다.
+  const [inboundMailKeys, setInboundMailKeys] = useState<string[]>([])
+  // Rack 배치도 보기. 켜면 표 자리에 배치도를 그리고, 탭을 누르거나 칸을 고르면 표로 돌아간다.
+  const [rackView, setRackView] = useState(false)
+  const [disposalView, setDisposalView] = useState(false)
+  const authUser = useAuthStore((state) => state.user)
+  const isOwner = useAuthStore((state) => state.isOwner)
   const defaultRequester = useAuthStore((state) => state.user?.displayName || state.user?.email?.split("@")[0] || "")
   const records = useAppStore((state) => state.records)
   const samples = useAppStore((state) => state.completed)
   const overrides = useAppStore((state) => state.fabricOverrides)
   const fabricEvents = useAppStore((state) => state.fabricEvents)
+  const disposalRounds = useAppStore((state) => state.disposalRounds)
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents), [fabricEvents, overrides, records, samples])
   const [exportOpen, setExportOpen] = useState(false)
   const [exportRange, setExportRange] = useState(loadExportRange)
@@ -508,6 +481,8 @@ export function Warehouse() {
   const [receiveYds, setReceiveYds] = useState<Record<string, string>>({})
   const [receiveNos, setReceiveNos] = useState<Record<string, string>>({})
   const [confirmChecks, setConfirmChecks] = useState<Record<string, boolean>>({})
+  // 실물 입고 확인 창의 Rack No. 입력값. 창고팀이 확인하면서 칸 번호를 같이 적는다.
+  const [confirmRacks, setConfirmRacks] = useState<Record<string, string>>({})
   const [unconfirmedOnly, setUnconfirmedOnly] = useState(false)
   // 웹 등록 행만 그리드에서 직접 고친다. DD·대장에서 온 행은 여기서 수정하지 않는다.
   const [editCell, setEditCell] = useState<{ row: string; col: string } | null>(null)
@@ -641,6 +616,8 @@ export function Warehouse() {
   }, [])
 
   const changeTab = (next: WarehouseTab) => {
+    setRackView(false)
+    setDisposalView(false)
     setTab(next)
     setChecked(new Set())
     setColumnFilters({})
@@ -720,6 +697,7 @@ export function Warehouse() {
     setActionDialog({ kind, keys: items.map((item) => item.key), restoreTo })
     setFormError("")
     setReceiveYds(Object.fromEntries(items.map((item) => [item.key, item.yds === null ? "" : String(item.yds)])))
+    setConfirmRacks(Object.fromEntries(items.map((item) => [item.key, item.rackNo ?? ""])))
     setStockYds(items[0].yds === null ? "" : String(items[0].yds))
     setStockBalance(items[0].balance === null ? "" : String(Math.max(0, items[0].balance)))
     setRecipient("")
@@ -734,7 +712,7 @@ export function Warehouse() {
     openAction(kind, [item])
   }
 
-  const runAction = async () => {
+  const runAction = async (withInboundMail = false) => {
     if (!actionDialog || !actionItems.length) return
     setFormError("")
     setSaving(true)
@@ -765,6 +743,7 @@ export function Warehouse() {
         setReceiveNos({})
         setChecked(new Set())
         setTab("WAREHOUSE")
+        if (withInboundMail) setInboundMailKeys(actionItems.map((item) => item.key))
       } else if (actionDialog.kind === "UNRECEIVE") {
         for (const item of actionItems) {
           if (item.status !== "WAREHOUSE") continue
@@ -775,12 +754,21 @@ export function Warehouse() {
       } else if (actionDialog.kind === "CONFIRM") {
         const targets = actionItems.filter((item) => confirmChecks[item.key] !== false)
         if (!targets.length) throw new Error("실물을 확인한 항목을 하나 이상 체크하세요.")
+        // 형식이 틀린 칸이 하나라도 있으면 확인 처리 전에 멈춘다. 빈 칸은 지정 안 함으로 둔다.
+        const rackEntries = targets.filter((item) => item.status === "WAREHOUSE").map((item) => {
+          const rackNo = normalizeRackNo(confirmRacks[item.key] ?? item.rackNo ?? "")
+          if (rackNo === null) throw new Error(`${item.storageNo || item.styleNo || "원단"}: ${RACK_FORMAT_HINT}`)
+          return { item, rackNo }
+        })
         for (const item of targets) {
           if (item.status !== "WAREHOUSE" || item.confirmedAt) continue
           await applyFabricAction({ fabricKey: item.key, action: "CONFIRM", fromStatus: "WAREHOUSE", toStatus: "WAREHOUSE", storageNo: item.storageNo, note: "창고 실물 입고 확인" })
         }
+        // 확인 처리가 끝난 최신 상태 위에 한 번에 저장해야 앞 저장을 덮지 않는다.
+        await saveFabricRackNos(rackEntries)
         setChecked(new Set())
         setConfirmChecks({})
+        setConfirmRacks({})
       } else if (actionDialog.kind === "REMOVE") {
         await removeFabricRows(actionItems.map((item) => ({ key: item.key, fromStatus: item.status })))
         setChecked(new Set())
@@ -956,6 +944,21 @@ export function Warehouse() {
             : "상태 복구"
 
   const unconfirmedCount = useMemo(() => ledger.filter((item) => item.status === "WAREHOUSE" && !item.confirmedAt).length, [ledger])
+
+  const storedItems = useMemo(() => ledger.filter((item) => item.status === "WAREHOUSE"), [ledger])
+
+  /** 배치도 칸에서 창고보관 목록으로 넘어간다. Rack No. 열 필터 하나만 걸어 머리 ▼ 메뉴에서 바로 풀 수 있다. */
+  const openRackSlot = (rackNo: string) => {
+    changeTab("WAREHOUSE")
+    setUnconfirmedOnly(false)
+    setSearch("")
+    setColumnFilters({ rackNo: [rackNo] })
+  }
+
+  const inboundMailItems = useMemo(() => {
+    const byKey = new Map(ledger.map((item) => [item.key, item]))
+    return inboundMailKeys.map((key) => byKey.get(key)).filter((item): item is FabricLedgerItem => Boolean(item))
+  }, [ledger, inboundMailKeys])
 
   const suggestedNos = useMemo(() => nextStorageNumbers(ledger, actionItems.length), [ledger, actionItems.length])
   const storageNoFor = (index: number): string =>
@@ -1336,13 +1339,19 @@ export function Warehouse() {
         })}
       </TabsList>
     </Tabs>
+    <Button type="button" size="sm" variant={rackView ? "default" : "outline"} className="shrink-0" aria-pressed={rackView} title="통합원단부 전용 rack 칸별 보관 현황" onClick={() => { setDisposalView(false); setRackView((current) => !current) }}>
+      <LayoutGrid className="size-4" />배치도
+    </Button>
+    <Button type="button" size="sm" variant={disposalView ? "default" : "outline"} className="shrink-0" aria-pressed={disposalView} onClick={() => setDisposalView(true)}>
+      <ClipboardList className="size-4" />폐기 라운드{disposalRounds.some((round) => round.status !== "완료") ? <Badge variant="secondary" className="ml-1 h-5 px-1.5">{disposalRounds.filter((round) => round.status !== "완료").length}</Badge> : null}
+    </Button>
     <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setExportOpen(true)}>
       <FileDown className="size-4" />창고팀 자료
     </Button>
     {canBackup ? <Button type="button" size="sm" variant="outline" className="shrink-0" disabled={backupExporting} title="DD 전체와 창고 상태·이력, 샘플대장을 필드 그대로 엑셀로 내려받습니다" onClick={() => void exportBackup()}>{backupExporting ? <Loader2 className="size-4 animate-spin" /> : <DatabaseBackup className="size-4" />}엑셀 백업</Button> : null}
     </div>
 
-    <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>
+    {rackView ? <RackMap items={storedItems} onOpenSlot={openRackSlot} /> : <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>
       <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2" style={{ background: accent.toolbarBg }}>
         <label className="relative block min-w-52 flex-1"><span className="sr-only">창고 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="R&D No., Style, FL, Buyer 검색" className="pl-9" /></label>
         <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{TAB_META[tab].label} <strong className="text-[var(--foreground)]">{rows.length.toLocaleString("ko-KR")}</strong>건 · 선택 {selectedRows.length}건</span>
@@ -1363,7 +1372,7 @@ export function Warehouse() {
 
       {renderGrid(tab, visibleRows, `${TAB_META[tab].label} 항목이 없습니다.`)}
       <div className="shrink-0 border-t border-[var(--border)] px-3 py-2 text-xs text-[var(--muted-foreground)]">체크박스로 여러 건을 고른 뒤 위 버튼으로 처리합니다. · {TAB_META[tab].description}</div>
-    </div>
+    </div>}
 
     {selectionStats || selectionNotice ? <div role="status" className="pointer-events-none fixed bottom-4 right-6 z-[75] flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--muted-foreground)] shadow-md">
       {selectionNotice ? <span className="text-[var(--foreground)]">{selectionNotice}</span> : null}
@@ -1386,6 +1395,17 @@ export function Warehouse() {
     </> : null}
 
     <OutboundRequestMailDialog open={outboundMailOpen} onOpenChange={setOutboundMailOpen} items={selectedRows} defaultRequester={defaultRequester} />
+    <InboundRequestMailDialog open={inboundMailKeys.length > 0} onOpenChange={(open) => { if (!open) setInboundMailKeys([]) }} items={inboundMailItems} defaultRequester={defaultRequester} />
+
+    {/* 폐기 라운드는 창고보관 표를 덮지 않고 팝업으로 연다(R152). */}
+    <Dialog open={disposalView} onOpenChange={setDisposalView}>
+      <DialogContent className="flex h-[92vh] w-[96vw] max-w-[1800px] flex-col gap-0 overflow-hidden p-0 sm:max-w-[96vw]">
+        <DialogHeader className="shrink-0 border-b border-[var(--border)] px-4 py-3"><DialogTitle>폐기 라운드</DialogTitle></DialogHeader>
+        <div className="flex min-h-0 flex-1 flex-col p-3">
+          <DisposalRoundPanel ledger={ledger} sequenceStart={sequenceStart} rounds={disposalRounds} actor={{ email: authUser?.email ?? "", name: authUser?.displayName || authUser?.email?.split("@")[0] || "" }} canWrite={currentUserCanWrite()} isOwner={isOwner} onSave={saveDisposalRounds} />
+        </div>
+      </DialogContent>
+    </Dialog>
 
     <Dialog open={exportOpen} onOpenChange={(open) => { if (!exportBusy) setExportOpen(open) }}>
       <DialogContent className="max-w-lg" showCloseButton={false}>
@@ -1469,13 +1489,34 @@ export function Warehouse() {
           {actionDialog?.kind === "UNRECEIVE" ? <p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건을 입고 대기로 되돌립니다. <strong>채번한 R&D No.가 취소되고 그 번호는 다시 쓸 수 있게 풀립니다.</strong> 실물 확인 표시와 보유 재고도 함께 지워지고, 출고 합계는 0부터 다시 셉니다. 지난 기록은 원단 상세의 이력에 그대로 남습니다.</p> : null}
           {actionDialog?.kind === "CONFIRM" ? <div className="space-y-2">
             <p className="text-xs text-[var(--muted-foreground)]">창고에서 실물을 확인한 건만 체크하세요. 확인된 행은 대장에서 회색으로 칠하던 것과 같게 흐리게 보입니다.</p>
+            <p className="text-xs text-[var(--muted-foreground)]">원단을 넣은 칸의 Rack No.를 적어 주세요(예: K-1-1). 모르면 비워 두고 나중에 표에서 적어도 됩니다.</p>
             <div className="max-h-72 space-y-1 overflow-y-auto">
-              {actionItems.map((item) => <label key={item.key} className={`flex items-center gap-3 rounded-[var(--radius)] border border-[var(--border)] px-3 py-2 ${item.confirmedAt ? "opacity-50" : ""}`}>
-                <Checkbox checked={item.confirmedAt ? true : confirmChecks[item.key] !== false} disabled={Boolean(item.confirmedAt)} onCheckedChange={(value) => setConfirmChecks((current) => ({ ...current, [item.key]: value === true }))} aria-label={`${item.storageNo || item.styleNo} 실물 확인`} />
-                <span className="min-w-0 flex-1 truncate text-sm"><span className="font-mono">{item.storageNo || "번호 없음"}</span> · {item.styleNo || item.flNo || "미입력"}</span>
-                <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{item.confirmedAt ? `확인 ${fmtDateFull(item.confirmedAt)}` : item.yds === null ? "" : `${formatYds(item.yds)}yds`}</span>
-              </label>)}
+              {actionItems.map((item) => {
+                const rackDraft = confirmRacks[item.key] ?? item.rackNo ?? ""
+                const rackInvalid = normalizeRackNo(rackDraft) === null
+                return <div key={item.key} className="flex items-center gap-3 rounded-[var(--radius)] border border-[var(--border)] px-3 py-2">
+                  <label className={`flex min-w-0 flex-1 items-center gap-3 ${item.confirmedAt ? "opacity-50" : ""}`}>
+                    <Checkbox checked={item.confirmedAt ? true : confirmChecks[item.key] !== false} disabled={Boolean(item.confirmedAt)} onCheckedChange={(value) => setConfirmChecks((current) => ({ ...current, [item.key]: value === true }))} aria-label={`${item.storageNo || item.styleNo} 실물 확인`} />
+                    <span className="min-w-0 flex-1 truncate text-sm"><span className="font-mono">{item.storageNo || "번호 없음"}</span> · {item.styleNo || item.flNo || "미입력"}</span>
+                    <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{item.confirmedAt ? `확인 ${fmtDateFull(item.confirmedAt)}` : item.yds === null ? "" : `${formatYds(item.yds)}yds`}</span>
+                  </label>
+                  <Input
+                    aria-label={`${item.storageNo || item.styleNo || "원단"} Rack No.`}
+                    title={rackInvalid ? RACK_FORMAT_HINT : "Rack No."}
+                    list="warehouse-confirm-rack-positions"
+                    placeholder="Rack No."
+                    className={`h-8 w-28 shrink-0 font-mono text-sm ${rackInvalid ? "border-[var(--destructive)]" : ""}`}
+                    value={rackDraft}
+                    onChange={(event) => setConfirmRacks((current) => ({ ...current, [item.key]: event.target.value }))}
+                    onBlur={(event) => {
+                      const normalized = normalizeRackNo(event.target.value)
+                      if (normalized !== null) setConfirmRacks((current) => ({ ...current, [item.key]: normalized }))
+                    }}
+                  />
+                </div>
+              })}
             </div>
+            <datalist id="warehouse-confirm-rack-positions"><option value={RACK_NONE_LABEL} />{RACK_POSITIONS.map((position) => <option key={position} value={position} />)}</datalist>
           </div> : null}
           {actionDialog?.kind === "DISPOSE" ? <div className="space-y-2"><Label htmlFor="warehouse-disposal-reason">폐기 사유</Label><Select value={disposalReason} onValueChange={(value) => setDisposalReason(value as DisposalReason)}><SelectTrigger id="warehouse-disposal-reason"><SelectValue placeholder="사유 선택" /></SelectTrigger><SelectContent>{DISPOSAL_REASONS.map((reason) => <SelectItem key={reason} value={reason}>{reason}</SelectItem>)}</SelectContent></Select><p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건에 같은 사유가 기록됩니다.</p></div> : null}
           {actionDialog?.kind === "RESTORE" ? <div className="space-y-2">
@@ -1515,7 +1556,7 @@ export function Warehouse() {
           {actionDialog?.kind === "RESTORE" ? <p className="text-sm">{actionItems[0]?.status === "EXHAUSTED" ? "창고 보관 상태로 복구합니다." : "폐기 전 상태로 복구합니다."}</p> : null}
           {formError ? <p role="alert" className="text-sm text-[var(--destructive)]">{formError}</p> : null}
         </DialogBody>
-        <DialogFooter><Button type="button" variant="outline" disabled={saving} onClick={closeActionDialog}>취소</Button><Button type="button" variant={actionDialog?.kind === "DISPOSE" || actionDialog?.kind === "REMOVE" ? "destructive" : "default"} disabled={saving} onClick={() => void runAction()}>{saving ? "처리 중…" : "처리 확정"}</Button></DialogFooter>
+        <DialogFooter><Button type="button" variant="outline" disabled={saving} onClick={closeActionDialog}>취소</Button>{actionDialog?.kind === "RECEIVE" ? <Button type="button" variant="outline" disabled={saving} title="입고 등록을 마친 뒤 정산관리팀 입고 요청 메일 창을 엽니다" onClick={() => void runAction(true)}><Mail />입고 등록 후 요청 메일</Button> : null}<Button type="button" variant={actionDialog?.kind === "DISPOSE" || actionDialog?.kind === "REMOVE" ? "destructive" : "default"} disabled={saving} onClick={() => void runAction()}>{saving ? "처리 중…" : "처리 확정"}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   </section>

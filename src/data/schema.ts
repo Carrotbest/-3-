@@ -112,6 +112,12 @@ export interface RequestStyle {
   reqId: string
   /** 소속 차트명. 예: "26.FEB EU MARKET" */
   chart: string
+  /** 소속 보드. R148 이관 전 데이터에는 없다. */
+  boardId?: string
+  /** 이 보드에서의 결과. 비어 있으면 진행중으로 본다. */
+  result?: RequestResult
+  /** 결과를 정한 시각(ISO) */
+  resultAt?: string
   /** 진행 단계. 엑셀의 시트 두 개를 이 값 하나로 대신한다. */
   stage: "분석" | "개발"
   /** 차트 내 순번(엑셀 A열) */
@@ -145,6 +151,67 @@ export interface RequestStyle {
   updatedAt: string
 }
 
+export const REQUEST_BOARD_KINDS = ["시즌 개발", "바이어 미팅", "소재 시리즈", "기타"] as const
+export type RequestBoardKind = (typeof REQUEST_BOARD_KINDS)[number]
+export const REQUEST_RESULTS = ["진행중", "완료", "드롭", "보류"] as const
+export type RequestResult = (typeof REQUEST_RESULTS)[number]
+
+export interface RequestBoardEvent {
+  at: string
+  by: string
+  name: string
+  action: "create" | "update" | "close" | "reopen" | "add" | "remove" | "result"
+  target?: string
+  from?: string
+  to?: string
+}
+
+export interface RequestBoard {
+  boardId: string
+  name: string
+  kind: RequestBoardKind
+  /** 소팀. 자유 입력 */
+  team: string
+  note: string
+  status: "진행" | "종결"
+  order: number
+  createdAt: string
+  createdBy: string
+  createdByName: string
+  closedAt?: string
+  closedBy?: string
+  closedByName?: string
+  updatedAt: string
+  /** 몇 년 뒤에도 보는 이력. 작업 이력은 90일만 보관하므로 여기 따로 남긴다. */
+  history: RequestBoardEvent[]
+}
+
+import type { ProcessStepKey } from "./request-process-stage"
+
+export interface RequestArchiveStage {
+  reqId: string
+  optId: string
+  lineId?: string
+  linked: boolean
+  label: string
+  stepKey?: ProcessStepKey
+  halted?: "보류" | "드롭" | "반려"
+  currentIndex: number
+  total: number
+  flNo?: string
+}
+
+export interface RequestArchive {
+  archiveId: string
+  boardId: string
+  board: RequestBoard
+  styles: RequestStyle[]
+  stages: RequestArchiveStage[]
+  closedAt: string
+  closedBy: string
+  closedByName: string
+}
+
 /**
  * 스타일에서 파생된 옵션 라인 1건. DD MASTER 행과 1대1로 연결한다.
  * 개발처·Yarn ETA·READY DATE·FL#은 연결된 DD 행에서 읽어 표시하므로 여기 저장하지 않는다.
@@ -156,8 +223,12 @@ export interface RequestOption {
   lineId?: string
   /** 옵션 번호. 1부터 */
   no: number
-  /** 엑셀 S열 */
+  /** YARN DETAIL. 원사 사양만 적는다. 조직과 중량은 아래 두 칸으로 나눴다. */
   yarnDetail: string
+  /** CONS. 원단 조직. `constructions.ts` 목록 값만 받는다. 분리 전 데이터에는 없다. */
+  construction?: string
+  /** W'T. 목표 중량(g/m2). 분리 전 데이터에는 없다. */
+  weight?: number | ""
   /** 엑셀 T열 */
   color: string
   /** 엑셀 U열 */
@@ -439,6 +510,77 @@ export const MEMBERS = [
 ] as const
 
 export type Member = (typeof MEMBERS)[number]
+
+export const DISPOSAL_DECISIONS = ["keeping", "폐기", "컷팅"] as const
+export type DisposalDecision = (typeof DISPOSAL_DECISIONS)[number]
+export type DisposalRoundStatus = "검토" | "창고 전달" | "완료"
+export type DisposalExclusion = "FL 미기입" | "FL 중복"
+
+export interface DisposalItem {
+  fabricKey: string
+  storageNo: string
+  flNo: string
+  styleNo: string
+  buyer: string
+  /** 보관 여부. 없으면 폐기(기본). R151 옛 값은 isKept가 읽는다. */
+  keep?: boolean
+  /** 라운드를 만들 때 원장에서 복사한다. 옛 라운드에는 없으니 화면이 원장에서 보충한다. */
+  requester?: string
+  developer?: string
+  yarnDetail?: string
+  construction?: string
+  rackNo?: string
+  excluded?: DisposalExclusion
+  included?: boolean
+  /** R151 호환용. 새 화면은 쓰지 않는다. */
+  firstPass?: "보관" | "폐기"
+  /** R151 호환용. 새 화면은 쓰지 않는다. */
+  teamKeep?: boolean
+  meeting?: number | ""
+  pickup?: number | ""
+  /** Cutting(1yd 컷팅 후 폐기). 폐기일 때만 의미가 있다. */
+  swatchLow?: boolean
+  /** R151 호환용. 새 화면은 쓰지 않는다. */
+  decision?: DisposalDecision
+  memo?: string
+  cutDoneAt?: string
+  cutDoneBy?: string
+  disposedAt?: string
+  disposedBy?: string
+}
+
+export interface DisposalRoundEvent {
+  at: string
+  by: string
+  name: string
+  action: "create" | "update" | "send" | "reopen" | "complete" | "cut" | "dispose"
+  target?: string
+  from?: string
+  to?: string
+}
+
+export interface DisposalRound {
+  roundId: string
+  title: string
+  status: DisposalRoundStatus
+  rangeFrom: number
+  rangeTo: number
+  requestedAt: string
+  note: string
+  createdAt: string
+  createdBy: string
+  createdByName: string
+  updatedAt: string
+  sentAt?: string
+  sentBy?: string
+  completedAt?: string
+  /** 마지막으로 반영한 RDDA 라이브러리 파일 */
+  rddaUsageFile?: { fileName: string; uploadedAt: string; uploadedBy: string; fileRows: number; matched: number }
+  /** 마지막으로 반영한 보관 목록 파일 */
+  keepListFile?: { fileName: string; uploadedAt: string; uploadedBy: string; fileFl: number; matched: number; unmatchedFl: string[] }
+  items: DisposalItem[]
+  history: DisposalRoundEvent[]
+}
 
 /**
  * 퇴사한 과거 3팀 담당자. 드롭다운·현재 담당자 목록에는 넣지 않는다.

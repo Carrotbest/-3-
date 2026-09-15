@@ -26,6 +26,9 @@ const MERGE_IDS: Record<string, (item: never) => string> = {
   fabricOverrides: (item: { key: string }) => item.key,
   fabricEvents: (item: { id: string }) => item.id,
   requests: (item: { reqId: string }) => item.reqId,
+  requestBoards: (item: { boardId: string }) => item.boardId,
+  requestArchive: (item: { archiveId: string }) => item.archiveId,
+  disposalRounds: (item: { roundId: string }) => item.roundId,
 }
 
 /** 이 클라이언트가 마지막으로 본 원격 값. 병합 기준선이다. */

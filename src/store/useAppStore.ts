@@ -1,11 +1,11 @@
 import { create } from "zustand"
 
 import { saveCache, saveCacheLocal } from "@/data/cache"
-import { diffDevRecords, diffFabricEvents, diffRequests, diffTsRecords, logAction, planRevert, type AuditAction, type AuditChange, type AuditKind } from "@/data/audit"
+import { diffDevRecords, diffFabricEvents, diffRequestBoards, diffRequests, diffTsRecords, logAction, planRevert, type AuditAction, type AuditChange, type AuditKind } from "@/data/audit"
 import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } from "../data/chemical"
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
 import { buildFabricLedger, fabricRecordIdentity, isFabricBalanceExhausted, type FabricLedgerItem } from "../data/fabric-ledger"
-import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type RequestStyle, type StudyRecord } from "../data/schema"
+import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type DisposalRound, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type RequestArchive, type RequestBoard, type RequestStyle, type StudyRecord } from "../data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
 import {
   sampleCompleted,
@@ -69,6 +69,9 @@ export interface AppState {
   fabricOverrides: FabricLedgerOverride[]
   fabricEvents: FabricLedgerEvent[]
   requests: RequestStyle[]
+  requestBoards: RequestBoard[]
+  requestArchive: RequestArchive[]
+  disposalRounds: DisposalRound[]
   trends: TrendItem[]
   chemical: ChemicalPortfolio | null
   chemicalManual: ChemicalItem[]
@@ -138,6 +141,9 @@ export function createInitialAppState(): AppState {
     fabricOverrides: [],
     fabricEvents: [],
     requests: [],
+    requestBoards: [],
+    requestArchive: [],
+    disposalRounds: [],
     trends,
     chemical,
     chemicalManual: [],
@@ -206,6 +212,28 @@ export function saveRequests(requests: RequestStyle[], kind: AuditKind = "edit")
   setAppState({ requests })
   void saveCache("requests", requests)
   void logAction({ kind, screen: "request", changes: diffRequests(before, requests) })
+}
+
+export function saveRequestBoards(boards: RequestBoard[], kind: AuditKind = "edit"): void {
+  const before = useAppStore.getState().requestBoards
+  setAppState({ requestBoards: boards })
+  void saveCache("requestBoards", boards)
+  void logAction({ kind, screen: "request", changes: diffRequestBoards(before, boards) })
+}
+
+export function saveRequestsAndBoards(requests: RequestStyle[], boards: RequestBoard[], kind: AuditKind = "edit"): void {
+  saveRequests(requests, kind)
+  saveRequestBoards(boards, kind)
+}
+
+export function saveRequestArchive(list: RequestArchive[]): void {
+  setAppState({ requestArchive: list })
+  void saveCache("requestArchive", list)
+}
+
+export function saveDisposalRounds(list: DisposalRound[]): void {
+  setAppState({ disposalRounds: list })
+  void saveCache("disposalRounds", list)
 }
 
 export function addTeamEvent(event: CalendarEvent): void {

@@ -78,6 +78,8 @@ export function applyRequestLinks(records: readonly DevRecord[], style: RequestS
       color: record.color || option.color,
       dyeing: record.dyeing || option.dyeingMethod,
       note: record.note || option.remark,
+      construction: record.construction || option.construction || "",
+      weight: record.weight === "" ? option.weight ?? "" : record.weight,
     } : {}
     return {
       ...record,
@@ -216,6 +218,8 @@ export function requestToIntakeRecords(style: RequestStyle, options: readonly Re
       color: option.color,
       dyeing: option.dyeingMethod,
       note: option.remark,
+      construction: option.construction ?? "",
+      weight: option.weight ?? "",
       tech: {
         ...record.tech,
         yarnDetail: option.yarnDetail,

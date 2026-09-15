@@ -1761,7 +1761,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     setHideClosed(false)
     // 전체 탭은 완료·DROP·REJECT를 감추므로, 닫힌 행이면 그 담당 탭으로 연다.
     setOwner(isClosedRecord(target) && target.owner ? target.owner : ALL)
-    setCellAnchor(focusRowId, "styleNo")
+    // 요청 옵션과 짝인 행이 한눈에 보이게 행 전체를 선택한다. 스크롤 기준은 Style No. 칸이다.
+    additiveClickRef.current = false
+    selectWholeRow(focusRowId)
     window.requestAnimationFrame(() => scrollCellIntoView({ row: focusRowId, col: "styleNo" }))
     clearFocus()
   }, [focusRowId, records.length, scoped])

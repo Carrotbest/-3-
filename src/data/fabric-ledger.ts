@@ -58,6 +58,34 @@ export interface FabricLedgerItem {
   fields: Record<string, string>
 }
 
+export const STORAGE_NO_MAX = 7999
+
+export function storageNumberOf(item: FabricLedgerItem): number | null {
+  const matched = item.storageNo.trim().match(/^\d{1,4}(?!\d)/)?.[0]
+  return matched ? Number(matched) : null
+}
+
+export function warehouseSequenceStart(numbers: readonly number[]): number {
+  const sorted = [...new Set(numbers)].sort((left, right) => left - right)
+  if (sorted.length < 2) return sorted[0] ?? 1
+  let start = sorted[0]
+  let widest = sorted[0] + STORAGE_NO_MAX - sorted[sorted.length - 1]
+  for (let index = 1; index < sorted.length; index += 1) {
+    const gap = sorted[index] - sorted[index - 1]
+    if (gap > widest) {
+      widest = gap
+      start = sorted[index]
+    }
+  }
+  return start
+}
+
+export function warehouseOrderKey(item: FabricLedgerItem, start: number): number {
+  const number = storageNumberOf(item)
+  if (number === null) return Number.MAX_SAFE_INTEGER
+  return number >= start ? number - start : number - start + STORAGE_NO_MAX
+}
+
 /** 원단 상세에서 보고 고치는 값. 앞 15개는 원장 본문 필드, 뒤는 DD tech·대장 원문에서 온 실무 값이다. */
 export const FABRIC_FIELD_IDS = [
   "styleNo", "flNo", "season", "category", "buyer", "owner", "planner",

@@ -7,29 +7,9 @@ import { createBlankDevRecord } from "./dd-workflow"
 import type { DevRecord, DevTechnical } from "./schema"
 
 // ─────────────────────────────────────────────── TDS Lists 기준값 (lists.py)
-export const CONSTRUCTIONS = [
-  "1*1 Rib", "10*6 Rib", "12*13 Rib", "2*1 Rib", "2*2 Rib", "2*4 Rib", "3*1 Rib", "3*2 Rib", "3*3 Rib",
-  "4*1 Rib", "4*2 Rib", "4*3 Rib", "4*4 Rib", "5*2 Drop Needle Rib", "5*2 Rib", "5*3 Rib", "5*4 Rib",
-  "6*2 Rib", "6*3 Rib", "6*4 Rib", "6*6 Rib", "7*3 Rib", "7*4 Rib", "7*5 Rib", "8*3 Rib", "8*4 Rib",
-  "8*5 Rib", "9*2 Rib", "9*4 Rib", "Boa Fleece", "Boucle", "Canvas", "Chambray", "Chiffon", "Comez Tape",
-  "Corduroy", "Crepe", "Crinkled Jersey", "Crochet", "Damboru", "Dazzle", "Denim", "Double Crepe",
-  "Double Face", "Double Jacquard", "Double Jersey", "Double Knit", "Double Mesh", "Double Pique",
-  "Double Sherpa", "Drop Needle", "Drop Needle Rib", "Drop Needle Single Jersey", "Duo Fold",
-  "Duo Fold Thermal", "Eyelet", "Eyelet Jacquard", "Eyelet Mesh", "Fabric Bonding", "Faux Leather",
-  "Faux Shearling", "Faux Suede", "Felt", "Film Bonding", "Flannel", "Flat Back Mesh", "Flat Back Rib",
-  "Flat Knit", "Flat Knit Jacquard", "Flatback Rib", "Flatback Thermal", "Fleece", "Fleece Velour",
-  "French Rib", "French Terry", "Fur", "Gauze", "Geargette", "Genuine Leather", "Hacci", "Herringbone",
-  "Honeycomb Jacquard", "Honeycomb Mesh", "Inlay Terry", "Interlock", "ITY", "Jacquard Rib", "Lace",
-  "Loop Terry", "Matte Jersey", "Memory", "Mesh", "Mesh Fleece", "Mesh Jacquard", "Milano Rib",
-  "Mini French Terry", "Mink Fleece", "Modified Single Jersey", "Nonwoven", "Ottoman", "Oxford",
-  "Pique Stripe", "Plain", "Plaited Jersey", "Pleats", "Pointelle", "Polar Fleece", "Polynosic", "Ponte",
-  "Poplin", "Pre-smocked Jersey", "Pucker Jersey", "Quilt", "Quilt Jacquard", "Raschel", "Rib Thermal",
-  "Russel Tape", "S-Knit", "Satin", "Scuba", "Seersucker", "Sequine", "Sherpa", "Single Crepe",
-  "Single Jacquard", "Single Jersey", "Single Pique", "Single Stripe", "Slub Jersey", "Sweater Fleece",
-  "Taffeta", "Terry", "Terry Jacquard", "Terry Velour", "Thermal", "Thermal Fleece", "Tricot",
-  "Tricot Mesh", "Twill", "Twill Fleece", "Twill Jersey", "Twill Rib", "Twill Terry", "Variegated Rib",
-  "Velour", "Velour Loop Terry", "Velvet", "Wide Rib", "Woven",
-]
+// 목록은 FABRIC REQUEST CONS 드롭다운과 같이 쓰려고 constructions.ts로 옮겼다. 기존 import 경로는 유지한다.
+import { CONSTRUCTIONS } from "./constructions"
+export { CONSTRUCTIONS }
 
 const NAME_MAP: Record<string, string> = {
   "Park, Hyang-Keun": "박향근", "Jin, Young-Eun": "진영은", "Byun, Jae-Hwi": "변재휘", "Kim, Ji-Hyun": "김지현",

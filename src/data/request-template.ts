@@ -12,6 +12,8 @@
  */
 import * as XLSX from "xlsx"
 
+import { CONSTRUCTIONS, matchConstruction } from "./constructions"
+import { legacyBoardId } from "./request-board"
 import type { RequestOption, RequestStyle } from "./schema"
 
 type Band = "기본" | "ORIGINAL" | "분석" | "의뢰" | "옵션"
@@ -23,9 +25,14 @@ interface TemplateColumn {
   /** 스타일 단위 값인지 옵션 라인 값인지 */
   scope: "style" | "option"
   key: string
+  /** 나중에 더한 열. 이 열이 없는 옛 양식 파일도 읽는다. */
+  optional?: boolean
 }
 
-/** 양식 열 순서. 파서도 이 순서를 읽는다. 순서를 바꾸면 기존 양식 파일이 깨진다. */
+/**
+ * 양식 열 순서. 내려받기는 이 순서로 쓰고, 파서는 2행 열 이름으로 위치를 찾는다.
+ * CONS와 W'T는 YARN DETAIL에서 나눈 열이라 optional이다. 열 이름을 바꾸면 기존 양식 파일이 깨진다.
+ */
 export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
   { band: "기본", head: "순번", width: 6, scope: "style", key: "seq" },
   { band: "기본", head: "차트", width: 20, scope: "style", key: "chart" },
@@ -45,6 +52,8 @@ export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
   { band: "의뢰", head: "개발", width: 30, scope: "style", key: "devPlan" },
   { band: "옵션", head: "Opt", width: 6, scope: "option", key: "no" },
   { band: "옵션", head: "YARN DETAIL", width: 30, scope: "option", key: "yarnDetail" },
+  { band: "옵션", head: "CONS", width: 18, scope: "option", key: "construction", optional: true },
+  { band: "옵션", head: "W'T", width: 8, scope: "option", key: "weight", optional: true },
   { band: "옵션", head: "COLOR", width: 18, scope: "option", key: "color" },
   { band: "옵션", head: "DYEING METHOD", width: 13, scope: "option", key: "dyeingMethod" },
   { band: "옵션", head: "REMARK", width: 26, scope: "option", key: "remark" },
@@ -96,6 +105,8 @@ const cellOf = (style: RequestStyle, option: RequestOption | null, key: string):
     case "devPlan": return style.devPlan || null
     case "no": return option ? option.no : null
     case "yarnDetail": return option ? option.yarnDetail || null : null
+    case "construction": return option ? option.construction || null : null
+    case "weight": return option && option.weight !== undefined && option.weight !== "" ? option.weight : null
     case "color": return option ? option.color || null : null
     case "dyeingMethod": return option ? option.dyeingMethod || null : null
     case "remark": return option ? option.remark || null : null
@@ -172,7 +183,7 @@ export async function buildRequestWorkbook(styles: readonly RequestStyle[] = [])
     "1. REQUEST 시트의 3행부터 입력합니다. 1행(밴드)과 2행(열 이름)은 지우거나 옮기지 마세요.",
     "2. 스타일 1건에 옵션이 여러 개면 옵션 수만큼 행을 씁니다.",
     "   첫 행에만 Garment Number를 포함한 스타일 정보를 적고, 두 번째 옵션부터는",
-    "   Opt / YARN DETAIL / COLOR / DYEING METHOD / REMARK 만 채웁니다.",
+    "   Opt / YARN DETAIL / CONS / W'T / COLOR / DYEING METHOD / REMARK 만 채웁니다.",
     "   Garment Number가 비어 있는 행은 바로 위 스타일의 옵션으로 읽습니다.",
     "3. 단계는 분석 또는 개발만 씁니다. 비우면 분석으로 들어갑니다.",
     "4. URGENT는 V 또는 O로 표시합니다. 비우면 해제입니다.",
@@ -181,6 +192,11 @@ export async function buildRequestWorkbook(styles: readonly RequestStyle[] = [])
     "   기존 건을 갱신할 때 웹에서 올린 garment 사진은 그대로 남습니다.",
     "7. garment 사진은 이 양식으로 올릴 수 없습니다. 웹 화면의 사진 칸에서 직접 올려 주세요.",
     "   엑셀에 붙인 이미지는 파일이 옮겨 다니면서 깨지기 때문에 웹에 보관합니다.",
+    "8. 옵션의 원단 사양은 세 칸으로 나눠 씁니다.",
+    "   YARN DETAIL에는 원사 사양만 적습니다. 예: CM 30'S/1 + SP 20D",
+    "   CONS는 셀의 드롭다운 목록에서 조직을 고릅니다. 표기를 맞추려고 목록 밖 값은 받지 않습니다.",
+    "   W'T는 중량을 숫자로만 적습니다. 단위는 g/m2 입니다.",
+    "   목록에 없는 조직이 필요하면 원단 R&D팀에 목록 추가를 요청하세요.",
   ]
   lines.forEach((line, index) => {
     const cell = guide.getCell(index + 1, 1)
@@ -188,6 +204,23 @@ export async function buildRequestWorkbook(styles: readonly RequestStyle[] = [])
     cell.font = { size: 10, bold: index === 0 }
     cell.alignment = { vertical: "middle" }
   })
+
+  // CONS 드롭다운. 목록이 길어 수식 문자열로 못 넣으므로 숨김 시트를 참조한다.
+  const lists = workbook.addWorksheet("LISTS", { state: "hidden" })
+  CONSTRUCTIONS.forEach((name, index) => { lists.getCell(index + 1, 1).value = name })
+  const consColumn = columnIndex("construction") + 1
+  const lastRow = Math.max(rowIndex, 3) + 500
+  for (let row = 3; row < lastRow; row += 1) {
+    ws.getCell(row, consColumn).dataValidation = {
+      type: "list",
+      allowBlank: true,
+      formulae: [`LISTS!$A$1:$A$${CONSTRUCTIONS.length}`],
+      showErrorMessage: true,
+      errorStyle: "stop",
+      errorTitle: "CONS",
+      error: "목록에서 조직을 고르세요.",
+    }
+  }
 
   const buffer = await workbook.xlsx.writeBuffer()
   return new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
@@ -239,20 +272,22 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
   const grid = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, blankrows: false, defval: null })
   if (grid.length < 3) throw new Error("데이터 행이 없습니다. 3행부터 입력해 주세요.")
 
-  // 2행 열 이름이 양식과 맞는지 본다. 순서가 어긋난 파일을 조용히 잘못 읽는 것보다 낫다.
+  // 2행 열 이름으로 위치를 찾는다. 필수 열이 없으면 조용히 잘못 읽지 않도록 멈춘다.
+  // CONS와 W'T가 없는 옛 양식은 두 값을 비운 채 읽는다.
   const header = (grid[1] ?? []).map((value) => asText(value))
-  const expected = TEMPLATE_COLUMNS.map((column) => column.head)
-  const mismatch = expected.findIndex((head, index) => asText(header[index]) !== head)
-  if (mismatch >= 0) {
-    throw new Error(`양식이 다릅니다. 2행 ${mismatch + 1}번째 열이 "${expected[mismatch]}" 여야 하는데 "${header[mismatch] || "(빈칸)"}" 입니다.`)
+  const indexByKey = new Map<string, number>()
+  for (const column of TEMPLATE_COLUMNS) {
+    const found = header.findIndex((head) => head === column.head)
+    if (found >= 0) indexByKey.set(column.key, found)
+    else if (!column.optional) throw new Error(`양식이 다릅니다. 2행에 "${column.head}" 열이 없습니다. 내려받은 양식을 그대로 쓰세요.`)
   }
 
   const at = (row: unknown[], key: string): unknown => {
-    const index = columnIndex(key)
-    return index < 0 ? null : row[index] ?? null
+    const index = indexByKey.get(key)
+    return index === undefined ? null : row[index] ?? null
   }
 
-  const optionKeys = ["yarnDetail", "color", "dyeingMethod", "remark"]
+  const optionKeys = ["yarnDetail", "construction", "weight", "color", "dyeingMethod", "remark"]
   const styles: RequestStyle[] = []
   const warnings: string[] = []
   let current: RequestStyle | null = null
@@ -291,7 +326,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
       }
       styles.push(current)
       // 스타일 행에 옵션 값이 같이 적혀 있으면 그것이 1번 옵션이다.
-      if (hasOption) current.options.push(readOption(row, at, current.reqId, 1))
+      if (hasOption) current.options.push(readOption(row, at, current.reqId, 1, (text) => warnings.push(`${excelRow}행: ${text}`)))
       continue
     }
 
@@ -303,7 +338,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
       warnings.push(`${excelRow}행: 위에 스타일 행이 없는 옵션이라 건너뛰었습니다.`)
       continue
     }
-    current.options.push(readOption(row, at, current.reqId, current.options.length + 1))
+    current.options.push(readOption(row, at, current.reqId, current.options.length + 1, (text) => warnings.push(`${excelRow}행: ${text}`)))
   }
 
   if (styles.length === 0) throw new Error("읽어 들인 스타일이 없습니다. Garment Number를 채웠는지 확인해 주세요.")
@@ -315,12 +350,19 @@ function readOption(
   at: (row: unknown[], key: string) => unknown,
   reqId: string,
   no: number,
+  warn: (text: string) => void,
 ): RequestOption {
+  // 목록 표기로 맞추고, 목록에 없으면 값을 버리지 않고 남긴 뒤 알린다. 웹에서 드롭다운으로 고친다.
+  const consRaw = asText(at(row, "construction"))
+  const construction = matchConstruction(consRaw)
+  if (construction === null) warn(`CONS "${consRaw}"는 조직 목록에 없어 그대로 넣었습니다. 웹에서 목록 값으로 바꿔 주세요.`)
   return {
     optId: `${reqId}#${no}`,
     lineId: crypto.randomUUID(),
     no,
     yarnDetail: asText(at(row, "yarnDetail")),
+    construction: construction ?? consRaw,
+    weight: asNumber(at(row, "weight")),
     color: asText(at(row, "color")),
     dyeingMethod: asText(at(row, "dyeingMethod")),
     remark: asText(at(row, "remark")),
@@ -339,7 +381,7 @@ export interface RequestMergeResult {
  * 그냥 덮으면 재업로드마다 사진이 날아간다.
  */
 export function mergeRequestStyles(existing: readonly RequestStyle[], incoming: readonly RequestStyle[]): RequestMergeResult {
-  const keyOf = (style: RequestStyle) => `${style.chart.trim()}::${style.garmentNo.trim().toLocaleUpperCase("en-US")}`
+  const keyOf = (style: RequestStyle) => `${style.boardId ?? legacyBoardId(style.chart)}::${style.garmentNo.trim().toLocaleUpperCase("en-US")}`
   const byKey = new Map(existing.map((style) => [keyOf(style), style]))
   const merged = [...existing]
   let added = 0

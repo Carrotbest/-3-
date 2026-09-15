@@ -6,10 +6,11 @@ import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, Dia
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { FabricLedgerItem } from "@/data/fabric-ledger"
+import { buildEml, copyMailTable, downloadEml, fileDateStamp } from "@/data/mail-draft"
 import {
-  copyOutboundRequestTable,
-  outboundRequestBody,
-  outboundRequestMailto,
+  OUTBOUND_REQUEST_COLUMNS,
+  outboundRequestHtml,
+  outboundRequestRows,
   outboundRequestSubject,
   stockYds,
   type OutboundRequestLine,
@@ -57,19 +58,21 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
   const setLine = (key: string, patch: Partial<{ qty: string; note: string }>) =>
     setLines((current) => ({ ...current, [key]: { qty: current[key]?.qty ?? "", note: current[key]?.note ?? "", ...patch } }))
 
-  const copyTable = async (openMail: boolean) => {
+  const copyTable = async () => {
     if (invalid) { setNotice({ kind: "error", text: "요청 수량을 모두 입력하세요." }); return }
     try {
-      const mode = await copyOutboundRequestTable(requestLines)
-      if (openMail) {
-        window.location.href = outboundRequestMailto(outboundRequestSubject(meta, requestLines), outboundRequestBody(meta, requestLines))
-        setNotice({ kind: "ok", text: mode === "html" ? "표를 복사했습니다. 열린 Outlook 본문의 안내 자리에 Ctrl+V로 붙여넣고 받는 사람을 입력하세요." : "표를 서식 없이 복사했습니다. Outlook 본문에 붙여넣으세요." })
-      } else {
-        setNotice({ kind: "ok", text: mode === "html" ? "표를 복사했습니다. 메일 본문에 붙여넣으세요." : "표를 서식 없이 복사했습니다." })
-      }
+      const mode = await copyMailTable(OUTBOUND_REQUEST_COLUMNS, outboundRequestRows(requestLines))
+      setNotice({ kind: "ok", text: mode === "html" ? "표를 복사했습니다. 메일 본문에 붙여넣으세요." : "표를 서식 없이 복사했습니다." })
     } catch {
       setNotice({ kind: "error", text: "복사에 실패했습니다. 브라우저의 클립보드 권한을 확인하세요." })
     }
+  }
+
+  const makeMail = () => {
+    if (invalid) { setNotice({ kind: "error", text: "요청 수량을 모두 입력하세요." }); return }
+    const eml = buildEml({ to: [], subject: outboundRequestSubject(meta, requestLines), html: outboundRequestHtml(meta, requestLines) })
+    downloadEml(`원단출고요청_${fileDateStamp()}.eml`, eml)
+    setNotice({ kind: "ok", text: "메일 파일을 내려받았습니다. 파일을 열면 표가 들어간 Outlook 새 메일 창이 뜹니다. 받는 사람을 입력하고 보내세요." })
   }
 
   return <Dialog open={open} onOpenChange={onOpenChange}>
@@ -130,14 +133,14 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
         </div>
 
         <p className="text-[11px] leading-relaxed text-[var(--muted-foreground)]">
-          메일은 자동으로 보내지 않습니다. 표를 복사한 뒤 Outlook 새 메일이 열리면 본문에 붙여넣고 받는 사람을 입력해 보내세요. 실제 출고 기록은 정산관리팀 컷팅 회신 뒤 기존 출고 버튼으로 남깁니다.
+          메일은 자동으로 보내지 않습니다. Outlook 메일 만들기를 누르면 제목과 표가 채워진 메일 파일을 내려받습니다. 파일을 열어 받는 사람을 입력하고 보내세요. 실제 출고 기록은 정산관리팀 컷팅 회신 뒤 기존 출고 버튼으로 남깁니다.
         </p>
         {notice ? <p role="status" className={`text-xs leading-relaxed ${notice.kind === "error" ? "text-[var(--destructive)]" : "text-[var(--chart-2)]"}`}>{notice.text}</p> : null}
       </DialogBody>
       <DialogFooter>
         <Button type="button" size="sm" variant="outline" onClick={() => onOpenChange(false)}>닫기</Button>
-        <Button type="button" size="sm" variant="outline" disabled={!items.length} onClick={() => void copyTable(false)}><Copy className="size-4" />표 복사</Button>
-        <Button type="button" size="sm" disabled={!items.length} onClick={() => void copyTable(true)}><Mail className="size-4" />표 복사 후 Outlook 열기</Button>
+        <Button type="button" size="sm" variant="outline" disabled={!items.length} onClick={() => void copyTable()}><Copy className="size-4" />표 복사</Button>
+        <Button type="button" size="sm" disabled={!items.length} onClick={makeMail}><Mail className="size-4" />Outlook 메일 만들기</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

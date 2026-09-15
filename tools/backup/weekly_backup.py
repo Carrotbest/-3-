@@ -29,7 +29,7 @@ KEYS = (
     "rdda", "fabricAnalysis", "ts", "orgMembers", "materials",
     "materialsManual", "materialDiagnostics", "fabricOverrides",
     "fabricEvents", "chemical", "chemicalManual", "chemicalLinks",
-    "requests",
+    "requests", "requestBoards", "requestArchive", "disposalRounds",
 )
 
 LABELS = {
@@ -39,6 +39,9 @@ LABELS = {
     "completed": "샘플대장",
     "ts": "TROUBLE SHOOTING",
     "requests": "FABRIC REQUEST",
+    "requestBoards": "REQUEST 보드",
+    "requestArchive": "REQUEST 보관함",
+    "disposalRounds": "폐기 라운드",
 }
 
 SHEETS = (
@@ -48,6 +51,7 @@ SHEETS = (
     ("샘플대장", "completed"),
     ("TS", "ts"),
     ("REQUEST", "requests"),
+    ("REQUEST보드", "requestBoards"),
 )
 
 BACKUP_NAME_RE = re.compile(r"^FabricRnD_주간백업_(\d{8})(\.zip)?$")

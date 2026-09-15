@@ -14,10 +14,29 @@ export const RACK_LEVELS = 3
 /** 추천 목록 맨 위의 지정 해제 항목. 고르고 확정하면 rack 번호를 지운다. */
 export const RACK_NONE_LABEL = "선택 안함"
 
-/** 입력칸 추천용 전체 칸 목록. K-1-1 ... L-10-3 */
-export const RACK_POSITIONS: readonly string[] = Object.entries(RACK_ROWS).flatMap(([row, racks]) =>
-  Array.from({ length: racks }, (_, rack) =>
-    Array.from({ length: RACK_LEVELS }, (_, level) => `${row}-${rack + 1}-${level + 1}`)).flat())
+/**
+ * 칸 하나의 위치. 배치도(2D)와 이후 3D 맵이 같은 모델을 읽는다.
+ * rowIndex는 열의 앞뒤 순서(3D 깊이), rack은 가로 위치, level은 위에서부터 층(1이 맨 위)이다.
+ */
+export interface RackSlot {
+  id: string
+  row: string
+  rowIndex: number
+  rack: number
+  level: number
+}
+
+/** 배치도에 그리는 열 순서(위부터). 실제 선반 배치에 맞춰 L열을 위에 둔다. */
+export const RACK_ROW_ORDER: readonly string[] = ["L", "K"]
+
+export const RACK_SLOTS: readonly RackSlot[] = RACK_ROW_ORDER.flatMap((row, rowIndex) =>
+  Array.from({ length: RACK_ROWS[row] }, (_, rack) =>
+    Array.from({ length: RACK_LEVELS }, (_, level) => ({ id: `${row}-${rack + 1}-${level + 1}`, row, rowIndex, rack: rack + 1, level: level + 1 }))).flat())
+
+/** 입력칸 추천용 전체 칸 목록. 배치도 순서와 무관하게 K-1-1 ... L-10-3 순서다. */
+export const RACK_POSITIONS: readonly string[] = [...RACK_SLOTS]
+  .sort((left, right) => left.row.localeCompare(right.row) || left.rack - right.rack || left.level - right.level)
+  .map((slot) => slot.id)
 
 export const RACK_FORMAT_HINT = "Rack No.는 K-1-1처럼 입력하세요. K열 rack 1~9, L열 rack 1~10, 칸 1~3입니다."
 
