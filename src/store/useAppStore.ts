@@ -5,6 +5,7 @@ import { diffDevRecords, diffFabricEvents, diffRequestBoards, diffRequests, diff
 import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } from "../data/chemical"
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
 import { buildFabricLedger, fabricRecordIdentity, isFabricBalanceExhausted, type FabricLedgerItem } from "../data/fabric-ledger"
+import type { DisposalCompletionEntry } from "@/data/disposal-round"
 import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type DisposalRound, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type RequestArchive, type RequestBoard, type RequestStyle, type StudyRecord } from "../data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
 import {
@@ -754,6 +755,62 @@ export async function confirmWarehouseBaseline(entries: ReadonlyArray<{ key: str
   return events.length
 }
 
+/**
+ * 폐기 라운드 최종 확정. 폐기·컷팅으로 판정된 원단을 창고 보관에서 이력(DISPOSED)으로 한 번에 옮긴다.
+ * applyFabricAction 을 건마다 부르면 라운드 건수만큼 전체 저장이 반복되므로
+ * confirmWarehouseBaseline 처럼 오버라이드와 이벤트를 모아 한 번만 쓴다.
+ */
+export async function applyDisposalRoundCompletion(
+  entries: ReadonlyArray<DisposalCompletionEntry>,
+  options: { reason: string; actor: string },
+): Promise<number> {
+  if (entries.length === 0) return 0
+  const state = useAppStore.getState()
+  const occurredAt = new Date().toISOString()
+  const actor = options.actor.trim() || "관리자"
+  const byKey = new Map(state.fabricOverrides.map((entry) => [entry.key, entry]))
+  const overrides: FabricLedgerOverride[] = []
+  const events: FabricLedgerEvent[] = []
+  entries.forEach((entry, index) => {
+    const previous = byKey.get(entry.key)
+    const storageNo = entry.storageNo.trim() || previous?.storageNo
+    overrides.push({
+      key: entry.key,
+      status: "DISPOSED",
+      storageNo,
+      yds: previous?.yds,
+      // 창고를 떠나므로 rack 칸을 비운다. applyFabricAction 과 같은 규칙이다.
+      rackNo: undefined,
+      note: previous?.note,
+      fields: previous?.fields,
+      updatedAt: occurredAt,
+      updatedBy: actor,
+    })
+    events.push({
+      id: `disposal-round-${occurredAt}-${index}`,
+      fabricKey: entry.key,
+      action: "DISPOSE",
+      fromStatus: entry.fromStatus,
+      toStatus: "DISPOSED",
+      occurredAt,
+      recordedAt: occurredAt,
+      actor,
+      note: entry.note,
+      storageNo,
+      reason: options.reason,
+    })
+  })
+  const touched = new Set(entries.map((entry) => entry.key))
+  const fabricOverrides = [...overrides, ...state.fabricOverrides.filter((entry) => !touched.has(entry.key))]
+  const fabricEvents = [...events, ...state.fabricEvents]
+  setAppState({ fabricOverrides, fabricEvents })
+  await Promise.all([
+    saveCache("fabricOverrides", fabricOverrides),
+    saveCache("fabricEvents", fabricEvents),
+  ])
+  return entries.length
+}
+
 const numberOrNull = (value: string): number | null => {
   const parsed = Number(value)
   return value.trim() && Number.isFinite(parsed) ? parsed : null
@@ -876,82 +933,62 @@ export async function saveFabricRackNos(entries: ReadonlyArray<{ item: FabricLed
   return changed
 }
 
-export async function applyFabricAction(input: ApplyFabricActionInput): Promise<void> {
-  const beforeEvents = useAppStore.getState().fabricEvents
+export async function applyFabricActions(inputs: ReadonlyArray<ApplyFabricActionInput>): Promise<void> {
+  if (!inputs.length) return
   const state = useAppStore.getState()
+  const beforeEvents = state.fabricEvents
   const occurredAt = new Date().toISOString()
-  const actor = input.actor?.trim() || "관리자"
-  const previous = state.fabricOverrides.find((item) => item.key === input.fabricKey)
-  const yds = input.yds === undefined
-    ? previous?.yds
-    : Number.isFinite(input.yds) && input.yds >= 0 ? input.yds : undefined
-  if (input.yds !== undefined && yds === undefined) throw new Error("보유 재고는 0 이상의 숫자여야 합니다.")
-
-  const qty = input.qty === undefined
-    ? undefined
-    : Number.isFinite(input.qty) && input.qty > 0 ? input.qty : undefined
-  if (input.action === "OUTBOUND" && qty === undefined) throw new Error("출고 수량은 0보다 커야 합니다.")
-  const recipient = input.to?.trim()
-  if (input.action === "OUTBOUND" && !recipient) throw new Error("출고 수령자를 입력해야 합니다.")
-
-  const previousOutboundTotal = state.fabricEvents.reduce((sum, event) =>
-    event.fabricKey === input.fabricKey && event.action === "OUTBOUND" && typeof event.qty === "number" && Number.isFinite(event.qty) && event.qty > 0
-      ? sum + event.qty
-      : sum, 0)
-  const outboundTotal = previousOutboundTotal + (input.action === "OUTBOUND" ? qty ?? 0 : 0)
-  // 잔량이 0이 되어도 소진 완료로 옮길지는 사용자가 정한다. 기본은 옮긴다.
-  const autoExhaust = input.autoExhaust !== false
-  const shouldAutoExhaust = autoExhaust && (input.action === "OUTBOUND" || (input.yds !== undefined && input.action !== "RESTORE" && input.action !== "DISPOSE"))
-  const resolvedToStatus = shouldAutoExhaust && isFabricBalanceExhausted(yds, outboundTotal)
-    ? "EXHAUSTED"
-    : input.action === "OUTBOUND"
-      ? previous?.status ?? input.fromStatus
-      : input.toStatus
-  const selectedDate = input.date?.trim()
-  const selectedDateValue = selectedDate && /^\d{4}-\d{2}-\d{2}$/.test(selectedDate) ? new Date(`${selectedDate}T12:00:00`) : null
-  const eventOccurredAt = selectedDateValue && !Number.isNaN(selectedDateValue.getTime()) ? selectedDateValue.toISOString() : occurredAt
-  const override: FabricLedgerOverride = {
-    key: input.fabricKey,
-    status: resolvedToStatus,
-    // 입고 대기로 내려가면 채번을 취소한다. 그 번호는 다시 쓸 수 있게 풀린다.
-    // 되돌리기(UNRECEIVE)든 이력에서의 복구(RESTORE)든 도착 상태가 기준이다.
-    storageNo: resolvedToStatus === "READY" ? undefined : input.storageNo?.trim() || previous?.storageNo,
-    // 같은 이유로 보유 재고도 비운다. 남겨 두면 입고한 적 없는 행에 재고가 붙어 있게 된다.
-    yds: resolvedToStatus === "READY" || input.clearYds ? undefined : yds,
-    // rack 칸은 창고보관 상태에서만 차지한다. 입고확인·재고수정·출고는 그대로 두고, 창고를 떠나면(폐기·소진·입고 취소) 칸을 비운다.
-    rackNo: resolvedToStatus === "WAREHOUSE" ? previous?.rackNo : undefined,
-    note: input.note?.trim() || previous?.note,
-    // 원단 상세에서 고친 값은 창고 동작(입고·확인·출고 등)과 무관하다. 그대로 물려준다.
-    fields: previous?.fields,
-    updatedAt: occurredAt,
-    updatedBy: actor,
-  }
-  const event: FabricLedgerEvent = {
-    id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    fabricKey: input.fabricKey,
-    action: input.action,
-    fromStatus: input.fromStatus,
-    toStatus: resolvedToStatus,
-    occurredAt: eventOccurredAt,
-    recordedAt: occurredAt,
-    actor,
-    note: input.note?.trim() || "",
-    storageNo: input.storageNo?.trim() || previous?.storageNo,
-    qty,
-    to: recipient,
-    division: input.division?.trim() || undefined,
-    reason: input.reason?.trim() || undefined,
-  }
-  const fabricOverrides = [override, ...state.fabricOverrides.filter((item) => item.key !== input.fabricKey)]
-  const fabricEvents = [event, ...state.fabricEvents]
-
+  const overrideMap = new Map(state.fabricOverrides.map((item) => [item.key, item]))
+  const outboundTotals = new Map<string, number>()
+  state.fabricEvents.forEach((event) => {
+    if (event.action !== "OUTBOUND" || typeof event.qty !== "number" || !Number.isFinite(event.qty) || event.qty <= 0) return
+    outboundTotals.set(event.fabricKey, (outboundTotals.get(event.fabricKey) ?? 0) + event.qty)
+  })
+  const newEvents: FabricLedgerEvent[] = []
+  const touched: string[] = []
   let records = state.records
-  if (input.action === "COMPLETE" && input.recordIdentity) {
-    records = records.map((record) => recordIdentity(record) === input.recordIdentity
-      ? { ...record, devStatus: "완료", stage: "완료", receivedDate: record.receivedDate || occurredAt.slice(0, 10) }
-      : record)
-  }
 
+  for (const input of inputs) {
+    const actor = input.actor?.trim() || "관리자"
+    const previous = overrideMap.get(input.fabricKey)
+    const yds = input.yds === undefined ? previous?.yds : Number.isFinite(input.yds) && input.yds >= 0 ? input.yds : undefined
+    if (input.yds !== undefined && yds === undefined) throw new Error("보유 재고는 0 이상의 숫자여야 합니다.")
+    const qty = input.qty === undefined ? undefined : Number.isFinite(input.qty) && input.qty > 0 ? input.qty : undefined
+    if (input.action === "OUTBOUND" && qty === undefined) throw new Error("출고 수량은 0보다 커야 합니다.")
+    const recipient = input.to?.trim()
+    if (input.action === "OUTBOUND" && !recipient) throw new Error("출고 수령자를 입력해야 합니다.")
+    const outboundTotal = (outboundTotals.get(input.fabricKey) ?? 0) + (input.action === "OUTBOUND" ? qty ?? 0 : 0)
+    const autoExhaust = input.autoExhaust !== false
+    const shouldAutoExhaust = autoExhaust && (input.action === "OUTBOUND" || (input.yds !== undefined && input.action !== "RESTORE" && input.action !== "DISPOSE"))
+    const resolvedToStatus = shouldAutoExhaust && isFabricBalanceExhausted(yds, outboundTotal) ? "EXHAUSTED" : input.action === "OUTBOUND" ? previous?.status ?? input.fromStatus : input.toStatus
+    const selectedDate = input.date?.trim()
+    const selectedDateValue = selectedDate && /^\d{4}-\d{2}-\d{2}$/.test(selectedDate) ? new Date(`${selectedDate}T12:00:00`) : null
+    const eventOccurredAt = selectedDateValue && !Number.isNaN(selectedDateValue.getTime()) ? selectedDateValue.toISOString() : occurredAt
+    overrideMap.set(input.fabricKey, {
+      key: input.fabricKey, status: resolvedToStatus,
+      storageNo: resolvedToStatus === "READY" ? undefined : input.storageNo?.trim() || previous?.storageNo,
+      yds: resolvedToStatus === "READY" || input.clearYds ? undefined : yds,
+      rackNo: resolvedToStatus === "WAREHOUSE" ? previous?.rackNo : undefined,
+      note: input.note?.trim() || previous?.note, fields: previous?.fields, updatedAt: occurredAt, updatedBy: actor,
+    })
+    if (!touched.includes(input.fabricKey)) touched.push(input.fabricKey)
+    if (input.action === "OUTBOUND") outboundTotals.set(input.fabricKey, outboundTotal)
+    newEvents.push({
+      id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      fabricKey: input.fabricKey, action: input.action, fromStatus: input.fromStatus, toStatus: resolvedToStatus,
+      occurredAt: eventOccurredAt, recordedAt: occurredAt, actor, note: input.note?.trim() || "",
+      storageNo: input.storageNo?.trim() || previous?.storageNo, qty, to: recipient,
+      division: input.division?.trim() || undefined, reason: input.reason?.trim() || undefined,
+    })
+    if (input.action === "COMPLETE" && input.recordIdentity) {
+      records = records.map((record) => recordIdentity(record) === input.recordIdentity
+        ? { ...record, devStatus: "완료", stage: "완료", receivedDate: record.receivedDate || occurredAt.slice(0, 10) }
+        : record)
+    }
+  }
+  const touchedSet = new Set(touched)
+  const fabricOverrides = [...touched.map((key) => overrideMap.get(key)!), ...state.fabricOverrides.filter((item) => !touchedSet.has(item.key))]
+  const fabricEvents = [...newEvents].reverse().concat(state.fabricEvents)
   setAppState({ fabricOverrides, fabricEvents, records })
   await Promise.all([
     saveCache("fabricOverrides", fabricOverrides),
@@ -959,6 +996,10 @@ export async function applyFabricAction(input: ApplyFabricActionInput): Promise<
     records === state.records ? Promise.resolve() : saveCache("records", records),
   ])
   void logAction({ kind: "warehouse", screen: "warehouse", changes: diffFabricEvents(beforeEvents, useAppStore.getState().fabricEvents) })
+}
+
+export async function applyFabricAction(input: ApplyFabricActionInput): Promise<void> {
+  await applyFabricActions([input])
 }
 
 /**

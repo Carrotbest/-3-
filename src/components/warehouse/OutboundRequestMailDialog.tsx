@@ -24,7 +24,13 @@ interface OutboundRequestMailDialogProps {
   defaultRequester: string
 }
 
-const EMPTY_META: OutboundRequestMeta = { division: "", requester: "", wantedDate: "", note: "" }
+/** 오늘 날짜(yyyy-mm-dd). toISOString은 UTC라 한국 시간 오전 9시 전에 어제로 나온다. 현지 날짜로 만든다. */
+const todayValue = (): string => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+}
+
+const EMPTY_META: OutboundRequestMeta = { division: "", requester: "", wantedDate: "" }
 
 /** 창고보관 원단의 컷팅·출고 요청 메일 초안. 메일은 사람이 Outlook에서 받는 사람을 넣고 보낸다(C형). */
 export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRequester }: OutboundRequestMailDialogProps) {
@@ -34,7 +40,7 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
 
   useEffect(() => {
     if (!open) return
-    setMeta({ ...EMPTY_META, requester: defaultRequester })
+    setMeta({ ...EMPTY_META, requester: defaultRequester, wantedDate: todayValue() })
     setLines(Object.fromEntries(items.map((item) => [item.key, { qty: "", note: "" }])))
     setNotice(null)
     // 창을 열 때 한 번만 초기화한다. 열린 동안 선택이 바뀌어도 입력을 지우지 않는다.
@@ -82,9 +88,9 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
         <DialogDescription>선택한 원단 {items.length}건의 컷팅·출고 요청 메일 초안을 만듭니다. 받는 사람은 Outlook에서 직접 입력합니다.</DialogDescription>
       </DialogHeader>
       <DialogBody className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-3">
           <div className="grid gap-1.5">
-            <Label htmlFor="outbound-division">사업부</Label>
+            <Label htmlFor="outbound-division">부서</Label>
             <Input id="outbound-division" value={meta.division} onChange={(event) => setMeta((current) => ({ ...current, division: event.target.value }))} />
           </div>
           <div className="grid gap-1.5">
@@ -95,17 +101,13 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
             <Label htmlFor="outbound-date">희망 컷팅일</Label>
             <Input id="outbound-date" type="date" value={meta.wantedDate} onChange={(event) => setMeta((current) => ({ ...current, wantedDate: event.target.value }))} />
           </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="outbound-note">비고</Label>
-            <Input id="outbound-note" value={meta.note} onChange={(event) => setMeta((current) => ({ ...current, note: event.target.value }))} />
-          </div>
         </div>
 
         <div className="max-h-[50vh] overflow-auto rounded-[var(--radius)] border border-[var(--border)]">
           <table className="w-full border-separate border-spacing-0 text-xs">
             <thead>
               <tr>
-                {["R&D No.", "Style No.", "FL#", "원단", "컬러", "재고(yds)", "요청(yds)", "비고"].map((head) => <th key={head} className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--muted)] px-2 py-1.5 text-center font-normal text-[var(--muted-foreground)]">{head}</th>)}
+                {OUTBOUND_REQUEST_COLUMNS.map((head) => <th key={head} className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--muted)] px-2 py-1.5 text-center font-normal text-[var(--muted-foreground)]">{head}</th>)}
               </tr>
             </thead>
             <tbody>
@@ -114,15 +116,14 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
                 const error = qtyError(line)
                 return <tr key={line.item.key}>
                   <td className="border-b border-[var(--border)] px-2 py-1.5 font-mono">{line.item.storageNo}</td>
-                  <td className="border-b border-[var(--border)] px-2 py-1.5 font-mono">{line.item.styleNo}</td>
-                  <td className="border-b border-[var(--border)] px-2 py-1.5 font-mono">{line.item.flNo}</td>
-                  <td className="max-w-40 truncate border-b border-[var(--border)] px-2 py-1.5" title={line.item.construction}>{line.item.construction}</td>
-                  <td className="max-w-28 truncate border-b border-[var(--border)] px-2 py-1.5" title={line.item.color}>{line.item.color}</td>
-                  <td className="border-b border-[var(--border)] px-2 py-1.5 text-right tabular-nums">{stock === null ? "" : stock.toLocaleString("ko-KR")}</td>
+                  <td className="border-b border-[var(--border)] px-2 py-1.5 font-mono">{line.item.rackNo ?? ""}</td>
                   <td className="w-24 border-b border-[var(--border)] px-2 py-1">
                     <Input aria-label={`${line.item.storageNo} 요청 수량`} inputMode="decimal" value={line.qty} onChange={(event) => setLine(line.item.key, { qty: event.target.value })} className={`h-7 text-right text-xs ${error && line.qty ? "border-[var(--destructive)]" : ""}`} />
                     {overStock(line) ? <p className="mt-0.5 text-[10px] text-[var(--warning)]">재고 초과</p> : null}
                   </td>
+                  <td className="border-b border-[var(--border)] px-2 py-1.5 text-right tabular-nums">{stock === null ? "" : stock.toLocaleString("ko-KR")}</td>
+                  <td className="border-b border-[var(--border)] px-2 py-1.5 font-mono">{line.item.flNo}</td>
+                  <td className="max-w-40 truncate border-b border-[var(--border)] px-2 py-1.5" title={line.item.construction}>{line.item.construction}</td>
                   <td className="w-40 border-b border-[var(--border)] px-2 py-1">
                     <Input aria-label={`${line.item.storageNo} 비고`} value={line.note} onChange={(event) => setLine(line.item.key, { note: event.target.value })} className="h-7 text-xs" />
                   </td>

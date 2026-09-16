@@ -14,14 +14,14 @@ export interface OutboundRequestLine {
 }
 
 export interface OutboundRequestMeta {
+  /** 요청 부서. 메일 본문에 "부서:"로 나간다 */
   division: string
   requester: string
-  /** yyyy-mm-dd */
+  /** yyyy-mm-dd. 창을 열 때 오늘 날짜가 채워지고 사람이 고칠 수 있다 */
   wantedDate: string
-  note: string
 }
 
-export const OUTBOUND_REQUEST_COLUMNS = ["R&D No.", "Style No.", "FL#", "원단", "컬러", "재고(yds)", "요청(yds)", "비고"] as const
+export const OUTBOUND_REQUEST_COLUMNS = ["R&D No.", "Rack No.", "요청(yds)", "재고(yds)", "FL#", "원단", "비고"] as const
 
 export function stockYds(item: FabricLedgerItem): number | null {
   return item.balance ?? item.yds
@@ -32,12 +32,11 @@ export function outboundRequestRows(lines: readonly OutboundRequestLine[]): stri
     const stock = stockYds(line.item)
     return [
       line.item.storageNo,
-      line.item.styleNo,
+      line.item.rackNo ?? "",
+      line.qty.trim(),
+      stock === null ? "" : String(stock),
       line.item.flNo,
       line.item.construction,
-      line.item.color,
-      stock === null ? "" : String(stock),
-      line.qty.trim(),
       line.note.trim(),
     ]
   })
@@ -58,10 +57,9 @@ export function outboundRequestHtml(meta: OutboundRequestMeta, lines: readonly O
     "{table}",
     "",
   ]
-  if (meta.division.trim()) rows.push(`사업부: ${meta.division.trim()}`)
+  if (meta.division.trim()) rows.push(`부서: ${meta.division.trim()}`)
   if (meta.requester.trim()) rows.push(`요청자: ${meta.requester.trim()}`)
   if (meta.wantedDate) rows.push(`희망 컷팅일: ${shortDate(meta.wantedDate)}`)
-  if (meta.note.trim()) rows.push(`비고: ${meta.note.trim()}`)
   rows.push("", "컷팅 완료되면 픽업 가능 일정 회신 부탁드립니다.", "", "감사합니다.")
   return mailBodyHtml(rows, mailTableHtml(OUTBOUND_REQUEST_COLUMNS, outboundRequestRows(lines)))
 }

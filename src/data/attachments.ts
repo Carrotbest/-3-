@@ -33,27 +33,19 @@ export async function putAttachment(file: File): Promise<ChemicalAttachment> {
     addedAt: new Date().toISOString(),
   }
   const database = await openCacheDatabase()
-  try {
-    const transaction = database.transaction(ATTACHMENT_STORE_NAME, "readwrite")
-    transaction.objectStore(ATTACHMENT_STORE_NAME).put(file, attachment.id)
-    await transactionDone(transaction)
-    return attachment
-  } finally {
-    database.close()
-  }
+  const transaction = database.transaction(ATTACHMENT_STORE_NAME, "readwrite")
+  transaction.objectStore(ATTACHMENT_STORE_NAME).put(file, attachment.id)
+  await transactionDone(transaction)
+  return attachment
 }
 
 export async function getAttachmentBlob(id: string): Promise<Blob | null> {
   const database = await openCacheDatabase()
-  try {
-    return await new Promise<Blob | null>((resolve, reject) => {
-      const request = database.transaction(ATTACHMENT_STORE_NAME, "readonly").objectStore(ATTACHMENT_STORE_NAME).get(id)
-      request.onsuccess = () => resolve(request.result instanceof Blob ? request.result : null)
-      request.onerror = () => reject(request.error ?? new Error("첨부 파일을 읽을 수 없습니다."))
-    })
-  } finally {
-    database.close()
-  }
+  return await new Promise<Blob | null>((resolve, reject) => {
+    const request = database.transaction(ATTACHMENT_STORE_NAME, "readonly").objectStore(ATTACHMENT_STORE_NAME).get(id)
+    request.onsuccess = () => resolve(request.result instanceof Blob ? request.result : null)
+    request.onerror = () => reject(request.error ?? new Error("첨부 파일을 읽을 수 없습니다."))
+  })
 }
 
 export async function getAttachmentUrl(id: string): Promise<string | null> {
@@ -63,11 +55,7 @@ export async function getAttachmentUrl(id: string): Promise<string | null> {
 
 export async function deleteAttachment(id: string): Promise<void> {
   const database = await openCacheDatabase()
-  try {
-    const transaction = database.transaction(ATTACHMENT_STORE_NAME, "readwrite")
-    transaction.objectStore(ATTACHMENT_STORE_NAME).delete(id)
-    await transactionDone(transaction)
-  } finally {
-    database.close()
-  }
+  const transaction = database.transaction(ATTACHMENT_STORE_NAME, "readwrite")
+  transaction.objectStore(ATTACHMENT_STORE_NAME).delete(id)
+  await transactionDone(transaction)
 }

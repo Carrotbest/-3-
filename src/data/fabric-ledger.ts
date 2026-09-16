@@ -528,7 +528,8 @@ export function buildFabricLedger(
       if (event.occurredAt > previous) confirmMap.set(itemKey, event.occurredAt)
     }
     // 창고를 떠나거나 되돌아오면 실물 확인은 무효가 된다. 다시 확인받아야 한다.
-    if (event.action === "RESTORE" || event.action === "DISPOSE" || event.action === "EXHAUST" || event.action === "UNRECEIVE") confirmMap.delete(itemKey)
+    // UNCONFIRM은 잘못 누른 확인만 되돌린다. 상태·채번·재고는 그대로 두고 확인 표시만 지운다.
+    if (event.action === "RESTORE" || event.action === "DISPOSE" || event.action === "EXHAUST" || event.action === "UNRECEIVE" || event.action === "UNCONFIRM") confirmMap.delete(itemKey)
     if (event.action !== "OUTBOUND" || typeof event.qty !== "number" || !Number.isFinite(event.qty) || event.qty <= 0) return
     const current = outboundMap.get(itemKey) ?? []
     current.push({ to: event.to?.trim() || "미입력", division: event.division?.trim() || undefined, qty: event.qty, date: event.occurredAt })

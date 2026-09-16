@@ -1,6 +1,6 @@
 import { isCompletedFlNo } from "./dd-workflow"
 import { STORAGE_NO_MAX, storageNumberOf, warehouseOrderKey, type FabricLedgerItem } from "./fabric-ledger"
-import type { DisposalItem, DisposalRound, DisposalRoundEvent } from "./schema"
+import type { DisposalItem, DisposalRound, DisposalRoundEvent, FabricLedgerStatus } from "./schema"
 
 const disposalStorageNumber = (item: DisposalItem): number | null => {
   const matched = item.storageNo.trim().match(/^\d{1,4}(?!\d)/)?.[0]
@@ -60,6 +60,21 @@ export type DisposalVerdict = "보관" | "폐기" | "컷팅"
 export const isKept = (item: DisposalItem): boolean => item.keep ?? (item.firstPass === "보관" || item.teamKeep === true || item.decision === "keeping")
 export const isCut = (item: DisposalItem): boolean => !isKept(item) && (item.swatchLow === true || (item.keep === undefined && item.decision === "컷팅"))
 export const itemVerdict = (item: DisposalItem): DisposalVerdict => isKept(item) ? "보관" : isCut(item) ? "컷팅" : "폐기"
+
+/** 최종 확정에서 창고를 떠나는 건. 보관만 창고에 남고 폐기·컷팅은 이력으로 간다. */
+export const isFinalDispose = (item: DisposalItem): boolean => isActiveItem(item) && !isKept(item)
+
+/** 폐기 사유. 창고 개별 폐기와 라운드 최종 확정이 같은 목록을 쓴다. */
+export const DISPOSAL_REASONS = ["용량 초과", "품질 불량", "개발 중단"] as const
+export type DisposalReason = (typeof DISPOSAL_REASONS)[number]
+
+/** 최종 확정에서 이력으로 옮길 한 건. 창고 저장 함수에 그대로 넘긴다. */
+export interface DisposalCompletionEntry {
+  key: string
+  storageNo: string
+  fromStatus: FabricLedgerStatus
+  note: string
+}
 
 export function parseMeetingPickup(text: string): { meeting: number | ""; pickup: number | "" } | null {
   const value = text.trim()

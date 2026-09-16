@@ -111,10 +111,20 @@ async function pushCacheNow<K extends CacheKey>(key: K, value: AppState[K]): Pro
       lastRemote.set(key, merged as unknown[])
     }
     // 병합 결과가 내 화면과 다르면(팀원의 변경이 섞였으면) 화면에도 반영한다.
-    if (merged !== value) {
-      setAppState(normalizeLoadedRecords({ [key]: merged } as AppStatePatch))
-      void saveCacheLocal(key, merged)
-    }
+    //
+    // 단, 전송이 도는 사이 내가 또 저장했으면 되쓰지 않는다.
+    // value 는 전송을 시작할 때의 스냅샷이라 지금 store 값보다 뒤처져 있고,
+    // 그대로 넣으면 그 사이에 저장한 건들이 배열에서 빠진다.
+    // (창고에서 24건을 한 번에 확인 처리하면 일부만 처리되던 원인. R200)
+    // 건너뛰어도 잃는 것은 없다. 최신 값은 곧 다음 전송에서 병합되고,
+    // 팀원의 변경분은 이 커밋이 부르는 onSnapshot 이 따로 내려 준다.
+    const current = (useAppStore.getState() as unknown as Record<string, unknown>)[key]
+    if (current !== value) return
+    // 참조가 아니라 내용으로 비교한다. mergeKeyed 는 바뀐 것이 없어도 늘 새 배열을 만들어
+    // merged !== value 가 항상 참이 된다.
+    if (JSON.stringify(merged) === JSON.stringify(value)) return
+    setAppState(normalizeLoadedRecords({ [key]: merged } as AppStatePatch))
+    void saveCacheLocal(key, merged)
   } catch (error) {
     // 권한 거부·오프라인 등은 조용히 무시한다. 로컬 상태는 유지한다.
     console.warn("[firestore-sync] push 실패:", (error as Error)?.message ?? error)
