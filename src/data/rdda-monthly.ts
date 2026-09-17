@@ -35,7 +35,7 @@ export function buildMonthlyReport(report: RddaReportV2, snapshots: RddaWeeklySn
   void snapshots
   const now = new Date().toISOString()
   const month = Number(monthId.slice(5, 7))
-  const meetingRows = [...report.buyers].filter((row) => row.meetings > 0).sort((a, b) => b.meetings - a.meetings).slice(0, 3)
+  const meetingRows = [...report.buyers].filter((row) => row.offers > 0).sort((a, b) => b.offers - a.offers).slice(0, 3)
   const shareRows = report.buyers.filter((row) => Number.isFinite(row.teamShare) && row.teamOffers > 0)
   const highestShare = [...shareRows].sort((a, b) => b.teamShare - a.teamShare)[0]
   const lowestShare = [...shareRows].sort((a, b) => a.teamShare - b.teamShare)[0]
@@ -51,8 +51,8 @@ export function buildMonthlyReport(report: RddaReportV2, snapshots: RddaWeeklySn
   const kpi = { meetings: report.meta.meetings, ...report.summary }
 
   const meetingBody = [
-    report.meta.meetings > 0 ? `${month}월 바이어 미팅은 ${count(report.meta.meetings)}건이었다.` : "",
-    meetingRows.length ? `${meetingRows.map((row, index) => `${index + 1}위 ${row.name} ${count(row.meetings)}건`).join(", ")} 순이었다.` : "",
+    report.meta.offers > 0 ? `${month}월 바이어 제안 원단은 ${count(report.meta.offers)}건이었다.` : "",
+    meetingRows.length ? `${meetingRows.map((row, index) => `${index + 1}위 ${row.name} ${count(row.offers)}건`).join(", ")} 순이었다.` : "",
   ].filter(Boolean).join("\n")
   const shareBody = [
     report.meta.offers > 0 ? `전체 제안 원단 ${count(report.meta.offers)}건 중 3팀 원단은 ${count(report.summary.teamOffers)}건으로 ${rate(report.summary.teamShare)}%를 차지했다.` : "",
@@ -76,7 +76,7 @@ export function buildMonthlyReport(report: RddaReportV2, snapshots: RddaWeeklySn
     status: "draft",
     kpi,
     sections: [
-      { id: "meetings", title: "월 바이어 미팅 현황", body: meetingBody },
+      { id: "meetings", title: "월 바이어 제안 현황", body: meetingBody },
       { id: "share", title: "전체 제안 대비 3팀 비율", body: shareBody },
       { id: "pickup", title: "바이어 selection 및 Pickup 현황", body: pickupBody },
       { id: "material", title: "소재 및 원단 트렌드", body: materialBody },

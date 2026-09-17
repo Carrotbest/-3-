@@ -9,6 +9,7 @@
  * 넘치는 셀 안에서만 세로 스크롤한다.
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { FlPerfMark } from "@/components/fabric/PerfBadge"
 import { Archive, ChevronDown, ChevronRight, ClipboardPaste, Copy, Download, Eraser, Flame, ImagePlus, Loader2, Pencil, Plus, Redo2, RotateCcw, Rows3, Scissors, Trash2, Undo2, Upload } from "lucide-react"
 import * as XLSX from "xlsx"
 import { useNavigate, useSearchParams } from "react-router-dom"
@@ -704,6 +705,7 @@ export function FabricRequest() {
     return <span className="inline-flex flex-wrap items-center gap-1">
       <button type="button" title="DD MASTER에서 열기" onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); openDd() }} className={`${chip} ${DD_TONE_CLASS[linkTone]} hover:opacity-80`}>연결</button>
       {status.flNo ? <button type="button" title="원단 상세 열기" onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); if (ledgerKey) navigate(`/fabric/${encodeURIComponent(ledgerKey)}`); else openDd() }} className="font-mono text-[11px] text-[var(--primary)] underline-offset-2 hover:underline">{status.flNo}</button> : null}
+      {status.flNo ? <FlPerfMark flNo={status.flNo} /> : null}
       {status.extra > 0 ? <span title={`같은 옵션에 연결된 DD 행이 ${status.extra}개 더 있습니다`} className="text-[10px] text-[var(--muted-foreground)]">+{status.extra}</span> : null}
     </span>
   }

@@ -1,6 +1,7 @@
 import { isCompletedFlNo } from "./dd-workflow"
 import { STORAGE_NO_MAX, storageNumberOf, warehouseOrderKey, type FabricLedgerItem } from "./fabric-ledger"
-import type { DisposalItem, DisposalRound, DisposalRoundEvent, FabricLedgerStatus } from "./schema"
+import { KEEP_GRADES, lookupPerformance, type FabricPerformance } from "./fabric-performance"
+import type { DisposalExclusion, DisposalItem, DisposalRound, DisposalRoundEvent, FabricLedgerStatus } from "./schema"
 
 const disposalStorageNumber = (item: DisposalItem): number | null => {
   const matched = item.storageNo.trim().match(/^\d{1,4}(?!\d)/)?.[0]
@@ -23,6 +24,7 @@ export function buildDisposalItems(
   rangeFrom: number,
   rangeTo: number,
   sequenceStart: number,
+  perfIndex: Map<string, FabricPerformance> | null = null,
 ): DisposalItem[] {
   const keyOf = (number: number) => number >= sequenceStart ? number - sequenceStart : number - sequenceStart + STORAGE_NO_MAX
   const lo = keyOf(rangeFrom)
@@ -37,7 +39,11 @@ export function buildDisposalItems(
     let excluded: DisposalItem["excluded"]
     if (!isCompletedFlNo(item.flNo)) excluded = "FL 미기입"
     else if (seen.has(normalizedFl)) excluded = "FL 중복"
-    else seen.add(normalizedFl)
+    else {
+      seen.add(normalizedFl)
+      excluded = performanceExclusion(lookupPerformance(perfIndex, item.flNo))
+    }
+    const perf = lookupPerformance(perfIndex, item.flNo)
     return {
       fabricKey: item.key,
       storageNo: item.storageNo,
@@ -49,9 +55,35 @@ export function buildDisposalItems(
       yarnDetail: item.fields?.yarnDetail ?? "",
       construction: item.construction,
       rackNo: item.rackNo,
+      ...(perf ? { meeting: perf.offers, ...(perf.picks !== null ? { pickup: perf.picks } : {}) } : {}),
       ...(excluded ? { excluded } : {}),
     }
   })
+}
+
+/** RDDA 성과로 폐기 후보에서 뺄 사유. 없으면 undefined. */
+export function performanceExclusion(perf: FabricPerformance | null): DisposalExclusion | undefined {
+  if (!perf || !KEEP_GRADES.includes(perf.grade)) return undefined
+  return perf.grade === "order" ? "오더 원단" : "베스트 원단"
+}
+
+/**
+ * 이미 만든 라운드에 RDDA 성과를 반영한다(R212). 제안·픽업 수를 채우고, 오더·베스트 원단은 제외로 돌린다.
+ * 사람이 포함으로 되돌린 건(included)과 FL 사유로 제외된 건은 건드리지 않는다.
+ */
+export function applyPerformance(round: DisposalRound, perfIndex: Map<string, FabricPerformance>): { round: DisposalRound; matched: number; excluded: number } {
+  let matched = 0
+  let excluded = 0
+  const items = round.items.map((item) => {
+    const perf = lookupPerformance(perfIndex, item.flNo)
+    if (!perf) return item
+    matched += 1
+    const next: DisposalItem = { ...item, meeting: perf.offers, ...(perf.picks !== null ? { pickup: perf.picks } : {}) }
+    const reason = performanceExclusion(perf)
+    if (reason && !item.excluded && !item.included) { next.excluded = reason; excluded += 1 }
+    return next
+  })
+  return { round: { ...round, items }, matched, excluded }
 }
 
 export const isActiveItem = (item: DisposalItem): boolean => !item.excluded || item.included === true

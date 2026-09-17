@@ -95,6 +95,12 @@
   `데이터`는 LIST에서 R&D No.로 원단명을 끌어 쓰는 참조표, `창고보관 현황`은 기간과 무관한 현재 시점 스냅샷이다.
   입고·출고완료 목록은 **R&D No.마다 최종 이력 1건만** 올린다. 입고 취소(UNRECEIVE)와 폐기 복구(RESTORE)가 마지막이면 제외한다.
 
+## RDDA (`src/routes/Rdda.tsx`, `src/data/rdda-dataset.ts`, `src/data/rdda-sync.ts`, `src/data/fabric-performance.ts`)
+- 수집: `/rdda` **RDDA 갱신**이 RDDA 창을 열고, 그 창에서 북마크 **RDDA 수집**(바탕화면 `RDDA_수집_v5.js`, 설치 `RDDA_수집_북마크설치.html`)을 누르면 postMessage로 데이터셋이 들어와 `state/rdda`에 저장된다. 수신은 origin `https://rdda.hansoll.com`과 연 창(source)만 받는다. **수집기에는 팀원 사번이 있어 저장소에 넣지 않는다.** JSON 업로드는 예비 경로다.
+- 저장 형식은 12개월 집계가 아니라 전 기간 압축 데이터셋(`RddaDataset` v3, 약 1.7MB)이다. 화면은 사용자가 고른 기간으로 `buildRddaReport`를 즉석 계산하고 탭은 `RddaReportV2`만 받는다. 원장 기반 지표(`cumulative`)는 기간과 무관한 누적값이다. 개인 계정 조회라 미팅은 전사의 절반 정도만 잡힌다.
+- 원단 성과(R210~R213): FL 원장 누적 제안·픽업·오더(폐기 리스트 미팅 차감)를 `buildPerformanceIndex`로 FL 색인해 창고 표·원단 상세·폐기 라운드·DD MASTER·REQUEST가 같은 값을 본다. 화면에서는 `usePerformanceIndex`/`useFabricPerformance`(`src/components/fabric/PerfBadge.tsx`)만 쓴다. 등급 기준은 `GRADE_RULES` 한 곳. 범위는 3팀 담당 FL뿐이다.
+- 폐기 라운드는 오더·베스트 원단(`KEEP_GRADES`)을 `오더 원단`, `베스트 원단` 사유로 자동 제외한다. 사람이 포함으로 되돌릴 수 있고, 되돌린 건(included)은 `RDDA 성과 반영`이 다시 제외하지 않는다. 아래 창고 절의 "keeping 자동 제외 금지"는 지난 라운드 보관 판정 이야기라 이것과 다르다.
+
 ## TREND REPORT (`tools/trend`, `src/routes/TrendFabric.tsx`, `src/routes/TrendMacro.tsx`)
 - 파이썬 수집기가 `public/data/trend/{feed,kpi,status}.json`을 만들고 두 화면이 그 파일만 fetch한다. 서버·DB·AI 호출 없다.
 - 자동 실행, Secrets, 점수 튜닝, 제목 번역, 바이어 소스 등 **운영 상세는 전부 `tools/trend/README.md`에 있다.** 여기 옮겨 적지 말 것.
@@ -161,7 +167,8 @@
 | 창고 입고대기 | GD=DD YDS / 국내=Received date | 대장 현황 시트 제외 |
 | STUDY/TS | 엑셀+웹입력 | 주차별 / 중복제외 |
 | TREND | RSS 24곳, SEC 공시, World Bank, US Census | 사전 점수 채택, 공개 자료만 |
-| RDDA REPORT | 월별 파일 | YTD 스냅샷, 합산 금지(미착수) |
+| RDDA ANALYSIS | RDDA 전 기간 데이터셋(북마크 수집) | 기간 선택 즉석 재집계, 원장 지표는 누적 |
+| 원단 성과 배지 | RDDA FL 원장 누적 | 폐기 리스트 미팅 차감, 3팀 담당 FL만 |
 
 ## 코덱스 협업
 기획·검토=Claude, 코딩=Codex, 최종확인=Claude. 절차·명령·함정은 `codex-handoff` 스킬에 있다. 지시서 `docs/codex/RNN-*.md`, 실행 파일 `.codex-runs/`(gitignore). **커밋은 사용자 요청 시에만.** `git reset --hard`/`checkout --`로 사용자 변경 되돌리기 금지.

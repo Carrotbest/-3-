@@ -518,7 +518,8 @@ export type Member = (typeof MEMBERS)[number]
 export const DISPOSAL_DECISIONS = ["keeping", "폐기", "컷팅"] as const
 export type DisposalDecision = (typeof DISPOSAL_DECISIONS)[number]
 export type DisposalRoundStatus = "검토" | "창고 전달" | "완료"
-export type DisposalExclusion = "FL 미기입" | "FL 중복"
+/** 오더·베스트 원단은 RDDA 성과로 자동 제외한다(R212). 포함 버튼으로 되돌릴 수 있다. */
+export type DisposalExclusion = "FL 미기입" | "FL 중복" | "오더 원단" | "베스트 원단"
 
 export interface DisposalItem {
   fabricKey: string

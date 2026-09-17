@@ -1,10 +1,11 @@
-import { useMemo, useState, type ReactNode } from "react"
+import { useId, useMemo, useState, type ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
 import { buildMonthlyReport, withPreviousKpi } from "@/data/rdda-monthly"
 import { toWeekId, type RddaMonthlyReport, type RddaReportV2, type RddaWeeklySnapshot } from "@/data/rdda-report"
 import { saveRddaReports, useAppStore } from "@/store/useAppStore"
 import { MonthlyReportDialog } from "./MonthlyReportDialog"
+import { useFill } from "./motion"
 import { RddaPanel, RddaTable } from "./RddaTable"
 
 const countText = (value: number) => `${value >= 0 ? "+" : ""}${value.toLocaleString()}건`
@@ -20,6 +21,8 @@ function TrendKpi({ label, value, delta }: { label: string; value: ReactNode; de
 }
 
 function TrendChart({ snapshots }: { snapshots: RddaWeeklySnapshot[] }) {
+  const fill = useFill()
+  const clipId = useId().replace(/:/g, "")
   const rows = [...snapshots].reverse()
   const width = 760
   const height = 240
@@ -38,10 +41,10 @@ function TrendChart({ snapshots }: { snapshots: RddaWeeklySnapshot[] }) {
   return <div className="p-4">
     <div className="mb-3 flex flex-wrap gap-4 text-xs text-[var(--muted-foreground)]"><span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-[var(--primary)]" />전체 픽업률</span><span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-amber-500" />팀 픽업률</span></div>
     <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label="전체 픽업률과 팀 픽업률 주간 추이">
+      <defs><clipPath id={clipId}><rect x={left} y={0} width={(width - left - right) * fill} height={height} /></clipPath></defs>
       {[low, (low + high) / 2, high].map((tick) => <g key={tick}><line x1={left} x2={width - right} y1={y(tick)} y2={y(tick)} stroke="var(--border)" /><text x={left - 8} y={y(tick) + 4} textAnchor="end" fontSize="11" fill="var(--muted-foreground)">{tick.toFixed(0)}%</text></g>)}
-      <polyline points={points("pickRate")} fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-      <polyline points={points("teamPickRate")} fill="none" stroke="#f59e0b" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-      {rows.map((row, index) => <g key={row.weekId}><circle cx={x(index)} cy={y(row.kpi.pickRate)} r="3" fill="var(--primary)" /><circle cx={x(index)} cy={y(row.kpi.teamPickRate)} r="3" fill="#f59e0b" />{labelIndexes.has(index) && <text x={x(index)} y={height - 9} textAnchor={index === 0 ? "start" : index === rows.length - 1 ? "end" : "middle"} fontSize="11" fill="var(--muted-foreground)">{row.weekId.replace(/^\d{4}-/, "")}</text>}</g>)}
+      <g clipPath={`url(#${clipId})`}><polyline points={points("pickRate")} fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" /><polyline points={points("teamPickRate")} fill="none" stroke="#f59e0b" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />{rows.map((row, index) => <g key={row.weekId}><circle cx={x(index)} cy={y(row.kpi.pickRate)} r="3" fill="var(--primary)" /><circle cx={x(index)} cy={y(row.kpi.teamPickRate)} r="3" fill="#f59e0b" /></g>)}</g>
+      {rows.map((row, index) => labelIndexes.has(index) && <text key={row.weekId} x={x(index)} y={height - 9} textAnchor={index === 0 ? "start" : index === rows.length - 1 ? "end" : "middle"} fontSize="11" fill="var(--muted-foreground)">{row.weekId.replace(/^\d{4}-/, "")}</text>)}
     </svg>
   </div>
 }

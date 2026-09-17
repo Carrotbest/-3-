@@ -27,6 +27,7 @@ import {
 import { tsSeed, TS_SEED_VERSION } from "@/data/ts-seed"
 import { isTsWellFormed } from "@/data/ts-health"
 import type { RddaMonthlyReport, RddaReportV2, RddaWeeklySnapshot } from "@/data/rdda-report"
+import type { RddaDataset } from "@/data/rdda-dataset"
 
 export type Theme = "light" | "dark"
 export type AppFilters = Record<string, unknown>
@@ -63,7 +64,7 @@ export interface AppState {
   study: StudyRecord[]
   studyFiles: string[]
   events: CalendarEvent[]
-  rdda: RddaReport | RddaReportV2 | null
+  rdda: RddaReport | RddaReportV2 | RddaDataset | null
   orgMembers: OrgMember[]
   materials: MaterialItem[]
   materialsManual: MaterialItem[]

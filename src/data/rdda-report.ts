@@ -18,7 +18,7 @@ export interface RddaReportV2 {
   genders: RddaSegmentRow[]
   fibers: RddaFiberRow[]
   weights: { band: string; offers: number; pickRate: number }[]
-  months: { month: string; offers: number; pickRate: number }[]
+  months: { month: string; offers: number; pickRate: number; picks?: number; teamOffers?: number; teamPicks?: number; teamPickRate?: number; teamShare?: number }[]
   seasons: RddaSegmentRow[]
   ledger: RddaLedgerRow[]
   origins: { name: string; count: number; hitRate: number; teamCount: number; note: string }[]
@@ -200,7 +200,7 @@ export function sampleRddaReport(): RddaReportV2 {
     ledger: [
       { scope: "전사 전체", count: 85415, shownRate: 42.8, avgShown: 3.4, hitRate: 14.7, shownHitRate: 34.3, orderRate: 5.8 },
       { scope: "우리 팀", count: 5538, shownRate: 51.2, avgShown: 4.1, hitRate: 19.9, shownHitRate: 38.9, orderRate: 7.3, lead: true },
-      { scope: "타팀 소싱", count: 79877, shownRate: 42.2, avgShown: 3.3, hitRate: 14.3, shownHitRate: 33.9, orderRate: 5.7 },
+      { scope: "소싱", count: 79877, shownRate: 42.2, avgShown: 3.3, hitRate: 14.3, shownHitRate: 33.9, orderRate: 5.7 },
     ],
     origins: [
       { name: "Korea", count: 28140, hitRate: 18.7, teamCount: 2640, note: "핵심 소싱" },

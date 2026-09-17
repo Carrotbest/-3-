@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { FabricPerformancePanel } from "@/components/fabric/FabricPerformancePanel"
 import { FlEntryCheckDialog } from "@/components/warehouse/FlEntryCheckDialog"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { fmtDateFull, toDate } from "@/data/format"
@@ -315,6 +316,8 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
         {terminationReason ? <p className="mt-3 border-t border-[var(--border)] pt-2 text-xs text-[var(--muted-foreground)]">종료 사유 {terminationReason}</p> : null}
         {!item.record ? <p className="mt-3 border-t border-[var(--border)] pt-2 text-xs text-[var(--muted-foreground)]">샘플관리대장 행입니다. 여기서 고친 값은 이 화면에만 저장되고 대장 원본은 그대로 둡니다.</p> : null}
       </header>
+
+      <FabricPerformancePanel flNo={item.flNo} />
 
       <FlEntryCheckDialog
         check={flEntryCheck}

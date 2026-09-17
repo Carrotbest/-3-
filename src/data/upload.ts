@@ -10,6 +10,7 @@ import { isExcludedDevelopment, parseDevelopment, parseFabricAnalysis, parseMate
 import { saveCache } from "./cache"
 import { mergeTsRecords, saveRddaSnapshots, setAppState, setChemicalPortfolio, setIngestState, useAppStore, type OrgMember } from "../store/useAppStore"
 import { buildSnapshot, pruneSnapshots, type RddaReportV2 } from "./rdda-report"
+import { buildRddaReport, defaultRange, isRddaDataset } from "./rdda-dataset"
 
 export interface UploadResult {
   records: DevRecord[]
@@ -148,6 +149,23 @@ function isRddaReportV2(value: unknown): value is RddaReportV2 {
   )
 }
 
+export async function applyRddaReport(value: unknown): Promise<void> {
+  setIngestState({ step: "validating" })
+  const dataset = isRddaDataset(value) ? value : null
+  const v2 = isRddaReportV2(value) ? value : null
+  const stored = dataset ?? v2
+  if (!stored) throw new Error("RDDA 집계 JSON 형식이 올바르지 않습니다.")
+  const report = dataset ? (() => {
+    const { from, to } = defaultRange(dataset)
+    return buildRddaReport(dataset, from, to)
+  })() : v2!
+  setAppState({ rdda: stored })
+  await saveCache("rdda", stored)
+  const snapshot = buildSnapshot(report)
+  const existing = useAppStore.getState().rddaSnapshots
+  saveRddaSnapshots(pruneSnapshots([...existing.filter((item) => item.weekId !== snapshot.weekId), snapshot]))
+}
+
 /** RDDA API 집계 JSON 한 개를 검증해 공용 state/rdda에 저장한다. */
 export async function ingestRddaReport(files: File[]): Promise<void> {
   const jsonFiles = files.filter((file) => /\.json$/i.test(file.name))
@@ -155,14 +173,13 @@ export async function ingestRddaReport(files: File[]): Promise<void> {
     if (jsonFiles.length !== 1 || files.length !== 1) throw new Error("RDDA 집계 JSON 파일 한 개를 선택해 주세요.")
     setIngestState({ step: "parsing" })
     const parsed: unknown = JSON.parse(await jsonFiles[0].text())
-    setIngestState({ step: "validating" })
-    if (!isRddaReportV2(parsed)) throw new Error("RDDA 집계 JSON 형식이 올바르지 않습니다.")
-    setAppState({ rdda: parsed })
-    await saveCache("rdda", parsed)
-    const snapshot = buildSnapshot(parsed)
-    const existing = useAppStore.getState().rddaSnapshots
-    saveRddaSnapshots(pruneSnapshots([...existing.filter((item) => item.weekId !== snapshot.weekId), snapshot]))
+    await applyRddaReport(parsed)
   })
+}
+
+export async function ingestRddaMessage(report: unknown): Promise<boolean> {
+  await run("rdda-report", "RDDA 자동 수집", () => applyRddaReport(report))
+  return useAppStore.getState().ingest.step !== "error"
 }
 
 export async function ingestFabric(file: File): Promise<void> {

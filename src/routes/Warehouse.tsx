@@ -9,6 +9,8 @@ import { FlEntryCheckDialog } from "@/components/warehouse/FlEntryCheckDialog"
 import { normalizeRackNo, RACK_FORMAT_HINT, RACK_NONE_LABEL, RACK_POSITIONS } from "@/data/warehouse-rack"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
+import { GRADE_ROW_CLASS, PerfBadge, PerfCounts, usePerformanceIndex } from "@/components/fabric/PerfBadge"
+import { GRADE_META, lookupPerformance, type FabricPerformance } from "@/data/fabric-performance"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -65,6 +67,7 @@ type WarehouseColumnId = "storageNo" | "styleNo" | "flNo" | "owner" | "stock" | 
   | "actualWidth" | "actualWeight" | "shrinkageLength" | "shrinkageWidth"
   | "knitInch" | "knitGauge" | "knitNeedles" | "loopF" | "loopT" | "loopB"
   | "greigeWidth" | "greigeWeight" | "note"
+  | "perfGrade" | "perfCounts" | "perfRate"
 
 interface WarehouseColumn {
   id: WarehouseColumnId
@@ -73,7 +76,7 @@ interface WarehouseColumn {
 }
 
 interface WarehouseGroup {
-  key: "fixed" | "ledger" | "process" | "result"
+  key: "fixed" | "rdda" | "ledger" | "process" | "result"
   label: string
   color: string
   collapsible?: boolean
@@ -116,6 +119,12 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
     { id: "dyeingDate", label: "Status", width: 78 },
     { id: "finishingMill", label: "가공 Mill", width: 88 },
     { id: "finishingDate", label: "Status", width: 78 },
+  ] },
+  // RDDA 원장 누적 성과(R211). FL No.로 붙이며 3팀 담당 FL만 수치가 있다.
+  { key: "rdda", label: "RDDA 성과", color: "var(--chart-2)", collapsible: true, columns: [
+    { id: "perfGrade", label: "등급", width: 84 },
+    { id: "perfCounts", label: "제안/픽업/오더", width: 104 },
+    { id: "perfRate", label: "픽업률", width: 68 },
   ] },
   { key: "result", label: "결과", color: "var(--chart-4)", columns: [
     { id: "completedAt", label: "Finish Date", width: 88 },
@@ -263,6 +272,19 @@ function nextStorageNumbers(items: readonly FabricLedgerItem[], count: number): 
  * 필터와 정렬이 보는 값. coreCell 이 화면에 그리는 값과 같은 출처를 쓴다.
  * 한쪽만 고치면 필터 목록과 화면이 어긋나므로 열을 더할 때 둘 다 손봐야 한다.
  */
+// cellValue 는 컴포넌트 밖 함수라 성과 색인을 인자로 받지 않는다. Warehouse 가 렌더마다 먼저 채운다.
+let perfIndexForCells: Map<string, FabricPerformance> | null = null
+const perfOf = (item: FabricLedgerItem): FabricPerformance | null => lookupPerformance(perfIndexForCells, item.flNo)
+
+/** 성과 열 정렬값. 문자열 비교로는 등급 순서와 숫자 크기가 맞지 않는다. */
+function perfSortValue(item: FabricLedgerItem, id: WarehouseColumnId): number {
+  const perf = perfOf(item)
+  if (!perf) return Number.NEGATIVE_INFINITY
+  if (id === "perfGrade") return -GRADE_META[perf.grade].rank
+  if (id === "perfCounts") return (perf.orders ?? 0) * 1_000_000 + (perf.picks ?? 0) * 1_000 + perf.offers
+  return perf.pickRate ?? -1
+}
+
 function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
   const record = item.record
   const led = item.sample?.ledger
@@ -318,6 +340,9 @@ function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
     case "greigeWidth": return first(record?.tech?.stageData?.greige?.width, led?.greige?.width)
     case "greigeWeight": return first(record?.tech?.stageData?.greige?.weight, led?.greige?.weight)
     case "note": return item.note
+    case "perfGrade": { const perf = perfOf(item); return perf ? GRADE_META[perf.grade].label : "" }
+    case "perfCounts": { const perf = perfOf(item); return perf ? `${perf.offers}/${perf.picks ?? "-"}/${perf.orders ?? "-"}` : "" }
+    case "perfRate": { const perf = perfOf(item); return perf?.pickRate != null ? `${perf.pickRate.toFixed(1)}%` : "" }
     default: return ""
   }
 }
@@ -373,6 +398,8 @@ function StatusMixBar({ counts, total, onPick }: { counts: Record<WarehouseTab, 
 }
 
 export function Warehouse() {
+  const perfIndex = usePerformanceIndex()
+  perfIndexForCells = perfIndex
   const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
   // 출고 요청 메일 초안(C형). 요청자 기본값은 로그인 표시 이름, 없으면 이메일 앞부분이다.
   const [outboundMailOpen, setOutboundMailOpen] = useState(false)
@@ -436,7 +463,7 @@ export function Warehouse() {
   }
   const [tab, setTab] = useState<WarehouseTab>("READY")
   // 펼침/접힘은 개인 브라우저에 남는다. 팀원 화면에는 영향을 주지 않는다.
-  const [openGroups, setOpenGroups] = useState(() => loadViewGroups(WH_OPEN_GROUPS_KEY, { process: true }))
+  const [openGroups, setOpenGroups] = useState(() => loadViewGroups(WH_OPEN_GROUPS_KEY, { process: true, rdda: true }))
   useEffect(() => { saveViewPref(WH_OPEN_GROUPS_KEY, openGroups) }, [openGroups])
   // 열 너비는 사용자가 끌어 조절하고 브라우저에 남는다. 기본값을 바꾸면 키를 올려야 반영된다.
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
@@ -558,6 +585,22 @@ export function Warehouse() {
     ].some((value) => String(value ?? "").toLocaleLowerCase("ko-KR").includes(query)))
   }, [ledger, search, tab, unconfirmedOnly])
 
+  // 원단별로 이력(소진·폐기)에 들어간 마지막 시각. 기록 시각(recordedAt)을 먼저 본다. 출고일(occurredAt)은 사람이 고른 날짜다.
+  const historyEnteredAt = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const event of fabricEvents) {
+      if (event.toStatus !== "EXHAUSTED" && event.toStatus !== "DISPOSED") continue
+      const at = event.recordedAt ?? event.occurredAt ?? ""
+      // DD 값이 바뀌면 원장 key가 달라질 수 있어 R&D No.로도 찾는다.
+      for (const id of [event.fabricKey, event.storageNo ? `no:${event.storageNo.trim()}` : ""]) {
+        if (!id) continue
+        const previous = map.get(id)
+        if (!previous || at > previous) map.set(id, at)
+      }
+    }
+    return { get: (item: FabricLedgerItem) => map.get(item.key) ?? (item.storageNo.trim() ? map.get(`no:${item.storageNo.trim()}`) : undefined) }
+  }, [fabricEvents])
+
   // 열 필터를 통과한 행. 정렬을 걸지 않으면 원장이 준 대장 순서를 그대로 쓴다.
   const visibleRows = useMemo(() => {
     const active = Object.entries(columnFilters).filter(([, values]) => values.length > 0)
@@ -566,13 +609,22 @@ export function Warehouse() {
     if (!sortRule) {
       // 창고 보관은 채번 순서대로 본다. 되감기(7999 다음 낮은 번호)까지 펴서 선반 순서와 맞춘다.
       // 대장 시트 순서를 그대로 쓰면 웹에서 새로 입고한 건이 번호와 무관하게 늘 맨 아래로 간다.
+      // 이력은 화면을 아래부터 본다. 창고에서 넘어온 순서대로 아래에 쌓이게, 이력에 들어간 시각 오름차순으로 둔다.
+      // 넘어온 기록이 없는 대장 이관분은 원래 순서 그대로 위에 둔다.
+      if (tab === "HISTORY") {
+        const legacy = filtered.filter((item) => !historyEnteredAt.get(item))
+        const moved = filtered.filter((item) => historyEnteredAt.get(item))
+          .sort((left, right) => historyEnteredAt.get(left)!.localeCompare(historyEnteredAt.get(right)!))
+        return [...legacy, ...moved]
+      }
       if (tab !== "WAREHOUSE") return filtered
       return [...filtered].sort((left, right) => warehouseOrderKey(left, sequenceStart) - warehouseOrderKey(right, sequenceStart))
     }
     const direction = sortRule.dir === "asc" ? 1 : -1
+    if (sortRule.col.startsWith("perf")) return [...filtered].sort((left, right) => direction * (perfSortValue(left, sortRule.col) - perfSortValue(right, sortRule.col)))
     return [...filtered].sort((left, right) =>
       direction * cellValue(left, sortRule.col).localeCompare(cellValue(right, sortRule.col), "ko-KR", { numeric: true }))
-  }, [rows, columnFilters, sortRule, tab, sequenceStart])
+  }, [rows, columnFilters, sortRule, tab, sequenceStart, perfIndex, historyEnteredAt])
   const divisionSuggestions = useMemo(() => [...new Set(fabricEvents.map((event) => event.division?.trim()).filter((value): value is string => Boolean(value)))].sort((left, right) => left.localeCompare(right, "ko-KR", { numeric: true })), [fabricEvents])
   // 입고 대기에서는 R&D No., 재고, 입고확인이 아직 의미가 없어 고정 열을 숨긴다. Rack No.는 창고보관 탭에서만 보인다.
   const visibleGroups = COLUMN_GROUPS
@@ -604,7 +656,13 @@ export function Warehouse() {
     const outboundCount = ledger.reduce((sum, item) => sum + item.outbound.length, 0)
     const missingStock = stored.filter((item) => item.yds === null).length
     const shipped = stockTotal + outboundTotal
+    // 창고보관 중인 RDDA 성과 원단(R211). 3팀 담당 FL만 집계된다.
+    const storedPerf = stored.map((item) => lookupPerformance(perfIndex, item.flNo))
     return {
+      orderStored: storedPerf.filter((perf) => perf?.grade === "order").length,
+      bestStored: storedPerf.filter((perf) => perf?.grade === "best").length,
+      perfMatched: storedPerf.filter(Boolean).length,
+      storedCount: stored.length,
       stockTotal,
       balanceTotal,
       outboundTotal,
@@ -613,7 +671,7 @@ export function Warehouse() {
       usedPct: shipped > 0 ? (outboundTotal / shipped) * 100 : 0,
       nextNo: String(nextStorageNumbers(ledger, 1)[0] ?? 0).padStart(4, "0"),
     }
-  }, [ledger])
+  }, [ledger, perfIndex])
 
   useEffect(() => {
     const finish = () => {
@@ -853,6 +911,9 @@ export function Warehouse() {
 
   const coreCell = (item: FabricLedgerItem, id: WarehouseColumnId): ReactNode => {
     if (id === "storageNo") return <TextCell value={item.storageNo} mono />
+    if (id === "perfGrade") return <PerfBadge perf={perfOf(item)} compact />
+    if (id === "perfCounts") return <PerfCounts perf={perfOf(item)} />
+    if (id === "perfRate") { const perf = perfOf(item); return <TextCell value={perf?.pickRate != null ? `${perf.pickRate.toFixed(1)}%` : ""} /> }
     if (id === "rackNo") return item.rackNo
       ? <TextCell value={item.rackNo} mono />
       : <span className="text-[10px] text-[var(--muted-foreground)]" title="더블클릭해서 Rack No. 입력">미지정</span>
@@ -1211,7 +1272,7 @@ export function Warehouse() {
                 const selected = checked.has(item.key)
                 return <TableRow
                   key={item.key}
-                  className={`h-8 cursor-pointer border-l-2 ${selected ? `${accent.rowBar} bg-[color-mix(in_srgb,var(--primary)_6%,transparent)]` : "border-l-transparent"}`}
+                  className={`h-8 cursor-pointer border-l-2 ${GRADE_ROW_CLASS[perfOf(item)?.grade ?? "normal"] ?? ""} ${selected ? `${accent.rowBar} bg-[color-mix(in_srgb,var(--primary)_6%,transparent)]` : "border-l-transparent"}`}
                   tabIndex={0}
                   aria-selected={selected}
                   aria-label={`${item.styleNo || item.flNo || "원단"} 상세 보기`}
@@ -1311,7 +1372,7 @@ export function Warehouse() {
       <KpiTile
         label="출고 누계 (yds)"
         basis="출고 처리한 수량의 누계입니다. 폐기·소진 처리분은 포함하지 않습니다."
-        footer={<p className="truncate text-[10px] text-[var(--muted-foreground)]">출고 <strong className="tabular-nums text-[var(--foreground)]">{kpi.outboundCount.toLocaleString("ko-KR")}</strong>건{kpi.missingStock ? ` · 재고 미기입 ${kpi.missingStock}건` : ""}</p>}
+        footer={<p className="truncate text-[10px] text-[var(--muted-foreground)]">출고 <strong className="tabular-nums text-[var(--foreground)]">{kpi.outboundCount.toLocaleString("ko-KR")}</strong>건{kpi.missingStock ? ` · 재고 미기입 ${kpi.missingStock}건` : ""}{perfIndex ? <span title={`창고보관 ${kpi.storedCount}건 중 RDDA 성과 매칭 ${kpi.perfMatched}건`}> · 보관 중 <strong className="text-amber-700">오더 {kpi.orderStored}</strong> / <strong className="text-emerald-700">베스트 {kpi.bestStored}</strong></span> : null}</p>}
       >
         <p className="flex items-baseline gap-1">
           <span className="text-2xl font-semibold tracking-tight tabular-nums"><NumberTicker value={Math.round(kpi.outboundTotal)} duration={GAUGE_MS} startOnView /></span>
