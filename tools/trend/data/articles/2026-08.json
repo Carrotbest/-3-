@@ -6411,9 +6411,10 @@
   "score": 3,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "바이어 · Abercrombie & Fitch"
+   "바이어 · Abercrombie & Fitch",
+   "바이어 · Amazon"
   ]
  },
  {
@@ -11129,6 +11130,30 @@
   ]
  },
  {
+  "key": "8e1e6f9c492c0db3",
+  "title": "Department store chain Kohl’s misses quarterly sales estimates amid cautious spending",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxNTUxlZ2s0b0JhQTNEcWF6SU1wM1NEVFcxcWZVNXhHRUtmTDhkRVBxM0NQMjVnc3dXaDNGMmtuQXpYUEVHNjUtbC14Q3ZSalc0UWc5a3NTeHVFMzMxZGRiQ0czRFVaUTFxYjdLWTNYaGNoeWdscXFpYzZpd3RNZmluRjVtRVdnTml0b2poQlFtNlRSN05UN1pXbHd0bmQtSmJkOTZWTWhSSm5PVHFuNFd0OG5YOVJCZGFWX2QyYmtyRXl6MVRXUWhvdFdzZzNGOWRtQ0YycUt6UnlkblYtMmd3?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-09-17",
+  "summary": "Department store chain Kohl’s misses quarterly sales estimates amid cautious spending BNN Bloomberg",
+  "content": "Department store chain Kohl’s misses quarterly sales estimates amid cautious spending BNN Bloomberg",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Kohl's",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 3,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Kohl's"
+  ]
+ },
+ {
   "key": "8da02cec26992b50",
   "title": "Aalto Researchers Tackle Cotton Recycling’s Color Problem",
   "title_ko": "Aalto 연구원, 면 재활용의 색상 문제 해결",
@@ -11478,6 +11503,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Kohl's"
+  ]
+ },
+ {
+  "key": "7ba7da7667e5ffc9",
+  "title": "Abercrombie Lifts Outlook as Profit, Sales Rise",
+  "title_ko": "Abercrombie, 이익과 매출 증가로 전망 상승",
+  "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOWmhaRmxsSklLd0NkTlQ5MElQeDV6SmlPSmV5eXhJeF9WVWxyM3VDTEN4SGVEY0lzZFZyeUhLZ0ZnZ0hId2NFbjZFUDVldWJTZFgyYXZzVUYzNGZXT3FXVlhnNVpTbXR5UlppTk55RG1rRm5qcFR6UFF4al9mazNkdnhoYVZhZkxzUjRnZnVrc3NZY0dFaGc?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-09-17",
+  "summary": "Abercrombie Lifts Outlook as Profit, Sales Rise WSJ",
+  "content": "Abercrombie Lifts Outlook as Profit, Sales Rise WSJ",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
   ]
  },
  {
@@ -11855,6 +11906,30 @@
    "kohls"
   ],
   "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Kohl's"
+  ]
+ },
+ {
+  "key": "645bbdc0899fd03a",
+  "title": "Kohl’s Sales Dip As Consumers Prioritize Essentials",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNb3loOFRxS29PVW5fZmx2a3g2LUExMlR0dzBUcjFDa3NmbEFDRno0TTE3bjZuV2JNeU1mLTFUVC1BTVhmczNVU0J5T1FYbXlkSE1tNTUtRzdFeGhvelJ2YWYwNDJXSXRzTnp1Z19VRHB1Z0ppYm8yT05YZWhmTXgtUmNKYXJWZTBCT1RtV25hSGcxdw?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-09-17",
+  "summary": "Kohl’s Sales Dip As Consumers Prioritize Essentials pymnts.com",
+  "content": "Kohl’s Sales Dip As Consumers Prioritize Essentials pymnts.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Kohl's",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 3,
   "relevant": false,
   "gate": "none",
   "hits": 1,
@@ -13032,6 +13107,32 @@
   "hits": 1,
   "sources": [
    "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "3007a0e5ce0be78f",
+  "title": "Abercrombie & Fitch Raises Full-Year Outlook After Strong Q2 Results",
+  "title_ko": "Abercrombie 및 Fitch, 2분기 실적 호조 후 연간 전망 상향 조정",
+  "link": "https://news.google.com/rss/articles/CBMia0FVX3lxTE9OSGJQLTJXVWFOYVNoMy13YkN4RVNtcGNxaXIyNEZtSzlxckVyOW5BMC00akRqNkNjVFdsZFNVTkMwLTRxNFEyNGd5dnFlSmo5WUZRazQ0ZDdzb1lJc2U5ZTR4X20tQUpMZkQ4?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-09-17",
+  "summary": "Abercrombie & Fitch Raises Full-Year Outlook After Strong Q2 Results achmadnurhidayat.id",
+  "content": "Abercrombie & Fitch Raises Full-Year Outlook After Strong Q2 Results achmadnurhidayat.id",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
   ]
  },
  {
@@ -19745,6 +19846,32 @@
    "walmart"
   ],
   "score": 6,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
+  "key": "de8814031693744e",
+  "title": "FY2027 Q2 Earnings Release",
+  "title_ko": "FY2027 Q2 수익 발표",
+  "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTE84MVlSbzV6dks4VlFhU1VCWEotSUd4QjdsYndaOVNaRmlqZlNoVU5WWGk1dTNWMVRNY2ZzZEYySWFsd0cyOG5TcWF3ZDlmZzhhb1g5OUJvMTFrNE5BVHNPRWZxcVI1QnlxUzVycDgwZzhldERvdmFN?oc=5",
+  "published": "2026-08-20",
+  "collected": "2026-09-17",
+  "summary": "FY2027 Q2 Earnings Release Walmart",
+  "content": "FY2027 Q2 Earnings Release Walmart",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
   "relevant": false,
   "gate": "none",
   "hits": 1,
@@ -27019,6 +27146,30 @@
   ]
  },
  {
+  "key": "78a9326056a1454c",
+  "title": "A Look Back at Apparel Retailer Stocks’ Q1 Earnings: Lululemon (NASDAQ:LULU) Vs The Rest Of The Pack",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxNajRqQkRkN3g1ajlZOVA0SElwODJMMVNOcnVEaE4wNDVwUFNuYS03X3A0ZzZHY0xHWG5qeHZRcUhoSEFMZ05sLVNqcjFjOF9HTHBjdXFkNGxaV2UtSmJxOTBVN0JfZXJrNE1maHR0dUZUVVpaOHlsTHlwT3NYcGdfQ0JmUjVSanE4cWRoWVEzcF9wSDNEQnItWkFmcDZYYlJvT3NsVGtkR21jdmRJV3ZPaGtpWl9CYjl0eUNjdzlCR2twcWxTM2ZoM3BPTVlJeVNlcmtrMTZ4c2s5R2o5Q2dNNWtuOWFJNkVoZVE?oc=5",
+  "published": "2026-08-13",
+  "collected": "2026-09-17",
+  "summary": "A Look Back at Apparel Retailer Stocks’ Q1 Earnings: Lululemon (NASDAQ:LULU) Vs The Rest Of The Pack StockStory",
+  "content": "A Look Back at Apparel Retailer Stocks’ Q1 Earnings: Lululemon (NASDAQ:LULU) Vs The Rest Of The Pack StockStory",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Urban Outfitters",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 6,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Urban Outfitters"
+  ]
+ },
+ {
   "key": "740e7ff5c7d41210",
   "title": "Nike, FedEx Reap Billions From Tariff Refunds: Who Actually Gets To Keep Them?",
   "title_ko": "Nike, FedEx는 관세 환급으로 수십억 달러를 거둬들입니다. 실제로 이를 보관할 수 있는 사람은 누구입니까?",
@@ -28866,6 +29017,30 @@
   ]
  },
  {
+  "key": "cf9e997f616a4095",
+  "title": "Ravens Foundation grants fund youth football apparel, equipment",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNUWVfLVROOEwwRnV1ZEhfeUdzeFl6M2lUa2pYVVc3TnR2ZTlVMHZjeVF1LUx0UHVPOFJKM0JMWGNPeFB0anBuRWtjeDdOMk52cS1yUnRvcThNLUY5bmgxZUVLb2VBal94Wm9fVm9nWHVQWm1qZ2Q4elVDMG55dUdMdVVWbXRMMTRMRVlRcFN2b3RkdERQZFBDcQ?oc=5",
+  "published": "2026-08-07",
+  "collected": "2026-09-17",
+  "summary": "Ravens Foundation grants fund youth football apparel, equipment WBAL-TV",
+  "content": "Ravens Foundation grants fund youth football apparel, equipment WBAL-TV",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
+  ]
+ },
+ {
   "key": "c3bccb8a983715cb",
   "title": "Under Armour Lowers Revenue Outlook on Soft Demand",
   "title_ko": "Under Armour, 소프트 수요로 인해 매출 전망 하향",
@@ -29384,6 +29559,32 @@
   "summary": "Under Armour forecasts steeper annual sales decline on weak North America demand 1470 & 100.3 WMBD",
   "content": null,
   "image": null,
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "ua"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
+  ]
+ },
+ {
+  "key": "55c4899c7539f286",
+  "title": "Under Armour Cuts Sales View on Softer Demand Around the World",
+  "title_ko": "Under Armour, 전 세계 수요 둔화에 따른 판매 전망 축소",
+  "link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQVGIwMUtuUFpwM2VkZFN2SnAwMWFaT3MwWlpHQ0h2WWFqdUFBcTdBQjRkVkFrM1Nrc1RMYkxoMUtwajY4amh0c3VVM0J3b01PNzRpa2QxUEdIQkc0QWFYZWdvVHNwcEh5UUh2NmpPSFNHQUMzMEdQNXVXM2RSS3hJR0l5bmJpQXk0SW45eGpROGt4eU1qbUlnTUF4ejNyQ3VVcHR6aXQtUTBDR0lrWVR2Vm5GSQ?oc=5",
+  "published": "2026-08-07",
+  "collected": "2026-09-17",
+  "summary": "Under Armour Cuts Sales View on Softer Demand Around the World Bloomberg.com",
+  "content": "Under Armour Cuts Sales View on Softer Demand Around the World Bloomberg.com",
+  "image": "",
   "image_tried": null,
   "source": "바이어 · Under Armour",
   "region": "해외",
