@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx"
 
-import type { DataMeta, HistoryState, RddaSnapshot } from "./sample"
+import type { DataMeta, HistoryState, RddaReport, RddaSnapshot } from "./sample"
 import type { CompletedSample, DevRecord } from "./schema"
 import { WEB_INTAKE_SHEET } from "./schema"
 import { parseChemicalPortfolio } from "./chemical"
@@ -8,7 +8,8 @@ import { reconcile, type ReconcileResult } from "./reconcile"
 import { loadTds } from "./tds-loader"
 import { isExcludedDevelopment, parseDevelopment, parseFabricAnalysis, parseMaterials, parseRdda, parseRddaSnapshot, parseSamples, parseStudy, parseTechnicalServices } from "./xlsx-parsers"
 import { saveCache } from "./cache"
-import { mergeTsRecords, setAppState, setChemicalPortfolio, setIngestState, useAppStore, type OrgMember } from "../store/useAppStore"
+import { mergeTsRecords, saveRddaSnapshots, setAppState, setChemicalPortfolio, setIngestState, useAppStore, type OrgMember } from "../store/useAppStore"
+import { buildSnapshot, pruneSnapshots, type RddaReportV2 } from "./rdda-report"
 
 export interface UploadResult {
   records: DevRecord[]
@@ -116,7 +117,9 @@ export async function ingestRdda(files: File[]): Promise<void> {
     if (!candidates.length) throw new Error("파일명에서 '26년 N월'을 확인할 수 있는 RDDA 엑셀을 선택해 주세요.")
     setIngestState({ step: "parsing" })
     // 기존 스냅샷에 이번 업로드 월들을 누적(같은 월 교체)
-    const snapMap = new Map<number, RddaSnapshot>((useAppStore.getState().rdda?.snapshots ?? []).map((snapshot) => [snapshot.month, snapshot]))
+    const current = useAppStore.getState().rdda
+    const legacy = current && "snapshots" in current ? current as RddaReport : null
+    const snapMap = new Map<number, RddaSnapshot>((legacy?.snapshots ?? []).map((snapshot) => [snapshot.month, snapshot]))
     const workbooks = new Map<number, Awaited<ReturnType<typeof workbookOf>>>()
     for (const candidate of candidates) {
       const workbook = await workbookOf(candidate.file)
@@ -130,6 +133,35 @@ export async function ingestRdda(files: File[]): Promise<void> {
     setIngestState({ step: "validating" })
     setAppState({ rdda })
     await saveCache("rdda", rdda)
+  })
+}
+
+function isRddaReportV2(value: unknown): value is RddaReportV2 {
+  if (!value || typeof value !== "object") return false
+  const report = value as Partial<RddaReportV2>
+  return Boolean(
+    report.meta && typeof report.meta.generatedAt === "string"
+    && report.summary && typeof report.summary.pickRate === "number"
+    && Array.isArray(report.buyers) && Array.isArray(report.ledger)
+    && Array.isArray(report.suppliers) && Array.isArray(report.teamYears)
+    && report.recommend && typeof report.recommend === "object",
+  )
+}
+
+/** RDDA API 집계 JSON 한 개를 검증해 공용 state/rdda에 저장한다. */
+export async function ingestRddaReport(files: File[]): Promise<void> {
+  const jsonFiles = files.filter((file) => /\.json$/i.test(file.name))
+  return run("rdda-report", jsonFiles.map((file) => file.name).join(", ") || files.map((file) => file.name).join(", "), async () => {
+    if (jsonFiles.length !== 1 || files.length !== 1) throw new Error("RDDA 집계 JSON 파일 한 개를 선택해 주세요.")
+    setIngestState({ step: "parsing" })
+    const parsed: unknown = JSON.parse(await jsonFiles[0].text())
+    setIngestState({ step: "validating" })
+    if (!isRddaReportV2(parsed)) throw new Error("RDDA 집계 JSON 형식이 올바르지 않습니다.")
+    setAppState({ rdda: parsed })
+    await saveCache("rdda", parsed)
+    const snapshot = buildSnapshot(parsed)
+    const existing = useAppStore.getState().rddaSnapshots
+    saveRddaSnapshots(pruneSnapshots([...existing.filter((item) => item.weekId !== snapshot.weekId), snapshot]))
   })
 }
 

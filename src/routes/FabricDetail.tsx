@@ -4,10 +4,12 @@ import { Link, useLocation, useParams } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { FlEntryCheckDialog } from "@/components/warehouse/FlEntryCheckDialog"
 import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { fmtDateFull, toDate } from "@/data/format"
-import type { FabricLedgerAction, FabricLedgerEvent } from "@/data/schema"
-import { applyFabricAction, saveFabricFields, useAppStore } from "@/store/useAppStore"
+import { WEB_INTAKE_SHEET, type FabricLedgerAction, type FabricLedgerEvent } from "@/data/schema"
+import { checkWarehouseFlEntry, needsFlConfirm, type WarehouseFlCheck } from "@/data/warehouse-fl-check"
+import { applyFabricAction, saveFabricFields, updateManualIntake, useAppStore } from "@/store/useAppStore"
 
 const ACTION_LABELS: Record<FabricLedgerAction, string> = {
   COMPLETE: "개발 완료",
@@ -172,6 +174,7 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
   const [draft, setDraft] = useState<Record<string, string>>({})
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
+  const [flEntryCheck, setFlEntryCheck] = useState<WarehouseFlCheck | null>(null)
 
   if (!item) {
     return (
@@ -216,15 +219,8 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
     }
   }
 
-  const confirmEdit = async () => {
-    const changed = Object.entries(draft).filter(([id, value]) => value !== valueOf(item, id))
-    if (!changed.length) { cancelEdit(); return }
+  const saveEdit = async (changed: [string, string][], manualFl?: string) => {
     const nextStorageNo = draft.storageNo ?? item.storageNo
-    const duplicate = nextStorageNo.trim()
-      && nextStorageNo.trim() !== item.storageNo
-      && ledger.some((other) => other.key !== item.key && other.storageNo.trim() === nextStorageNo.trim())
-    if (duplicate) { setError(`R&D No. ${nextStorageNo.trim()} 는 다른 원단이 이미 쓰고 있습니다.`); return }
-
     setSaving(true)
     setError("")
     try {
@@ -244,7 +240,12 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
           autoExhaust: false,
         })
       }
-      const dataPatch = Object.fromEntries(changed.filter(([id]) => !STOCK_IDS.has(id)))
+      if (manualFl !== undefined) {
+        const manualId = item.sample?.id
+        if (!manualId) throw new Error("창고 직접 추가 원단 ID를 찾을 수 없습니다.")
+        await updateManualIntake(manualId, "flNo", manualFl)
+      }
+      const dataPatch = Object.fromEntries(changed.filter(([id]) => !STOCK_IDS.has(id) && !(manualFl !== undefined && id === "flNo")))
       if (Object.keys(dataPatch).length) await saveFabricFields(item, dataPatch)
       setEditing(false)
       setDraft({})
@@ -255,8 +256,27 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
     }
   }
 
+  const confirmEdit = async () => {
+    const changed = Object.entries(draft).filter(([id, value]) => value !== valueOf(item, id))
+    if (!changed.length) { cancelEdit(); return }
+    const nextStorageNo = draft.storageNo ?? item.storageNo
+    const duplicate = nextStorageNo.trim()
+      && nextStorageNo.trim() !== item.storageNo
+      && ledger.some((other) => other.key !== item.key && other.storageNo.trim() === nextStorageNo.trim())
+    if (duplicate) { setError(`R&D No. ${nextStorageNo.trim()} 는 다른 원단이 이미 쓰고 있습니다.`); return }
+
+    const flChange = changed.find(([id]) => id === "flNo")
+    const manualFl = !item.record && item.sample?.sourceSheet === WEB_INTAKE_SHEET && flChange
+      ? checkWarehouseFlEntry(flChange[1], item, records, ledger) : null
+    if (manualFl && needsFlConfirm(manualFl)) { setFlEntryCheck(manualFl); return }
+    await saveEdit(changed, manualFl?.fl)
+  }
+
   const cell = (id: string, label: string, type: "text" | "date" | "number" = "text", suffix = "") =>
     <FieldCell key={id} id={id} label={label} type={type} suffix={suffix} item={item} editing={editing} draft={draft} onChange={change} />
+  const flCell = item.record && editing
+    ? <CellShell label="FL#"><span className="block truncate font-mono text-sm font-medium">{item.flNo || "—"}</span><span className="block text-[10px] text-[var(--muted-foreground)]">DD MASTER에서 입력</span></CellShell>
+    : cell("flNo", "FL#")
 
   return (
     <div className="space-y-3">
@@ -281,7 +301,7 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
       <header className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <dl className={GRID + " min-w-0 flex-1 grid-cols-2 sm:grid-cols-4"}>
-            {cell("flNo", "FL#")}
+            {flCell}
             {cell("styleNo", "Style No.")}
             {cell("storageNo", "R&D No.")}
             <StaticCell label="상태"><Badge className={`${status.tone} border-transparent text-white`}>{status.label}</Badge></StaticCell>
@@ -295,6 +315,18 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
         {terminationReason ? <p className="mt-3 border-t border-[var(--border)] pt-2 text-xs text-[var(--muted-foreground)]">종료 사유 {terminationReason}</p> : null}
         {!item.record ? <p className="mt-3 border-t border-[var(--border)] pt-2 text-xs text-[var(--muted-foreground)]">샘플관리대장 행입니다. 여기서 고친 값은 이 화면에만 저장되고 대장 원본은 그대로 둡니다.</p> : null}
       </header>
+
+      <FlEntryCheckDialog
+        check={flEntryCheck}
+        saving={saving}
+        onCancel={() => setFlEntryCheck(null)}
+        onConfirm={() => {
+          if (!flEntryCheck) return
+          const changed = Object.entries(draft).filter(([id, value]) => value !== valueOf(item, id))
+          setFlEntryCheck(null)
+          void saveEdit(changed, flEntryCheck.fl)
+        }}
+      />
 
       <div className="grid gap-3 xl:grid-cols-2">
         <Section title="원단" accent="bg-emerald-500">

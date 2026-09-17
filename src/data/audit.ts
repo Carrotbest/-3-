@@ -27,7 +27,7 @@ export const AUDIT_RETENTION_DAYS = 90
  */
 const MAX_CHANGES_PER_DOC = 2000
 
-export type AuditScreen = "dd" | "ts" | "request" | "warehouse"
+export type AuditScreen = "dd" | "ts" | "request" | "warehouse" | "rdda"
 export type AuditKind = "edit" | "paste" | "fill" | "replace" | "clear" | "intake" | "upload" | "warehouse" | "revert"
 
 /** 셀 1개의 변경. 키를 짧게 쓴다. 문서 수천 개가 쌓이므로 이름 길이가 그대로 용량이다. */
@@ -58,6 +58,7 @@ const SCREEN_LABEL: Record<AuditScreen, string> = {
   ts: "TROUBLE SHOOTING",
   request: "FABRIC REQUEST",
   warehouse: "WAREHOUSE",
+  rdda: "RDDA",
 }
 
 const KIND_LABEL: Record<AuditKind, string> = {

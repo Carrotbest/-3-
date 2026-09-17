@@ -1,10 +1,10 @@
 import { create } from "zustand"
 
 import { saveCache, saveCacheLocal } from "@/data/cache"
-import { diffDevRecords, diffFabricEvents, diffRequestBoards, diffRequests, diffTsRecords, logAction, planRevert, type AuditAction, type AuditChange, type AuditKind } from "@/data/audit"
+import { diffByKey, diffDevRecords, diffFabricEvents, diffRequestBoards, diffRequests, diffTsRecords, logAction, planRevert, type AuditAction, type AuditChange, type AuditKind } from "@/data/audit"
 import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } from "../data/chemical"
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
-import { buildFabricLedger, fabricRecordIdentity, isFabricBalanceExhausted, type FabricLedgerItem } from "../data/fabric-ledger"
+import { buildFabricLedger, fabricRecordIdIndex, fabricRecordIdOf, fabricRecordIdentity, isFabricBalanceExhausted, type FabricLedgerItem } from "../data/fabric-ledger"
 import type { DisposalCompletionEntry } from "@/data/disposal-round"
 import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type DisposalRound, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type RequestArchive, type RequestBoard, type RequestStyle, type StudyRecord } from "../data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
@@ -26,6 +26,7 @@ import {
 } from "../data/sample"
 import { tsSeed, TS_SEED_VERSION } from "@/data/ts-seed"
 import { isTsWellFormed } from "@/data/ts-health"
+import type { RddaMonthlyReport, RddaReportV2, RddaWeeklySnapshot } from "@/data/rdda-report"
 
 export type Theme = "light" | "dark"
 export type AppFilters = Record<string, unknown>
@@ -62,7 +63,7 @@ export interface AppState {
   study: StudyRecord[]
   studyFiles: string[]
   events: CalendarEvent[]
-  rdda: RddaReport | null
+  rdda: RddaReport | RddaReportV2 | null
   orgMembers: OrgMember[]
   materials: MaterialItem[]
   materialsManual: MaterialItem[]
@@ -73,6 +74,8 @@ export interface AppState {
   requestBoards: RequestBoard[]
   requestArchive: RequestArchive[]
   disposalRounds: DisposalRound[]
+  rddaSnapshots: RddaWeeklySnapshot[]
+  rddaReports: RddaMonthlyReport[]
   trends: TrendItem[]
   chemical: ChemicalPortfolio | null
   chemicalManual: ChemicalItem[]
@@ -145,6 +148,8 @@ export function createInitialAppState(): AppState {
     requestBoards: [],
     requestArchive: [],
     disposalRounds: [],
+    rddaSnapshots: [],
+    rddaReports: [],
     trends,
     chemical,
     chemicalManual: [],
@@ -235,6 +240,18 @@ export function saveRequestArchive(list: RequestArchive[]): void {
 export function saveDisposalRounds(list: DisposalRound[]): void {
   setAppState({ disposalRounds: list })
   void saveCache("disposalRounds", list)
+}
+
+export function saveRddaSnapshots(list: RddaWeeklySnapshot[]): void {
+  setAppState({ rddaSnapshots: list })
+  void saveCache("rddaSnapshots", list)
+}
+
+export function saveRddaReports(list: RddaMonthlyReport[]): void {
+  const before = useAppStore.getState().rddaReports
+  setAppState({ rddaReports: list })
+  void saveCache("rddaReports", list)
+  void logAction({ kind: "edit", screen: "rdda", changes: diffByKey(before, list, (item) => item.monthId) })
 }
 
 export function addTeamEvent(event: CalendarEvent): void {
@@ -396,6 +413,24 @@ export async function deleteManualMaterial(id: string): Promise<void> {
 }
 
 const recordIdentity = (record: DevRecord): string => `${record._src.sheet}::${record._src.row}`
+
+type FabricState = Pick<AppState, "records" | "completed" | "fabricOverrides" | "fabricEvents">
+
+function recordIdForFabricKey(state: FabricState, key: string, index?: ReadonlyMap<string, string>): string | undefined {
+  const recordIds = index ?? fabricRecordIdIndex(buildFabricLedger(
+    state.records, state.completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true },
+  ))
+  return recordIds.get(key)
+}
+
+function previousFabricOverride(
+  overrides: readonly FabricLedgerOverride[],
+  key: string,
+  recordId?: string,
+): FabricLedgerOverride | undefined {
+  return overrides.find((entry) => entry.key === key)
+    ?? (recordId ? overrides.find((entry) => entry.recordId === recordId) : undefined)
+}
 
 function normalizedIntakePart(value: unknown): string {
   return String(value ?? "").normalize("NFKC").trim().replace(/\s+/g, " ").toUpperCase()
@@ -736,10 +771,12 @@ export async function updateManualIntake(id: string, columnId: string, raw: stri
 export async function confirmWarehouseBaseline(entries: ReadonlyArray<{ key: string; storageNo: string }>, actor = "관리자"): Promise<number> {
   if (entries.length === 0) return 0
   const state = useAppStore.getState()
+  const recordIds = fabricRecordIdIndex(buildFabricLedger(state.records, state.completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true }))
   const occurredAt = new Date().toISOString()
   const events: FabricLedgerEvent[] = entries.map((entry, index) => ({
     id: `confirm-baseline-${occurredAt}-${index}`,
     fabricKey: entry.key,
+    recordId: recordIdForFabricKey(state, entry.key, recordIds),
     action: "CONFIRM",
     fromStatus: "WAREHOUSE",
     toStatus: "WAREHOUSE",
@@ -766,16 +803,23 @@ export async function applyDisposalRoundCompletion(
 ): Promise<number> {
   if (entries.length === 0) return 0
   const state = useAppStore.getState()
+  const recordIds = fabricRecordIdIndex(buildFabricLedger(state.records, state.completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true }))
   const occurredAt = new Date().toISOString()
   const actor = options.actor.trim() || "관리자"
-  const byKey = new Map(state.fabricOverrides.map((entry) => [entry.key, entry]))
   const overrides: FabricLedgerOverride[] = []
   const events: FabricLedgerEvent[] = []
+  const replacedKeys = new Set<string>()
+  const replacedRecordIds = new Set<string>()
   entries.forEach((entry, index) => {
-    const previous = byKey.get(entry.key)
+    const recordId = recordIdForFabricKey(state, entry.key, recordIds)
+    const previous = previousFabricOverride(state.fabricOverrides, entry.key, recordId)
+    replacedKeys.add(entry.key)
+    if (previous) replacedKeys.add(previous.key)
+    if (recordId) replacedRecordIds.add(recordId)
     const storageNo = entry.storageNo.trim() || previous?.storageNo
     overrides.push({
       key: entry.key,
+      recordId: recordId ?? previous?.recordId,
       status: "DISPOSED",
       storageNo,
       yds: previous?.yds,
@@ -789,6 +833,7 @@ export async function applyDisposalRoundCompletion(
     events.push({
       id: `disposal-round-${occurredAt}-${index}`,
       fabricKey: entry.key,
+      recordId: recordId ?? previous?.recordId,
       action: "DISPOSE",
       fromStatus: entry.fromStatus,
       toStatus: "DISPOSED",
@@ -800,8 +845,8 @@ export async function applyDisposalRoundCompletion(
       reason: options.reason,
     })
   })
-  const touched = new Set(entries.map((entry) => entry.key))
-  const fabricOverrides = [...overrides, ...state.fabricOverrides.filter((entry) => !touched.has(entry.key))]
+  const fabricOverrides = [...overrides, ...state.fabricOverrides.filter((entry) =>
+    !replacedKeys.has(entry.key) && !(entry.recordId && replacedRecordIds.has(entry.recordId)))]
   const fabricEvents = [...events, ...state.fabricEvents]
   setAppState({ fabricOverrides, fabricEvents })
   await Promise.all([
@@ -873,6 +918,7 @@ export async function saveFabricFields(item: FabricLedgerItem, patch: Record<str
   const previous = state.fabricOverrides.find((entry) => entry.key === item.key)
   const override: FabricLedgerOverride = {
     key: item.key,
+    recordId: previous?.recordId,
     status: previous?.status ?? item.status,
     storageNo: previous?.storageNo ?? (item.storageNo || undefined),
     yds: previous?.yds ?? (item.yds ?? undefined),
@@ -901,15 +947,19 @@ export async function saveFabricRackNo(item: FabricLedgerItem, rackNo: string): 
  */
 export async function saveFabricRackNos(entries: ReadonlyArray<{ item: FabricLedgerItem; rackNo: string }>): Promise<number> {
   const state = useAppStore.getState()
-  const byKey = new Map(state.fabricOverrides.map((entry) => [entry.key, entry]))
   const updatedAt = new Date().toISOString()
+  const replacements = new Map<string, FabricLedgerOverride>()
+  const replacedKeys = new Set<string>()
+  const replacedRecordIds = new Set<string>()
   let changed = 0
   for (const { item, rackNo } of entries) {
-    const previous = byKey.get(item.key)
+    const recordId = fabricRecordIdOf(item)
+    const previous = previousFabricOverride(state.fabricOverrides, item.key, recordId)
     const nextRack = rackNo.trim() || undefined
     if (previous ? previous.rackNo === nextRack : !nextRack) continue
-    byKey.set(item.key, {
+    const next: FabricLedgerOverride = {
       key: item.key,
+      recordId: recordId ?? previous?.recordId,
       status: previous?.status ?? item.status,
       storageNo: previous?.storageNo ?? (item.storageNo || undefined),
       yds: previous?.yds ?? (item.yds ?? undefined),
@@ -918,15 +968,18 @@ export async function saveFabricRackNos(entries: ReadonlyArray<{ item: FabricLed
       fields: previous?.fields,
       updatedAt,
       updatedBy: "관리자",
-    })
+    }
+    replacements.set(recordId ? `record:${recordId}` : `key:${item.key}`, next)
+    replacedKeys.add(item.key)
+    if (previous) replacedKeys.add(previous.key)
+    if (next.recordId) replacedRecordIds.add(next.recordId)
     changed += 1
   }
   if (!changed) return 0
-  const touched = new Set(entries.map((entry) => entry.item.key))
   const fabricOverrides = [
-    ...state.fabricOverrides.filter((entry) => touched.has(entry.key)).map((entry) => byKey.get(entry.key) ?? entry),
-    ...[...byKey.values()].filter((entry) => touched.has(entry.key) && !state.fabricOverrides.some((existing) => existing.key === entry.key)),
-    ...state.fabricOverrides.filter((entry) => !touched.has(entry.key)),
+    ...replacements.values(),
+    ...state.fabricOverrides.filter((entry) =>
+      !replacedKeys.has(entry.key) && !(entry.recordId && replacedRecordIds.has(entry.recordId))),
   ]
   setAppState({ fabricOverrides })
   await saveCache("fabricOverrides", fabricOverrides)
@@ -937,45 +990,64 @@ export async function applyFabricActions(inputs: ReadonlyArray<ApplyFabricAction
   if (!inputs.length) return
   const state = useAppStore.getState()
   const beforeEvents = state.fabricEvents
+  const recordIds = fabricRecordIdIndex(buildFabricLedger(state.records, state.completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true }))
   const occurredAt = new Date().toISOString()
-  const overrideMap = new Map(state.fabricOverrides.map((item) => [item.key, item]))
+  const overrideMap = new Map<string, FabricLedgerOverride>()
+  state.fabricOverrides.forEach((item) => {
+    overrideMap.set(`key:${item.key}`, item)
+    if (item.recordId && !overrideMap.has(`record:${item.recordId}`)) overrideMap.set(`record:${item.recordId}`, item)
+  })
+  const replacements = new Map<string, FabricLedgerOverride>()
+  const replacedKeys = new Set<string>()
+  const replacedRecordIds = new Set<string>()
   const outboundTotals = new Map<string, number>()
   state.fabricEvents.forEach((event) => {
     if (event.action !== "OUTBOUND" || typeof event.qty !== "number" || !Number.isFinite(event.qty) || event.qty <= 0) return
-    outboundTotals.set(event.fabricKey, (outboundTotals.get(event.fabricKey) ?? 0) + event.qty)
+    const identity = event.recordId ?? recordIdForFabricKey(state, event.fabricKey, recordIds) ?? event.fabricKey
+    outboundTotals.set(identity, (outboundTotals.get(identity) ?? 0) + event.qty)
   })
   const newEvents: FabricLedgerEvent[] = []
-  const touched: string[] = []
   let records = state.records
 
   for (const input of inputs) {
     const actor = input.actor?.trim() || "관리자"
-    const previous = overrideMap.get(input.fabricKey)
+    const recordId = recordIdForFabricKey(state, input.fabricKey, recordIds) ?? input.recordIdentity
+    const previous = overrideMap.get(`key:${input.fabricKey}`)
+      ?? (recordId ? overrideMap.get(`record:${recordId}`) : undefined)
     const yds = input.yds === undefined ? previous?.yds : Number.isFinite(input.yds) && input.yds >= 0 ? input.yds : undefined
     if (input.yds !== undefined && yds === undefined) throw new Error("보유 재고는 0 이상의 숫자여야 합니다.")
     const qty = input.qty === undefined ? undefined : Number.isFinite(input.qty) && input.qty > 0 ? input.qty : undefined
     if (input.action === "OUTBOUND" && qty === undefined) throw new Error("출고 수량은 0보다 커야 합니다.")
     const recipient = input.to?.trim()
     if (input.action === "OUTBOUND" && !recipient) throw new Error("출고 수령자를 입력해야 합니다.")
-    const outboundTotal = (outboundTotals.get(input.fabricKey) ?? 0) + (input.action === "OUTBOUND" ? qty ?? 0 : 0)
+    const ledgerIdentity = recordId ?? input.fabricKey
+    const outboundTotal = (outboundTotals.get(ledgerIdentity) ?? 0) + (input.action === "OUTBOUND" ? qty ?? 0 : 0)
     const autoExhaust = input.autoExhaust !== false
     const shouldAutoExhaust = autoExhaust && (input.action === "OUTBOUND" || (input.yds !== undefined && input.action !== "RESTORE" && input.action !== "DISPOSE"))
     const resolvedToStatus = shouldAutoExhaust && isFabricBalanceExhausted(yds, outboundTotal) ? "EXHAUSTED" : input.action === "OUTBOUND" ? previous?.status ?? input.fromStatus : input.toStatus
     const selectedDate = input.date?.trim()
     const selectedDateValue = selectedDate && /^\d{4}-\d{2}-\d{2}$/.test(selectedDate) ? new Date(`${selectedDate}T12:00:00`) : null
     const eventOccurredAt = selectedDateValue && !Number.isNaN(selectedDateValue.getTime()) ? selectedDateValue.toISOString() : occurredAt
-    overrideMap.set(input.fabricKey, {
+    const override: FabricLedgerOverride = {
       key: input.fabricKey, status: resolvedToStatus,
+      recordId: recordId ?? previous?.recordId,
       storageNo: resolvedToStatus === "READY" ? undefined : input.storageNo?.trim() || previous?.storageNo,
       yds: resolvedToStatus === "READY" || input.clearYds ? undefined : yds,
       rackNo: resolvedToStatus === "WAREHOUSE" ? previous?.rackNo : undefined,
       note: input.note?.trim() || previous?.note, fields: previous?.fields, updatedAt: occurredAt, updatedBy: actor,
-    })
-    if (!touched.includes(input.fabricKey)) touched.push(input.fabricKey)
-    if (input.action === "OUTBOUND") outboundTotals.set(input.fabricKey, outboundTotal)
+    }
+    const replacementKey = override.recordId ? `record:${override.recordId}` : `key:${input.fabricKey}`
+    replacements.set(replacementKey, override)
+    overrideMap.set(`key:${input.fabricKey}`, override)
+    if (override.recordId) overrideMap.set(`record:${override.recordId}`, override)
+    replacedKeys.add(input.fabricKey)
+    if (previous) replacedKeys.add(previous.key)
+    if (override.recordId) replacedRecordIds.add(override.recordId)
+    if (input.action === "OUTBOUND") outboundTotals.set(ledgerIdentity, outboundTotal)
     newEvents.push({
       id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       fabricKey: input.fabricKey, action: input.action, fromStatus: input.fromStatus, toStatus: resolvedToStatus,
+      recordId: recordId ?? previous?.recordId,
       occurredAt: eventOccurredAt, recordedAt: occurredAt, actor, note: input.note?.trim() || "",
       storageNo: input.storageNo?.trim() || previous?.storageNo, qty, to: recipient,
       division: input.division?.trim() || undefined, reason: input.reason?.trim() || undefined,
@@ -986,8 +1058,8 @@ export async function applyFabricActions(inputs: ReadonlyArray<ApplyFabricAction
         : record)
     }
   }
-  const touchedSet = new Set(touched)
-  const fabricOverrides = [...touched.map((key) => overrideMap.get(key)!), ...state.fabricOverrides.filter((item) => !touchedSet.has(item.key))]
+  const fabricOverrides = [...replacements.values(), ...state.fabricOverrides.filter((item) =>
+    !replacedKeys.has(item.key) && !(item.recordId && replacedRecordIds.has(item.recordId)))]
   const fabricEvents = [...newEvents].reverse().concat(state.fabricEvents)
   setAppState({ fabricOverrides, fabricEvents, records })
   await Promise.all([
@@ -1013,13 +1085,19 @@ export async function removeFabricRows(
 ): Promise<void> {
   if (!entries.length) return
   const state = useAppStore.getState()
+  const recordIds = fabricRecordIdIndex(buildFabricLedger(state.records, state.completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true }))
   const occurredAt = new Date().toISOString()
   const keys = new Set(entries.map((entry) => entry.key))
+  const removedRecordIds = new Set<string>()
 
   const overrides: FabricLedgerOverride[] = entries.map((entry) => {
-    const previous = state.fabricOverrides.find((item) => item.key === entry.key)
+    const recordId = recordIdForFabricKey(state, entry.key, recordIds)
+    if (recordId) removedRecordIds.add(recordId)
+    const previous = previousFabricOverride(state.fabricOverrides, entry.key, recordId)
+    if (previous) keys.add(previous.key)
     return {
       key: entry.key,
+      recordId: recordId ?? previous?.recordId,
       status: "REMOVED",
       storageNo: previous?.storageNo,
       yds: previous?.yds,
@@ -1032,6 +1110,7 @@ export async function removeFabricRows(
   const events: FabricLedgerEvent[] = entries.map((entry, index) => ({
     id: `remove-${occurredAt}-${index}`,
     fabricKey: entry.key,
+    recordId: recordIdForFabricKey(state, entry.key, recordIds),
     action: "REMOVE",
     fromStatus: entry.fromStatus,
     toStatus: "REMOVED",
@@ -1041,8 +1120,42 @@ export async function removeFabricRows(
     note: "입고 대기 목록에서 삭제",
   }))
 
-  const fabricOverrides = [...overrides, ...state.fabricOverrides.filter((item) => !keys.has(item.key))]
+  const fabricOverrides = [...overrides, ...state.fabricOverrides.filter((item) =>
+    !keys.has(item.key) && !(item.recordId && removedRecordIds.has(item.recordId)))]
   const fabricEvents = [...events, ...state.fabricEvents]
   setAppState({ fabricOverrides, fabricEvents })
   await Promise.all([saveCache("fabricOverrides", fabricOverrides), saveCache("fabricEvents", fabricEvents)])
+}
+
+/** 기존 창고 기록 중 현재 원장에서 확실히 찾을 수 있는 DD 행에만 고유번호를 보충한다. */
+export async function backfillFabricRecordIds(): Promise<number> {
+  const state = useAppStore.getState()
+  const ledger = buildFabricLedger(state.records, state.completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true })
+  const recordIds = fabricRecordIdIndex(ledger)
+  let filled = 0
+  let overridesChanged = false
+  let eventsChanged = false
+  const fabricOverrides = state.fabricOverrides.map((entry) => {
+    if (entry.recordId) return entry
+    const recordId = recordIds.get(entry.key)
+    if (!recordId) return entry
+    filled += 1
+    overridesChanged = true
+    return { ...entry, recordId }
+  })
+  const fabricEvents = state.fabricEvents.map((event) => {
+    if (event.recordId) return event
+    const recordId = recordIds.get(event.fabricKey)
+    if (!recordId) return event
+    filled += 1
+    eventsChanged = true
+    return { ...event, recordId }
+  })
+  if (!filled) return 0
+  setAppState({ fabricOverrides, fabricEvents })
+  await Promise.all([
+    overridesChanged ? saveCache("fabricOverrides", fabricOverrides) : Promise.resolve(),
+    eventsChanged ? saveCache("fabricEvents", fabricEvents) : Promise.resolve(),
+  ])
+  return filled
 }

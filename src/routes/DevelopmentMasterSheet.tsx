@@ -1128,6 +1128,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [clipNotice, setClipNotice] = useState<string | null>(null)
   const clipRef = useRef<{ text: string; cut: boolean } | null>(null)              // 브라우저 클립보드 차단 시 대체 버퍼
   const cutRangeRef = useRef<{ top: number; bottom: number; left: number; right: number } | null>(null)
+  const [copyMark, setCopyMark] = useState<CellRect | null>(null)
   const selectingRef = useRef(false)
   const rowSelectingRef = useRef(false)
   const fillDragRef = useRef<{ source: CellRect } | null>(null)
@@ -1300,16 +1301,19 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const editEnabled = owner !== ALL
 
   /**
-   * 화면 표시 순서. 방금 접수한 행만 확인하기 쉽도록 잠시 맨 위로 끌어올린다.
-   * recentIntakeRows 는 저장하지 않는 화면 상태라, 새로고침하면 기본 순서(맨 아래)로 돌아간다.
+   * 화면 표시 순서. 신규 접수 행은 기본 순서대로 맨 아래에 둔다(엑셀처럼 아래로 쌓인다).
+   * 예전에는 방금 접수한 행을 새로고침 전까지 맨 위로 끌어올렸는데, 목록 순서가 흔들려 없앴다.
+   * recentIntakeRows 는 "신규" 표시와 접수 직후 스크롤 위치에만 쓴다.
    */
-  const filtered = useMemo(() => {
-    if (!recentIntakeRows.size) return ordered
-    const recent: DevRecord[] = []
-    const rest: DevRecord[] = []
-    for (const record of ordered) (recentIntakeRows.has(recordIdentity(record)) ? recent : rest).push(record)
-    return [...recent, ...rest]
-  }, [ordered, recentIntakeRows])
+  const filtered = ordered
+  const pendingIntakeScrollRef = useRef<string | null>(null)
+  useEffect(() => {
+    const target = pendingIntakeScrollRef.current
+    if (!target || !filtered.some((record) => recordIdentity(record) === target)) return
+    pendingIntakeScrollRef.current = null
+    const firstCol = displayedColumns[0]?.id
+    if (firstCol) scrollCellIntoView({ row: target, col: firstCol })
+  })
 
   const styleToneByKey = useMemo(() => new Map(styleTimeline(records, new Date()).map((row) => [row.styleNo, row.state])), [records])
   const styleToneOf = useCallback((key: string) => styleToneByKey.get(key) ?? null, [styleToneByKey])
@@ -1676,10 +1680,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const inFillPreview = (row: number | undefined, colId: string): boolean => {
-    if (!fillPreview || row === undefined) return false
+    if (row === undefined) return false
     const col = colIndexOf.get(colId)
-    return col !== undefined && row >= fillPreview.top && row <= fillPreview.bottom && col >= fillPreview.left && col <= fillPreview.right
+    if (col === undefined) return false
+    const inCopyMark = copyMark !== null && row >= copyMark.top && row <= copyMark.bottom && col >= copyMark.left && col <= copyMark.right
+    const inActiveFill = fillPreview !== null && row >= fillPreview.top && row <= fillPreview.bottom && col >= fillPreview.left && col <= fillPreview.right
       && (!rect || row < rect.top || row > rect.bottom || col < rect.left || col > rect.right)
+    return inCopyMark || inActiveFill
   }
 
   /** 헤더 강조용 — 선택 사각형의 열 범위에 드는지. */
@@ -1807,6 +1814,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const colIndex = colIndexOf.get(cellRef.col)
     const column = colIndex === undefined ? undefined : displayedColumns[colIndex]
     if (rowIndex === undefined || !filtered[rowIndex] || !column || isLockedCell(filtered[rowIndex], column)) return
+    setCopyMark(null)
     setEditSeed(initial)
     setEditCell(cellRef)
   }
@@ -1887,6 +1895,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       let cursor = 0
       const reorderedIds = globalIds.map((identity) => visibleSet.has(identity) ? movedVisible[cursor++] : identity)
       const order = new Map(reorderedIds.map((identity, index) => [identity, index]))
+      setCopyMark(null)
       await commitRecords((records) => records.map((record) => {
         const nextOrder = order.get(recordIdentity(record))
         return nextOrder === undefined || record.sortOrder === nextOrder ? record : { ...record, sortOrder: nextOrder }
@@ -2072,6 +2081,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const merged = [...sorted.slice(0, cut), ...created, ...sorted.slice(cut)]
 
     pushUndoSnapshot(before)
+    setCopyMark(null)
     await writeDevelopmentRecords(merged.map((record, index) => ({ ...record, sortOrder: index })))
     setRange(null)
     notify(`${created.length}개 행을 아래에 삽입했습니다.`)
@@ -2171,6 +2181,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const at = anchorIndex === -1 ? sorted.length : anchorIndex + (position === "below" ? 1 : 0)
     const merged = [...sorted.slice(0, at), ...created, ...sorted.slice(at)]
     pushUndoSnapshot(before)
+    setCopyMark(null)
     await writeDevelopmentRecords(merged.map((record, index) => ({ ...record, sortOrder: index })))
     const first = displayedColumns[0], last = displayedColumns[displayedColumns.length - 1]
     if (first && last) {
@@ -2185,6 +2196,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const blankOwner = owner === ALL ? "" : owner
     const created = Array.from({ length: count }, () => createEmptyGridRecord(blankOwner))
+    setCopyMark(null)
     await commitRecords((records) => {
       const rank = rankOf(records)
       const sorted = [...records].sort((a, b) => (rank.get(recordIdentity(a)) ?? 0) - (rank.get(recordIdentity(b)) ?? 0))
@@ -2215,6 +2227,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     clipRef.current = { text, cut }
     cutRangeRef.current = cut ? { ...rect } : null
     try { await navigator.clipboard.writeText(text) } catch { /* 클립보드 권한이 없어도 앱 내부 붙여넣기는 동작한다. */ }
+    setCopyMark({ ...rect })
     const count = allRects.reduce((sum, area) => sum + (area.bottom - area.top + 1) * (area.right - area.left + 1), 0)
     notify(cut ? `${count}개 셀 잘라내기` : `${count}개 셀 복사`)
   }
@@ -2298,16 +2311,26 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       }
     }
 
+    const gridHeight = grid.length
+    const gridWidth = Math.max(...grid.map((row) => row.length))
+    const selectionHeight = rect.bottom - rect.top + 1
+    const selectionWidth = rect.right - rect.left + 1
+    const repeat = !cut && selectionHeight >= gridHeight && selectionWidth >= gridWidth
+      && selectionHeight % gridHeight === 0 && selectionWidth % gridWidth === 0
+    const targetHeight = repeat ? selectionHeight : gridHeight
+    const targetWidth = repeat ? selectionWidth : gridWidth
     let skipped = 0
-    for (let r = 0; r < grid.length; r += 1) {
+    let filled = 0
+    for (let r = 0; r < targetHeight; r += 1) {
       const record = filtered[rect.top + r]
       if (!record) break
       let draft = edits.get(recordIdentity(record)) ?? record
-      for (let c = 0; c < grid[r].length; c += 1) {
+      for (let c = 0; c < targetWidth; c += 1) {
         const column = displayedColumns[rect.left + c]
         if (!column) break
         if (isLockedCell(record, column)) { skipped += 1; continue }
-        draft = updateRecordCell(draft, column, grid[r][c])
+        draft = updateRecordCell(draft, column, grid[r % gridHeight][c % gridWidth] ?? "")
+        filled += 1
       }
       put(record, draft)
     }
@@ -2316,7 +2339,10 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     await commitRecords((records) => records.map((record) => edits.get(recordIdentity(record)) ?? record))
     clipRef.current = clipRef.current ? { ...clipRef.current, cut: false } : null
     cutRangeRef.current = null
-    notify(skipped ? `붙여넣기 완료 · 수정 불가 ${skipped}칸 제외` : "붙여넣기 완료")
+    if (cut) setCopyMark(null)
+    notify(repeat
+      ? skipped ? `${filled}개 셀에 붙여넣었습니다. (수정 불가 ${skipped}개 제외)` : `${filled}개 셀에 붙여넣었습니다.`
+      : skipped ? `붙여넣기 완료 · 수정 불가 ${skipped}칸 제외` : "붙여넣기 완료")
   }
 
   /** 우클릭: 선택 밖 셀이면 그 셀을 먼저 선택하고 메뉴를 연다(엑셀과 동일). */
@@ -2366,7 +2392,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (mod && key === "z" && event.shiftKey) { event.preventDefault(); void redoLast(); return }
     if (mod && key === "z") { event.preventDefault(); void undoLast(); return }
     if (mod && key === "y") { event.preventDefault(); void redoLast(); return }
-    if (event.key === "Escape") { setRange(null); setMenu(null); return }
+    if (event.key === "Escape") { setCopyMark(null); setRange(null); setMenu(null); return }
     if (event.key === "Delete" || event.key === "Backspace") { if (rect) { event.preventDefault(); void clearRange() }; return }
     if (event.shiftKey && event.code === "Space") { if (range) { event.preventDefault(); selectWholeRow(range.focus.row) }; return }
     if (event.key.startsWith("Arrow")) {
@@ -2376,7 +2402,23 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       return
     }
     if (event.key === "Tab") { event.preventDefault(); moveSelection(event.shiftKey ? "left" : "right", false, true); return }
-    if (event.key === "Enter") { event.preventDefault(); moveSelection(event.shiftKey ? "up" : "down"); return }
+    if (event.key === "Enter") {
+      if (copyMark && editEnabled && rect && !event.shiftKey) {
+        event.preventDefault()
+        void (async () => {
+          try { await pasteRange() }
+          finally {
+            setCopyMark(null)
+            clipRef.current = null
+            cutRangeRef.current = null
+          }
+        })()
+        return
+      }
+      event.preventDefault()
+      moveSelection(event.shiftKey ? "up" : "down")
+      return
+    }
     if (event.key === "F2") { if (range) { event.preventDefault(); beginCellEdit(range.focus) }; return }
     if (event.key.length === 1 && !mod && !event.altKey && range) {
       event.preventDefault()
@@ -2489,11 +2531,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         setIntakeError(`이미 DD MASTER에 등록된 동일 작지·옵션입니다. 중복 ${result.skipped}건은 저장하지 않았습니다.`)
         return
       }
-      // 방금 접수한 행만 잠시 맨 위로 올려 확인하게 한다. 새로고침하면 기본 순서(맨 아래)로 내려간다.
+      // 신규 행은 목록 맨 아래에 붙는다. "신규" 표시를 달고 첫 행으로 스크롤해 확인하게 한다.
       setRecentIntakeRows((current) => new Set([...current, ...result.addedIdentities]))
+      pendingIntakeScrollRef.current = result.addedIdentities[0] ?? null
       setIntakeNotice(result.skipped
         ? `${result.added}건 신규 · 기존 중복 ${result.skipped}건 제외`
-        : `${result.added}건 등록 · 새로고침 전까지 맨 위에 표시합니다.`)
+        : `${result.added}건 등록 · 목록 맨 아래에 추가했습니다.`)
       closeIntake()
     } finally {
       setSavingIntake(false)
@@ -2619,6 +2662,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!confirmDelete?.length) return
     const identities = new Set(confirmDelete.map(recordIdentity))
+    setCopyMark(null)
     await commitRecords((records) => records.filter((record) => !identities.has(recordIdentity(record))))
     setConfirmDelete(null)
     setRange(null)

@@ -376,6 +376,8 @@ export type FabricLedgerAction = "COMPLETE" | "RECEIVE" | "UNRECEIVE" | "CONFIRM
 /** 원본 엑셀은 그대로 두고 웹에서 변경한 운영 상태만 덧씌운다. */
 export interface FabricLedgerOverride {
   key: string
+  /** DD 원단의 행 고유번호. 화면에는 표시하지 않고 원장 연결에만 쓴다. */
+  recordId?: string
   status: FabricLedgerStatus
   storageNo?: string
   yds?: number
@@ -395,6 +397,8 @@ export interface FabricLedgerOverride {
 export interface FabricLedgerEvent {
   id: string
   fabricKey: string
+  /** DD 원단의 행 고유번호. 화면에는 표시하지 않고 원장 연결에만 쓴다. */
+  recordId?: string
   action: FabricLedgerAction
   fromStatus: FabricLedgerStatus
   toStatus: FabricLedgerStatus

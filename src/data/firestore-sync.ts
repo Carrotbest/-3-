@@ -29,6 +29,8 @@ const MERGE_IDS: Record<string, (item: never) => string> = {
   requestBoards: (item: { boardId: string }) => item.boardId,
   requestArchive: (item: { archiveId: string }) => item.archiveId,
   disposalRounds: (item: { roundId: string }) => item.roundId,
+  rddaSnapshots: (item: { weekId: string }) => item.weekId,
+  rddaReports: (item: { monthId: string }) => item.monthId,
 }
 
 /** 이 클라이언트가 마지막으로 본 원격 값. 병합 기준선이다. */

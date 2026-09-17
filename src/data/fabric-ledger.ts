@@ -231,6 +231,28 @@ export function fabricRecordIdentity(record: DevRecord | null): string | undefin
   return record ? recordIdentity(record) : undefined
 }
 
+export function fabricRecordIdOf(item: FabricLedgerItem): string | undefined {
+  return item.record ? recordIdentity(item.record) : undefined
+}
+
+/** 현재 원장의 key와 호환 색인에서 DD 행 고유번호를 찾는다. */
+export function fabricRecordIdIndex(items: readonly FabricLedgerItem[]): Map<string, string> {
+  const claimed = new Map<string, string | undefined>()
+  items.forEach((item) => claimed.set(item.key, fabricRecordIdOf(item)))
+  items.forEach((item) => {
+    const recordId = fabricRecordIdOf(item)
+    const aliases = [
+      ...(item.sample ? fabricIdentities(item.sample.storageNo ?? "", item.sample.flNo, item.sample.styleNo) : []),
+      ...(item.record ? [...fabricIdentities("", item.record.flNo, item.record.styleNo), ddRowBaseKey(item.record)] : []),
+      ...(item.sample && item.sourceOrder !== null ? [`source:${item.sample.sourceSheet ?? "sample"}::${item.sourceOrder}`] : []),
+    ]
+    aliases.forEach((key) => {
+      if (!claimed.has(key)) claimed.set(key, recordId)
+    })
+  })
+  return new Map([...claimed].filter((entry): entry is [string, string] => entry[1] !== undefined))
+}
+
 /**
  * 입고 대기 판정. 개발처에 따라 보는 칸이 다르다.
  *
@@ -413,6 +435,7 @@ export function buildFabricLedger(
 ): FabricLedgerItem[] {
   const items = new Map<string, FabricLedgerItem>()
   const identityIndex = new Map<string, string>()
+  const recordKeyIndex = new Map<string, string>()
   const closedHistoryKeyCounts = new Map<string, number>()
   const ddRowKeyCounts = new Map<string, number>()
 
@@ -484,6 +507,7 @@ export function buildFabricLedger(
     const existing = items.get(matchedKey)
     const item = existing ? (existing.record ? existing : mergeRecord(existing, record)) : emptyFromRecord(record, matchedKey)
     items.set(matchedKey, item)
+    recordKeyIndex.set(recordIdentity(record), matchedKey)
     // 색인은 살아 있는 항목 key 보다 뒤에 본다(resolveStoredKey). 그래서 dd: key 를 남겨도
     // 실제로 그 key 를 쓰는 다른 행이 있으면 그쪽이 이긴다.
     registerIdentities(item, [...fabricIdentities("", record.flNo, record.styleNo), ddBaseKey])
@@ -491,9 +515,11 @@ export function buildFabricLedger(
 
   // 현재 key가 아니면 예전 fl:/style: key를 색인으로 해석해 기존 웹 기록을 이어 붙인다.
   const resolveStoredKey = (key: string): string | undefined => items.has(key) ? key : identityIndex.get(key)
+  const resolveEntryKey = (key: string, recordId?: string): string | undefined =>
+    (recordId ? recordKeyIndex.get(recordId) : undefined) ?? resolveStoredKey(key)
   const overrideMap = new Map<string, FabricLedgerOverride>()
   overrides.forEach((override) => {
-    const itemKey = resolveStoredKey(override.key)
+    const itemKey = resolveEntryKey(override.key, override.recordId)
     if (!itemKey) return
     // 한 항목에 여러 key 의 기록이 붙을 수 있다. FL 을 나중에 적어 key 가 바뀐 뒤 손으로 다시 입고하면
     // 예전 dd: 기록과 새 fl: 기록이 둘 다 살아 있다. 배열 순서는 팀 공유 병합에 따라 흔들리므로
@@ -510,7 +536,7 @@ export function buildFabricLedger(
   // 출고 날짜는 사용자가 과거로 고를 수 있으므로 표시용 occurredAt이 아니라 기록 시각을 기준으로 한다.
   const eventOrder = (event: FabricLedgerEvent): string => event.recordedAt || event.occurredAt
   ;[...fabricEvents].sort((left, right) => eventOrder(left).localeCompare(eventOrder(right))).forEach((event) => {
-    const itemKey = resolveStoredKey(event.fabricKey)
+    const itemKey = resolveEntryKey(event.fabricKey, event.recordId)
     if (!itemKey) return
     // 입고 대기로 내려가면 그 원단의 재고 기간이 끝난다. 다음 입고부터 다시 센다.
     // 되돌리기든 이력에서의 복구든 도착 상태가 기준이다.

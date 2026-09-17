@@ -5,6 +5,7 @@ import { InboundRequestMailDialog } from "@/components/warehouse/InboundRequestM
 import { RackMap } from "@/components/warehouse/RackMap"
 import { DisposalRoundPanel } from "@/components/warehouse/DisposalRoundPanel"
 import { OutboundRequestMailDialog } from "@/components/warehouse/OutboundRequestMailDialog"
+import { FlEntryCheckDialog } from "@/components/warehouse/FlEntryCheckDialog"
 import { normalizeRackNo, RACK_FORMAT_HINT, RACK_NONE_LABEL, RACK_POSITIONS } from "@/data/warehouse-rack"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
@@ -37,8 +38,9 @@ import { FabricDetailBody } from "@/routes/FabricDetail"
 import { fmtDateFull, fmtDateMd } from "@/data/format"
 import type { FabricLedgerStatus } from "@/data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
+import { checkWarehouseFlEntry, needsFlConfirm, type WarehouseFlCheck } from "@/data/warehouse-fl-check"
 import { useInView } from "@/lib/useInView"
-import { addManualIntake, updateManualIntake, applyDisposalRoundCompletion, applyFabricAction, applyFabricActions, confirmWarehouseBaseline, removeFabricRows, saveDisposalRounds, saveFabricRackNo, saveFabricRackNos, useAppStore, type ApplyFabricActionInput } from "@/store/useAppStore"
+import { addManualIntake, updateManualIntake, applyDisposalRoundCompletion, applyFabricAction, applyFabricActions, backfillFabricRecordIds, confirmWarehouseBaseline, removeFabricRows, saveDisposalRounds, saveFabricRackNo, saveFabricRackNos, useAppStore, type ApplyFabricActionInput } from "@/store/useAppStore"
 
 type WarehouseTab = "READY" | "WAREHOUSE" | "HISTORY"
 type ActionKind = "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "UNCONFIRM" | "DISPOSE" | "STOCK" | "OUTBOUND" | "EXHAUST" | "RESTORE" | "REMOVE"
@@ -381,6 +383,7 @@ export function Warehouse() {
   const [disposalView, setDisposalView] = useState(false)
   const authUser = useAuthStore((state) => state.user)
   const isOwner = useAuthStore((state) => state.isOwner)
+  const canWrite = useAuthStore((state) => state.isOwner || (state.status === "signed-in" && state.approval === "approved"))
   const defaultRequester = useAuthStore((state) => state.user?.displayName || state.user?.email?.split("@")[0] || "")
   const records = useAppStore((state) => state.records)
   const samples = useAppStore((state) => state.completed)
@@ -388,6 +391,12 @@ export function Warehouse() {
   const fabricEvents = useAppStore((state) => state.fabricEvents)
   const disposalRounds = useAppStore((state) => state.disposalRounds)
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents), [fabricEvents, overrides, records, samples])
+  const recordIdBackfillRef = useRef(false)
+  useEffect(() => {
+    if (!canWrite || recordIdBackfillRef.current) return
+    recordIdBackfillRef.current = true
+    void backfillFabricRecordIds().catch(() => undefined)
+  }, [canWrite])
   const [exportOpen, setExportOpen] = useState(false)
   const [exportRange, setExportRange] = useState(loadExportRange)
   const [exportBusy, setExportBusy] = useState(false)
@@ -485,6 +494,7 @@ export function Warehouse() {
   const [unconfirmedOnly, setUnconfirmedOnly] = useState(false)
   // 웹 등록 행만 그리드에서 직접 고친다. DD·대장에서 온 행은 여기서 수정하지 않는다.
   const [editCell, setEditCell] = useState<{ row: string; col: string } | null>(null)
+  const [flEntryCheck, setFlEntryCheck] = useState<{ item: FabricLedgerItem; manualId: string; check: WarehouseFlCheck } | null>(null)
   // 엑셀식 열 필터와 정렬. 기본은 대장 행 순서이고 정렬을 걸었을 때만 바뀐다.
   const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({})
   const [sortRule, setSortRule] = useState<{ col: WarehouseColumnId; dir: "asc" | "desc" } | null>(null)
@@ -1245,6 +1255,13 @@ export function Warehouse() {
                               const normalized = normalizeRackNo(event.target.value)
                               if (normalized === null) setSelectionNotice(RACK_FORMAT_HINT)
                               else void saveFabricRackNo(item, normalized)
+                            } else if (column.id === "flNo") {
+                              const value = event.target.value
+                              if (value.trim() !== item.flNo.trim()) {
+                                const check = checkWarehouseFlEntry(value, item, records, ledger)
+                                if (needsFlConfirm(check)) setFlEntryCheck({ item, manualId: manualId as string, check })
+                                else void updateManualIntake(manualId as string, "flNo", check.fl)
+                              }
                             } else void updateManualIntake(manualId as string, column.id, event.target.value)
                             setEditCell(null)
                           }}
@@ -1388,6 +1405,15 @@ export function Warehouse() {
 
     <OutboundRequestMailDialog open={outboundMailOpen} onOpenChange={setOutboundMailOpen} items={selectedRows} defaultRequester={defaultRequester} />
     <InboundRequestMailDialog open={inboundMailKeys.length > 0} onOpenChange={(open) => { if (!open) setInboundMailKeys([]) }} items={inboundMailItems} defaultRequester={defaultRequester} />
+    <FlEntryCheckDialog
+      check={flEntryCheck?.check ?? null}
+      onCancel={() => setFlEntryCheck(null)}
+      onConfirm={() => {
+        if (!flEntryCheck) return
+        void updateManualIntake(flEntryCheck.manualId, "flNo", flEntryCheck.check.fl)
+        setFlEntryCheck(null)
+      }}
+    />
 
     {/* 폐기 라운드는 창고보관 표를 덮지 않고 팝업으로 연다(R152). */}
     <Dialog open={disposalView} onOpenChange={setDisposalView}>

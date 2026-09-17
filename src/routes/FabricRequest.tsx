@@ -17,13 +17,14 @@ import { currentUserCanWrite, useAuthStore } from "@/data/auth"
 import { buildFabricLedger } from "@/data/fabric-ledger"
 import { ddRecordsByLineId, requestDdStatus, type RequestDdStatus } from "@/data/request-link"
 import { requestProcessStage, type ProcessStage } from "@/data/request-process-stage"
-import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindColor, buildBoardArchive, canDeleteBoard, canManageBoard, closeBoard, migrateChartsToBoards, nextBoardSeq, reopenBoard, resultOf } from "@/data/request-board"
+import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindColor, buildBoardArchive, canDeleteBoard, canManageBoard, closeBoard, migrateChartsToBoards, nextBoardSeq, removeBoardWithStyles, reopenBoard, resultOf } from "@/data/request-board"
 import type { AuditKind } from "@/data/audit"
 
 import { ProcessStageChip } from "@/components/request/ProcessStageChip"
 import { ProcessStageDialog } from "@/components/request/ProcessStageDialog"
 import { RequestBoardHeader } from "@/components/request/RequestBoardHeader"
 import { RequestBoardCloseDialog } from "@/components/request/RequestBoardCloseDialog"
+import { BoardDeleteDialog } from "@/components/request/BoardDeleteDialog"
 import { RequestArchiveView } from "@/components/request/RequestArchiveView"
 import { MoveStyleDialog, RequestBoardDialog, type RequestBoardValues } from "@/components/request/RequestBoardDialog"
 import { Button } from "@/components/ui/button"
@@ -721,6 +722,7 @@ export function FabricRequest() {
   const [activeBoard, setActiveBoard] = useState<string>(() => { try { return window.localStorage.getItem("fabric.request.activeBoard") || ALL_BOARDS } catch { return ALL_BOARDS } })
   const [boardDialog, setBoardDialog] = useState<"create" | "edit" | null>(null)
   const [closeOpen, setCloseOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const [archiveSelected, setArchiveSelected] = useState<string | null>(null)
   const [moveStyle, setMoveStyle] = useState<RequestStyle | null>(null)
   const [draft, setDraft] = useState<RequestStyle | null>(null)
@@ -754,6 +756,16 @@ export function FabricRequest() {
   useEffect(() => { if (requestBoards.length > 0 && activeBoard !== ALL_BOARDS && activeBoard !== ARCHIVE_VIEW && !activeBoardInfo) setActiveBoard(ALL_BOARDS) }, [activeBoard, activeBoardInfo, requestBoards.length])
   useEffect(() => { try { window.localStorage.setItem("fabric.request.activeBoard", activeBoard) } catch { /* 현재 세션만 유지한다. */ } }, [activeBoard])
   const scoped = useMemo(() => activeBoard === ALL_BOARDS ? requests : requests.filter((item) => item.boardId === activeBoard), [activeBoard, requests])
+  const deleteStats = useMemo(() => {
+    if (!activeBoardInfo) return { styles: 0, options: 0, linked: 0 }
+    const styles = requests.filter((style) => style.boardId === activeBoardInfo.boardId)
+    const reqIds = new Set(styles.map((style) => style.reqId))
+    return {
+      styles: styles.length,
+      options: styles.reduce((sum, style) => sum + style.options.length, 0),
+      linked: ddRecords.filter((record) => reqIds.has(record.tech?.requestLink?.reqId ?? "")).length,
+    }
+  }, [activeBoardInfo, ddRecords, requests])
 
   const ownerOptions = useMemo(() => {
     const fromData = requests.flatMap((item) => [item.analyst, item.developer]).filter(Boolean)
@@ -1489,7 +1501,14 @@ export function FabricRequest() {
     }
     setBoardDialog(null)
   }
-  const deleteBoard = () => { if (!activeBoardInfo) return; saveRequestBoards(requestBoards.filter((item) => item.boardId !== activeBoardInfo.boardId)); setActiveBoard(ALL_BOARDS); setBoardDialog(null) }
+  const deleteBoard = () => {
+    if (!activeBoardInfo || !isOwner) return
+    const boardName = activeBoardInfo.name
+    const next = removeBoardWithStyles(requests, requestBoards, activeBoardInfo.boardId)
+    saveRequestsAndBoards(next.requests, next.boards, "clear")
+    setUndoStack([]); setRedoStack([]); setActiveBoard(ALL_BOARDS); setBoardDialog(null); setDeleteOpen(false)
+    setNotice({ kind: "ok", text: `보드 "${boardName}"와 스타일 ${next.removedStyles}건을 삭제했습니다.` })
+  }
   const closeActiveBoard = ({ memo, fillResult }: { memo: string; fillResult?: Exclude<RequestResult, "진행중"> }) => {
     if (!activeBoardInfo || !canManageBoard(activeBoardInfo, authUser?.email, isOwner)) return
     const now = new Date().toISOString()
@@ -1550,7 +1569,7 @@ export function FabricRequest() {
       </div>
 
       {activeBoard === ARCHIVE_VIEW ? <RequestArchiveView archives={requestArchive} boards={requestBoards} selectedId={archiveSelected} onSelect={setArchiveSelected} canManage={(board) => canManageBoard(board, authUser?.email, isOwner)} onReopen={reopenArchivedBoard} onDownload={(archive) => void downloadArchive(archive)} /> : <>
-      {activeBoardInfo ? <RequestBoardHeader board={activeBoardInfo} styles={scoped} stageOf={(option) => requestProcessStage(ddByLine, option)} canManage={canManageBoard(activeBoardInfo, authUser?.email, isOwner)} onEdit={() => setBoardDialog("edit")} onCloseBoard={() => setCloseOpen(true)} /> : null}
+      {activeBoardInfo ? <RequestBoardHeader board={activeBoardInfo} styles={scoped} stageOf={(option) => requestProcessStage(ddByLine, option)} canManage={canManageBoard(activeBoardInfo, authUser?.email, isOwner)} canDelete={canDeleteBoard(activeBoardInfo, isOwner)} onEdit={() => setBoardDialog("edit")} onCloseBoard={() => setCloseOpen(true)} onDelete={() => setDeleteOpen(true)} /> : null}
 
       <div
         className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)]"
@@ -1870,8 +1889,9 @@ export function FabricRequest() {
         onSave={upsert}
       />
 
-      <RequestBoardDialog open={boardDialog !== null} mode={boardDialog ?? "create"} board={boardDialog === "edit" ? activeBoardInfo ?? undefined : undefined} boards={requestBoards} teams={[...new Set(requestBoards.map((board) => board.team).filter(Boolean))]} isOwner={isOwner} canDelete={Boolean(activeBoardInfo && canDeleteBoard(activeBoardInfo, requests, isOwner))} onSubmit={submitBoard} onDelete={deleteBoard} onOpenChange={(open) => { if (!open) setBoardDialog(null) }} />
+      <RequestBoardDialog open={boardDialog !== null} mode={boardDialog ?? "create"} board={boardDialog === "edit" ? activeBoardInfo ?? undefined : undefined} boards={requestBoards} teams={[...new Set(requestBoards.map((board) => board.team).filter(Boolean))]} isOwner={isOwner} canDelete={Boolean(activeBoardInfo && canDeleteBoard(activeBoardInfo, isOwner))} onSubmit={submitBoard} onDelete={() => { setBoardDialog(null); setDeleteOpen(true) }} onOpenChange={(open) => { if (!open) setBoardDialog(null) }} />
       <RequestBoardCloseDialog open={closeOpen} board={activeBoardInfo} styles={scoped} onConfirm={closeActiveBoard} onOpenChange={setCloseOpen} />
+      <BoardDeleteDialog open={deleteOpen} board={activeBoardInfo} styleCount={deleteStats.styles} optionCount={deleteStats.options} linkedCount={deleteStats.linked} onConfirm={deleteBoard} onOpenChange={setDeleteOpen} />
       <MoveStyleDialog open={moveStyle !== null} boards={openBoards.filter((board) => board.boardId !== activeBoard)} onOpenChange={(open) => { if (!open) setMoveStyle(null) }} onMove={(boardId) => { if (!moveStyle) return; const board = openBoards.find((item) => item.boardId === boardId); if (!board) return; saveMutation(requests.map((style) => style.reqId === moveStyle.reqId ? { ...style, boardId, chart: board.name, seq: nextBoardSeq(requests, boardId), updatedAt: new Date().toISOString() } : style)); setMoveStyle(null) }} />
 
       <PreviewDialog style={preview} onClose={() => setPreview(null)} />

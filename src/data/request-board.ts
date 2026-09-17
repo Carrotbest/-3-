@@ -143,11 +143,24 @@ export function canManageBoard(
 }
 
 export function canDeleteBoard(
-  board: RequestBoard,
-  requests: readonly RequestStyle[],
+  _board: RequestBoard,
   isOwner: boolean,
 ): boolean {
-  return isOwner && !requests.some((request) => request.boardId === board.boardId)
+  return isOwner
+}
+
+export function removeBoardWithStyles(
+  requests: readonly RequestStyle[],
+  boards: readonly RequestBoard[],
+  boardId: string,
+): { requests: RequestStyle[]; boards: RequestBoard[]; removedStyles: number; removedOptions: number } {
+  const removed = requests.filter((request) => request.boardId === boardId)
+  return {
+    requests: requests.filter((request) => request.boardId !== boardId),
+    boards: boards.filter((board) => board.boardId !== boardId),
+    removedStyles: removed.length,
+    removedOptions: removed.reduce((sum, request) => sum + request.options.length, 0),
+  }
 }
 
 export function appendRequestHistory(

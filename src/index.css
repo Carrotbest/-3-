@@ -498,3 +498,25 @@ input.dd-date::-webkit-calendar-picker-indicator {
     transform: none;
   }
 }
+
+.rdda-print-deck { display: none; }
+
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  body * { visibility: hidden !important; }
+  .rdda-print-root, .rdda-print-root * { visibility: visible !important; }
+  .rdda-print-root { position: fixed !important; inset: 0 !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; translate: none !important; transform: none !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
+  .rdda-report-editor { display: none !important; }
+  .rdda-print-deck { display: block !important; color: #111827; background: white; }
+  .rdda-print-page { box-sizing: border-box; min-height: 180mm; padding: 18mm 22mm; page-break-after: always; break-after: page; font-size: 12pt; line-height: 1.75; }
+  .rdda-print-page:last-child { page-break-after: auto; break-after: auto; }
+  .rdda-print-page h1, .rdda-print-page h2 { margin: 0 0 18mm; font-size: 20pt; }
+  .rdda-print-page p { max-width: 86%; white-space: pre-line; }
+  .rdda-print-cover { display: flex; flex-direction: column; justify-content: center; }
+  .rdda-print-cover h1 { margin-bottom: 10mm; font-size: 28pt; }
+  .rdda-print-cover p { margin: 0 0 5mm; font-size: 20pt; }
+  .rdda-print-kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12mm; }
+  .rdda-print-kpis div { padding: 10mm; border: 1px solid #cbd5e1; }
+  .rdda-print-kpis span { display: block; margin-bottom: 4mm; color: #64748b; }
+  .rdda-print-kpis strong { font-size: 24pt; }
+}

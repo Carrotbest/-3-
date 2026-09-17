@@ -75,6 +75,7 @@
 
 ## 창고 (`src/routes/Warehouse.tsx`, `src/data/fabric-ledger.ts`)
 - DD+대장 FL 우선·Style 보조 병합. 개발진행→입고대기(READY)→창고보관→소진/폐기. 입고 시 R&D No. 자동 채번. 웹상태=IDB `fabricOverrides`, 이력=`fabricEvents`.
+- FL은 DD 원단이면 DD MASTER에서만 입력하고, 창고 직접 추가 원단만 창고에서 `checkWarehouseFlEntry` 검사 후 `updateManualIntake`로 저장한다. 같은 FL은 원장에서 자동으로 한 원단으로 합쳐진다. 현황에 없는 추가 옵션은 DD 행을 추가하는 것이 팀 규칙이다.
 - **입고 대기 판정은 개발처로 갈린다**(`statusFromRecord`). GD는 YDS 수취일, 국내·생산은 Received date다. 국내는 YDS 공정이 없어 그 칸이 비활성이라 YDS만 보면 영영 안 올라온다. 대장 '현황' 시트는 READY로 올리지 않는다. 창고에서 '직접 추가'한 웹 등록 행만 예외.
 - 목록에서 빼는 '선택 삭제'는 `REMOVED` 오버라이드로 감추는 것이다. 원본은 지우지 않는다. 폐기와 다르다.
 - Rack No.(`src/data/warehouse-rack.ts`): 창고팀 선반배치도 기준 통합원단부 전용 rack은 K열 9개, L열 10개, rack당 3칸(위에서부터 1~3)이고 형식은 `K-1-1`이다. 원단을 입고 순서가 아니라 빈 칸에 넣기 위한 번호라 같은 칸을 여러 원단이 쓸 수 있다. 원단별 상태(`FabricLedgerOverride.rackNo`)에만 저장한다. `applyFabricAction`은 도착 상태가 창고보관이면 이전 값을 물려주고 창고를 떠나면(폐기, 소진, 입고 취소) 비운다. `saveFabricFields`도 값을 물려준다. **override를 새로 만드는 곳에 rackNo를 빠뜨리면 창고 동작마다 번호가 지워진다.** 창고보관 탭에서만 열이 보이고 더블클릭으로 입력한다. 지우기는 두 가지다. Rack No. 칸을 선택하고 Delete·Backspace(여러 영역 포함, `saveFabricRackNos`로 한 번에 저장), 또는 추천 목록 맨 위 `선택 안함`(`RACK_NONE_LABEL`)을 고르고 확정한다. 여러 원단을 원단마다 따로 저장하면 앞 저장을 뒤 저장이 덮어쓰므로 묶어서 저장한다. 실물 입고 확인 창에도 원단마다 Rack No. 칸이 있어 창고팀이 확인하면서 적는다. 형식이 틀린 칸이 있으면 확인 처리 전에 멈추고, 확인 처리(`applyFabricAction`)가 모두 끝난 뒤 체크한 원단의 번호를 `saveFabricRackNos`로 한 번에 저장한다. 순서를 바꾸면 확인 처리가 새 번호를 덮는다. 입고대기 탭은 R&D No., 재고, 입고확인 고정 열을 숨긴다.
