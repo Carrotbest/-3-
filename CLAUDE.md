@@ -111,6 +111,13 @@
 - 사내 보안 공지(2026-09-14, 외부 서비스는 개인 메일로 가입)에 따라 새 이메일로 회사 도메인은 막고, 회사 메일 계정 팀원에게 권고 문구와 알림 점을 띄운다. **소유자 계정은 이메일 변경을 잠근다.** 소유자 판정이 이메일 문자열(`OWNER_EMAIL`, firestore/storage rules)이라 바꾸면 소유자 권한이 사라진다.
 - `firestore.rules`는 `users/{uid}` 수정을 소유자만 허용한다. 팀원이 이메일을 바꿔도 사용자 목록의 이메일 필드는 옛 값이 남으므로 소유자가 갱신한다. 규칙은 바꾸지 않았다.
 
+## 권한 (`src/data/screen-permissions.ts`, `src/data/departments.ts`, `src/components/settings/UserApprovalPanel.tsx`)
+- R217: 사용자 문서 `users/{uid}`에 화면별 `access`(none/read/edit)와 `department`를 둔다. 예전 `screenPermissions`(불리언)는 라우팅·사이드바 호환용으로 access에서 파생해 같이 저장한다. access가 없는 기존 사용자는 불리언 true를 편집으로 읽어 동작이 바뀌지 않는다.
+- 부서 기본값은 `DEPARTMENTS` 한 곳(통합원단부 1·2·3팀, 정산관리팀, 사업부서). **3팀이 원단 R&D(우리 팀)다**(2026-09-17 사용자 확인). 1팀은 디자인·마케팅 성격의 소싱 위주 팀으로 FABRIC REQUEST를 쓰는 유관부서다. 가입 화면에서 부서를 골라 신청하면 그 부서 기본 권한이 문서에 들어가고, 승인하면 바로 적용된다. 승인 대기 중에는 신청 문서의 access를 믿지 않고 부서 기본값을 보인다(소유자가 손댄 뒤 `permissionsUpdatedAt`부터는 저장값). 승인은 권한이 하나 이상일 때만 된다.
+- HOME은 우리 팀 KPI라 `HomeGate`가 `access.home === "read"`이면 블러로 가린다. 호버는 보이고 클릭·키 입력은 막는다. 관리 화면에서 HOME 단계 이름은 없음/블러/공개다. 가림일 뿐 데이터는 브라우저에 있으므로 전사 배포 전에는 HOME 구성을 따로 만든다.
+- 읽기 권한 적용은 세 겹이다. `pushCache`가 `currentUserCanEditKey`로 중앙 저장을 막고 화면 값을 마지막 중앙 값으로 되돌린다. 키와 화면의 대응은 `CACHE_KEY_SCREENS`다. `ReadOnlyGuard`가 셀 더블클릭·붙여넣기·지우기·끌어놓기를 막는다. `logAction`도 같은 판정으로 이력을 남기지 않는다. 새 저장 키를 만들면 `CACHE_KEY_SCREENS`에 더해야 한다. 빠지면 소유자만 저장된다.
+- **아직 Firestore 규칙에는 반영하지 않았다.** 서버는 승인 여부만 본다. 규칙 반영은 보안 점검 C 항목으로 남아 있다.
+
 ## 주간 백업 (`tools/backup`)
 - PC 작업 스케줄러가 매주 Firestore `state`를 앱 로그인 계정(Firebase Auth REST, 비밀번호는 Windows 자격 증명 관리자)으로 읽어 저장소 밖 폴더에 JSON·엑셀·zip을 남기고 Outlook으로 메일을 보낸다.
 - 서비스 계정 키 방식은 조직 정책 `iam.disableServiceAccountKeyCreation`으로 막혀 있다. 되살리지 말 것.

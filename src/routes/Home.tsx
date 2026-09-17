@@ -10,6 +10,7 @@ import { MaterialDeck, MaterialDetailSheet, MaterialFormSheet } from "@/componen
 import { OwnerLaneBoard } from "@/components/charts/OwnerLaneBoard"
 import { HomeTrendSection } from "@/components/dashboard/HomeTrendSection"
 import { TodayBriefing } from "@/components/dashboard/TodayBriefing"
+import { useAuthStore } from "@/data/auth"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { Reveal } from "@/components/motion/Reveal"
@@ -824,6 +825,8 @@ function RddaTrendChart({ monthly, reduceMotion }: { monthly: MonthlyDevelopment
 }
 
 export function Home() {
+  // 팀 브리핑은 원단 R&D 3팀 일정이라 HOME 공개(편집) 권한자에게만 띄운다(R219).
+  const showTeamBriefing = useAuthStore((state) => state.isOwner || state.access.home === "edit")
   const navigate = useNavigate()
   const [kpiDetailKind, setKpiDetailKind] = useState<HomeKpiDetailKind | null>(null)
   // 화면을 열 때는 늘 전주 월요일부터 오늘까지다. 구간을 바꿔도 다음에 열면 다시 이 값이다.
@@ -988,9 +991,13 @@ export function Home() {
         </CardContent></Card>
       </Reveal>
 
+      {/* FL 등록 현황 카드와 같이 제목을 카드 안에 둔다. */}
       <section aria-labelledby="owner-board-title">
-        <div className="mb-5 flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--gradient-3)] to-[var(--gradient-1)] text-white shadow-[0_7px_18px_-6px_rgba(76,91,212,0.65)]"><ClipboardList className="size-4" aria-hidden="true" /></span><div><h2 id="owner-board-title" className="text-base font-semibold text-[var(--foreground)]">담당자별 진행 현황</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">담당자·공정 단계별 진행 중 스타일 분포입니다.</p></div></div>
-        <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}><OwnerLaneBoard rows={records} hideOwners={HOME_HIDDEN_OWNER_NAMES} onSelect={() => navigate("/development")} /></Card>
+        <Card className={`relative overflow-hidden ${HOME_GLASS_SURFACE} ${HOME_GLASS_STATIC}`}>
+          <span aria-hidden="true" className="pointer-events-none absolute inset-x-5 top-0 h-px bg-white/95" />
+          <div className="relative flex items-center gap-3 px-6 pt-6 sm:px-7 sm:pt-7"><span className="flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--gradient-3)] to-[var(--gradient-1)] text-white shadow-[0_7px_18px_-6px_rgba(76,91,212,0.65)]"><ClipboardList className="size-4" aria-hidden="true" /></span><div><h2 id="owner-board-title" className="text-base font-semibold text-[var(--foreground)]">담당자별 진행 현황</h2><p className="mt-1 text-xs text-[var(--muted-foreground)]">담당자·공정 단계별 진행 중 스타일 분포</p></div></div>
+          <OwnerLaneBoard rows={records} hideOwners={HOME_HIDDEN_OWNER_NAMES} onSelect={() => navigate("/development")} />
+        </Card>
       </section>
 
       <section aria-labelledby="work-report-title">
@@ -1032,7 +1039,7 @@ export function Home() {
 
       <MaterialDetailSheet item={selectedMaterial} onOpenChange={(open) => { if (!open) setSelectedMaterial(null) }} onEdit={(item) => openMaterialForm(item.kind, item)} onNavigate={selectedMaterial && ["TS", "STUDY", "PORTFOLIO"].includes(selectedMaterial.kind) ? (item) => navigate(item.kind === "TS" ? "/ts" : item.kind === "STUDY" ? "/study" : "/trend/portfolio") : undefined} />
       <MaterialFormSheet open={materialFormKind !== null} defaultKind={materialFormKind ?? "MACRO"} item={editingMaterial} onOpenChange={(open) => { if (!open) { setMaterialFormKind(null); setEditingMaterial(null) } }} />
-      <TodayBriefing />
+      {showTeamBriefing ? <TodayBriefing /> : null}
     </section>
   )
 }

@@ -33,6 +33,8 @@ export interface NavigationItem {
 
 export interface NavigationGroup {
   label: string
+  /** 사이드바 구역 강조색(R220). 호버·클릭·현재 화면 글라스 효과에 쓴다. */
+  accent: string
   items: NavigationItem[]
 }
 
@@ -52,7 +54,7 @@ export const routeDefinitions: RouteDefinition[] = [
   { path: "/warehouse", title: "WAREHOUSE", subtitle: "완료 샘플의 입고·보관·소진·폐기 이력을 관리합니다." },
   { path: "/calendar", title: "CALENDAR", subtitle: "팀 일정과 주요 납기를 확인합니다." },
   { path: "/setting", title: "SETTING", subtitle: "데이터 연결, 기준값, 사용자 권한을 한곳에서 관리합니다." },
-  { path: "/trend/macro", title: "MACRO TREND", subtitle: "바이어 매출과 원자재·정부 통계를 확인합니다." },
+  { path: "/trend/macro", title: "MARKET PULSE", subtitle: "거시 지표·원자재 가격·바이어 실적으로 시장 흐름을 봅니다." },
   { path: "/trend/fabric", title: "FABRIC TREND", subtitle: "소재·원사·원단·염색가공 개발 기사를 모아 봅니다." },
   { path: "/trend/portfolio", title: "PORTFOLIO", subtitle: "팀이 개발한 기능성 원단 자산입니다." },
   { path: "/process-innovation", title: "PROCESS INNOVATION", subtitle: "프로세스 혁신 화면을 준비하고 있습니다." },
@@ -61,12 +63,14 @@ export const routeDefinitions: RouteDefinition[] = [
 export const navigationGroups: NavigationGroup[] = [
   {
     label: "개요",
+    accent: "#6366f1",
     items: [
       { label: "HOME", path: "/", icon: LayoutDashboard },
     ],
   },
   {
-    label: "개발",
+    label: "샘플 관리",
+    accent: "#0d9488",
     items: [
       { label: "FABRIC REQUEST", path: "/request", icon: ClipboardList },
       { label: "DEVELOPMENT", path: "/development", icon: FlaskConical },
@@ -86,6 +90,7 @@ export const navigationGroups: NavigationGroup[] = [
   },
   {
     label: "기술 · 분석",
+    accent: "#ea580c",
     items: [
       { label: "TROUBLE SHOOTING", path: "/ts", icon: Wrench },
       { label: "TECHNICAL REFERENCES", path: "/study", icon: BookOpenCheck },
@@ -95,9 +100,10 @@ export const navigationGroups: NavigationGroup[] = [
   },
   {
     label: "트렌드 · 일정",
+    accent: "#c026d3",
     items: [
       { label: "FABRIC TREND", path: "/trend/fabric", icon: Waves },
-      { label: "MACRO TREND", path: "/trend/macro", icon: Globe2 },
+      { label: "MARKET PULSE", path: "/trend/macro", icon: Globe2 },
       { label: "PORTFOLIO", path: "/trend/portfolio", icon: Layers3 },
       { label: "PROCESS INNOVATION", path: "/process-innovation", icon: Workflow },
       { label: "CALENDAR", path: "/calendar", icon: CalendarDays },
@@ -105,6 +111,7 @@ export const navigationGroups: NavigationGroup[] = [
   },
   {
     label: "시스템",
+    accent: "#475569",
     items: [
       { label: "SETTING", path: "/setting", icon: Settings, ownerOnly: true },
     ],

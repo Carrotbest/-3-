@@ -1,7 +1,8 @@
 import { collection, doc, onSnapshot, serverTimestamp, updateDoc, type Unsubscribe } from "firebase/firestore"
 
 import { auth, db } from "./firebase"
-import { normalizeScreenPermissions, type ScreenPermissions } from "./screen-permissions"
+import { departmentById } from "./departments"
+import { accessToScreenPermissions, normalizeScreenAccess, type ScreenAccessMap } from "./screen-permissions"
 
 export type ManagedUserStatus = "pending" | "approved" | "rejected"
 
@@ -10,7 +11,8 @@ export interface ManagedUser {
   email: string
   name: string | null
   status: ManagedUserStatus
-  screenPermissions: ScreenPermissions
+  access: ScreenAccessMap
+  department: string | null
   requestedAt: string | null
 }
 
@@ -27,6 +29,9 @@ export function listenManagedUsers(onData: (users: ManagedUser[]) => void): Unsu
           name?: string | null
           status?: string
           screenPermissions?: unknown
+          access?: unknown
+          department?: string | null
+          permissionsUpdatedAt?: unknown
           requestedAt?: { toDate?: () => Date }
         }
         const status: ManagedUserStatus = data.status === "approved"
@@ -37,7 +42,12 @@ export function listenManagedUsers(onData: (users: ManagedUser[]) => void): Unsu
           email: data.email ?? "",
           name: data.name ?? null,
           status,
-          screenPermissions: normalizeScreenPermissions(data.screenPermissions),
+          // 승인 대기인데 소유자가 아직 권한을 손대지 않았으면 신청 부서 기본값을 쓴다.
+          // 신청 문서에 적힌 access를 그대로 믿지 않기 위해서다(R218).
+          access: status === "pending" && !data.permissionsUpdatedAt && departmentById(data.department)
+            ? { ...departmentById(data.department)!.access }
+            : normalizeScreenAccess(data.access, data.screenPermissions),
+          department: typeof data.department === "string" ? data.department : null,
           requestedAt: data.requestedAt?.toDate ? data.requestedAt.toDate().toISOString() : null,
         }
       })
@@ -49,18 +59,23 @@ export function listenManagedUsers(onData: (users: ManagedUser[]) => void): Unsu
   )
 }
 
-export async function approveUser(uid: string, screenPermissions: ScreenPermissions): Promise<void> {
+export async function approveUser(uid: string, access: ScreenAccessMap, department: string | null): Promise<void> {
   await updateDoc(doc(db, "users", uid), {
     status: "approved",
-    screenPermissions,
+    access,
+    department,
+    screenPermissions: accessToScreenPermissions(access),
     approvedAt: serverTimestamp(),
     approvedBy: auth.currentUser?.email ?? "owner",
   })
 }
 
-export async function updateUserScreenPermissions(uid: string, screenPermissions: ScreenPermissions): Promise<void> {
+/** 접근 수준과 부서를 저장한다. 예전 화면(라우팅)이 읽는 screenPermissions도 함께 맞춘다. */
+export async function updateUserAccess(uid: string, access: ScreenAccessMap, department: string | null): Promise<void> {
   await updateDoc(doc(db, "users", uid), {
-    screenPermissions,
+    access,
+    department,
+    screenPermissions: accessToScreenPermissions(access),
     permissionsUpdatedAt: serverTimestamp(),
     permissionsUpdatedBy: auth.currentUser?.email ?? "owner",
   })

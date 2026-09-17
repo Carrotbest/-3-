@@ -9,7 +9,7 @@ import {
 
 import { db, auth } from "./firebase"
 import { CACHE_KEYS, saveCacheLocal, setFirestorePush, type CacheKey } from "./cache"
-import { currentUserIsOwner, currentUserCanWrite } from "./auth"
+import { currentUserIsOwner, currentUserCanWrite, currentUserCanEditKey } from "./auth"
 import { mergeKeyed } from "./sync-merge"
 import { normalizeLoadedRecords, setAppState, useAppStore, type AppState, type AppStatePatch } from "../store/useAppStore"
 import type { TsRecord } from "./sample"
@@ -75,6 +75,8 @@ function splitChunks(text: string): string[] {
 /** 소유자 또는 승인된 팀원이 값을 Firestore로 반영한다(청크 분할·원자적 배치). */
 async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
   if (!currentUserCanWrite()) return
+  // 화면 권한이 읽기면 중앙에 올리지 않고 화면 값을 마지막 중앙 값으로 되돌린다(R217).
+  if (!currentUserCanEditKey(key)) { revertBlockedKey(key); return }
   if (SKIP_SYNC_KEYS.has(key)) return
   const previousChain = pushChains.get(key) ?? Promise.resolve()
   const chained = previousChain.then(() => pushCacheNow(key, value)).catch(() => {})
@@ -154,6 +156,18 @@ function wouldWipeLocalData(key: CacheKey, value: unknown): boolean {
   return Array.isArray(local) && local.length > 0
 }
 
+/** 마지막으로 받은 중앙 값. 읽기 권한 사용자가 화면에서 바꾼 값을 되돌릴 때 쓴다. */
+const lastRemoteValue = new Map<string, unknown>()
+
+function revertBlockedKey(key: CacheKey): void {
+  if (lastRemoteValue.has(key)) {
+    const value = lastRemoteValue.get(key) as AppState[CacheKey]
+    setAppState(normalizeLoadedRecords({ [key]: value } as AppStatePatch))
+    void saveCacheLocal(key, value)
+  }
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("fabric:readonly-blocked", { detail: { key } }))
+}
+
 /**
  * 스냅샷 전체에서 각 키의 값을 재조립해 store와 로컬 캐시에 반영한다.
  * 중앙에 존재하는 키 목록을 돌려준다(최초 시딩 판단에 사용).
@@ -193,6 +207,7 @@ function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }
     }
     try {
       const value = JSON.parse(json) as AppState[CacheKey]
+      lastRemoteValue.set(key, value)
       if (wouldWipeLocalData(key as CacheKey, value)) return
       // 중앙에 구버전 파서가 만든 낡은 TS가 남아 있을 수 있다.
       // 그 값이 정상 데이터를 덮지 않도록 막고, 소유자면 정상 로컬 값으로 중앙을 고쳐 쓴다.

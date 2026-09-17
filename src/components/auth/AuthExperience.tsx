@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Sparkles,
   UserRound,
+  Building2,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { initAuth, signIn, signOutUser, signUp, useAuthStore } from "@/data/auth"
 import { CAPTURE } from "@/data/capture"
+import { DEPARTMENTS } from "@/data/departments"
 
 type Mode = "login" | "signup"
 
@@ -115,6 +117,7 @@ function ProductPreview() {
 
 function AuthDialog({ open, mode, onOpenChange, onModeChange }: { open: boolean; mode: Mode; onOpenChange: (open: boolean) => void; onModeChange: (mode: Mode) => void }) {
   const [name, setName] = useState("")
+  const [department, setDepartment] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -129,7 +132,7 @@ function AuthDialog({ open, mode, onOpenChange, onModeChange }: { open: boolean;
     setNotice("")
     try {
       if (mode === "login") await signIn(email, password)
-      else { await signUp(email, password, name); setNotice("Your request has been submitted. Access will open after administrator approval.") }
+      else { await signUp(email, password, name, department); setNotice("Your request has been submitted. Access will open after administrator approval.") }
     } catch {
       // 오류 메시지는 auth 스토어(error)에 반영된다.
     } finally { setSubmitting(false) }
@@ -152,6 +155,7 @@ function AuthDialog({ open, mode, onOpenChange, onModeChange }: { open: boolean;
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" ? <div className="space-y-2"><Label htmlFor="signup-name" className="text-xs font-semibold text-slate-700">Name</Label><div className="relative"><UserRound className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input id="signup-name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Enter your name" className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 text-slate-950 shadow-none placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-slate-900" /></div></div> : null}
+            {mode === "signup" ? <div className="space-y-2"><Label htmlFor="signup-department" className="text-xs font-semibold text-slate-700">Department</Label><div className="relative"><Building2 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><select id="signup-department" required value={department} onChange={(event) => setDepartment(event.target.value)} className={`h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-9 text-sm shadow-none outline-none focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-slate-900 ${department ? "text-slate-950" : "text-slate-400"}`}><option value="" disabled>Select your department</option>{DEPARTMENTS.map((item) => <option key={item.id} value={item.id} className="text-slate-950">{item.label}</option>)}</select><span aria-hidden="true" className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">▾</span></div><p className="text-[11px] leading-4 text-slate-400">Screen access for your department is applied once the administrator approves.</p></div> : null}
             <div className="space-y-2"><Label htmlFor="auth-email" className="text-xs font-semibold text-slate-700">Email</Label><div className="relative"><Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input id="auth-email" type="email" autoComplete="username" autoFocus value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@company.com" required className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 text-slate-950 shadow-none placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-slate-900" /></div></div>
             <div className="space-y-2"><Label htmlFor="auth-password" className="text-xs font-semibold text-slate-700">Password</Label><div className="relative"><LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input id="auth-password" type={showPassword ? "text" : "password"} autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(event) => setPassword(event.target.value)} placeholder={mode === "signup" ? "At least 6 characters" : "Enter your password"} required className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 pr-11 text-slate-950 shadow-none placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-slate-900" /><button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-slate-400 outline-none hover:bg-slate-200 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-slate-900" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button></div></div>
             {error ? <div className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700" role="alert">{error}</div> : null}

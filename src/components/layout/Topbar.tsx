@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom"
 import { AccountSettingsDialog, COMPANY_EMAIL_DOMAIN } from "@/components/auth/AccountSettingsDialog"
 import { Button } from "@/components/ui/button"
 import { routeDefinitions } from "@/routes/route-config"
-import { signOutUser, useAuthStore } from "@/data/auth"
+import { signOutUser, useAuthStore, useScreenAccess } from "@/data/auth"
 
 interface TopbarProps {
   onToggleSidebar: () => void
@@ -17,7 +17,9 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
   const isOwner = useAuthStore((state) => state.isOwner)
   const approval = useAuthStore((state) => state.approval)
   const [accountOpen, setAccountOpen] = useState(false)
-  const canWrite = isOwner || approval === "approved"
+  const screenAccess = useScreenAccess(pathname)
+  // 소유자는 편집. 팀원은 지금 화면의 권한을 보인다(R217). 등록되지 않은 경로는 승인 여부로만 본다.
+  const canWrite = isOwner || (approval === "approved" && screenAccess !== "read")
   // 사내 보안 공지(2026-09-14): 외부 서비스는 개인 메일 사용 권장. 소유자 외 회사 메일 계정에 알림 점을 띄운다.
   const suggestPersonalEmail = !isOwner && COMPANY_EMAIL_DOMAIN.test(user?.email ?? "")
   const currentRoute = routeDefinitions.find((definition) => definition.path === pathname)
@@ -60,7 +62,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
                 ? "bg-[color-mix(in_srgb,var(--primary)_16%,transparent)] text-[var(--primary)]"
                 : "bg-[var(--muted)] text-[var(--muted-foreground)]")
             }
-            title={canWrite ? "편집·업로드 권한" : "읽기 전용(승인 대기)"}
+            title={canWrite ? "이 화면 편집 권한" : approval === "approved" ? "이 화면은 읽기 권한입니다" : "읽기 전용(승인 대기)"}
           >
             {canWrite ? "편집 권한" : "읽기 전용"}
           </span>

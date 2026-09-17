@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react"
-import { ChevronDown } from "lucide-react"
+import { ArrowRight, ChevronDown } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -30,25 +30,21 @@ function SidebarLink({ item, collapsed, onNavigate, active = false }: SidebarLin
       to={item.path}
       end={item.path === "/" || item.path === "/development"}
       onClick={onNavigate}
-      className={({ isActive }) =>
-        cn(
-          "group relative flex h-9 items-center gap-3 overflow-hidden rounded-[var(--radius)] px-3 text-sm font-medium text-[var(--sidebar-foreground)] outline-none transition-colors duration-[var(--t-fast)] before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:origin-center before:scale-y-50 before:rounded-full before:bg-[var(--chart-1)] before:opacity-0 before:transition-[transform,opacity] before:duration-[var(--t-fast)] hover:bg-[color-mix(in_srgb,var(--sidebar-accent)_60%,transparent)] hover:text-[var(--sidebar-accent-foreground)] focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)] motion-reduce:transition-none motion-reduce:before:transition-none",
-          (isActive || active) && "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)] before:scale-y-100 before:opacity-100",
-        )
-      }
+      data-active={active ? "true" : undefined}
+      className="nav-glass group flex h-10 items-center gap-2.5 rounded-[12px] pl-2 pr-3 text-[11.5px] text-[var(--sidebar-foreground)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)]"
     >
-      <item.icon
-        aria-hidden="true"
-        className="size-4 shrink-0 transition-transform duration-[var(--t-fast)] group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-      />
+      <span className="nav-glass-icon flex size-7 shrink-0 items-center justify-center rounded-[8px]">
+        <item.icon aria-hidden="true" className="size-4" />
+      </span>
       <span
         className={cn(
-          "truncate transition-opacity duration-500 [transition-timing-function:cubic-bezier(0.83,0,0.17,1)] motion-reduce:transition-none",
+          "nav-glass-label whitespace-nowrap transition-opacity duration-500 [transition-timing-function:cubic-bezier(0.83,0,0.17,1)] motion-reduce:transition-none",
           collapsed ? "opacity-0" : "opacity-100",
         )}
       >
         {item.label}
       </span>
+      {!collapsed ? <ArrowRight aria-hidden="true" className="nav-glass-arrow ml-auto size-3.5 shrink-0" /> : null}
     </NavLink>
   )
 
@@ -149,9 +145,10 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
             <section
               key={group.label}
               aria-label={group.label}
+              style={{ "--nav-accent": group.accent } as React.CSSProperties}
               className={cn(groupIndex > 0 && "mt-4 border-t border-[var(--sidebar-border)] pt-4")}
             >
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {group.items.map((item) => {
                   if (!item.children) {
                     return <SidebarLink key={item.path} item={item} collapsed={showCollapsed} onNavigate={handleNavigate} />
@@ -174,8 +171,8 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
                             aria-expanded={isOpen}
                             onClick={() => setOpenMap((current) => ({ ...current, [item.path]: !isOpen }))}
                             className={cn(
-                              "flex size-9 shrink-0 items-center justify-center rounded-[var(--radius)] text-[var(--muted-foreground)] outline-none transition-colors duration-[var(--t-fast)] hover:bg-[color-mix(in_srgb,var(--sidebar-accent)_60%,transparent)] focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)] motion-reduce:transition-none",
-                              isParentActive && "text-[var(--sidebar-accent-foreground)]",
+                              "flex size-9 shrink-0 items-center justify-center rounded-[10px] text-[var(--muted-foreground)] outline-none transition-colors duration-[var(--t-fast)] hover:bg-[color-mix(in_srgb,var(--nav-accent)_12%,transparent)] hover:text-[var(--nav-accent)] focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)] motion-reduce:transition-none",
+                              isParentActive && "text-[var(--nav-accent)]",
                             )}
                           >
                             <ChevronDown
@@ -197,7 +194,7 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
                           )}
                         >
                           <div className="overflow-hidden">
-                            <div className="ml-4 space-y-1 border-l border-[var(--sidebar-border)] pl-4">
+                            <div className="ml-5 space-y-0.5 border-l border-[color-mix(in_srgb,var(--nav-accent)_30%,var(--sidebar-border))] py-0.5 pl-3">
                               {item.children.map((child) => (
                                 <NavLink
                                   key={child.path}
@@ -205,14 +202,9 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
                                   end
                                   onClick={handleNavigate}
                                   tabIndex={isOpen ? undefined : -1}
-                                  className={({ isActive }) =>
-                                    cn(
-                                      "relative block rounded-[var(--radius)] px-3 py-2 text-sm text-[var(--muted-foreground)] outline-none transition-colors duration-[var(--t-fast)] before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-[var(--chart-1)] before:opacity-0 before:transition-opacity before:duration-[var(--t-fast)] hover:bg-[color-mix(in_srgb,var(--sidebar-accent)_60%,transparent)] hover:text-[var(--sidebar-accent-foreground)] focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)] motion-reduce:transition-none motion-reduce:before:transition-none",
-                                      isActive && "bg-[var(--sidebar-accent)] font-medium text-[var(--sidebar-accent-foreground)] before:opacity-100",
-                                    )
-                                  }
+                                  className="nav-glass block rounded-[10px] px-3 py-1.5 text-[11px] text-[var(--muted-foreground)] [--nav-origin:10px_50%] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)]"
                                 >
-                                  {child.label}
+                                  <span className="nav-glass-label">{child.label}</span>
                                 </NavLink>
                               ))}
                             </div>

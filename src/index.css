@@ -528,3 +528,94 @@ tr.perf-row-best > td { background-image: linear-gradient(color-mix(in srgb, #10
 tr.perf-row-best > td:first-child { box-shadow: inset 3px 0 0 #10b981; }
 tr.perf-row-hit > td:first-child { box-shadow: inset 3px 0 0 color-mix(in srgb, #10b981 55%, transparent); }
 tr.perf-row-dim > td { color: color-mix(in srgb, var(--foreground) 62%, transparent); }
+
+/* ------------------------------------------------------------------
+ * 사이드바 글라스 내비게이션(R220)
+ * 구역 강조색은 section 의 --nav-accent 로 받는다(route-config accent).
+ * 선을 쓰지 않는다. 아이콘 자리의 작은 빛 점이 번져 메뉴를 채우고(interactive-hover-button 참고),
+ * 글자는 밀려나며 떠오르고 끝에 화살표가 스며든다.
+ * 글꼴은 Manrope 대문자, 가는 굵기와 넓은 자간으로 세련되게 둔다.
+ * ------------------------------------------------------------------ */
+.nav-glass {
+  /* --nav-accent 는 상위 section 에서 물려받는다. 여기서 기본값을 주면 구역 색을 덮는다. */
+  --nav-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --nav-origin: 22px 50%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  font-family: "Manrope", "Inter", sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  transition: color 520ms var(--nav-ease), transform 420ms var(--nav-ease);
+}
+.nav-glass::before { /* 번지는 빛: 아이콘 자리의 점에서 원이 커져 메뉴를 채운다 */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    radial-gradient(140% 160% at 12% 50%, color-mix(in srgb, var(--nav-accent) 20%, transparent), color-mix(in srgb, var(--nav-accent) 6%, transparent) 75%),
+    linear-gradient(180deg, color-mix(in srgb, white 55%, transparent), color-mix(in srgb, white 15%, transparent));
+  clip-path: circle(0% at var(--nav-origin));
+  opacity: 0.4;
+  transition: clip-path 640ms var(--nav-ease), opacity 640ms var(--nav-ease);
+}
+.nav-glass .nav-glass-label {
+  display: inline-block;
+  transition: transform 560ms var(--nav-ease), text-shadow 560ms var(--nav-ease), letter-spacing 560ms var(--nav-ease);
+}
+.nav-glass .nav-glass-icon {
+  transition: color 560ms var(--nav-ease), transform 560ms var(--nav-ease), filter 560ms var(--nav-ease), background-color 560ms var(--nav-ease), box-shadow 560ms var(--nav-ease);
+}
+.nav-glass .nav-glass-arrow {
+  opacity: 0;
+  transform: translateX(-10px);
+  color: var(--nav-accent);
+  transition: opacity 480ms var(--nav-ease), transform 560ms var(--nav-ease);
+}
+
+/* 마우스 올림 */
+.nav-glass:hover { color: color-mix(in srgb, var(--nav-accent) 80%, var(--sidebar-accent-foreground)); }
+.nav-glass:hover::before { clip-path: circle(160% at var(--nav-origin)); opacity: 1; }
+.nav-glass:hover .nav-glass-label {
+  transform: translate3d(4px, 0, 0);
+  letter-spacing: 0.1em;
+  text-shadow: 0 1px 0 color-mix(in srgb, white 90%, transparent), 0 6px 14px color-mix(in srgb, var(--nav-accent) 28%, transparent);
+}
+.nav-glass:hover .nav-glass-icon {
+  color: var(--nav-accent);
+  transform: translate3d(1px, -1px, 0);
+  filter: drop-shadow(0 5px 7px color-mix(in srgb, var(--nav-accent) 38%, transparent));
+}
+.nav-glass:hover .nav-glass-arrow { opacity: 0.85; transform: translateX(0); }
+
+/* 누름 */
+.nav-glass:active { transform: scale(0.985); transition-duration: 140ms; }
+
+/* 현재 화면 */
+/* 선택·유지 상태의 글자는 입체 효과 없이 굵게만 둔다. 호버 중이어도 같다. */
+.nav-glass:is([data-active="true"], [aria-current="page"]) { color: var(--sidebar-accent-foreground); font-weight: 700; }
+.nav-glass:is([data-active="true"], [aria-current="page"]) .nav-glass-label,
+.nav-glass:is([data-active="true"], [aria-current="page"]):hover .nav-glass-label { text-shadow: none; transform: none; letter-spacing: inherit; }
+.nav-glass:is([data-active="true"], [aria-current="page"]):hover .nav-glass-icon { transform: none; filter: none; color: white; }
+.nav-glass:is([data-active="true"], [aria-current="page"])::before {
+  clip-path: circle(160% at var(--nav-origin));
+  opacity: 1;
+  background:
+    radial-gradient(140% 160% at 12% 50%, color-mix(in srgb, var(--nav-accent) 26%, transparent), color-mix(in srgb, var(--nav-accent) 8%, transparent) 78%),
+    linear-gradient(180deg, color-mix(in srgb, white 70%, transparent), color-mix(in srgb, white 25%, transparent));
+}
+.nav-glass:is([data-active="true"], [aria-current="page"]) .nav-glass-icon {
+  color: white;
+  background-color: var(--nav-accent);
+  background-image: linear-gradient(145deg, color-mix(in srgb, white 30%, transparent), transparent 60%);
+  box-shadow: 0 6px 14px -5px color-mix(in srgb, var(--nav-accent) 75%, transparent);
+}
+.nav-glass:is([data-active="true"], [aria-current="page"]) .nav-glass-arrow { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-glass, .nav-glass::before, .nav-glass .nav-glass-label, .nav-glass .nav-glass-icon, .nav-glass .nav-glass-arrow { transition: none; }
+  .nav-glass:hover .nav-glass-label, .nav-glass:hover .nav-glass-icon, .nav-glass:active { transform: none; }
+}

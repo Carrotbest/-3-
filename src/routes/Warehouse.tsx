@@ -30,7 +30,7 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/compon
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { buildFabricLedger, fabricRecordIdentity, STORAGE_NO_MAX, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
-import { currentUserCanWrite, useAuthStore } from "@/data/auth"
+import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
 import { downloadBlob } from "@/data/dd-export"
 import { DISPOSAL_REASONS, type DisposalReason } from "@/data/disposal-round"
@@ -1481,7 +1481,7 @@ export function Warehouse() {
       <DialogContent className="flex h-[92vh] w-[96vw] max-w-[1800px] flex-col gap-0 overflow-hidden p-0 sm:max-w-[96vw]">
         <DialogHeader className="shrink-0 border-b border-[var(--border)] px-4 py-3"><DialogTitle>폐기 라운드</DialogTitle></DialogHeader>
         <div className="flex min-h-0 flex-1 flex-col p-3">
-          <DisposalRoundPanel ledger={ledger} sequenceStart={sequenceStart} rounds={disposalRounds} actor={{ email: authUser?.email ?? "", name: authUser?.displayName || authUser?.email?.split("@")[0] || "" }} canWrite={currentUserCanWrite()} isOwner={isOwner} onSave={saveDisposalRounds} onCompleteDisposal={async (entries, reason) => {
+          <DisposalRoundPanel ledger={ledger} sequenceStart={sequenceStart} rounds={disposalRounds} actor={{ email: authUser?.email ?? "", name: authUser?.displayName || authUser?.email?.split("@")[0] || "" }} canWrite={currentUserCanEditKey("disposalRounds")} isOwner={isOwner} onSave={saveDisposalRounds} onCompleteDisposal={async (entries, reason) => {
             const moved = await applyDisposalRoundCompletion(entries, { reason, actor: authUser?.displayName || authUser?.email || "관리자" })
             setChecked(new Set())
             setTab("HISTORY")

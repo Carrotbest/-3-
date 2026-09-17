@@ -14,7 +14,7 @@ import { Archive, ChevronDown, ChevronRight, ClipboardPaste, Copy, Download, Era
 import * as XLSX from "xlsx"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { CONSTRUCTIONS, matchConstruction } from "@/data/constructions"
-import { currentUserCanWrite, useAuthStore } from "@/data/auth"
+import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { buildFabricLedger } from "@/data/fabric-ledger"
 import { ddRecordsByLineId, requestDdStatus, type RequestDdStatus } from "@/data/request-link"
 import { requestProcessStage, type ProcessStage } from "@/data/request-process-stage"
@@ -657,7 +657,7 @@ export function FabricRequest() {
   const isOwner = useAuthStore((state) => state.isOwner)
   const boardMigrationRef = useRef(false)
   useEffect(() => {
-    if (boardMigrationRef.current || !currentUserCanWrite() || requests.length === 0 || requests.every((request) => request.boardId)) return
+    if (boardMigrationRef.current || !currentUserCanEditKey("requests") || requests.length === 0 || requests.every((request) => request.boardId)) return
     const actor = {
       email: authUser?.email ?? authUser?.uid ?? "unknown",
       name: authUser?.displayName?.trim() || authUser?.email?.split("@")[0] || "알 수 없음",
@@ -1548,7 +1548,7 @@ export function FabricRequest() {
             </button>
           })}
         </div>
-        <Button type="button" size="sm" disabled={!currentUserCanWrite()} onClick={() => setBoardDialog("create")} className="shrink-0 gap-1 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition-transform active:translate-y-px"><Plus className="size-4" />새 보드</Button>
+        <Button type="button" size="sm" disabled={!currentUserCanEditKey("requestBoards")} onClick={() => setBoardDialog("create")} className="shrink-0 gap-1 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition-transform active:translate-y-px"><Plus className="size-4" />새 보드</Button>
         <Button type="button" size="sm" variant={activeBoard === ARCHIVE_VIEW ? "secondary" : "outline"} className="shrink-0 rounded-lg" onClick={() => setActiveBoard(ARCHIVE_VIEW)}><Archive className="size-3.5" />보관함<Badge variant="secondary" className="h-5 px-1.5 tabular-nums">{requestBoards.filter((board) => board.status === "종결").length}</Badge></Button>
         {activeBoard !== ARCHIVE_VIEW ? <div className="ml-auto flex items-center gap-2">
           <input

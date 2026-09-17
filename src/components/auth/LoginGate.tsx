@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { initAuth, signIn, signOutUser, signUp, useAuthStore } from "@/data/auth"
+import { DEPARTMENTS } from "@/data/departments"
 
 type Mode = "login" | "signup"
 
 function AuthScreen() {
   const [mode, setMode] = useState<Mode>("login")
   const [name, setName] = useState("")
+  const [department, setDepartment] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [submitting, setSubmitting] = useState(false)
@@ -25,7 +27,7 @@ function AuthScreen() {
       if (mode === "login") {
         await signIn(email, password)
       } else {
-        await signUp(email, password, name)
+        await signUp(email, password, name, department)
         setNotice("가입 신청이 접수되었습니다. 관리자 승인 후 이용할 수 있습니다.")
       }
     } catch {
@@ -80,6 +82,15 @@ function AuthScreen() {
                 onChange={(event) => setName(event.target.value)}
                 placeholder="예: 홍길동"
               />
+            </div>
+          ) : null}
+          {mode === "signup" ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="signup-department">부서</Label>
+              <select id="signup-department" required value={department} onChange={(event) => setDepartment(event.target.value)} className="h-9 w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-2 text-sm">
+                <option value="" disabled>부서를 선택하세요</option>
+                {DEPARTMENTS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+              </select>
             </div>
           ) : null}
           <div className="space-y-1.5">

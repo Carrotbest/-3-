@@ -14,7 +14,7 @@
 import { addDoc, collection, getDocs, limit as fsLimit, orderBy, query, where } from "firebase/firestore"
 
 import { db, auth } from "./firebase"
-import { currentUserCanWrite } from "./auth"
+import { currentUserCanEditKey, currentUserCanWrite } from "./auth"
 import type { DevRecord, FabricLedgerEvent, RequestBoard, RequestStyle } from "./schema"
 import type { TsRecord } from "./sample"
 
@@ -154,6 +154,9 @@ const actorName = (): string => {
  * 작업 1건을 남긴다. 변경이 없으면 아무것도 쓰지 않는다.
  * 실패해도 던지지 않는다. 로그를 못 남겼다고 사용자의 저장이 막히면 안 된다.
  */
+/** 이력 화면 이름 → 그 화면이 쓰는 대표 저장 키. */
+const AUDIT_SCREEN_KEY: Partial<Record<AuditScreen, string>> = { request: "requests", rdda: "rddaReports", ts: "ts", dd: "records", warehouse: "fabricEvents" }
+
 export async function logAction(input: {
   kind: AuditKind
   screen: AuditScreen
@@ -161,6 +164,8 @@ export async function logAction(input: {
 }): Promise<void> {
   if (!input.changes.length) return
   if (!currentUserCanWrite()) return
+  // 읽기 권한이라 중앙 저장이 막힌 작업은 이력에도 남기지 않는다(R217).
+  if (!currentUserCanEditKey(AUDIT_SCREEN_KEY[input.screen] ?? "")) return
   const user = auth.currentUser
   const base = {
     at: new Date().toISOString(),

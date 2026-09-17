@@ -300,13 +300,13 @@ function MacroTrendTicker({ cards }: { cards: KpiCard[] }) {
       <CardContent className="p-5 sm:p-6">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-semibold tracking-[0.12em] text-[var(--muted-foreground)]">MACRO</p>
+            <p className="text-xs font-semibold tracking-[0.12em] text-[var(--muted-foreground)]">MARKET PULSE</p>
             <h3 className="mt-1 truncate text-base font-semibold text-[var(--foreground)]">주요 거시 지표</h3>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Badge variant="outline" className="border-white/65 bg-white/34 text-[10px]">3 / {cards.length}</Badge>
             <Button asChild variant="outline" size="sm" className="h-7 gap-1 px-2 text-[11px] [&_svg]:size-3.5">
-              <Link to="/trend/macro" aria-label="MACRO TREND 전체 보기">전체 보기<ArrowUpRight aria-hidden="true" /></Link>
+              <Link to="/trend/macro" aria-label="MARKET PULSE 전체 보기">전체 보기<ArrowUpRight aria-hidden="true" /></Link>
             </Button>
           </div>
         </div>

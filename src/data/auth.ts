@@ -15,7 +15,8 @@ import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore"
 
 import { auth, db } from "./firebase"
 import { OWNER_EMAIL } from "./app-config"
-import { createScreenPermissions, normalizeScreenPermissions, type ScreenPermissions } from "./screen-permissions"
+import { departmentById } from "./departments"
+import { accessForPath, accessToScreenPermissions, canEditCacheKey, createScreenAccess, createScreenPermissions, normalizeScreenAccess, type ScreenAccess, type ScreenAccessMap, type ScreenPermissions } from "./screen-permissions"
 
 export type AuthStatus = "loading" | "signed-out" | "signed-in"
 /** 소유자는 항상 approved. 그 외는 users/{uid}.status를 따른다(문서 없으면 pending). */
@@ -27,6 +28,9 @@ interface AuthState {
   isOwner: boolean
   approval: ApprovalState
   screenPermissions: ScreenPermissions
+  /** 화면별 없음/읽기/편집(R217). 소유자는 전부 편집. */
+  access: ScreenAccessMap
+  department: string | null
   error: string | null
 }
 
@@ -36,6 +40,8 @@ export const useAuthStore = create<AuthState>(() => ({
   isOwner: false,
   approval: "unknown",
   screenPermissions: createScreenPermissions(false),
+  access: createScreenAccess("none"),
+  department: null,
   error: null,
 }))
 
@@ -58,6 +64,8 @@ export function initAuth(): void {
         isOwner: false,
         approval: "unknown",
         screenPermissions: createScreenPermissions(false),
+        access: createScreenAccess("none"),
+        department: null,
         error: null,
       })
       return
@@ -70,6 +78,8 @@ export function initAuth(): void {
       isOwner: owner,
       approval: owner ? "approved" : "unknown",
       screenPermissions: createScreenPermissions(owner),
+      access: createScreenAccess(owner ? "edit" : "none"),
+      department: null,
       error: null,
     })
 
@@ -81,9 +91,12 @@ export function initAuth(): void {
         const data = snap.exists() ? snap.data() : null
         const status = data ? (data.status as string) : "pending"
         const approval: ApprovalState = status === "approved" ? "approved" : status === "rejected" ? "rejected" : "pending"
+        const access = normalizeScreenAccess(data?.access, data?.screenPermissions)
         useAuthStore.setState({
           approval,
-          screenPermissions: normalizeScreenPermissions(data?.screenPermissions),
+          access,
+          department: typeof data?.department === "string" ? data.department : null,
+          screenPermissions: accessToScreenPermissions(access),
         })
       },
       () => useAuthStore.setState({ approval: "pending" }),
@@ -94,6 +107,18 @@ export function initAuth(): void {
 /** 로그인한 사용자가 소유자(편집 권한)인지 여부. UI 게이팅에 사용. */
 export function currentUserIsOwner(): boolean {
   return isOwnerUser(auth.currentUser)
+}
+
+/** 이 중앙 저장 키를 쓸 수 있는지(R217). 소유자는 전부, 팀원은 그 키를 다루는 화면 중 하나라도 편집이면 허용. */
+export function currentUserCanEditKey(key: string): boolean {
+  if (currentUserIsOwner()) return true
+  const state = useAuthStore.getState()
+  return state.status === "signed-in" && state.approval === "approved" && canEditCacheKey(state.access, key)
+}
+
+/** 경로의 접근 수준. 등록되지 않은 경로는 null. 소유자는 편집. */
+export function useScreenAccess(pathname: string): ScreenAccess | null {
+  return useAuthStore((state) => state.isOwner ? "edit" : accessForPath(pathname, state.access))
 }
 
 /** 중앙 데이터를 쓸 수 있는 사용자인지. 소유자 또는 승인된 팀원. */
@@ -164,8 +189,14 @@ export async function signIn(email: string, password: string): Promise<void> {
 }
 
 /** 방문자 자율 가입. 계정을 만들고 승인 대기(users/{uid}.status='pending') 문서를 남긴다. */
-export async function signUp(email: string, password: string, name: string): Promise<void> {
+export async function signUp(email: string, password: string, name: string, departmentId: string): Promise<void> {
   useAuthStore.setState({ error: null })
+  const department = departmentById(departmentId)
+  if (!department) {
+    const message = "Select your department."
+    useAuthStore.setState({ error: message })
+    throw new Error(message)
+  }
   try {
     const credential = await createUserWithEmailAndPassword(auth, email.trim(), password)
     const displayName = name.trim()
@@ -176,7 +207,11 @@ export async function signUp(email: string, password: string, name: string): Pro
       email: (credential.user.email ?? email.trim()).toLowerCase(),
       name: displayName || null,
       status: "pending",
-      screenPermissions: createScreenPermissions(true),
+      // 신청자가 고른 부서의 기본 권한을 미리 채운다(R218). 승인 전에는 규칙상 아무것도 열리지 않고,
+      // 소유자가 승인을 누르면 이 권한이 바로 적용된다.
+      department: department.id,
+      access: department.access,
+      screenPermissions: accessToScreenPermissions(department.access),
       requestedAt: serverTimestamp(),
     })
   } catch (error) {

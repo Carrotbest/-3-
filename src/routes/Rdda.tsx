@@ -103,7 +103,7 @@ export function Rdda() {
       <div className="relative flex flex-wrap items-start justify-between gap-5">
         <div className="flex min-w-0 items-start gap-3.5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-[11px] bg-gradient-to-br from-[var(--gradient-1)] to-[var(--gradient-3)] text-white shadow-[0_10px_22px_-10px_rgba(76,91,212,0.7)]"><BarChart3 className="size-5" aria-hidden="true" /></span>
-          <div><div className="flex flex-wrap items-center gap-2"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--gradient-1)]">Fabric intelligence</p><span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${usingSample ? "border-amber-200 bg-amber-50/80 text-amber-700" : "border-emerald-200 bg-emerald-50/80 text-emerald-700"}`}>{usingSample ? "SAMPLE DATA" : "LIVE DATA"}</span></div><h1 className="mt-0.5 text-xl font-semibold tracking-[-0.035em] text-[var(--foreground)]">RDDA ANALYSIS</h1></div>
+          <div className="self-center"><div className="flex flex-wrap items-center gap-2.5"><h1 className="text-lg font-semibold uppercase tracking-[0.14em] text-[var(--gradient-1)]">Fabric intelligence</h1><span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${usingSample ? "border-amber-200 bg-amber-50/80 text-amber-700" : "border-emerald-200 bg-emerald-50/80 text-emerald-700"}`}>{usingSample ? "SAMPLE DATA" : "LIVE DATA"}</span></div></div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button type="button" size="sm" onClick={startRddaSync}><RefreshCw aria-hidden="true" />RDDA 갱신</Button>

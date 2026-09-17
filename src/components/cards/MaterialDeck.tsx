@@ -17,7 +17,7 @@ import { deleteManualMaterial, saveManualMaterial, useAppStore } from "@/store/u
 export const MATERIAL_KIND_LABELS: Record<MaterialKind, string> = {
   TS: "TS",
   STUDY: "STUDY",
-  MACRO: "MACRO TREND",
+  MACRO: "MARKET PULSE",
   FABRIC: "FABRIC TREND",
   PORTFOLIO: "PORTFOLIO",
 }
