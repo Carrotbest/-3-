@@ -4,6 +4,7 @@
 import { daysLeft, normalizeSeason, toDate, tsRequester } from "./format"
 import {
   CATEGORIES,
+  FABRIC1_INTAKE_SHEET,
   httpsMaterialLink,
   MEMBERS,
   ownerDisplayName,
@@ -1282,6 +1283,8 @@ export function mergedFlRegistrations(
 ): FlRegistration[] {
   const byFl = new Map<string, FlRegistration>()
   for (const sample of samples) {
+    // 1팀 입고 행은 FL 대 R&D No.가 1:N 이라 단일 원장 계약을 깬다. 집계에서 뺀다.
+    if (sample.sourceSheet === FABRIC1_INTAKE_SHEET) continue
     if (!sample.flNo) continue
     const month = rddaMonthFromFlNo(sample.flNo)
     if (!month) continue

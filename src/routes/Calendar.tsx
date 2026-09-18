@@ -411,7 +411,6 @@ export function Calendar() {
                         const index = weekIndex * 7 + dayIndex
                         const key = dateKey(day)
                         const meetings = meetingsByDate.get(key) ?? []
-                        const visibleMeetings = mode === "month" ? meetings.slice(0, 2) : meetings
                         const dayEventCount = filteredEvents.filter((item) => item.date <= key && eventEndDate(item) >= key).length
                         const otherMonth = mode === "month" && day.getMonth() !== cursor.getMonth()
                         const holiday = holidayName(key)
@@ -448,7 +447,7 @@ export function Calendar() {
                               {holiday ? <span className="text-[10px] text-[var(--muted-foreground)]">{holiday}</span> : null}
                             </span>
                             <div className="relative z-10 grid gap-1.5">
-                              {visibleMeetings.map((item, itemIndex) => (
+                              {meetings.map((item, itemIndex) => (
                                 <div
                                   key={`${item.id ?? item.title}-${itemIndex}`}
                                   role={item.id ? "button" : undefined}
@@ -467,7 +466,6 @@ export function Calendar() {
                                   {item.id ? <button type="button" onMouseDown={(event) => event.stopPropagation()} onClick={(event) => requestDelete(item, event)} aria-label={pendingDeleteId === item.id ? `${item.title} 삭제 확인` : `${item.title} 삭제`} className={`absolute right-1 top-1 inline-flex size-5 items-center justify-center rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] transition-opacity hover:text-[var(--destructive)] motion-reduce:transition-none ${pendingDeleteId === item.id ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"}`}><X aria-hidden="true" className="size-3" /></button> : null}
                                 </div>
                               ))}
-                              {mode === "month" && meetings.length > 2 ? <span className="text-xs font-semibold text-[var(--muted-foreground)]">+{meetings.length - 2}건</span> : null}
                             </div>
                           </div>
                         )

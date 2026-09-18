@@ -1018,7 +1018,8 @@ export function Home() {
                         <div><h3 className="text-sm font-semibold text-[var(--foreground)]">{deck.title}</h3><p className="mt-1 text-xs text-[var(--muted-foreground)]">{deck.description}</p></div>
                       </div>
                     </div>
-                    <div className="mt-4"><MaterialDeck items={deck.items} emptyMessage={deck.empty} onOpen={setSelectedMaterial} /></div>
+                    {/* 카드가 작다는 평가가 있어 HOME에서만 넓은 배치를 쓴다. 섹션 높이는 그대로다. */}
+                    <div className="mt-4"><MaterialDeck items={deck.items} emptyMessage={deck.empty} onOpen={setSelectedMaterial} layout="wide" /></div>
                     <div className="mt-4 flex justify-end"><Button type="button" variant="ghost" size="sm" onClick={() => navigate(deck.path)}>전체 보기<ArrowUpRight aria-hidden="true" /></Button></div>
                   </CardContent>
                 </Card>

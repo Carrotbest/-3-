@@ -16,7 +16,7 @@ import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore"
 import { auth, db } from "./firebase"
 import { OWNER_EMAIL } from "./app-config"
 import { departmentById } from "./departments"
-import { accessForPath, accessToScreenPermissions, canEditCacheKey, createScreenAccess, createScreenPermissions, normalizeScreenAccess, type ScreenAccess, type ScreenAccessMap, type ScreenPermissions } from "./screen-permissions"
+import { accessForPath, accessToScreenPermissions, canEditCacheKey, createScreenAccess, createScreenPermissions, normalizeScreenAccess, permissionKeyForPath, type ScreenAccess, type ScreenAccessMap, type ScreenPermissions } from "./screen-permissions"
 
 export type AuthStatus = "loading" | "signed-out" | "signed-in"
 /** 소유자는 항상 approved. 그 외는 users/{uid}.status를 따른다(문서 없으면 pending). */
@@ -117,8 +117,16 @@ export function currentUserCanEditKey(key: string): boolean {
 }
 
 /** 경로의 접근 수준. 등록되지 않은 경로는 null. 소유자는 편집. */
+const ACCESS_RANK: Record<ScreenAccess, number> = { none: 0, read: 1, edit: 2 }
+
 export function useScreenAccess(pathname: string): ScreenAccess | null {
-  return useAuthStore((state) => state.isOwner ? "edit" : accessForPath(pathname, state.access))
+  return useAuthStore((state) => {
+    if (state.isOwner) return "edit"
+    const base = accessForPath(pathname, state.access)
+    if (permissionKeyForPath(pathname) !== "warehouse") return base
+    const fabric1 = state.access.warehouseFabric1
+    return ACCESS_RANK[fabric1] > ACCESS_RANK[base ?? "none"] ? fabric1 : base
+  })
 }
 
 /** 중앙 데이터를 쓸 수 있는 사용자인지. 소유자 또는 승인된 팀원. */

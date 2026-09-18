@@ -306,6 +306,9 @@ export function httpsMaterialLink(value: string | undefined): string | undefined
 /** 대장에 없는 건을 창고 화면에서 직접 등록할 때 쓰는 출처 표시. 대장 재업로드가 지우지 않는다. */
 export const WEB_INTAKE_SHEET = "웹 등록"
 
+/** 통합원단부 1팀(디자인·마케팅 소싱) 입고 대장 행. 3팀 원단과 채번·집계를 분리하는 표시다. */
+export const FABRIC1_INTAKE_SHEET = "1팀 입고"
+
 export interface CompletedSample {
   /** 웹 저장용 고유 키. 엑셀 재업로드 없이도 유지되도록 파싱 시 부여한다(completedSampleId). */
   id?: string

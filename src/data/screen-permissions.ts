@@ -4,6 +4,10 @@ export const SCREEN_PERMISSION_OPTIONS = [
   { key: "development", label: "DEVELOPMENT", paths: ["/development"] },
   { key: "ddMaster", label: "DD MASTER", prefixes: ["/development/"] },
   { key: "warehouse", label: "WAREHOUSE", paths: ["/warehouse"], prefixes: ["/fabric/"] },
+  // 창고 화면 안에서 1팀 원단 스코프만 지배한다. 경로가 없어 라우팅에는 영향을 주지 않는다.
+  { key: "warehouseFabric1", label: "WAREHOUSE (1팀)" },
+  // 출고 요청 메일은 데이터를 저장하지 않는 기능이라 편집 권한과 별도로 둔다.
+  { key: "warehouseOutbound", label: "출고 요청 메일" },
   { key: "ts", label: "TROUBLE SHOOTING", paths: ["/ts"] },
   { key: "study", label: "TECHNICAL REFERENCES", paths: ["/study"] },
   { key: "rdda", label: "RDDA REPORT", paths: ["/rdda"] },
@@ -63,12 +67,12 @@ export const ACCESS_LABELS: Record<ScreenAccess, string> = { none: "없음", rea
 
 /** 권한 표에 보이는 묶음. SETTING은 소유자 전용이라 표에 넣지 않는다. excelBackup은 기능이라 허용/차단 두 단계다. */
 export const ACCESS_GROUPS: { label: string; keys: ScreenPermissionKey[] }[] = [
-  { label: "업무", keys: ["home", "fabricRequest", "development", "ddMaster", "warehouse", "calendar"] },
+  { label: "업무", keys: ["home", "fabricRequest", "development", "ddMaster", "warehouse", "warehouseFabric1", "calendar"] },
   { label: "분석·자료", keys: ["rdda", "fabricAnalysis", "fabricTrend", "portfolio", "processInnovation", "ts", "study"] },
-  { label: "기능", keys: ["excelBackup"] },
+  { label: "기능", keys: ["excelBackup", "warehouseOutbound"] },
 ]
 
-export const FEATURE_KEYS: readonly ScreenPermissionKey[] = ["excelBackup"]
+export const FEATURE_KEYS: readonly ScreenPermissionKey[] = ["excelBackup", "warehouseOutbound"]
 
 export function createScreenAccess(level: ScreenAccess): ScreenAccessMap {
   return Object.fromEntries(SCREEN_PERMISSION_OPTIONS.map((option) => [option.key, option.key === "setting" ? "none" : level])) as ScreenAccessMap
@@ -103,9 +107,9 @@ export function accessToScreenPermissions(access: ScreenAccessMap): ScreenPermis
 export const CACHE_KEY_SCREENS: Record<string, readonly ScreenPermissionKey[]> = {
   records: ["ddMaster", "development"],
   meta: ["ddMaster", "development"],
-  completed: ["warehouse", "ddMaster"],
-  fabricOverrides: ["warehouse", "ddMaster"],
-  fabricEvents: ["warehouse", "ddMaster"],
+  completed: ["warehouse", "ddMaster", "warehouseFabric1"],
+  fabricOverrides: ["warehouse", "ddMaster", "warehouseFabric1"],
+  fabricEvents: ["warehouse", "ddMaster", "warehouseFabric1"],
   disposalRounds: ["warehouse"],
   requests: ["fabricRequest"],
   requestBoards: ["fabricRequest"],

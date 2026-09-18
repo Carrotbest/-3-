@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode , type CSSProperties } from "react"
 import * as Popover from "@radix-ui/react-popover"
-import { ArchiveRestore, ClipboardList, Copy, DatabaseBackup, FileDown, Info, LayoutGrid, ListX, Loader2, Mail, PackageCheck, PackageOpen, PackageX, Pencil, Rows3, Search, Send, Trash2 } from "lucide-react"
+import { ArchiveRestore, ClipboardList, Copy, DatabaseBackup, Eye, FileDown, Info, LayoutGrid, ListX, Loader2, Mail, PackageCheck, PackageOpen, PackageX, Pencil, Rows3, Search, Send, Trash2 } from "lucide-react"
 import { InboundRequestMailDialog } from "@/components/warehouse/InboundRequestMailDialog"
 import { RackMap } from "@/components/warehouse/RackMap"
 import { DisposalRoundPanel } from "@/components/warehouse/DisposalRoundPanel"
@@ -28,7 +28,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { buildFabricLedger, fabricRecordIdentity, STORAGE_NO_MAX, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
+import { buildFabricLedger, FABRIC1_STORAGE_NO_MIN, fabricRecordIdentity, isFabric1Item, STORAGE_NO_MAX, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
@@ -38,6 +38,7 @@ import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED, type Index
 import { buildWarehouseWorkbook, collectWarehouseExport, warehouseExportFileName } from "@/data/warehouse-export"
 import { FabricDetailBody } from "@/routes/FabricDetail"
 import { fmtDateFull, fmtDateMd } from "@/data/format"
+import { rddaProductionType } from "@/data/derive"
 import type { FabricLedgerStatus } from "@/data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
 import { checkWarehouseFlEntry, needsFlConfirm, type WarehouseFlCheck } from "@/data/warehouse-fl-check"
@@ -62,7 +63,7 @@ const TAB_META: Record<WarehouseTab, { label: string; description: string }> = {
 
 type WarehouseColumnId = "storageNo" | "styleNo" | "flNo" | "owner" | "stock" | "confirm" | "rackNo"
   | "season" | "buyer" | "category" | "requestDate" | "completedAt"
-  | "originalRef" | "planner" | "yarnDetail" | "construction" | "weight" | "color" | "dyeing" | "dueDate"
+  | "originalRef" | "planner" | "yarnDetail" | "construction" | "content" | "weight" | "color" | "dyeing" | "flSource" | "supplier" | "priceYd" | "priceLb" | "dueDate"
   | "yarnMill" | "yarnDate" | "knittingMill" | "knittingDate" | "dyeingMill" | "dyeingDate" | "finishingMill" | "finishingDate"
   | "actualWidth" | "actualWeight" | "shrinkageLength" | "shrinkageWidth"
   | "knitInch" | "knitGauge" | "knitNeedles" | "loopF" | "loopT" | "loopB"
@@ -103,11 +104,16 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
     { id: "flNo", label: "FL.#", width: 100 },
     { id: "yarnDetail", label: "Yarn", width: 220 },
     { id: "construction", label: "Cons.", width: 124 },
+    { id: "content", label: "Content", width: 200 },
     { id: "weight", label: "Target wt'", width: 80 },
     { id: "actualWidth", label: "Final 폭", width: 76 },
     { id: "actualWeight", label: "Final 중량", width: 82 },
     { id: "color", label: "Color", width: 104 },
     { id: "dyeing", label: "Dyeing Side", width: 88 },
+    { id: "flSource", label: "구분", width: 84 },
+    { id: "supplier", label: "공급처", width: 150 },
+    { id: "priceYd", label: "Price ($/YD)", width: 88 },
+    { id: "priceLb", label: "Price ($/LB)", width: 88 },
     { id: "requestDate", label: "Request Date", width: 88 },
   ] },
   { key: "process", label: "공정", color: "var(--warning)", collapsible: true, columns: [
@@ -148,12 +154,14 @@ const WH_OPEN_GROUPS_KEY = "warehouse-open-groups-v1"
 const MIN_COL_WIDTH = 48
 
 /** 행 높이가 h-8 로 고정이라 보이는 구간만 그리면 된다. 이력 탭은 4,400행이 넘는다. */
-const MANUAL_EDITABLE = new Set(["styleNo", "flNo", "buyer", "season", "category", "owner", "construction", "note", "originalRef", "planner", "yarnDetail", "color", "dyeing"])
+const MANUAL_EDITABLE = new Set(["styleNo", "flNo", "buyer", "season", "category", "owner", "construction", "content", "priceYd", "priceLb", "supplier", "note", "originalRef", "planner", "yarnDetail", "color", "dyeing"])
+const FABRIC1_ONLY_COLUMNS = new Set<WarehouseColumnId>(["content", "flSource", "supplier", "priceYd", "priceLb"])
 
 const ROW_HEIGHT = 32
 const ROW_OVERSCAN = 12
 
 const TAB_ORDER: WarehouseTab[] = ["READY", "WAREHOUSE", "HISTORY"]
+const TAB_ORDER_TEAM1: WarehouseTab[] = ["WAREHOUSE", "HISTORY"]
 const TAB_STATUSES: Record<WarehouseTab, readonly FabricLedgerStatus[]> = {
   READY: ["READY"],
   WAREHOUSE: ["WAREHOUSE"],
@@ -161,10 +169,10 @@ const TAB_STATUSES: Record<WarehouseTab, readonly FabricLedgerStatus[]> = {
 }
 
 /** 탭·상태별 고정 액센트. 모든 탭에서 열 구성이 같으므로 색으로만 맥락을 구분한다. */
-const TAB_ACCENT: Record<WarehouseTab, { fill: string; dot: string; active: string; badge: string; bar: string; drop: string; rowBar: string; borderTop: string; headBg: string; toolbarBg: string }> = {
-  READY: { fill: "bg-[var(--warning)]", dot: "bg-[var(--warning)]", active: "data-[state=active]:bg-[var(--warning)] data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:font-semibold", badge: "bg-[color-mix(in_srgb,var(--warning)_15%,transparent)] text-[var(--warning)] group-data-[state=active]/tab:bg-white/25 group-data-[state=active]/tab:text-white", bar: "bg-[var(--warning)]", drop: "ring-2 ring-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_15%,transparent)]", rowBar: "border-l-[var(--warning)]", borderTop: "border-t-[var(--warning)]", headBg: "color-mix(in srgb, var(--warning) 16%, var(--card))", toolbarBg: "color-mix(in srgb, var(--warning) 7%, var(--card))" },
-  WAREHOUSE: { fill: "bg-[var(--chart-2)]", dot: "bg-[var(--chart-2)]", active: "data-[state=active]:bg-[var(--chart-2)] data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:font-semibold", badge: "bg-[color-mix(in_srgb,var(--chart-2)_15%,transparent)] text-[var(--chart-2)] group-data-[state=active]/tab:bg-white/25 group-data-[state=active]/tab:text-white", bar: "bg-[var(--chart-2)]", drop: "ring-2 ring-[var(--chart-2)] bg-[color-mix(in_srgb,var(--chart-2)_15%,transparent)]", rowBar: "border-l-[var(--chart-2)]", borderTop: "border-t-[var(--chart-2)]", headBg: "color-mix(in srgb, var(--chart-2) 16%, var(--card))", toolbarBg: "color-mix(in srgb, var(--chart-2) 7%, var(--card))" },
-  HISTORY: { fill: "bg-[var(--muted-foreground)]", dot: "bg-[var(--muted-foreground)]", active: "data-[state=active]:bg-[var(--muted-foreground)] data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:font-semibold", badge: "bg-[color-mix(in_srgb,var(--muted-foreground)_15%,transparent)] text-[var(--foreground)] group-data-[state=active]/tab:bg-white/25 group-data-[state=active]/tab:text-white", bar: "bg-[var(--muted-foreground)]", drop: "ring-2 ring-[var(--muted-foreground)] bg-[color-mix(in_srgb,var(--muted-foreground)_15%,transparent)]", rowBar: "border-l-[var(--muted-foreground)]", borderTop: "border-t-[var(--muted-foreground)]", headBg: "color-mix(in srgb, var(--muted-foreground) 16%, var(--card))", toolbarBg: "color-mix(in srgb, var(--muted-foreground) 7%, var(--card))" },
+const TAB_ACCENT: Record<WarehouseTab, { fill: string; dot: string; active: string; badge: string; bar: string; drop: string; rowBar: string; borderTop: string; headBg: string }> = {
+  READY: { fill: "bg-[var(--warning)]", dot: "bg-[var(--warning)]", active: "data-[state=active]:bg-[var(--warning)] data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:font-semibold", badge: "bg-[color-mix(in_srgb,var(--warning)_15%,transparent)] text-[var(--warning)] group-data-[state=active]/tab:bg-white/25 group-data-[state=active]/tab:text-white", bar: "bg-[var(--warning)]", drop: "ring-2 ring-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_15%,transparent)]", rowBar: "border-l-[var(--warning)]", borderTop: "border-t-[var(--warning)]", headBg: "color-mix(in srgb, var(--warning) 16%, var(--card))" },
+  WAREHOUSE: { fill: "bg-[var(--chart-2)]", dot: "bg-[var(--chart-2)]", active: "data-[state=active]:bg-[var(--chart-2)] data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:font-semibold", badge: "bg-[color-mix(in_srgb,var(--chart-2)_15%,transparent)] text-[var(--chart-2)] group-data-[state=active]/tab:bg-white/25 group-data-[state=active]/tab:text-white", bar: "bg-[var(--chart-2)]", drop: "ring-2 ring-[var(--chart-2)] bg-[color-mix(in_srgb,var(--chart-2)_15%,transparent)]", rowBar: "border-l-[var(--chart-2)]", borderTop: "border-t-[var(--chart-2)]", headBg: "color-mix(in srgb, var(--chart-2) 16%, var(--card))" },
+  HISTORY: { fill: "bg-[var(--muted-foreground)]", dot: "bg-[var(--muted-foreground)]", active: "data-[state=active]:bg-[var(--muted-foreground)] data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:font-semibold", badge: "bg-[color-mix(in_srgb,var(--muted-foreground)_15%,transparent)] text-[var(--foreground)] group-data-[state=active]/tab:bg-white/25 group-data-[state=active]/tab:text-white", bar: "bg-[var(--muted-foreground)]", drop: "ring-2 ring-[var(--muted-foreground)] bg-[color-mix(in_srgb,var(--muted-foreground)_15%,transparent)]", rowBar: "border-l-[var(--muted-foreground)]", borderTop: "border-t-[var(--muted-foreground)]", headBg: "color-mix(in srgb, var(--muted-foreground) 16%, var(--card))" },
 }
 
 const GRIP_WIDTH = 42
@@ -237,7 +245,7 @@ function occupiedStorageNumbers(items: readonly FabricLedgerItem[]): Set<number>
   const used = new Set<number>()
   items.forEach((item) => {
     if (item.status !== "WAREHOUSE") return
-    const matched = item.storageNo.trim().match(/^\d{1,4}(?!\d)/)?.[0]
+    const matched = item.storageNo.trim().match(/^\d{1,5}(?!\d)/)?.[0]
     if (matched) used.add(Number(matched))
   })
   return used
@@ -248,22 +256,29 @@ function lastIssuedStorageNumber(items: readonly FabricLedgerItem[]): number {
   let last = 0
   items.forEach((item) => {
     if (item.status !== "WAREHOUSE") return
-    const matched = item.storageNo.trim().match(/^\d{1,4}(?!\d)/)?.[0]
+    const matched = item.storageNo.trim().match(/^\d{1,5}(?!\d)/)?.[0]
     if (matched) last = Number(matched)
   })
   return last
 }
 
-function nextStorageNumbers(items: readonly FabricLedgerItem[], count: number): number[] {
-  const used = occupiedStorageNumbers(items)
+function nextStorageNumbers(items: readonly FabricLedgerItem[], count: number, scope: "team3" | "team1" = "team3"): number[] {
+  const scoped = items.filter((item) => isFabric1Item(item) === (scope === "team1"))
+  const used = occupiedStorageNumbers(scoped)
   const picked: number[] = []
   const take = (candidate: number) => {
     if (used.has(candidate)) return
     picked.push(candidate)
     used.add(candidate)
   }
+  if (scope === "team1") {
+    // 1팀은 되감지 않는다. 마지막 번호 다음부터 계속 올린다. 상한이 없다.
+    const last = Math.max(FABRIC1_STORAGE_NO_MIN - 1, ...[...used])
+    for (let candidate = last + 1; picked.length < count; candidate += 1) take(candidate)
+    return picked
+  }
   // 마지막 채번 다음부터 위로 채우고, 7999 를 넘기면 비어 있는 낮은 번호로 되감는다.
-  for (let candidate = lastIssuedStorageNumber(items) + 1; candidate <= STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
+  for (let candidate = lastIssuedStorageNumber(scoped) + 1; candidate <= STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
   for (let candidate = 1; candidate <= STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
   return picked
 }
@@ -315,9 +330,18 @@ function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
     case "planner": return first(record?.planner, led?.planner)
     case "yarnDetail": return first(record?.tech?.yarnDetail, led?.yarnDetail)
     case "construction": return first(record?.construction, item.construction)
+    case "content": return item.fields.content ?? ""
     case "weight": return first(record?.weight, led?.targetWeight)
     case "color": return first(record?.color, led?.color)
     case "dyeing": return first(record?.dyeing, led?.dyeingSide)
+    case "flSource": {
+      if (!item.flNo.trim()) return ""
+      const type = rddaProductionType(item.flNo)
+      return type === "gd" ? "GD개발" : type === "purchase" ? "완사입" : type === "production" ? "생산팀" : type === "domestic" ? "자체개발" : "기타"
+    }
+    case "supplier": return item.fields.supplier ?? ""
+    case "priceYd": return item.fields.priceYd ?? ""
+    case "priceLb": return item.fields.priceLb ?? ""
     case "dueDate": return first(record?.dueDate, led?.dueDate)
     case "yarnMill": return first(record?.tech?.mills?.yarn, led?.mills?.yarn)
     case "yarnDate": return first(record?.tech?.processDates?.yarn, sam?.process.yarn)
@@ -376,12 +400,12 @@ function KpiBar({ pct, className }: { pct: number; className: string }) {
   )
 }
 
-/** 3개 조회 탭 비율 스택바 — 세그먼트를 누르면 해당 탭으로 이동한다. */
-function StatusMixBar({ counts, total, onPick }: { counts: Record<WarehouseTab, number>; total: number; onPick: (tab: WarehouseTab) => void }) {
+/** 조회 탭 비율 스택바 — 세그먼트를 누르면 해당 탭으로 이동한다. */
+function StatusMixBar({ counts, total, tabs, onPick }: { counts: Record<WarehouseTab, number>; total: number; tabs: readonly WarehouseTab[]; onPick: (tab: WarehouseTab) => void }) {
   const { ref, inView } = useInView<HTMLDivElement>({ once: true, threshold: 0.2 })
   return (
-    <div ref={ref} className="flex h-2.5 w-full overflow-hidden rounded-full bg-[var(--muted)]" role="img" aria-label={`상태 분포 — ${TAB_ORDER.map((key) => `${TAB_META[key].label} ${counts[key]}건`).join(", ")}`}>
-      {TAB_ORDER.map((key) => (
+    <div ref={ref} className="flex h-2.5 w-full overflow-hidden rounded-full bg-[var(--muted)]" role="img" aria-label={`상태 분포 — ${tabs.map((key) => `${TAB_META[key].label} ${counts[key]}건`).join(", ")}`}>
+      {tabs.map((key) => (
         <button
           key={key}
           type="button"
@@ -400,6 +424,16 @@ function StatusMixBar({ counts, total, onPick }: { counts: Record<WarehouseTab, 
 export function Warehouse() {
   const perfIndex = usePerformanceIndex()
   perfIndexForCells = perfIndex
+  const access = useAuthStore((state) => state.access)
+  const isOwner = useAuthStore((state) => state.isOwner)
+  const canSeeTeam3 = isOwner || access.warehouse !== "none"
+  const canSeeTeam1 = isOwner || access.warehouseFabric1 !== "none"
+  const [teamScope, setTeamScope] = useState<"team3" | "team1">(() => canSeeTeam3 ? "team3" : "team1")
+  const scopeAccess = teamScope === "team1" ? access.warehouseFabric1 : access.warehouse
+  /** 지금 보고 있는 스코프를 고칠 수 있는가. 버튼과 표 편집은 모두 이 값을 본다. */
+  const canEditScope = isOwner || scopeAccess === "edit"
+  /** 출고 요청 메일은 데이터를 저장하지 않는 기능이라 편집과 별도로 본다. */
+  const canRequestOutbound = isOwner || access.warehouseOutbound !== "none"
   const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
   // 출고 요청 메일 초안(C형). 요청자 기본값은 로그인 표시 이름, 없으면 이메일 앞부분이다.
   const [outboundMailOpen, setOutboundMailOpen] = useState(false)
@@ -409,7 +443,6 @@ export function Warehouse() {
   const [rackView, setRackView] = useState(false)
   const [disposalView, setDisposalView] = useState(false)
   const authUser = useAuthStore((state) => state.user)
-  const isOwner = useAuthStore((state) => state.isOwner)
   const canWrite = useAuthStore((state) => state.isOwner || (state.status === "signed-in" && state.approval === "approved"))
   const defaultRequester = useAuthStore((state) => state.user?.displayName || state.user?.email?.split("@")[0] || "")
   const records = useAppStore((state) => state.records)
@@ -418,6 +451,13 @@ export function Warehouse() {
   const fabricEvents = useAppStore((state) => state.fabricEvents)
   const disposalRounds = useAppStore((state) => state.disposalRounds)
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents), [fabricEvents, overrides, records, samples])
+  const scopedLedger = useMemo(() => ledger.filter((item) => isFabric1Item(item) === (teamScope === "team1")), [ledger, teamScope])
+  /** 3팀 번호 순환을 전제하는 곳(폐기 라운드)이 쓰는 목록. 팀 전환과 무관하게 항상 3팀만이다. */
+  const team3Ledger = useMemo(() => ledger.filter((item) => !isFabric1Item(item)), [ledger])
+  useEffect(() => {
+    if (!canSeeTeam3 && canSeeTeam1 && teamScope === "team3") setTeamScope("team1")
+    else if (!canSeeTeam1 && canSeeTeam3 && teamScope === "team1") setTeamScope("team3")
+  }, [canSeeTeam1, canSeeTeam3, teamScope])
   const recordIdBackfillRef = useRef(false)
   useEffect(() => {
     if (!canWrite || recordIdBackfillRef.current) return
@@ -448,8 +488,8 @@ export function Warehouse() {
   const exportRangeError = exportDayCount > 31 ? "기간이 너무 깁니다. 31일 이내로 좁혀 주세요."
     : exportDayCount <= 0 ? "시작일과 종료일을 올바르게 지정해 주세요." : ""
   const exportData = useMemo(() => exportOpen && !exportRangeError
-    ? collectWarehouseExport(fabricEvents, ledger, exportDates.from, exportDates.to) : null,
-  [exportOpen, exportRangeError, fabricEvents, ledger, exportDates.from, exportDates.to])
+    ? collectWarehouseExport(fabricEvents, scopedLedger, exportDates.from, exportDates.to) : null,
+  [exportOpen, exportRangeError, fabricEvents, scopedLedger, exportDates.from, exportDates.to])
   const runExport = async () => {
     if (!exportData || exportBusy) return
     setExportBusy(true)
@@ -462,6 +502,7 @@ export function Warehouse() {
     } finally { setExportBusy(false) }
   }
   const [tab, setTab] = useState<WarehouseTab>("READY")
+  const tabOrder = teamScope === "team1" ? TAB_ORDER_TEAM1 : TAB_ORDER
   // 펼침/접힘은 개인 브라우저에 남는다. 팀원 화면에는 영향을 주지 않는다.
   const [openGroups, setOpenGroups] = useState(() => loadViewGroups(WH_OPEN_GROUPS_KEY, { process: true, rdda: true }))
   useEffect(() => { saveViewPref(WH_OPEN_GROUPS_KEY, openGroups) }, [openGroups])
@@ -565,15 +606,15 @@ export function Warehouse() {
   const rangeDraggingRef = useRef(false)
   const suppressClickRef = useRef(false)
 
-  const counts = useMemo(() => Object.fromEntries(TAB_ORDER.map((key) => [key, ledger.filter((item) => TAB_STATUSES[key].includes(item.status)).length])) as Record<WarehouseTab, number>, [ledger])
+  const counts = useMemo(() => Object.fromEntries(TAB_ORDER.map((key) => [key, scopedLedger.filter((item) => TAB_STATUSES[key].includes(item.status)).length])) as Record<WarehouseTab, number>, [scopedLedger])
   /** 되감기 지점은 검색·필터와 무관하게 창고 보관 전체 번호로 정한다. */
   const sequenceStart = useMemo(
-    () => warehouseSequenceStart(ledger.filter((item) => item.status === "WAREHOUSE").map(storageNumberOf).filter((value): value is number => value !== null)),
+    () => warehouseSequenceStart(ledger.filter((item) => item.status === "WAREHOUSE" && !isFabric1Item(item)).map(storageNumberOf).filter((value): value is number => value !== null)),
     [ledger],
   )
   const rows = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("ko-KR")
-    return ledger.filter((item) => TAB_STATUSES[tab].includes(item.status))
+    return scopedLedger.filter((item) => TAB_STATUSES[tab].includes(item.status))
       .filter((item) => !(unconfirmedOnly && tab === "WAREHOUSE") || !item.confirmedAt)
       .filter((item) => !query || [
       item.storageNo, item.styleNo, item.flNo, item.season, item.category, item.buyer, item.owner,
@@ -583,7 +624,7 @@ export function Warehouse() {
       item.record?.color, item.record?.dyeing, item.record?.dueDate,
       ...item.outbound.flatMap((outbound) => [outbound.to, outbound.division]),
     ].some((value) => String(value ?? "").toLocaleLowerCase("ko-KR").includes(query)))
-  }, [ledger, search, tab, unconfirmedOnly])
+  }, [scopedLedger, search, tab, unconfirmedOnly])
 
   // 원단별로 이력(소진·폐기)에 들어간 마지막 시각. 기록 시각(recordedAt)을 먼저 본다. 출고일(occurredAt)은 사람이 고른 날짜다.
   const historyEnteredAt = useMemo(() => {
@@ -618,16 +659,22 @@ export function Warehouse() {
         return [...legacy, ...moved]
       }
       if (tab !== "WAREHOUSE") return filtered
+      if (teamScope === "team1") {
+        return [...filtered].sort((left, right) => (storageNumberOf(left) ?? Number.MAX_SAFE_INTEGER) - (storageNumberOf(right) ?? Number.MAX_SAFE_INTEGER))
+      }
       return [...filtered].sort((left, right) => warehouseOrderKey(left, sequenceStart) - warehouseOrderKey(right, sequenceStart))
     }
     const direction = sortRule.dir === "asc" ? 1 : -1
     if (sortRule.col.startsWith("perf")) return [...filtered].sort((left, right) => direction * (perfSortValue(left, sortRule.col) - perfSortValue(right, sortRule.col)))
     return [...filtered].sort((left, right) =>
       direction * cellValue(left, sortRule.col).localeCompare(cellValue(right, sortRule.col), "ko-KR", { numeric: true }))
-  }, [rows, columnFilters, sortRule, tab, sequenceStart, perfIndex, historyEnteredAt])
+  }, [rows, columnFilters, sortRule, tab, teamScope, sequenceStart, perfIndex, historyEnteredAt])
   const divisionSuggestions = useMemo(() => [...new Set(fabricEvents.map((event) => event.division?.trim()).filter((value): value is string => Boolean(value)))].sort((left, right) => left.localeCompare(right, "ko-KR", { numeric: true })), [fabricEvents])
   // 입고 대기에서는 R&D No., 재고, 입고확인이 아직 의미가 없어 고정 열을 숨긴다. Rack No.는 창고보관 탭에서만 보인다.
-  const visibleGroups = COLUMN_GROUPS
+  const scopeGroups = COLUMN_GROUPS
+    .filter((group) => teamScope !== "team1" || (group.key !== "process" && group.key !== "rdda"))
+    .map((group) => teamScope === "team1" ? group : { ...group, columns: group.columns.filter((column) => !FABRIC1_ONLY_COLUMNS.has(column.id)) })
+  const visibleGroups = scopeGroups
     .filter((group) => !group.collapsible || openGroups[group.key as keyof typeof openGroups])
     .map((group) => group.key !== "fixed" ? group : { ...group, columns: group.columns.filter((column) => tab !== "READY" && (column.id !== "rackNo" || tab === "WAREHOUSE")) })
     .filter((group) => group.columns.length > 0)
@@ -635,7 +682,7 @@ export function Warehouse() {
   const fixedColumns = visibleColumns.filter((column) => COLUMN_GROUPS[0].columns.some((fixed) => fixed.id === column.id))
   const groupedColumns = visibleGroups.filter((group) => group.key !== "fixed")
   const tableWidth = GRIP_WIDTH + ACTION_WIDTH + visibleColumns.reduce((sum, column) => sum + widthOf(column), 0)
-  const ledgerByKey = useMemo(() => new Map(ledger.map((item) => [item.key, item])), [ledger])
+  const ledgerByKey = useMemo(() => new Map(scopedLedger.map((item) => [item.key, item])), [scopedLedger])
   const outboundHistoryItem = outboundHistoryKey ? ledgerByKey.get(outboundHistoryKey) ?? null : null
   const actionItems = actionDialog?.keys.map((key) => ledgerByKey.get(key)).filter((item): item is FabricLedgerItem => Boolean(item)) ?? []
   const selectedRows = rows.filter((item) => checked.has(item.key))
@@ -649,11 +696,11 @@ export function Warehouse() {
 
   // KPI — 탭 badge와 겹치지 않는 재고·출고 관점 지표.
   const kpi = useMemo(() => {
-    const stored = ledger.filter((item) => item.status === "WAREHOUSE")
+    const stored = scopedLedger.filter((item) => item.status === "WAREHOUSE")
     const stockTotal = stored.reduce((sum, item) => sum + (item.yds ?? 0), 0)
     const balanceTotal = stored.reduce((sum, item) => sum + (item.balance ?? 0), 0)
-    const outboundTotal = ledger.reduce((sum, item) => sum + item.outboundTotal, 0)
-    const outboundCount = ledger.reduce((sum, item) => sum + item.outbound.length, 0)
+    const outboundTotal = scopedLedger.reduce((sum, item) => sum + item.outboundTotal, 0)
+    const outboundCount = scopedLedger.reduce((sum, item) => sum + item.outbound.length, 0)
     const missingStock = stored.filter((item) => item.yds === null).length
     const shipped = stockTotal + outboundTotal
     // 창고보관 중인 RDDA 성과 원단(R211). 3팀 담당 FL만 집계된다.
@@ -669,9 +716,11 @@ export function Warehouse() {
       outboundCount,
       missingStock,
       usedPct: shipped > 0 ? (outboundTotal / shipped) * 100 : 0,
-      nextNo: String(nextStorageNumbers(ledger, 1)[0] ?? 0).padStart(4, "0"),
+      nextNo: teamScope === "team3"
+        ? String(nextStorageNumbers(ledger, 1, teamScope)[0] ?? 0).padStart(4, "0")
+        : String(nextStorageNumbers(ledger, 1, teamScope)[0] ?? ""),
     }
-  }, [ledger, perfIndex])
+  }, [ledger, scopedLedger, perfIndex, teamScope])
 
   useEffect(() => {
     const finish = () => {
@@ -774,6 +823,16 @@ export function Warehouse() {
     setDisposalReason("")
   }
 
+  const changeTeamScope = (next: "team3" | "team1") => {
+    setTeamScope(next)
+    setRackView(false)
+    setDisposalView(false)
+    setChecked(new Set())
+    setColumnFilters({})
+    setSortRule(null)
+    if (next === "team1" && tab === "READY") setTab("WAREHOUSE")
+  }
+
   const stopAndOpen = (event: MouseEvent, kind: ActionKind, item: FabricLedgerItem) => {
     event.stopPropagation()
     openAction(kind, [item])
@@ -785,18 +844,22 @@ export function Warehouse() {
     setSaving(true)
     try {
       if (actionDialog.kind === "RECEIVE") {
-        const auto = nextStorageNumbers(ledger, actionItems.length)
+        const auto = nextStorageNumbers(ledger, actionItems.length, teamScope)
         if (auto.length < actionItems.length) throw new Error("사용할 수 있는 R&D No.가 부족합니다. 번호를 직접 입력하세요.")
         const taken = occupiedStorageNumbers(ledger)
         const assigned = actionItems.map((item, index) => {
-          const raw = (receiveNos[item.key] ?? String(auto[index]).padStart(4, "0")).trim()
+          const raw = (receiveNos[item.key] ?? (teamScope === "team3" ? String(auto[index]).padStart(4, "0") : String(auto[index]))).trim()
           const num = Number(raw)
-          if (!/^\d{1,4}$/.test(raw) || !Number.isInteger(num) || num < 1 || num > STORAGE_NO_MAX) {
-            throw new Error(`R&D No. 는 1부터 ${STORAGE_NO_MAX} 사이여야 합니다. 8000번대는 타 사업부 대역입니다.`)
+          const okTeam3 = /^\d{1,4}$/.test(raw) && Number.isInteger(num) && num >= 1 && num <= STORAGE_NO_MAX
+          const okTeam1 = /^\d{4,5}$/.test(raw) && Number.isInteger(num) && num >= FABRIC1_STORAGE_NO_MIN
+          if (teamScope === "team1" ? !okTeam1 : !okTeam3) {
+            throw new Error(teamScope === "team1"
+              ? `R&D No. 는 ${FABRIC1_STORAGE_NO_MIN} 이상이어야 합니다.`
+              : `R&D No. 는 1부터 ${STORAGE_NO_MAX} 사이여야 합니다. 8000번대는 1팀 대역입니다.`)
           }
           if (taken.has(num)) throw new Error(`R&D No. ${raw} 는 이미 창고에 있습니다.`)
           taken.add(num)
-          return raw.padStart(4, "0")
+          return teamScope === "team3" ? raw.padStart(4, "0") : raw
         })
         const parsedYds = actionItems.map((item) => {
           const raw = receiveYds[item.key]?.trim() ?? ""
@@ -899,6 +962,10 @@ export function Warehouse() {
       case "category": return item.category
       case "owner": return item.owner
       case "construction": return item.construction
+      case "content": return item.fields.content ?? ""
+      case "priceYd": return item.fields.priceYd ?? ""
+      case "priceLb": return item.fields.priceLb ?? ""
+      case "supplier": return item.fields.supplier ?? ""
       case "note": return item.note
       case "originalRef": return led?.originalRef ?? ""
       case "planner": return led?.planner ?? ""
@@ -936,6 +1003,7 @@ export function Warehouse() {
     if (id === "category") return <TextCell value={cellValue(item, "category")} />
     if (id === "requestDate") return <TextCell value={item.requestDate ? fmtDateMd(item.requestDate) : ""} />
     if (id === "completedAt") return <TextCell value={item.completedAt ? fmtDateMd(item.completedAt) : ""} />
+    if (FABRIC1_ONLY_COLUMNS.has(id)) return <TextCell value={cellValue(item, id)} />
 
     // 대장 값이 기준이다. DD는 대장 칸이 비었을 때만 채운다.
     const record = item.record
@@ -977,6 +1045,7 @@ export function Warehouse() {
   }
 
   const actionCell = (item: FabricLedgerItem) => {
+    if (!canEditScope) return <span className="text-xs text-[var(--muted-foreground)]">보기</span>
     if (item.status === "READY") return <span className="text-xs text-[var(--muted-foreground)]">선택 처리</span>
     if (item.status === "WAREHOUSE") return <div className="flex items-center justify-end gap-1" onClick={(event) => event.stopPropagation()}>
       <Button type="button" size="icon" variant="outline" className="size-7" title="재고 기입·수정" aria-label={`${item.styleNo} 재고 기입·수정`} onClick={(event) => stopAndOpen(event, "STOCK", item)}><Pencil /></Button>
@@ -1005,9 +1074,9 @@ export function Warehouse() {
           : actionDialog?.kind === "EXHAUST" ? "소진 완료"
             : "상태 복구"
 
-  const unconfirmedCount = useMemo(() => ledger.filter((item) => item.status === "WAREHOUSE" && !item.confirmedAt).length, [ledger])
+  const unconfirmedCount = useMemo(() => scopedLedger.filter((item) => item.status === "WAREHOUSE" && !item.confirmedAt).length, [scopedLedger])
 
-  const storedItems = useMemo(() => ledger.filter((item) => item.status === "WAREHOUSE"), [ledger])
+  const storedItems = useMemo(() => scopedLedger.filter((item) => item.status === "WAREHOUSE"), [scopedLedger])
 
   /** 배치도 칸에서 창고보관 목록으로 넘어간다. Rack No. 열 필터 하나만 걸어 머리 ▼ 메뉴에서 바로 풀 수 있다. */
   const openRackSlot = (rackNo: string) => {
@@ -1018,15 +1087,15 @@ export function Warehouse() {
   }
 
   const inboundMailItems = useMemo(() => {
-    const byKey = new Map(ledger.map((item) => [item.key, item]))
+    const byKey = new Map(scopedLedger.map((item) => [item.key, item]))
     return inboundMailKeys.map((key) => byKey.get(key)).filter((item): item is FabricLedgerItem => Boolean(item))
-  }, [ledger, inboundMailKeys])
+  }, [scopedLedger, inboundMailKeys])
 
-  const suggestedNos = useMemo(() => nextStorageNumbers(ledger, actionItems.length), [ledger, actionItems.length])
+  const suggestedNos = useMemo(() => nextStorageNumbers(ledger, actionItems.length, teamScope), [ledger, actionItems.length, teamScope])
   const storageNoFor = (index: number): string =>
-    receiveNos[actionItems[index]?.key ?? ""] ?? String(suggestedNos[index] ?? "").padStart(4, "0")
+    receiveNos[actionItems[index]?.key ?? ""] ?? (teamScope === "team3" ? String(suggestedNos[index] ?? "").padStart(4, "0") : String(suggestedNos[index] ?? ""))
 
-  const totalCount = TAB_ORDER.reduce((sum, key) => sum + counts[key], 0)
+  const totalCount = tabOrder.reduce((sum, key) => sum + counts[key], 0)
 
   useEffect(() => {
     const stop = () => { cellDragRef.current = false }
@@ -1036,7 +1105,7 @@ export function Warehouse() {
       // 팝업 창 안의 키는 표에 넘기지 않는다(다른 창에서 글자를 지우다 rack 번호가 지워지지 않게).
       if (active instanceof HTMLElement && active.closest("[role=dialog]")) return
       // Delete·Backspace: 창고보관 탭에서 선택 영역이 걸친 Rack No. 칸을 지운다. Ctrl+클릭으로 더한 영역도 포함한다.
-      if ((event.key === "Delete" || event.key === "Backspace") && tab === "WAREHOUSE" && allRangeRects.length) {
+      if (canEditScope && (event.key === "Delete" || event.key === "Backspace") && tab === "WAREHOUSE" && allRangeRects.length) {
         const rackCol = visibleColumns.findIndex((column) => column.id === "rackNo")
         if (rackCol < 0) return
         const targets = new Map<string, FabricLedgerItem>()
@@ -1257,7 +1326,7 @@ export function Warehouse() {
                 <TableHead rowSpan={2} className="relative sticky top-0 z-30 border-b border-[var(--border)] px-1.5 text-right text-xs font-normal text-[var(--muted-foreground)]" style={{ background: accent.headBg }}>
                   <span>처리</span>
                   <span className="absolute right-full top-1 flex -translate-y-0 gap-1 pr-2">
-                    {COLUMN_GROUPS.filter((group) => group.collapsible && !openGroups[group.key as keyof typeof openGroups]).map((group) => <button key={group.key} type="button" aria-label={`${group.label} 열 펼치기`} aria-pressed={false} title={`${group.label} 열 펼치기`} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: true }))} className="inline-flex h-5 shrink-0 items-center gap-1 rounded border border-[var(--border)] bg-[var(--card)] px-1.5 text-[10px] font-semibold leading-none hover:bg-[var(--muted)]"><span>{group.label}</span><span aria-hidden="true">+</span></button>)}
+                    {scopeGroups.filter((group) => group.collapsible && !openGroups[group.key as keyof typeof openGroups]).map((group) => <button key={group.key} type="button" aria-label={`${group.label} 열 펼치기`} aria-pressed={false} title={`${group.label} 열 펼치기`} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: true }))} className="inline-flex h-5 shrink-0 items-center gap-1 rounded border border-[var(--border)] bg-[var(--card)] px-1.5 text-[10px] font-semibold leading-none hover:bg-[var(--muted)]"><span>{group.label}</span><span aria-hidden="true">+</span></button>)}
                   </span>
                 </TableHead>
               </TableRow>
@@ -1299,12 +1368,12 @@ export function Warehouse() {
                     ].filter(Boolean).join(", ") : ""
                     const cellActive = selectedCell?.row === item.key && selectedCell.col === column.id
                     const confirmed = Boolean(item.confirmedAt)
-                    const manualId = item.sample?.sourceSheet === WEB_INTAKE_SHEET ? item.sample.id : undefined
+                    const manualId = canEditScope && item.sample?.sourceSheet === WEB_INTAKE_SHEET ? item.sample.id : undefined
                     // Rack No.는 대장 행이든 DD 행이든 창고보관 원단이면 모두 편집한다(원단별 상태에만 저장).
-                    const rackEditable = column.id === "rackNo" && item.status === "WAREHOUSE"
+                    const rackEditable = canEditScope && column.id === "rackNo" && item.status === "WAREHOUSE"
                     const editable = rackEditable || (Boolean(manualId) && MANUAL_EDITABLE.has(column.id))
                     const editing = editable && editCell?.row === item.key && editCell.col === column.id
-                    return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; if (event.ctrlKey || event.metaKey) { if (cellRange) setExtraCellRanges((current) => [...current, cellRange]) } else setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) { setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }) } setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
+                    return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; if (event.ctrlKey || event.metaKey) { if (cellRange) setExtraCellRanges((current) => [...current, cellRange]) } else setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) { setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }) } setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (canEditScope && column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
                       ? <input
                           autoFocus
                           defaultValue={String(cellRawValue(item, column.id) ?? "")}
@@ -1350,7 +1419,7 @@ export function Warehouse() {
       <KpiTile
         label="상태 분포"
         basis="완료 샘플(DD 완료 + 샘플관리대장)을 FL 우선·Style 보조로 병합한 건수입니다. 입고대기·창고보관·이력 세 조회 구분의 합이며, 개발 진행중 건은 포함하지 않습니다."
-        footer={<StatusMixBar counts={counts} total={totalCount} onPick={changeTab} />}
+        footer={<StatusMixBar counts={counts} total={totalCount} tabs={tabOrder} onPick={changeTab} />}
       >
         <p className="flex items-baseline gap-1">
           <span className="text-2xl font-semibold tracking-tight tabular-nums"><NumberTicker value={totalCount} duration={GAUGE_MS} startOnView /></span>
@@ -1393,9 +1462,12 @@ export function Warehouse() {
     </div>
 
     <div className="flex shrink-0 items-center gap-2">
+    {canSeeTeam3 && canSeeTeam1 ? <div className="inline-flex shrink-0 rounded-md border border-[var(--border)] bg-[var(--muted)] p-0.5">
+      {(["team3", "team1"] as const).map((scope) => <button key={scope} type="button" aria-pressed={teamScope === scope} onClick={() => changeTeamScope(scope)} className={`h-7 rounded px-2.5 text-xs font-medium transition-colors ${teamScope === scope ? "bg-[var(--card)] text-[var(--foreground)] shadow-sm" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"}`}>{scope === "team3" ? "3팀 원단" : "1팀 원단"}</button>)}
+    </div> : null}
     <Tabs value={tab} onValueChange={(value) => changeTab(value as WarehouseTab)} className="min-w-0 flex-1">
       <TabsList className="flex w-full justify-start gap-1 overflow-x-auto">
-        {TAB_ORDER.map((key) => {
+        {tabOrder.map((key) => {
           return <TabsTrigger
             key={key}
             value={key}
@@ -1411,32 +1483,33 @@ export function Warehouse() {
     <Button type="button" size="sm" variant={rackView ? "default" : "outline"} className="shrink-0" aria-pressed={rackView} title="통합원단부 전용 rack 칸별 보관 현황" onClick={() => { setDisposalView(false); setRackView((current) => !current) }}>
       <LayoutGrid className="size-4" />배치도
     </Button>
-    <Button type="button" size="sm" variant={disposalView ? "default" : "outline"} className="shrink-0" aria-pressed={disposalView} onClick={() => setDisposalView(true)}>
+    {teamScope === "team3" && (isOwner || access.warehouse === "edit") ? <Button type="button" size="sm" variant={disposalView ? "default" : "outline"} className="shrink-0" aria-pressed={disposalView} onClick={() => setDisposalView(true)}>
       <ClipboardList className="size-4" />폐기 라운드{disposalRounds.some((round) => round.status !== "완료") ? <Badge variant="secondary" className="ml-1 h-5 px-1.5">{disposalRounds.filter((round) => round.status !== "완료").length}</Badge> : null}
-    </Button>
+    </Button> : null}
     <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setExportOpen(true)}>
       <FileDown className="size-4" />창고팀 자료
     </Button>
     {canBackup ? <Button type="button" size="sm" variant="outline" className="shrink-0" disabled={backupExporting} title="DD 전체와 창고 상태·이력, 샘플대장을 필드 그대로 엑셀로 내려받습니다" onClick={() => void exportBackup()}>{backupExporting ? <Loader2 className="size-4 animate-spin" /> : <DatabaseBackup className="size-4" />}엑셀 백업</Button> : null}
+    {!canEditScope && scopeAccess === "read" ? <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50/95 px-2.5 py-1 text-xs font-semibold text-sky-700"><Eye className="size-3.5" aria-hidden="true" />읽기 전용</span> : null}
     </div>
 
     {rackView ? <RackMap items={storedItems} onOpenSlot={openRackSlot} /> : <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>
-      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2" style={{ background: accent.toolbarBg }}>
+      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2">
         <label className="relative block min-w-52 flex-1"><span className="sr-only">창고 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="R&D No., Style, FL, Buyer 검색" className="pl-9" /></label>
         <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{TAB_META[tab].label} <strong className="text-[var(--foreground)]">{rows.length.toLocaleString("ko-KR")}</strong>건 · 선택 {selectedRows.length}건</span>
-        {tab === "READY" ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RECEIVE", selectedRows)}><PackageCheck />선택 입고</Button> : null}
-        {tab === "READY" ? <Button type="button" size="sm" variant="outline" onClick={async () => { await addManualIntake(); setTab("READY"); setUnconfirmedOnly(false); setSearch("") }}><Pencil />직접 추가</Button> : null}
-        {tab === "READY" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("REMOVE", selectedRows)}><ListX />선택 삭제</Button> : null}
-        {tab === "WAREHOUSE" ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("CONFIRM", selectedRows)} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-600/40 dark:bg-emerald-500 dark:hover:bg-emerald-600"><PackageCheck />입고 확인</Button> : null}
-        {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.some((item) => item.confirmedAt)} title={selectedRows.some((item) => item.confirmedAt) ? "선택한 원단의 실물 확인 표시를 지웁니다" : "확인된 원단을 먼저 선택하세요."} onClick={() => openAction("UNCONFIRM", selectedRows)}><PackageX />입고 확인 취소</Button> : null}
-        {tab === "WAREHOUSE" ? <Button type="button" size="sm" disabled={selectedRows.length !== 1} title={selectedRows.length === 1 ? undefined : "출고는 한 건씩 등록합니다."} onClick={() => openAction("OUTBOUND", selectedRows)}><Send />출고</Button> : null}
-        {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} title={selectedRows.length ? "선택한 원단의 컷팅·출고 요청 메일 초안을 만듭니다" : "요청할 원단을 먼저 선택하세요."} onClick={() => setOutboundMailOpen(true)}><Mail />출고 요청 메일</Button> : null}
-        {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("EXHAUST", selectedRows)}><PackageOpen />소진</Button> : null}
-        {tab === "READY" || tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("DISPOSE", selectedRows)}><Trash2 />폐기</Button> : null}
-        {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("UNRECEIVE", selectedRows)}><PackageOpen />입고 대기로</Button> : null}
-        {tab === "HISTORY" ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "WAREHOUSE")}><PackageCheck />창고 보관으로</Button> : null}
-        {tab === "HISTORY" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "READY")}><PackageOpen />입고 대기로</Button> : null}
-        {tab === "WAREHOUSE" && unconfirmedCount > 0 ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setBaselineOpen(true)}>전체 확인 처리</Button> : null}
+        {tab === "READY" && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RECEIVE", selectedRows)}><PackageCheck />선택 입고</Button> : null}
+        {tab === "READY" && canEditScope ? <Button type="button" size="sm" variant="outline" onClick={async () => { await addManualIntake(); setTab("READY"); setUnconfirmedOnly(false); setSearch("") }}><Pencil />직접 추가</Button> : null}
+        {tab === "READY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("REMOVE", selectedRows)}><ListX />선택 삭제</Button> : null}
+        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("CONFIRM", selectedRows)} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-600/40 dark:bg-emerald-500 dark:hover:bg-emerald-600"><PackageCheck />입고 확인</Button> : null}
+        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.some((item) => item.confirmedAt)} title={selectedRows.some((item) => item.confirmedAt) ? "선택한 원단의 실물 확인 표시를 지웁니다" : "확인된 원단을 먼저 선택하세요."} onClick={() => openAction("UNCONFIRM", selectedRows)}><PackageX />입고 확인 취소</Button> : null}
+        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" disabled={selectedRows.length !== 1} title={selectedRows.length === 1 ? undefined : "출고는 한 건씩 등록합니다."} onClick={() => openAction("OUTBOUND", selectedRows)}><Send />출고</Button> : null}
+        {tab === "WAREHOUSE" && canRequestOutbound ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} title={selectedRows.length ? "선택한 원단의 컷팅·출고 요청 메일 초안을 만듭니다" : "요청할 원단을 먼저 선택하세요."} onClick={() => setOutboundMailOpen(true)}><Mail />출고 요청 메일</Button> : null}
+        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("EXHAUST", selectedRows)}><PackageOpen />소진</Button> : null}
+        {(tab === "READY" || tab === "WAREHOUSE") && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("DISPOSE", selectedRows)}><Trash2 />폐기</Button> : null}
+        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("UNRECEIVE", selectedRows)}><PackageOpen />입고 대기로</Button> : null}
+        {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "WAREHOUSE")}><PackageCheck />창고 보관으로</Button> : null}
+        {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "READY")}><PackageOpen />입고 대기로</Button> : null}
+        {tab === "WAREHOUSE" && canEditScope && unconfirmedCount > 0 ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setBaselineOpen(true)}>전체 확인 처리</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant={unconfirmedOnly ? "default" : "outline"} aria-pressed={unconfirmedOnly} onClick={() => setUnconfirmedOnly((current) => !current)}>미확인 {unconfirmedCount}건</Button> : null}
       </div>
 
@@ -1481,7 +1554,8 @@ export function Warehouse() {
       <DialogContent className="flex h-[92vh] w-[96vw] max-w-[1800px] flex-col gap-0 overflow-hidden p-0 sm:max-w-[96vw]">
         <DialogHeader className="shrink-0 border-b border-[var(--border)] px-4 py-3"><DialogTitle>폐기 라운드</DialogTitle></DialogHeader>
         <div className="flex min-h-0 flex-1 flex-col p-3">
-          <DisposalRoundPanel ledger={ledger} sequenceStart={sequenceStart} rounds={disposalRounds} actor={{ email: authUser?.email ?? "", name: authUser?.displayName || authUser?.email?.split("@")[0] || "" }} canWrite={currentUserCanEditKey("disposalRounds")} isOwner={isOwner} onSave={saveDisposalRounds} onCompleteDisposal={async (entries, reason) => {
+          {/* 폐기 라운드는 3팀 번호(1~7999) 순환을 전제로 범위를 자른다. 1팀 행을 넣으면 순서가 깨진다. R223에서 팀 분리한다. */}
+          <DisposalRoundPanel ledger={team3Ledger} sequenceStart={sequenceStart} rounds={disposalRounds} actor={{ email: authUser?.email ?? "", name: authUser?.displayName || authUser?.email?.split("@")[0] || "" }} canWrite={currentUserCanEditKey("disposalRounds")} isOwner={isOwner} onSave={saveDisposalRounds} onCompleteDisposal={async (entries, reason) => {
             const moved = await applyDisposalRoundCompletion(entries, { reason, actor: authUser?.displayName || authUser?.email || "관리자" })
             setChecked(new Set())
             setTab("HISTORY")
@@ -1532,7 +1606,7 @@ export function Warehouse() {
           <Button type="button" disabled={saving} onClick={async () => {
             setSaving(true)
             try {
-              const targets = ledger.filter((item) => item.status === "WAREHOUSE" && !item.confirmedAt).map((item) => ({ key: item.key, storageNo: item.storageNo }))
+              const targets = scopedLedger.filter((item) => item.status === "WAREHOUSE" && !item.confirmedAt).map((item) => ({ key: item.key, storageNo: item.storageNo }))
               await confirmWarehouseBaseline(targets)
               setBaselineOpen(false)
               setUnconfirmedOnly(false)

@@ -117,6 +117,7 @@
 - HOME은 우리 팀 KPI라 `HomeGate`가 `access.home === "read"`이면 블러로 가린다. 호버는 보이고 클릭·키 입력은 막는다. 관리 화면에서 HOME 단계 이름은 없음/블러/공개다. 가림일 뿐 데이터는 브라우저에 있으므로 전사 배포 전에는 HOME 구성을 따로 만든다.
 - 읽기 권한 적용은 세 겹이다. `pushCache`가 `currentUserCanEditKey`로 중앙 저장을 막고 화면 값을 마지막 중앙 값으로 되돌린다. 키와 화면의 대응은 `CACHE_KEY_SCREENS`다. `ReadOnlyGuard`가 셀 더블클릭·붙여넣기·지우기·끌어놓기를 막는다. `logAction`도 같은 판정으로 이력을 남기지 않는다. 새 저장 키를 만들면 `CACHE_KEY_SCREENS`에 더해야 한다. 빠지면 소유자만 저장된다.
 - **아직 Firestore 규칙에는 반영하지 않았다.** 서버는 승인 여부만 본다. 규칙 반영은 보안 점검 C 항목으로 남아 있다.
+- R223: 창고 권한은 세 축으로 갈린다. `warehouse`가 3팀 스코프와 라우팅, `warehouseFabric1`이 1팀 스코프, `warehouseOutbound`가 출고 요청 메일(데이터를 저장하지 않는 기능이라 별도 축)이다. 1팀은 3팀 화면에서 읽기와 출고 요청만, 1팀 화면에서는 편집한다. 창고팀은 두 팀을 모두 편집한다. **라우팅 `ReadOnlyGuard`는 `/warehouse`에서 두 권한 중 높은 쪽을 보도록 `useScreenAccess`가 합치고, 스코프별 방어는 `Warehouse.tsx`의 `canEditScope` 하나로 한다.** 버튼이나 표 편집에 새 진입점을 만들 때 이 값을 빠뜨리면 1팀과 3팀 판단이 섞인다.
 
 ## 주간 백업 (`tools/backup`)
 - PC 작업 스케줄러가 매주 Firestore `state`를 앱 로그인 계정(Firebase Auth REST, 비밀번호는 Windows 자격 증명 관리자)으로 읽어 저장소 밖 폴더에 JSON·엑셀·zip을 남기고 Outlook으로 메일을 보낸다.

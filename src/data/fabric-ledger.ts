@@ -6,7 +6,7 @@ import type {
   FabricLedgerStatus,
 } from "./schema"
 import { isGdRecord } from "./dd-workflow"
-import { WEB_INTAKE_SHEET } from "./schema"
+import { FABRIC1_INTAKE_SHEET, WEB_INTAKE_SHEET } from "./schema"
 
 export interface FabricLedgerOutbound {
   to: string
@@ -60,11 +60,19 @@ export interface FabricLedgerItem {
 
 export const STORAGE_NO_MAX = 7999
 
+/** 1팀 대역 시작 번호. 1팀은 여기서부터 상한 없이 순증하고 되감지 않는다. */
+export const FABRIC1_STORAGE_NO_MIN = 8000
+
+export function isFabric1Item(item: FabricLedgerItem): boolean {
+  return item.sourceSheet === FABRIC1_INTAKE_SHEET
+}
+
 export function storageNumberOf(item: FabricLedgerItem): number | null {
-  const matched = item.storageNo.trim().match(/^\d{1,4}(?!\d)/)?.[0]
+  const matched = item.storageNo.trim().match(/^\d{1,5}(?!\d)/)?.[0]
   return matched ? Number(matched) : null
 }
 
+/** 3팀(1~7999) 순환 정렬 전용. 1팀 행을 넣지 마라. */
 export function warehouseSequenceStart(numbers: readonly number[]): number {
   const sorted = [...new Set(numbers)].sort((left, right) => left - right)
   if (sorted.length < 2) return sorted[0] ?? 1
@@ -80,6 +88,7 @@ export function warehouseSequenceStart(numbers: readonly number[]): number {
   return start
 }
 
+/** 3팀(1~7999) 순환 정렬 전용. 1팀 행을 넣지 마라. */
 export function warehouseOrderKey(item: FabricLedgerItem, start: number): number {
   const number = storageNumberOf(item)
   if (number === null) return Number.MAX_SAFE_INTEGER
@@ -92,6 +101,7 @@ export const FABRIC_FIELD_IDS = [
   "construction", "weight", "color", "dyeing", "requestDate", "dueDate", "completedAt", "note",
   "yarnDetail", "millYarn", "millKnitting", "millDyeing", "millFinishing",
   "fds", "yds", "review", "passFail", "actualWidth", "actualWeight", "shrinkageLength", "shrinkageWidth",
+  "content", "priceYd", "priceLb", "supplier",
 ] as const
 export type FabricFieldId = (typeof FABRIC_FIELD_IDS)[number]
 
@@ -129,6 +139,10 @@ function deriveFields(item: FabricLedgerItem): Record<string, string> {
     actualWeight: numberText(tech?.actual?.weight ?? sample?.inhouse?.weightGsm),
     shrinkageLength: numberText(tech?.actual?.shrinkageLength ?? shrinkagePair?.length ?? shrinkageFlat),
     shrinkageWidth: numberText(tech?.actual?.shrinkageWidth ?? shrinkagePair?.width),
+    content: "",
+    priceYd: "",
+    priceLb: "",
+    supplier: "",
   }
 }
 
@@ -476,10 +490,19 @@ export function buildFabricLedger(
 
     const fallback = sampleFallback(sample, index)
     const storageNo = sample.storageNo ?? ""
-    const matchedKey = resolveKey(storageNo, sample.flNo, sample.styleNo, fallback)
+    const fabric1 = sample.sourceSheet === FABRIC1_INTAKE_SHEET
+    const matchedKey = fabric1
+      ? fabricLedgerKey(sample.flNo, sample.styleNo, fallback, storageNo)
+      : resolveKey(storageNo, sample.flNo, sample.styleNo, fallback)
     const existing = items.get(matchedKey)
     const item = existing ? mergeSample(existing, sample, index) : emptyFromSample(sample, index)
     items.set(matchedKey, item)
+    if (fabric1) {
+      // 1팀은 같은 FL에 컬러별로 R&D No.를 따로 매긴다. FL·Style 색인을 올리면
+      // 같은 FL 의 3팀 DD 레코드가 1팀 입고 행에 병합된다. 자기 key 만 등록한다.
+      identityIndex.set(matchedKey, matchedKey)
+      return
+    }
     // R&D No.가 key여도 FL을 함께 등록해야 뒤의 DD 레코드가 같은 항목을 찾는다.
     registerIdentities(item, [
       ...fabricIdentities(storageNo, sample.flNo, sample.styleNo),

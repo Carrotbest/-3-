@@ -71,6 +71,9 @@ export const MATERIAL_CARD_PALETTES = [
 
 const INACTIVE_CARD_SHADOW = "shadow-sm"
 const MATERIAL_DECK_VISIBLE_CARDS = 9
+/** 기본 카드 폭. HOME 업무 카드는 `layout="wide"`로 더 넓게 쓴다. */
+const MATERIAL_DECK_CARD_WIDTH = "clamp(230px,25%,340px)"
+const MATERIAL_DECK_WIDE_CARD_WIDTH = "clamp(240px,42%,360px)"
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false)
@@ -98,7 +101,7 @@ const VELOCITY_LERP = 0.18
 const MAX_FRAME_SECONDS = 0.05
 const STOP_VELOCITY = 0.025
 
-function cardTransform(distance: number, cardWidth: number, stageWidth: number, visibleCards: number, deepPerspective = false): string {
+function cardTransform(distance: number, cardWidth: number, stageWidth: number, visibleCards: number, deepPerspective = false, wide = false): string {
   const abs = Math.abs(distance)
   const dir = Math.sign(distance)
   const radius = Math.max(1, (visibleCards - 1) / 2)
@@ -113,8 +116,9 @@ function cardTransform(distance: number, cardWidth: number, stageWidth: number, 
   const depthStep = (isHomeDeck ? HOME_DECK_DEPTH_STEP : MATERIAL_DECK_DEPTH_STEP) * (deepPerspective ? 1.2 : 1)
   const translateZ = -depthDistance * depthStep
   const projectedHalfWidth = cardWidth * scale * Math.max(0.2, Math.cos(Math.abs(tilt) * Math.PI / 180)) / 2
-  const edgeTravel = Math.max(deepPerspective ? cardWidth * 0.9 : cardWidth * 0.72, stageWidth / 2 - projectedHalfWidth)
-  const spread = isHomeDeck ? 1 : (deepPerspective ? 0.95 : MATERIAL_DECK_SPREAD)
+  const travelFloor = wide ? cardWidth * 1.02 : deepPerspective ? cardWidth * 0.9 : cardWidth * 0.72
+  const edgeTravel = Math.max(travelFloor, stageWidth / 2 - projectedHalfWidth)
+  const spread = wide ? 1 : isHomeDeck ? 1 : (deepPerspective ? 0.95 : MATERIAL_DECK_SPREAD)
   const tx = dir * edgeTravel * spacing * spread
   return `translateX(calc(-50% + ${tx.toFixed(2)}px)) translateZ(${translateZ.toFixed(2)}px) rotateY(${tilt.toFixed(2)}deg) scale(${scale.toFixed(3)})`
 }
@@ -168,8 +172,9 @@ export function useCoverflowMotion(itemCount: number, reduced: boolean) {
         }
         return
       }
-      card.style.transform = cardTransform(distance, cardWidth, stageWidth, visibleCards, stage.dataset.coverflowDeep === "true")
-      const opacity = 1 - 0.4 * Math.min(1, abs)
+      const wide = stage.dataset.coverflowWide === "true"
+      card.style.transform = cardTransform(distance, cardWidth, stageWidth, visibleCards, stage.dataset.coverflowDeep === "true", wide)
+      const opacity = wide ? 1 - 0.08 * Math.min(1, abs) : 1 - 0.4 * Math.min(1, abs)
       card.style.opacity = opacity.toFixed(3)
       card.style.filter = "none"
       card.style.zIndex = String(100 - Math.round(abs * 10))
@@ -397,6 +402,8 @@ interface MaterialDeckProps {
   hideBadges?: boolean
   expandInline?: boolean
   deepPerspective?: boolean
+  /** `wide`는 카드를 넓히고 옆 카드를 카드 폭만큼 밀어 앞 카드 글자가 가리지 않게 한다. */
+  layout?: "default" | "wide"
 }
 
 export function MaterialDeck({
@@ -408,7 +415,10 @@ export function MaterialDeck({
   hideBadges = false,
   expandInline = false,
   deepPerspective = false,
+  layout = "default",
 }: MaterialDeckProps) {
+  const wide = layout === "wide"
+  const cardWidth = wide ? MATERIAL_DECK_WIDE_CARD_WIDTH : MATERIAL_DECK_CARD_WIDTH
   const deckItems = useMemo(() => sortMaterialsNewest(items), [items])
   const reduced = useReducedMotion()
   const { active, move, goTo, rootRef, setCardRef, rootProps } = useCoverflowMotion(deckItems.length, reduced)
@@ -459,6 +469,7 @@ export function MaterialDeck({
       tabIndex={0}
       data-coverflow-visible={visibleCards}
       data-coverflow-deep={deepPerspective}
+      data-coverflow-wide={wide}
       onPointerMove={rootProps.onPointerMove}
       onKeyDown={rootProps.onKeyDown}
       onPointerLeave={rootProps.onPointerLeave}
@@ -500,10 +511,11 @@ export function MaterialDeck({
                 aria-hidden={!isActive}
                 aria-expanded={expandInline && isActive ? expandedItemId === item.id : undefined}
                 onClick={() => openItem(item, index)}
-                className={`absolute left-1/2 top-2 flex h-44 [width:clamp(230px,25%,340px)] cursor-pointer flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-left text-[var(--foreground)] opacity-0 outline-none transition-shadow duration-300 [backface-visibility:hidden] [transform-style:preserve-3d] will-change-transform focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${isActive ? palette.activeShadow : INACTIVE_CARD_SHADOW}`}
+                style={{ width: cardWidth }}
+                className={`absolute left-1/2 top-2 flex h-44 cursor-pointer flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-left text-[var(--foreground)] opacity-0 outline-none transition-shadow duration-300 [backface-visibility:hidden] [transform-style:preserve-3d] will-change-transform focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none ${isActive ? palette.activeShadow : INACTIVE_CARD_SHADOW}`}
               >
                 <span aria-hidden="true" className={`pointer-events-none absolute inset-x-0 top-0 h-1 ${palette.background}`} />
-                <span aria-hidden="true" className={`pointer-events-none absolute inset-0 z-20 bg-[var(--foreground)] transition-opacity duration-300 motion-reduce:transition-none ${isActive ? "opacity-0" : "opacity-[0.06]"}`} />
+                <span aria-hidden="true" className={`pointer-events-none absolute inset-0 z-20 bg-[var(--foreground)] transition-opacity duration-300 motion-reduce:transition-none ${isActive ? "opacity-0" : wide ? "opacity-[0.14]" : "opacity-[0.06]"}`} />
                 {hideBadges ? (
                   <span className="relative z-10 flex h-full flex-col">
                     <span className="flex items-center justify-between gap-2 text-xs font-medium text-[var(--muted-foreground)]">
@@ -556,7 +568,8 @@ export function MaterialDeck({
 
       {expandInline && expandedItem ? (
         <div
-          className="absolute left-1/2 top-[7rem] z-50 w-[clamp(230px,25%,340px)] -translate-x-1/2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_1.5rem_3rem_-0.5rem_rgba(16,24,64,0.35)] transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none"
+          style={{ width: cardWidth }}
+          className="absolute left-1/2 top-[7rem] z-50 -translate-x-1/2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_1.5rem_3rem_-0.5rem_rgba(16,24,64,0.35)] transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none"
         >
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">

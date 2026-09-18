@@ -1796,9 +1796,11 @@ export function FabricRequest() {
                     )
                   })
                   rows.push(
-                    <TableRow key={`a:${style.reqId}`} className="border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]" style={{ height: ADD_ROW_HEIGHT }}>
+                    // 옵션 추가 줄은 항상 자리를 지키되 버튼은 그 줄에 마우스를 올리거나 키보드로 오면 보인다.
+                    // 스타일마다 버튼이 떠 있으면 옵션 값보다 버튼이 먼저 눈에 든다. 우클릭 메뉴에도 같은 동작이 있다.
+                    <TableRow key={`a:${style.reqId}`} className="group/add border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]" style={{ height: ADD_ROW_HEIGHT }}>
                       <TableCell colSpan={optionColumns.length} className="border-b border-r border-[var(--border)] border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] bg-[var(--card)] p-0">
-                        <Button type="button" variant="ghost" className="h-5 w-full justify-start gap-1 px-2 text-[11px] font-normal text-[var(--muted-foreground)] hover:text-[var(--foreground)]" onClick={() => addOption(style)}>
+                        <Button type="button" variant="ghost" aria-label={`${style.garmentNo || "스타일"} 옵션 추가`} className="h-5 w-full justify-start gap-1 px-2 text-[11px] font-normal text-[var(--muted-foreground)] opacity-0 transition-opacity duration-150 hover:text-[var(--foreground)] focus-visible:opacity-100 group-hover/add:opacity-100 motion-reduce:transition-none" onClick={() => addOption(style)}>
                           <Plus className="size-3" />옵션 추가
                         </Button>
                       </TableCell>

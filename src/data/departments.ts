@@ -12,20 +12,20 @@ const preset = (base: ScreenAccess, overrides: Partial<Record<ScreenPermissionKe
 export const DEPARTMENTS: { id: DepartmentId; label: string; short: string; hint: string; access: ScreenAccessMap }[] = [
   {
     // 디자인·마케팅 성격의 소싱 위주 팀. FABRIC REQUEST로 소싱 의뢰를 넣고 개발 진행과 트렌드를 본다.
-    id: "fabric1", label: "통합원단부 1팀(디자인·마케팅 소싱)", short: "1팀", hint: "소싱 의뢰(REQUEST) 편집, HOME 블러, 나머지 읽기",
-    access: preset("read", { fabricRequest: "edit", excelBackup: "none" }),
+    id: "fabric1", label: "통합원단부 1팀(디자인·마케팅 소싱)", short: "1팀", hint: "소싱 의뢰(REQUEST) 편집, 1팀 창고 편집, 3팀 창고는 읽기+출고 요청",
+    access: preset("read", { fabricRequest: "edit", excelBackup: "none", warehouseFabric1: "edit", warehouseOutbound: "edit" }),
   },
   {
     id: "fabric2", label: "통합원단부 2팀", short: "2팀", hint: "요청 편집, HOME 블러, 나머지 읽기",
-    access: preset("read", { fabricRequest: "edit", excelBackup: "none" }),
+    access: preset("read", { fabricRequest: "edit", excelBackup: "none", warehouseFabric1: "none", warehouseOutbound: "none" }),
   },
   {
     id: "fabric3", label: "통합원단부 3팀(원단 R&D)", short: "3팀", hint: "우리 팀. HOME 공개, 전 화면 편집",
     access: preset("edit", {}),
   },
   {
-    id: "settlement", label: "정산관리팀(창고팀)", short: "창고", hint: "창고 편집, HOME 블러, 캘린더 읽기",
-    access: preset("none", { warehouse: "edit", home: "read", calendar: "read" }),
+    id: "settlement", label: "정산관리팀(창고팀)", short: "창고", hint: "3팀·1팀 창고 편집, HOME 블러, 캘린더 읽기",
+    access: preset("none", { warehouse: "edit", warehouseFabric1: "edit", warehouseOutbound: "edit", home: "read", calendar: "read" }),
   },
   {
     id: "business", label: "사업부서", short: "사업부", hint: "HOME 블러, 요청·개발 현황·창고·트렌드 읽기",
