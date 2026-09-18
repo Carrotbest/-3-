@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-17T23:11:07+00:00",
+"generated_at": "2026-09-18T22:54:39+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -1117,7 +1117,7 @@
 "period_end": "2026-05-10",
 "prev": 1.3,
 "yoy": 11.6,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_operating_costco",
@@ -1203,7 +1203,7 @@
 "period_end": "2026-05-10",
 "prev": 8.0,
 "yoy": 11.3,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_inventory_costco",
@@ -1289,7 +1289,7 @@
 "period_end": "2026-05-10",
 "prev": 2.2,
 "yoy": 4.4,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_revenue_duluth",
@@ -4083,6 +4083,13 @@
 "news": {
 "carters": [
 {
+"d": "2026-09-17",
+"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도",
+"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence",
+"u": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNUE1KWHhjM3JXTG8tRzY2XzlKdFFQZnNVTzJrQWFmZ01sSDcyT0R0SnFqRFhiXzNIMFVVSVc2Nm5pZ1Z3R0plQ3FvLUdTLTFUaEVPSzd4Q25FR1NKVl81VHV1ZDM0MGlwME1IdWlKQUdMSlpDRlB2T05TWExwOG5KUWxieHUtRzIxRnctQUh6b0NuOU1PcG5SR09VN3RfaHVZR0tZeXg3UncwdVo1eFplNG1PRGRHX1FYUFEwbVhiMjJ5WEthR3c?oc=5",
+"m": "바이어 · Carter's"
+},
+{
 "d": "2026-09-02",
 "t": "투자자들이 다음 수익 업데이트를 기다리면서 Carter's, Inc.의 주식은 안정적으로 유지됩니다.",
 "o": "Carter's, Inc. stock holds steady as investors await next earnings update",
@@ -4129,13 +4136,6 @@
 "t": "Carter's, Inc. 2026년 2분기 실적 요약",
 "o": "Carter's, Inc. Q2 2026 Earnings Call Summary",
 "u": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPdVFJRzFoVFI2M00xbGtrUE1VdURXZFlMNGFCcjdsYnN6el9id0d1N2V2Y3NFZkViakpEZ1lzU0VIQWlRZGpfS1BrRTByd1VaeWxCdzJya3FpbkxJUmxiakk2TW15cGotMmR0a3BxYWVEOEVXT1BhUkhKd0RsVXoxbW42QWxBQlRxZzllMVFMeWI4WmYtUmJLWQ?oc=5",
-"m": "바이어 · Carter's"
-},
-{
-"d": "2026-07-31",
-"t": "Carter's, Inc., 2026년 7월 4일에 종료된 2분기 및 6개월 동안의 수익 결과 보고",
-"o": "Carter's, Inc. Reports Earnings Results for the Second Quarter and Six Months Ended July 04, 2026",
-"u": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxNYTR3VGhaMHBrYjZlMjNYSU92akNyalZJZXpCZktkQjFtYTg4Nk5XOERjVGx0SDF4TVBsNU80YVFid1hrM1VpLXZfbGJ3eFRBb2dQQmo0RDlEQnN6QmNOUFJlOHN0Y1hDUF9Ydm5iOHJJZnNZMmhsN19kem1TN2gwX1g3OTNfa2Zqd0szdHNJcHFtVGQyX2Nkamptc3F3Y0p6dWNFZTBoTjQzTFpSTXhvYnRGS1pHQnlCZ1htamxfdWhCd0RYM2FfdTNhNVYzalZhSnVXRWhUSjhpdXRZM0I2Mg?oc=5",
 "m": "바이어 · Carter's"
 }
 ],
@@ -4199,6 +4199,13 @@
 ],
 "anf": [
 {
+"d": "2026-09-18",
+"t": "의류 소매업체 주식의 2분기 실적 반영: Abercrombie 및 Fitch(NYSE:ANF)",
+"o": "Reflecting On Apparel Retailer Stocks’ Q2 Earnings: Abercrombie and Fitch (NYSE:ANF)",
+"u": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxQX0pndmE4VXluTl9zdl9kQWJ3Rkx2eklDT0w0UkpFMXJHRGNvVWxVcWE4YXZrTjZGRWM3dGxPVzRXdTRqejR3bGhETnZGRkQ3UHlUazdmZkFsd2pKV0l3cVF1cE9QalVVNVM0dm9pUlBwTGh0Tk41cy1BWHBJRW9PWjFqSTZIWWhhYklrajh2d29UMjVKc05ZWFhmTnFzNzJGQnB1RkhiaWJvNDBmQW95bVA3X3pwTVI2ajF6ajdFR1pyLVpFTVU4ZzdPVEZMeGVnMVB6NENkYmQ?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
 "d": "2026-09-10",
 "t": "American Eagle Outfitters는 1억 6100만 달러 관세 환급으로 인해 13% 하락했습니다. Urban Outfitters는 3%, Abercrombie 및 Fitch 전표를 삭제합니다.",
 "o": "American Eagle Outfitters Sinks 13% as $161M Tariff Refund Flatters Beat; Urban Outfitters Drops 3%, Abercrombie & Fitch Slips",
@@ -4246,16 +4253,16 @@
 "o": "Abercrombie & Fitch Q2 2026 Earnings Report: Net Sales and Income Surge",
 "u": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNaHJoOFBaRzFfNjZuQVRnT25Fb2lzdVVDYXUwR3MwblZUR1dGdGFRajl5cHU4X3l2Tl9ib2wzWlowYWNPU3RoTU8zaC1OOHg3eVprREhVQnJNVlcwU1hzU2xBdHBMQ2t4QWNJSWhLVkdndXFHcjJrTzN5SWExVmVEYnBEblRVNGktaUh4Z2JpRF9kaTBsOXBlbnhWN2JUbl9OT1FONHA0OEw3WjJVdHpEc1c0dmZSUQ?oc=5",
 "m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-09-02",
-"t": "Abercrombie & Fitch (ANF) 2026년 2분기 실적 통화 기록",
-"o": "Abercrombie & Fitch (ANF) Q2 2026 Earnings Call Transcript",
-"u": "https://news.google.com/rss/articles/CBMiswFBVV95cUxONXZXbDFGbjhzaG92bFhmS0VCOHdsVWFwTFh2MGVBeFd2NjVTM1FBQ3BNemFYME1GQnlreVY0TVhReHFvaXNkb09Zd1JGLS03NElfdzZSMVFEbmtHbUNHd1BvS05zVDg5YXhFeXlQVUQ3UFp5WEx4ZVB3bDVoMmlkTVZNNkQ5VXJMQTBDMWdGN1F1WXUzTENNdlRPNnhyTjlPX1gtVDViZnBBbTdrcm5BeFpLbw?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
 }
 ],
 "urban": [
+{
+"d": "2026-09-18",
+"t": "낙관적인 수익 전망 및 분석가 목표로 Urban Outfitters 주가 상승",
+"o": "Urban Outfitters stock gains on upbeat earnings outlook and analyst targets",
+"u": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPWWdib2JvOHhxd0IzQUowNEZJRU0xSHdiUVRVTFlIbFllbTYwYTN6VEFaZFE2UmFfRWJGUnlfWGFhS3BkZnNpRWVIMDhJY3o0QUNHMWRLRkV5VmMyVzc0X3p0TnZDdmRac01xdldXbWNpWWpDbVhOV0pzMXVzcFBnUUlzakRjajgyaUFxRndtT3V3OUxEUGtzbFN5b0dOR0VFM0tVcy1RTzlVTHJMZU42X0Q3cVRQTkVtaFNoc3ljWE9DeGtJ?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
 {
 "d": "2026-09-10",
 "t": "American Eagle Outfitters는 1억 6100만 달러 관세 환급으로 인해 13% 하락했습니다. Urban Outfitters는 3%, Abercrombie 및 Fitch 전표를 삭제합니다.",
@@ -4303,13 +4310,6 @@
 "t": "Urban Outfitters는 기관이 늘어남에 따라 매출이 10% 증가한 16억 6천만 달러를 기록했습니다.",
 "o": "Urban Outfitters posts 10% revenue jump to $1.66B as institutions pile in",
 "u": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPNTc2Smp3NXNCakc1YzJtc3d0SHhZTmR2WlBNcTZZTjNaNmpKSktUd1RyWEZfNGZ0Rm5rRHB2dU9IZXIxbkFBdGhyOHJPM1BLRHlhMTBfQ1pEV01HZFd5QW5WYlFWSE4xdEpiTWlrREpkRVJjVWN3bUV1YVNseTMwbmVBMmRuTnl2bDRHbmlrTFJDR1NUNUw0NGtDT1BFVDQ0dTl1ZlJVdzg?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-09-02",
-"t": "Urban Outfitters: 강력한 판매 실적에 대한 높은 가치 평가(NASDAQ:URBN)",
-"o": "Urban Outfitters: Great Valuation For Strong Sales Performance (NASDAQ:URBN)",
-"u": "https://news.google.com/rss/articles/CBMipAFBVV95cUxQbHNfUlltd2xfSVoycHVfaUUwR2E5Vms0UkFIZ0FhQy1PNmNzQ1FudkdDNWtmclhfZTN4bUJObGJweG9BcTVSa29WdUJuLXBBMmhaaV9ibkk3eDktRnBYNElJaEtlX2tfYkFtSjBaQXJLRElidjJlYXlxU0N1ZWlmMFFjdjRMZlpPSHk2UnNuSHh0emFVdldDRGwzNzktSzczWmM3Nw?oc=5",
 "m": "바이어 · Urban Outfitters"
 }
 ],
@@ -4373,6 +4373,20 @@
 ],
 "nike": [
 {
+"d": "2026-09-18",
+"t": "UBS의 가격 인하로 Nike는 수익 압박에 직면",
+"o": "Nike faces earnings pressure as UBS cuts price target",
+"u": "https://news.google.com/rss/articles/CBMingFBVV95cUxNampvNGZOaXJwOVN2emQ4YWpVV1hZb0hRcUUtdHhuYkNqZndIakctQ3JpZGZDWEZwY2s5eGJPS3ZjUFY4NXdYYVA1S1FKT0VTcDRSRlFJUUl3VEhHNWpOSm8wVmZxVFlFOC0zajc0X2t1OEI1bWktM0kxTlloSHZOb3V4WlZWNmdTRkdCUldrOGJSb1piZDY2QW5MS2w5QQ?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-09-18",
+"t": "미국 Nike, 마라톤 선수용 Alphafly 4 출시",
+"o": "US' Nike launches Alphafly 4 for marathon runners",
+"u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPbUhEd2QxbHI1M29uM3NmQ1FoaUdqd1lXQ3JYT2dmTFRXcGtJcmpEdFR5c28zZndKTFdQZUlQU2xOM3RyemZMY3V1eFBMenJrQjVobEhqc3RFYVM3b0NXVjVkRU9YNVBkNEVzNEhuMU1QRmZyYjNfNEdoYWZ2c3ExVjZWWlpNSTctWExpX1FkZnQ5U3FVZGtaRC1nMWtGZ2JDTTMzMTMtb2xQdTBneUNfSFBmcGtQVy11SkVV?oc=5",
+"m": "Fibre2Fashion"
+},
+{
 "d": "2026-09-17",
 "t": "Nike 매출 둔화로 인해 1분기 실적이 스트리트 뷰를 놓칠 가능성이 높다고 UBS가 밝혔습니다.",
 "o": "Nike First-Quarter Earnings Likely to Miss Street Views Amid Sales Slowdown, UBS Says",
@@ -4412,20 +4426,6 @@
 "t": "보고서에 따르면 마이애미는 의류 제공업체로서 Nike에 복귀하기 위해 수익성이 좋은 2억 달러 이상의 계약을 체결했습니다.",
 "o": "Miami signs lucrative $200M+ contract to return to Nike as apparel provider, per report",
 "u": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxOS1ZKZVBWR3YzWUFzYmJoR2NKRTFyazJpRWFjMlA1cGozbUl5andUNjFzbTgydnBfclBFSjdKQUZwOC1mOGVmNFhzWW1ZTWEtWWI2NmpVR1BDa013SnVtTmhMRG9ZcmkzRHRuX0dNaThyWGdIYjlaYldZVTU0MW9NNVZ1aTVtVkZYd0NxaW5IN2pfQlJ5VHZuQmZ1aU8yNzhqSXVtOUs3VGpGTFdzLWZDeElJX0hGT3RaTnZJdWdjVExybER5Q2pITVk3bUUwMXE0T3hRWlRTa1Q?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-09-16",
-"t": "마이애미, 2억 달러 이상의 가치가 있는 Nike와 10년 후원 및 의류 계약 체결",
-"o": "Miami signing 10-year sponsorship, apparel deal with Nike worth over $200M",
-"u": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQa09ockJGQzdMcy1LNzRaYUh3VlNIVDYwcFQycnY1cUdXMHFGbHo2V1Fsck52S1BXVzVYUU8yOWZlY25ZMWFSWnhpVFBJcUJ6WjNuVjZMMHlPNU9LTDBaZTRPbVFTZTZGVDhsWVlLb1pVQTZfV0JCd2FvWE1mTnhpODNzX2xELUExZnlqUFBJdXNJNm5uR2cwM3NCUGU1Tms?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-09-16",
-"t": "90 프리미엄 Nike 어패럴 에어맥스 90 X 360 Nike 에어맥스 90 그레이 블루 AJ1285-016 구매처",
-"o": "90 Premium Nike Apparel Air Max 90 X 360 Nike Air Max 90 Grey Blue Where To Buy AJ1285-016",
-"u": "https://news.google.com/rss/articles/CBMifEFVX3lxTE40ZlB4YzZ1QUtTQXNXQ1gxcERqSjRXODlmQ3pIN1JSUEUwV1RTVkp6bDltbkV3eEJiTm4tNGQ0TGZQM2l2YWZ2OUd1aF9Eb01OdGE4el9YRF9nOTgyN09lU0FVN18wX2hUOGZWNHdHUXNxMmZkOHZPRmNWdWw?oc=5",
 "m": "바이어 · Nike"
 }
 ],
@@ -4489,59 +4489,59 @@
 ],
 "costco": [
 {
-"d": "2026-09-17",
-"t": "Costco 주가는 9월 24일 실적 발표에 2.5% 움직일 수 있습니다.",
-"o": "Costco shares may move 2.5% on Sept. 24 earnings release",
-"u": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNVklIcHhyN3J4YU5zczdWaHBkSUNBbjNtelcweHp3cml5eE14Tkw0b01TX2xmU0g4STJkZnc2N3UtMWxrTURKeE8wNFExd21OelVpWnktN3hMVmt0QnZOLTQ2MnlMZEU1d2FtQkVEcGZJYXFkWGVNNlpVUDRFMjV6TlJaV3VKRWMySmc0SDF0cWR4YU15ZzNxaDJZMndaVzJtOURmdjJLVF94LWlESU5NSnc1cUhVQQ?oc=5",
+"d": "2026-09-18",
+"t": "최고의 월스트리트 예측자들은 4분기 실적을 앞두고 Costco 기대치를 개편했습니다",
+"o": "Top Wall Street Forecasters Revamp Costco Expectations Ahead Of Q4 Earnings",
+"u": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxNNE9tbzYwbjhNLUxTNXJQVUVXd1Z6a2NlVFBmQk9Xa0R0Nl9tQy1SNzlyb0wtSlJoOHFsN3c2b3lpbVNqeUY4UXA3N09JWFFScFpUcGFRTkljVlB0ZGxRWGVzYjMwY09RckF1TXZJeDV1VmZvX1pLZWlTQTRZZTZuTU1TM0ZQVVhzNll6SWlRNWI3S1NxcHNXb2tpRThzWUNma2dnNDd2NVBtT1lJT2NoVERuSk5YS29Pcy1WaVUzTXExYmpBUEtyN2RTVnc0X3FmOU5xcHRBdnR4MUZtY0FMdkFkVWMzQXM?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-17",
-"t": "앞으로의 주: PMI 데이터, Costco 수익 예정",
-"o": "The Week Ahead: PMI Data, Costco Earnings Due",
-"u": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPaEQzVFl2RXFZMDFTbXYwdWVnYmhESUlsQ0x0akp6Mk9vWmVua0hJaU1xcks5U1ZkSm1oYTlSM1NwUU5ETmZ3ejBGUDNuVDE3Z2Z3aGUta1BocXpUaXZrMmV0VWtYSEFuNnlvaWI4cDJwUFl0djFmdEctTmQtOWhoMU1pTEhrZjM5WkpjNTZ3QUx0NEVxOTdDNlRKSFhWSnlzZkxGYQ?oc=5",
+"d": "2026-09-18",
+"t": "앞으로의 주: 글로벌 PMI, 호주 노동 보고서, Costco 실적",
+"o": "The Week Ahead: Global PMIs, Australia labour report, Costco earnings",
+"u": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxONV9MaWZuNkhGVnFKSDlzRWpuS0J0aHBoVC1BVVQ2aWhkc3laU0hjUDdlNkEydkwyRS0wT1gxN21vUHZ3MUl5a1lfR2QxUkJESWZGRGdsQVJpUU5sY212Umk2WVBER2d2SUR0RGcwVC1MSXU5bDhLbGJQeWlfQklseTlQNmlEVlpQdHhXSVpCRnVUSF93ZDRMcFVGYnJHNURRenRlRi0wZFZnSl9VR0FVRy1tNThjS2Z2?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-17",
-"t": "Costco(COST), 9월 24일 4분기 실적 보고 - 분석가들이 예상하는 내용은 다음과 같습니다.",
-"o": "Costco (COST) Reports Q4 Earnings on Sept. 24 — Here’s What Analysts Expect",
-"u": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPbml2XzRLeTh1YU4zXzZVMmJGUnRlbi13ZU44Sm5qenB0MzlVdjVnblVYVGE3UWxYMXdLSHNjUDN0UUFxSkJvWEVfcjBKTEVwRElGeHo1cWc1R0x3b2lrWU5lTXZtRFNEMXBSbE9xNExEOEh1emFPcTNtelVPdHpGV2gzZS0xSlBSSmx6amFMQi1JR1NCOGI3WVA1R0tZZ1Z4?oc=5",
+"d": "2026-09-18",
+"t": "Costco 분석가들이 회계 4분기 결과를 주시함에 따라 납품 확대로 도매 주가 상승",
+"o": "Costco Wholesale stock gains on delivery expansion as analysts eye fiscal Q4 results",
+"u": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxNbVkxSkcxTTVjQnNPREhUUUJJdWwybzQxQUg2ekllYVhWTnNCZXdNUlZqSlI2cGdrSWJmaG1hZFZXSEY5UHdaSlEwbEtOTHNVdGFpN2ctVFJVdTVfdTlqb2wyemlNWXZ5bGpJNmFvWDAyb1YyQWlWaTlGRHZFVjctVTd5QUJQN2NGVjVBaXFxOVVsVG4xdUVpX29UODJ4aEVCZ3NkZWkzYldhR0g5OE83Nkl1RE9FSzREVjBHRV9jbW5RYTFhTFhvUW1xTUhIZnJ2Mmc?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-17",
-"t": "Costco 주가는 9월 24일 실적 발표에 2.5% 변동할 수 있습니다. 부터 Investing.com",
-"o": "Costco shares may move 2.5% on Sept. 24 earnings release By Investing.com",
-"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxORkV1VTVZSVNtRVFyUU1ZdDBsa3J6WDZ5dGZRMTgxZTNLZnF5Q3VnSUc1NFVtcFJabUxfb0V6dnF4LXB0ZkpudmVLcFMtMmtfNDQtS2RDZWprYmJnUTc1eWxpOWdOQWtJTHZndENHOFdvWGxhVEFkQzFVWGU1UE9sTFhvTVpWRTlKYmUzVlBLY2dhZVEyRXNIaXZQYXA0QVAtQ3FFMTJIVkVxc0JWdXVmSHRZYXk?oc=5",
+"d": "2026-09-18",
+"t": "Costco의 DoorDash 출시는 9월 24일 보고된 분기에 도달하기에는 너무 늦었습니다",
+"o": "Costco’s DoorDash Launch Came Too Late to Touch the Quarter It Reports September 24",
+"u": "https://news.google.com/rss/articles/CBMixAFBVV95cUxOZTBZcDRqUDB5d2tTd2tiU014Z3k3eExOWDF5Z1V5dzFfVUZLd1hkQnN2RzBQOU4tUVFMWTREMUY0NFdIT0ZjeE45UWRxeW5ndlRha21laDRuZFpWX0lZclRIdTZ2ak9LR2FaYlExN05Xbi15dHlkVG5qU1o0Q3c4WEY3c0t6NUhfN3NqNTFZUTZTS3VsbUF1WHY2eFZCMUdqM1VMY25UdmlpMi1yNTFXTVpBemhjRS16VFh1U0R5UFRMOUZu?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-17",
-"t": "Costco 회계연도 4분기 실적에 앞서 도매주 이익 분석가 지원",
-"o": "Costco Wholesale stock gains analyst support ahead fiscal Q4 earnings",
-"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxPZV9BT1V3dkpLSXV0Xzg5Z2ZNSzdza3I4Tm5pRm5yU1ZnWXFNQ25EUTNLQ1hPbWY3M1BZaXNmaTkyVGduZEljZkYxSU1JUGZNcXk1RnhUUVdBTG11TE5JZmpQd0FDNlZTMDR0WXppb0FMSGYtbHJSOFJGUDJOMEFDTjVJVWt6dnlNSHVyNEFEdmxPaS13c0VBZ2FGUjcxY2pnVmFFVjhGX0ZjeVJBQkl3ZkdoUjVXZXJLUzhtbDRnZGVlUk5SU2VKRXRrUEs?oc=5",
+"d": "2026-09-18",
+"t": "Costco 주식: '이 창고에는 여전히 재고가 가득 차 있습니다'라고 4분기 실적을 앞두고 5성 UBS 분석가가 말했습니다.",
+"o": "Costco Stock: ‘This Warehouse Is Still Stocked Full,’ Says 5-Star UBS Analyst Ahead of Q4 Earnings",
+"u": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNNTV3OUdIcVozejdyWU1seFBaZEZYdXIwWG9IV0dJUUhrNzhHcDJVSzROU25EOWp1SGRpbjBPdmJSaGxZTTJSMVAxMGg1LUxQZWpybElfU2NXekJJZVpkbndMTXMzbkR3ekV4X2hUZkx3SDJNUVBHYlhQcmh4cXlzS1hsTjJsV1ljVU9YMmlvT2pmTHU2RlBQQlBXekNsUkcyb0NLN2lERjFNS1Vib3YzTnJDaTc5SUJUQlVXSTd2M1dGUQ?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-16",
-"t": "Costco(CTO) 2025년 2분기 수익 보고서 - 결과, 통화 및 슬라이드",
-"o": "Costco (CTO) Q2 2025 Earnings Report - Results, Call & Slides",
-"u": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOY24tWGZmYXRESTVrZVJERlR2TmdBaS16ZTlIOExKa2pCT2d5eVpFS0lwY1ZQbm9xaHNGYjAzTXFkcXdVR2lFb1RqR3NsOTZ0c1ZRQ0gwQVhJOWkxcGtMVzd4ZVVobUg5alVUc1ZSTkhlWmxRdTh5MDlDVVhEdXlJeUM4WQ?oc=5",
+"d": "2026-09-18",
+"t": "9월 24일 수익 보고 전에 Costco 주식을 구매해야 하는 놀라운 이유 1가지",
+"o": "1 Incredible Reason to Buy Costco Stock Before It Reports Earnings on Sept. 24.",
+"u": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPWmVGOFJlekpncm5hblFFSVo1UW9EbU16SzBNa2thMGJkOUgzbUhUMDJKMXNoR2RPek5KYjlSNy0xOWV1UnhXNTNlT18tY1FuN3VkQndzTTlfSENxYldZNUh0THBycnpoSzQyekY5Q01fM0I5VW9zNVBoTUp5Q2J4SF9WYU5IdUgwbUo1MmotRDlGWXlsN0lr?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-16",
-"t": "Costco 4분기 매출 증가로 인해 9월 24일 실적을 앞두고 도매 주가 하락",
-"o": "Costco Wholesale stock dips ahead of September 24 earnings as Q4 sales climb",
-"u": "https://news.google.com/rss/articles/CBMizgFBVV95cUxOSDM5bXRHMnFtUFlKMlN5ZFNRRmI0ZmZxVVVUUVhpNHdndEN4cTBwRXZzSkVuTGhYUUszb0RhVjlFRHZETFZYN0IyNXFUZlJqMmZwYk92bXU0d2dtVmxXUDRwX0s3RlRfa191TXJYZWt4VjlIQ3dwcmdIZU5iMkpmTXpxUXdMM1E5UWNVdmNjQldZRWFtazdSUWhrc3F6TTJocmF1X2xtU1FHbWk4RWV4RTg1aGF5dVNxeTJRZlN1UmRDaFkyWTV4UmFtcDBXZw?oc=5",
+"d": "2026-09-18",
+"t": "Darden 레스토랑, Costco, 이 IT 유통업체와 함께 수익 스포트라이트",
+"o": "Darden Restaurants, Costco In Earnings Spotlight, Along With This IT Distributor",
+"u": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQYmx6ZVBNandKcGRwLUtwSmVHVUlibTRKMjVqTUNrbWFsYzhDdExVNXBWNmZoUEJoRFhaMGdiNjZVWWRXOFV6d3Z1NF9BYm9selBMX3JxNFVybHl3MFBDZmdtQmg5S2JDYTVzZTZJakE1LTI1OTNBR2hFREt0MWNlRWw2MW45YW1sMWZka3MyZnhJb0NFZnJHUHZreE1xMlhMMHBXUUJXZHRESWFIS3c?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-16",
-"t": "4분기 회계 결과를 앞두고 Uber Eats 파트너십 확장으로 Costco(COST) 주가 상승",
-"o": "Costco (COST) Stock Climbs on Uber Eats Partnership Expansion Ahead of Fiscal Q4 Results",
-"u": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPZ3E5aWItaF9xXzZTcHR1RFRhRHRpdGdENVJOM1VpZ2d6bmoyQWtSS3hheU1COWRCZTE1dE80R0ttbTFBQjNkSE9iUXFSdjZ4OUVyU0R4QVBWcUFocWNnYVdLV0VkaHVWTTVsOWFsT1poNlY1N0RqcGRhYWc0RkM0UVRFZThiWEt0ejVVQ2FVTVRGbnpGVzROTlJIUVJ0cHdFU3gwSnNwbU9MRDloczFF?oc=5",
+"d": "2026-09-18",
+"t": "COST Stock: 옵션 시장이 Costco의 4분기 수익 후 반응을 과대평가하고 있습니까?",
+"o": "COST Stock: Is the Options Market Overestimating Costco’s Q4 Post-Earnings Reaction?",
+"u": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNUjRXaHE4OUt6UVRHN2R0NklzSFV5WGpEYUtRZkJGRTZQZWctN1djbG56eGYtUUhBQnVaRGJpQml5OGVhYXZwclVod1BCQm1NY2FTbHlaVXMxV3hiUTdNaXpUbHl0QmRKUzJ4YlNiUTAzQ0dJZkhjSHdxMmdQLXFLUTgyYll3Y19tNG9mSjZ1bzZPaE84ZE9WU0RGdzZPaXc2UUtxNWszb2x0aEJhSk5DYQ?oc=5",
 "m": "바이어 · Costco"
 }
 ],
