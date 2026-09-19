@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-09-18T22:54:39+00:00",
+"generated_at": "2026-09-19T22:33:22+00:00",
 "window_days": 120,
-"total": 957,
-"translated": 957,
-"filtered_out": 1720,
+"total": 967,
+"translated": 967,
+"filtered_out": 1758,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 20,
-"scanned": 682,
-"kept": 261,
-"material": 174
+"scanned": 619,
+"kept": 227,
+"material": 149
 },
 "30": {
 "sources": 23,
-"scanned": 2294,
-"kept": 850,
-"material": 621
+"scanned": 2320,
+"kept": 852,
+"material": 624
 }
 }
 },
@@ -25,19 +25,19 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 312
+"n": 314
 },
 {
 "key": "RETAIL",
-"n": 231
+"n": 232
 },
 {
 "key": "FABRIC",
-"n": 186
+"n": 189
 },
 {
 "key": "ETC",
-"n": 119
+"n": 122
 },
 {
 "key": "CHEMICAL",
@@ -45,17 +45,17 @@
 },
 {
 "key": "YARN",
-"n": 28
+"n": 29
 }
 ],
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 256
+"n": 257
 },
 {
 "key": "Fibre2Fashion",
-"n": 156
+"n": 157
 },
 {
 "key": "국제섬유신문",
@@ -63,19 +63,19 @@
 },
 {
 "key": "Textile Focus",
-"n": 61
+"n": 63
 },
 {
 "key": "주제검색 · 국내소재",
 "n": 56
 },
 {
-"key": "Ecotextile News",
-"n": 52
+"key": "Textile Today",
+"n": 53
 },
 {
-"key": "Textile Today",
-"n": 50
+"key": "Ecotextile News",
+"n": 52
 },
 {
 "key": "주제검색 · 신소재",
@@ -91,19 +91,19 @@
 },
 {
 "key": "Textile World",
-"n": 25
+"n": 27
 },
 {
 "key": "Knitting Industry",
 "n": 24
 },
 {
-"key": "Apparel Insider",
+"key": "Apparel Resources",
 "n": 19
 },
 {
-"key": "Apparel Resources",
-"n": 18
+"key": "Apparel Insider",
+"n": 19
 },
 {
 "key": "주제검색 · 염색가공",
@@ -137,15 +137,15 @@
 "tags": [
 {
 "key": "방글라데시",
-"n": 61
+"n": 64
 },
 {
 "key": "리사이클",
-"n": 58
+"n": 59
 },
 {
 "key": "전시회",
-"n": 42
+"n": 43
 },
 {
 "key": "데님",
@@ -153,7 +153,7 @@
 },
 {
 "key": "제직",
-"n": 17
+"n": 18
 },
 {
 "key": "바이오소재",
@@ -184,6 +184,10 @@
 "n": 9
 },
 {
+"key": "경편",
+"n": 8
+},
+{
 "key": "r-PET",
 "n": 8
 },
@@ -197,10 +201,6 @@
 },
 {
 "key": "스트레치",
-"n": 7
-},
-{
-"key": "경편",
 "n": 7
 },
 {
@@ -226,6 +226,10 @@
 {
 "key": "오가닉코튼",
 "n": 6
+},
+{
+"key": "환편",
+"n": 5
 },
 {
 "key": "모달",
@@ -268,8 +272,8 @@
 "n": 4
 },
 {
-"key": "환편",
-"n": 4
+"key": "GOTS",
+"n": 3
 },
 {
 "key": "OEKO-TEX",
@@ -289,10 +293,6 @@
 },
 {
 "key": "DWR",
-"n": 2
-},
-{
-"key": "면가",
 "n": 2
 }
 ],
@@ -330,15 +330,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-20",
-"total": 3,
-"by": {
-"MATERIAL": 1,
-"RETAIL": 1,
-"CHEMICAL": 1
-}
-},
 {
 "date": "2026-08-21",
 "total": 4,
@@ -640,13 +631,24 @@
 },
 {
 "date": "2026-09-18",
-"total": 32,
+"total": 33,
 "by": {
 "ETC": 1,
 "RETAIL": 16,
 "MATERIAL": 11,
 "CHEMICAL": 2,
-"FABRIC": 2
+"FABRIC": 3
+}
+},
+{
+"date": "2026-09-19",
+"total": 9,
+"by": {
+"FABRIC": 2,
+"MATERIAL": 2,
+"ETC": 3,
+"YARN": 1,
+"RETAIL": 1
 }
 }
 ],
@@ -654,9 +656,9 @@
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 60,
+"recent": 63,
 "prior": 0,
-"delta": 60,
+"delta": 63,
 "weeks": [
 0,
 0,
@@ -669,15 +671,15 @@
 7,
 14,
 23,
-16
+19
 ]
 },
 {
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 53,
+"recent": 54,
 "prior": 3,
-"delta": 50,
+"delta": 51,
 "weeks": [
 0,
 0,
@@ -690,15 +692,15 @@
 12,
 4,
 28,
-9
+10
 ]
 },
 {
 "tag": "전시회",
 "label_en": "performance days",
-"recent": 36,
+"recent": 37,
 "prior": 6,
-"delta": 30,
+"delta": 31,
 "weeks": [
 0,
 0,
@@ -711,15 +713,15 @@
 9,
 6,
 20,
-1
+2
 ]
 },
 {
 "tag": "데님",
 "label_en": "denim",
-"recent": 31,
-"prior": 3,
-"delta": 28,
+"recent": 30,
+"prior": 4,
+"delta": 26,
 "weeks": [
 0,
 0,
@@ -759,9 +761,9 @@
 {
 "tag": "제직",
 "label_en": "woven fabric",
-"recent": 14,
+"recent": 15,
 "prior": 3,
-"delta": 11,
+"delta": 12,
 "weeks": [
 0,
 0,
@@ -774,7 +776,7 @@
 2,
 1,
 7,
-4
+5
 ]
 },
 {
@@ -820,27 +822,6 @@
 ]
 },
 {
-"tag": "난연",
-"label_en": "flame retardant",
-"recent": 2,
-"prior": 3,
-"delta": -1,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-3,
-0,
-1,
-1,
-0
-]
-},
-{
 "tag": "렌징",
 "label_en": "lenzing",
 "recent": 2,
@@ -862,23 +843,23 @@
 ]
 },
 {
-"tag": "인도네시아",
-"label_en": "indonesia",
-"recent": 3,
-"prior": 2,
-"delta": 1,
+"tag": "난연",
+"label_en": "flame retardant",
+"recent": 2,
+"prior": 3,
+"delta": -1,
 "weeks": [
 0,
 0,
 0,
 0,
-1,
-1,
 0,
 0,
 0,
+3,
+0,
 1,
-2,
+1,
 0
 ]
 },
@@ -901,6 +882,27 @@
 0,
 1,
 2
+]
+},
+{
+"tag": "인도네시아",
+"label_en": "indonesia",
+"recent": 3,
+"prior": 2,
+"delta": 1,
+"weeks": [
+0,
+0,
+0,
+0,
+1,
+1,
+0,
+0,
+0,
+1,
+2,
+0
 ]
 }
 ],
@@ -936,6 +938,12 @@
 "first": "2026-08-31"
 },
 {
+"tag": "경편",
+"label_en": "warp knit",
+"n": 8,
+"first": "2026-08-26"
+},
+{
 "tag": "r-PET",
 "label_en": "recycled polyester",
 "n": 8,
@@ -952,12 +960,6 @@
 "label_en": "traceability",
 "n": 7,
 "first": "2026-09-02"
-},
-{
-"tag": "경편",
-"label_en": "warp knit",
-"n": 7,
-"first": "2026-08-26"
 },
 {
 "tag": "모달",
@@ -982,6 +984,12 @@
 "label_en": "digital product passport",
 "n": 4,
 "first": "2026-09-02"
+},
+{
+"tag": "GOTS",
+"label_en": "gots",
+"n": 3,
+"first": "2026-09-14"
 },
 {
 "tag": "OEKO-TEX",
@@ -1018,12 +1026,6 @@
 "label_en": "cotton price",
 "n": 2,
 "first": "2026-09-03"
-},
-{
-"tag": "GOTS",
-"label_en": "gots",
-"n": 2,
-"first": "2026-09-14"
 },
 {
 "tag": "자카드",
@@ -1081,6 +1083,209 @@
 }
 ],
 "articles": [
+{
+"id": "da29b9645f163f5c",
+"d": "2026-09-19",
+"t": "2026년 가을 Yarn Expo가 글로벌 소싱에 지속 가능한 혁신을 접목하며 막을 내립니다.",
+"o": "Yarn Expo Autumn 2026 Draws To A Close, Weaving Sustainable Innovation Into Global Sourcing",
+"u": "https://www.textileworld.com/textile-world/fiber-world/2026/09/yarn-expo-autumn-2026-draws-to-a-close-weaving-sustainable-innovation-into-global-sourcing/",
+"s": "SHANGHAI — September 18, 2026 — Yarn Expo Autumn 2026 concluded with approximately 600 exhibitors from 14 countries and regions, connecting with nearly 22,000 visitors from 110 represented markets, bringing the textile industry’s evolving material agenda into sharper focus. Held alongside Intertexti",
+"c": "FABRIC",
+"x": "SHANGHAI — September 18, 2026 — Yarn Expo Autumn 2026 concluded with approximately 600 exhibitors from 14 countries and regions, connecting with nearly 22,000 visitors from 110 represented markets, bringing the textile industry’s evolving material agenda into sharper focus. Nearly 22,000 visitors gathered at Yarn Expo Autumn 2026 to explore global yarn and fibre innovations. (Photo: Messe Frankfurt) Held alongside Intertextile Shanghai Apparel Fabrics – Autumn Edition, CHIC and PH Value, the fair connected upstream fibre and yarn innovation with fabric development, garment production and fashion-market demand. Its broad product offering enabled buyers to assess recycled, bio-based and regenerated fibres alongside performance-led solutions, demonstrating how responsible choices can meet practical requirements across textile applications. Industry players from across the textile spectrum made new business connections, supporting cross-border sourcing dialogue and the commercialisation of innovation. Speaking at the fair’s conclusion, Ms Wilmet Shea, General Manager of Messe Frankfurt (HK) Ltd, commented: “This edition showed that sustainability and performance are no longer separate product categories; buyers increasingly expect credible solutions that deliver both. By bringing material innovators, processors, spinners, brands and downstream buyers together face to face, Yarn Expo Autumn 2026 has turned shared priorities into practical discussions and tangible business outcomes. We are pleased that through this exchange, our platform is helping to create new commercial partnerships across a more responsive textile value chain.” Where circularity, bio-based inputs and performance converge From plant-based polyester to recycled PET and regenerated fibres, exhibitors showed ",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/09/Yarn-Expo-Autumn-2026-photo.png",
+"g": [
+"제직",
+"전시회"
+],
+"m": "Textile World",
+"r": "해외",
+"v": 17,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "d54be5ba655f2c92",
+"d": "2026-09-19",
+"t": "Spinnova, Tearfil 인수 및 관련 150만 유로 규모의 브리지 론 파이낸싱 관련 의향서 서명",
+"o": "Spinnova Signs Letter Of Intent Regarding Potential Acquisition Of Tearfil And Related EUR 1.5 Million Bridge Loan Financing",
+"u": "https://www.textileworld.com/textile-world/2026/09/spinnova-signs-letter-of-intent-regarding-potential-acquisition-of-tearfil-and-related-eur-1-5-million-bridge-loan-financing/",
+"s": "JYVÄSKYLÄ, Finland — September 17, 2026 — Spinnova Plc (“Spinnova” or the “company”), a materials technology company producing textile fibre from wood pulp and waste streams, has signed a non-binding letter of intent with Tearfil – Indústria Têxtil, S.A. (“Tearfil”) and its shareholders concerning a",
+"c": "MATERIAL",
+"x": "JYVÄSKYLÄ, Finland — September 17, 2026 — Spinnova Plc (“Spinnova” or the “company”), a materials technology company producing textile fibre from wood pulp and waste streams, has signed a non-binding letter of intent with Tearfil – Indústria Têxtil, S.A. (“Tearfil”) and its shareholders concerning a potential acquisition by Spinnova of all shares in Tearfil. Tearfil is a Portuguese yarn spinning company and a key development partner in Spinnova’s ecosystem. The contemplated transaction would strengthen Spinnova’s position in the textile value chain by securing dedicated yarn development and spinning capabilities for SPINNOVA® fibre. The potential acquisition is intended to shorten development cycles, provide greater control over the conversion of SPINNOVA® fibre into customer-ready yarns and textile applications, and accelerate commercialisation with brand and supply chain partners. “Tearfil has been an important partner for Spinnova, playing a key role in advancing SPINNOVA® fibre toward commercial applications,” said Janne Poranen, CEO of Spinnova. “Bringing these capabilities into Spinnova would strengthen our ability to support broader adoption of SPINNOVA® fibre and advance the commercial scaling of our technology”. The letter of intent sets out the parties’ current understanding of the framework for the potential acquisition, including an initial purchase valuation of EUR 500,000 paid in cash and Spinnova’s shares for all shares in Tearfil. Except for certain provisions expressly stated to be binding, the letter of intent is non-binding and does not create an obligation for Spinnova to proceed with or complete the acquisition. The intended timeframe for completion of the potential acquisition is during Q1 2027. Under the letter of intent, Spinnova contemplates pro",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2023/12/Spinnova_logo_black.png",
+"g": [],
+"m": "Textile World",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "b99eb6152c94d791",
+"d": "2026-09-19",
+"t": "'BGMEA 컵 2026' 트로피 공개",
+"o": "‘BGMEA Cup 2026’ Trophy Unveiled",
+"u": "https://textilefocus.com/here-is-a-polished-english-translation-suitable-for-a-news-press-release-format-sporting-excitement-sweeps-through-apparel-industry-as-bgmea-cup-2026-trophy-unveiled/",
+"s": "Huawei presents BGMEA Cup 2026 powered by BURI The trophy unveiling ceremony of the ‘BGMEA Cup 2026’, one of the country’s largest and most popular corporate football tournaments organized by the Bangladesh Garment Manufacturers and Exporters Association (BGMEA), along with the ‘Celebration of BGMEA",
+"c": "ETC",
+"x": "Huawei presents BGMEA Cup 2026 powered by BURI The trophy unveiling ceremony of the ‘BGMEA Cup 2026’, one of the country’s largest and most popular corporate football tournaments organized by the Bangladesh Garment Manufacturers and Exporters Association (BGMEA), along with the ‘Celebration of BGMEA-BAFFU Partnership’ and Mega Auction, was held today (Saturday) in a festive and vibrant atmosphere. The event was held at the Noorul Quader Auditorium of the BGMEA Complex, with Md. Aminul Haque, State Minister for Youth and Sports of the Government of the People’s Republic of Bangladesh, attending as the chief guest. In the presence of BGMEA President Mahmud Hasan Khan, Bangladesh Football Federation (BFF) Vice President Fahad Mohammad Ahmed Karim, and leaders of both organizations, he formally unveiled the ‘BGMEA Cup 2026’ trophy amid an enthusiastic atmosphere. The event was chaired by BGMEA President Mahmud Hasan Khan, while BFF Vice President Fahad Mohammad Ahmed Karim attended as the special guest. Among others, BGMEA Senior Vice President Inamul Haq Khan, Vice President Md. Rezwan Selim, Vice President (Finance) Mijanur Rahman, Director Shah Rayeed Chowdhury, Director Nafis-Ud-Doula, Director Zowardar Mohammad Hosne Quamar Alam, former BGMEA Director Md. Imranur Rahman, Sports Committee Chairman Md. Sazzad Ali Khan, Sustainable Energy Committee Chairman Md. Saifur Rahman, Fakir Kamruzzaman Nahid, Mirza Shams Mahmud Shakti members of various BGMEA committees, and prominent entrepreneurs from the apparel industry were present at the event. BGMEA Secretary General Major General Dr. Md. Sahedul Islam (Retd.) delivered the welcome address. At the beginning of the programme, BGMEA Director and Director-in-Charge of the Sports Committee, Shah Rayeed Chowdhury, highlighted va",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/BGMEA-1.jpeg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "a58142737bdaf2ab",
+"d": "2026-09-19",
+"t": "Spinnova, 섬유 상용화 가속화 위해 Tearfil 인수 움직임",
+"o": "Spinnova moves to acquire Tearfil to accelerate fiber commercialization",
+"u": "https://textiletoday.com.bd/spinnova-moves-to-acquire-tearfil-to-accelerate-fiber-commercialization",
+"s": "Finnish textile fiber innovator Spinnova has signed a non-binding letter of intent to acquire Portuguese yarn spinning company Tearfil. The deal aims to strengthen its yarn development capabilities an...",
+"c": "YARN",
+"x": "Finnish textile fiber innovator Spinnova has signed a non-binding letter of intent to acquire Portuguese yarn spinning company Tearfil. The deal aims to strengthen its yarn development capabilities and accelerate the commercialization of its fiber. Figure: Spinnova develops textile fiber from wood-based and waste-based raw materials. Courtesy: Collected Tearfil is an existing partner of Spinnova. The proposed acquisition would bring dedicated yarn development and spinning capabilities within Spinnova’s operations. According to Spinnova, the move would give the company greater control over the conversion of its fiber into customer-ready yarns. It also expects the integration to shorten development cycles. Spinnova develops textile fiber from wood-based and waste-based raw materials. The company has been working to scale the technology and expand its commercial applications across the textile industry. By bringing yarn development and spinning capabilities in-house, Spinnova aims to improve coordination between fiber production and yarn development. This could also help it respond more quickly to customer requirements during product development. The proposed deal is part of Spinnova’s efforts to advance its fiber technology from development toward wider commercial use. However, the letter of intent is non-binding, and the acquisition remains subject to further discussions and the completion of the required conditions. If completed, the transaction would combine Spinnova’s fibre technology with Tearfil’s yarn development and spinning expertise.",
+"i": "/storage/uploads/2026/9/spinnovamovestoac_17897969177363.jpg",
+"g": [],
+"m": "Textile Today",
+"r": "해외",
+"v": 17,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "a40a96ece5372cf2",
+"d": "2026-09-19",
+"t": "Eurojersey, 'Out of Frame' 스포츠웨어 패브릭 컨셉 출시",
+"o": "Eurojersey launches ‘Out of Frame’ sportswear fabric concept",
+"u": "https://textiletoday.com.bd/eurojersey-launches-out-of-frame-sportswear-fabric-concept",
+"s": "Italian warp knitting specialist Eurojersey has launched its ‘Out of Frame’ concept, featuring a range of warp-knitted fabrics developed for performance sportswear. The concept focuses on fabrics desi...",
+"c": "FABRIC",
+"x": "Italian warp knitting specialist Eurojersey has launched its ‘Out of Frame’ concept, featuring a range of warp-knitted fabrics developed for performance sportswear. The concept focuses on fabrics designed for movement-led applications, from everyday exercise to high-intensity training across sports and wellness. Courtesy: Collected The company says the developments address the changing needs of performance sportswear, where fabric performance and freedom of movement are key requirements. Eurojersey plans to showcase the ‘Out of Frame’ concept at Performance Days in Munich and Functional Textiles in Shanghai later this year. The collection highlights warp knitting's role in developing fabrics for activewear applications. Warp-knitted structures can be engineered to meet different performance requirements, making them suitable for garments that need flexibility and comfort in motion. The new concept also reflects the broader development of sportswear beyond traditional high-performance applications. Wellness and everyday physical activity are creating demand for fabrics that combine performance with comfort and versatility.",
+"i": "/storage/uploads/2026/9/eurojerseylaunches_17897967047618.jpg",
+"g": [
+"경편"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 14,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "9ecb91e7fb48b845",
+"d": "2026-09-19",
+"t": "섬유 및 의류 무역 단체는 지역 기반 가스 배급을 모색합니다.",
+"o": "Textile and apparel trade bodies seek area-based gas rationing",
+"u": "https://textiletoday.com.bd/textile-and-apparel-trade-bodies-seek-area-based-gas-rationing",
+"s": "Four major textile and garment trade bodies have urged the government to introduce area-based gas rationing promptly to maintain industrial production amid the ongoing gas shortage. The Bangladesh Gar...",
+"c": "ETC",
+"x": "Four major textile and garment trade bodies have urged the government to introduce area-based gas rationing promptly to maintain industrial production amid the ongoing gas shortage. The Bangladesh Garment Manufacturers and Exporters Association (BGMEA), Bangladesh Knitwear Manufacturers and Exporters Association (BKMEA), Bangladesh Textile Mills Association (BTMA) and Bangladesh Terry Towel & Linen Manufacturers & Exporters Association (BTTLMEA) requested in a letter sent to the Managing Director of Gas Transmission Company Limited (GTCL) on September 16. Figure: The organizations proposed dividing industrial establishments into separate zones. The organizations proposed dividing industrial establishments into separate zones. They suggested preparing gas rationing rosters for each area instead of uniform distribution across all zones. Under the proposed system, gas supply to one industrial area could be restricted for four to five days while other areas receive adequate supply. The restrictions would then rotate among different zones. The associations recommended that the rationing roster consider production dependency, industry type, employment, export contribution and safety to ensure gas is allocated according to industrial needs and economic importance. They also urged the government to promptly assess excess gas available in other distribution areas beyond their proportional allocation and reallocate it to the Titas Gas distribution area. Around 90% of industries are located within the Titas Gas distribution area, but inadequate gas supply has prevented the company from meeting industrial demand. According to the trade bodies, comparative data on approved load, gas allocation and actual gas receipt show a significant concentration of demand in the Titas area, parti",
+"i": "/storage/uploads/2026/9/textileandapparel_17898085987732.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "4c5fb7612e502c90",
+"d": "2026-09-19",
+"t": "세컨드 솔트, 론칭 첫 분기 매출 10억 돌파…경량패딩 3차 완판",
+"o": "세컨드 솔트, 론칭 첫 분기 매출 10억 돌파…경량패딩 3차 완판",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148712",
+"s": "제우인터내셔날(대표 김길서)이 전개하는 ‘세컨드 솔트(Second Salt)’가 론칭 첫 분기 매출 10억 원을 돌파한 데 이어 무신사 단독 경량패딩의 3차 완판을 기록하며 시장 안착에 속도를 내고 있다.지난 5월 21일 첫선을 보인 세컨드 솔트는 여름 론칭 직후인 2분기 매출 10억 원을 넘어섰다. 가을 시즌 무신사 단독 주력 상품으로 선보인 경량패딩은 실용성과 트렌디한 디자인을 앞세워 소비자 반응을 이끌어냈다. 현재 프리오더가 진행 중인 가운데 연이은 주문 증가로 3차 완판을 기록하며 초기 흥행을 이어가고 있다.초기 실적 호조를",
+"c": "RETAIL",
+"x": "제우인터내셔날(대표 김길서)이 전개하는 ‘세컨드 솔트(Second Salt)’가 론칭 첫 분기 매출 10억 원을 돌파한 데 이어 무신사 단독 경량패딩의 3차 완판을 기록하며 시장 안착에 속도를 내고 있다.지난 5월 21일 첫선을 보인 세컨드 솔트는 여름 론칭 직후인 2분기 매출 10억 원을 넘어섰다. 가을 시즌 무신사 단독 주력 상품으로 선보인 경량패딩은 실용성과 트렌디한 디자인을 앞세워 소비자 반응을 이끌어냈다. 현재 프리오더가 진행 중인 가운데 연이은 주문 증가로 3차 완판을 기록하며 초기 흥행을 이어가고 있다.초기 실적 호조를",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148712_130673_2136_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 9,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "0ba81e2ca8e60bb4",
+"d": "2026-09-19",
+"t": "글로벌 스탠다드, GRTS 섬유 가공 표준 출시",
+"o": "Global Standards Launches GRTS Textile Processing Standard",
+"u": "https://apparelresources.com/business-news/manufacturing/global-standards-launches-grts-textile-processing-standard/",
+"s": "Global Standards has launched the Global Responsible Textile Standard (GRTS), a new textile processing standard covering products made from a wider range of plant, animal, synthetic, man-made cellulosic and recycled fibres. Developed from decades of experience with the Global Organic Textile Standar",
+"c": "MATERIAL",
+"x": "Global Standards has launched the Global Responsible Textile Standard (GRTS), a new textile processing standard covering products made from a wider range of plant, animal, synthetic, man-made cellulosic and recycled fibres. Developed from decades of experience with the Global Organic Textile Standard (GOTS), GRTS provides a certification route for textile products that fall outside GOTS’ […] The post Global Standards Launches GRTS Textile Processing Standard appeared first on Apparel Resources .",
+"i": "https://apparelresources.com/wp-content/uploads/2026/09/Global-Standards-Launches-GRTS-Textile-Processing-Standard.jpg",
+"g": [
+"리사이클",
+"GOTS"
+],
+"m": "Apparel Resources",
+"r": "해외",
+"v": 16,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Apparel Resources"
+]
+},
+{
+"id": "09df45dcbddbea66",
+"d": "2026-09-19",
+"t": "CHT Bangladesh, 독일 의회 대표단 및 대사 환영",
+"o": "CHT Bangladesh Welcomes German Parliamentary Delegation and Ambassador",
+"u": "https://textilefocus.com/cht-bangladesh-welcomes-german-parliamentary-delegation-and-ambassador/",
+"s": "A delegation of the German Bundestag visited CHT Bangladesh Limited at the Meghna Industrial Economic Zone to gain first-hand insights into the company’s local operations, production capabilities, and contribution to Bangladesh’s textile industry. Led by Nicklas Kappe, Chair of the German-South Asia",
+"c": "ETC",
+"x": "A delegation of the German Bundestag visited CHT Bangladesh Limited at the Meghna Industrial Economic Zone to gain first-hand insights into the company’s local operations, production capabilities, and contribution to Bangladesh’s textile industry. Led by Nicklas Kappe, Chair of the German-South Asian Parliamentary Friendship Group, the delegation included Members of the German Bundestag Johann Saathoff, Ulle Schauws, and Gerold Otten. They were joined by Katerina Bienert from the Administration of the German Bundestag. The delegation was accompanied by Dr Rüdiger Lotz, Ambassador of the Federal Republic of Germany to Bangladesh, and representatives of the German Embassy in Dhaka, including Olga Nowikow Winnen, Economic Attaché, and Monika Reuter, Head of Political, Press and Culture. Prodip Kumar Dhar, Managing Director and Head of Production Site, welcomed the guests together with the management team of CHT Bangladesh Limited. During a tour of the plant, the visitors learned more about CHT Bangladesh’s production, technical expertise, quality standards, and approach to responsible manufacturing and environmental protection. The exchange focused on the role of German companies in Bangladesh, opportunities for sustainable industrial development, and the importance of technology, innovation, and long-term cooperation in strengthening economic relations between the two countries. “We are honored to welcome the German parliamentary delegation and representatives of the German Embassy to our site. Their visit underlines the strong partnership between Germany and Bangladesh and gives us the opportunity to demonstrate how CHT contributes to responsible manufacturing, innovation, and the sustainable development of the textile industry.” Prodip Kumar Dhar, Managing Director and ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/CHT.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
 {
 "id": "fd087575edb3497f",
 "d": "2026-09-18",
@@ -1373,6 +1578,29 @@
 "x": "US cotton exports weaken as Upland shipments fall 20% Fibre2Fashion",
 "i": "",
 "g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "7c5a4ec94121c1e5",
+"d": "2026-09-18",
+"t": "Interlock 직물 공급 업체",
+"o": "Interlock Fabric Suppliers",
+"u": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOUkdDdFRud2FKQTRGZ2FrRUNCVVlGWmJodGtQbU9TcWNNdkhQVHdmV1RHRVY5VlpwME5kR25iV2M4bW1kVzEwZXMxTzlrY1Z1Z2hxZTY3TTJvc3lPSXQ4Vk1fSlh6ZkgtZWlFRTA5Q19NWnpaeEt2aDh6RzJTWm84dHVVbw?oc=5",
+"s": "Interlock Fabric Suppliers Fibre2Fashion",
+"c": "FABRIC",
+"x": "Interlock Fabric Suppliers Fibre2Fashion",
+"i": "",
+"g": [
+"환편"
+],
 "m": "Fibre2Fashion",
 "r": "해외",
 "v": 7,
