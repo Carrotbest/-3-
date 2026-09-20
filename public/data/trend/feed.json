@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-09-19T22:33:22+00:00",
+"generated_at": "2026-09-20T22:47:07+00:00",
 "window_days": 120,
-"total": 967,
-"translated": 967,
-"filtered_out": 1758,
+"total": 985,
+"translated": 985,
+"filtered_out": 1775,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 20,
-"scanned": 619,
-"kept": 227,
-"material": 149
+"scanned": 631,
+"kept": 236,
+"material": 156
 },
 "30": {
 "sources": 23,
-"scanned": 2320,
-"kept": 852,
-"material": 624
+"scanned": 2336,
+"kept": 867,
+"material": 638
 }
 }
 },
@@ -25,23 +25,23 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 314
+"n": 323
 },
 {
 "key": "RETAIL",
-"n": 232
+"n": 234
 },
 {
 "key": "FABRIC",
-"n": 189
+"n": 193
 },
 {
 "key": "ETC",
-"n": 122
+"n": 123
 },
 {
 "key": "CHEMICAL",
-"n": 81
+"n": 83
 },
 {
 "key": "YARN",
@@ -51,11 +51,11 @@
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 257
+"n": 261
 },
 {
 "key": "Fibre2Fashion",
-"n": 157
+"n": 169
 },
 {
 "key": "국제섬유신문",
@@ -63,7 +63,7 @@
 },
 {
 "key": "Textile Focus",
-"n": 63
+"n": 64
 },
 {
 "key": "주제검색 · 국내소재",
@@ -71,7 +71,7 @@
 },
 {
 "key": "Textile Today",
-"n": 53
+"n": 54
 },
 {
 "key": "Ecotextile News",
@@ -137,7 +137,7 @@
 "tags": [
 {
 "key": "방글라데시",
-"n": 64
+"n": 65
 },
 {
 "key": "리사이클",
@@ -145,11 +145,11 @@
 },
 {
 "key": "전시회",
-"n": 43
+"n": 44
 },
 {
 "key": "데님",
-"n": 34
+"n": 35
 },
 {
 "key": "제직",
@@ -184,6 +184,10 @@
 "n": 9
 },
 {
+"key": "추적성",
+"n": 8
+},
+{
 "key": "경편",
 "n": 8
 },
@@ -192,11 +196,11 @@
 "n": 8
 },
 {
-"key": "캐시미어",
+"key": "관세",
 "n": 7
 },
 {
-"key": "추적성",
+"key": "캐시미어",
 "n": 7
 },
 {
@@ -205,10 +209,6 @@
 },
 {
 "key": "PFAS",
-"n": 6
-},
-{
-"key": "관세",
 "n": 6
 },
 {
@@ -256,6 +256,14 @@
 "n": 5
 },
 {
+"key": "GOTS",
+"n": 4
+},
+{
+"key": "플리스",
+"n": 4
+},
+{
 "key": "DTY",
 "n": 4
 },
@@ -272,7 +280,7 @@
 "n": 4
 },
 {
-"key": "GOTS",
+"key": "면가",
 "n": 3
 },
 {
@@ -284,16 +292,8 @@
 "n": 3
 },
 {
-"key": "플리스",
-"n": 3
-},
-{
 "key": "BCI코튼",
 "n": 3
-},
-{
-"key": "DWR",
-"n": 2
 }
 ],
 "entities": [
@@ -330,15 +330,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-21",
-"total": 4,
-"by": {
-"MATERIAL": 2,
-"FABRIC": 1,
-"ETC": 1
-}
-},
 {
 "date": "2026-08-22",
 "total": 1,
@@ -516,10 +507,10 @@
 },
 {
 "date": "2026-09-08",
-"total": 72,
+"total": 73,
 "by": {
 "RETAIL": 13,
-"MATERIAL": 26,
+"MATERIAL": 27,
 "FABRIC": 14,
 "ETC": 10,
 "CHEMICAL": 7,
@@ -619,36 +610,47 @@
 },
 {
 "date": "2026-09-17",
-"total": 30,
+"total": 34,
 "by": {
-"MATERIAL": 6,
+"MATERIAL": 9,
 "RETAIL": 16,
 "FABRIC": 2,
+"CHEMICAL": 3,
 "YARN": 1,
-"ETC": 3,
-"CHEMICAL": 2
+"ETC": 3
 }
 },
 {
 "date": "2026-09-18",
-"total": 33,
+"total": 35,
 "by": {
 "ETC": 1,
 "RETAIL": 16,
-"MATERIAL": 11,
+"MATERIAL": 12,
 "CHEMICAL": 2,
-"FABRIC": 3
+"FABRIC": 4
 }
 },
 {
 "date": "2026-09-19",
-"total": 9,
+"total": 11,
 "by": {
-"FABRIC": 2,
-"MATERIAL": 2,
+"FABRIC": 3,
+"MATERIAL": 3,
 "ETC": 3,
 "YARN": 1,
 "RETAIL": 1
+}
+},
+{
+"date": "2026-09-20",
+"total": 9,
+"by": {
+"FABRIC": 2,
+"MATERIAL": 3,
+"RETAIL": 2,
+"ETC": 1,
+"CHEMICAL": 1
 }
 }
 ],
@@ -656,9 +658,9 @@
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 63,
+"recent": 64,
 "prior": 0,
-"delta": 63,
+"delta": 64,
 "weeks": [
 0,
 0,
@@ -671,7 +673,7 @@
 7,
 14,
 23,
-19
+20
 ]
 },
 {
@@ -698,9 +700,9 @@
 {
 "tag": "전시회",
 "label_en": "performance days",
-"recent": 37,
+"recent": 38,
 "prior": 6,
-"delta": 31,
+"delta": 32,
 "weeks": [
 0,
 0,
@@ -713,15 +715,15 @@
 9,
 6,
 20,
-2
+3
 ]
 },
 {
 "tag": "데님",
 "label_en": "denim",
-"recent": 30,
+"recent": 31,
 "prior": 4,
-"delta": 26,
+"delta": 27,
 "weeks": [
 0,
 0,
@@ -734,7 +736,7 @@
 4,
 9,
 12,
-5
+6
 ]
 },
 {
@@ -864,27 +866,6 @@
 ]
 },
 {
-"tag": "리넨",
-"label_en": "linen",
-"recent": 3,
-"prior": 2,
-"delta": 1,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-1,
-0,
-1,
-0,
-0,
-1,
-2
-]
-},
-{
 "tag": "인도네시아",
 "label_en": "indonesia",
 "recent": 3,
@@ -903,6 +884,27 @@
 1,
 2,
 0
+]
+},
+{
+"tag": "리넨",
+"label_en": "linen",
+"recent": 3,
+"prior": 2,
+"delta": 1,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+1,
+0,
+1,
+0,
+0,
+1,
+2
 ]
 }
 ],
@@ -938,6 +940,12 @@
 "first": "2026-08-31"
 },
 {
+"tag": "추적성",
+"label_en": "traceability",
+"n": 8,
+"first": "2026-09-02"
+},
+{
 "tag": "경편",
 "label_en": "warp knit",
 "n": 8,
@@ -956,12 +964,6 @@
 "first": "2026-09-07"
 },
 {
-"tag": "추적성",
-"label_en": "traceability",
-"n": 7,
-"first": "2026-09-02"
-},
-{
 "tag": "모달",
 "label_en": "modal fiber",
 "n": 5,
@@ -972,6 +974,18 @@
 "label_en": "coating",
 "n": 5,
 "first": "2026-08-28"
+},
+{
+"tag": "GOTS",
+"label_en": "gots",
+"n": 4,
+"first": "2026-09-14"
+},
+{
+"tag": "플리스",
+"label_en": "fleece",
+"n": 4,
+"first": "2026-09-02"
 },
 {
 "tag": "효성",
@@ -986,10 +1000,10 @@
 "first": "2026-09-02"
 },
 {
-"tag": "GOTS",
-"label_en": "gots",
+"tag": "면가",
+"label_en": "cotton price",
 "n": 3,
-"first": "2026-09-14"
+"first": "2026-09-03"
 },
 {
 "tag": "OEKO-TEX",
@@ -1004,12 +1018,6 @@
 "first": "2026-09-02"
 },
 {
-"tag": "플리스",
-"label_en": "fleece",
-"n": 3,
-"first": "2026-09-02"
-},
-{
 "tag": "BCI코튼",
 "label_en": "better cotton",
 "n": 3,
@@ -1020,12 +1028,6 @@
 "label_en": "dwr",
 "n": 2,
 "first": "2026-09-04"
-},
-{
-"tag": "면가",
-"label_en": "cotton price",
-"n": 2,
-"first": "2026-09-03"
 },
 {
 "tag": "자카드",
@@ -1084,6 +1086,225 @@
 ],
 "articles": [
 {
+"id": "dc3052f0795ca455",
+"d": "2026-09-20",
+"t": "글로벌 섬유 연합(Global Textile Alliance), 뉴욕 기후 주간(Climate Week NYC)에서 식물성 저탄소 데님 소개",
+"o": "Global Textile Alliance introduces plant-based low-carbon denim at Climate Week NYC",
+"u": "https://textiletoday.com.bd/global-textile-alliance-introduces-plant-based-low-carbon-denim-at-climate-week-nyc",
+"s": "A new industry collaboration showcases how plant-based and low-carbon denim can transform the textile supply chain. The project brings together key global players to create Naturalls, a sustainable d...",
+"c": "FABRIC",
+"x": "A new industry collaboration showcases how plant-based and low-carbon denim can transform the textile supply chain. The project brings together key global players to create Naturalls, a sustainable denim collection. The involved companies include The Lycra Company, Avalo, Neela by Sapphire Fibers Ltd., and Soko. They presented this project during Climate Week NYC. Figure: Global Textile Alliance introduces plant-based low-carbon denim at Climate Week NYC. Courtesy: Collected Every piece of clothing begins in a field. Climate change places huge demands on modern farming. Designers and product developers need sustainable choices that deliver high performance. This collaboration proves that fashion can achieve high impact without trading off innovation. The fabrics in this collection offer exceptional softness. They feature a combination of Low-Footprint Cotton from Avalo and Renewable Lycra fiber from The Lycra Company. The cotton requires zero irrigation and uses 75 percent less fertilizer. It also generates half the carbon emissions of conventionally grown cotton. The Renewable Lycra fiber contains 70 percent renewable content. This lowers the fiber carbon footprint by up to 45 percent compared to standard spandex. Neela managed the spinning, weaving, and garment production. The mill focused on strong fabric aesthetics, comfort, and visual appeal. Soko applied its advanced Hydrogel and Rare technologies for garment finishing. Hydrogel turns water into a gel and allows multiple treatments in one bath. This process cuts water consumption by up to 85 percent, energy use by up to 68 percent, and processing time by up to 50 percent. The Rare technology uses naturally derived mineral pigments and natural binders to create rich shades.",
+"i": "/storage/uploads/2026/9/globaltextileallia_17898858405922.jpg",
+"g": [
+"데님"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "c1c7946f830715c6",
+"d": "2026-09-20",
+"t": "chinapage=25의 최신 산업 뉴스를 모두 읽어보세요.",
+"o": "Read all Latest Industrial News in chinapage=25",
+"u": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1KRzY0UnlGTGx2T2xybnRvRlBfbm9ybDBTcDBuLUl4Y1pyUzVLVEtLUUpNckx6V2xxOTVGeXhmbmZPU2pQUVFDZXBGTjg2X2dsSlk5bWVSS3hfTVU4RXhoQUI2RGZwNy1kaG41RQ?oc=5",
+"s": "Read all Latest Industrial News in chinapage=25 fibre2fashion.com",
+"c": "MATERIAL",
+"x": "Read all Latest Industrial News in chinapage=25 fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "b278403ba44c2f1e",
+"d": "2026-09-20",
+"t": "미 FABRIC법 재발의…의류 제조 1억 달러 지원·브랜드 책임 확대",
+"o": "미 FABRIC법 재발의…의류 제조 1억 달러 지원·브랜드 책임 확대",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148716",
+"s": "미국이 의류 노동규제와 자국 생산기반 지원을 결합한 ‘패션 책임 및 실질적인 제도 변화 구축법(Fashioning Accountability and Building Real Institutional Change Act·FABRIC Act)’을 다시 의회에 올렸다. 의류 노동자의 성과급(piece rate) 중심 기본임금을 시간급 체계로 전환하고, 생산을 발주한 브랜드에도 임금법 위반 책임을 확대하는 한편 미국 내 의류 제조업에 1억 달러 규모의 지원 프로그램을 마련하는 것이 핵심이다. 관세를 통한 수입 억제보다 생산설비·인력·노동환",
+"c": "FABRIC",
+"x": "미국이 의류 노동규제와 자국 생산기반 지원을 결합한 ‘패션 책임 및 실질적인 제도 변화 구축법(Fashioning Accountability and Building Real Institutional Change Act·FABRIC Act)’을 다시 의회에 올렸다. 의류 노동자의 성과급(piece rate) 중심 기본임금을 시간급 체계로 전환하고, 생산을 발주한 브랜드에도 임금법 위반 책임을 확대하는 한편 미국 내 의류 제조업에 1억 달러 규모의 지원 프로그램을 마련하는 것이 핵심이다. 관세를 통한 수입 억제보다 생산설비·인력·노동환",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148716_130678_4444_v150.jpg",
+"g": [
+"관세"
+],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "aecc3caa6b881872",
+"d": "2026-09-20",
+"t": "명품 소비자는 떠났는데...투자자들은 돌아온다?",
+"o": "명품 소비자는 떠났는데...투자자들은 돌아온다?",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148718",
+"s": "글로벌 럭셔리업계가 매출 감소 국면에서 벗어나 안정화의 신호를 보이고 있다. 딜로이트(Deloitte)의 ‘글로벌 패션·럭셔리 사모펀드 및 투자자 조사 2026’에 따르면, 조사 대상 럭셔리업계의 2026년 상반기 매출은 0.6% 증가했다. 지난해 상반기 12.4% 감소했던 흐름에서 반등한 것이다. 개인용 럭셔리 상품 부문은 0.9%, 가구·생활용품과 고급 호텔, 전용기, 레스토랑, 고급 자동차, 요트 등을 포함한 나머지 부문 합계는 0.4% 성장했다. 이번 조사는 글로벌 사모펀드 관계자 약 50명과 럭셔리 기업 119개사를 대상으",
+"c": "RETAIL",
+"x": "글로벌 럭셔리업계가 매출 감소 국면에서 벗어나 안정화의 신호를 보이고 있다. 딜로이트(Deloitte)의 ‘글로벌 패션·럭셔리 사모펀드 및 투자자 조사 2026’에 따르면, 조사 대상 럭셔리업계의 2026년 상반기 매출은 0.6% 증가했다. 지난해 상반기 12.4% 감소했던 흐름에서 반등한 것이다. 개인용 럭셔리 상품 부문은 0.9%, 가구·생활용품과 고급 호텔, 전용기, 레스토랑, 고급 자동차, 요트 등을 포함한 나머지 부문 합계는 0.4% 성장했다. 이번 조사는 글로벌 사모펀드 관계자 약 50명과 럭셔리 기업 119개사를 대상으",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148718_130681_543_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "77b21e561b420be1",
+"d": "2026-09-20",
+"t": "10년 간의 섬유 초점: 여정을 기념하고 신뢰와 믿음으로 미래를 만들어 나갑니다.",
+"o": "A Decade of Textile Focus: Celebrating the Journey, Shaping the Future with trust & reliability",
+"u": "https://textilefocus.com/decade-of-textile-focus-celebrating-the-journey-shaping-the-future-with-trust-reliability/",
+"s": "Dear Readers & Esteemed Colleagues of the Industry, Ten years ago, Textile Focus began with a clear ambition- to build a credible platform for Bangladesh’s textile and apparel industry, connect stakeholders, spotlight innovation, and tell the stories shaping one of the world’s most important manufac",
+"c": "ETC",
+"x": "Dear Readers & Esteemed Colleagues of the Industry, Ten years ago, Textile Focus began with a clear ambition- to build a credible platform for Bangladesh’s textile and apparel industry, connect stakeholders, spotlight innovation, and tell the stories shaping one of the world’s most important manufacturing sectors. Figure: Mohammad Ashraful Islam, Editor, Textile Focus Today, as we celebrate our 10th Anniversary , we look back with gratitude and pride- and forward with renewed determination. Over the past decade, Bangladesh’s textile and apparel industry has undergone remarkable transformation. It has navigated global disruptions, technological change, sustainability demands, evolving consumer expectations, and intensifying competition. Throughout this journey, Textile Focus has remained committed to documenting the industry, amplifying its voices, and creating meaningful connections. Our name reflects our responsibility. We believe industry media should do more than report what has happened. It should help stakeholders understand what is happening, why it matters, and where the industry is heading . That responsibility matters more than ever as the sector enters a new era. Sustainability, circularity, renewable energy, digitalization, automation, artificial intelligence, and advanced manufacturing are redefining the global textile and apparel landscape. For Bangladesh, the next decade presents both opportunity and responsibility. Having established itself as a global apparel manufacturing powerhouse, the country must now pursue greater value addition, product diversification, technological advancement, productivity, innovation, and deeper integration into global value chains. We believe Bangladesh can strengthen its position not only as a manufacturing destination, but ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Editor.png",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "4826a35aa76a0186",
+"d": "2026-09-20",
+"t": "마리끌레르, 도산·북촌 플래그십 확장…외국인 공략 가속",
+"o": "마리끌레르, 도산·북촌 플래그십 확장…외국인 공략 가속",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148719",
+"s": "퍼스트에프앤씨(대표 전효진)의 프렌치 감성의 여성 영 컨템포러리 브랜드 ‘마리끌레르(marie claire)’가 도산과 북촌에 플래그십 스토어를 잇따라 열고 외국인 관광객 공략에 속도를 낸다. 성수점과 한남점의 외국인 매출 비중이 80%에 달하는 가운데 관광 수요가 높은 핵심 상권으로 직영 매장을 확대하고, 지역별 특성을 반영한 공간 전략으로 브랜드 경험을 강화한다.퍼스트에프앤씨가 전개하는 마리끌레르는 지난 11일 서울 강남구 도산공원 인근에 ‘마리끌레르 부띠크 도산점’을, 15일 종로구 북촌에 ‘마리끌레르 맨숀 북촌점’을 각각 오",
+"c": "RETAIL",
+"x": "퍼스트에프앤씨(대표 전효진)의 프렌치 감성의 여성 영 컨템포러리 브랜드 ‘마리끌레르(marie claire)’가 도산과 북촌에 플래그십 스토어를 잇따라 열고 외국인 관광객 공략에 속도를 낸다. 성수점과 한남점의 외국인 매출 비중이 80%에 달하는 가운데 관광 수요가 높은 핵심 상권으로 직영 매장을 확대하고, 지역별 특성을 반영한 공간 전략으로 브랜드 경험을 강화한다.퍼스트에프앤씨가 전개하는 마리끌레르는 지난 11일 서울 강남구 도산공원 인근에 ‘마리끌레르 부띠크 도산점’을, 15일 종로구 북촌에 ‘마리끌레르 맨숀 북촌점’을 각각 오",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148719_130682_10_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 9,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "3ed1dc3312a71499",
+"d": "2026-09-20",
+"t": "폴리에스테르 혼합 구매자",
+"o": "Polyester Blends Buyers",
+"u": "https://news.google.com/rss/articles/CBMiekFVX3lxTE9iRnAyRUY3TnhqSnhHQ0RFWGhOX0lQRmdFeEota1RSRGtBVjQyWHRCZTdWblM2WnphaXhSLTVYV19VZEUwUllGbXJYZklOX2xMR0VWa1dJd2xmaGppdHdJNE1aWVFBSHo0MElIczNxZm80bjZmb1BNRXF3?oc=5",
+"s": "Polyester Blends Buyers fibre2fashion.com",
+"c": "MATERIAL",
+"x": "Polyester Blends Buyers fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "2c8eb11896bbd836",
+"d": "2026-09-20",
+"t": "디지털 텍스타일 프린팅: 패션 산업에 혁명을 일으키다",
+"o": "Digital Textile Printing: Revolutionising the Fashion Industry",
+"u": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNeF9KZ2VZOVJ0VTFBV0xQMnNwWkRiT3E4eFRJcGZkRG5tQmFYVnB0XzRkZTFjbHFTWEJ5SUQ3VnRGaUZaRGRXWTltS1pkdzlSRm9ZR1NIWGZHWXRtS0RyTjhraUZYbUVIWWxfOEdiNjdFMnFxbVVkanlHdEV0aWdUNzJHLUtpWTgxWmJVeXMyQVl5ZjdSR2FDM1VDdUYwc255alh0c2VVLW93WnFSOHRwSzllWkx4UWNPU0VBM2dTZWlHY1FHR2Zz?oc=5",
+"s": "Digital Textile Printing: Revolutionising the Fashion Industry fibre2fashion.com",
+"c": "CHEMICAL",
+"x": "Digital Textile Printing: Revolutionising the Fashion Industry fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "192a2f61ba9bad4d",
+"d": "2026-09-20",
+"t": "유기농 넘어 재활용까지…新글로벌 책임섬유 인증 ‘GRTS’ 출범",
+"o": "유기농 넘어 재활용까지…新글로벌 책임섬유 인증 ‘GRTS’ 출범",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148717",
+"s": "비영리 표준기관 글로벌 스탠더즈(Global Standards)가 ‘글로벌 책임섬유표준(Global Responsible Textile Standard·GRTS)’을 공식 출범하고 식물·동물 섬유부터 재생셀룰로오스, 재활용 섬유까지 아우르는 새로운 섬유 가공 인증체계를 가동했다. 유기농 원료 중심이던 GOTS의 한계를 보완하면서 원료 인증과 가공·제조 과정의 환경, 인권, 화학물질 관리 및 물리적 추적성을 하나의 체계로 연결한다는 것이 핵심이다.GRTS는 새로운 원료 인증을 만드는 방식이 아니다. 이미 제3자 표준으로 인증된 책임섬",
+"c": "MATERIAL",
+"x": "비영리 표준기관 글로벌 스탠더즈(Global Standards)가 ‘글로벌 책임섬유표준(Global Responsible Textile Standard·GRTS)’을 공식 출범하고 식물·동물 섬유부터 재생셀룰로오스, 재활용 섬유까지 아우르는 새로운 섬유 가공 인증체계를 가동했다. 유기농 원료 중심이던 GOTS의 한계를 보완하면서 원료 인증과 가공·제조 과정의 환경, 인권, 화학물질 관리 및 물리적 추적성을 하나의 체계로 연결한다는 것이 핵심이다.GRTS는 새로운 원료 인증을 만드는 방식이 아니다. 이미 제3자 표준으로 인증된 책임섬",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148717_130680_5022_v150.jpg",
+"g": [
+"GOTS",
+"추적성"
+],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 13,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "f4ef295aea7df19b",
+"d": "2026-09-19",
+"t": "Interfilière Shanghai 2026에서 친밀한 패션, 직물 및 혁신의 미래를 발견하세요 | 티켓 받기",
+"o": "Discover the future of intimate fashion, fabrics, and innovation at Interfilière Shanghai 2026 | Get Your Ticket",
+"u": "https://news.google.com/rss/articles/CBMiggFBVV95cUxNakZ1cHFqYWgtMWxueVNEdTJWLW9jSzVxUlNyQzNFblJsQzNCVDR5SEhxNHJkc3Jnb1NPYTRNLW5oNnFFN1VkQ1V0MVFUYWxWcUpxNjNHQmhrV1RGaFRNZGhrUWlpREVHZnhVeThGWmFIcEU4dFZzd0dhN3BLdXF4bmhB?oc=5",
+"s": "Discover the future of intimate fashion, fabrics, and innovation at Interfilière Shanghai 2026 | Get Your Ticket fibre2fashion.com",
+"c": "FABRIC",
+"x": "Discover the future of intimate fashion, fabrics, and innovation at Interfilière Shanghai 2026 | Get Your Ticket fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "da29b9645f163f5c",
 "d": "2026-09-19",
 "t": "2026년 가을 Yarn Expo가 글로벌 소싱에 지속 가능한 혁신을 접목하며 막을 내립니다.",
@@ -1100,11 +1321,12 @@
 "m": "Textile World",
 "r": "해외",
 "v": 17,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Textile World"
+"Textile World",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -1165,11 +1387,12 @@
 "m": "Textile Today",
 "r": "해외",
 "v": 17,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Textile Today"
+"Textile Today",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -1237,6 +1460,29 @@
 "e": [],
 "ms": [
 "한국섬유신문"
+]
+},
+{
+"id": "2c319078108df2ce",
+"d": "2026-09-19",
+"t": "경제 불확실성 속에 세계 면화 가격 상승세 둔화",
+"o": "Global cotton prices see slow growth amidst economic uncertainty",
+"u": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNV2tYTWMybXdMZENCaHBOUnl5SkNNRDE5OVRPa0JWQkdxV2h4SUkxZ2g1ZGp4SV9mQVcwM0ZkcW5URlpZaE5nRkUzQloza0RUbEM3YkVZY2tVSEEwbE9SNHpHbWJtS0lteWNUZURmMjJmTmxpZm5xdUVLNjVEOEM1VmhHQ3p2TGVDbDd3UQ?oc=5",
+"s": "Global cotton prices see slow growth amidst economic uncertainty fibre2fashion.com",
+"c": "MATERIAL",
+"x": "Global cotton prices see slow growth amidst economic uncertainty fibre2fashion.com",
+"i": "",
+"g": [
+"면가"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -1370,6 +1616,27 @@
 "e": [],
 "ms": [
 "국제섬유신문"
+]
+},
+{
+"id": "e65365e285ad83b4",
+"d": "2026-09-18",
+"t": "유럽의 산업 생산량은 EU에서 0.3%, 유로 지역에서 0.1% 감소",
+"o": "Europe's industrial output falls 0.3% in EU, 0.1% in Euro area",
+"u": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxOelJCb0xtQTJCekh6YXZjeXpsc2t0WnlpVzRkdWVlUEdRUU9kelJTeWhVM0tCMGFJdXhMNXdSM0o5U1lHTmRTQnY3Z3RIaG9yTFdhYXlhQ2VvWkNreFNjM1d1cHNDS0xBVkRCQm5OeWdyMkxFOTRQbmJYMlE3cnYzRTRXMHI1WF9JT0FVVm55anp3QTZsUzNCbmZ2V0QwWWwtWjQxcGwzeHJCWE9HOElNTTI2WmdjQjZjVlk0M1Q3WUFxek1aUnJXVTNCUjctNTlSY2Flc2tR?oc=5",
+"s": "Europe's industrial output falls 0.3% in EU, 0.1% in Euro area fibre2fashion.com",
+"c": "MATERIAL",
+"x": "Europe's industrial output falls 0.3% in EU, 0.1% in Euro area fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -1756,6 +2023,29 @@
 "e": [],
 "ms": [
 "주제검색 · 신소재"
+]
+},
+{
+"id": "392b3db746230fca",
+"d": "2026-09-18",
+"t": "Fleece 직물 공급 업체",
+"o": "Fleece Fabric Suppliers",
+"u": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOTEF5YzVmN1g2aXFFY0hQR2VvRjJ1c1g0bWdvR2FKSVRrQnh0OUM3S1ZLd09OTzJraHUxeWVaMW9rTkxUR2dWNncxb0tuSVVTOWZmZ0lPclByVW9kWENGZHZFRko0eDlVN2lzUzBGbGREQ0VmeVFsa2ZrM09wOHZBZWpsdERwZw?oc=5",
+"s": "Fleece Fabric Suppliers fibre2fashion.com",
+"c": "FABRIC",
+"x": "Fleece Fabric Suppliers fibre2fashion.com",
+"i": "",
+"g": [
+"플리스"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -2166,6 +2456,48 @@
 ]
 },
 {
+"id": "cb4afd2bfec32dad",
+"d": "2026-09-17",
+"t": "ELiAR 스마트 센서는 섬유 염색에 실시간 제어를 제공합니다.",
+"o": "ELiAR Smart Sensors bring real-time control to textile dyeing",
+"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOT2ZWSXdhbktyODY5ajZkMWtpclo1eUlENXFkMkxyc2pKRV9ZVzUzWFhUa3hXQUd1RHdFSVNQOHlTeElIT1c3THQxT0dES0l4YThnQ1JxZERNR05KS1JHeURDakNQSUo4NWZLTFZkSEJ5MGphc3V1c3d1MkExRXdsYms3cGlta0MweEFaVkQyME1tSVg0N2trbDdfTHBqbkU4MEhhcWdyOVBoVU1DT0g3aVJyWW1vaEl3ZVYtRzNCSWp5Z0Vxc01mUzgxS1Q?oc=5",
+"s": "ELiAR Smart Sensors bring real-time control to textile dyeing fibre2fashion.com",
+"c": "CHEMICAL",
+"x": "ELiAR Smart Sensors bring real-time control to textile dyeing fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "bf141e6ee8a3b507",
+"d": "2026-09-17",
+"t": "US' 갭, A.P.C. 37피스 한정판 패션 컬렉션 공개",
+"o": "US' Gap, A.P.C. unveil 37-piece limited-edition fashion collection",
+"u": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxPeHFvak9IaWZGWlpGcDJBbXBPR24wSzd1OFh3Yl9iZFdQbzVaQzF4VDdJeV9NVUtLd3dXT0ZoaWVaeGtleWlaNlpjQ3VxRi1xeVpuTkw5WlpIYldEa2xWdGl2dXpJcE1YazNwZm1Zay04NExteGZpVXQ3WW1tN0ZEWkRHa3BoUXJIQ1o3bU1uRVppZXZuYUhNNGdWYU04X283cElzQVFFVl9tdExUalA5bThQWk5RMlpuNDE3a2ZjcDdRV1k5TnFobG1STWxSWjVOaDZST1FvYThxUk0?oc=5",
+"s": "US' Gap, A.P.C. unveil 37-piece limited-edition fashion collection fibre2fashion.com",
+"c": "MATERIAL",
+"x": "US' Gap, A.P.C. unveil 37-piece limited-edition fashion collection fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "b4e840b8480b2dab",
 "d": "2026-09-17",
 "t": "어메이징 송, 한국 시장 공식 진출…글로벌 확장 시동",
@@ -2555,6 +2887,29 @@
 ]
 },
 {
+"id": "28ba06dc17f61680",
+"d": "2026-09-17",
+"t": "Intertextile 상하이 2026, 방문객 10만 명 돌파",
+"o": "Intertextile Shanghai 2026 draws over 100,000 visitors",
+"u": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxPQ2lnejlqanl6TWlrM2JrSWxzcTFwWWZrS25JZzR0cmI4VF9QckpPdmtRRXpOOEdWZ0lncHNNcE5xcXl5VE8yTkotN3dLdnFSQUJxd3ZXN1NvdWJaRXIyZEI4WFJSbHY5ZXJwdVBrWGlCejViQVZKSC1QWlRWOFZEU0I2SFZIQXBNMDliTVA4blZBNVVvTEZ4MGEwLTY3LUV5UzlBUzQzdDJOY2hQdkNiSEhkYXpjQkE4NjQ0WExTSHkwY0ZKRUxUWmJpNGlmaEQ2dm5NVnJ2MA?oc=5",
+"s": "Intertextile Shanghai 2026 draws over 100,000 visitors fibre2fashion.com",
+"c": "MATERIAL",
+"x": "Intertextile Shanghai 2026 draws over 100,000 visitors fibre2fashion.com",
+"i": "",
+"g": [
+"전시회"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "1d17b3baa2a687cf",
 "d": "2026-09-17",
 "t": "올리비아하슬러, ‘하슬러다움’ 재정립…2027년 브랜드 체질 바꾼다",
@@ -2594,6 +2949,27 @@
 "e": [],
 "ms": [
 "한국섬유신문"
+]
+},
+{
+"id": "0653c7a74ba64bd4",
+"d": "2026-09-17",
+"t": "프랑스 Lectra, 패션 개발을 위한 AI 기반 Apogy 출시",
+"o": "France's Lectra launches AI-powered Apogy for fashion development",
+"u": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOX0paanREUkhoMS1KU0cwN015VjRLOEJTZFhmbGF0VnJ5ZGJkOWN0cFJ5U0ZaUGg1ZDJoQVRYQnh4VGgySWdiemZ1VDY3WHJ2dllJMTB1Q01STVR1c3g2RVV1ZGloVXg5QkotS3JURTJWTkhJdDBnaHJaMGstZEE1V05SLUxEZllLQnFOT3I0NkhmS0h0UWtSZmVYMURWNWZGN0pqdF9nRFExODhGaEFxcE0zbkhMSVVfR3BpYWVUeDdjUm8wd0xuV0J4ZVVEbTIyQmc?oc=5",
+"s": "France's Lectra launches AI-powered Apogy for fashion development fibre2fashion.com",
+"c": "MATERIAL",
+"x": "France's Lectra launches AI-powered Apogy for fashion development fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -8056,11 +8432,12 @@
 "m": "한국섬유신문",
 "r": "국내",
 "v": 11,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"한국섬유신문"
+"한국섬유신문",
+"주제검색 · 국내소재"
 ]
 },
 {
@@ -10395,6 +10772,27 @@
 "e": [],
 "ms": [
 "Textile Focus"
+]
+},
+{
+"id": "835e3f615548222c",
+"d": "2026-09-08",
+"t": "디지털 제품 제작이 의류 개발을 변화시키는 방법",
+"o": "How Digital Product Creation is Changing Apparel Development",
+"u": "https://news.google.com/rss/articles/CBMixwFBVV95cUxPelNCUS1uQjdBaWRwWFZOR3FpTXhWT2duQ2VldTJMVGZHWWxoal9heFdka0h0T3dMNmx3S0tibkNHV2lOUVFLejZqSEpUamJRUHhGUHFSN3JvbzRkVEg1U3kwSzlvVGtCVFZKT0hTa04xYVd5Y2tMazVFQURVZktfUzZEd2p6ZG9raTh6OHo4cVVKLTRCZ0x5QUFjOUYwVE11elZGRDBNaXFUUU1KUzJ5M3Z5ZC1ESnplaF9aUVhkSU56RzJTYnNj?oc=5",
+"s": "How Digital Product Creation is Changing Apparel Development fibre2fashion.com",
+"c": "MATERIAL",
+"x": "How Digital Product Creation is Changing Apparel Development fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {

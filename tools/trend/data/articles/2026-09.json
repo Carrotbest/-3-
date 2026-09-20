@@ -1,5 +1,734 @@
 [
  {
+  "key": "ff854a4b7592848d",
+  "title": "Roksanda Spring 2027: Showing the Ropes",
+  "title_ko": null,
+  "link": "https://wwd.com/runway/spring-2027/london/roksanda/review/",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "The designer drew inspiration from textile sculptor Françoise Grossen, known for her knotting and braiding, and tinged her daywear with arty touches.",
+  "content": "The designer drew inspiration from textile sculptor Françoise Grossen, known for her knotting and braiding, and tinged her daywear with arty touches.",
+  "image": "",
+  "image_tried": "2026-09-20T22:45:24+00:00",
+  "source": "WWD",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "WWD"
+  ]
+ },
+ {
+  "key": "fca36caa1dbc6c06",
+  "title": "India's trade deals creating new markets for entrepreneurs, says Modi",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxPU3d3VmYybXVMdi14bXFRWFRHNHJjZnk2U25HMmlTcUJpUVA5S2dzek43N09Ob3Rfd1k3UlRQTHN5RTJLd0R2OURvN19CLUNuWk1nbl9tNXFKbDFIQ1R1MkFOWkQxUnBrbU96TVpScWpUSXpWdWlQb2JiN3RWZThsRnVsaWZkNHMyVlhKeU5SS254Q080Z1BNZ0JOSGRKNkRmR2ZkcnRUaEd4YTFsZVZ4ZmpTN2xHRTh5YUpKZnZTUXUzX1ZrdmJFd0FUTHZVankwcUFfZl9qVTBVcUJMbXdqdkxR?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "India's trade deals creating new markets for entrepreneurs, says Modi fibre2fashion.com",
+  "content": "India's trade deals creating new markets for entrepreneurs, says Modi fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "f9fbd61e52c86ff0",
+  "title": "Keysight to Demonstrate End-to-End Solutions for Scaling AI Infrastructure at ECOC 2026",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNVmthVWpFaU5qVlpPbmZ4MEFWeDN4a2F2d0p3cFR0ODRvSnJleWNENk1tb0JmOGFnTV9sX2VzSGFSV2ZHOVVUVTlnNFFCaFR6ME1tb0pjREJaaTZmajNDTVlJTFBma0ltSzZTbGFCLXJUcTBKWk05cG1GOGZfV3hyUXF3RmpBSnpnYlVBQmR6c1NucnAzUEQxVks2RzdJOEdIZWN6U1NIbHJzU1NPcjRwUQ?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Keysight to Demonstrate End-to-End Solutions for Scaling AI Infrastructure at ECOC 2026 01net",
+  "content": "Keysight to Demonstrate End-to-End Solutions for Scaling AI Infrastructure at ECOC 2026 01net",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "f06c3eebd7c0e889",
+  "title": "Euro area current account surplus falls to $32.2 bn in July",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxPdWk1VXp4NzZTT0tiSm5qNFB1ZmJPemRpbGxJWHFVMGtiOFVPRndFZ0xtVVE3NnhOOXdRNUVBUG1TelRZUVlHdHk3c3psMGRrUWpoU3g3YWlRQm55SlhXMU8tbjFKNlY4N0hSLWVhLUlqUWcwckViekYtN2pYQkRsbkJ4TC1WckkxUXNCeEhxOHFHRm11Q1p4QzFHVXBRTHRRdXlCLVRrUmJpRUMzZ0RZa3ZldjZocDhFRTZqdTFlcC1vSDdXaHk2bWFfd2gxWlkzRGc?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Euro area current account surplus falls to $32.2 bn in July fibre2fashion.com",
+  "content": "Euro area current account surplus falls to $32.2 bn in July fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 6,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "e618ccfe83cb0b4d",
+  "title": "Beyond power cuts: What's at stake for Bangladesh's RMG sector?",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxOZ1JrWGNLTTFRRExWaDkyUUJlVjk1Y0NxOVFVckp4OE9obURuMkJDUHA2LWtxbHZDTm0ySTZuLXdlWGZTbWNzb0tGVk5MUVpUWE4wbUl5Xy1BQjdTM2Z3VW5qZF8yQ1MxWE1FSlhyU216WWhnRlJNQVF2MUh0Ri1kekktSWdBUGM3UWp2cDVGRkdZT2ZrNFFKd3pzNjFoQVJuOHl0RHp2cHZRSTVac3ZFVVlKQjN4Nm9VOWVDNk9VRkJsY2IyZThOSGdrd29TS2Z4NXQtdjlqVmNsWGdLVkVXZ2lUd0s?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Beyond power cuts: What's at stake for Bangladesh's RMG sector? fibre2fashion.com",
+  "content": "Beyond power cuts: What's at stake for Bangladesh's RMG sector? fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "방글라데시"
+  ],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "dc3052f0795ca455",
+  "title": "Global Textile Alliance introduces plant-based low-carbon denim at Climate Week NYC",
+  "title_ko": "글로벌 섬유 연합(Global Textile Alliance), 뉴욕 기후 주간(Climate Week NYC)에서 식물성 저탄소 데님 소개",
+  "link": "https://textiletoday.com.bd/global-textile-alliance-introduces-plant-based-low-carbon-denim-at-climate-week-nyc",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "A new industry collaboration showcases how plant-based and low-carbon denim can transform the textile supply chain. The project brings together key global players to create Naturalls, a sustainable d...",
+  "content": "A new industry collaboration showcases how plant-based and low-carbon denim can transform the textile supply chain. The project brings together key global players to create Naturalls, a sustainable denim collection. The involved companies include The Lycra Company, Avalo, Neela by Sapphire Fibers Ltd., and Soko. They presented this project during Climate Week NYC. Figure: Global Textile Alliance introduces plant-based low-carbon denim at Climate Week NYC. Courtesy: Collected Every piece of clothing begins in a field. Climate change places huge demands on modern farming. Designers and product developers need sustainable choices that deliver high performance. This collaboration proves that fashion can achieve high impact without trading off innovation. The fabrics in this collection offer exceptional softness. They feature a combination of Low-Footprint Cotton from Avalo and Renewable Lycra fiber from The Lycra Company. The cotton requires zero irrigation and uses 75 percent less fertilizer. It also generates half the carbon emissions of conventionally grown cotton. The Renewable Lycra fiber contains 70 percent renewable content. This lowers the fiber carbon footprint by up to 45 percent compared to standard spandex. Neela managed the spinning, weaving, and garment production. The mill focused on strong fabric aesthetics, comfort, and visual appeal. Soko applied its advanced Hydrogel and Rare technologies for garment finishing. Hydrogel turns water into a gel and allows multiple treatments in one bath. This process cuts water consumption by up to 85 percent, energy use by up to 68 percent, and processing time by up to 50 percent. The Rare technology uses naturally derived mineral pigments and natural binders to create rich shades.",
+  "image": "/storage/uploads/2026/9/globaltextileallia_17898858405922.jpg",
+  "image_tried": null,
+  "source": "Textile Today",
+  "region": "해외",
+  "category": "FABRIC",
+  "tags": [
+   "데님"
+  ],
+  "entities": [],
+  "score": 11,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Textile Today"
+  ]
+ },
+ {
+  "key": "d186745dfafb5932",
+  "title": "Ralph Lauren Classic Oxford Shirt Down to $123 on Amazon",
+  "title_ko": "Ralph Lauren 클래식 옥스포드 셔츠 Amazon에서 $ 123까지 할인",
+  "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPQ3A3eGxoTXFMd0YwTEFQUEgteHYwOElpYVZRUUhCTkJUQ0RDZWw5R1Y0RDZDcHplcFdvSGUwUTZJNUEzZzF3QjJqc1hEVDNJN25pUUNZYUdiZlJHaFdnQ1JGeDd1RG1BRGdQRVJrenU2VkU0WHZmWHBHd0RLNzlUWW1ycEZqRWZtMUxEMlItNU5HbzZtcDBlSXg4eURyNFZHNWZiRXVWNmpLb01tNnpwZFYtRU8?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Ralph Lauren Classic Oxford Shirt Down to $123 on Amazon The Inventory",
+  "content": "Ralph Lauren Classic Oxford Shirt Down to $123 on Amazon The Inventory",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Amazon",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "amazon"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Amazon"
+  ]
+ },
+ {
+  "key": "cedd979cef3d7e4f",
+  "title": "Target Corp. stock edges lower after strong summer sales and analyst target hike",
+  "title_ko": "Target Corp 주식은 여름 판매 강세와 분석가 Target 인상으로 하락",
+  "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNdE1tVjNIOUY5M05nSTF0RXowb3hHRDRTdXBkcFJsWC02SUlaT3NSRHJnSEZNYTgyMWpIcDRqM3BpQldOUXhqWW1KZUp4aVhJM3ZIUzdoZEIya3pQU0RZSVVRbVhaRGRiZm5tTXBIS1hFOE10aEdyUGhiUF9MdExtSEdiYWw1UVFNVUU3TDNRTzFGMFlaeXVDWGRzbUJXQlVDZnNzZUV1WUl1bTd1SXRPdU4wQ1BYT3FRSnVDR3FtY0otVGpoY1djQzhB?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Target Corp. stock edges lower after strong summer sales and analyst target hike AD HOC NEWS",
+  "content": "Target Corp. stock edges lower after strong summer sales and analyst target hike AD HOC NEWS",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Target",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "target"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Target"
+  ]
+ },
+ {
+  "key": "c1c7946f830715c6",
+  "title": "Read all Latest Industrial News in chinapage=25",
+  "title_ko": "chinapage=25의 최신 산업 뉴스를 모두 읽어보세요.",
+  "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1KRzY0UnlGTGx2T2xybnRvRlBfbm9ybDBTcDBuLUl4Y1pyUzVLVEtLUUpNckx6V2xxOTVGeXhmbmZPU2pQUVFDZXBGTjg2X2dsSlk5bWVSS3hfTVU4RXhoQUI2RGZwNy1kaG41RQ?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Read all Latest Industrial News in chinapage=25 fibre2fashion.com",
+  "content": "Read all Latest Industrial News in chinapage=25 fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "baca766b0d860839",
+  "title": "PREMIÈRE VISION PARIS, THE FASHION INDUSTRY’S DECISION-MAKING PLATFORM",
+  "title_ko": null,
+  "link": "https://textilefocus.com/premiere-vision-paris-the-fashion-industrys-decision-making-platform/",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "The edition that has just come to a close at Paris Nord Villepinte confirms the repositioning undertaken over the past two seasons: Première Vision Paris is becoming a meeting point where the textile and fashion industries come together to exchange ideas, connect and make decisions, as much as to source, with one constant objective: driving […] The post PREMIÈRE VISION PARIS, THE FASHION INDUSTRY’S DECISION-MAKING PLATFORM appeared first on Textile Focus .",
+  "content": "The edition that has just come to a close at Paris Nord Villepinte confirms the repositioning undertaken over the past two seasons: Première Vision Paris is becoming a meeting point where the textile and fashion industries come together to exchange ideas, connect and make decisions, as much as to source, with one constant objective: driving business development for exhibitors. A VISITOR PROFILE REFOCUSED ON CREATIVITY AND VALUE The most significant shift in this edition has been the consolidation of the visitor base around the key players who determine a product’s value. Fashion houses, designers and luxury brands were up 19% compared with September 2025, while retail companies increased by 30%. Influencers, trend agencies and agents whose expertise subsequently shapes dozens of collections each gained more than 10 percentage points. Commercial functions followed the same upward trend. A trade show that attracts a growing share of designers and influencers strengthens its influence over the season being shaped. This rise in value is underpinned by a strengthened international presence: six out of ten visitors came from abroad, with the Italian, German and Swiss industrial hubs gaining ground alongside Turkey and India. It also reflects the show’s growing role in the institutional sphere: European textile federations met for the second consecutive year under the auspices of Euratex, in the presence of Valère Moutarlier, Deputy Director-General for “European Industry and Decarbonisation” at the European Commission, and French members of parliament. Sébastien Martin, Minister responsible for Industry, addressed attendees via video message. One year on, the declaration signed at the show has produced its first regulatory impact with the introduction of European taxation on ",
+  "image": "https://textilefocus.com/wp-content/uploads/2026/09/PREMIERE-VISION-PARIS-01-03-SEPT-26.png",
+  "image_tried": null,
+  "source": "Textile Focus",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 5,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Textile Focus"
+  ]
+ },
+ {
+  "key": "b278403ba44c2f1e",
+  "title": "미 FABRIC법 재발의…의류 제조 1억 달러 지원·브랜드 책임 확대",
+  "title_ko": "미 FABRIC법 재발의…의류 제조 1억 달러 지원·브랜드 책임 확대",
+  "link": "http://www.ktnews.com/news/articleView.html?idxno=148716",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "미국이 의류 노동규제와 자국 생산기반 지원을 결합한 ‘패션 책임 및 실질적인 제도 변화 구축법(Fashioning Accountability and Building Real Institutional Change Act·FABRIC Act)’을 다시 의회에 올렸다. 의류 노동자의 성과급(piece rate) 중심 기본임금을 시간급 체계로 전환하고, 생산을 발주한 브랜드에도 임금법 위반 책임을 확대하는 한편 미국 내 의류 제조업에 1억 달러 규모의 지원 프로그램을 마련하는 것이 핵심이다. 관세를 통한 수입 억제보다 생산설비·인력·노동환",
+  "content": "미국이 의류 노동규제와 자국 생산기반 지원을 결합한 ‘패션 책임 및 실질적인 제도 변화 구축법(Fashioning Accountability and Building Real Institutional Change Act·FABRIC Act)’을 다시 의회에 올렸다. 의류 노동자의 성과급(piece rate) 중심 기본임금을 시간급 체계로 전환하고, 생산을 발주한 브랜드에도 임금법 위반 책임을 확대하는 한편 미국 내 의류 제조업에 1억 달러 규모의 지원 프로그램을 마련하는 것이 핵심이다. 관세를 통한 수입 억제보다 생산설비·인력·노동환",
+  "image": "http://www.ktnews.com/news/thumbnail/202609/148716_130678_4444_v150.jpg",
+  "image_tried": null,
+  "source": "한국섬유신문",
+  "region": "국내",
+  "category": "FABRIC",
+  "tags": [
+   "관세"
+  ],
+  "entities": [],
+  "score": 8,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "한국섬유신문"
+  ]
+ },
+ {
+  "key": "aecc3caa6b881872",
+  "title": "명품 소비자는 떠났는데...투자자들은 돌아온다?",
+  "title_ko": "명품 소비자는 떠났는데...투자자들은 돌아온다?",
+  "link": "http://www.ktnews.com/news/articleView.html?idxno=148718",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "글로벌 럭셔리업계가 매출 감소 국면에서 벗어나 안정화의 신호를 보이고 있다. 딜로이트(Deloitte)의 ‘글로벌 패션·럭셔리 사모펀드 및 투자자 조사 2026’에 따르면, 조사 대상 럭셔리업계의 2026년 상반기 매출은 0.6% 증가했다. 지난해 상반기 12.4% 감소했던 흐름에서 반등한 것이다. 개인용 럭셔리 상품 부문은 0.9%, 가구·생활용품과 고급 호텔, 전용기, 레스토랑, 고급 자동차, 요트 등을 포함한 나머지 부문 합계는 0.4% 성장했다. 이번 조사는 글로벌 사모펀드 관계자 약 50명과 럭셔리 기업 119개사를 대상으",
+  "content": "글로벌 럭셔리업계가 매출 감소 국면에서 벗어나 안정화의 신호를 보이고 있다. 딜로이트(Deloitte)의 ‘글로벌 패션·럭셔리 사모펀드 및 투자자 조사 2026’에 따르면, 조사 대상 럭셔리업계의 2026년 상반기 매출은 0.6% 증가했다. 지난해 상반기 12.4% 감소했던 흐름에서 반등한 것이다. 개인용 럭셔리 상품 부문은 0.9%, 가구·생활용품과 고급 호텔, 전용기, 레스토랑, 고급 자동차, 요트 등을 포함한 나머지 부문 합계는 0.4% 성장했다. 이번 조사는 글로벌 사모펀드 관계자 약 50명과 럭셔리 기업 119개사를 대상으",
+  "image": "http://www.ktnews.com/news/thumbnail/202609/148718_130681_543_v150.jpg",
+  "image_tried": null,
+  "source": "한국섬유신문",
+  "region": "국내",
+  "category": "RETAIL",
+  "tags": [],
+  "entities": [],
+  "score": 6,
+  "relevant": true,
+  "gate": "retail",
+  "hits": 1,
+  "sources": [
+   "한국섬유신문"
+  ]
+ },
+ {
+  "key": "9ac7a15cf11d6aa2",
+  "title": "글렌 마틴스, 6년 만에 디젤 떠난다…메종 마르지엘라는 계속",
+  "title_ko": null,
+  "link": "http://www.ktnews.com/news/articleView.html?idxno=148715",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "글렌 마틴스(Glenn Martens)가 약 6년간 이끌어온 디젤(Diesel)을 떠난다. 디젤은 마틴스가 오는 9월 22일 밀라노패션위크에서 공개하는 2027년 봄·여름(SS27) 컬렉션을 끝으로 크리에이티브 디렉터직에서 물러난다고 밝혔다. 후임은 아직 정해지지 않았으며 브랜드는 차기 크리에이티브 리더십을 추후 발표할 예정이다.다만 마틴스가 모기업 OTB그룹을 떠나는 것은 아니다. 그는 2025년부터 맡아온 메종 마르지엘라(Maison Margiela) 크리에이티브 디렉터직은 계속 수행한다. 구체적인 결별 사유는 공개되지 않았다.",
+  "content": "글렌 마틴스(Glenn Martens)가 약 6년간 이끌어온 디젤(Diesel)을 떠난다. 디젤은 마틴스가 오는 9월 22일 밀라노패션위크에서 공개하는 2027년 봄·여름(SS27) 컬렉션을 끝으로 크리에이티브 디렉터직에서 물러난다고 밝혔다. 후임은 아직 정해지지 않았으며 브랜드는 차기 크리에이티브 리더십을 추후 발표할 예정이다.다만 마틴스가 모기업 OTB그룹을 떠나는 것은 아니다. 그는 2025년부터 맡아온 메종 마르지엘라(Maison Margiela) 크리에이티브 디렉터직은 계속 수행한다. 구체적인 결별 사유는 공개되지 않았다.",
+  "image": "http://www.ktnews.com/news/thumbnail/202609/148715_130677_4052_v150.jpg",
+  "image_tried": null,
+  "source": "한국섬유신문",
+  "region": "국내",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 5,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "한국섬유신문"
+  ]
+ },
+ {
+  "key": "8e0337cba4eac33f",
+  "title": "Dockers Gordon Leather Oxfords Are Just $49 on Amazon",
+  "title_ko": "Dockers Gordon Leather Oxfords는 Amazon에서 49달러에 불과합니다.",
+  "link": "https://news.google.com/rss/articles/CBMirgFBVV95cUxNYzJkZGJGYS1fY1N2UEdnRU1kN1hlR3NCNEdMVGFhN2p5c1R5ZWFTVjk2R0pXQnpMVHFVM3BIWTZYc1dXbDRCY2RBdXY3OTBJYTUzd0tiR0lpbmhoSkI0QXEtd3hyVXRWM3FkYTVIVTlyZHVBdlRxSi1naDVLQnVqSlBBWVFhV1EwMG9MWnNFYUVPVjN3RVVnWlpSME1WRmdxck1VY3BhaVhJZm4yamc?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Dockers Gordon Leather Oxfords Are Just $49 on Amazon The Inventory",
+  "content": "Dockers Gordon Leather Oxfords Are Just $49 on Amazon The Inventory",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Amazon",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "amazon"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Amazon"
+  ]
+ },
+ {
+  "key": "77b21e561b420be1",
+  "title": "A Decade of Textile Focus: Celebrating the Journey, Shaping the Future with trust & reliability",
+  "title_ko": "10년 간의 섬유 초점: 여정을 기념하고 신뢰와 믿음으로 미래를 만들어 나갑니다.",
+  "link": "https://textilefocus.com/decade-of-textile-focus-celebrating-the-journey-shaping-the-future-with-trust-reliability/",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Dear Readers & Esteemed Colleagues of the Industry, Ten years ago, Textile Focus began with a clear ambition- to build a credible platform for Bangladesh’s textile and apparel industry, connect stakeholders, spotlight innovation, and tell the stories shaping one of the world’s most important manufacturing sectors. Today, as we celebrate our 10th Anniversary, we look […] The post A Decade of Textile Focus: Celebrating the Journey, Shaping the Future with trust & reliability appeared first on Textile Focus .",
+  "content": "Dear Readers & Esteemed Colleagues of the Industry, Ten years ago, Textile Focus began with a clear ambition- to build a credible platform for Bangladesh’s textile and apparel industry, connect stakeholders, spotlight innovation, and tell the stories shaping one of the world’s most important manufacturing sectors. Figure: Mohammad Ashraful Islam, Editor, Textile Focus Today, as we celebrate our 10th Anniversary , we look back with gratitude and pride- and forward with renewed determination. Over the past decade, Bangladesh’s textile and apparel industry has undergone remarkable transformation. It has navigated global disruptions, technological change, sustainability demands, evolving consumer expectations, and intensifying competition. Throughout this journey, Textile Focus has remained committed to documenting the industry, amplifying its voices, and creating meaningful connections. Our name reflects our responsibility. We believe industry media should do more than report what has happened. It should help stakeholders understand what is happening, why it matters, and where the industry is heading . That responsibility matters more than ever as the sector enters a new era. Sustainability, circularity, renewable energy, digitalization, automation, artificial intelligence, and advanced manufacturing are redefining the global textile and apparel landscape. For Bangladesh, the next decade presents both opportunity and responsibility. Having established itself as a global apparel manufacturing powerhouse, the country must now pursue greater value addition, product diversification, technological advancement, productivity, innovation, and deeper integration into global value chains. We believe Bangladesh can strengthen its position not only as a manufacturing destination, but ",
+  "image": "https://textilefocus.com/wp-content/uploads/2026/09/Editor.png",
+  "image_tried": null,
+  "source": "Textile Focus",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "방글라데시"
+  ],
+  "entities": [],
+  "score": 8,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Textile Focus"
+  ]
+ },
+ {
+  "key": "61078f7f718b5cc1",
+  "title": "Recover™ appoints Enes Adak, Fehmi Yüksel as Co-CEOs to accelerate its next growth phase",
+  "title_ko": null,
+  "link": "https://textiletoday.com.bd/recovertm-appoints-enes-adak-fehmi-yuksel-as-co-ceos-to-accelerate-its-next-growth-phase",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Recover™, a leading materials science company and global producer of consistent, high-quality, recycled cotton fibers and circular material solutions at scale announced the appointment of Enes Adak an...",
+  "content": "Recover™, a leading materials science company and global producer of consistent, high-quality, recycled cotton fibers and circular material solutions at scale announced the appointment of Enes Adak and Fehmi Yüksel as Co-Chief Executive Officers. This leadership transition marks an important step in Recover's evolution as the company enters its next stage of development. Figure: From (left to right): Fehmi Yüksel and Enes Adak. Courtesy: Recover Textile Systems, S.L. Together with the executive team, Adak and Yüksel will steer Recover’s next growth phase. Their focus will be stronger customer service, deeper partnerships, and scaling the global platform In addition to his new role as Co-CEO, Enes Adak will continue to serve as Chief Product Officer and lead Recover’s Product, Commercial and Operations functions, including sales, product, technology, global sourcing, supply chain and production. Alongside his responsibilities as Co-CEO, Fehmi Yüksel will continue to serve as Chief Financial Officer, leading the company's strategic direction, integrated scaling, stakeholder engagement, and long-term growth initiatives. \"Recover™ has built a strong foundation, combining scaled production capabilities, trusted relationships with leading brands and retailers, and a differentiated position in the growing recycled cotton market,\" said Hans Ploos van Amstel, Executive Chairman of Recover™. \"The co-CEO structure combines Enes' operational and product leadership with Fehmi's expertise in strategy, finance and business transformation. Together, they bring complementary capabilities that will help accelerate execution, strengthen our partnerships, and continue scaling the business globally.\" Adak brings nearly two decades of global leadership experience across the consumer and reta",
+  "image": "/storage/uploads/2026/9/recovertmappointse_17898805682143.jpg",
+  "image_tried": null,
+  "source": "Textile Today",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "리사이클"
+  ],
+  "entities": [],
+  "score": 5,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Textile Today"
+  ]
+ },
+ {
+  "key": "50fd3941c10c51aa",
+  "title": "German Bundestag delegation visits CHT Bangladesh in Meghna Economic Zone",
+  "title_ko": null,
+  "link": "https://textiletoday.com.bd/german-bundestag-delegation-visits-cht-bangladesh-in-meghna-economic-zone",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "A delegation of the German Bundestag visited CHT Bangladesh Limited at the Meghna Industrial Economic Zone to gain first-hand insights into the company’s local operations, production capabilities, and...",
+  "content": "A delegation of the German Bundestag visited CHT Bangladesh Limited at the Meghna Industrial Economic Zone to gain first-hand insights into the company’s local operations, production capabilities, and contribution to Bangladesh’s textile industry. Led by Nicklas Kappe, Chair of the German-South Asian Parliamentary Friendship Group, the delegation included Members of the German Bundestag Johann Saathoff, Ulle Schauws, and Gerold Otten. They were joined by Katerina Bienert from the Administration of the German Bundestag. The delegation was accompanied by Dr Rüdiger Lotz, Ambassador of the Federal Republic of Germany to Bangladesh, and representatives of the German Embassy in Dhaka, including Olga Nowikow Winnen, Economic Attaché, and Monika Reuter, Head of Political, Press and Culture. Prodip Kumar Dhar, Managing Director and Head of Production Site, welcomed the guests together with the management team of CHT Bangladesh Limited. During a tour of the plant, the visitors learned more about CHT Bangladesh’s production, technical expertise, quality standards, and approach to responsible manufacturing and environmental protection. The exchange focused on the role of German companies in Bangladesh, opportunities for sustainable industrial development, and the importance of technology, innovation, and long-term cooperation in strengthening economic relations between the two countries. “We are honored to welcome the German parliamentary delegation and representatives of the German Embassy to our site. Their visit underlines the strong partnership between Germany and Bangladesh and allows us to demonstrate how CHT contributes to responsible manufacturing, innovation, and the sustainable development of the textile industry,\" said Prodip Kumar Dhar, Managing Director and Head of Pr",
+  "image": "/storage/uploads/2026/9/germanbundestagdel_17898888239758.png",
+  "image_tried": null,
+  "source": "Textile Today",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "방글라데시"
+  ],
+  "entities": [],
+  "score": 2,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Textile Today"
+  ]
+ },
+ {
+  "key": "4cde9df347304f98",
+  "title": "Euratex calls for action as EU textile industry faces China trade pressure",
+  "title_ko": null,
+  "link": "https://textiletoday.com.bd/euratex-calls-for-action-as-eu-textile-industry-faces-china-trade-pressure",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Europe’s textile and apparel sector faces an unprecedented crisis. Low-cost imports from China are flooding the market. As a result, local producers are struggling to stay competitive. The European Ap...",
+  "content": "Europe’s textile and apparel sector faces an unprecedented crisis. Low-cost imports from China are flooding the market. As a result, local producers are struggling to stay competitive. The European Apparel and Textile Confederation, known as Euratex, is now calling on the European Union for immediate help. Figure: The EU goods trade deficit with China reached 359.8 billion euros in 2025. Unfair pricing and cheap e-commerce shipments continue to hurt local factories. Courtesy: Collected Ursula von der Leyen, President of the European Commission, recently promised to rebalance trade with China. She spoke at the European Parliament autumn session on September 16. She declared that the EU would use every tool to create a level playing field. This statement follows the Buy European initiative from July. That plan aims to favor local producers in public procurement. However, Euratex believes political promises are moving too slowly. The European textile sector includes 200,000 businesses. It generates almost 166 billion euros in annual revenue. It also employs 1.2 million workers. Industry leaders warn that these jobs are now at serious risk. The EU goods trade deficit with China reached 359.8 billion euros in 2025. Unfair pricing and cheap e-commerce shipments continue to hurt local factories. Furthermore, high energy costs and complex European green regulations are adding pressure on small businesses. Euratex wants four specific actions from EU leaders. First, customs authorities must increase checks to stop illegal under-invoicing. Second, officials must enforce anti-dumping measures much faster. Third, the EU needs simple and uniform business rules across all member states. Fourth, the next EU budget must include direct financial support for textile modernization. Euratex",
+  "image": "/storage/uploads/2026/9/euratexcallsforac_17898861293272.jpg",
+  "image_tried": null,
+  "source": "Textile Today",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 5,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Textile Today"
+  ]
+ },
+ {
+  "key": "4826a35aa76a0186",
+  "title": "마리끌레르, 도산·북촌 플래그십 확장…외국인 공략 가속",
+  "title_ko": "마리끌레르, 도산·북촌 플래그십 확장…외국인 공략 가속",
+  "link": "http://www.ktnews.com/news/articleView.html?idxno=148719",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "퍼스트에프앤씨(대표 전효진)의 프렌치 감성의 여성 영 컨템포러리 브랜드 ‘마리끌레르(marie claire)’가 도산과 북촌에 플래그십 스토어를 잇따라 열고 외국인 관광객 공략에 속도를 낸다. 성수점과 한남점의 외국인 매출 비중이 80%에 달하는 가운데 관광 수요가 높은 핵심 상권으로 직영 매장을 확대하고, 지역별 특성을 반영한 공간 전략으로 브랜드 경험을 강화한다.퍼스트에프앤씨가 전개하는 마리끌레르는 지난 11일 서울 강남구 도산공원 인근에 ‘마리끌레르 부띠크 도산점’을, 15일 종로구 북촌에 ‘마리끌레르 맨숀 북촌점’을 각각 오",
+  "content": "퍼스트에프앤씨(대표 전효진)의 프렌치 감성의 여성 영 컨템포러리 브랜드 ‘마리끌레르(marie claire)’가 도산과 북촌에 플래그십 스토어를 잇따라 열고 외국인 관광객 공략에 속도를 낸다. 성수점과 한남점의 외국인 매출 비중이 80%에 달하는 가운데 관광 수요가 높은 핵심 상권으로 직영 매장을 확대하고, 지역별 특성을 반영한 공간 전략으로 브랜드 경험을 강화한다.퍼스트에프앤씨가 전개하는 마리끌레르는 지난 11일 서울 강남구 도산공원 인근에 ‘마리끌레르 부띠크 도산점’을, 15일 종로구 북촌에 ‘마리끌레르 맨숀 북촌점’을 각각 오",
+  "image": "http://www.ktnews.com/news/thumbnail/202609/148719_130682_10_v150.jpg",
+  "image_tried": null,
+  "source": "한국섬유신문",
+  "region": "국내",
+  "category": "RETAIL",
+  "tags": [],
+  "entities": [],
+  "score": 9,
+  "relevant": true,
+  "gate": "retail",
+  "hits": 1,
+  "sources": [
+   "한국섬유신문"
+  ]
+ },
+ {
+  "key": "46b6835a56a5bd5f",
+  "title": "The Week Ahead: Fed Speakers, Consumer Sentiment and Earnings Set Stock Market Tone",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOVE1FYm5RTGlfc1FyMENCWkk5MU5CQ3NzLUNWVnNKTmVYT1hYbU9hcmUzOWkwRkFRbWJ2OGVqdHZvWlpkSEJ1WUctaHNVTGl5VGtueVp0aDlwOGthVlc3T1AtOXEtNDQ0ZVVhckxSUzFNWkRZLVNIcVpoSWZWUGtza1hhZUNxYW1XbTRjMjNUTmMyYWt6Qi0yZnNOdER6VmU3TVZXWlZNVWNaNnZZR2dLVUc5Y2xFTUVrcE82YlV4QTR2SHNSSjF1bDh2RVY?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "The Week Ahead: Fed Speakers, Consumer Sentiment and Earnings Set Stock Market Tone FXEmpire",
+  "content": "The Week Ahead: Fed Speakers, Consumer Sentiment and Earnings Set Stock Market Tone FXEmpire",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 6,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
+  ]
+ },
+ {
+  "key": "3ed1dc3312a71499",
+  "title": "Polyester Blends Buyers",
+  "title_ko": "폴리에스테르 혼합 구매자",
+  "link": "https://news.google.com/rss/articles/CBMiekFVX3lxTE9iRnAyRUY3TnhqSnhHQ0RFWGhOX0lQRmdFeEota1RSRGtBVjQyWHRCZTdWblM2WnphaXhSLTVYV19VZEUwUllGbXJYZklOX2xMR0VWa1dJd2xmaGppdHdJNE1aWVFBSHo0MElIczNxZm80bjZmb1BNRXF3?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Polyester Blends Buyers fibre2fashion.com",
+  "content": "Polyester Blends Buyers fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "2dc5ac0c0b9bee4a",
+  "title": "Bangladesh-Germany Business Dialogue Explores New Avenues for Trade and Investment Cooperation",
+  "title_ko": null,
+  "link": "https://textilefocus.com/bangladesh-germany-business-dialogue-explores-new-avenues-for-trade-and-investment-cooperation/",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "The Bangladesh-German Chamber of Commerce and Industry (BGCCI) hosted a high-level business dialogue with H.E. Mr. Muhammad Zulqar Nain, Ambassador of Bangladesh to Germany, at the BGCCI office in Dhaka today. The programme was attended by members of the BGCCI Board of Directors, a former President of BGCCI, and CEOs and senior representatives of BGCCI […] The post Bangladesh-Germany Business Dialogue Explores New Avenues for Trade and Investment Cooperation appeared first on Textile Focus .",
+  "content": "The Bangladesh-German Chamber of Commerce and Industry (BGCCI) hosted a high-level business dialogue with H.E. Mr. Muhammad Zulqar Nain, Ambassador of Bangladesh to Germany, at the BGCCI office in Dhaka today. The programme was attended by members of the BGCCI Board of Directors, a former President of BGCCI, and CEOs and senior representatives of BGCCI member companies, including leading German businesses operating in Bangladesh. The programme began with a welcome address by Md. Rokonuzzaman, FCA, President of BGCCI, followed by a presentation by Mr. Farooque Khan, Senior Vice President, BGCCI, highlighting the Chamber’s activities and initiatives to strengthen Bangladesh-Germany business relations. The Ambassador subsequently delivered a presentation outlining the initiatives being undertaken by the Embassy of Bangladesh in Germany to strengthen investor confidence and promote Bangladesh as an attractive destination for German investment. He also highlighted opportunities for German businesses to export to Bangladesh in several key sectors and further expand their presence in the Bangladeshi market. The Ambassador emphasized Bangladesh’s growing strategic importance to Germany and highlighted opportunities for stronger economic cooperation between the two countries. He also expressed appreciation for the support of the German Government for Bangladesh’s candidacy at the United Nations. The discussion focused on expanding bilateral trade, creating stronger partnerships between Bangladeshi and German companies, and promoting greater German investment in Bangladesh. Participants explored opportunities for joint ventures, technology cooperation, business matchmaking and access to the German and wider European markets. Particular attention was given to emerging areas of coo",
+  "image": "https://textilefocus.com/wp-content/uploads/2026/09/AHP044591.jpg",
+  "image_tried": null,
+  "source": "Textile Focus",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "방글라데시"
+  ],
+  "entities": [],
+  "score": 2,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Textile Focus"
+  ]
+ },
+ {
+  "key": "2c8eb11896bbd836",
+  "title": "Digital Textile Printing: Revolutionising the Fashion Industry",
+  "title_ko": "디지털 텍스타일 프린팅: 패션 산업에 혁명을 일으키다",
+  "link": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNeF9KZ2VZOVJ0VTFBV0xQMnNwWkRiT3E4eFRJcGZkRG5tQmFYVnB0XzRkZTFjbHFTWEJ5SUQ3VnRGaUZaRGRXWTltS1pkdzlSRm9ZR1NIWGZHWXRtS0RyTjhraUZYbUVIWWxfOEdiNjdFMnFxbVVkanlHdEV0aWdUNzJHLUtpWTgxWmJVeXMyQVl5ZjdSR2FDM1VDdUYwc255alh0c2VVLW93WnFSOHRwSzllWkx4UWNPU0VBM2dTZWlHY1FHR2Zz?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Digital Textile Printing: Revolutionising the Fashion Industry fibre2fashion.com",
+  "content": "Digital Textile Printing: Revolutionising the Fashion Industry fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "CHEMICAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "2ad7665cb86945e1",
+  "title": "The Week Ahead: Earnings from Blackberry, Costco",
+  "title_ko": "앞으로의 주: Blackberry, Costco의 수익",
+  "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPbFdSUmMwNEFFVDdvNTRYUkNYZ2ZXZWQ4ZHNxZ19FZkxpWFZQbDFFa01pTjdtZmxrYjZ3N2Z1SUhlb25UWklZVjRaaU9acjZHakJVUDVyWGdzVXBYTEVrR0Z0eGM0WWc4cWM0Yld0RUoxMjZZSjNOaS1vLTBMN1kwWF9lQW50aTFyZ3VfZlJMNTRoUUJ2RDRvYXhla3M?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "The Week Ahead: Earnings from Blackberry, Costco bnnbloomberg.ca",
+  "content": "The Week Ahead: Earnings from Blackberry, Costco bnnbloomberg.ca",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
+  ]
+ },
+ {
+  "key": "224bff971bdd2f97",
+  "title": "Nike's Turbulent Stretch: Mbappé's Exit, Index Demotion, and a Make-or-Break Earnings Test",
+  "title_ko": "Nike의 격동적인 확장: Mbappé의 퇴장, 지수 강등 및 성패를 좌우하는 수익 테스트",
+  "link": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPMmtIVVNVc0FyeVJXaXN4aFZMTUJpUDlyVTloTnY1MlNzTzZfVmJQRHJIcTEzUHhOa2xIZFFGUUg5Z3hhOEJRZ3VyNGFHLXJuTE9pcFl1eEttSDB0dExpY3ltUlNMSHZKczloV3ZVSzFTQ0xWcFhJOWtSS0FiMFBSZFpqOE1fbi1ETGtCdmhyOGI5bUtuSUtQS2hVTUxfR3d0OVNTcWxXS3NrRENXRnpTN0VJTDNSRkVwX05LLWhkaXlmM0wtQzRjYzFnSQ?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Nike's Turbulent Stretch: Mbappé's Exit, Index Demotion, and a Make-or-Break Earnings Test AD HOC NEWS",
+  "content": "Nike's Turbulent Stretch: Mbappé's Exit, Index Demotion, and a Make-or-Break Earnings Test AD HOC NEWS",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Nike",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "nike"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Nike"
+  ]
+ },
+ {
+  "key": "218424cc37eb3411",
+  "title": "What to Expect in the Week Ahead (Costco Earnings, S&P 100 Rebalancing & US-China Summit)",
+  "title_ko": "이번 주에 기대할 사항(Costco 수익, S&P 100 재조정 및 미중 정상회담)",
+  "link": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNMnJ3bEFkcjRsYVNqTEZ3NUQzcVRiZUZvM3ZjSUJ1OFJ0bE5GNFI0c3NTcGMtQ2FPdVpZX3VKZjdndW9sS1F5MnF1N0FIdHMwaUx0MVFDN3lkZ2JOZHdUazd6bGFXNDk2NFI2bVVuVHBUWHVqQTZ1aE80MXhsUDBfYWZQSkJLTERXM29RVUI0Qmgtc1kxLXY1WGFiX1NIelB2SEpVdGpZQQ?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "What to Expect in the Week Ahead (Costco Earnings, S&P 100 Rebalancing & US-China Summit) Moomoo",
+  "content": "What to Expect in the Week Ahead (Costco Earnings, S&P 100 Rebalancing & US-China Summit) Moomoo",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
+  ]
+ },
+ {
+  "key": "192a2f61ba9bad4d",
+  "title": "유기농 넘어 재활용까지…新글로벌 책임섬유 인증 ‘GRTS’ 출범",
+  "title_ko": "유기농 넘어 재활용까지…新글로벌 책임섬유 인증 ‘GRTS’ 출범",
+  "link": "http://www.ktnews.com/news/articleView.html?idxno=148717",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "비영리 표준기관 글로벌 스탠더즈(Global Standards)가 ‘글로벌 책임섬유표준(Global Responsible Textile Standard·GRTS)’을 공식 출범하고 식물·동물 섬유부터 재생셀룰로오스, 재활용 섬유까지 아우르는 새로운 섬유 가공 인증체계를 가동했다. 유기농 원료 중심이던 GOTS의 한계를 보완하면서 원료 인증과 가공·제조 과정의 환경, 인권, 화학물질 관리 및 물리적 추적성을 하나의 체계로 연결한다는 것이 핵심이다.GRTS는 새로운 원료 인증을 만드는 방식이 아니다. 이미 제3자 표준으로 인증된 책임섬",
+  "content": "비영리 표준기관 글로벌 스탠더즈(Global Standards)가 ‘글로벌 책임섬유표준(Global Responsible Textile Standard·GRTS)’을 공식 출범하고 식물·동물 섬유부터 재생셀룰로오스, 재활용 섬유까지 아우르는 새로운 섬유 가공 인증체계를 가동했다. 유기농 원료 중심이던 GOTS의 한계를 보완하면서 원료 인증과 가공·제조 과정의 환경, 인권, 화학물질 관리 및 물리적 추적성을 하나의 체계로 연결한다는 것이 핵심이다.GRTS는 새로운 원료 인증을 만드는 방식이 아니다. 이미 제3자 표준으로 인증된 책임섬",
+  "image": "http://www.ktnews.com/news/thumbnail/202609/148717_130680_5022_v150.jpg",
+  "image_tried": null,
+  "source": "한국섬유신문",
+  "region": "국내",
+  "category": "MATERIAL",
+  "tags": [
+   "GOTS",
+   "추적성"
+  ],
+  "entities": [],
+  "score": 13,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "한국섬유신문"
+  ]
+ },
+ {
+  "key": "177b6b9e47b7ab25",
+  "title": "Costco Stock Nears Bear Market: Can Earnings Turn It Around?",
+  "title_ko": "Costco 주식이 약세장에 가까워졌습니다. 수익이 반전될 수 있을까요?",
+  "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxQQjVXUzhtRHI4aGdSRHcyaUNIVG81eHBmeEc4RS16UndGN3dmU0dmOUdtOHR0VkF4S0V3Ukh6NHk1MU0tNTU5WFR4LW5YVDk0Wno0ak9GOWhic2J1Y0c1NEl5eWE2V1NHOGFrVHlhOWtpMXdxdTlrN0d4d0NqSGpNWDJYWGtmYnBTSTExeDZiV3ltUV93eXFPdlVBSUNmQ3Q4elJxMjZ0Y1RTTkVkRXZvalFmX0M4dw?oc=5",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Costco Stock Nears Bear Market: Can Earnings Turn It Around? Benzinga",
+  "content": "Costco Stock Nears Bear Market: Can Earnings Turn It Around? Benzinga",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
+  ]
+ },
+ {
+  "key": "16104b26d90dad13",
+  "title": "Urmi Group showcases SLCP-led responsible manufacturing at UN forum",
+  "title_ko": null,
+  "link": "https://textiletoday.com.bd/urmi-group-showcases-slcp-led-responsible-manufacturing-at-un-forum",
+  "published": "2026-09-20",
+  "collected": "2026-09-20",
+  "summary": "Group's Head of Sustainability was the sole voice from Bangladesh's RMG and textile manufacturing sector at this year's Forum, spotlighting a decade of measurable progress in human rights due diligenc...",
+  "content": "Group's Head of Sustainability was the sole voice from Bangladesh's RMG and textile manufacturing sector at this year's Forum, spotlighting a decade of measurable progress in human rights due diligence, climate adaptation, and supply chain data convergence. Urmi Group, a leading Bangladeshi Ready-Made Garment (RMG) and textile manufacturer employing 16,317 people, represented Bangladesh's manufacturing sector at the United Nations Responsible Business and Human Rights Forum 2026, held from 14 to 17 September at the United Nations Conference Centre in Bangkok under the theme “Building Resilience, Advancing Rights.” ABM Faqrul Alam, Head of Sustainability at Urmi Group, was the sole representative from Bangladesh's RMG and textile industry speaking from a manufacturer's perspective at this year's Forum — a distinction that placed Urmi Group's on-the-ground experience directly before a global audience of governments, brands, investors, trade unions, and civil society. Alam spoke on the panel “Responsible Purchasing Practices for Resilient Supply Chains: From Shared Principles to Practical Action,” organized by the Fair Wear Foundation and the Social & Labour Convergence Program (SLCP). He was joined by Jason Mandels (Fair Wear Foundation), Shafiar Rana (SLCP), and Quang Tran (Evolution Lab SGN), with the session moderated by Hong Anh of Fair Wear. The panel examined how responsible purchasing practices can move from shared industry principles into everyday commercial decisions between brands and suppliers. Drawing directly on Urmi Group's own operating experience, Mr. Alam emphasized that sustainability and wage commitments require sustained, multi-year commercial commitment from buyers to justify the capital investment suppliers must make at the factory level. “Sustainabi",
+  "image": "/storage/uploads/2026/9/urmigroupshowcases_17899001473684.jpg",
+  "image_tried": null,
+  "source": "Textile Today",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "방글라데시"
+  ],
+  "entities": [],
+  "score": 5,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Textile Today"
+  ]
+ },
+ {
   "key": "f94dcc209b30ed91",
   "title": "Contrast Takes Centre Stage As Colour Blocking Enters The A/W 2026 Wardrobe",
   "title_ko": null,
@@ -21,6 +750,30 @@
   "hits": 1,
   "sources": [
    "Apparel Resources"
+  ]
+ },
+ {
+  "key": "f4ef295aea7df19b",
+  "title": "Discover the future of intimate fashion, fabrics, and innovation at Interfilière Shanghai 2026 | Get Your Ticket",
+  "title_ko": "Interfilière Shanghai 2026에서 친밀한 패션, 직물 및 혁신의 미래를 발견하세요 | 티켓 받기",
+  "link": "https://news.google.com/rss/articles/CBMiggFBVV95cUxNakZ1cHFqYWgtMWxueVNEdTJWLW9jSzVxUlNyQzNFblJsQzNCVDR5SEhxNHJkc3Jnb1NPYTRNLW5oNnFFN1VkQ1V0MVFUYWxWcUpxNjNHQmhrV1RGaFRNZGhrUWlpREVHZnhVeThGWmFIcEU4dFZzd0dhN3BLdXF4bmhB?oc=5",
+  "published": "2026-09-19",
+  "collected": "2026-09-20",
+  "summary": "Discover the future of intimate fashion, fabrics, and innovation at Interfilière Shanghai 2026 | Get Your Ticket fibre2fashion.com",
+  "content": "Discover the future of intimate fashion, fabrics, and innovation at Interfilière Shanghai 2026 | Get Your Ticket fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "FABRIC",
+  "tags": [],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -221,9 +974,10 @@
   "score": 17,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Textile World"
+   "Textile World",
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -395,9 +1149,10 @@
   "score": 17,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Textile Today"
+   "Textile Today",
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -951,6 +1706,32 @@
   ]
  },
  {
+  "key": "2c319078108df2ce",
+  "title": "Global cotton prices see slow growth amidst economic uncertainty",
+  "title_ko": "경제 불확실성 속에 세계 면화 가격 상승세 둔화",
+  "link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNV2tYTWMybXdMZENCaHBOUnl5SkNNRDE5OVRPa0JWQkdxV2h4SUkxZ2g1ZGp4SV9mQVcwM0ZkcW5URlpZaE5nRkUzQloza0RUbEM3YkVZY2tVSEEwbE9SNHpHbWJtS0lteWNUZURmMjJmTmxpZm5xdUVLNjVEOEM1VmhHQ3p2TGVDbDd3UQ?oc=5",
+  "published": "2026-09-19",
+  "collected": "2026-09-20",
+  "summary": "Global cotton prices see slow growth amidst economic uncertainty fibre2fashion.com",
+  "content": "Global cotton prices see slow growth amidst economic uncertainty fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "면가"
+  ],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "1ece76cff4cafd4f",
   "title": "ITMF Announces International Collaboration Award 2026 Winners",
   "title_ko": null,
@@ -1421,6 +2202,30 @@
   "hits": 1,
   "sources": [
    "국제섬유신문"
+  ]
+ },
+ {
+  "key": "e65365e285ad83b4",
+  "title": "Europe's industrial output falls 0.3% in EU, 0.1% in Euro area",
+  "title_ko": "유럽의 산업 생산량은 EU에서 0.3%, 유로 지역에서 0.1% 감소",
+  "link": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxOelJCb0xtQTJCekh6YXZjeXpsc2t0WnlpVzRkdWVlUEdRUU9kelJTeWhVM0tCMGFJdXhMNXdSM0o5U1lHTmRTQnY3Z3RIaG9yTFdhYXlhQ2VvWkNreFNjM1d1cHNDS0xBVkRCQm5OeWdyMkxFOTRQbmJYMlE3cnYzRTRXMHI1WF9JT0FVVm55anp3QTZsUzNCbmZ2V0QwWWwtWjQxcGwzeHJCWE9HOElNTTI2WmdjQjZjVlk0M1Q3WUFxek1aUnJXVTNCUjctNTlSY2Flc2tR?oc=5",
+  "published": "2026-09-18",
+  "collected": "2026-09-20",
+  "summary": "Europe's industrial output falls 0.3% in EU, 0.1% in Euro area fibre2fashion.com",
+  "content": "Europe's industrial output falls 0.3% in EU, 0.1% in Euro area fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -2042,6 +2847,30 @@
   "hits": 1,
   "sources": [
    "Just Style"
+  ]
+ },
+ {
+  "key": "97fc1c2151358078",
+  "title": "EU Parliament backs wider CBAM scope, support for downstream firms",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQQi1pWW1FSzBNWjA2Nko3QktyTk40VDc1U095akl0RkJuQ0s5SEhrNmtobkwxbWZWcTVkTEtVYTN0QlhSdTMtOXl1UmZCUFhCVEFDWGJGa0hhQ1JoUnVOVlIxaEJFTHdtNmJNUC1hQnYyUllTUzBDemtSNW1NS1hucjFMM25uTW1RR2tvX1hteU1CQjBlcFRhY20yRWFlWVRzbjBqQm41YXFMRFBpTzJFVXpFNA?oc=5",
+  "published": "2026-09-18",
+  "collected": "2026-09-20",
+  "summary": "EU Parliament backs wider CBAM scope, support for downstream firms fibre2fashion.com",
+  "content": "EU Parliament backs wider CBAM scope, support for downstream firms fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -2707,6 +3536,32 @@
   ]
  },
  {
+  "key": "5714254d65f1402c",
+  "title": "Vietnam's outbound investment jumps 4.7-fold in January-August 2026",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxQbG5ZN0JhTW5kSGs4dFkxUG96c2s1eEJLUlhPcTNhandIRE4wOC1UbklPbGh4T1hydkxGWUIzWGNFSmU0S0lGSjAydUFUeHZCSnQxMmo2NmpfMnFvY0dnYTA4SUNRRUpkSHJkYkNJX2EzSTJXODdzNFdkVWhSMU5JTVlaWnNVVjRUZDlVa0c5d2R5RllXOGJyNjFxVy1ZR0tZSlNQMjlXY1AxRWk5TktlM3U0bUNyUWFybnZDeDBMTFRpS2Z3T1lkQjNuampsemROY25iM0EyeWIyejB0RGZ0dC1IeUxYaTZIZ2NvQXlsQjFKTzVE?oc=5",
+  "published": "2026-09-18",
+  "collected": "2026-09-20",
+  "summary": "Vietnam's outbound investment jumps 4.7-fold in January-August 2026 fibre2fashion.com",
+  "content": "Vietnam's outbound investment jumps 4.7-fold in January-August 2026 fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "베트남"
+  ],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "548cfd3113f2c913",
   "title": "Darden Restaurants, Costco In Earnings Spotlight, Along With This IT Distributor",
   "title_ko": "Darden 레스토랑, Costco, 이 IT 유통업체와 함께 수익 스포트라이트",
@@ -2778,6 +3633,30 @@
   "hits": 1,
   "sources": [
    "주제검색 · 국내소재"
+  ]
+ },
+ {
+  "key": "50a94c1b65c47fd4",
+  "title": "Formaldehyde-Free Durable Press Resins Market to Accelerate on Regulatory Bans, Driving Growth Toward 2035",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxONWF5UEs2dloySGFfX1JOMm9TY0FPQjRYLWpGa2JJcXRSdDZUVEJDU2FHelh3bmF3dktMeGNfb0JBMFdiNWRObzNFWXhSeWFRaC0yb3g5b2ZJdlhBUS1ra2FwaWU1alhWRFhyM3dsSEhWeEZKOUFlQ0RpLWFIZzhNdkhjaWIyNGlReDMtcG1SaFJBaktENFhZTGJwS3VzeXN0emlWaWZ3UHRMV0tpRFY4Q2dSQzEtRm9fRUZab2dlaDlqMzVLdm84a2pvUWFCeTkt?oc=5",
+  "published": "2026-09-18",
+  "collected": "2026-09-20",
+  "summary": "Formaldehyde-Free Durable Press Resins Market to Accelerate on Regulatory Bans, Driving Growth Toward 2035 indexbox.io",
+  "content": "Formaldehyde-Free Durable Press Resins Market to Accelerate on Regulatory Bans, Driving Growth Toward 2035 indexbox.io",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -3070,6 +3949,32 @@
   "hits": 1,
   "sources": [
    "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "392b3db746230fca",
+  "title": "Fleece Fabric Suppliers",
+  "title_ko": "Fleece 직물 공급 업체",
+  "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOTEF5YzVmN1g2aXFFY0hQR2VvRjJ1c1g0bWdvR2FKSVRrQnh0OUM3S1ZLd09OTzJraHUxeWVaMW9rTkxUR2dWNncxb0tuSVVTOWZmZ0lPclByVW9kWENGZHZFRko0eDlVN2lzUzBGbGREQ0VmeVFsa2ZrM09wOHZBZWpsdERwZw?oc=5",
+  "published": "2026-09-18",
+  "collected": "2026-09-20",
+  "summary": "Fleece Fabric Suppliers fibre2fashion.com",
+  "content": "Fleece Fabric Suppliers fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "FABRIC",
+  "tags": [
+   "플리스"
+  ],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -3879,6 +4784,34 @@
   ]
  },
  {
+  "key": "05a07ff81d70d510",
+  "title": "Amazon, Costco among companies fighting centralized tariff refund suits",
+  "title_ko": "중앙 집중식 관세 환급 소송에 맞서 싸우는 회사 중 Amazon, Costco",
+  "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQbDJVaXR5QV9uMm1tZVd0TzdvTDJSM0xWZjg3MkF5My1KOXhsRkdFbE1RaU5IcTR3blVJUFdGaUE2MlBEQ1puQndhNmlGUG9oM2VjcTJtci1tYUNqMEtNcDF2eFUxUl9jV21JRmNYLWFOR1N3T0lfLU13ZDJpMFdNQkNtaWVFeFBSR1F3ejBIZWxRZ1dsQ2JuclF3T0ZqS1F5ZENzTWFkNDE?oc=5",
+  "published": "2026-09-18",
+  "collected": "2026-09-20",
+  "summary": "Amazon, Costco among companies fighting centralized tariff refund suits CFO Dive",
+  "content": "Amazon, Costco among companies fighting centralized tariff refund suits CFO Dive",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Amazon",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "관세"
+  ],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Amazon"
+  ]
+ },
+ {
   "key": "055c303c30cc0839",
   "title": "최고급 캐시미어 남· 여 코트 ‘와디즈’에 펀딩",
   "title_ko": "최고급 캐시미어 남· 여 코트 ‘와디즈’에 펀딩",
@@ -4029,6 +4962,32 @@
   "hits": 1,
   "sources": [
    "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "fad14ebed2e9faca",
+  "title": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - Consensus Miss Rate",
+  "title_ko": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도 - 합의 실패율",
+  "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNZkpxUFNBYmVveU5DNHFQR0w0dlBoWlZCZWRMMzBmSDFxdDdBR2xPS1RWZjZwSG15UU1wUHpIQ3RZRGYwM1prdjhoWlNCMnNHcU1ZelF1VzY1bVBzM1N0ZmFoLVBxNjFydzVWajRMQWpuckZ2MEE2aWRQdFRFX1BBSGFjdEViakVqbnZuR2NXN0UzWFNDZ1RWZzhRejRWVy1BY3NpbGFCOHphdmJVZEgzZ1ExM0hXalQ2OE1HdDNPc25lbTNT?oc=5",
+  "published": "2026-09-17",
+  "collected": "2026-09-20",
+  "summary": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - Consensus Miss Rate dars.gov.et",
+  "content": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - Consensus Miss Rate dars.gov.et",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Carter's",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "carters"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Carter's"
   ]
  },
  {
@@ -4601,6 +5560,30 @@
   ]
  },
  {
+  "key": "cb4afd2bfec32dad",
+  "title": "ELiAR Smart Sensors bring real-time control to textile dyeing",
+  "title_ko": "ELiAR 스마트 센서는 섬유 염색에 실시간 제어를 제공합니다.",
+  "link": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOT2ZWSXdhbktyODY5ajZkMWtpclo1eUlENXFkMkxyc2pKRV9ZVzUzWFhUa3hXQUd1RHdFSVNQOHlTeElIT1c3THQxT0dES0l4YThnQ1JxZERNR05KS1JHeURDakNQSUo4NWZLTFZkSEJ5MGphc3V1c3d1MkExRXdsYms3cGlta0MweEFaVkQyME1tSVg0N2trbDdfTHBqbkU4MEhhcWdyOVBoVU1DT0g3aVJyWW1vaEl3ZVYtRzNCSWp5Z0Vxc01mUzgxS1Q?oc=5",
+  "published": "2026-09-17",
+  "collected": "2026-09-20",
+  "summary": "ELiAR Smart Sensors bring real-time control to textile dyeing fibre2fashion.com",
+  "content": "ELiAR Smart Sensors bring real-time control to textile dyeing fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "CHEMICAL",
+  "tags": [],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "cad12057a5c3b8c4",
   "title": "Ukraine seizes 420k counterfeit luxury apparel items worth millions",
   "title_ko": null,
@@ -4623,6 +5606,30 @@
   "sources": [
    "바이어 · PVH",
    "바이어 · Nike"
+  ]
+ },
+ {
+  "key": "c6f9a8a3b02c0948",
+  "title": "Inside the AI Fabric: Scaling the Networks Behind Tomorrow's AI Factories",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNOXpFaFg3R0dpa3c1WlVZNWM4dm1raUlKZEFqbHVrd3docnpac0hac1JGRGlZbU9UQzZkcHJpMm1mOHJuNmRXaDBPZk4xVEFqVWVBV2dJYzZRYnhwaFVicXpDRmpzTzR0VEYyVkpJb01Ial9KOFptSmpLdmxOYkk3Tzd6UFBUMWFUNXVxMXNhNnJFRTZXcGl6dzdpeDAzM0RfYm9NemNfV3dmTzQ4dXBQNnlDcTJNNW5VcFRzbzlkZ3I0aVVpX1pURThR?oc=5",
+  "published": "2026-09-17",
+  "collected": "2026-09-20",
+  "summary": "Inside the AI Fabric: Scaling the Networks Behind Tomorrow's AI Factories Lightwave Online",
+  "content": "Inside the AI Fabric: Scaling the Networks Behind Tomorrow's AI Factories Lightwave Online",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -4819,6 +5826,30 @@
   "hits": 1,
   "sources": [
    "한국섬유신문"
+  ]
+ },
+ {
+  "key": "bf141e6ee8a3b507",
+  "title": "US' Gap, A.P.C. unveil 37-piece limited-edition fashion collection",
+  "title_ko": "US' 갭, A.P.C. 37피스 한정판 패션 컬렉션 공개",
+  "link": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxPeHFvak9IaWZGWlpGcDJBbXBPR24wSzd1OFh3Yl9iZFdQbzVaQzF4VDdJeV9NVUtLd3dXT0ZoaWVaeGtleWlaNlpjQ3VxRi1xeVpuTkw5WlpIYldEa2xWdGl2dXpJcE1YazNwZm1Zay04NExteGZpVXQ3WW1tN0ZEWkRHa3BoUXJIQ1o3bU1uRVppZXZuYUhNNGdWYU04X283cElzQVFFVl9tdExUalA5bThQWk5RMlpuNDE3a2ZjcDdRV1k5TnFobG1STWxSWjVOaDZST1FvYThxUk0?oc=5",
+  "published": "2026-09-17",
+  "collected": "2026-09-20",
+  "summary": "US' Gap, A.P.C. unveil 37-piece limited-edition fashion collection fibre2fashion.com",
+  "content": "US' Gap, A.P.C. unveil 37-piece limited-edition fashion collection fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -6508,6 +7539,32 @@
   ]
  },
  {
+  "key": "28ba06dc17f61680",
+  "title": "Intertextile Shanghai 2026 draws over 100,000 visitors",
+  "title_ko": "Intertextile 상하이 2026, 방문객 10만 명 돌파",
+  "link": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxPQ2lnejlqanl6TWlrM2JrSWxzcTFwWWZrS25JZzR0cmI4VF9QckpPdmtRRXpOOEdWZ0lncHNNcE5xcXl5VE8yTkotN3dLdnFSQUJxd3ZXN1NvdWJaRXIyZEI4WFJSbHY5ZXJwdVBrWGlCejViQVZKSC1QWlRWOFZEU0I2SFZIQXBNMDliTVA4blZBNVVvTEZ4MGEwLTY3LUV5UzlBUzQzdDJOY2hQdkNiSEhkYXpjQkE4NjQ0WExTSHkwY0ZKRUxUWmJpNGlmaEQ2dm5NVnJ2MA?oc=5",
+  "published": "2026-09-17",
+  "collected": "2026-09-20",
+  "summary": "Intertextile Shanghai 2026 draws over 100,000 visitors fibre2fashion.com",
+  "content": "Intertextile Shanghai 2026 draws over 100,000 visitors fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "전시회"
+  ],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "28656da9aa09191a",
   "title": "Zacks Research Issues Optimistic Forecast for URBN Earnings",
   "title_ko": null,
@@ -6874,6 +7931,30 @@
   "hits": 1,
   "sources": [
    "바이어 · Costco"
+  ]
+ },
+ {
+  "key": "0653c7a74ba64bd4",
+  "title": "France's Lectra launches AI-powered Apogy for fashion development",
+  "title_ko": "프랑스 Lectra, 패션 개발을 위한 AI 기반 Apogy 출시",
+  "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOX0paanREUkhoMS1KU0cwN015VjRLOEJTZFhmbGF0VnJ5ZGJkOWN0cFJ5U0ZaUGg1ZDJoQVRYQnh4VGgySWdiemZ1VDY3WHJ2dllJMTB1Q01STVR1c3g2RVV1ZGloVXg5QkotS3JURTJWTkhJdDBnaHJaMGstZEE1V05SLUxEZllLQnFOT3I0NkhmS0h0UWtSZmVYMURWNWZGN0pqdF9nRFExODhGaEFxcE0zbkhMSVVfR3BpYWVUeDdjUm8wd0xuV0J4ZVVEbTIyQmc?oc=5",
+  "published": "2026-09-17",
+  "collected": "2026-09-20",
+  "summary": "France's Lectra launches AI-powered Apogy for fashion development fibre2fashion.com",
+  "content": "France's Lectra launches AI-powered Apogy for fashion development fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -10166,6 +11247,32 @@
   "hits": 1,
   "sources": [
    "Just Style"
+  ]
+ },
+ {
+  "key": "16c4e49ccd5a608f",
+  "title": "Costco Core Fourth-Quarter Earnings to Miss Estimates, Oppenheimer Says",
+  "title_ko": "Costco 핵심 4분기 수익이 추정치를 빗나갔다고 Oppenheimer가 밝혔습니다.",
+  "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPaDREQ1lUdmRQLV9fY1dncGNuano5UWhkQmFrU3BZcmVQQXRpN3ZpLUh5aS14eG15ZldLenV0TjRWcldveXZrMVQ3VldIaW1KQm9DSEJrNFNMSnRuRGhtVVJWR1hkT0swNzNzRlZKTmxHYk04dGF6NDFsejNKdUlDMFI5WEgwZGJvRXVxYUNFZWdKZDE2ZTRiNHNIVVpTdndTM29aWl9TVjIxdXQtVWJ4YW9BeE5qMnRfVXozWXdxR0I?oc=5",
+  "published": "2026-09-16",
+  "collected": "2026-09-20",
+  "summary": "Costco Core Fourth-Quarter Earnings to Miss Estimates, Oppenheimer Says marketscreener.com",
+  "content": "Costco Core Fourth-Quarter Earnings to Miss Estimates, Oppenheimer Says marketscreener.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
   ]
  },
  {
@@ -13769,6 +14876,32 @@
   "hits": 1,
   "sources": [
    "Textile Today"
+  ]
+ },
+ {
+  "key": "dfdd4b248200ff6a",
+  "title": "Nike Apparel Nike Sportswear Nike Air Max 97 Wolf Grey Red Nike Air Max 97 University Red Where To Buy 921826-009",
+  "title_ko": "#에어맥스97울프그레이레드 #에어맥스97유니버시티레드 #에어맥스97울프그레이레드",
+  "link": "https://news.google.com/rss/articles/CBMifkFVX3lxTE9BRHVqdHFzeVA1cXdzMHk4Q1ZWZWl3SThzcnBHcDJSWW5JUndKMXM0R1d5ZEY4RkoydVlBUjItX2F0VGFva192cmVZc1ZJb1pqcGhiRXJvdlMwT3lJYUI0VGNGdGNCQmRlZXVOUzBnSGVlSWVIVk84V19DTVB5Zw?oc=5",
+  "published": "2026-09-14",
+  "collected": "2026-09-20",
+  "summary": "Nike Apparel Nike Sportswear Nike Air Max 97 Wolf Grey Red Nike Air Max 97 University Red Where To Buy 921826-009 Fuel Car Magazine",
+  "content": "Nike Apparel Nike Sportswear Nike Air Max 97 Wolf Grey Red Nike Air Max 97 University Red Where To Buy 921826-009 Fuel Car Magazine",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Nike",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "nike"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Nike"
   ]
  },
  {
@@ -21835,6 +22968,32 @@
   ]
  },
  {
+  "key": "c6ef4e4b5dddfeb3",
+  "title": "Vans Filmore Decon Sneakers Drop to $55 on Amazon",
+  "title_ko": "Vans Filmore Decon 스니커즈, Amazon에서 55달러로 하락",
+  "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPbzNHMnh0cmE5cFR2S25wNjJQTE9pTFdVUTk4enFNa1AyNjJIa21tdE8tRERyNTlOUWtmRHZhbHdvcVNZQVZrZUQ0TWtrcmw3bzNZNUlVRllDWFFaWkZSamN0SVFMLW9qNW9reGhlUms0OEl5S3FIY0NsSmp4dW5XcjNPRG8wRkRYMElydHpRM01JRFdrVW9Md21Yck5vRHl3TUNFUk5rdHVCMkFTM0o2dVNBYjA?oc=5",
+  "published": "2026-09-10",
+  "collected": "2026-09-20",
+  "summary": "Vans Filmore Decon Sneakers Drop to $55 on Amazon The Inventory",
+  "content": "Vans Filmore Decon Sneakers Drop to $55 on Amazon The Inventory",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Amazon",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "amazon"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Amazon"
+  ]
+ },
+ {
   "key": "c46479aff8d16b54",
   "title": "형지엘리트, 조지메이슨대와 ‘시니어 로봇’ 산학협력",
   "title_ko": null,
@@ -24587,9 +25746,10 @@
   "score": 11,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "한국섬유신문"
+   "한국섬유신문",
+   "주제검색 · 국내소재"
   ]
  },
  {
@@ -31676,6 +32836,30 @@
   ]
  },
  {
+  "key": "835e3f615548222c",
+  "title": "How Digital Product Creation is Changing Apparel Development",
+  "title_ko": "디지털 제품 제작이 의류 개발을 변화시키는 방법",
+  "link": "https://news.google.com/rss/articles/CBMixwFBVV95cUxPelNCUS1uQjdBaWRwWFZOR3FpTXhWT2duQ2VldTJMVGZHWWxoal9heFdka0h0T3dMNmx3S0tibkNHV2lOUVFLejZqSEpUamJRUHhGUHFSN3JvbzRkVEg1U3kwSzlvVGtCVFZKT0hTa04xYVd5Y2tMazVFQURVZktfUzZEd2p6ZG9raTh6OHo4cVVKLTRCZ0x5QUFjOUYwVE11elZGRDBNaXFUUU1KUzJ5M3Z5ZC1ESnplaF9aUVhkSU56RzJTYnNj?oc=5",
+  "published": "2026-09-08",
+  "collected": "2026-09-20",
+  "summary": "How Digital Product Creation is Changing Apparel Development fibre2fashion.com",
+  "content": "How Digital Product Creation is Changing Apparel Development fibre2fashion.com",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "82953e0af98d4c6e",
   "title": "Blooming Brocade Are Turning Textural for Fall/Winter 2026",
   "title_ko": null,
@@ -36705,6 +37889,30 @@
   "collected": "2026-09-07",
   "summary": "EU Council approves customs reform with tougher e-commerce rules Fibre2Fashion",
   "content": "EU Council approves customs reform with tougher e-commerce rules Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "1919efbe1aa06d8f",
+  "title": "Fibre Inflation Meets Retailer Pricing Paralysis: 2026 Apparel Margin Squeeze Tightens",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxOSG9vbThWRWpVaHZzTDRDd1kzWGRkRl9ubnRQaGlvZFZJMm91Ti1zcVpxTTBCUFZSVGVIRGxCdjZ2VFVYVVhoelNWVE5xZDBtWmlqdGFmS1VoZWh6V0FfODJhYUpjUlNrV3MtTlNoVG5sMERsQzVoOGRleW1Ea2V2VmE0M3pSbDg1VGUtUzVScTB0UkZ0Q2hMMUxsUVBiZ05CZ2xmODZxUzJ2d29XcEROYWtMZTFKQjllVHQwbXpxckpVU1NLUkdMUmJqQ01DclY3MWQwVnJod1pueGNyMXpudER5eUw2ODQy?oc=5",
+  "published": "2026-09-07",
+  "collected": "2026-09-20",
+  "summary": "Fibre Inflation Meets Retailer Pricing Paralysis: 2026 Apparel Margin Squeeze Tightens fibre2fashion.com",
+  "content": "Fibre Inflation Meets Retailer Pricing Paralysis: 2026 Apparel Margin Squeeze Tightens fibre2fashion.com",
   "image": "",
   "image_tried": null,
   "source": "Fibre2Fashion",
@@ -41763,6 +42971,30 @@
   ]
  },
  {
+  "key": "46efb27fc32856d7",
+  "title": "The Only Labor Day Menswear Sales Worth Shopping",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPVWlLVFNOMXBsakcwYWxaRXlIbm4tR2h6XzRGUU9rQUhEdGZSMFdCVUNLTHpRdF9DTUlZNWpUcTJGR0xFRzdXNnBiZ3VuTFZPTlpOVW9sUExEbU9LSVNZT0V4Y21ETmVnXzJCUlRpMFJaeFF6Z3ZrdVd1UnRXQ3N4bElETEVzVzFLMkQ2YmMwNUE1QQ?oc=5",
+  "published": "2026-09-04",
+  "collected": "2026-09-20",
+  "summary": "The Only Labor Day Menswear Sales Worth Shopping esquire.com",
+  "content": "The Only Labor Day Menswear Sales Worth Shopping esquire.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Amazon",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Amazon"
+  ]
+ },
+ {
   "key": "45dab6acf6b9beda",
   "title": "Tariff windfall lifts Abercrombie (NYSE: ANF) profit and cash for buybacks",
   "title_ko": "관세 횡재로 인해 Abercrombie(NYSE: ANF)의 환매를 위한 이익과 현금이 증가합니다.",
@@ -44034,6 +45266,34 @@
   "hits": 1,
   "sources": [
    "Textile Today"
+  ]
+ },
+ {
+  "key": "ba0cf6b92c377f08",
+  "title": "Profit surges at Duluth Holdings (DLTH) on tariff windfall—but how big was the refund?",
+  "title_ko": "관세 횡재로 인해 Duluth Holdings(DLTH)의 이익이 급등했지만 환급액은 얼마나 컸습니까?",
+  "link": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQV3E2YjVTSVNSNFo4dWgzd1g2TGFvdElHWlFWbFdQRXFfdk5xRjFHUm1TenFwZ2s4LWFZMlRVYjE2dkdCaW1Td0trd3ZGUVdLTW85RTF6RnVhOU5iaGpoU2xfWmd6bGFGaS1IY01wcGhqVzBZdXg1YjlIV2gxMTZETXBUMGpZLU1zU0xqMDRsSWUxWmI0X3BPX1BaT3RVRlV0ckpwTVpBVXlXYjRw?oc=5",
+  "published": "2026-09-03",
+  "collected": "2026-09-20",
+  "summary": "Profit surges at Duluth Holdings (DLTH) on tariff windfall—but how big was the refund? Stock Titan",
+  "content": "Profit surges at Duluth Holdings (DLTH) on tariff windfall—but how big was the refund? Stock Titan",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Duluth Trading",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "관세"
+  ],
+  "entities": [
+   "duluth"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Duluth Trading"
   ]
  },
  {
@@ -53249,6 +54509,32 @@
   "hits": 1,
   "sources": [
    "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "b80d9ef65fe70e24",
+  "title": "161-Year-Old Children's Apparel Giant Carter's Closes 29 More Stores in Footprint Reduction - Return On Equity",
+  "title_ko": "161세 아동복 거대 기업 Carter's, 점유면적 감소로 29개 매장 추가 폐쇄 - 자기자본수익률",
+  "link": "https://news.google.com/rss/articles/CBMizwFBVV95cUxPc1RmRzV3YkR1OF9JQmFqbXlMUGhqaFRrYWhMSi1KVkRURzdRVFNfRmVjTTJSa00wRXU1MG1NMzc3RTMzSU84V2dkWVR1ZGFXLWFLNTd2ZkJ5MjJsMHRmdEY5NmpHM3NkOGxiVVoycHROV1VZeExzanZjTGFYMmxDMWh1YXpqNm5pYTYwZm00LXNucEw1bUJKYTRfUTFxLXcyZmJJdXd3ekI2UHlKRjNxakxLR1EwNGFwX0Vpc3Y1WmVRM0QtS05welFOeGpCTlE?oc=5",
+  "published": "2026-09-01",
+  "collected": "2026-09-20",
+  "summary": "161-Year-Old Children's Apparel Giant Carter's Closes 29 More Stores in Footprint Reduction - Return On Equity careplusvn.com",
+  "content": "161-Year-Old Children's Apparel Giant Carter's Closes 29 More Stores in Footprint Reduction - Return On Equity careplusvn.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Carter's",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "carters"
+  ],
+  "score": 3,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Carter's"
   ]
  },
  {
