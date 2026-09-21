@@ -1,10 +1,9 @@
-import { canceledOutboundIds, type FabricLedgerItem } from "./fabric-ledger"
+import { canceledOutboundIds, storageNoLabel, type FabricLedgerItem } from "./fabric-ledger"
 import type { FabricLedgerEvent } from "./schema"
 
-export interface WarehouseDayRows {
+export interface WarehouseMovementRow {
+  storageNo: string
   date: string
-  inbound: { storageNo: string; date: string }[]
-  outboundDone: { storageNo: string; date: string }[]
 }
 
 export interface WarehouseListRow {
@@ -19,34 +18,17 @@ export interface WarehouseListRow {
   weight: number | ""
 }
 
-/** 창고보관 전체 목록 1행. 기간과 무관한 현재 시점 스냅샷이다. */
-export interface WarehouseStockRow {
-  storageNo: string
-  styleNo: string
-  flNo: string
-  season: string
-  buyer: string
-  owner: string
-  fabric: string
-  construction: string
-  color: string
-  weight: number | ""
-  balance: number | ""
-}
-
 export interface WarehouseExportData {
   from: string
   to: string
-  days: WarehouseDayRows[]
+  inbound: WarehouseMovementRow[]
+  outboundDone: WarehouseMovementRow[]
   list: WarehouseListRow[]
-  stock: WarehouseStockRow[]
-  totals: { inbound: number; outboundDone: number; listCount: number; stockCount: number }
+  totals: { inbound: number; outboundDone: number; listCount: number; inboundYds: number; disposedYds: number }
 }
 
-/** 입고 쪽 이력. UNRECEIVE(입고 취소)가 마지막이면 입고로 보지 않는다. */
-const INBOUND_ACTIONS = new Set(["RECEIVE", "CONFIRM", "UNRECEIVE"])
-/** 출고 완료 쪽 이력. RESTORE(되돌리기)가 마지막이면 완료로 보지 않는다. */
-const OUTBOUND_DONE_ACTIONS = new Set(["EXHAUST", "DISPOSE", "RESTORE"])
+const DONE_STATUS = new Set(["EXHAUSTED", "DISPOSED"])
+const INBOUND_STATUS = new Set(["WAREHOUSE", "EXHAUSTED", "DISPOSED"])
 
 /** R&D No.는 원본이 숫자 셀이다. 숫자로 읽히면 숫자로, 아니면 문자열 그대로 넣는다. */
 const storageCell = (storageNo: string): string | number | null => {
@@ -65,88 +47,82 @@ export function collectWarehouseExport(
   from: string,
   to: string,
 ): WarehouseExportData {
-  const days: WarehouseDayRows[] = []
-  const end = new Date(`${to}T00:00:00Z`).getTime()
-  for (let time = new Date(`${from}T00:00:00Z`).getTime(); time <= end; time += 86400000) {
-    days.push({ date: new Date(time).toISOString().slice(0, 10), inbound: [], outboundDone: [] })
-  }
-  const byDate = new Map(days.map((day) => [day.date, day]))
-  const byStorageNo = new Map(ledger.map((item) => [item.storageNo, item]))
+  const itemByNo = new Map(ledger.filter((item) => item.storageNo.trim()).map((item) => [item.storageNo.trim(), item]))
   const canceledOutbounds = canceledOutboundIds(events)
+  const inRange = (date: string): boolean => date >= from && date <= to
 
-  // 같은 R&D No.에 입고확인이 여러 번 찍히면 이력이 그만큼 쌓인다. 보고서에는 최종 1건만 올린다.
-  // 기간 밖 이력까지 봐야 "기간 안에서 입고했다가 뒤에 취소된 건"을 걸러낼 수 있다.
+  // 기간 밖 이력까지 시간순으로 봐야 나중에 취소되거나 복구된 건을 걸러낼 수 있다.
   const ordered = [...events].sort((a, b) => eventTime(a).localeCompare(eventTime(b)))
   const lastInbound = new Map<string, FabricLedgerEvent>()
-  const lastOutboundDone = new Map<string, FabricLedgerEvent>()
+  const lastDone = new Map<string, FabricLedgerEvent>()
   for (const event of ordered) {
-    const storageNo = event.storageNo ?? ""
+    const storageNo = (event.storageNo ?? "").trim()
     if (!storageNo) continue
-    if (INBOUND_ACTIONS.has(event.action)) lastInbound.set(storageNo, event)
-    if (OUTBOUND_DONE_ACTIONS.has(event.action)) lastOutboundDone.set(storageNo, event)
+    if (event.toStatus === "READY" || event.toStatus === "REMOVED") {
+      lastInbound.delete(storageNo)
+      lastDone.delete(storageNo)
+      continue
+    }
+    if (event.action === "RECEIVE") lastInbound.set(storageNo, event)
+    else if (event.action === "CONFIRM" && !lastInbound.has(storageNo)) lastInbound.set(storageNo, event)
+    if (DONE_STATUS.has(event.toStatus)) lastDone.set(storageNo, event)
+    else lastDone.delete(storageNo)
   }
 
-  const push = (
+  const movementRows = (
     final: Map<string, FabricLedgerEvent>,
-    undone: string,
-    pick: (day: WarehouseDayRows) => { storageNo: string; date: string }[],
-  ) => {
-    const rows: { storageNo: string; date: string }[] = []
+    statusAllowed: (item: FabricLedgerItem) => boolean,
+  ): WarehouseMovementRow[] => {
+    const rows: WarehouseMovementRow[] = []
     final.forEach((event, storageNo) => {
-      if (event.action === undone) return
+      const item = itemByNo.get(storageNo)
+      if (!item || !statusAllowed(item)) return
       const date = (event.occurredAt ?? "").slice(0, 10)
-      if (byDate.has(date)) rows.push({ storageNo, date })
+      if (inRange(date)) rows.push({ storageNo: storageNoLabel(item), date })
     })
     rows.sort((a, b) => a.date.localeCompare(b.date)
       || a.storageNo.localeCompare(b.storageNo, undefined, { numeric: true }))
-    for (const row of rows) pick(byDate.get(row.date)!).push(row)
+    return rows
   }
-  push(lastInbound, "UNRECEIVE", (day) => day.inbound)
-  push(lastOutboundDone, "RESTORE", (day) => day.outboundDone)
+  const inbound = movementRows(lastInbound, (item) => INBOUND_STATUS.has(item.status))
+  const outboundDone = movementRows(lastDone, (item) => DONE_STATUS.has(item.status))
 
   // 출고 요청은 건마다 별개다. 같은 R&D No.가 여러 번 나가면 그만큼 줄이 생긴다. 합치지 않는다.
   const list: WarehouseListRow[] = events
-    .filter((event) => event.action === "OUTBOUND" && !canceledOutbounds.has(event.id) && byDate.has((event.occurredAt ?? "").slice(0, 10)))
+    .filter((event) => event.action === "OUTBOUND" && !canceledOutbounds.has(event.id) && inRange((event.occurredAt ?? "").slice(0, 10)))
     .sort((a, b) => (a.occurredAt ?? "").localeCompare(b.occurredAt ?? "")
       || (a.storageNo ?? "").localeCompare(b.storageNo ?? "", undefined, { numeric: true }))
     .map((event) => {
       const date = (event.occurredAt ?? "").slice(0, 10)
-      const storageNo = event.storageNo ?? ""
-      const tech = byStorageNo.get(storageNo)?.record?.tech
+      const storageNo = (event.storageNo ?? "").trim()
+      const item = itemByNo.get(storageNo)
+      const tech = item?.record?.tech
       return {
         requestDate: `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}`,
         requester: event.to ?? "", division: event.division ?? "", qty: event.qty ?? "",
-        storageNo, fabric: tech?.yarnDetail ?? "",
+        storageNo: item ? storageNoLabel(item) : storageNo, fabric: tech?.yarnDetail ?? "",
         width: tech?.actual?.width ?? "", weight: tech?.actual?.weight ?? "",
       }
     })
 
-  // 창고보관 전체는 기간과 무관하다. 지금 창고에 있는 것만 담는다.
-  const stock: WarehouseStockRow[] = ledger
-    .filter((item) => item.status === "WAREHOUSE")
-    .map((item) => {
-      const tech = item.record?.tech
-      return {
-        storageNo: item.storageNo ?? "",
-        styleNo: item.record?.styleNo ?? item.sample?.styleNo ?? "",
-        flNo: item.record?.flNo ?? item.sample?.flNo ?? "",
-        season: item.record?.season ?? "",
-        buyer: item.record?.buyer ?? "",
-        owner: item.record?.owner ?? "",
-        fabric: tech?.yarnDetail ?? "",
-        construction: item.record?.construction ?? "",
-        color: item.record?.color ?? "",
-        weight: typeof item.record?.weight === "number" ? item.record.weight : ("" as const),
-        balance: typeof item.balance === "number" ? item.balance : ("" as const),
-      }
-    })
-    .sort((a, b) => a.storageNo.localeCompare(b.storageNo, undefined, { numeric: true }))
+  const roundYds = (value: number): number => Math.round(value * 100) / 100
+  const inboundYds = roundYds([...lastInbound].reduce((sum, [storageNo, event]) => {
+    const item = itemByNo.get(storageNo)
+    const date = (event.occurredAt ?? "").slice(0, 10)
+    return item && INBOUND_STATUS.has(item.status) && inRange(date) ? sum + (item.yds ?? 0) : sum
+  }, 0))
+  const disposedYds = roundYds([...lastDone].reduce((sum, [storageNo, event]) => {
+    const item = itemByNo.get(storageNo)
+    const date = (event.occurredAt ?? "").slice(0, 10)
+    return item?.status === "DISPOSED" && inRange(date) ? sum + Math.max(0, item.balance ?? 0) : sum
+  }, 0))
 
-  return { from, to, days, list, stock, totals: {
-    inbound: days.reduce((sum, day) => sum + day.inbound.length, 0),
-    outboundDone: days.reduce((sum, day) => sum + day.outboundDone.length, 0),
+  return { from, to, inbound, outboundDone, list, totals: {
+    inbound: inbound.length,
+    outboundDone: outboundDone.length,
     listCount: list.length,
-    stockCount: stock.length,
+    inboundYds,
+    disposedYds,
   } }
 }
 
@@ -170,15 +146,15 @@ export async function buildWarehouseWorkbook(data: WarehouseExportData): Promise
   const workbook = new ExcelJS.Workbook()
 
   /**
-   * 입출고 시트. `blankRows`는 입고 목록과 출고완료 블록 사이의 빈 줄 수다.
-   * 원본이 일자별 2줄, 주차(요약) 1줄이라 그대로 맞춘다.
+   * 입출고 요약 시트. 입고 목록과 소진·폐기 블록 사이의 빈 줄은 1줄로 고정한다.
    * 창고팀이 시트를 통째로 복사해 붙이므로 행 위치가 어긋나면 안 된다.
    */
-  const movementSheet = (name: string, inbound: WarehouseDayRows["inbound"], outboundDone: WarehouseDayRows["outboundDone"], blankRows: 1 | 2) => {
+  const movementSheet = (name: string, inbound: WarehouseMovementRow[], outboundDone: WarehouseMovementRow[]) => {
     const sheet = workbook.addWorksheet(name)
     sheet.getColumn(1).width = 8.88
     ;[2, 3, 4].forEach((col) => { sheet.getColumn(col).width = 14.75 })
     sheet.getColumn(5).width = 20.75
+    sheet.getColumn(6).width = 14.75
 
     const put = (row: number, col: number, value: unknown, opts: { size: number; bold?: boolean; fill?: string; numFmt?: string; box?: boolean }) => {
       const cell = sheet.getCell(row, col)
@@ -192,13 +168,15 @@ export async function buildWarehouseWorkbook(data: WarehouseExportData): Promise
     }
 
     // 3행 요약 머리 — 연두, 굵기 없음, 11pt
-    ;["부서명", "입고", "RND 출고 완료건"].forEach((label, i) => put(3, i + 2, label, { size: 11, fill: HEAD_LIME }))
+    ;["부서명", "입고", "RND 소진/폐기 건", "입고 yds", "폐기 yds"].forEach((label, i) => put(3, i + 2, label, { size: 11, fill: HEAD_LIME }))
     put(4, 2, "R&D", { size: 11 })
     put(4, 3, inbound.length || null, { size: 11 })
     put(4, 4, outboundDone.length || null, { size: 11 })
+    put(4, 5, data.totals.inboundYds || null, { size: 11, numFmt: "#,##0.##" })
+    put(4, 6, data.totals.disposedYds || null, { size: 11, numFmt: "#,##0.##" })
 
     /** 목록 블록 하나. 제목(굵게 12pt, 테두리 없음) + 머리(진초록 9pt) + 데이터. */
-    const block = (titleRow: number, title: string, dateHead: string, entries: WarehouseDayRows["inbound"]) => {
+    const block = (titleRow: number, title: string, dateHead: string, entries: WarehouseMovementRow[]) => {
       put(titleRow, 2, title, { size: 12, bold: true, box: false })
       ;["부서명", "R&D No.", dateHead].forEach((label, i) => put(titleRow + 1, i + 2, label, { size: 9, fill: HEAD_GREEN }))
       const start = titleRow + 2
@@ -215,11 +193,10 @@ export async function buildWarehouseWorkbook(data: WarehouseExportData): Promise
     }
 
     const inboundLast = block(7, "입고 현황", "입고일자", inbound)
-    block(inboundLast + blankRows + 1, "RND 출고 완료 현황", "폐기일자", outboundDone)
+    block(inboundLast + 2, "RND 소진/폐기 현황", "폐기일자", outboundDone)
   }
 
-  movementSheet("요약", data.days.flatMap((day) => day.inbound), data.days.flatMap((day) => day.outboundDone), 1)
-  data.days.forEach((day) => movementSheet(day.date.slice(5).replace("-", "."), day.inbound, day.outboundDone, 2))
+  movementSheet("요약", data.inbound, data.outboundDone)
 
   const list = workbook.addWorksheet("LIST")
   list.getColumn(1).width = 3.75
@@ -251,8 +228,6 @@ export async function buildWarehouseWorkbook(data: WarehouseExportData): Promise
   })
 
   buildRequestSummarySheet(workbook, data)
-  buildLookupSheet(workbook, data)
-  buildStockSheet(workbook, data)
 
   const buffer = await workbook.xlsx.writeBuffer()
   return new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
@@ -336,84 +311,6 @@ function buildRequestSummarySheet(workbook: ExcelWorkbook, data: WarehouseExport
   put(teamSum, 6, "합계", { bold: true, fill: TEAL })
   put(teamSum, 7, total, { bold: true, fill: TEAL })
   put(teamSum, 8, undefined, { size: 9, left: true })
-}
-
-/** 원본 `데이터` 시트. LIST에서 R&D No.로 원단명을 끌어 쓰는 참조표다. */
-function buildLookupSheet(workbook: ExcelWorkbook, data: WarehouseExportData): void {
-  const ws = workbook.addWorksheet("데이터")
-  ws.getColumn(1).width = 4
-  ws.getColumn(2).width = 12
-  ws.getColumn(3).width = 60
-  ;["Style No.", "원단명"].forEach((label, i) => {
-    const cell = ws.getCell(2, i + 2)
-    cell.value = label
-    cell.font = { name: MALGUN, size: 9, bold: true }
-    cell.alignment = { horizontal: "center", vertical: "middle" }
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEAD_LIME } }
-    cell.border = BOX
-  })
-  data.stock.forEach((row, i) => {
-    const at = 3 + i
-    const no = ws.getCell(at, 2)
-    no.value = storageCell(row.storageNo)
-    no.font = { name: MALGUN, size: 9 }
-    no.alignment = { horizontal: "center", vertical: "middle" }
-    no.border = BOX
-    const name = ws.getCell(at, 3)
-    name.value = row.fabric || null
-    name.font = { name: MALGUN, size: 9 }
-    name.alignment = { horizontal: "left", vertical: "middle" }
-    name.border = BOX
-  })
-}
-
-const STOCK_COLUMNS: readonly { key: keyof WarehouseStockRow; head: string; width: number; left?: boolean }[] = [
-  { key: "storageNo", head: "R&D No.", width: 10 },
-  { key: "styleNo", head: "Style/#", width: 14 },
-  { key: "flNo", head: "FL.#", width: 13 },
-  { key: "season", head: "Season", width: 9 },
-  { key: "buyer", head: "Buyer", width: 12 },
-  { key: "owner", head: "Developer", width: 10 },
-  { key: "fabric", head: "Yarn", width: 46, left: true },
-  { key: "construction", head: "Cons.", width: 16, left: true },
-  { key: "color", head: "Color", width: 14, left: true },
-  { key: "weight", head: "중량", width: 8 },
-  { key: "balance", head: "재고(yds)", width: 10 },
-]
-
-/** 창고보관 전체 목록. 기간과 무관한 현재 시점 스냅샷이다. */
-function buildStockSheet(workbook: ExcelWorkbook, data: WarehouseExportData): void {
-  const ws = workbook.addWorksheet("창고보관 현황")
-  ws.getColumn(1).width = 4
-  STOCK_COLUMNS.forEach((column, i) => { ws.getColumn(i + 2).width = column.width })
-
-  const title = ws.getCell(1, 2)
-  title.value = `창고보관 ${data.stock.length.toLocaleString("ko-KR")}건 · ${new Date().toISOString().slice(0, 10)} 기준`
-  title.font = { name: MALGUN, size: 11, bold: true }
-
-  STOCK_COLUMNS.forEach((column, i) => {
-    const cell = ws.getCell(2, i + 2)
-    cell.value = column.head
-    cell.font = { name: MALGUN, size: 9, bold: true }
-    cell.alignment = { horizontal: "center", vertical: "middle" }
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEAD_GREEN } }
-    cell.border = BOX
-  })
-  ws.getRow(2).height = 16.6
-
-  data.stock.forEach((row, i) => {
-    STOCK_COLUMNS.forEach((column, c) => {
-      const cell = ws.getCell(3 + i, c + 2)
-      const value = column.key === "storageNo" ? storageCell(row.storageNo) : row[column.key]
-      cell.value = (value === "" ? null : value) as never
-      cell.font = { name: MALGUN, size: 9 }
-      cell.alignment = { horizontal: column.left ? "left" : "center", vertical: "middle" }
-      cell.border = BOX
-    })
-  })
-  if (data.stock.length) {
-    ws.autoFilter = { from: { row: 2, column: 2 }, to: { row: 2 + data.stock.length, column: 1 + STOCK_COLUMNS.length } }
-  }
 }
 
 export function warehouseExportFileName(from: string, to: string): string {

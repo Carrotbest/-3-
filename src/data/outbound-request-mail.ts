@@ -1,4 +1,4 @@
-import type { FabricLedgerItem } from "@/data/fabric-ledger"
+import { storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { mailBodyHtml, mailTableHtml, shortDate, storageNoSummary } from "@/data/mail-draft"
 
 /**
@@ -31,7 +31,7 @@ export function outboundRequestRows(lines: readonly OutboundRequestLine[]): stri
   return lines.map((line) => {
     const stock = stockYds(line.item)
     return [
-      line.item.storageNo,
+      storageNoLabel(line.item),
       line.item.rackNo ?? "",
       line.qty.trim(),
       stock === null ? "" : String(stock),

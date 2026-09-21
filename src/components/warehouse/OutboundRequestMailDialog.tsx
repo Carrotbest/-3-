@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { FabricLedgerItem } from "@/data/fabric-ledger"
+import { storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { buildEml, copyMailTable, downloadEml, fileDateStamp } from "@/data/mail-draft"
 import {
   OUTBOUND_REQUEST_COLUMNS,
@@ -132,7 +132,7 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
                 const stock = stockYds(line.item)
                 const error = qtyError(line)
                 return <tr key={line.item.key}>
-                  <td className="border-b border-[var(--border)] px-2 py-1.5 font-mono">{line.item.storageNo}</td>
+                  <td className="border-b border-[var(--border)] px-2 py-1.5 font-mono">{storageNoLabel(line.item)}</td>
                   <td className="border-b border-[var(--border)] px-2 py-1.5 font-mono">{line.item.rackNo ?? ""}</td>
                   <td className="w-24 border-b border-[var(--border)] px-2 py-1">
                     <Input aria-label={`${line.item.storageNo} 요청 수량`} inputMode="decimal" value={line.qty} onChange={(event) => setLine(line.item.key, { qty: event.target.value })} className={`h-7 text-right text-xs ${error && line.qty ? "border-[var(--destructive)]" : ""}`} />

@@ -695,6 +695,7 @@ export interface ApplyFabricActionInput {
   actor?: string
   note?: string
   storageNo?: string
+  roll?: boolean
   autoExhaust?: boolean
   yds?: number
   /** 보유 재고를 비운다. 값을 지우는 것과 값을 안 건드리는 것을 구분한다. */
@@ -838,6 +839,7 @@ export async function applyDisposalRoundCompletion(
       yds: previous?.yds,
       // 창고를 떠나므로 rack 칸을 비운다. applyFabricAction 과 같은 규칙이다.
       rackNo: undefined,
+      roll: previous?.roll,
       note: previous?.note,
       fields: previous?.fields,
       updatedAt: occurredAt,
@@ -936,6 +938,7 @@ export async function saveFabricFields(item: FabricLedgerItem, patch: Record<str
     storageNo: previous?.storageNo ?? (item.storageNo || undefined),
     yds: previous?.yds ?? (item.yds ?? undefined),
     rackNo: previous?.rackNo,
+    roll: previous?.roll,
     note: previous?.note,
     fields: { ...previous?.fields, ...patch },
     updatedAt: new Date().toISOString(),
@@ -977,6 +980,52 @@ export async function saveFabricRackNos(entries: ReadonlyArray<{ item: FabricLed
       storageNo: previous?.storageNo ?? (item.storageNo || undefined),
       yds: previous?.yds ?? (item.yds ?? undefined),
       rackNo: nextRack,
+      roll: previous?.roll,
+      note: previous?.note,
+      fields: previous?.fields,
+      updatedAt,
+      updatedBy: "관리자",
+    }
+    replacements.set(recordId ? `record:${recordId}` : `key:${item.key}`, next)
+    replacedKeys.add(item.key)
+    if (previous) replacedKeys.add(previous.key)
+    if (next.recordId) replacedRecordIds.add(next.recordId)
+    changed += 1
+  }
+  if (!changed) return 0
+  const fabricOverrides = [
+    ...replacements.values(),
+    ...state.fabricOverrides.filter((entry) =>
+      !replacedKeys.has(entry.key) && !(entry.recordId && replacedRecordIds.has(entry.recordId))),
+  ]
+  setAppState({ fabricOverrides })
+  await saveCache("fabricOverrides", fabricOverrides)
+  return changed
+}
+
+/**
+ * 선택한 원단의 롤 표시를 한 번에 켜고 끈다.
+ * 원단마다 따로 저장하면 앞 저장을 뒤 저장이 덮어쓸 수 있어 새 배열을 한 번만 만든다.
+ */
+export async function saveFabricRolls(entries: ReadonlyArray<{ item: FabricLedgerItem; roll: boolean }>): Promise<number> {
+  const state = useAppStore.getState()
+  const updatedAt = new Date().toISOString()
+  const replacements = new Map<string, FabricLedgerOverride>()
+  const replacedKeys = new Set<string>()
+  const replacedRecordIds = new Set<string>()
+  let changed = 0
+  for (const { item, roll } of entries) {
+    const recordId = fabricRecordIdOf(item)
+    const previous = previousFabricOverride(state.fabricOverrides, item.key, recordId)
+    if ((previous?.roll ?? false) === roll) continue
+    const next: FabricLedgerOverride = {
+      key: item.key,
+      recordId: recordId ?? previous?.recordId,
+      status: previous?.status ?? item.status,
+      storageNo: previous?.storageNo ?? (item.storageNo || undefined),
+      yds: previous?.yds ?? (item.yds ?? undefined),
+      rackNo: previous?.rackNo,
+      roll: roll || undefined,
       note: previous?.note,
       fields: previous?.fields,
       updatedAt,
@@ -1066,6 +1115,7 @@ export async function applyFabricActions(inputs: ReadonlyArray<ApplyFabricAction
       storageNo: resolvedToStatus === "READY" ? undefined : input.storageNo?.trim() || previous?.storageNo,
       yds: resolvedToStatus === "READY" || input.clearYds ? undefined : yds,
       rackNo: resolvedToStatus === "WAREHOUSE" ? previous?.rackNo : undefined,
+      roll: input.roll ?? previous?.roll,
       note: input.note?.trim() || previous?.note, fields: previous?.fields, updatedAt: occurredAt, updatedBy: actor,
     }
     const replacementKey = override.recordId ? `record:${override.recordId}` : `key:${input.fabricKey}`
@@ -1198,6 +1248,7 @@ export async function removeFabricRows(
       status: "REMOVED",
       storageNo: previous?.storageNo,
       yds: previous?.yds,
+      roll: previous?.roll,
       note: previous?.note,
       fields: previous?.fields,
       updatedAt: occurredAt,

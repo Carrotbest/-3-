@@ -1,4 +1,4 @@
-import type { FabricLedgerItem } from "@/data/fabric-ledger"
+import { storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { mailBodyHtml, mailTableHtml, shortDate, storageNoSummary } from "@/data/mail-draft"
 
 /**
@@ -16,7 +16,7 @@ export const INBOUND_REQUEST_COLUMNS = ["R&D No.", "Style No.", "FL#", "Buyer", 
 
 export function inboundRequestRows(items: readonly FabricLedgerItem[]): string[][] {
   return items.map((item) => [
-    item.storageNo,
+    storageNoLabel(item),
     item.styleNo,
     item.flNo,
     item.buyer,

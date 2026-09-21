@@ -386,6 +386,8 @@ export interface FabricLedgerOverride {
   yds?: number
   /** 창고 rack 칸 번호(K-1-1 형식, `src/data/warehouse-rack.ts`). 창고보관 상태에서만 의미가 있다. */
   rackNo?: string
+  /** 롤 원단 표시. 채번에는 영향이 없고 화면·자료 표기에만 R을 붙인다. */
+  roll?: boolean
   note?: string
   /**
    * 원단 상세에서 직접 고친 값. DD 레코드가 없는 샘플관리대장 행의 수정본이다.

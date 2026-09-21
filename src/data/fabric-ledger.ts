@@ -71,6 +71,8 @@ export interface FabricLedgerItem {
   confirmedAt: string
   /** 창고 rack 칸 번호(K-1-1 형식). 원단별 상태(override)에만 저장한다. */
   rackNo?: string
+  /** 롤 원단 표시. 원단별 상태(override)에만 저장한다. */
+  roll?: boolean
   lastMovedAt: string
   lastOutbound: FabricLedgerOutbound | null
   sourceOrder: number | null
@@ -95,6 +97,16 @@ export function isFabric1Item(item: FabricLedgerItem): boolean {
 export function storageNumberOf(item: FabricLedgerItem): number | null {
   const matched = item.storageNo.trim().match(/^\d{1,5}(?!\d)/)?.[0]
   return matched ? Number(matched) : null
+}
+
+/**
+ * 화면과 창고팀 자료에 찍는 R&D No. 표기. 롤 원단은 뒤에 R을 붙인다.
+ * 저장 값(storageNo)은 숫자 문자열 그대로 둔다. 채번·정렬·중복 검사에 이 함수를 쓰지 마라.
+ */
+export function storageNoLabel(item: Pick<FabricLedgerItem, "storageNo" | "roll">): string {
+  const value = (item.storageNo ?? "").trim()
+  if (!value || !item.roll) return value
+  return /r$/i.test(value) ? value : `${value}R`
 }
 
 /** 3팀(1~7999) 순환 정렬 전용. 1팀 행을 넣지 마라. */
@@ -696,6 +708,7 @@ export function buildFabricLedger(
       status: override.status,
       storageNo: override.storageNo ?? item.storageNo,
       rackNo: override.rackNo,
+      roll: override.roll,
       note: override.note ?? item.note,
       updatedAt: override.updatedAt,
       updatedBy: override.updatedBy,

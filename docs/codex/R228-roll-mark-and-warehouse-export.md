@@ -2,7 +2,7 @@
 
 ## 상태
 
-미착수. R224, R225, R226, R227이 워킹트리에 들어가 있고 빌드까지 통과했다. **그 작업을 되돌리거나 다시 만들지 마라.**
+미착수. R224~R235가 커밋(effa3d3)까지 끝나 있다. **그 작업을 되돌리거나 다시 만들지 마라.** 아래 줄 번호는 그 커밋 기준으로 다시 잡은 값이다.
 
 2026-09-21 정산관리팀(창고팀) 미팅에서 나온 요구를 옮긴 것이다. A와 B는 별개 주제지만 같은 화면(`/warehouse`)과 같은 데이터 흐름이라 한 번에 한다.
 
@@ -23,25 +23,25 @@
 
 ## A-1. 저장 필드
 
-`src/data/schema.ts:380` `FabricLedgerOverride`에 `rackNo` 아래로 추가한다.
+`src/data/schema.ts` `FabricLedgerOverride`(388행 `rackNo?: string`) 아래로 추가한다.
 
 ```ts
   /** 롤 원단 표시. 채번에는 영향이 없고 화면·자료 표기에만 R을 붙인다. */
   roll?: boolean
 ```
 
-`src/data/fabric-ledger.ts:73` `FabricLedgerItem`의 `rackNo` 아래로 추가한다.
+`src/data/fabric-ledger.ts` `FabricLedgerItem`(73행 `rackNo?: string`) 아래로 추가한다.
 
 ```ts
   /** 롤 원단 표시. 원단별 상태(override)에만 저장한다. */
   roll?: boolean
 ```
 
-`src/data/fabric-ledger.ts:625-633` `merged`에 `rackNo: override.rackNo` 다음 줄로 `roll: override.roll,`을 넣는다.
+`src/data/fabric-ledger.ts` 698행 `rackNo: override.rackNo,` 다음 줄에 `roll: override.roll,`을 넣는다.
 
 ## A-2. 표시 함수
 
-`src/data/fabric-ledger.ts`의 `storageNumberOf`(96행) 바로 위에 넣는다.
+`src/data/fabric-ledger.ts`의 `storageNumberOf`(95행) 바로 위에 넣는다.
 
 ```ts
 /**
@@ -87,26 +87,26 @@ export async function saveFabricRolls(entries: ReadonlyArray<{ item: FabricLedge
 
 `src/routes/Warehouse.tsx`
 
-- 558-559행 옆에 상태를 더한다. `const [receiveRolls, setReceiveRolls] = useState<Record<string, boolean>>({})`
+- 587행 `receiveYds` 상태 옆에 더한다. `const [receiveRolls, setReceiveRolls] = useState<Record<string, boolean>>({})`
 - `closeActionDialog`에서 다른 입력값을 비우는 자리에 `setReceiveRolls({})`를 같이 넣는다.
-- 1772행 RECEIVE 다이얼로그 본문. 각 행의 `보유 yds (옵션)` 입력 칸 아래에 체크박스를 붙인다. 격자는 `grid-cols-[minmax(0,1fr)_9rem]`이므로 오른쪽 칸 안에 넣는다.
+- 1905행 RECEIVE 다이얼로그 본문. 각 행의 `보유 yds (옵션)` 입력 칸 아래에 체크박스를 붙인다. 격자는 `grid-cols-[minmax(0,1fr)_9rem]`이므로 오른쪽 칸 안에 넣는다.
 
 ```tsx
 <label className="mt-1 flex items-center gap-1.5 text-xs"><Checkbox checked={receiveRolls[item.key] === true} onCheckedChange={(value) => setReceiveRolls((current) => ({ ...current, [item.key]: value === true }))} aria-label={`${item.styleNo || item.flNo || "원단"} 롤 원단`} /><span>롤 원단</span></label>
 ```
 
-- 880행 `RECEIVE` 처리에서 `applyFabricActions`에 넘기는 각 입력에 `roll: receiveRolls[item.key] === true`를 더한다.
-- 1772행 안내 문장 끝에 한 문장을 더한다. `롤 원단은 체크하면 번호 뒤에 R이 붙습니다. 채번은 그대로입니다.`
+- 926행 `RECEIVE` 처리에서 `applyFabricActions`에 넘기는 각 입력에 `roll: receiveRolls[item.key] === true`를 더한다.
+- 1905행 안내 문장 끝에 한 문장을 더한다. `롤 원단은 체크하면 번호 뒤에 R이 붙습니다. 채번은 그대로입니다.`
 
 ## A-6. 창고보관 탭 토글 버튼
 
-`src/routes/Warehouse.tsx:1615-1618`의 첫 묶음(입고 확인 / 입고 확인 취소) 안, `입고 확인 취소` 버튼 뒤에 넣는다. 새 묶음을 만들지 마라(R226에서 정리한 줄이다).
+`src/routes/Warehouse.tsx` 1746행에서 시작하는 첫 묶음(입고 확인 / 입고 확인 취소) 안, `입고 확인 취소` 버튼 뒤에 넣는다. 새 묶음을 만들지 마라(R226에서 정리한 줄이다).
 
 ```tsx
 <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} title="선택한 원단의 R&D No. 뒤에 R을 붙이거나 뗍니다. 채번은 바뀌지 않습니다." onClick={() => void toggleRollMark()}>롤 표기</Button>
 ```
 
-`toggleRollMark`는 `undoLastWarehouseAction`(1161행) 근처에 둔다.
+`toggleRollMark`는 `commitStorageNo`(1296행) 근처에 둔다.
 
 ```ts
 /** 선택 전부가 롤이면 끄고, 하나라도 아니면 켠다. */
@@ -124,9 +124,9 @@ const toggleRollMark = async () => {
 
 | 파일 | 위치 | 비고 |
 |---|---|---|
-| `src/routes/Warehouse.tsx` | 1040 `case "storageNo"` 셀 | 표 본문 |
-| `src/routes/Warehouse.tsx` | 942 `R&D No. ${item.storageNo || "미지정"}` | 출고 확정 오류 문구 |
-| `src/routes/Warehouse.tsx` | 1770 DialogDescription, 1785, 1847, 1854 | 다이얼로그 표시 |
+| `src/routes/Warehouse.tsx` | 1093행 `if (id === "storageNo")` 셀 | 표 본문 |
+| `src/routes/Warehouse.tsx` | 995행 `R&D No. ${item.storageNo || "미지정"}` | 출고 확정 오류 문구 |
+| `src/routes/Warehouse.tsx` | 1903 DialogDescription, 1917, 1980, 1987 | 다이얼로그 표시 |
 | `src/data/inbound-request-mail.ts` | 19행 표 칸 | 제목(31행)은 그대로 둔다 |
 | `src/data/outbound-request-mail.ts` | 34행 표 칸 | 제목(47행)은 그대로 둔다 |
 | `src/components/warehouse/OutboundRequestMailDialog.tsx` | 135행 표 칸 | 화면 미리보기 |
@@ -148,7 +148,7 @@ const toggleRollMark = async () => {
 창고팀이 일자별로 집계하려고 만들던 시트라 요약만 있으면 된다고 확인했다.
 
 - `buildLookupSheet`, `buildStockSheet`, `STOCK_COLUMNS`, `WarehouseStockRow`, `collectWarehouseExport`의 `stock` 계산, `totals.stockCount`를 지운다.
-- 222행 `data.days.forEach((day) => movementSheet(...))` 줄을 지운다.
+- `buildWarehouseWorkbook` 안 `data.days.forEach((day) => movementSheet(...))` 줄(222행)을 지운다.
 - `WarehouseDayRows`와 `data.days`를 없애고 `WarehouseExportData`를 아래로 바꾼다. 일자별 시트가 사라지면 날짜별로 나눠 담을 이유가 없다.
 
 ```ts
@@ -168,7 +168,7 @@ export interface WarehouseExportData {
 ```
 
 - `movementSheet`의 `blankRows` 매개변수를 지우고 요약 기준인 빈 줄 1줄로 고정한다. 요약 시트 한 번만 부른다.
-- `src/routes/Warehouse.tsx:1711` 문구를 `입고 {n}건 · 소진/폐기 {n}건 · 출고요청 {n}건`으로 바꾼다. 창고보관 건수는 뺀다.
+- `src/routes/Warehouse.tsx` 1844행 문구를 `입고 {n}건 · 소진/폐기 {n}건 · 출고요청 {n}건`으로 바꾼다. 창고보관 건수는 뺀다.
 
 **LIST 시트와 `주차 집계` 시트의 서식·행 위치·열 너비는 그대로 둔다.** 창고팀이 시트째 복사해 붙이는 자리다.
 
