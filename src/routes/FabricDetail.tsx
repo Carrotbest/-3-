@@ -19,6 +19,7 @@ const ACTION_LABELS: Record<FabricLedgerAction, string> = {
   CONFIRM: "실물 입고 확인",
   UNCONFIRM: "실물 확인 취소",
   OUTBOUND: "반출",
+  UNOUTBOUND: "출고 취소",
   EXHAUST: "소진 완료",
   DISPOSE: "폐기",
   RESTORE: "상태 복구",

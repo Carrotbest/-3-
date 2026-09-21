@@ -16,6 +16,7 @@ import {
   type OutboundRequestLine,
   type OutboundRequestMeta,
 } from "@/data/outbound-request-mail"
+import { buildOutboundCard, notifyTeams } from "@/data/teams-notify"
 
 interface OutboundRequestMailDialogProps {
   open: boolean
@@ -37,12 +38,14 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
   const [meta, setMeta] = useState<OutboundRequestMeta>(EMPTY_META)
   const [lines, setLines] = useState<Record<string, { qty: string; note: string }>>({})
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
+  const [teamsNotice, setTeamsNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
 
   useEffect(() => {
     if (!open) return
     setMeta({ ...EMPTY_META, requester: defaultRequester, wantedDate: todayValue() })
     setLines(Object.fromEntries(items.map((item) => [item.key, { qty: "", note: "" }])))
     setNotice(null)
+    setTeamsNotice(null)
     // 창을 열 때 한 번만 초기화한다. 열린 동안 선택이 바뀌어도 입력을 지우지 않는다.
   }, [open])
 
@@ -74,11 +77,25 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
     }
   }
 
-  const makeMail = () => {
+  const makeMail = async () => {
+    setTeamsNotice(null)
     if (invalid) { setNotice({ kind: "error", text: "요청 수량을 모두 입력하세요." }); return }
     const eml = buildEml({ to: [], subject: outboundRequestSubject(meta, requestLines), html: outboundRequestHtml(meta, requestLines) })
     downloadEml(`원단출고요청_${fileDateStamp()}.eml`, eml)
     setNotice({ kind: "ok", text: "메일 파일을 내려받았습니다. 파일을 열면 표가 들어간 Outlook 새 메일 창이 뜹니다. 받는 사람을 입력하고 보내세요." })
+  }
+
+  const sendTeamsNotice = async () => {
+    setTeamsNotice(null)
+    if (invalid) { setTeamsNotice({ kind: "error", text: "요청 수량을 모두 입력하세요." }); return }
+    try {
+      const result = await notifyTeams(buildOutboundCard({ meta, lines: requestLines }))
+      setTeamsNotice(result === "sent"
+        ? { kind: "ok", text: "Teams 알림을 보냈습니다." }
+        : { kind: "ok", text: "Teams 알림 주소가 없어 알림은 보내지 않았습니다." })
+    } catch {
+      setTeamsNotice({ kind: "error", text: "Teams 알림을 보내지 못했습니다." })
+    }
   }
 
   return <Dialog open={open} onOpenChange={onOpenChange}>
@@ -137,11 +154,13 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
           메일은 자동으로 보내지 않습니다. Outlook 메일 만들기를 누르면 제목과 표가 채워진 메일 파일을 내려받습니다. 파일을 열어 받는 사람을 입력하고 보내세요. 실제 출고 기록은 정산관리팀 컷팅 회신 뒤 기존 출고 버튼으로 남깁니다.
         </p>
         {notice ? <p role="status" className={`text-xs leading-relaxed ${notice.kind === "error" ? "text-[var(--destructive)]" : "text-[var(--chart-2)]"}`}>{notice.text}</p> : null}
+        {teamsNotice ? <p role="status" className={`text-xs leading-relaxed ${teamsNotice.kind === "error" ? "text-[var(--warning)]" : "text-[var(--chart-2)]"}`}>{teamsNotice.text}</p> : null}
       </DialogBody>
       <DialogFooter>
         <Button type="button" size="sm" variant="outline" onClick={() => onOpenChange(false)}>닫기</Button>
         <Button type="button" size="sm" variant="outline" disabled={!items.length} onClick={() => void copyTable()}><Copy className="size-4" />표 복사</Button>
-        <Button type="button" size="sm" disabled={!items.length} onClick={makeMail}><Mail className="size-4" />Outlook 메일 만들기</Button>
+        <Button type="button" size="sm" variant="outline" disabled={!items.length} onClick={() => void makeMail()}><Mail className="size-4" />메일로 작성</Button>
+        <Button type="button" size="sm" disabled={!items.length} onClick={() => void sendTeamsNotice()}>Teams 알림 보내기</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

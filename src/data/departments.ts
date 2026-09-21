@@ -16,8 +16,8 @@ export const DEPARTMENTS: { id: DepartmentId; label: string; short: string; hint
     access: preset("read", { fabricRequest: "edit", excelBackup: "none", warehouseFabric1: "edit", warehouseOutbound: "edit" }),
   },
   {
-    id: "fabric2", label: "통합원단부 2팀", short: "2팀", hint: "요청 편집, HOME 블러, 나머지 읽기",
-    access: preset("read", { fabricRequest: "edit", excelBackup: "none", warehouseFabric1: "none", warehouseOutbound: "none" }),
+    id: "fabric2", label: "통합원단부 2팀", short: "2팀", hint: "요청 편집, 출고 요청, HOME 블러, 나머지 읽기",
+    access: preset("read", { fabricRequest: "edit", excelBackup: "none", warehouseFabric1: "none", warehouseOutbound: "edit" }),
   },
   {
     id: "fabric3", label: "통합원단부 3팀(원단 R&D)", short: "3팀", hint: "우리 팀. HOME 공개, 전 화면 편집",

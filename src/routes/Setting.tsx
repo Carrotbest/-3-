@@ -25,6 +25,7 @@ import { downloadLedgerArchive } from "@/data/ledger-archive"
 import { ingestChemical, ingestDevelopment, ingestFabric, ingestMaterials, ingestRdda, ingestSamples, ingestStudyWorkbook, ingestTs } from "@/data/upload"
 import { rddaMonthFromFlNo } from "@/data/derive"
 import { CATEGORIES, MEMBERS } from "@/data/schema"
+import { loadTeamsWebhook, saveTeamsWebhook } from "@/data/teams-notify"
 import { createInitialAppState, useAppStore } from "@/store/useAppStore"
 
 const STORAGE_KEY = "fabric.settings"
@@ -99,6 +100,30 @@ export function Setting() {
   const [permissionError, setPermissionError] = useState("")
   const [saveMessage, setSaveMessage] = useState("")
   const [recentUploads, setRecentUploads] = useState<Record<string, string>>({})
+  const [teamsWebhook, setTeamsWebhook] = useState("")
+  const [teamsWebhookSaving, setTeamsWebhookSaving] = useState(false)
+
+  useEffect(() => {
+    if (!isOwner) return
+    void loadTeamsWebhook()
+      .then(setTeamsWebhook)
+      .catch(() => setSaveMessage("Teams 알림 주소를 불러오지 못했습니다."))
+  }, [isOwner])
+
+  const saveWebhook = async () => {
+    setTeamsWebhookSaving(true)
+    try {
+      const savedUrl = await saveTeamsWebhook(teamsWebhook)
+      setTeamsWebhook(savedUrl)
+      setSaveMessage(teamsWebhook.trim() && !savedUrl
+        ? "HTTPS 주소만 저장할 수 있어 Teams 알림을 껐습니다."
+        : "Teams 알림 설정을 저장했습니다.")
+    } catch {
+      setSaveMessage("Teams 알림 설정을 저장하지 못했습니다.")
+    } finally {
+      setTeamsWebhookSaving(false)
+    }
+  }
 
   const resetCache = async () => {
     await clearCache()
@@ -347,7 +372,7 @@ export function Setting() {
           </SectionCard>
         </TabsContent>
 
-        <TabsContent value="alerts" className="mt-6">
+        <TabsContent value="alerts" className="mt-6 space-y-4">
           <SectionCard title="알림 규칙" subtitle="변경 후 저장 버튼을 눌러 반영합니다.">
             <div className="grid gap-3">
               {draft.alerts.map((rule) => (
@@ -369,6 +394,15 @@ export function Setting() {
               ))}
             </div>
           </SectionCard>
+          {isOwner ? <SectionCard title="Teams 알림" subtitle="창고 입고 등록과 출고 요청을 Teams 채널에 알립니다. 비우면 알림을 보내지 않습니다.">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="min-w-0 flex-1">
+                <Label htmlFor="teams-webhook">워크플로 주소</Label>
+                <Input id="teams-webhook" type="url" className="mt-2" value={teamsWebhook} onChange={(event) => setTeamsWebhook(event.target.value)} placeholder="https://" autoComplete="off" />
+              </div>
+              <Button type="button" disabled={teamsWebhookSaving} onClick={() => void saveWebhook()}><Save aria-hidden="true" />{teamsWebhookSaving ? "저장 중" : "저장"}</Button>
+            </div>
+          </SectionCard> : null}
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">

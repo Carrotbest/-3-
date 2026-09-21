@@ -5,7 +5,7 @@ import type {
   FabricLedgerOverride,
   FabricLedgerStatus,
 } from "./schema"
-import { isGdRecord } from "./dd-workflow"
+import { isCompletedFlNo, isGdRecord } from "./dd-workflow"
 import { FABRIC1_INTAKE_SHEET, WEB_INTAKE_SHEET } from "./schema"
 
 export interface FabricLedgerOutbound {
@@ -13,6 +13,31 @@ export interface FabricLedgerOutbound {
   division?: string
   qty: number
   date: string
+}
+
+/** 취소 이벤트가 무효로 만든 출고 이벤트 id를 모은다. */
+export function canceledOutboundIds(events: readonly FabricLedgerEvent[]): Set<string> {
+  return new Set(events
+    .filter((event) => event.action === "UNOUTBOUND" && Boolean(event.targetEventId))
+    .map((event) => event.targetEventId!))
+}
+
+/** 원단의 아직 취소되지 않은 가장 최근 출고 한 건을 찾는다. */
+export function latestActiveOutbound(
+  events: readonly FabricLedgerEvent[],
+  fabricKey: string,
+  recordId?: string,
+): FabricLedgerEvent | null {
+  const canceled = canceledOutboundIds(events)
+  const matches = (event: FabricLedgerEvent): boolean =>
+    recordId && event.recordId ? event.recordId === recordId : event.fabricKey === fabricKey
+  return events.reduce<FabricLedgerEvent | null>((latest, event) => {
+    if (event.action !== "OUTBOUND" || canceled.has(event.id) || !matches(event)) return latest
+    if (!latest) return event
+    const time = event.recordedAt || event.occurredAt
+    const latestTime = latest.recordedAt || latest.occurredAt
+    return time > latestTime ? event : latest
+  }, null)
 }
 
 export interface FabricLedgerItem {
@@ -452,6 +477,8 @@ export function buildFabricLedger(
   const recordKeyIndex = new Map<string, string>()
   const closedHistoryKeyCounts = new Map<string, number>()
   const ddRowKeyCounts = new Map<string, number>()
+  // A single FL can have multiple warehouse rows. Keep every eligible sample candidate.
+  const samplePoolByFl = new Map<string, string[]>()
 
   const registerIdentities = (item: FabricLedgerItem, rowIdentities: readonly string[]) => {
     fabricIdentities(item.storageNo, item.flNo, item.styleNo).concat(rowIdentities).forEach((identity) => {
@@ -508,26 +535,93 @@ export function buildFabricLedger(
       ...fabricIdentities(storageNo, sample.flNo, sample.styleNo),
       `source:${sample.sourceSheet ?? "sample"}::${index}`,
     ])
+    const flKey = normalized(sample.flNo)
+    if (flKey) {
+      const pool = samplePoolByFl.get(flKey) ?? []
+      if (!pool.includes(matchedKey)) pool.push(matchedKey)
+      samplePoolByFl.set(flKey, pool)
+    }
   })
 
+  // Use the DD count only for the conservative one-to-one fallback below.
+  const ddCountByFl = new Map<string, number>()
   records.forEach((record) => {
-    const fallback = recordIdentity(record)
-    // DD의 'Style No.'는 대장의 Style/#과 뜻이 다르고 원본 FL이 들어 있어 보조 식별자로 쓰면 다른 행에 붙는다.
-    // 그래서 DD 레코드는 FL로만 대장에 붙인다. FL이 없는 행은 각자 한 항목이며 서로 묶이지 않는다.
-    // FL 유무와 상관없이 DD 행 key 를 만들어 둔다.
-    // FL 을 나중에 적으면 항목 key 가 dd: 에서 fl: 로 바뀌는데, 그때 예전 dd: key 로 저장된
-    // 입고 기록(override·이력)을 못 찾으면 창고 보관 건이 R&D No.를 잃고 입고 대기로 되돌아간다.
-    const ddBaseKey = ddRowBaseKey(record)
-    let matchedKey: string
-    if (normalized(record.flNo)) {
-      matchedKey = resolveKey("", record.flNo, "", fallback)
+    const fl = isCompletedFlNo(record.flNo) ? normalized(record.flNo) : ""
+    if (fl) ddCountByFl.set(fl, (ddCountByFl.get(fl) ?? 0) + 1)
+  })
+  // 목록에서 숨긴 행이다. 여기에 DD 행을 붙이면 그 DD 행까지 화면에서 사라진다.
+  const removedKeys = new Set(overrides.filter((override) => override.status === "REMOVED").map((override) => override.key))
+  // Preserve an explicit warehouse link before considering field-based matches.
+  const linkedStorageByRecordId = new Map<string, string>()
+  overrides.forEach((override) => {
+    const storage = normalized(override.storageNo ?? "")
+    if (override.recordId && storage) linkedStorageByRecordId.set(override.recordId, `rnd:${storage}`)
+  })
+  const claimedSampleKeys = new Set<string>()
+  const flOccurrence = new Map<string, number>()
+
+  const takeSampleMatch = (record: DevRecord, fl: string): string | undefined => {
+    const pool = (samplePoolByFl.get(fl) ?? []).filter((key) =>
+      !claimedSampleKeys.has(key) && !items.get(key)?.record && !removedKeys.has(key))
+    if (!pool.length) return undefined
+    const claim = (key: string): string => {
+      claimedSampleKeys.add(key)
+      return key
+    }
+
+    const linked = linkedStorageByRecordId.get(recordIdentity(record))
+    if (linked && pool.includes(linked)) return claim(linked)
+
+    const yarn = normalized(record.tech?.yarnDetail ?? "")
+    if (yarn) {
+      const matched = pool.find((key) => normalized(items.get(key)?.sample?.ledger?.yarnDetail ?? "") === yarn)
+      if (matched) return claim(matched)
+    }
+
+    if (pool.length === 1 && (ddCountByFl.get(fl) ?? 0) === 1) return claim(pool[0])
+    return undefined
+  }
+
+  const ownKeyFor = (_record: DevRecord, fl: string, ddBaseKey: string): string => {
+    let base: string
+    if (fl) {
+      const occurrence = (flOccurrence.get(fl) ?? 0) + 1
+      flOccurrence.set(fl, occurrence)
+      base = occurrence === 1 ? `fl:${fl}` : `fl:${fl}#${occurrence}`
     } else {
-      // 값이 완전히 같은 행이 겹칠 때만 #2부터 순번을 붙여 모든 행을 보존한다.
       const occurrence = (ddRowKeyCounts.get(ddBaseKey) ?? 0) + 1
       ddRowKeyCounts.set(ddBaseKey, occurrence)
-      matchedKey = occurrence === 1 ? ddBaseKey : `${ddBaseKey}#${occurrence}`
+      base = occurrence === 1 ? ddBaseKey : `${ddBaseKey}#${occurrence}`
     }
+    let key = base
+    let suffix = 2
+    while (items.has(key)) {
+      key = `${base}@${suffix}`
+      suffix += 1
+    }
+    return key
+  }
+
+  records.forEach((record) => {
+    const ddBaseKey = ddRowBaseKey(record)
+    // FL# 칸에는 번호 대신 메모가 들어 있는 행이 많다(미등록, 컬러 잘못염색됨 …).
+    // 그런 글자를 원단 식별자로 쓰면 뜻이 없는 글자로 행이 묶이거나 갈라진다.
+    // 형식이 맞는 번호일 때만 FL 로 본다.
+    const fl = isCompletedFlNo(record.flNo) ? normalized(record.flNo) : ""
+    // FL 형식이 아닌 글자가 적힌 행은 R229 이전 규칙 그대로 둔다.
+    // 근거 없는 병합이지만 오래 그렇게 굴러왔고, 지금 푸는 것은 이 작업의 범위가 아니다.
+    const legacyText = !fl && normalized(record.flNo) ? normalized(record.flNo) : ""
+    let matchedKey: string
+    if (legacyText) {
+      matchedKey = resolveKey("", record.flNo, "", recordIdentity(record))
+    } else {
+      // Allocate every DD row's own key first so match success cannot shift later keys.
+      const ownKey = ownKeyFor(record, fl, ddBaseKey)
+      matchedKey = (fl ? takeSampleMatch(record, fl) : undefined) ?? ownKey
+    }
+
     const existing = items.get(matchedKey)
+    // Candidate matching excludes items that already own a DD record, so no DD row is swallowed here.
     const item = existing ? (existing.record ? existing : mergeRecord(existing, record)) : emptyFromRecord(record, matchedKey)
     items.set(matchedKey, item)
     recordKeyIndex.set(recordIdentity(record), matchedKey)
@@ -558,6 +652,7 @@ export function buildFabricLedger(
   // 배열 순서를 쓰면 안 된다. 팀 공유 병합이 새 기록을 배열 끝으로 보내 최신 기록이 가장 오래된 것으로 뒤집힌다.
   // 출고 날짜는 사용자가 과거로 고를 수 있으므로 표시용 occurredAt이 아니라 기록 시각을 기준으로 한다.
   const eventOrder = (event: FabricLedgerEvent): string => event.recordedAt || event.occurredAt
+  const canceledOutbounds = canceledOutboundIds(fabricEvents)
   ;[...fabricEvents].sort((left, right) => eventOrder(left).localeCompare(eventOrder(right))).forEach((event) => {
     const itemKey = resolveEntryKey(event.fabricKey, event.recordId)
     if (!itemKey) return
@@ -578,8 +673,8 @@ export function buildFabricLedger(
     }
     // 창고를 떠나거나 되돌아오면 실물 확인은 무효가 된다. 다시 확인받아야 한다.
     // UNCONFIRM은 잘못 누른 확인만 되돌린다. 상태·채번·재고는 그대로 두고 확인 표시만 지운다.
-    if (event.action === "RESTORE" || event.action === "DISPOSE" || event.action === "EXHAUST" || event.action === "UNRECEIVE" || event.action === "UNCONFIRM") confirmMap.delete(itemKey)
-    if (event.action !== "OUTBOUND" || typeof event.qty !== "number" || !Number.isFinite(event.qty) || event.qty <= 0) return
+    if (event.action === "RESTORE" || event.action === "DISPOSE" || event.action === "EXHAUST" || event.action === "UNRECEIVE" || event.action === "UNCONFIRM" || event.action === "UNOUTBOUND") confirmMap.delete(itemKey)
+    if (event.action !== "OUTBOUND" || canceledOutbounds.has(event.id) || typeof event.qty !== "number" || !Number.isFinite(event.qty) || event.qty <= 0) return
     const current = outboundMap.get(itemKey) ?? []
     current.push({ to: event.to?.trim() || "미입력", division: event.division?.trim() || undefined, qty: event.qty, date: event.occurredAt })
     outboundMap.set(itemKey, current)

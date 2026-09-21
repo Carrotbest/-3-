@@ -1,4 +1,4 @@
-import type { FabricLedgerItem } from "./fabric-ledger"
+import { canceledOutboundIds, type FabricLedgerItem } from "./fabric-ledger"
 import type { FabricLedgerEvent } from "./schema"
 
 export interface WarehouseDayRows {
@@ -72,6 +72,7 @@ export function collectWarehouseExport(
   }
   const byDate = new Map(days.map((day) => [day.date, day]))
   const byStorageNo = new Map(ledger.map((item) => [item.storageNo, item]))
+  const canceledOutbounds = canceledOutboundIds(events)
 
   // 같은 R&D No.에 입고확인이 여러 번 찍히면 이력이 그만큼 쌓인다. 보고서에는 최종 1건만 올린다.
   // 기간 밖 이력까지 봐야 "기간 안에서 입고했다가 뒤에 취소된 건"을 걸러낼 수 있다.
@@ -105,7 +106,7 @@ export function collectWarehouseExport(
 
   // 출고 요청은 건마다 별개다. 같은 R&D No.가 여러 번 나가면 그만큼 줄이 생긴다. 합치지 않는다.
   const list: WarehouseListRow[] = events
-    .filter((event) => event.action === "OUTBOUND" && byDate.has((event.occurredAt ?? "").slice(0, 10)))
+    .filter((event) => event.action === "OUTBOUND" && !canceledOutbounds.has(event.id) && byDate.has((event.occurredAt ?? "").slice(0, 10)))
     .sort((a, b) => (a.occurredAt ?? "").localeCompare(b.occurredAt ?? "")
       || (a.storageNo ?? "").localeCompare(b.storageNo ?? "", undefined, { numeric: true }))
     .map((event) => {

@@ -28,7 +28,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { buildFabricLedger, FABRIC1_STORAGE_NO_MIN, fabricRecordIdentity, isFabric1Item, STORAGE_NO_MAX, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
+import { buildFabricLedger, FABRIC1_STORAGE_NO_MIN, fabricRecordIdentity, isFabric1Item, latestActiveOutbound, STORAGE_NO_MAX, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
@@ -42,11 +42,13 @@ import { rddaProductionType } from "@/data/derive"
 import type { FabricLedgerStatus } from "@/data/schema"
 import { WEB_INTAKE_SHEET } from "@/data/schema"
 import { checkWarehouseFlEntry, needsFlConfirm, type WarehouseFlCheck } from "@/data/warehouse-fl-check"
+import { buildInboundCard, buildOutboundCancelCard, buildOutboundConfirmCard, notifyTeams } from "@/data/teams-notify"
+import { claimStorageNumbers, releaseStorageNumbers } from "@/data/storage-claims"
 import { useInView } from "@/lib/useInView"
-import { addManualIntake, updateManualIntake, applyDisposalRoundCompletion, applyFabricAction, applyFabricActions, backfillFabricRecordIds, confirmWarehouseBaseline, removeFabricRows, saveDisposalRounds, saveFabricRackNo, saveFabricRackNos, useAppStore, type ApplyFabricActionInput } from "@/store/useAppStore"
+import { addManualIntake, updateManualIntake, applyDisposalRoundCompletion, applyFabricAction, applyFabricActions, backfillFabricRecordIds, confirmWarehouseBaseline, removeFabricRows, saveDisposalRounds, saveFabricRackNo, saveFabricRackNos, undoFabricEntry, useAppStore, type ApplyFabricActionInput, type FabricUndoEntry } from "@/store/useAppStore"
 
 type WarehouseTab = "READY" | "WAREHOUSE" | "HISTORY"
-type ActionKind = "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "UNCONFIRM" | "DISPOSE" | "STOCK" | "OUTBOUND" | "EXHAUST" | "RESTORE" | "REMOVE"
+type ActionKind = "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "UNCONFIRM" | "DISPOSE" | "STOCK" | "OUTBOUND" | "UNOUTBOUND" | "EXHAUST" | "RESTORE" | "REMOVE"
 
 interface ActionDialogState {
   kind: ActionKind
@@ -237,9 +239,9 @@ function formatYds(value: number): string {
 }
 
 /**
- * 8000번대는 타 사업부가 쓰고 있어 우리 대역이 아니다. 최대값 다음 번호를 주면 8000이 나온다.
- * 폐기·소진으로 풀린 번호를 다시 쓰는 운영이라, 창고에 지금 있는 번호를 피해
- * 가장 낮은 빈 번호부터 채운다. 부여된 번호는 화면에서 고칠 수 있다.
+ * 지금 창고에 있어서 쓸 수 없는 번호. 창고보관만 센다.
+ * 소진·폐기로 이력에 간 번호는 다시 쓴다. 오래된 이력은 FL No.로 찾지 R&D No.로 찾지 않는다.
+ * 번호를 아껴 쓰는 것보다 빈칸 없이 순서대로 나가는 것이 창고팀과의 약속이다.
  */
 function occupiedStorageNumbers(items: readonly FabricLedgerItem[]): Set<number> {
   const used = new Set<number>()
@@ -249,17 +251,6 @@ function occupiedStorageNumbers(items: readonly FabricLedgerItem[]): Set<number>
     if (matched) used.add(Number(matched))
   })
   return used
-}
-
-/** 대장 행 순서가 곧 채번 순서다. 마지막으로 채번된 번호 다음부터 이어 간다. */
-function lastIssuedStorageNumber(items: readonly FabricLedgerItem[]): number {
-  let last = 0
-  items.forEach((item) => {
-    if (item.status !== "WAREHOUSE") return
-    const matched = item.storageNo.trim().match(/^\d{1,5}(?!\d)/)?.[0]
-    if (matched) last = Number(matched)
-  })
-  return last
 }
 
 function nextStorageNumbers(items: readonly FabricLedgerItem[], count: number, scope: "team3" | "team1" = "team3"): number[] {
@@ -277,8 +268,39 @@ function nextStorageNumbers(items: readonly FabricLedgerItem[], count: number, s
     for (let candidate = last + 1; picked.length < count; candidate += 1) take(candidate)
     return picked
   }
-  // 마지막 채번 다음부터 위로 채우고, 7999 를 넘기면 비어 있는 낮은 번호로 되감는다.
-  for (let candidate = lastIssuedStorageNumber(scoped) + 1; candidate <= STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
+  const numberOf = (value: string): number | null => {
+    const matched = value.trim().match(/^\d{1,5}(?!\d)/)?.[0]
+    return matched ? Number(matched) : null
+  }
+  // 어떤 상태로든 그 번호를 쓰는 항목이 있으면 '기록 있음'이다. 빈자리 판정에만 쓴다.
+  const recorded = new Set<number>()
+  scoped.forEach((item) => {
+    const value = numberOf(item.storageNo)
+    if (value !== null) recorded.add(value)
+  })
+  // 프론티어 = 웹에서 마지막으로 입고 등록한 번호. 원장 항목의 입고일(intakeAt)로 찾는다.
+  // 대장에서 이관된 옛 항목은 intakeAt 이 없다. 그래서 옛 주기에 남은 높은 번호에 끌려가지 않는다.
+  const stockedItems = scoped.filter((item) => item.status === "WAREHOUSE")
+  const latestIntake = stockedItems.filter((item) => item.intakeAt)
+    .sort((left, right) => left.intakeAt.localeCompare(right.intakeAt)).at(-1)
+  const frontier = numberOf(latestIntake?.storageNo ?? "")
+    ?? Math.max(0, ...stockedItems.map((item) => numberOf(item.storageNo) ?? 0))
+  // 현재 주기 밴드. 프론티어에서 아래로 내려가다 기록 없는 번호가 20개 이어지면 옛 주기다.
+  const GAP_BREAK = 20
+  let band = frontier
+  let run = 0
+  for (let candidate = frontier; candidate >= 1; candidate -= 1) {
+    if (recorded.has(candidate)) { run = 0; band = candidate; continue }
+    run += 1
+    if (run >= GAP_BREAK) break
+  }
+  // 1) 주기 안에 생긴 빈자리부터 메운다. 입고 취소나 숨김으로 풀린 번호다.
+  for (let candidate = band; candidate <= frontier && picked.length < count; candidate += 1) {
+    if (!recorded.has(candidate)) take(candidate)
+  }
+  // 2) 프론티어 다음부터 순서대로. 창고에 있는 번호만 건너뛴다(이력 번호는 그냥 쓴다).
+  for (let candidate = frontier + 1; candidate <= STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
+  // 3) 7999 를 넘기면 1 부터 되감는다.
   for (let candidate = 1; candidate <= STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
   return picked
 }
@@ -452,6 +474,14 @@ export function Warehouse() {
   const disposalRounds = useAppStore((state) => state.disposalRounds)
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents), [fabricEvents, overrides, records, samples])
   const scopedLedger = useMemo(() => ledger.filter((item) => isFabric1Item(item) === (teamScope === "team1")), [ledger, teamScope])
+  /**
+   * 목록에서 숨긴(REMOVED) 항목. 되살리기 화면에서만 쓴다.
+   * 채번과 통계는 위 `ledger` 를 그대로 보게 두어야 한다. 숨긴 번호까지 점유로 세면 채번이 달라진다.
+   */
+  const hiddenLedger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents, { includeRemoved: true })
+    .filter((item) => item.status === "REMOVED" && isFabric1Item(item) === (teamScope === "team1")),
+  [fabricEvents, overrides, records, samples, teamScope])
+  const hiddenCount = hiddenLedger.length
   /** 3팀 번호 순환을 전제하는 곳(폐기 라운드)이 쓰는 목록. 팀 전환과 무관하게 항상 3팀만이다. */
   const team3Ledger = useMemo(() => ledger.filter((item) => !isFabric1Item(item)), [ledger])
   useEffect(() => {
@@ -560,6 +590,7 @@ export function Warehouse() {
   // 실물 입고 확인 창의 Rack No. 입력값. 창고팀이 확인하면서 칸 번호를 같이 적는다.
   const [confirmRacks, setConfirmRacks] = useState<Record<string, string>>({})
   const [unconfirmedOnly, setUnconfirmedOnly] = useState(false)
+  const [hiddenOnly, setHiddenOnly] = useState(false)
   // 웹 등록 행만 그리드에서 직접 고친다. DD·대장에서 온 행은 여기서 수정하지 않는다.
   const [editCell, setEditCell] = useState<{ row: string; col: string } | null>(null)
   const [flEntryCheck, setFlEntryCheck] = useState<{ item: FabricLedgerItem; manualId: string; check: WarehouseFlCheck } | null>(null)
@@ -575,6 +606,8 @@ export function Warehouse() {
   // Ctrl+클릭으로 더한 영역. cellRange는 마지막에 잡은 활성 영역이다.
   const [extraCellRanges, setExtraCellRanges] = useState<{ ar: number; ac: number; fr: number; fc: number }[]>([])
   const [selectionNotice, setSelectionNotice] = useState<string | null>(null)
+  const [undoStack, setUndoStack] = useState<FabricUndoEntry[]>([])
+  const [undoing, setUndoing] = useState(false)
   const cellDragRef = useRef(false)
   const [cellMenu, setCellMenu] = useState<{ x: number; y: number } | null>(null)
   const [viewports, setViewports] = useState<Record<string, { top: number; height: number }>>({})
@@ -596,7 +629,7 @@ export function Warehouse() {
   const [stockBalance, setStockBalance] = useState("")
   const [recipient, setRecipient] = useState("")
   const [division, setDivision] = useState("")
-  const [outboundQty, setOutboundQty] = useState("")
+  const [outboundQtys, setOutboundQtys] = useState<Record<string, string>>({})
   const [outboundDate, setOutboundDate] = useState(localDateValue)
   const [disposalReason, setDisposalReason] = useState<DisposalReason | "">("")
   const [formError, setFormError] = useState("")
@@ -614,8 +647,9 @@ export function Warehouse() {
   )
   const rows = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("ko-KR")
-    return scopedLedger.filter((item) => TAB_STATUSES[tab].includes(item.status))
-      .filter((item) => !(unconfirmedOnly && tab === "WAREHOUSE") || !item.confirmedAt)
+    const base = hiddenOnly ? hiddenLedger : scopedLedger.filter((item) => TAB_STATUSES[tab].includes(item.status))
+    return base
+      .filter((item) => !(unconfirmedOnly && tab === "WAREHOUSE" && !hiddenOnly) || !item.confirmedAt)
       .filter((item) => !query || [
       item.storageNo, item.styleNo, item.flNo, item.season, item.category, item.buyer, item.owner,
       item.sample?.ledger?.seasonRaw, item.sample?.ledger?.categoryRaw, item.sample?.ledger?.originalRef,
@@ -624,7 +658,7 @@ export function Warehouse() {
       item.record?.color, item.record?.dyeing, item.record?.dueDate,
       ...item.outbound.flatMap((outbound) => [outbound.to, outbound.division]),
     ].some((value) => String(value ?? "").toLocaleLowerCase("ko-KR").includes(query)))
-  }, [scopedLedger, search, tab, unconfirmedOnly])
+  }, [hiddenLedger, hiddenOnly, scopedLedger, search, tab, unconfirmedOnly])
 
   // 원단별로 이력(소진·폐기)에 들어간 마지막 시각. 기록 시각(recordedAt)을 먼저 본다. 출고일(occurredAt)은 사람이 고른 날짜다.
   const historyEnteredAt = useMemo(() => {
@@ -682,10 +716,12 @@ export function Warehouse() {
   const fixedColumns = visibleColumns.filter((column) => COLUMN_GROUPS[0].columns.some((fixed) => fixed.id === column.id))
   const groupedColumns = visibleGroups.filter((group) => group.key !== "fixed")
   const tableWidth = GRIP_WIDTH + ACTION_WIDTH + visibleColumns.reduce((sum, column) => sum + widthOf(column), 0)
-  const ledgerByKey = useMemo(() => new Map(scopedLedger.map((item) => [item.key, item])), [scopedLedger])
+  const ledgerByKey = useMemo(() => new Map([...scopedLedger, ...hiddenLedger].map((item) => [item.key, item])), [scopedLedger, hiddenLedger])
   const outboundHistoryItem = outboundHistoryKey ? ledgerByKey.get(outboundHistoryKey) ?? null : null
   const actionItems = actionDialog?.keys.map((key) => ledgerByKey.get(key)).filter((item): item is FabricLedgerItem => Boolean(item)) ?? []
   const selectedRows = rows.filter((item) => checked.has(item.key))
+  const activeOutboundFor = (item: FabricLedgerItem) => latestActiveOutbound(fabricEvents, item.key, fabricRecordIdentity(item.record))
+  const hasSelectedActiveOutbound = selectedRows.some((item) => Boolean(activeOutboundFor(item)))
   const allRowsSelected = visibleRows.length > 0 && visibleRows.every((item) => checked.has(item.key))
   const someRowsSelected = visibleRows.some((item) => checked.has(item.key))
   const accent = TAB_ACCENT[tab]
@@ -734,6 +770,7 @@ export function Warehouse() {
   const changeTab = (next: WarehouseTab) => {
     setRackView(false)
     setDisposalView(false)
+    setHiddenOnly(false)
     setTab(next)
     setChecked(new Set())
     setColumnFilters({})
@@ -818,7 +855,7 @@ export function Warehouse() {
     setStockBalance(items[0].balance === null ? "" : String(Math.max(0, items[0].balance)))
     setRecipient("")
     setDivision("")
-    setOutboundQty("")
+    setOutboundQtys({})
     setOutboundDate(localDateValue())
     setDisposalReason("")
   }
@@ -836,6 +873,11 @@ export function Warehouse() {
   const stopAndOpen = (event: MouseEvent, kind: ActionKind, item: FabricLedgerItem) => {
     event.stopPropagation()
     openAction(kind, [item])
+  }
+
+  const rememberUndo = (entry: FabricUndoEntry) => {
+    if (!entry.eventIds.length) return
+    setUndoStack((current) => [...current, entry].slice(-50))
   }
 
   const runAction = async (withInboundMail = false) => {
@@ -867,13 +909,43 @@ export function Warehouse() {
           if (yds !== undefined && (!Number.isFinite(yds) || yds < 0)) throw new Error("입고 수량은 0 이상의 숫자로 입력하세요.")
           return yds
         })
-        await applyFabricActions(actionItems.map((item, index) => ({ fabricKey: item.key, action: "RECEIVE" as const, fromStatus: "READY" as const, toStatus: "WAREHOUSE" as const, storageNo: assigned[index], yds: parsedYds[index], note: "웹 입고 등록", recordIdentity: fabricRecordIdentity(item.record) })))
+        // 예약을 먼저 잡는다. 다른 사람이 같은 번호를 집고 있으면 여기서 갈린다.
+        // 후보는 화면이 고른 번호를 앞에 두고, 뒤에 여유분을 붙인다.
+        // 손으로 고친 번호가 남에게 잡혀 있으면 여유분에서 다른 번호가 나간다.
+        const spare = nextStorageNumbers(ledger, actionItems.length + 30, teamScope)
+          .map((value) => teamScope === "team3" ? String(value).padStart(4, "0") : String(value))
+        let claimed: string[]
+        try {
+          claimed = await claimStorageNumbers([...assigned, ...spare], actionItems.length)
+        } catch (error) {
+          throw new Error(error instanceof Error && error.message ? error.message
+            : "R&D No.를 예약하지 못했습니다. 연결을 확인한 뒤 다시 시도하세요.")
+        }
+        const changedNos = claimed.filter((value, index) => value !== assigned[index])
+        try {
+          rememberUndo(await applyFabricActions(actionItems.map((item, index) => ({ fabricKey: item.key, action: "RECEIVE" as const, fromStatus: "READY" as const, toStatus: "WAREHOUSE" as const, storageNo: claimed[index], yds: parsedYds[index], note: "웹 입고 등록", recordIdentity: fabricRecordIdentity(item.record) }))))
+        } finally {
+          // 원장에 들어갔으면 예약은 더 필요 없다. 실패했으면 번호를 다른 사람에게 돌려준다.
+          void releaseStorageNumbers(claimed)
+        }
+        if (changedNos.length) {
+          setSelectionNotice(`다른 사람이 먼저 쓴 번호가 있어 ${changedNos.join(", ")} 로 바뀌었습니다.`)
+        }
+        try {
+          await notifyTeams(buildInboundCard({
+            registrant: defaultRequester,
+            registeredDate: localDateValue(),
+            items: actionItems.map((item, index) => ({ item, storageNo: claimed[index], yds: parsedYds[index] })),
+          }))
+        } catch {
+          setSelectionNotice("입고 등록은 완료했지만 Teams 알림을 보내지 못했습니다.")
+        }
         setReceiveNos({})
         setChecked(new Set())
         setTab("WAREHOUSE")
         if (withInboundMail) setInboundMailKeys(actionItems.map((item) => item.key))
       } else if (actionDialog.kind === "UNRECEIVE") {
-        await applyFabricActions(actionItems.filter((item) => item.status === "WAREHOUSE").map((item) => ({ fabricKey: item.key, action: "UNRECEIVE" as const, fromStatus: "WAREHOUSE" as const, toStatus: "READY" as const, note: "입고 대기로 되돌림" })))
+        rememberUndo(await applyFabricActions(actionItems.filter((item) => item.status === "WAREHOUSE").map((item) => ({ fabricKey: item.key, action: "UNRECEIVE" as const, fromStatus: "WAREHOUSE" as const, toStatus: "READY" as const, note: "입고 대기로 되돌림" }))))
         setChecked(new Set())
         setTab("READY")
       } else if (actionDialog.kind === "CONFIRM") {
@@ -885,41 +957,82 @@ export function Warehouse() {
           if (rackNo === null) throw new Error(`${item.storageNo || item.styleNo || "원단"}: ${RACK_FORMAT_HINT}`)
           return { item, rackNo }
         })
-        await applyFabricActions(targets.filter((item) => item.status === "WAREHOUSE" && !item.confirmedAt).map((item) => ({ fabricKey: item.key, action: "CONFIRM" as const, fromStatus: "WAREHOUSE" as const, toStatus: "WAREHOUSE" as const, storageNo: item.storageNo, note: "창고 실물 입고 확인" })))
+        const undoEntry = await applyFabricActions(targets.filter((item) => item.status === "WAREHOUSE" && !item.confirmedAt).map((item) => ({ fabricKey: item.key, action: "CONFIRM" as const, fromStatus: "WAREHOUSE" as const, toStatus: "WAREHOUSE" as const, storageNo: item.storageNo, note: "창고 실물 입고 확인" })))
         // 확인 처리가 끝난 최신 상태 위에 한 번에 저장해야 앞 저장을 덮지 않는다.
         await saveFabricRackNos(rackEntries)
+        const latestOverrides = useAppStore.getState().fabricOverrides
+        undoEntry.overrides = undoEntry.overrides.map((change) => ({
+          ...change,
+          after: latestOverrides.find((entry) => entry.key === change.after.key)
+            ?? latestOverrides.find((entry) => change.after.recordId && entry.recordId === change.after.recordId)
+            ?? change.after,
+        }))
+        rememberUndo(undoEntry)
         setChecked(new Set())
         setConfirmChecks({})
         setConfirmRacks({})
       } else if (actionDialog.kind === "UNCONFIRM") {
-        await applyFabricActions(actionItems.filter((item) => item.status === "WAREHOUSE" && item.confirmedAt).map((item) => ({ fabricKey: item.key, action: "UNCONFIRM" as const, fromStatus: "WAREHOUSE" as const, toStatus: "WAREHOUSE" as const, storageNo: item.storageNo, note: "실물 입고 확인 취소" })))
+        rememberUndo(await applyFabricActions(actionItems.filter((item) => item.status === "WAREHOUSE" && item.confirmedAt).map((item) => ({ fabricKey: item.key, action: "UNCONFIRM" as const, fromStatus: "WAREHOUSE" as const, toStatus: "WAREHOUSE" as const, storageNo: item.storageNo, note: "실물 입고 확인 취소" }))))
         setChecked(new Set())
       } else if (actionDialog.kind === "REMOVE") {
         await removeFabricRows(actionItems.map((item) => ({ key: item.key, fromStatus: item.status })))
         setChecked(new Set())
       } else if (actionDialog.kind === "DISPOSE") {
         if (!disposalReason) throw new Error("폐기 사유를 선택하세요.")
-        await applyFabricActions(actionItems.filter((item) => item.status === "READY" || item.status === "WAREHOUSE").map((item) => ({ fabricKey: item.key, action: "DISPOSE" as const, fromStatus: item.status, toStatus: "DISPOSED" as const, storageNo: item.storageNo, reason: disposalReason, note: `폐기: ${disposalReason}` })))
+        rememberUndo(await applyFabricActions(actionItems.filter((item) => item.status === "READY" || item.status === "WAREHOUSE").map((item) => ({ fabricKey: item.key, action: "DISPOSE" as const, fromStatus: item.status, toStatus: "DISPOSED" as const, storageNo: item.storageNo, reason: disposalReason, note: `폐기: ${disposalReason}` }))))
         setChecked(new Set())
         setTab("HISTORY")
       } else if (actionDialog.kind === "STOCK") {
         const item = actionItems[0]
         const yds = Number(stockYds)
         if (!stockYds.trim() || !Number.isFinite(yds) || yds < 0) throw new Error("보유 재고를 0 이상의 숫자로 입력하세요.")
-        await applyFabricAction({ fabricKey: item.key, action: "NOTE", fromStatus: item.status, toStatus: item.status, storageNo: item.storageNo, yds, note: "보유 재고 수정" })
+        rememberUndo(await applyFabricAction({ fabricKey: item.key, action: "NOTE", fromStatus: item.status, toStatus: item.status, storageNo: item.storageNo, yds, note: "보유 재고 수정" }))
         if (yds - item.outboundTotal <= 0) setTab("HISTORY")
       } else if (actionDialog.kind === "OUTBOUND") {
-        const item = actionItems[0]
-        const qty = Number(outboundQty)
-        if (item.balance === null) throw new Error("먼저 보유 재고를 입력하세요.")
         if (!recipient.trim()) throw new Error("수령자를 입력하세요.")
-        if (!Number.isFinite(qty) || qty <= 0) throw new Error("출고 수량을 0보다 큰 숫자로 입력하세요.")
-        if (qty > item.balance) throw new Error(`현재 잔량 ${formatYds(item.balance)} yds를 초과할 수 없습니다.`)
         if (!outboundDate) throw new Error("출고 날짜를 선택하세요.")
-        await applyFabricAction({ fabricKey: item.key, action: "OUTBOUND", fromStatus: "WAREHOUSE", toStatus: "WAREHOUSE", storageNo: item.storageNo, qty, to: recipient, division, date: outboundDate, note: "출고 등록", autoExhaust: exhaustOnZero })
-        if (qty >= item.balance) setTab("HISTORY")
+        const confirmed = actionItems.map((item) => {
+          const label = `R&D No. ${item.storageNo || "미지정"}`
+          const qty = Number(outboundQtys[item.key]?.trim() ?? "")
+          if (item.balance === null) throw new Error(`${label}: 먼저 보유 재고를 입력하세요.`)
+          if (!Number.isFinite(qty) || qty <= 0) throw new Error(`${label}: 출고 수량을 0보다 큰 숫자로 입력하세요.`)
+          if (qty > item.balance) throw new Error(`${label}: 현재 잔량 ${formatYds(item.balance)} yds를 초과할 수 없습니다.`)
+          return { item, qty, balanceAfter: item.balance - qty }
+        })
+        rememberUndo(await applyFabricActions(confirmed.map(({ item, qty }) => ({ fabricKey: item.key, action: "OUTBOUND" as const, fromStatus: "WAREHOUSE" as const, toStatus: "WAREHOUSE" as const, storageNo: item.storageNo, qty, to: recipient, division, date: outboundDate, note: "출고 등록", autoExhaust: exhaustOnZero }))))
+        try {
+          await notifyTeams(buildOutboundConfirmCard({ to: recipient.trim(), division, date: outboundDate, items: confirmed }))
+        } catch {
+          setSelectionNotice("출고는 확정했지만 Teams 알림을 보내지 못했습니다.")
+        }
+        if (confirmed.every(({ balanceAfter }) => balanceAfter <= 0)) setTab("HISTORY")
+      } else if (actionDialog.kind === "UNOUTBOUND") {
+        const canceled = actionItems.flatMap((item) => {
+          const outbound = activeOutboundFor(item)
+          return outbound && typeof outbound.qty === "number" ? [{ item, outbound }] : []
+        })
+        if (!canceled.length) throw new Error("취소할 출고가 없습니다.")
+        rememberUndo(await applyFabricActions(canceled.map(({ item, outbound }) => ({
+          fabricKey: item.key,
+          action: "UNOUTBOUND" as const,
+          fromStatus: item.status,
+          toStatus: item.status === "EXHAUSTED" ? "WAREHOUSE" as const : item.status,
+          storageNo: item.storageNo,
+          targetEventId: outbound.id,
+          note: "출고 취소",
+        }))))
+        try {
+          await notifyTeams(buildOutboundCancelCard({
+            canceler: defaultRequester,
+            canceledDate: localDateValue(),
+            items: canceled.map(({ item, outbound }) => ({ item, qty: outbound.qty!, outboundDate: outbound.occurredAt.slice(0, 10) })),
+          }))
+        } catch {
+          setSelectionNotice("출고는 취소했지만 Teams 알림을 보내지 못했습니다.")
+        }
+        setChecked(new Set())
       } else if (actionDialog.kind === "EXHAUST") {
-        await applyFabricActions(actionItems.filter((item) => item.status === "WAREHOUSE").map((item) => ({ fabricKey: item.key, action: "EXHAUST" as const, fromStatus: item.status, toStatus: "EXHAUSTED" as const, storageNo: item.storageNo, note: "수동 소진 완료" })))
+        rememberUndo(await applyFabricActions(actionItems.filter((item) => item.status === "WAREHOUSE").map((item) => ({ fabricKey: item.key, action: "EXHAUST" as const, fromStatus: item.status, toStatus: "EXHAUSTED" as const, storageNo: item.storageNo, note: "수동 소진 완료" }))))
         setChecked(new Set())
         setTab("HISTORY")
       } else {
@@ -939,7 +1052,7 @@ export function Warehouse() {
             note: restoreStatus === "READY" ? "입고 대기로 되돌림" : "창고 보관으로 되돌림",
           })
         }
-        await applyFabricActions(restoreInputs)
+        rememberUndo(await applyFabricActions(restoreInputs))
         setChecked(new Set())
         setTab(restoreStatus)
       }
@@ -1070,7 +1183,8 @@ export function Warehouse() {
     : actionDialog?.kind === "DISPOSE" ? "선택 폐기"
       : actionDialog?.kind === "REMOVE" ? "선택 삭제"
         : actionDialog?.kind === "STOCK" ? "보유 재고 수정"
-        : actionDialog?.kind === "OUTBOUND" ? "출고 등록"
+        : actionDialog?.kind === "OUTBOUND" ? "출고 확정"
+          : actionDialog?.kind === "UNOUTBOUND" ? "출고 취소"
           : actionDialog?.kind === "EXHAUST" ? "소진 완료"
             : "상태 복구"
 
@@ -1097,13 +1211,134 @@ export function Warehouse() {
 
   const totalCount = tabOrder.reduce((sum, key) => sum + counts[key], 0)
 
+  const undoLastWarehouseAction = async () => {
+    const entry = undoStack[undoStack.length - 1]
+    if (!entry || undoing) return
+    setUndoing(true)
+    setUndoStack((current) => current.slice(0, -1))
+    const beforeState = useAppStore.getState()
+    const outboundEvents = entry.kind === "OUTBOUND"
+      ? entry.eventIds.map((id) => beforeState.fabricEvents.find((event) => event.id === id))
+        .filter((event) => event?.action === "OUTBOUND" && typeof event.qty === "number")
+      : []
+    const beforeLedger = buildFabricLedger(beforeState.records, beforeState.completed, beforeState.fabricOverrides, beforeState.fabricEvents, { includeRemoved: true })
+    try {
+      const result = await undoFabricEntry(entry)
+      const skipped = result.conflicted ? ` 다른 작업과 겹친 ${result.conflicted}건은 건너뛰었습니다.` : ""
+      let notice = `되돌리기 ${result.applied}건을 적용했습니다.${skipped}`
+      if (entry.kind === "RECEIVE" && result.applied) {
+        notice += " Teams 알림은 이미 나갔습니다. 필요하면 채널에 따로 알려 주십시오."
+      }
+      if (entry.kind === "OUTBOUND" && result.applied) {
+        const remainingIds = new Set(useAppStore.getState().fabricEvents.map((event) => event.id))
+        const canceled = outboundEvents.flatMap((event) => {
+          if (!event || remainingIds.has(event.id) || typeof event.qty !== "number") return []
+          const item = beforeLedger.find((candidate) => event.recordId && fabricRecordIdentity(candidate.record)
+            ? fabricRecordIdentity(candidate.record) === event.recordId
+            : candidate.key === event.fabricKey)
+          return item ? [{ item, qty: event.qty, outboundDate: event.occurredAt.slice(0, 10) }] : []
+        })
+        if (canceled.length) {
+          try {
+            await notifyTeams(buildOutboundCancelCard({ canceler: defaultRequester, canceledDate: localDateValue(), items: canceled }))
+          } catch {
+            notice += " 출고는 되돌렸지만 Teams 알림을 보내지 못했습니다."
+          }
+        }
+      }
+      setSelectionNotice(notice)
+    } catch {
+      setUndoStack((current) => [...current, entry].slice(-50))
+      setSelectionNotice("되돌리기에 실패했습니다.")
+    } finally {
+      setUndoing(false)
+    }
+  }
+
+  /**
+   * 숨긴 행을 감추기 직전 상태로 되돌린다.
+   * 목표 상태는 그 행의 마지막 REMOVE 기록의 `fromStatus` 다. 창고보관에서 감춘 건은
+   * 번호를 지킨 채 창고보관으로 돌아가고, 입고대기에서 감춘 건은 입고대기로 돌아간다.
+   */
+  const restoreHiddenRows = async () => {
+    if (!selectedRows.length || saving) return
+    setSaving(true)
+    try {
+      const recordIdOf = (item: FabricLedgerItem) => fabricRecordIdentity(item.record)
+      const inputs: ApplyFabricActionInput[] = selectedRows.map((item) => {
+        const recordId = recordIdOf(item)
+        const removal = [...fabricEvents]
+          .filter((event) => event.action === "REMOVE"
+            && (recordId && event.recordId ? event.recordId === recordId : event.fabricKey === item.key))
+          .sort((left, right) => (left.recordedAt ?? left.occurredAt).localeCompare(right.recordedAt ?? right.occurredAt))
+          .at(-1)
+        const target = removal?.fromStatus === "WAREHOUSE" ? "WAREHOUSE" as const : "READY" as const
+        return {
+          fabricKey: item.key, action: "RESTORE" as const,
+          fromStatus: "REMOVED" as const, toStatus: target,
+          storageNo: target === "WAREHOUSE" ? item.storageNo : undefined,
+          note: "목록 숨김 해제",
+        }
+      })
+      rememberUndo(await applyFabricActions(inputs))
+      setSelectionNotice(`${inputs.length}건을 목록으로 되돌렸습니다.`)
+      if (hiddenCount - inputs.length <= 0) setHiddenOnly(false)
+    } catch {
+      setSelectionNotice("되살리기에 실패했습니다.")
+    } finally { setSaving(false) }
+  }
+
+  /**
+   * R&D No.를 고친다. 채번 기록이라 검사를 통과한 값만 저장하고 이력을 남긴다.
+   * 저장은 applyFabricActions 를 지난다. 그래야 rackNo 같은 다른 값이 함께 물려가고
+   * Ctrl+Z 되돌리기와 작업 이력이 같이 걸린다. 오버라이드를 직접 만들지 마라.
+   */
+  const commitStorageNo = async (item: FabricLedgerItem, raw: string) => {
+    const value = raw.trim()
+    const before = item.storageNo.trim()
+    if (!value || value === before) return
+    const number = Number(value)
+    const okTeam3 = /^\d{1,4}$/.test(value) && Number.isInteger(number) && number >= 1 && number <= STORAGE_NO_MAX
+    const okTeam1 = /^\d{4,5}$/.test(value) && Number.isInteger(number) && number >= FABRIC1_STORAGE_NO_MIN
+    if (teamScope === "team1" ? !okTeam1 : !okTeam3) {
+      setSelectionNotice(teamScope === "team1"
+        ? `R&D No. 는 ${FABRIC1_STORAGE_NO_MIN} 이상이어야 합니다.`
+        : `R&D No. 는 1부터 ${STORAGE_NO_MAX} 사이여야 합니다. 8000번대는 1팀 대역입니다.`)
+      return
+    }
+    const next = teamScope === "team3" ? value.padStart(4, "0") : value
+    const scoped = ledger.filter((other) => other.key !== item.key && isFabric1Item(other) === (teamScope === "team1"))
+    if (occupiedStorageNumbers(scoped).has(number)) {
+      setSelectionNotice(`R&D No. ${value} 는 이미 창고에 있습니다.`)
+      return
+    }
+    try {
+      rememberUndo(await applyFabricActions([{
+        fabricKey: item.key, action: "NOTE",
+        fromStatus: item.status, toStatus: item.status,
+        storageNo: next,
+        note: `R&D No. ${before || "없음"} → ${next}`,
+      }]))
+      setSelectionNotice(`R&D No. 를 ${next} 로 바꿨습니다. 되돌리려면 Ctrl+Z 입니다.`)
+    } catch {
+      setSelectionNotice("R&D No. 를 바꾸지 못했습니다.")
+    }
+  }
+
   useEffect(() => {
     const stop = () => { cellDragRef.current = false }
     const onCopy = (event: globalThis.KeyboardEvent) => {
       const active = document.activeElement
       if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) return
+      if (active instanceof HTMLElement && active.isContentEditable) return
       // 팝업 창 안의 키는 표에 넘기지 않는다(다른 창에서 글자를 지우다 rack 번호가 지워지지 않게).
       if (active instanceof HTMLElement && active.closest("[role=dialog]")) return
+      if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === "z") {
+        if (!canEditScope || !undoStack.length || document.querySelector("[role=dialog]")) return
+        event.preventDefault()
+        void undoLastWarehouseAction()
+        return
+      }
       // Delete·Backspace: 창고보관 탭에서 선택 영역이 걸친 Rack No. 칸을 지운다. Ctrl+클릭으로 더한 영역도 포함한다.
       if (canEditScope && (event.key === "Delete" || event.key === "Backspace") && tab === "WAREHOUSE" && allRangeRects.length) {
         const rackCol = visibleColumns.findIndex((column) => column.id === "rackNo")
@@ -1371,7 +1606,10 @@ export function Warehouse() {
                     const manualId = canEditScope && item.sample?.sourceSheet === WEB_INTAKE_SHEET ? item.sample.id : undefined
                     // Rack No.는 대장 행이든 DD 행이든 창고보관 원단이면 모두 편집한다(원단별 상태에만 저장).
                     const rackEditable = canEditScope && column.id === "rackNo" && item.status === "WAREHOUSE"
-                    const editable = rackEditable || (Boolean(manualId) && MANUAL_EDITABLE.has(column.id))
+                    // R&D No.는 채번 기록이라 창고보관 상태에서만, 편집 권한이 있을 때만 고친다.
+                    // 소진·폐기로 넘어간 건은 고치지 않는다. 지난 출고 자료와 어긋난다.
+                    const storageEditable = canEditScope && column.id === "storageNo" && item.status === "WAREHOUSE"
+                    const editable = rackEditable || storageEditable || (Boolean(manualId) && MANUAL_EDITABLE.has(column.id))
                     const editing = editable && editCell?.row === item.key && editCell.col === column.id
                     return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; if (event.ctrlKey || event.metaKey) { if (cellRange) setExtraCellRanges((current) => [...current, cellRange]) } else setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) { setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }) } setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (canEditScope && column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
                       ? <input
@@ -1380,6 +1618,11 @@ export function Warehouse() {
                           className="h-7 w-full rounded-none border-0 bg-[var(--card)] px-1 text-xs text-[var(--foreground)] outline-none ring-2 ring-inset ring-[var(--ring)]"
                           list={rackEditable ? "warehouse-rack-positions" : undefined}
                           onBlur={(event) => {
+                            if (storageEditable) {
+                              void commitStorageNo(item, event.target.value)
+                              setEditCell(null)
+                              return
+                            }
                             if (rackEditable) {
                               // 형식이 틀리면 저장하지 않고 알린다. 빈 값은 지정 해제다.
                               const normalized = normalizeRackNo(event.target.value)
@@ -1497,24 +1740,39 @@ export function Warehouse() {
       <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2">
         <label className="relative block min-w-52 flex-1"><span className="sr-only">창고 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="R&D No., Style, FL, Buyer 검색" className="pl-9" /></label>
         <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{TAB_META[tab].label} <strong className="text-[var(--foreground)]">{rows.length.toLocaleString("ko-KR")}</strong>건 · 선택 {selectedRows.length}건</span>
-        {tab === "READY" && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RECEIVE", selectedRows)}><PackageCheck />선택 입고</Button> : null}
-        {tab === "READY" && canEditScope ? <Button type="button" size="sm" variant="outline" onClick={async () => { await addManualIntake(); setTab("READY"); setUnconfirmedOnly(false); setSearch("") }}><Pencil />직접 추가</Button> : null}
-        {tab === "READY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("REMOVE", selectedRows)}><ListX />선택 삭제</Button> : null}
-        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("CONFIRM", selectedRows)} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-600/40 dark:bg-emerald-500 dark:hover:bg-emerald-600"><PackageCheck />입고 확인</Button> : null}
-        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.some((item) => item.confirmedAt)} title={selectedRows.some((item) => item.confirmedAt) ? "선택한 원단의 실물 확인 표시를 지웁니다" : "확인된 원단을 먼저 선택하세요."} onClick={() => openAction("UNCONFIRM", selectedRows)}><PackageX />입고 확인 취소</Button> : null}
-        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" disabled={selectedRows.length !== 1} title={selectedRows.length === 1 ? undefined : "출고는 한 건씩 등록합니다."} onClick={() => openAction("OUTBOUND", selectedRows)}><Send />출고</Button> : null}
-        {tab === "WAREHOUSE" && canRequestOutbound ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} title={selectedRows.length ? "선택한 원단의 컷팅·출고 요청 메일 초안을 만듭니다" : "요청할 원단을 먼저 선택하세요."} onClick={() => setOutboundMailOpen(true)}><Mail />출고 요청 메일</Button> : null}
-        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("EXHAUST", selectedRows)}><PackageOpen />소진</Button> : null}
-        {(tab === "READY" || tab === "WAREHOUSE") && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("DISPOSE", selectedRows)}><Trash2 />폐기</Button> : null}
-        {tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("UNRECEIVE", selectedRows)}><PackageOpen />입고 대기로</Button> : null}
+        {tab === "READY" && !hiddenOnly && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RECEIVE", selectedRows)}><PackageCheck />선택 입고</Button> : null}
+        {tab === "READY" && !hiddenOnly && canEditScope ? <Button type="button" size="sm" variant="outline" onClick={async () => { await addManualIntake(); setTab("READY"); setUnconfirmedOnly(false); setSearch("") }}><Pencil />직접 추가</Button> : null}
+        {tab === "READY" && !hiddenOnly && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("REMOVE", selectedRows)}><ListX />선택 삭제</Button> : null}
+        {tab === "WAREHOUSE" && canEditScope ? <div className="flex shrink-0 items-center gap-2">
+          <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("CONFIRM", selectedRows)} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-600/40 dark:bg-emerald-500 dark:hover:bg-emerald-600"><PackageCheck />입고 확인</Button>
+          <Button type="button" size="sm" variant="outline" disabled={!selectedRows.some((item) => item.confirmedAt)} title={selectedRows.some((item) => item.confirmedAt) ? "선택한 원단의 실물 확인 표시를 지웁니다" : "확인된 원단을 먼저 선택하세요."} onClick={() => openAction("UNCONFIRM", selectedRows)}><PackageX />입고 확인 취소</Button>
+        </div> : null}
+        {tab === "WAREHOUSE" && canEditScope ? <span aria-hidden="true" className="h-5 w-px shrink-0 bg-[var(--border)]" /> : null}
+        {tab === "WAREHOUSE" && canRequestOutbound ? <div className="flex shrink-0 items-center gap-2">
+          <Button type="button" size="sm" disabled={!selectedRows.length} className="bg-sky-600 text-white hover:bg-sky-700 disabled:bg-sky-600/40 dark:bg-sky-500 dark:hover:bg-sky-600" title={selectedRows.length ? "선택한 원단의 출고를 창고팀에 요청합니다" : "요청할 원단을 먼저 선택하세요."} onClick={() => setOutboundMailOpen(true)}><Mail />출고 요청</Button>
+        </div> : null}
+        {tab === "WAREHOUSE" && canEditScope && canRequestOutbound ? <span aria-hidden="true" className="h-5 w-px shrink-0 bg-[var(--border)]" /> : null}
+        {tab === "WAREHOUSE" && canEditScope ? <div className="flex shrink-0 items-center gap-2">
+          <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} className="border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200 dark:hover:bg-amber-500/20" title={selectedRows.length ? "창고팀에서 커팅을 마친 후 누르세요" : "출고할 원단을 먼저 선택하세요."} onClick={() => openAction("OUTBOUND", selectedRows)}><Send />출고 확정</Button>
+          <Button type="button" size="sm" variant="outline" disabled={!hasSelectedActiveOutbound} title={hasSelectedActiveOutbound ? "선택한 원단의 최근 출고를 취소합니다" : "취소할 출고가 있는 원단을 선택하세요."} onClick={() => openAction("UNOUTBOUND", selectedRows)}><PackageX />출고 취소</Button>
+        </div> : null}
+        {tab === "WAREHOUSE" && canEditScope ? <span aria-hidden="true" className="h-5 w-px shrink-0 bg-[var(--border)]" /> : null}
+        {(tab === "READY" || tab === "WAREHOUSE") && canEditScope ? <div className="flex shrink-0 items-center gap-2">
+          {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("EXHAUST", selectedRows)}><PackageOpen />소진</Button> : null}
+          <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("DISPOSE", selectedRows)}><Trash2 />폐기</Button>
+          {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("UNRECEIVE", selectedRows)}><PackageOpen />입고 대기로</Button> : null}
+          {tab === "WAREHOUSE" && unconfirmedCount > 0 ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setBaselineOpen(true)}>전체 확인 처리</Button> : null}
+        </div> : null}
         {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "WAREHOUSE")}><PackageCheck />창고 보관으로</Button> : null}
         {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "READY")}><PackageOpen />입고 대기로</Button> : null}
-        {tab === "WAREHOUSE" && canEditScope && unconfirmedCount > 0 ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setBaselineOpen(true)}>전체 확인 처리</Button> : null}
+        {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!hasSelectedActiveOutbound} title={hasSelectedActiveOutbound ? "선택한 원단의 최근 출고를 취소합니다" : "취소할 출고가 있는 원단을 선택하세요."} onClick={() => openAction("UNOUTBOUND", selectedRows)}><PackageX />출고 취소</Button> : null}
         {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant={unconfirmedOnly ? "default" : "outline"} aria-pressed={unconfirmedOnly} onClick={() => setUnconfirmedOnly((current) => !current)}>미확인 {unconfirmedCount}건</Button> : null}
+        {tab === "READY" && hiddenCount > 0 ? <Button type="button" size="sm" variant={hiddenOnly ? "default" : "outline"} aria-pressed={hiddenOnly} title="선택 삭제로 목록에서 감춘 행입니다" onClick={() => setHiddenOnly((current) => !current)}>숨긴 행 {hiddenCount}건</Button> : null}
+        {hiddenOnly && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => void restoreHiddenRows()}><PackageCheck />되살리기</Button> : null}
       </div>
 
-      {renderGrid(tab, visibleRows, `${TAB_META[tab].label} 항목이 없습니다.`)}
-      <div className="shrink-0 border-t border-[var(--border)] px-3 py-2 text-xs text-[var(--muted-foreground)]">체크박스로 여러 건을 고른 뒤 위 버튼으로 처리합니다. · {TAB_META[tab].description}</div>
+      {renderGrid(tab, visibleRows, hiddenOnly ? "숨긴 행이 없습니다." : `${TAB_META[tab].label} 항목이 없습니다.`)}
+      <div className="shrink-0 border-t border-[var(--border)] px-3 py-2 text-xs text-[var(--muted-foreground)]">{hiddenOnly ? "선택 삭제로 감춘 행입니다. 골라서 되살리면 감추기 직전 상태로 돌아갑니다." : `체크박스로 여러 건을 고른 뒤 위 버튼으로 처리합니다. · ${TAB_META[tab].description} 창고보관 탭에서는 R&D No. 칸을 더블클릭해 번호를 고칠 수 있습니다.`}</div>
     </div>}
 
     {selectionStats || selectionNotice ? <div role="status" className="pointer-events-none fixed bottom-4 right-6 z-[75] flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--muted-foreground)] shadow-md">
@@ -1642,9 +1900,9 @@ export function Warehouse() {
 
     <Dialog open={Boolean(actionDialog)} onOpenChange={(open) => { if (!open && !saving) closeActionDialog() }}>
       <DialogContent className="max-w-xl">
-        <DialogHeader><DialogTitle>{actionTitle}</DialogTitle><DialogDescription>{actionItems.length === 1 ? `${actionItems[0]?.storageNo || "자동 채번"} · ${actionItems[0]?.styleNo || actionItems[0]?.flNo || "원단"}` : `선택한 ${actionItems.length}건을 처리합니다.`}</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>{actionTitle}</DialogTitle><DialogDescription>{actionDialog?.kind === "UNOUTBOUND" ? "원단마다 가장 최근 출고 한 건을 취소합니다. 잔량이 돌아오고, 소진된 원단은 창고 보관으로 돌아갑니다. 출고 기록은 지우지 않고 취소 기록을 덧붙입니다." : actionItems.length === 1 ? `${actionItems[0]?.storageNo || "자동 채번"} · ${actionItems[0]?.styleNo || actionItems[0]?.flNo || "원단"}` : `선택한 ${actionItems.length}건을 처리합니다.`}</DialogDescription></DialogHeader>
         <DialogBody className="space-y-4">
-          {actionDialog?.kind === "RECEIVE" ? <div className="space-y-2"><p className="text-xs text-[var(--muted-foreground)]">창고에 없는 가장 낮은 번호부터 채웁니다. 8000번대는 타 사업부 대역이라 쓰지 않습니다. 번호는 직접 고칠 수 있고 yds는 비워 두어도 됩니다.</p>{actionItems.map((item, index) => <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_9rem] items-end gap-3 rounded-[var(--radius)] border border-[var(--border)] p-3"><div className="min-w-0"><div className="flex items-center gap-2"><Input aria-label={`${item.styleNo || item.flNo || "원단"} R&D No.`} className="h-8 w-20 font-mono text-sm" value={storageNoFor(index)} onChange={(event) => setReceiveNos((current) => ({ ...current, [item.key]: event.target.value }))} /><span className="truncate text-sm font-medium">{item.styleNo || item.flNo || "미입력"}</span></div><p className="mt-1 truncate text-xs text-[var(--muted-foreground)]">{item.flNo || "FL No. 없음"}</p></div><div className="space-y-1"><Label htmlFor={`receive-yds-${index}`} className="text-xs">보유 yds (옵션)</Label><Input id={`receive-yds-${index}`} type="number" min="0" step="0.01" value={receiveYds[item.key] ?? ""} onChange={(event) => setReceiveYds((current) => ({ ...current, [item.key]: event.target.value }))} /></div></div>)}</div> : null}
+          {actionDialog?.kind === "RECEIVE" ? <div className="space-y-2"><p className="text-xs text-[var(--muted-foreground)]">빠진 번호를 먼저 메우고 마지막 번호 다음으로 이어 갑니다. 이력으로 간 번호는 다시 씁니다. 8000번대는 타 사업부 대역이라 쓰지 않습니다. 번호는 직접 고칠 수 있고 yds는 비워 두어도 됩니다.</p>{actionItems.map((item, index) => <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_9rem] items-end gap-3 rounded-[var(--radius)] border border-[var(--border)] p-3"><div className="min-w-0"><div className="flex items-center gap-2"><Input aria-label={`${item.styleNo || item.flNo || "원단"} R&D No.`} className="h-8 w-20 font-mono text-sm" value={storageNoFor(index)} onChange={(event) => setReceiveNos((current) => ({ ...current, [item.key]: event.target.value }))} /><span className="truncate text-sm font-medium">{item.styleNo || item.flNo || "미입력"}</span></div><p className="mt-1 truncate text-xs text-[var(--muted-foreground)]">{item.flNo || "FL No. 없음"}</p></div><div className="space-y-1"><Label htmlFor={`receive-yds-${index}`} className="text-xs">보유 yds (옵션)</Label><Input id={`receive-yds-${index}`} type="number" min="0" step="0.01" value={receiveYds[item.key] ?? ""} onChange={(event) => setReceiveYds((current) => ({ ...current, [item.key]: event.target.value }))} /></div></div>)}</div> : null}
           {actionDialog?.kind === "UNRECEIVE" ? <p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건을 입고 대기로 되돌립니다. <strong>채번한 R&D No.가 취소되고 그 번호는 다시 쓸 수 있게 풀립니다.</strong> 실물 확인 표시와 보유 재고도 함께 지워지고, 출고 합계는 0부터 다시 셉니다. 지난 기록은 원단 상세의 이력에 그대로 남습니다.</p> : null}
           {actionDialog?.kind === "UNCONFIRM" ? <p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.filter((item) => item.confirmedAt).length}건의 <strong>실물 확인 표시만 지웁니다.</strong> R&D No., 보유 재고, 출고 기록은 그대로 둡니다. 확인이 안 된 건은 건너뜁니다. 취소 기록은 원단 상세의 이력에 남습니다.</p> : null}
           {actionDialog?.kind === "CONFIRM" ? <div className="space-y-2">
@@ -1711,12 +1969,30 @@ export function Warehouse() {
               <p className="text-xs text-[var(--muted-foreground)]">둘 중 아무 칸이나 고치면 나머지가 따라 바뀝니다. 잔량은 전체 수량에서 출고 합계 {formatYds(outboundTotal)} yds를 뺀 값입니다. 출고 이력은 그대로 두고 수량만 고칩니다.</p>
             </div>
           })() : null}
-          {actionDialog?.kind === "OUTBOUND" ? <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="warehouse-recipient">수령자</Label><Input id="warehouse-recipient" value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="수령자를 자유롭게 입력" /></div><div className="space-y-2"><Label htmlFor="warehouse-division">사업부 (옵션)</Label><Input id="warehouse-division" list="warehouse-division-suggestions" value={division} onChange={(event) => setDivision(event.target.value)} placeholder="사업부를 자유롭게 입력" /><datalist id="warehouse-division-suggestions">{divisionSuggestions.map((value) => <option key={value} value={value} />)}</datalist></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-qty">수량 (yds)</Label><Input id="warehouse-outbound-qty" type="number" min="0.01" max={actionItems[0]?.balance ?? undefined} step="0.01" value={outboundQty} onChange={(event) => setOutboundQty(event.target.value)} /></div><div className="space-y-2"><Label htmlFor="warehouse-outbound-date">출고 날짜</Label><Input id="warehouse-outbound-date" type="date" value={outboundDate} onChange={(event) => setOutboundDate(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><p className="text-xs text-[var(--muted-foreground)]">현재 잔량 {actionItems[0]?.balance === null ? "미기입" : `${formatYds(actionItems[0]?.balance ?? 0)} yds`}</p><label className="flex items-center gap-2 text-xs"><Checkbox checked={exhaustOnZero} onCheckedChange={(value) => setExhaustOnZero(value === true)} aria-label="잔량 0이면 소진 완료" /><span>출고 후 잔량이 0이 되면 소진 완료로 옮깁니다. 체크를 풀면 창고 보관에 남습니다.</span></label></div></div> : null}
+          {actionDialog?.kind === "OUTBOUND" ? <div className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2"><Label htmlFor="warehouse-recipient">수령자</Label><Input id="warehouse-recipient" value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="수령자를 자유롭게 입력" /></div>
+              <div className="space-y-2"><Label htmlFor="warehouse-division">사업부 (옵션)</Label><Input id="warehouse-division" list="warehouse-division-suggestions" value={division} onChange={(event) => setDivision(event.target.value)} placeholder="사업부를 자유롭게 입력" /><datalist id="warehouse-division-suggestions">{divisionSuggestions.map((value) => <option key={value} value={value} />)}</datalist></div>
+              <div className="space-y-2"><Label htmlFor="warehouse-outbound-date">출고 날짜</Label><Input id="warehouse-outbound-date" type="date" value={outboundDate} onChange={(event) => setOutboundDate(event.target.value)} /></div>
+              <div className="flex items-end pb-2"><label className="flex items-center gap-2 text-xs"><Checkbox checked={exhaustOnZero} onCheckedChange={(value) => setExhaustOnZero(value === true)} aria-label="잔량 0이면 소진 완료" /><span>잔량 0이면 소진 완료로 이동</span></label></div>
+            </div>
+            <div className="space-y-2">{actionItems.map((item, index) => <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_9rem] items-end gap-3 rounded-[var(--radius)] border border-[var(--border)] p-3">
+              <div className="min-w-0"><div className="flex items-center gap-2"><span className="font-mono text-sm">{item.storageNo || "번호 없음"}</span><span className="truncate text-sm font-medium">{item.styleNo || item.flNo || "미입력"}</span></div><p className="mt-1 truncate text-xs text-[var(--muted-foreground)]">FL {item.flNo || "No. 없음"} · 현재 잔량 {item.balance === null ? "미기입" : `${formatYds(item.balance)} yds`}</p></div>
+              <div className="space-y-1"><Label htmlFor={`warehouse-outbound-qty-${index}`} className="text-xs">출고 수량 (yds)</Label><Input id={`warehouse-outbound-qty-${index}`} type="number" min="0.01" max={item.balance ?? undefined} step="0.01" value={outboundQtys[item.key] ?? ""} onChange={(event) => setOutboundQtys((current) => ({ ...current, [item.key]: event.target.value }))} /></div>
+            </div>)}</div>
+          </div> : null}
+          {actionDialog?.kind === "UNOUTBOUND" ? <div className="max-h-72 space-y-2 overflow-y-auto">{actionItems.map((item) => {
+            const outbound = activeOutboundFor(item)
+            return <div key={item.key} className={`rounded-[var(--radius)] border border-[var(--border)] px-3 py-2 ${outbound ? "" : "opacity-50"}`}>
+              <div className="flex items-center justify-between gap-3"><span className="font-mono text-sm">{item.storageNo || "번호 없음"}</span><span className="truncate text-sm font-medium">{item.styleNo || item.flNo || "미입력"}</span></div>
+              {outbound ? <p className="mt-1 text-xs text-[var(--muted-foreground)]">출고일 {fmtDateFull(outbound.occurredAt)}　받는 곳 {outbound.to || "미입력"}　수량 {formatYds(outbound.qty ?? 0)} yds</p> : <p className="mt-1 text-xs text-[var(--muted-foreground)]">취소할 출고 없음</p>}
+            </div>
+          })}</div> : null}
           {actionDialog?.kind === "EXHAUST" ? <p className="text-sm">재고 수량과 관계없이 이 원단을 소진 완료로 이동합니다.</p> : null}
           {actionDialog?.kind === "RESTORE" ? <p className="text-sm">{actionItems[0]?.status === "EXHAUSTED" ? "창고 보관 상태로 복구합니다." : "폐기 전 상태로 복구합니다."}</p> : null}
           {formError ? <p role="alert" className="text-sm text-[var(--destructive)]">{formError}</p> : null}
         </DialogBody>
-        <DialogFooter><Button type="button" variant="outline" disabled={saving} onClick={closeActionDialog}>취소</Button>{actionDialog?.kind === "RECEIVE" ? <Button type="button" variant="outline" disabled={saving} title="입고 등록을 마친 뒤 정산관리팀 입고 요청 메일 창을 엽니다" onClick={() => void runAction(true)}><Mail />입고 등록 후 요청 메일</Button> : null}<Button type="button" variant={actionDialog?.kind === "DISPOSE" || actionDialog?.kind === "REMOVE" ? "destructive" : "default"} disabled={saving} onClick={() => void runAction()}>{saving ? "처리 중…" : "처리 확정"}</Button></DialogFooter>
+        <DialogFooter><Button type="button" variant="outline" disabled={saving} onClick={closeActionDialog}>취소</Button>{actionDialog?.kind === "RECEIVE" ? <Button type="button" variant="outline" disabled={saving} title="입고 등록을 마친 뒤 정산관리팀 입고 요청 메일 창을 엽니다" onClick={() => void runAction(true)}><Mail />입고 등록 후 요청 메일</Button> : null}<Button type="button" variant={actionDialog?.kind === "DISPOSE" || actionDialog?.kind === "REMOVE" ? "destructive" : "default"} disabled={saving || (actionDialog?.kind === "UNOUTBOUND" && !actionItems.some((item) => Boolean(activeOutboundFor(item))))} onClick={() => void runAction()}>{saving ? "처리 중…" : "처리 확정"}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   </section>

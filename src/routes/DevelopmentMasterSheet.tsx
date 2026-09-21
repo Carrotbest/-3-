@@ -1064,7 +1064,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const saveState = useAppStore((state) => state.recordsSaveState)
   const samples = useAppStore((state) => state.completed)
   const overrides = useAppStore((state) => state.fabricOverrides)
-  const ledger = useMemo(() => buildFabricLedger(records, samples, overrides), [overrides, records, samples])
+  // 숨긴 항목까지 받는다. 빼면 창고에서 감춘 행이 DD 에서 '미연결'로 보여
+  // 사람이 원인을 알 방법이 없다. '삭제됨'으로 보여야 창고에서 되살리면 된다는 것을 안다.
+  const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, [], { includeRemoved: true }), [overrides, records, samples])
   const ledgerByRecord = useMemo(() => new Map(ledger.flatMap((item) => item.record ? [[recordIdentity(item.record), item] as const] : [])), [ledger])
   // 펼침/접힘은 개인 브라우저에 남는다. 팀원 화면에는 영향을 주지 않는다.
   // 전체 미리보기 안내 말풍선. 담당 카드 아래에 떠올랐다가 1초 뒤 서서히 사라진다.
