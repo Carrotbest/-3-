@@ -7,7 +7,7 @@ import { recalculateDevelopmentRecords } from "../data/dd-workflow"
 import { buildFabricLedger, canceledOutboundIds, fabricRecordIdIndex, fabricRecordIdOf, fabricRecordIdentity, isFabricBalanceExhausted, type FabricLedgerItem } from "../data/fabric-ledger"
 import type { DisposalCompletionEntry } from "@/data/disposal-round"
 import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type DisposalRound, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type RequestArchive, type RequestBoard, type RequestStyle, type StudyRecord } from "../data/schema"
-import { WEB_INTAKE_SHEET } from "@/data/schema"
+import { FABRIC1_INTAKE_SHEET, WEB_INTAKE_SHEET } from "@/data/schema"
 import {
   sampleCompleted,
   sampleChemicalPortfolio,
@@ -753,7 +753,7 @@ export async function updateManualIntake(id: string, columnId: string, raw: stri
   const state = useAppStore.getState()
   const value = raw.trim()
   const completed = state.completed.map((sample) => {
-    if (sample.id !== id || sample.sourceSheet !== WEB_INTAKE_SHEET) return sample
+    if (sample.id !== id || (sample.sourceSheet !== WEB_INTAKE_SHEET && sample.sourceSheet !== FABRIC1_INTAKE_SHEET)) return sample
     const ledger = { ...(sample.ledger ?? {}) }
     switch (columnId) {
       case "styleNo": return { ...sample, styleNo: value }
@@ -763,6 +763,7 @@ export async function updateManualIntake(id: string, columnId: string, raw: stri
       case "category": return { ...sample, category: value }
       case "owner": return { ...sample, owner: value }
       case "construction": return { ...sample, construction: value }
+      case "requestDate": return { ...sample, requestDate: value, completedAt: sample.sourceSheet === FABRIC1_INTAKE_SHEET ? value : sample.completedAt }
       case "note": return { ...sample, process: { ...sample.process, remark: value } }
       case "originalRef": ledger.originalRef = value; return { ...sample, ledger }
       case "planner": ledger.planner = value; return { ...sample, ledger }
@@ -949,6 +950,89 @@ export async function saveFabricFields(item: FabricLedgerItem, patch: Record<str
   await saveCache("fabricOverrides", fabricOverrides)
 }
 
+const FABRIC1_SAMPLE_FIELDS = new Set(["flNo", "color", "construction", "owner", "requestDate", "note"])
+const FABRIC1_OVERRIDE_FIELDS = new Set(["millRef", "content", "actualWidth", "actualWeight", "priceYd", "priceLb", "supplier"])
+
+/** 1팀 창고 표에서 선택한 여러 셀을 저장소별로 모아 한 번씩 비운다. */
+export async function clearFabric1Cells(entries: ReadonlyArray<{ item: FabricLedgerItem; columnId: string }>): Promise<number> {
+  if (!entries.length) return 0
+  const state = useAppStore.getState()
+  const sampleTargets = new Map<string, Set<string>>()
+  const fieldTargets = new Map<string, { item: FabricLedgerItem; fields: Set<string> }>()
+
+  for (const { item, columnId } of entries) {
+    if (item.sample?.sourceSheet !== FABRIC1_INTAKE_SHEET) continue
+    const sampleId = item.sample.id
+    if (!sampleId) continue
+    if (FABRIC1_SAMPLE_FIELDS.has(columnId)) {
+      const fields = sampleTargets.get(sampleId) ?? new Set<string>()
+      fields.add(columnId)
+      sampleTargets.set(sampleId, fields)
+    } else if (FABRIC1_OVERRIDE_FIELDS.has(columnId)) {
+      const target = fieldTargets.get(item.key) ?? { item, fields: new Set<string>() }
+      target.fields.add(columnId)
+      fieldTargets.set(item.key, target)
+    }
+  }
+
+  let changed = 0
+  let completedChanged = false
+  const completed = state.completed.map((sample) => {
+    const fields = sample.id ? sampleTargets.get(sample.id) : undefined
+    if (!fields?.size || sample.sourceSheet !== FABRIC1_INTAKE_SHEET) return sample
+    let next = sample
+    for (const field of fields) {
+      if (field === "flNo" && next.flNo) { next = { ...next, flNo: "" }; changed += 1 }
+      else if (field === "color" && next.ledger?.color) { next = { ...next, ledger: { ...next.ledger, color: "" } }; changed += 1 }
+      else if (field === "construction" && next.construction) { next = { ...next, construction: "" }; changed += 1 }
+      else if (field === "owner" && next.owner) { next = { ...next, owner: "" }; changed += 1 }
+      else if (field === "requestDate" && next.requestDate) { next = { ...next, requestDate: "", completedAt: "" }; changed += 1 }
+      else if (field === "note" && next.process.remark) { next = { ...next, process: { ...next.process, remark: "" } }; changed += 1 }
+    }
+    if (next !== sample) completedChanged = true
+    return next
+  })
+
+  const updatedAt = new Date().toISOString()
+  const replacements = new Map<string, FabricLedgerOverride>()
+  for (const { item, fields } of fieldTargets.values()) {
+    const previous = state.fabricOverrides.find((entry) => entry.key === item.key)
+    const nextFields = { ...previous?.fields }
+    let itemChanged = false
+    for (const field of fields) {
+      if (!(item.fields[field] ?? "").trim()) continue
+      nextFields[field] = ""
+      itemChanged = true
+      changed += 1
+    }
+    if (!itemChanged) continue
+    replacements.set(item.key, {
+      key: item.key,
+      recordId: previous?.recordId,
+      status: previous?.status ?? item.status,
+      storageNo: previous?.storageNo ?? (item.storageNo || undefined),
+      yds: previous?.yds ?? (item.yds ?? undefined),
+      rackNo: previous?.rackNo ?? item.rackNo,
+      roll: previous?.roll ?? item.roll,
+      note: previous?.note,
+      fields: nextFields,
+      updatedAt,
+      updatedBy: "관리자",
+    })
+  }
+
+  if (completedChanged) {
+    setAppState({ completed })
+    await saveCache("completed", completed)
+  }
+  if (replacements.size) {
+    const fabricOverrides = [...replacements.values(), ...state.fabricOverrides.filter((entry) => !replacements.has(entry.key))]
+    setAppState({ fabricOverrides })
+    await saveCache("fabricOverrides", fabricOverrides)
+  }
+  return changed
+}
+
 /**
  * 창고보관 원단의 rack 칸 번호를 저장한다. 빈 문자열이면 지정 해제다.
  * 형식 검사는 호출부(`normalizeRackNo`)가 한다. 원단별 상태 한 건만 바꾸고 다른 값은 그대로 물려준다.
@@ -1001,6 +1085,91 @@ export async function saveFabricRackNos(entries: ReadonlyArray<{ item: FabricLed
   setAppState({ fabricOverrides })
   await saveCache("fabricOverrides", fabricOverrides)
   return changed
+}
+
+export interface Fabric1IntakeInput {
+  storageNo: string
+  flNo: string
+  color: string
+  construction: string
+  owner: string
+  requestDate: string
+  note: string
+  yds: number | null
+  roll: boolean
+  /** 입고 이력 시각. 비우면 지금이다. 기존 대장 이관은 입고 요청일을 넣어 이번 주 창고 보고에 잡히지 않게 한다. */
+  occurredAt?: string
+  /** 입고 이력 메모. 비우면 "1팀 신규 입고". */
+  eventNote?: string
+  /** millRef, content, actualWidth, actualWeight, priceYd, priceLb, supplier */
+  fields: Record<string, string>
+}
+
+/** 1팀은 실물을 받은 뒤 등록하므로 샘플·창고 상태·입고 이력을 한 작업으로 저장한다. */
+export async function addFabric1Intake(inputs: readonly Fabric1IntakeInput[]): Promise<void> {
+  if (!inputs.length) return
+  const state = useAppStore.getState()
+  const now = new Date().toISOString()
+  const samples: CompletedSample[] = inputs.map((input, index) => ({
+    id: `f1:${Date.now()}:${index}:${Math.random().toString(36).slice(2, 8)}`,
+    storageNo: input.storageNo.trim(),
+    styleNo: "",
+    flNo: input.flNo.trim(),
+    season: "",
+    category: "",
+    buyer: "",
+    owner: input.owner.trim(),
+    construction: input.construction.trim(),
+    requestDate: input.requestDate,
+    sourceSheet: FABRIC1_INTAKE_SHEET,
+    ledger: { color: input.color.trim() },
+    process: { knit: "", dye: "", finish: "", remark: "" },
+    inhouse: { widthCm: null, weightGsm: null, shrinkagePct: { length: null, width: null }, pilling: null },
+    completedAt: input.requestDate,
+  }))
+  samples.forEach((sample, index) => { sample.process.remark = inputs[index].note.trim() })
+  const completed = [...state.completed, ...samples]
+  setAppState({ completed })
+  await saveCache("completed", completed)
+
+  const created = buildFabricLedger(state.records, completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true })
+  const keys = inputs.map((input) => created.find((item) => item.storageNo === input.storageNo.trim() && item.sourceSheet === FABRIC1_INTAKE_SHEET)?.key)
+  if (keys.some((key) => !key)) throw new Error("신규 입고 원단을 원장에서 찾지 못했습니다.")
+
+  const replacements = new Map<string, FabricLedgerOverride>()
+  inputs.forEach((input, index) => {
+    const key = keys[index] as string
+    replacements.set(key, {
+      key,
+      status: "WAREHOUSE",
+      storageNo: input.storageNo.trim(),
+      ...(input.yds === null ? {} : { yds: input.yds }),
+      ...(input.roll ? { roll: true } : {}),
+      fields: Object.fromEntries(Object.entries(input.fields).filter(([, value]) => value.trim())),
+      updatedAt: now,
+      updatedBy: input.owner.trim() || "관리자",
+    })
+  })
+  const fabricOverrides = [...replacements.values(), ...state.fabricOverrides.filter((entry) => !replacements.has(entry.key))]
+  setAppState({ fabricOverrides })
+  await saveCache("fabricOverrides", fabricOverrides)
+
+  const newEvents: FabricLedgerEvent[] = inputs.map((input, index) => ({
+    id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${index}-${Math.random().toString(36).slice(2)}`,
+    fabricKey: keys[index] as string,
+    action: "RECEIVE",
+    fromStatus: "READY",
+    toStatus: "WAREHOUSE",
+    occurredAt: input.occurredAt || now,
+    recordedAt: now,
+    actor: input.owner.trim() || "관리자",
+    note: input.eventNote || "1팀 신규 입고",
+    storageNo: input.storageNo.trim(),
+    qty: input.yds ?? undefined,
+  }))
+  const fabricEvents = [...newEvents].reverse().concat(state.fabricEvents)
+  setAppState({ fabricEvents })
+  await saveCache("fabricEvents", fabricEvents)
 }
 
 /**

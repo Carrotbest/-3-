@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode , type CSSProperties } from "react"
 import * as Popover from "@radix-ui/react-popover"
-import { ArchiveRestore, ClipboardList, Copy, DatabaseBackup, Eye, FileDown, Info, LayoutGrid, ListX, Loader2, Mail, PackageCheck, PackageOpen, PackageX, Pencil, Rows3, Search, Send, Trash2 } from "lucide-react"
+import { ArchiveRestore, ClipboardList, Copy, DatabaseBackup, Eye, FileDown, History, Info, LayoutGrid, ListX, Loader2, Mail, PackageCheck, PackageOpen, PackageX, Pencil, Plus, Rows3, Search, Send, Trash2 } from "lucide-react"
+import { Fabric1IntakeDialog } from "@/components/warehouse/Fabric1IntakeDialog"
 import { InboundRequestMailDialog } from "@/components/warehouse/InboundRequestMailDialog"
 import { RackMap } from "@/components/warehouse/RackMap"
 import { DisposalRoundPanel } from "@/components/warehouse/DisposalRoundPanel"
 import { OutboundRequestMailDialog } from "@/components/warehouse/OutboundRequestMailDialog"
 import { FlEntryCheckDialog } from "@/components/warehouse/FlEntryCheckDialog"
-import { normalizeRackNo, RACK_FORMAT_HINT, RACK_NONE_LABEL, RACK_POSITIONS } from "@/data/warehouse-rack"
+import { normalizeRackNo, RACK_FORMAT_HINT } from "@/data/warehouse-rack"
+import { CONSTRUCTIONS } from "@/data/constructions"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
 import { GRADE_ROW_CLASS, PerfBadge, PerfCounts, usePerformanceIndex } from "@/components/fabric/PerfBadge"
@@ -28,7 +30,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { buildFabricLedger, FABRIC1_STORAGE_NO_MIN, fabricRecordIdentity, isFabric1Item, latestActiveOutbound, STORAGE_NO_MAX, storageNoLabel, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
+import { buildFabricLedger, FABRIC1_STORAGE_NO_MAX, FABRIC1_STORAGE_NO_MIN, fabricRecordIdentity, isFabric1Item, latestActiveOutbound, STORAGE_NO_MAX, STORAGE_NO_WRAP, storageNoLabel, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
@@ -40,12 +42,12 @@ import { FabricDetailBody } from "@/routes/FabricDetail"
 import { fmtDateFull, fmtDateMd } from "@/data/format"
 import { rddaProductionType } from "@/data/derive"
 import type { FabricLedgerStatus } from "@/data/schema"
-import { WEB_INTAKE_SHEET } from "@/data/schema"
+import { FABRIC1_INTAKE_SHEET, WEB_INTAKE_SHEET } from "@/data/schema"
 import { checkWarehouseFlEntry, needsFlConfirm, type WarehouseFlCheck } from "@/data/warehouse-fl-check"
 import { buildInboundCard, buildOutboundCancelCard, buildOutboundConfirmCard, notifyTeams } from "@/data/teams-notify"
 import { claimStorageNumbers, releaseStorageNumbers } from "@/data/storage-claims"
 import { useInView } from "@/lib/useInView"
-import { addManualIntake, updateManualIntake, applyDisposalRoundCompletion, applyFabricAction, applyFabricActions, backfillFabricRecordIds, confirmWarehouseBaseline, removeFabricRows, saveDisposalRounds, saveFabricRackNo, saveFabricRackNos, saveFabricRolls, undoFabricEntry, useAppStore, type ApplyFabricActionInput, type FabricUndoEntry } from "@/store/useAppStore"
+import { addManualIntake, updateManualIntake, applyDisposalRoundCompletion, applyFabricAction, applyFabricActions, backfillFabricRecordIds, clearFabric1Cells, removeFabricRows, saveDisposalRounds, saveFabricFields, saveFabricRackNo, saveFabricRackNos, undoFabricEntry, useAppStore, type ApplyFabricActionInput, type FabricUndoEntry } from "@/store/useAppStore"
 
 type WarehouseTab = "READY" | "WAREHOUSE" | "HISTORY"
 type ActionKind = "RECEIVE" | "UNRECEIVE" | "CONFIRM" | "UNCONFIRM" | "DISPOSE" | "STOCK" | "OUTBOUND" | "UNOUTBOUND" | "EXHAUST" | "RESTORE" | "REMOVE"
@@ -63,7 +65,7 @@ const TAB_META: Record<WarehouseTab, { label: string; description: string }> = {
   HISTORY: { label: "이력", description: "전량 소진 또는 폐기된 원단" },
 }
 
-type WarehouseColumnId = "storageNo" | "styleNo" | "flNo" | "owner" | "stock" | "confirm" | "rackNo"
+type WarehouseColumnId = "storageNo" | "styleNo" | "flNo" | "millRef" | "owner" | "stock" | "confirm" | "rackNo"
   | "season" | "buyer" | "category" | "requestDate" | "completedAt"
   | "originalRef" | "planner" | "yarnDetail" | "construction" | "content" | "weight" | "color" | "dyeing" | "flSource" | "supplier" | "priceYd" | "priceLb" | "dueDate"
   | "yarnMill" | "yarnDate" | "knittingMill" | "knittingDate" | "dyeingMill" | "dyeingDate" | "finishingMill" | "finishingDate"
@@ -151,13 +153,36 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
   ] },
 ]
 
+// 1팀 열은 1팀 엑셀 순서를 따른다(2026-09-22). No., R&D Number, 위치, 폐기는 고정 열과 탭이 대신한다.
+const TEAM1_COLUMN_GROUPS: readonly WarehouseGroup[] = [
+  COLUMN_GROUPS[0],
+  { key: "ledger", label: "대장", color: "var(--chart-1)", columns: [
+    { id: "flNo", label: "FL No.", width: 100 },
+    { id: "millRef", label: "Mill Ref.", width: 120 },
+    { id: "color", label: "Color", width: 104 },
+    { id: "construction", label: "Construction", width: 124 },
+    { id: "content", label: "Content", width: 200 },
+    { id: "actualWidth", label: "Width (INCH)", width: 88 },
+    { id: "actualWeight", label: "Weight (G/M2)", width: 92 },
+    { id: "priceYd", label: "Price ($/YD)", width: 88 },
+    { id: "priceLb", label: "Price ($/LB)", width: 88 },
+    { id: "owner", label: "입고담당자", width: 88 },
+    { id: "requestDate", label: "입고 요청일", width: 88 },
+    { id: "note", label: "Remark", width: 200 },
+    { id: "supplier", label: "완사입 업체", width: 150 },
+  ] },
+]
+
 const WH_COL_WIDTHS_KEY = "warehouse-col-widths-v1"
 const WH_OPEN_GROUPS_KEY = "warehouse-open-groups-v1"
 const MIN_COL_WIDTH = 48
 
 /** 행 높이가 h-8 로 고정이라 보이는 구간만 그리면 된다. 이력 탭은 4,400행이 넘는다. */
 const MANUAL_EDITABLE = new Set(["styleNo", "flNo", "buyer", "season", "category", "owner", "construction", "content", "priceYd", "priceLb", "supplier", "note", "originalRef", "planner", "yarnDetail", "color", "dyeing"])
-const FABRIC1_ONLY_COLUMNS = new Set<WarehouseColumnId>(["content", "flSource", "supplier", "priceYd", "priceLb"])
+const FABRIC1_SAMPLE_EDITABLE = new Set<WarehouseColumnId>(["flNo", "color", "construction", "owner", "requestDate", "note"])
+const FABRIC1_OVERRIDE_EDITABLE = new Set<WarehouseColumnId>(["millRef", "content", "actualWidth", "actualWeight", "priceYd", "priceLb", "supplier"])
+const FABRIC1_EDITABLE = new Set<WarehouseColumnId>([...FABRIC1_SAMPLE_EDITABLE, ...FABRIC1_OVERRIDE_EDITABLE])
+const FABRIC1_ONLY_COLUMNS = new Set<WarehouseColumnId>(["millRef", "content", "flSource", "supplier", "priceYd", "priceLb"])
 
 const ROW_HEIGHT = 32
 const ROW_OVERSCAN = 12
@@ -178,7 +203,8 @@ const TAB_ACCENT: Record<WarehouseTab, { fill: string; dot: string; active: stri
 }
 
 const GRIP_WIDTH = 42
-const ACTION_WIDTH = 120
+const ACTION_WIDTH = 56
+const FABRIC1_RANGE = { min: FABRIC1_STORAGE_NO_MIN, max: FABRIC1_STORAGE_NO_MAX }
 
 /** DEVELOPMENT Overview와 동일한 게이지 모션(1500ms · easeInOutCubic). */
 const GAUGE_MS = 1500
@@ -262,15 +288,37 @@ function nextStorageNumbers(items: readonly FabricLedgerItem[], count: number, s
     picked.push(candidate)
     used.add(candidate)
   }
-  if (scope === "team1") {
-    // 1팀은 되감지 않는다. 마지막 번호 다음부터 계속 올린다. 상한이 없다.
-    const last = Math.max(FABRIC1_STORAGE_NO_MIN - 1, ...[...used])
-    for (let candidate = last + 1; picked.length < count; candidate += 1) take(candidate)
-    return picked
-  }
   const numberOf = (value: string): number | null => {
     const matched = value.trim().match(/^\d{1,5}(?!\d)/)?.[0]
     return matched ? Number(matched) : null
+  }
+  const stockedItems = scoped.filter((item) => item.status === "WAREHOUSE")
+  const numberInScope = (item: FabricLedgerItem | null | undefined): number | null => {
+    if (!item) return null
+    const value = numberOf(item.storageNo)
+    if (value === null) return null
+    return scope === "team1" && (value < FABRIC1_RANGE.min || value > FABRIC1_RANGE.max) ? null : value
+  }
+  // 한 번에 입고한 항목은 intakeAt이 같다. 같은 시각의 끝 번호를 순환 순서로 골라 프론티어로 삼는다.
+  const latestIntakeAt = stockedItems.reduce((latest, item) => item.intakeAt && numberInScope(item) !== null && item.intakeAt > latest ? item.intakeAt : latest, "")
+  const latestItems = latestIntakeAt ? stockedItems.filter((item) => item.intakeAt === latestIntakeAt && numberInScope(item) !== null) : []
+  const latestNumbers = latestItems.map(numberInScope).filter((value): value is number => value !== null)
+  const latestStart = scope === "team1"
+    ? warehouseSequenceStart(latestNumbers, FABRIC1_RANGE)
+    : warehouseSequenceStart(latestNumbers)
+  const latestItem = latestItems.reduce<FabricLedgerItem | null>((last, item) => {
+    if (!last) return item
+    const itemKey = scope === "team1" ? warehouseOrderKey(item, latestStart, FABRIC1_RANGE) : warehouseOrderKey(item, latestStart)
+    const lastKey = scope === "team1" ? warehouseOrderKey(last, latestStart, FABRIC1_RANGE) : warehouseOrderKey(last, latestStart)
+    return itemKey > lastKey ? item : last
+  }, null)
+  const frontier = numberInScope(latestItem)
+    ?? Math.max(scope === "team1" ? FABRIC1_STORAGE_NO_MIN - 1 : 0, ...stockedItems.map((item) => numberInScope(item) ?? 0))
+  if (scope === "team1") {
+    // 1팀은 빈자리를 메우지 않는다. 최신 입고 번호 다음부터 가고 9999 다음은 8000으로 되감는다.
+    for (let candidate = frontier + 1; candidate <= FABRIC1_STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
+    for (let candidate = FABRIC1_STORAGE_NO_MIN; candidate <= frontier && picked.length < count; candidate += 1) take(candidate)
+    return picked
   }
   // 어떤 상태로든 그 번호를 쓰는 항목이 있으면 '기록 있음'이다. 빈자리 판정에만 쓴다.
   const recorded = new Set<number>()
@@ -280,11 +328,6 @@ function nextStorageNumbers(items: readonly FabricLedgerItem[], count: number, s
   })
   // 프론티어 = 웹에서 마지막으로 입고 등록한 번호. 원장 항목의 입고일(intakeAt)로 찾는다.
   // 대장에서 이관된 옛 항목은 intakeAt 이 없다. 그래서 옛 주기에 남은 높은 번호에 끌려가지 않는다.
-  const stockedItems = scoped.filter((item) => item.status === "WAREHOUSE")
-  const latestIntake = stockedItems.filter((item) => item.intakeAt)
-    .sort((left, right) => left.intakeAt.localeCompare(right.intakeAt)).at(-1)
-  const frontier = numberOf(latestIntake?.storageNo ?? "")
-    ?? Math.max(0, ...stockedItems.map((item) => numberOf(item.storageNo) ?? 0))
   // 현재 주기 밴드. 프론티어에서 아래로 내려가다 기록 없는 번호가 20개 이어지면 옛 주기다.
   const GAP_BREAK = 20
   let band = frontier
@@ -300,8 +343,8 @@ function nextStorageNumbers(items: readonly FabricLedgerItem[], count: number, s
   }
   // 2) 프론티어 다음부터 순서대로. 창고에 있는 번호만 건너뛴다(이력 번호는 그냥 쓴다).
   for (let candidate = frontier + 1; candidate <= STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
-  // 3) 7999 를 넘기면 1 부터 되감는다.
-  for (let candidate = 1; candidate <= STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
+  // 3) 7999 를 넘기면 1000 부터 되감는다.
+  for (let candidate = STORAGE_NO_WRAP; candidate <= STORAGE_NO_MAX && picked.length < count; candidate += 1) take(candidate)
   return picked
 }
 
@@ -339,6 +382,7 @@ function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
     case "storageNo": return item.storageNo
     case "styleNo": return item.styleNo
     case "flNo": return item.flNo
+    case "millRef": return item.fields.millRef ?? ""
     case "owner": return item.owner
     case "stock": return item.yds === null ? "" : `${item.balance ?? 0}/${item.yds}`
     case "confirm": return item.status !== "WAREHOUSE" ? "" : item.confirmedAt ? "확인" : "미확인"
@@ -373,8 +417,8 @@ function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
     case "dyeingDate": return first(record?.tech?.processDates?.dyeing, sam?.process.dye)
     case "finishingMill": return first(record?.tech?.mills?.finishing, led?.mills?.finishing)
     case "finishingDate": return first(record?.tech?.processDates?.finishing, sam?.process.finish)
-    case "actualWidth": return first(record?.tech?.actual?.width, sam?.inhouse.widthCm)
-    case "actualWeight": return first(record?.tech?.actual?.weight, sam?.inhouse.weightGsm)
+    case "actualWidth": return first(record?.tech?.actual?.width, sam?.inhouse.widthCm) || (item.fields.actualWidth ?? "")
+    case "actualWeight": return first(record?.tech?.actual?.weight, sam?.inhouse.weightGsm) || (item.fields.actualWeight ?? "")
     case "shrinkageLength": return first(record?.tech?.actual?.shrinkageLength, typeof sam?.inhouse.shrinkagePct === "object" ? sam?.inhouse.shrinkagePct.length : undefined)
     case "shrinkageWidth": return first(record?.tech?.actual?.shrinkageWidth, typeof sam?.inhouse.shrinkagePct === "object" ? sam?.inhouse.shrinkagePct.width : undefined)
     case "knitInch": return first(record?.tech?.knitSpec?.inch, led?.knitSpec?.inch)
@@ -459,6 +503,7 @@ export function Warehouse() {
   const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
   // 출고 요청 메일 초안(C형). 요청자 기본값은 로그인 표시 이름, 없으면 이메일 앞부분이다.
   const [outboundMailOpen, setOutboundMailOpen] = useState(false)
+  const [fabric1IntakeOpen, setFabric1IntakeOpen] = useState(false)
   // 선택 입고 뒤 입고 요청 메일을 만들 원단 key. 입고 등록이 끝난 원장 값(R&D No.)으로 표를 채운다.
   const [inboundMailKeys, setInboundMailKeys] = useState<string[]>([])
   // Rack 배치도 보기. 켜면 표 자리에 배치도를 그리고, 탭을 누르거나 칸을 고르면 표로 돌아간다.
@@ -473,6 +518,7 @@ export function Warehouse() {
   const fabricEvents = useAppStore((state) => state.fabricEvents)
   const disposalRounds = useAppStore((state) => state.disposalRounds)
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents), [fabricEvents, overrides, records, samples])
+  const suggestFabric1Numbers = useCallback((count: number) => nextStorageNumbers(ledger, count, "team1"), [ledger])
   const scopedLedger = useMemo(() => ledger.filter((item) => isFabric1Item(item) === (teamScope === "team1")), [ledger, teamScope])
   /**
    * 목록에서 숨긴(REMOVED) 항목. 되살리기 화면에서만 쓴다.
@@ -538,17 +584,18 @@ export function Warehouse() {
   useEffect(() => { saveViewPref(WH_OPEN_GROUPS_KEY, openGroups) }, [openGroups])
   // 열 너비는 사용자가 끌어 조절하고 브라우저에 남는다. 기본값을 바꾸면 키를 올려야 반영된다.
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
-    const defaults = Object.fromEntries(COLUMN_GROUPS.flatMap((group) => group.columns).map((column) => [column.id, column.width]))
+    const storedWidths: Record<string, number> = {}
+    const knownIds = new Set([...COLUMN_GROUPS, ...TEAM1_COLUMN_GROUPS].flatMap((group) => group.columns).map((column) => column.id))
     try {
       const raw = window.localStorage.getItem(WH_COL_WIDTHS_KEY)
       if (raw) {
         const stored = JSON.parse(raw) as Record<string, unknown>
         Object.entries(stored).forEach(([id, value]) => {
-          if (id in defaults && typeof value === "number" && Number.isFinite(value) && value >= MIN_COL_WIDTH) defaults[id] = value
+          if (knownIds.has(id as WarehouseColumnId) && typeof value === "number" && Number.isFinite(value) && value >= MIN_COL_WIDTH) storedWidths[id] = value
         })
       }
     } catch { /* 저장소를 못 쓰면 기본 너비로 간다. */ }
-    return defaults
+    return storedWidths
   })
   const widthOf = (column: WarehouseColumn): number => columnWidths[column.id] ?? column.width
   const resizeRef = useRef<{ id: string; startX: number; startWidth: number } | null>(null)
@@ -601,7 +648,6 @@ export function Warehouse() {
   const [filterMenu, setFilterMenu] = useState<WarehouseColumnId | null>(null)
   const [filterSearch, setFilterSearch] = useState("")
   const [exhaustOnZero, setExhaustOnZero] = useState(true)
-  const [baselineOpen, setBaselineOpen] = useState(false)
   // 셀 범위 선택. 행은 visibleRows 인덱스, 열은 visibleColumns 인덱스다.
   const [cellRange, setCellRange] = useState<{ ar: number; ac: number; fr: number; fc: number } | null>(null)
   // Ctrl+클릭으로 더한 영역. cellRange는 마지막에 잡은 활성 영역이다.
@@ -610,7 +656,7 @@ export function Warehouse() {
   const [undoStack, setUndoStack] = useState<FabricUndoEntry[]>([])
   const [undoing, setUndoing] = useState(false)
   const cellDragRef = useRef(false)
-  const [cellMenu, setCellMenu] = useState<{ x: number; y: number } | null>(null)
+  const [cellMenu, setCellMenu] = useState<{ x: number; y: number; key: string } | null>(null)
   const [viewports, setViewports] = useState<Record<string, { top: number; height: number }>>({})
   const gridRefs = useRef<Record<string, HTMLDivElement | null>>({})
   /**
@@ -646,6 +692,13 @@ export function Warehouse() {
     () => warehouseSequenceStart(ledger.filter((item) => item.status === "WAREHOUSE" && !isFabric1Item(item)).map(storageNumberOf).filter((value): value is number => value !== null)),
     [ledger],
   )
+  // Rack No. 추천은 고정 선반 목록이 아니라 지금까지 입력된 값이다. 배치가 바뀌어도 사람이 친 값이 그대로 목록이 된다.
+  const usedRackNos = useMemo(() => [...new Set(ledger.map((item) => item.rackNo?.trim() ?? "").filter(Boolean))]
+    .sort((left, right) => left.localeCompare(right, "ko-KR", { numeric: true })), [ledger])
+  const fabric1SequenceStart = useMemo(
+    () => warehouseSequenceStart(ledger.filter((item) => item.status === "WAREHOUSE" && isFabric1Item(item)).map(storageNumberOf).filter((value): value is number => value !== null), FABRIC1_RANGE),
+    [ledger],
+  )
   const rows = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("ko-KR")
     const base = hiddenOnly ? hiddenLedger : scopedLedger.filter((item) => TAB_STATUSES[tab].includes(item.status))
@@ -653,6 +706,7 @@ export function Warehouse() {
       .filter((item) => !(unconfirmedOnly && tab === "WAREHOUSE" && !hiddenOnly) || !item.confirmedAt)
       .filter((item) => !query || [
       item.storageNo, item.styleNo, item.flNo, item.season, item.category, item.buyer, item.owner,
+      item.fields.millRef,
       item.sample?.ledger?.seasonRaw, item.sample?.ledger?.categoryRaw, item.sample?.ledger?.originalRef,
       item.construction, item.lastOutbound?.to, item.lastOutbound?.division, item.note,
       item.record?.planner, item.record?.tech?.original?.brand, item.record?.tech?.yarnDetail,
@@ -695,7 +749,7 @@ export function Warehouse() {
       }
       if (tab !== "WAREHOUSE") return filtered
       if (teamScope === "team1") {
-        return [...filtered].sort((left, right) => (storageNumberOf(left) ?? Number.MAX_SAFE_INTEGER) - (storageNumberOf(right) ?? Number.MAX_SAFE_INTEGER))
+        return [...filtered].sort((left, right) => warehouseOrderKey(left, fabric1SequenceStart, FABRIC1_RANGE) - warehouseOrderKey(right, fabric1SequenceStart, FABRIC1_RANGE))
       }
       return [...filtered].sort((left, right) => warehouseOrderKey(left, sequenceStart) - warehouseOrderKey(right, sequenceStart))
     }
@@ -703,12 +757,12 @@ export function Warehouse() {
     if (sortRule.col.startsWith("perf")) return [...filtered].sort((left, right) => direction * (perfSortValue(left, sortRule.col) - perfSortValue(right, sortRule.col)))
     return [...filtered].sort((left, right) =>
       direction * cellValue(left, sortRule.col).localeCompare(cellValue(right, sortRule.col), "ko-KR", { numeric: true }))
-  }, [rows, columnFilters, sortRule, tab, teamScope, sequenceStart, perfIndex, historyEnteredAt])
+  }, [rows, columnFilters, sortRule, tab, teamScope, sequenceStart, fabric1SequenceStart, perfIndex, historyEnteredAt])
   const divisionSuggestions = useMemo(() => [...new Set(fabricEvents.map((event) => event.division?.trim()).filter((value): value is string => Boolean(value)))].sort((left, right) => left.localeCompare(right, "ko-KR", { numeric: true })), [fabricEvents])
   // 입고 대기에서는 R&D No., 재고, 입고확인이 아직 의미가 없어 고정 열을 숨긴다. Rack No.는 창고보관 탭에서만 보인다.
-  const scopeGroups = COLUMN_GROUPS
-    .filter((group) => teamScope !== "team1" || (group.key !== "process" && group.key !== "rdda"))
-    .map((group) => teamScope === "team1" ? group : { ...group, columns: group.columns.filter((column) => !FABRIC1_ONLY_COLUMNS.has(column.id)) })
+  const scopeGroups = teamScope === "team1"
+    ? TEAM1_COLUMN_GROUPS
+    : COLUMN_GROUPS.map((group) => ({ ...group, columns: group.columns.filter((column) => !FABRIC1_ONLY_COLUMNS.has(column.id)) }))
   const visibleGroups = scopeGroups
     .filter((group) => !group.collapsible || openGroups[group.key as keyof typeof openGroups])
     .map((group) => group.key !== "fixed" ? group : { ...group, columns: group.columns.filter((column) => tab !== "READY" && (column.id !== "rackNo" || tab === "WAREHOUSE")) })
@@ -716,7 +770,8 @@ export function Warehouse() {
   const visibleColumns = visibleGroups.flatMap((group) => group.columns)
   const fixedColumns = visibleColumns.filter((column) => COLUMN_GROUPS[0].columns.some((fixed) => fixed.id === column.id))
   const groupedColumns = visibleGroups.filter((group) => group.key !== "fixed")
-  const tableWidth = GRIP_WIDTH + ACTION_WIDTH + visibleColumns.reduce((sum, column) => sum + widthOf(column), 0)
+  const gripWidth = teamScope === "team1" ? 62 : GRIP_WIDTH
+  const tableWidth = gripWidth + ACTION_WIDTH + visibleColumns.reduce((sum, column) => sum + widthOf(column), 0)
   const ledgerByKey = useMemo(() => new Map([...scopedLedger, ...hiddenLedger].map((item) => [item.key, item])), [scopedLedger, hiddenLedger])
   const outboundHistoryItem = outboundHistoryKey ? ledgerByKey.get(outboundHistoryKey) ?? null : null
   const actionItems = actionDialog?.keys.map((key) => ledgerByKey.get(key)).filter((item): item is FabricLedgerItem => Boolean(item)) ?? []
@@ -728,7 +783,7 @@ export function Warehouse() {
   const accent = TAB_ACCENT[tab]
   const fixedLeft = (id: WarehouseColumnId): number => {
     const index = fixedColumns.findIndex((column) => column.id === id)
-    return GRIP_WIDTH + fixedColumns.slice(0, Math.max(0, index)).reduce((sum, column) => sum + widthOf(column), 0)
+    return gripWidth + fixedColumns.slice(0, Math.max(0, index)).reduce((sum, column) => sum + widthOf(column), 0)
   }
 
   // KPI — 탭 badge와 겹치지 않는 재고·출고 관점 지표.
@@ -836,6 +891,14 @@ export function Warehouse() {
     setDetailKey(key)
   }
 
+  const openOutboundHistory = (key: string) => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false
+      return
+    }
+    setOutboundHistoryKey(key)
+  }
+
   /** 그립 핸들 드래그 — 선택 전체(핸들 행이 미선택이면 그 행만)를 끌고 간다. */
 
 
@@ -869,6 +932,7 @@ export function Warehouse() {
     setChecked(new Set())
     setColumnFilters({})
     setSortRule(null)
+    if (next === "team1") setUnconfirmedOnly(false)
     if (next === "team1" && tab === "READY") setTab("WAREHOUSE")
   }
 
@@ -889,16 +953,18 @@ export function Warehouse() {
     try {
       if (actionDialog.kind === "RECEIVE") {
         const auto = nextStorageNumbers(ledger, actionItems.length, teamScope)
-        if (auto.length < actionItems.length) throw new Error("사용할 수 있는 R&D No.가 부족합니다. 번호를 직접 입력하세요.")
+        if (auto.length < actionItems.length) throw new Error(teamScope === "team1"
+          ? "1팀 R&D No. 대역(8000~9999)이 모두 사용 중입니다."
+          : "사용할 수 있는 R&D No.가 부족합니다. 번호를 직접 입력하세요.")
         const taken = occupiedStorageNumbers(ledger)
         const assigned = actionItems.map((item, index) => {
           const raw = (receiveNos[item.key] ?? (teamScope === "team3" ? String(auto[index]).padStart(4, "0") : String(auto[index]))).trim()
           const num = Number(raw)
           const okTeam3 = /^\d{1,4}$/.test(raw) && Number.isInteger(num) && num >= 1 && num <= STORAGE_NO_MAX
-          const okTeam1 = /^\d{4,5}$/.test(raw) && Number.isInteger(num) && num >= FABRIC1_STORAGE_NO_MIN
+          const okTeam1 = /^\d{4}$/.test(raw) && Number.isInteger(num) && num >= FABRIC1_STORAGE_NO_MIN && num <= FABRIC1_STORAGE_NO_MAX
           if (teamScope === "team1" ? !okTeam1 : !okTeam3) {
             throw new Error(teamScope === "team1"
-              ? `R&D No. 는 ${FABRIC1_STORAGE_NO_MIN} 이상이어야 합니다.`
+              ? `R&D No. 는 ${FABRIC1_STORAGE_NO_MIN}부터 ${FABRIC1_STORAGE_NO_MAX} 사이여야 합니다.`
               : `R&D No. 는 1부터 ${STORAGE_NO_MAX} 사이여야 합니다. 8000번대는 1팀 대역입니다.`)
           }
           if (taken.has(num)) throw new Error(`R&D No. ${raw} 는 이미 창고에 있습니다.`)
@@ -1072,12 +1138,16 @@ export function Warehouse() {
       case "rackNo": return item.rackNo ?? ""
       case "styleNo": return item.styleNo
       case "flNo": return item.flNo
+      case "millRef": return item.fields.millRef ?? ""
       case "buyer": return item.buyer
       case "season": return item.season
       case "category": return item.category
       case "owner": return item.owner
+      case "requestDate": return item.requestDate
       case "construction": return item.construction
       case "content": return item.fields.content ?? ""
+      case "actualWidth": return item.fields.actualWidth ?? ""
+      case "actualWeight": return item.fields.actualWeight ?? ""
       case "priceYd": return item.fields.priceYd ?? ""
       case "priceLb": return item.fields.priceLb ?? ""
       case "supplier": return item.fields.supplier ?? ""
@@ -1105,7 +1175,7 @@ export function Warehouse() {
     if (id === "stock") {
       const balance = item.balance === null ? null : Math.max(0, item.balance)
       // 한 번 클릭은 셀 선택만 한다. 팝업이 바로 뜨면 더블클릭으로 여는 수정 창이 가려진다.
-      return <span className={`block h-full w-full truncate text-left tabular-nums ${balance === 0 ? "text-[var(--muted-foreground)]" : ""}`} title={item.yds === null ? "더블클릭해서 재고 입력" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds · 더블클릭해서 수정`}>{item.yds === null ? "" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds`}</span>
+      return <span className={`flex h-full w-full items-center overflow-hidden whitespace-nowrap tabular-nums ${balance === 0 ? "text-[var(--muted-foreground)]" : ""}`} title={item.yds === null ? "더블클릭해서 재고 입력" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds · 더블클릭해서 수정`}>{item.yds === null ? "" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds`}</span>
     }
     if (id === "confirm") {
       if (item.status !== "WAREHOUSE") return <TextCell value="" />
@@ -1144,8 +1214,8 @@ export function Warehouse() {
     if (id === "dyeingDate") { const v = pick(record?.tech?.processDates?.dyeing, sam?.process.dye); return <TextCell value={v ? fmtDateFull(v) : String(v ?? "")} /> }
     if (id === "finishingMill") return <TextCell value={pick(record?.tech?.mills?.finishing, led?.mills?.finishing)} />
     if (id === "finishingDate") { const v = pick(record?.tech?.processDates?.finishing, sam?.process.finish); return <TextCell value={v ? fmtDateFull(v) : String(v ?? "")} /> }
-    if (id === "actualWidth") return <TextCell value={pick(record?.tech?.actual?.width, sam?.inhouse.widthCm)} />
-    if (id === "actualWeight") return <TextCell value={pick(record?.tech?.actual?.weight, sam?.inhouse.weightGsm)} />
+    if (id === "actualWidth") return <TextCell value={pick(record?.tech?.actual?.width, sam?.inhouse.widthCm) || item.fields.actualWidth || ""} />
+    if (id === "actualWeight") return <TextCell value={pick(record?.tech?.actual?.weight, sam?.inhouse.weightGsm) || item.fields.actualWeight || ""} />
     if (id === "shrinkageLength") return <TextCell value={pick(record?.tech?.actual?.shrinkageLength, typeof sam?.inhouse.shrinkagePct === "object" ? sam?.inhouse.shrinkagePct.length : undefined)} />
     if (id === "shrinkageWidth") return <TextCell value={pick(record?.tech?.actual?.shrinkageWidth, typeof sam?.inhouse.shrinkagePct === "object" ? sam?.inhouse.shrinkagePct.width : undefined)} />
     if (id === "knitInch") return <TextCell value={pick(record?.tech?.knitSpec?.inch, led?.knitSpec?.inch)} />
@@ -1159,17 +1229,16 @@ export function Warehouse() {
     return <TextCell value={item.note} />
   }
 
+  // 처리 열은 삭제 하나만 둔다(2026-09-22). 재고, 출고, 소진, 폐기, 복구는 상단 선택 버튼과 재고 칸 더블클릭으로 한다.
+  // 삭제는 폐기가 아니라 목록에서 빼는 것이다(REMOVE). 창고보관, 이력, 창고팀 집계 어디에도 남지 않는다.
   const actionCell = (item: FabricLedgerItem) => {
     if (!canEditScope) return <span className="text-xs text-[var(--muted-foreground)]">보기</span>
     if (item.status === "READY") return <span className="text-xs text-[var(--muted-foreground)]">선택 처리</span>
-    if (item.status === "WAREHOUSE") return <div className="flex items-center justify-end gap-1" onClick={(event) => event.stopPropagation()}>
-      <Button type="button" size="icon" variant="outline" className="size-7" title="재고 기입·수정" aria-label={`${item.styleNo} 재고 기입·수정`} onClick={(event) => stopAndOpen(event, "STOCK", item)}><Pencil /></Button>
-      <Button type="button" size="icon" variant="outline" className="size-7" title="출고" aria-label={`${item.styleNo} 출고`} onClick={(event) => stopAndOpen(event, "OUTBOUND", item)}><Send /></Button>
-      <Button type="button" size="icon" variant="outline" className="size-7" title="수동 소진 완료" aria-label={`${item.styleNo} 수동 소진 완료`} onClick={(event) => stopAndOpen(event, "EXHAUST", item)}><PackageOpen /></Button>
-      <Button type="button" size="icon" variant="outline" className="size-7" title="폐기" aria-label={`${item.styleNo} 폐기`} onClick={(event) => stopAndOpen(event, "DISPOSE", item)}><Trash2 /></Button>
+    return <div className="flex items-center justify-center" onClick={(event) => event.stopPropagation()}>
+      <Button type="button" size="icon" variant="ghost" className="size-7 text-[var(--muted-foreground)] hover:text-[var(--destructive)]" title="삭제" aria-label={`${storageNoLabel(item) || item.flNo || "원단"} 삭제`} onClick={(event) => stopAndOpen(event, "REMOVE", item)}><Trash2 /></Button>
     </div>
-    return <Button type="button" size="sm" variant="outline" onClick={(event) => stopAndOpen(event, "RESTORE", item)}><ArchiveRestore />{item.status === "EXHAUSTED" ? "창고 복구" : "복구"}</Button>
   }
+
 
   const handleRowKeyDown = (event: KeyboardEvent<HTMLTableRowElement>, item: FabricLedgerItem) => {
     if (event.target !== event.currentTarget || (event.key !== "Enter" && event.key !== " ")) return
@@ -1301,10 +1370,10 @@ export function Warehouse() {
     if (!value || value === before) return
     const number = Number(value)
     const okTeam3 = /^\d{1,4}$/.test(value) && Number.isInteger(number) && number >= 1 && number <= STORAGE_NO_MAX
-    const okTeam1 = /^\d{4,5}$/.test(value) && Number.isInteger(number) && number >= FABRIC1_STORAGE_NO_MIN
+    const okTeam1 = /^\d{4}$/.test(value) && Number.isInteger(number) && number >= FABRIC1_STORAGE_NO_MIN && number <= FABRIC1_STORAGE_NO_MAX
     if (teamScope === "team1" ? !okTeam1 : !okTeam3) {
       setSelectionNotice(teamScope === "team1"
-        ? `R&D No. 는 ${FABRIC1_STORAGE_NO_MIN} 이상이어야 합니다.`
+        ? `R&D No. 는 ${FABRIC1_STORAGE_NO_MIN}부터 ${FABRIC1_STORAGE_NO_MAX} 사이여야 합니다.`
         : `R&D No. 는 1부터 ${STORAGE_NO_MAX} 사이여야 합니다. 8000번대는 1팀 대역입니다.`)
       return
     }
@@ -1327,14 +1396,6 @@ export function Warehouse() {
     }
   }
 
-  /** 선택 전부가 롤이면 끄고, 하나라도 아니면 켠다. */
-  const toggleRollMark = async () => {
-    if (!selectedRows.length) return
-    const next = !selectedRows.every((item) => item.roll)
-    const changed = await saveFabricRolls(selectedRows.map((item) => ({ item, roll: next })))
-    setSelectionNotice(changed ? `롤 표시를 ${next ? "켰습니다" : "껐습니다"}. ${changed}건` : "바뀐 건이 없습니다.")
-  }
-
   useEffect(() => {
     const stop = () => { cellDragRef.current = false }
     const onCopy = (event: globalThis.KeyboardEvent) => {
@@ -1351,6 +1412,42 @@ export function Warehouse() {
       }
       // Delete·Backspace: 창고보관 탭에서 선택 영역이 걸친 Rack No. 칸을 지운다. Ctrl+클릭으로 더한 영역도 포함한다.
       if (canEditScope && (event.key === "Delete" || event.key === "Backspace") && tab === "WAREHOUSE" && allRangeRects.length) {
+        if (teamScope === "team1") {
+          const seen = new Set<string>()
+          const rackTargets = new Map<string, FabricLedgerItem>()
+          const fabricTargets: Array<{ item: FabricLedgerItem; columnId: string }> = []
+          let skippedProtected = false
+          for (const area of allRangeRects) {
+            for (let r = area.top; r <= area.bottom; r += 1) {
+              const target = visibleRows[r]
+              if (!target) continue
+              for (let c = area.left; c <= area.right; c += 1) {
+                const column = visibleColumns[c]
+                if (!column) continue
+                const key = `${target.key}:${column.id}`
+                if (seen.has(key)) continue
+                seen.add(key)
+                if (column.id === "rackNo") {
+                  if (target.rackNo && target.status === "WAREHOUSE") rackTargets.set(target.key, target)
+                } else if (["storageNo", "stock", "confirm"].includes(column.id)) {
+                  skippedProtected = true
+                } else if (target.sample?.sourceSheet === FABRIC1_INTAKE_SHEET && FABRIC1_EDITABLE.has(column.id) && cellValue(target, column.id).trim()) {
+                  fabricTargets.push({ item: target, columnId: column.id })
+                }
+              }
+            }
+          }
+          event.preventDefault()
+          void (async () => {
+            const rackCount = await saveFabricRackNos([...rackTargets.values()].map((target) => ({ item: target, rackNo: "" })))
+            const fabricCount = await clearFabric1Cells(fabricTargets)
+            const count = rackCount + fabricCount
+            const cleared = count ? `셀 ${count}개를 지웠습니다.` : "지울 수 있는 값이 없습니다."
+            const protectedNote = skippedProtected ? " R&D No., 재고, 입고확인 칸은 지우지 않습니다." : ""
+            setSelectionNotice(`${cleared}${protectedNote}`)
+          })().catch(() => setSelectionNotice("선택한 셀을 지우지 못했습니다."))
+          return
+        }
         const rackCol = visibleColumns.findIndex((column) => column.id === "rackNo")
         if (rackCol < 0) return
         const targets = new Map<string, FabricLedgerItem>()
@@ -1556,7 +1653,7 @@ export function Warehouse() {
             }}>
           <table className="w-full table-fixed select-none border-separate border-spacing-0 text-xs [&_input]:select-text [&_textarea]:select-text" style={{ width: tableWidth, minWidth: tableWidth }}>
             <colgroup>
-              <col style={{ width: GRIP_WIDTH }} />
+              <col style={{ width: gripWidth }} />
               {visibleColumns.map((column) => <col key={column.id} style={{ width: widthOf(column) }} />)}
               <col style={{ width: ACTION_WIDTH }} />
             </colgroup>
@@ -1576,7 +1673,7 @@ export function Warehouse() {
                 </TableHead>
               </TableRow>
               <TableRow className="h-8 hover:bg-[var(--card)]">
-                {groupedColumns.flatMap((group) => group.columns.map((column) => <TableHead key={column.id} className="group/head relative sticky top-8 z-30 truncate border-b border-r border-[var(--border)] px-1.5 text-xs font-normal text-[var(--muted-foreground)]" style={{ background: `color-mix(in srgb, ${group.color} 7%, ${accent.headBg})` }} title={column.label}>{column.label}{filterButton(column)}<span aria-hidden="true" title={`${column.label} 너비 조절`} onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></TableHead>))}
+                {groupedColumns.flatMap((group) => group.columns.map((column) => <TableHead key={column.id} className={`${teamScope === "team1" ? "text-center" : ""} group/head relative sticky top-8 z-30 truncate border-b border-r border-[var(--border)] px-1.5 text-xs font-normal text-[var(--muted-foreground)]`} style={{ background: `color-mix(in srgb, ${group.color} 7%, ${accent.headBg})` }} title={column.label}>{column.label}{filterButton(column)}<span aria-hidden="true" title={`${column.label} 너비 조절`} onMouseDown={(event) => startColumnResize(column, event)} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></TableHead>))}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1595,6 +1692,7 @@ export function Warehouse() {
                   <TableCell className="sticky left-0 z-20 h-8 cursor-ns-resize border-b border-r border-[var(--border)] px-1.5 py-0" style={{ background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" }} title="끌어서 여러 행 선택" onMouseDown={(event) => beginRangeSelect(event, index)} onMouseEnter={() => extendRangeSelect(index)} onClick={(event) => event.stopPropagation()}>
                     <div className="flex items-center justify-center gap-0.5">
                       <Checkbox checked={selected} onCheckedChange={(value) => toggleChecked(item.key, value === true)} aria-label={`${item.styleNo || item.flNo} 선택`} />
+                      {teamScope === "team1" ? <button type="button" className="inline-flex size-5 items-center justify-center rounded text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]" aria-label="반출 이력" title="반출 이력" onMouseDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); openOutboundHistory(item.key) }}><History className="size-3.5" /></button> : null}
                     </div>
                   </TableCell>
                   {visibleColumns.map((column) => {
@@ -1614,19 +1712,22 @@ export function Warehouse() {
                     const cellActive = selectedCell?.row === item.key && selectedCell.col === column.id
                     const confirmed = Boolean(item.confirmedAt)
                     const manualId = canEditScope && item.sample?.sourceSheet === WEB_INTAKE_SHEET ? item.sample.id : undefined
+                    const fabric1Id = canEditScope && teamScope === "team1" && item.sample?.sourceSheet === FABRIC1_INTAKE_SHEET ? item.sample.id : undefined
+                    const fabric1Editable = Boolean(fabric1Id) && FABRIC1_EDITABLE.has(column.id)
                     // Rack No.는 대장 행이든 DD 행이든 창고보관 원단이면 모두 편집한다(원단별 상태에만 저장).
                     const rackEditable = canEditScope && column.id === "rackNo" && item.status === "WAREHOUSE"
                     // R&D No.는 채번 기록이라 창고보관 상태에서만, 편집 권한이 있을 때만 고친다.
                     // 소진·폐기로 넘어간 건은 고치지 않는다. 지난 출고 자료와 어긋난다.
                     const storageEditable = canEditScope && column.id === "storageNo" && item.status === "WAREHOUSE"
-                    const editable = rackEditable || storageEditable || (Boolean(manualId) && MANUAL_EDITABLE.has(column.id))
+                    const editable = rackEditable || storageEditable || fabric1Editable || (Boolean(manualId) && MANUAL_EDITABLE.has(column.id))
                     const editing = editable && editCell?.row === item.key && editCell.col === column.id
-                    return <TableCell key={column.id} className={`h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; if (event.ctrlKey || event.metaKey) { if (cellRange) setExtraCellRanges((current) => [...current, cellRange]) } else setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) { setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }) } setCellMenu({ x: event.clientX, y: event.clientY }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (canEditScope && column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else openDetail(item.key) }}>{editing
+                    return <TableCell key={column.id} className={`${teamScope === "team1" ? "text-center [&_.flex]:justify-center" : ""} h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; if (event.ctrlKey || event.metaKey) { if (cellRange) setExtraCellRanges((current) => [...current, cellRange]) } else setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) { setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }) } setCellMenu({ x: event.clientX, y: event.clientY, key: item.key }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (canEditScope && column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else if (teamScope !== "team1") openDetail(item.key) }}>{editing
                       ? <input
                           autoFocus
+                          type={fabric1Editable && column.id === "requestDate" ? "date" : "text"}
                           defaultValue={String(cellRawValue(item, column.id) ?? "")}
                           className="h-7 w-full rounded-none border-0 bg-[var(--card)] px-1 text-xs text-[var(--foreground)] outline-none ring-2 ring-inset ring-[var(--ring)]"
-                          list={rackEditable ? "warehouse-rack-positions" : undefined}
+                          list={rackEditable ? "warehouse-rack-positions" : fabric1Editable && column.id === "construction" ? "warehouse-fabric1-constructions" : undefined}
                           onBlur={(event) => {
                             if (storageEditable) {
                               void commitStorageNo(item, event.target.value)
@@ -1638,6 +1739,14 @@ export function Warehouse() {
                               const normalized = normalizeRackNo(event.target.value)
                               if (normalized === null) setSelectionNotice(RACK_FORMAT_HINT)
                               else void saveFabricRackNo(item, normalized)
+                            } else if (fabric1Editable) {
+                              const before = cellRawValue(item, column.id).trim()
+                              let value = event.target.value.trim()
+                              if ((column.id === "priceYd" || column.id === "priceLb") && value && Number(value) === 0) value = ""
+                              if (value !== before) {
+                                if (FABRIC1_SAMPLE_EDITABLE.has(column.id)) void updateManualIntake(fabric1Id as string, column.id, value)
+                                else if (FABRIC1_OVERRIDE_EDITABLE.has(column.id)) void saveFabricFields(item, { [column.id]: value })
+                              }
                             } else if (column.id === "flNo") {
                               const value = event.target.value
                               if (value.trim() !== item.flNo.trim()) {
@@ -1656,7 +1765,8 @@ export function Warehouse() {
                           }}
                         />
                       : coreCell(item, column.id)}
-                    {editing && rackEditable ? <datalist id="warehouse-rack-positions"><option value={RACK_NONE_LABEL} />{RACK_POSITIONS.map((position) => <option key={position} value={position} />)}</datalist> : null}</TableCell>
+                    {editing && rackEditable ? <datalist id="warehouse-rack-positions">{usedRackNos.map((position) => <option key={position} value={position} />)}</datalist> : null}
+                    {editing && fabric1Editable && column.id === "construction" ? <datalist id="warehouse-fabric1-constructions">{CONSTRUCTIONS.map((value) => <option key={value} value={value} />)}</datalist> : null}</TableCell>
                   })}
                   <TableCell className="h-8 border-b border-[var(--border)] px-1.5 py-0 text-right" data-no-range onClick={(event) => event.stopPropagation()}>{actionCell(item)}</TableCell>
                 </TableRow>
@@ -1748,6 +1858,7 @@ export function Warehouse() {
 
     {rackView ? <RackMap items={storedItems} onOpenSlot={openRackSlot} /> : <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>
       <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2">
+        {teamScope === "team1" && tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" className="shrink-0" onClick={() => setFabric1IntakeOpen(true)}><Plus />신규 입고</Button> : null}
         <label className="relative block min-w-52 flex-1"><span className="sr-only">창고 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="R&D No., Style, FL, Buyer 검색" className="pl-9" /></label>
         <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{TAB_META[tab].label} <strong className="text-[var(--foreground)]">{rows.length.toLocaleString("ko-KR")}</strong>건 · 선택 {selectedRows.length}건</span>
         {tab === "READY" && !hiddenOnly && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RECEIVE", selectedRows)}><PackageCheck />선택 입고</Button> : null}
@@ -1756,7 +1867,6 @@ export function Warehouse() {
         {tab === "WAREHOUSE" && canEditScope ? <div className="flex shrink-0 items-center gap-2">
           <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("CONFIRM", selectedRows)} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-emerald-600/40 dark:bg-emerald-500 dark:hover:bg-emerald-600"><PackageCheck />입고 확인</Button>
           <Button type="button" size="sm" variant="outline" disabled={!selectedRows.some((item) => item.confirmedAt)} title={selectedRows.some((item) => item.confirmedAt) ? "선택한 원단의 실물 확인 표시를 지웁니다" : "확인된 원단을 먼저 선택하세요."} onClick={() => openAction("UNCONFIRM", selectedRows)}><PackageX />입고 확인 취소</Button>
-          <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} title="선택한 원단의 R&D No. 뒤에 R을 붙이거나 뗍니다. 채번은 바뀌지 않습니다." onClick={() => void toggleRollMark()}>롤 표시</Button>
         </div> : null}
         {tab === "WAREHOUSE" && canEditScope ? <span aria-hidden="true" className="h-5 w-px shrink-0 bg-[var(--border)]" /> : null}
         {tab === "WAREHOUSE" && canRequestOutbound ? <div className="flex shrink-0 items-center gap-2">
@@ -1771,13 +1881,12 @@ export function Warehouse() {
         {(tab === "READY" || tab === "WAREHOUSE") && canEditScope ? <div className="flex shrink-0 items-center gap-2">
           {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("EXHAUST", selectedRows)}><PackageOpen />소진</Button> : null}
           <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("DISPOSE", selectedRows)}><Trash2 />폐기</Button>
-          {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("UNRECEIVE", selectedRows)}><PackageOpen />입고 대기로</Button> : null}
-          {tab === "WAREHOUSE" && unconfirmedCount > 0 ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setBaselineOpen(true)}>전체 확인 처리</Button> : null}
+          {tab === "WAREHOUSE" && teamScope !== "team1" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("UNRECEIVE", selectedRows)}><PackageOpen />입고 대기로</Button> : null}
         </div> : null}
         {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "WAREHOUSE")}><PackageCheck />창고 보관으로</Button> : null}
-        {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "READY")}><PackageOpen />입고 대기로</Button> : null}
+        {tab === "HISTORY" && canEditScope && teamScope !== "team1" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => openAction("RESTORE", selectedRows, "READY")}><PackageOpen />입고 대기로</Button> : null}
         {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!hasSelectedActiveOutbound} title={hasSelectedActiveOutbound ? "선택한 원단의 최근 출고를 취소합니다" : "취소할 출고가 있는 원단을 선택하세요."} onClick={() => openAction("UNOUTBOUND", selectedRows)}><PackageX />출고 취소</Button> : null}
-        {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant={unconfirmedOnly ? "default" : "outline"} aria-pressed={unconfirmedOnly} onClick={() => setUnconfirmedOnly((current) => !current)}>미확인 {unconfirmedCount}건</Button> : null}
+        {tab === "WAREHOUSE" && teamScope !== "team1" ? <Button type="button" size="sm" variant={unconfirmedOnly ? "default" : "outline"} aria-pressed={unconfirmedOnly} onClick={() => setUnconfirmedOnly((current) => !current)}>미확인 {unconfirmedCount}건</Button> : null}
         {tab === "READY" && hiddenCount > 0 ? <Button type="button" size="sm" variant={hiddenOnly ? "default" : "outline"} aria-pressed={hiddenOnly} title="선택 삭제로 목록에서 감춘 행입니다" onClick={() => setHiddenOnly((current) => !current)}>숨긴 행 {hiddenCount}건</Button> : null}
         {hiddenOnly && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => void restoreHiddenRows()}><PackageCheck />되살리기</Button> : null}
       </div>
@@ -1800,12 +1909,29 @@ export function Warehouse() {
     {cellMenu ? <>
       <div className="fixed inset-0 z-[85]" onMouseDown={() => setCellMenu(null)} onContextMenu={(event) => { event.preventDefault(); setCellMenu(null) }} />
       <div role="menu" className="fixed z-[90] w-40 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-1 text-xs shadow-lg" style={{ left: Math.min(cellMenu.x, window.innerWidth - 176), top: Math.min(cellMenu.y, window.innerHeight - 120) }}>
+        {teamScope === "team1" ? <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { const key = cellMenu.key; setCellMenu(null); openDetail(key) }}><Info className="size-3.5" />원단 상세</button> : null}
         <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => void copyRange()}><Copy className="size-3.5" />복사 (Ctrl+C)</button>
         <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { if (rangeRect) { setExtraCellRanges([]); setCellRange({ ar: rangeRect.top, ac: 0, fr: rangeRect.bottom, fc: visibleColumns.length - 1 }) } setCellMenu(null) }}><Rows3 className="size-3.5" />행 전체 선택</button>
         <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--muted-foreground)] hover:bg-[var(--muted)]" onClick={() => { setExtraCellRanges([]); setCellRange(null); setCellMenu(null) }}>선택 해제</button>
       </div>
     </> : null}
 
+    <Fabric1IntakeDialog
+      open={fabric1IntakeOpen}
+      onOpenChange={setFabric1IntakeOpen}
+      ledger={ledger}
+      defaultOwner={defaultRequester}
+      suggestNumbers={suggestFabric1Numbers}
+      onSaved={(storageNo, notice) => {
+        setSearch("")
+        setColumnFilters({})
+        setSortRule(null)
+        setHiddenOnly(false)
+        setUnconfirmedOnly(false)
+        setChecked(new Set())
+        setSelectionNotice(notice ?? `R&D No. ${storageNo} 입고했습니다.`)
+      }}
+    />
     <OutboundRequestMailDialog open={outboundMailOpen} onOpenChange={setOutboundMailOpen} items={selectedRows} defaultRequester={defaultRequester} />
     <InboundRequestMailDialog open={inboundMailKeys.length > 0} onOpenChange={(open) => { if (!open) setInboundMailKeys([]) }} items={inboundMailItems} defaultRequester={defaultRequester} />
     <FlEntryCheckDialog
@@ -1862,41 +1988,19 @@ export function Warehouse() {
       </DialogContent>
     </Dialog>
 
-    <Dialog open={baselineOpen} onOpenChange={(open) => { if (!open && !saving) setBaselineOpen(false) }}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>기존 재고 전체 확인 처리</DialogTitle><DialogDescription>엑셀 대장에서 넘어온 재고를 한 번에 확인된 것으로 표시합니다.</DialogDescription></DialogHeader>
-        <DialogBody className="space-y-3 text-sm">
-          <p>지금 창고 보관 중 미확인이 <strong>{unconfirmedCount}건</strong>입니다. 전부 확인 처리합니다.</p>
-          <p className="text-xs text-[var(--muted-foreground)]">대장의 회색 표시는 셀 서식이라 읽어올 수 없습니다. 그래서 어느 건이 확인됐는지 알 수 없고, 지금 창고에 있는 재고를 확인된 것으로 봅니다. 이력에는 &quot;기존 재고 일괄 확인 (엑셀 대장 이관)&quot;으로 남습니다.</p>
-          <p className="text-xs text-[var(--muted-foreground)]">이 작업은 한 번만 하면 됩니다. 앞으로 입고되는 건은 창고팀이 건별로 확인합니다. 되돌리려면 해당 건을 입고 대기로 보냈다가 다시 입고해야 합니다.</p>
-        </DialogBody>
-        <DialogFooter>
-          <Button type="button" variant="outline" disabled={saving} onClick={() => setBaselineOpen(false)}>취소</Button>
-          <Button type="button" disabled={saving} onClick={async () => {
-            setSaving(true)
-            try {
-              const targets = scopedLedger.filter((item) => item.status === "WAREHOUSE" && !item.confirmedAt).map((item) => ({ key: item.key, storageNo: item.storageNo }))
-              await confirmWarehouseBaseline(targets)
-              setBaselineOpen(false)
-              setUnconfirmedOnly(false)
-            } catch (error) { window.alert(error instanceof Error ? error.message : "처리하지 못했습니다.") }
-            finally { setSaving(false) }
-          }}>{unconfirmedCount}건 확인 처리</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
 
     <Dialog open={Boolean(outboundHistoryItem)} onOpenChange={(open) => { if (!open) setOutboundHistoryKey(null) }}>
       <DialogContent className="max-w-2xl">
         {outboundHistoryItem ? <>
-          <DialogHeader><DialogTitle>반출 이력</DialogTitle><DialogDescription>{outboundHistoryItem.storageNo || outboundHistoryItem.styleNo || outboundHistoryItem.flNo || "원단"}</DialogDescription></DialogHeader>
-          <DialogBody>
-            <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
+          <DialogHeader><DialogTitle>반출 이력</DialogTitle><DialogDescription>{storageNoLabel(outboundHistoryItem) || "R&D No. 없음"} · {outboundHistoryItem.flNo || "FL No. 없음"}</DialogDescription></DialogHeader>
+          <DialogBody className="space-y-3">
+            {outboundHistoryItem.outbound.length ? <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
               <table className="w-full text-xs">
                 <thead className="bg-[var(--muted)] text-left text-[var(--muted-foreground)]"><tr><th className="px-3 py-2">날짜</th><th className="px-3 py-2">반출처</th><th className="px-3 py-2">사업부</th><th className="px-3 py-2 text-right">수량</th></tr></thead>
-                <tbody>{outboundHistoryItem.outbound.length ? outboundHistoryItem.outbound.map((event, index) => <tr key={`${event.date}-${index}`} className="border-t border-[var(--border)]"><td className="px-3 py-2">{fmtDateFull(event.date)}</td><td className="px-3 py-2">{event.to}</td><td className="px-3 py-2">{event.division ?? ""}</td><td className="px-3 py-2 text-right tabular-nums">{formatYds(event.qty)} yds</td></tr>) : <tr><td colSpan={4} className="px-3 py-8 text-center text-[var(--muted-foreground)]">반출 이력이 없습니다</td></tr>}</tbody>
+                <tbody>{outboundHistoryItem.outbound.map((event, index) => <tr key={`${event.date}-${index}`} className="border-t border-[var(--border)]"><td className="px-3 py-2">{fmtDateFull(event.date)}</td><td className="px-3 py-2">{event.to}</td><td className="px-3 py-2">{event.division ?? ""}</td><td className="px-3 py-2 text-right tabular-nums">{formatYds(event.qty)} yds</td></tr>)}</tbody>
               </table>
-            </div>
+            </div> : <p className="rounded-[var(--radius)] border border-[var(--border)] px-3 py-8 text-center text-xs text-[var(--muted-foreground)]">반출 기록이 없습니다.</p>}
+            <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-xs text-[var(--muted-foreground)]"><span>입고 <strong className="tabular-nums text-[var(--foreground)]">{outboundHistoryItem.yds === null ? "-" : `${formatYds(outboundHistoryItem.yds)} yds`}</strong></span><span>누적 반출 <strong className="tabular-nums text-[var(--foreground)]">{outboundHistoryItem.outboundTotal === null ? "-" : `${formatYds(outboundHistoryItem.outboundTotal)} yds`}</strong></span><span>잔량 <strong className="tabular-nums text-[var(--foreground)]">{outboundHistoryItem.balance === null ? "-" : `${formatYds(outboundHistoryItem.balance)} yds`}</strong></span></div>
           </DialogBody>
         </> : null}
       </DialogContent>
@@ -1913,12 +2017,12 @@ export function Warehouse() {
       <DialogContent className="max-w-xl">
         <DialogHeader><DialogTitle>{actionTitle}</DialogTitle><DialogDescription>{actionDialog?.kind === "UNOUTBOUND" ? "원단마다 가장 최근 출고 한 건을 취소합니다. 잔량이 돌아오고, 소진된 원단은 창고 보관으로 돌아갑니다. 출고 기록은 지우지 않고 취소 기록을 덧붙입니다." : actionItems.length === 1 ? `${storageNoLabel(actionItems[0]) || "자동 채번"} · ${actionItems[0]?.styleNo || actionItems[0]?.flNo || "원단"}` : `선택한 ${actionItems.length}건을 처리합니다.`}</DialogDescription></DialogHeader>
         <DialogBody className="space-y-4">
-          {actionDialog?.kind === "RECEIVE" ? <div className="space-y-2"><p className="text-xs text-[var(--muted-foreground)]">빠진 번호를 먼저 메우고 마지막 번호 다음으로 이어 갑니다. 이력으로 간 번호는 다시 씁니다. 8000번대는 타 사업부 대역이라 쓰지 않습니다. 번호는 직접 고칠 수 있고 yds는 비워 두어도 됩니다. 롤 원단은 체크하면 번호 뒤에 R을 붙입니다. 채번은 그대로입니다.</p>{actionItems.map((item, index) => <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_9rem] items-end gap-3 rounded-[var(--radius)] border border-[var(--border)] p-3"><div className="min-w-0"><div className="flex items-center gap-2"><Input aria-label={`${item.styleNo || item.flNo || "원단"} R&D No.`} className="h-8 w-20 font-mono text-sm" value={storageNoFor(index)} onChange={(event) => setReceiveNos((current) => ({ ...current, [item.key]: event.target.value }))} /><span className="truncate text-sm font-medium">{item.styleNo || item.flNo || "미입력"}</span></div><p className="mt-1 truncate text-xs text-[var(--muted-foreground)]">{item.flNo || "FL No. 없음"}</p></div><div className="space-y-1"><Label htmlFor={`receive-yds-${index}`} className="text-xs">보유 yds (옵션)</Label><Input id={`receive-yds-${index}`} type="number" min="0" step="0.01" value={receiveYds[item.key] ?? ""} onChange={(event) => setReceiveYds((current) => ({ ...current, [item.key]: event.target.value }))} /><label className="mt-1 flex items-center gap-1.5 text-xs"><Checkbox checked={receiveRolls[item.key] === true} onCheckedChange={(value) => setReceiveRolls((current) => ({ ...current, [item.key]: value === true }))} aria-label={`${item.styleNo || item.flNo || "원단"} 롤 원단`} /><span>롤 원단</span></label></div></div>)}</div> : null}
+          {actionDialog?.kind === "RECEIVE" ? <div className="space-y-2"><p className="text-xs text-[var(--muted-foreground)]">빠진 번호를 먼저 메우고 마지막 번호 다음으로 이어 갑니다. 7999 다음은 1000부터 이어집니다. 이력으로 간 번호는 다시 씁니다. 8000번대는 타 사업부 대역이라 쓰지 않습니다. 번호는 직접 고칠 수 있고 yds는 비워 두어도 됩니다. 롤 원단은 체크하면 번호 뒤에 R을 붙입니다. 채번은 그대로입니다.</p>{actionItems.map((item, index) => <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_9rem] items-end gap-3 rounded-[var(--radius)] border border-[var(--border)] p-3"><div className="min-w-0"><div className="flex items-center gap-2"><Input aria-label={`${item.styleNo || item.flNo || "원단"} R&D No.`} className="h-8 w-20 font-mono text-sm" value={storageNoFor(index)} onChange={(event) => setReceiveNos((current) => ({ ...current, [item.key]: event.target.value }))} /><span className="truncate text-sm font-medium">{item.styleNo || item.flNo || "미입력"}</span></div><p className="mt-1 truncate text-xs text-[var(--muted-foreground)]">{item.flNo || "FL No. 없음"}</p></div><div className="space-y-1"><Label htmlFor={`receive-yds-${index}`} className="text-xs">보유 yds (옵션)</Label><Input id={`receive-yds-${index}`} type="number" min="0" step="0.01" value={receiveYds[item.key] ?? ""} onChange={(event) => setReceiveYds((current) => ({ ...current, [item.key]: event.target.value }))} /><label className="mt-1 flex items-center gap-1.5 text-xs"><Checkbox checked={receiveRolls[item.key] === true} onCheckedChange={(value) => setReceiveRolls((current) => ({ ...current, [item.key]: value === true }))} aria-label={`${item.styleNo || item.flNo || "원단"} 롤 원단`} /><span>롤 원단</span></label></div></div>)}</div> : null}
           {actionDialog?.kind === "UNRECEIVE" ? <p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건을 입고 대기로 되돌립니다. <strong>채번한 R&D No.가 취소되고 그 번호는 다시 쓸 수 있게 풀립니다.</strong> 실물 확인 표시와 보유 재고도 함께 지워지고, 출고 합계는 0부터 다시 셉니다. 지난 기록은 원단 상세의 이력에 그대로 남습니다.</p> : null}
           {actionDialog?.kind === "UNCONFIRM" ? <p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.filter((item) => item.confirmedAt).length}건의 <strong>실물 확인 표시만 지웁니다.</strong> R&D No., 보유 재고, 출고 기록은 그대로 둡니다. 확인이 안 된 건은 건너뜁니다. 취소 기록은 원단 상세의 이력에 남습니다.</p> : null}
           {actionDialog?.kind === "CONFIRM" ? <div className="space-y-2">
             <p className="text-xs text-[var(--muted-foreground)]">창고에서 실물을 확인한 건만 체크하세요. 확인된 행은 대장에서 회색으로 칠하던 것과 같게 흐리게 보입니다.</p>
-            <p className="text-xs text-[var(--muted-foreground)]">원단을 넣은 칸의 Rack No.를 적어 주세요(예: K-1-1). 모르면 비워 두고 나중에 표에서 적어도 됩니다.</p>
+            <p className="text-xs text-[var(--muted-foreground)]">원단을 넣은 칸의 Rack No.를 적어 주세요. 입력한 값 그대로 저장하고, 이미 쓰인 번호가 참고로 뜹니다. 모르면 비워 두고 나중에 표에서 적어도 됩니다.</p>
             <div className="max-h-72 space-y-1 overflow-y-auto">
               {actionItems.map((item) => {
                 const rackDraft = confirmRacks[item.key] ?? item.rackNo ?? ""
@@ -1945,7 +2049,7 @@ export function Warehouse() {
                 </div>
               })}
             </div>
-            <datalist id="warehouse-confirm-rack-positions"><option value={RACK_NONE_LABEL} />{RACK_POSITIONS.map((position) => <option key={position} value={position} />)}</datalist>
+            <datalist id="warehouse-confirm-rack-positions">{usedRackNos.map((position) => <option key={position} value={position} />)}</datalist>
           </div> : null}
           {actionDialog?.kind === "DISPOSE" ? <div className="space-y-2"><Label htmlFor="warehouse-disposal-reason">폐기 사유</Label><Select value={disposalReason} onValueChange={(value) => setDisposalReason(value as DisposalReason)}><SelectTrigger id="warehouse-disposal-reason"><SelectValue placeholder="사유 선택" /></SelectTrigger><SelectContent>{DISPOSAL_REASONS.map((reason) => <SelectItem key={reason} value={reason}>{reason}</SelectItem>)}</SelectContent></Select><p className="text-xs text-[var(--muted-foreground)]">선택한 {actionItems.length}건에 같은 사유가 기록됩니다.</p></div> : null}
           {actionDialog?.kind === "RESTORE" ? <div className="space-y-2">
@@ -1954,7 +2058,7 @@ export function Warehouse() {
               ? "입고 대기는 채번 전 상태입니다. R&D No.가 풀리고 보유 재고와 출고 합계도 초기화됩니다. 지난 기록은 원단 상세의 이력에 남습니다."
               : "소진·폐기 표시를 지우고 창고 보관으로 되돌립니다. R&D No.와 보유 재고, 출고 이력은 그대로 둡니다."}</p>
           </div> : null}
-          {actionDialog?.kind === "REMOVE" ? <div className="space-y-2"><p className="text-sm">선택한 {actionItems.length}건을 입고 대기 목록에서 숨깁니다.</p><p className="text-xs text-[var(--muted-foreground)]">DD MASTER 원본과 개발 이력은 그대로 남습니다. 창고 화면에서만 감추며 폐기로 기록하지 않습니다. 삭제 기록은 원단 상세의 이력에 남습니다.</p></div> : null}
+          {actionDialog?.kind === "REMOVE" ? <div className="space-y-2"><p className="text-sm">선택한 {actionItems.length}건을 창고 목록에서 삭제합니다.</p><p className="text-xs text-[var(--muted-foreground)]">폐기가 아닙니다. 창고보관, 이력, 창고팀 자료 어디에도 나오지 않고 R&D No.는 다시 쓸 수 있게 풀립니다. 3팀 원단은 DD MASTER 원본과 개발 이력이 그대로 남습니다. 삭제 기록은 작업 이력에 남습니다.</p></div> : null}
           {actionDialog?.kind === "STOCK" ? (() => {
             const outboundTotal = actionItems[0]?.outboundTotal ?? 0
             const changeTotal = (value: string) => {

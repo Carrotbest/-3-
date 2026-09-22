@@ -87,8 +87,12 @@ export interface FabricLedgerItem {
 
 export const STORAGE_NO_MAX = 7999
 
-/** 1팀 대역 시작 번호. 1팀은 여기서부터 상한 없이 순증하고 되감지 않는다. */
+/** 3팀 되감기 시작 번호. 7999 다음은 1000이다(2026-09-22). */
+export const STORAGE_NO_WRAP = 1000
+
+/** 1팀 대역. 8000~9999를 돌고 9999 다음은 8000이다(2026-09-22). */
 export const FABRIC1_STORAGE_NO_MIN = 8000
+export const FABRIC1_STORAGE_NO_MAX = 9999
 
 export function isFabric1Item(item: FabricLedgerItem): boolean {
   return item.sourceSheet === FABRIC1_INTAKE_SHEET
@@ -109,12 +113,16 @@ export function storageNoLabel(item: Pick<FabricLedgerItem, "storageNo" | "roll"
   return /r$/i.test(value) ? value : `${value}R`
 }
 
-/** 3팀(1~7999) 순환 정렬 전용. 1팀 행을 넣지 마라. */
-export function warehouseSequenceStart(numbers: readonly number[]): number {
+/** R&D No. 순환 대역에서 가장 큰 공백 다음 번호를 찾아 시간순 시작점으로 쓴다. */
+export function warehouseSequenceStart(
+  numbers: readonly number[],
+  range: { min: number; max: number } = { min: 1, max: STORAGE_NO_MAX },
+): number {
   const sorted = [...new Set(numbers)].sort((left, right) => left - right)
-  if (sorted.length < 2) return sorted[0] ?? 1
+  if (sorted.length < 2) return sorted[0] ?? range.min
   let start = sorted[0]
-  let widest = sorted[0] + STORAGE_NO_MAX - sorted[sorted.length - 1]
+  const cycleLength = range.max - range.min + 1
+  let widest = sorted[0] + cycleLength - sorted[sorted.length - 1]
   for (let index = 1; index < sorted.length; index += 1) {
     const gap = sorted[index] - sorted[index - 1]
     if (gap > widest) {
@@ -125,11 +133,16 @@ export function warehouseSequenceStart(numbers: readonly number[]): number {
   return start
 }
 
-/** 3팀(1~7999) 순환 정렬 전용. 1팀 행을 넣지 마라. */
-export function warehouseOrderKey(item: FabricLedgerItem, start: number): number {
+/** 순환 대역의 시작점을 기준으로 펼친 정렬 키. */
+export function warehouseOrderKey(
+  item: FabricLedgerItem,
+  start: number,
+  range: { min: number; max: number } = { min: 1, max: STORAGE_NO_MAX },
+): number {
   const number = storageNumberOf(item)
   if (number === null) return Number.MAX_SAFE_INTEGER
-  return number >= start ? number - start : number - start + STORAGE_NO_MAX
+  const cycleLength = range.max - range.min + 1
+  return number >= start ? number - start : number - start + cycleLength
 }
 
 /** 원단 상세에서 보고 고치는 값. 앞 15개는 원장 본문 필드, 뒤는 DD tech·대장 원문에서 온 실무 값이다. */
@@ -139,6 +152,7 @@ export const FABRIC_FIELD_IDS = [
   "yarnDetail", "millYarn", "millKnitting", "millDyeing", "millFinishing",
   "fds", "yds", "review", "passFail", "actualWidth", "actualWeight", "shrinkageLength", "shrinkageWidth",
   "content", "priceYd", "priceLb", "supplier",
+  "millRef",
 ] as const
 export type FabricFieldId = (typeof FABRIC_FIELD_IDS)[number]
 
@@ -320,6 +334,8 @@ function statusFromRecord(record: DevRecord): FabricLedgerStatus {
 
 export function statusFromSample(sample: CompletedSample): FabricLedgerStatus {
   const sheet = normalized(sample.sourceSheet ?? "")
+  // 1팀은 실물이 온 뒤에 등록한다. 등록이 곧 창고 보관이다(입고 대기 단계가 없다).
+  if (sample.sourceSheet === FABRIC1_INTAKE_SHEET) return "WAREHOUSE"
   if (sheet.includes("폐기")) return "DISPOSED"
   if (sheet.includes("소진완료") || sheet.includes("소진")) return "EXHAUSTED"
   if (sheet.includes("창고보관") || sheet.includes("창고")) return "WAREHOUSE"
@@ -340,7 +356,7 @@ const statusRank: Record<FabricLedgerStatus, number> = {
 
 /** 직접 등록 행은 배열 위치가 아니라 자기 id로 식별한다. 대장을 다시 올려 행 인덱스가 바뀌어도 기존 기록을 찾는다. */
 function sampleFallback(sample: CompletedSample, index: number): string {
-  return sample.sourceSheet === WEB_INTAKE_SHEET && sample.id ? sample.id : `${sample.sourceSheet ?? "sample"}::${index}`
+  return (sample.sourceSheet === WEB_INTAKE_SHEET || sample.sourceSheet === FABRIC1_INTAKE_SHEET) && sample.id ? sample.id : `${sample.sourceSheet ?? "sample"}::${index}`
 }
 
 function emptyFromRecord(record: DevRecord, key: string): FabricLedgerItem {

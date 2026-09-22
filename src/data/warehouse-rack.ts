@@ -41,18 +41,19 @@ export const RACK_POSITIONS: readonly string[] = [...RACK_SLOTS]
 export const RACK_FORMAT_HINT = "Rack No.는 K-1-1처럼 입력하세요. K열 rack 1~9, L열 rack 1~10, 칸 1~3입니다."
 
 /**
- * 사람이 친 값을 표준 형식으로 바꾼다. `k 1 1`, `K1-1`, `k-01-1`도 받는다.
- * 빈 값, "선택 안함", "미지정", "-"는 ""(지정 해제), 규칙에 안 맞으면 null이다.
+ * 사람이 친 값을 저장할 값으로 바꾼다. 선반 배치가 바뀔 수 있어 형식을 강제하지 않는다(2026-09-22).
+ * `k 1 1`, `K1-1`처럼 현재 K/L 선반 규칙에 맞으면 `K-1-1`로 맞춰 주고, 그 밖의 값은 대문자로 그대로 둔다.
+ * 빈 값, "선택 안함", "미지정", "-"는 ""(지정 해제)다. 반환형의 null은 옛 호출부 호환용이며 이제 나오지 않는다.
  */
 export function normalizeRackNo(raw: string): string | null {
   const text = raw.trim().toUpperCase()
   if (!text || text === RACK_NONE_LABEL || text === "미지정" || text === "-") return ""
   const match = /^([A-Z])\s*[-\s]?\s*(\d{1,2})\s*[-\s]\s*(\d{1,2})$/.exec(text)
-  if (!match) return null
+  if (!match) return text
   const [, row, rackText, levelText] = match
   const racks = RACK_ROWS[row]
   const rack = Number(rackText)
   const level = Number(levelText)
-  if (!racks || rack < 1 || rack > racks || level < 1 || level > RACK_LEVELS) return null
+  if (!racks || rack < 1 || rack > racks || level < 1 || level > RACK_LEVELS) return text
   return `${row}-${rack}-${level}`
 }
