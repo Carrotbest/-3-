@@ -44,6 +44,7 @@
 - 요청 연결 도우미(`RequestLinkHelperDialog`, `buildLinkHelperGroups`): 미연결 DD 행을 Style No.로 묶어 Garment No. 일치 후보로 auto·review·none을 가른다. auto는 후보 1개이고 미연결 옵션 수=행 수일 때만이며 값을 채우지 않는다. 짝 규칙은 `defaultLinkPairs` 하나다. 일괄 연결은 그룹 결과를 누적해 앞 그룹이 연결한 옵션을 막고, 스냅샷·쓰기는 한 번이다.
 
 ## FABRIC REQUEST (`src/routes/FabricRequest.tsx`, `src/data/request-template.ts`, `src/data/request-image.ts`)
+- 화면 이름은 2026-09-22부터 DEVELOPMENT REQUEST다(경로 `/request`, 코드 이름 FabricRequest는 그대로). `/development`는 PROGRESS OVERVIEW. 네비 순서: HOME, FABRIC ANALYSIS, DEVELOPMENT REQUEST, DD MASTER, PROGRESS OVERVIEW, WAREHOUSE.
 - 표 편집은 DD MASTER와 같은 선택·키보드·클립보드·되돌리기 단축키를 쓴다.
 - 드래그 선택(셀, 행 머리, 채우기 핸들) 중 표 가장자리 가까이 가면 `scrollRef` 상자를 굴린다. 위쪽 기준은 sticky 머리글 아래 선이고, 행 머리 드래그는 세로로만 굴린다. 매 프레임 `elementFromPoint`로 포인터 아래 칸(`data-slot-index`, `data-col-id`, 행 머리 `data-row-start`)을 다시 찾아 선택을 넓히며, 같은 칸이면 setRange를 건너뛴다(프레임마다 재렌더 방지).
 - 격자는 slot(블럭당 `max(1, 옵션 수)`) × `visibleColumns`다. style 열은 블럭 병합 셀이며 복사는 첫 slot에만 값을 쓰고, 붙여넣기는 옵션을 자동으로 늘리지 않는다.
@@ -140,6 +141,7 @@
 - 데모 FL(`sample.ts` `FL-26xxx`)은 실제 형식(`FL+YY+MM+4자리`)과 달라 RDDA/개발처 집계가 0으로 보일 수 있음(실데이터는 정상). RDDA 집계 기준 미확정 — 손대기 전 확정(`fabric-rnd-fl-ledger`).
 - 날짜 파싱 `XLSX.SSF.format("yyyy-mm-dd", value)`(하루 밀림 방지). zaji는 `cellDates:true`.
 - 팝업 투명 버그: `bg-background` 미매핑 → `src/components/ui/dialog.tsx`는 `var(--card)` 명시 사용.
+- **`DialogContent`에 `relative`, `absolute`, `static`을 넘기지 말 것.** tailwind-merge가 기본 `fixed`를 지워 팝업이 문서 흐름으로 떨어진다. 화면 아래에 깔리고, 머리말을 끌면 좌표가 어긋나 사라진다(2026-09-22 분석 결과 팝업). 안쪽 absolute 요소의 기준은 `fixed`로 이미 선다.
 - **긴 목록을 `SectionCard`로 감싸지 말 것.** `Reveal`의 IntersectionObserver 임계값이 0.12라 카드가 뷰포트보다 훨씬 길면 영영 안 보인다. 기사 피드는 `Card`를 직접 쓴다.
 - TREND의 HIT는 조회수가 아니라 같은 dedup_key를 다룬 매체 수다. RSS에 조회수가 없다.
 - **인라인 편집기의 키 처리는 `stopPropagation`이 필수다**(`editorKeyHandler`). 표 단축키는 window 의 keydown 이 받고 "포커스가 입력칸이면 무시"로 편집 중을 피하는데, Enter·Tab 은 편집기가 먼저 편집기를 닫아 버려 window 에 닿을 때는 그 방어가 이미 무너져 있다. 막지 않으면 선택이 두 칸씩 건너뛴다. `preventDefault`로는 안 막힌다.

@@ -31,3 +31,18 @@ export async function saveInboundRecipients(list: readonly MailAddress[]): Promi
   }, { merge: true })
   return inbound
 }
+
+export async function loadAnalysisRecipients(): Promise<MailAddress[]> {
+  const snap = await getDoc(doc(db, ...RECIPIENT_DOC))
+  return snap.exists() ? cleanList(snap.data().analysis) : []
+}
+
+export async function saveAnalysisRecipients(list: readonly MailAddress[]): Promise<MailAddress[]> {
+  const analysis = cleanList(list)
+  await setDoc(doc(db, ...RECIPIENT_DOC), {
+    analysis,
+    updatedAt: serverTimestamp(),
+    updatedBy: auth.currentUser?.email ?? "",
+  }, { merge: true })
+  return analysis
+}

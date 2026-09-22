@@ -27,7 +27,7 @@ export const AUDIT_RETENTION_DAYS = 90
  */
 const MAX_CHANGES_PER_DOC = 2000
 
-export type AuditScreen = "dd" | "ts" | "request" | "warehouse" | "rdda"
+export type AuditScreen = "dd" | "ts" | "request" | "warehouse" | "rdda" | "analysis"
 export type AuditKind = "edit" | "paste" | "fill" | "replace" | "clear" | "intake" | "upload" | "warehouse" | "revert"
 
 /** 셀 1개의 변경. 키를 짧게 쓴다. 문서 수천 개가 쌓이므로 이름 길이가 그대로 용량이다. */
@@ -56,8 +56,9 @@ export interface AuditAction {
 const SCREEN_LABEL: Record<AuditScreen, string> = {
   dd: "DD MASTER",
   ts: "TROUBLE SHOOTING",
-  request: "FABRIC REQUEST",
+  request: "DEVELOPMENT REQUEST",
   warehouse: "WAREHOUSE",
+  analysis: "FABRIC ANALYSIS",
   rdda: "RDDA",
 }
 
@@ -155,7 +156,7 @@ const actorName = (): string => {
  * 실패해도 던지지 않는다. 로그를 못 남겼다고 사용자의 저장이 막히면 안 된다.
  */
 /** 이력 화면 이름 → 그 화면이 쓰는 대표 저장 키. */
-const AUDIT_SCREEN_KEY: Partial<Record<AuditScreen, string>> = { request: "requests", rdda: "rddaReports", ts: "ts", dd: "records", warehouse: "fabricEvents" }
+const AUDIT_SCREEN_KEY: Partial<Record<AuditScreen, string>> = { request: "requests", rdda: "rddaReports", analysis: "analysisRequests", ts: "ts", dd: "records", warehouse: "fabricEvents" }
 
 export async function logAction(input: {
   kind: AuditKind

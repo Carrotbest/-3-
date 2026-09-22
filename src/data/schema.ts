@@ -247,6 +247,48 @@ export interface FabricAnalysisRow {
   owner: string
 }
 
+export const ANALYSIS_STATES = ["작성", "의뢰", "완료", "취소"] as const
+export type AnalysisState = (typeof ANALYSIS_STATES)[number]
+export const ANALYSIS_REQUEST_TYPES = ["Normal", "Urgent"] as const
+export type AnalysisRequestType = (typeof ANALYSIS_REQUEST_TYPES)[number]
+
+/** FABRIC ANALYSIS 분석 의뢰 1건. AX 리캡 22열을 그대로 옮기고 사진과 상태를 더했다. */
+export interface AnalysisRequest {
+  id: string
+  anNo: string
+  state: AnalysisState
+  requestedAt: string
+  requestType: AnalysisRequestType
+  requester: string
+  requesterEmail: string
+  department: string
+  customer: string
+  objective: string
+  description: string
+  requesterComment: string
+  source: string
+  sourceCode: string
+  season: string
+  gender: string
+  brand: string
+  construction: string
+  contents: string
+  weight: number | ""
+  imagePath?: string
+  imageThumbPath?: string
+  resultImages?: { key: string; imagePath: string; imageThumbPath: string }[]
+  inCharge: string
+  yarnDescription: string
+  constructionRnd: string
+  weightRnd: number | ""
+  commentRnd: string
+  finishedAt: string
+  requestReqId?: string
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
 export type MaterialKind = "TS" | "STUDY" | "MACRO" | "FABRIC" | "PORTFOLIO"
 
 export interface MaterialDetailRow {

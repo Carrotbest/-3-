@@ -66,7 +66,7 @@ export function RequestPickerDialog({ open, onOpenChange, requests, records, sty
 
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="w-[92vw] max-w-4xl">
-      <DialogHeader><DialogTitle>{mode === "link" ? `FABRIC REQUEST 연결 · ${linkRows.length}행` : "FABRIC REQUEST에서 불러오기"}</DialogTitle></DialogHeader>
+      <DialogHeader><DialogTitle>{mode === "link" ? `DEVELOPMENT REQUEST 연결 · ${linkRows.length}행` : "DEVELOPMENT REQUEST에서 불러오기"}</DialogTitle></DialogHeader>
       <DialogBody className="grid grid-cols-[1.1fr_1fr] gap-3">
         <section className="min-w-0 space-y-2">
           <Input className="h-8" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Garment No. · Brand · 차트 · 개발 담당 검색" />

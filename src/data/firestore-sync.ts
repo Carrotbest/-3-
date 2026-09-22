@@ -33,6 +33,7 @@ const MERGE_IDS: Record<string, (item: never) => string> = {
   disposalRounds: (item: { roundId: string }) => item.roundId,
   rddaSnapshots: (item: { weekId: string }) => item.weekId,
   rddaReports: (item: { monthId: string }) => item.monthId,
+  analysisRequests: (item: { id: string }) => item.id,
 }
 
 /**

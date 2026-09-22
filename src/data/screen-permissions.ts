@@ -1,7 +1,7 @@
 export const SCREEN_PERMISSION_OPTIONS = [
   { key: "home", label: "HOME", paths: ["/"] },
-  { key: "fabricRequest", label: "FABRIC REQUEST", paths: ["/request"] },
-  { key: "development", label: "DEVELOPMENT", paths: ["/development"] },
+  { key: "fabricRequest", label: "DEVELOPMENT REQUEST", paths: ["/request"] },
+  { key: "development", label: "PROGRESS OVERVIEW", paths: ["/development"] },
   { key: "ddMaster", label: "DD MASTER", prefixes: ["/development/"] },
   { key: "warehouse", label: "WAREHOUSE", paths: ["/warehouse"], prefixes: ["/fabric/"] },
   // 창고 화면 안에서 1팀 원단 스코프만 지배한다. 경로가 없어 라우팅에는 영향을 주지 않는다.
@@ -121,6 +121,7 @@ export const CACHE_KEY_SCREENS: Record<string, readonly ScreenPermissionKey[]> =
   rdda: ["rdda"],
   rddaSnapshots: ["rdda"],
   rddaReports: ["rdda"],
+  analysisRequests: ["fabricAnalysis"],
   fabricAnalysis: ["fabricAnalysis"],
   materials: ["processInnovation", "portfolio", "study"],
   materialsManual: ["processInnovation", "portfolio", "study"],

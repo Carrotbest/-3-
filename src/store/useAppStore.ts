@@ -6,7 +6,7 @@ import { mergeChemicalPortfolio, type ChemicalItem, type ChemicalPortfolio } fro
 import { recalculateDevelopmentRecords } from "../data/dd-workflow"
 import { buildFabricLedger, canceledOutboundIds, fabricRecordIdIndex, fabricRecordIdOf, fabricRecordIdentity, isFabricBalanceExhausted, type FabricLedgerItem } from "../data/fabric-ledger"
 import type { DisposalCompletionEntry } from "@/data/disposal-round"
-import { MEMBERS, materialIdOf, type CompletedSample, type DevRecord, type DisposalRound, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type RequestArchive, type RequestBoard, type RequestStyle, type StudyRecord } from "../data/schema"
+import { MEMBERS, materialIdOf, type AnalysisRequest, type CompletedSample, type DevRecord, type DisposalRound, type FabricAnalysisRow, type FabricLedgerAction, type FabricLedgerEvent, type FabricLedgerOverride, type FabricLedgerStatus, type MaterialDiagnostics, type MaterialItem, type RequestArchive, type RequestBoard, type RequestStyle, type StudyRecord } from "../data/schema"
 import { FABRIC1_INTAKE_SHEET, WEB_INTAKE_SHEET } from "@/data/schema"
 import {
   sampleCompleted,
@@ -77,6 +77,7 @@ export interface AppState {
   disposalRounds: DisposalRound[]
   rddaSnapshots: RddaWeeklySnapshot[]
   rddaReports: RddaMonthlyReport[]
+  analysisRequests: AnalysisRequest[]
   trends: TrendItem[]
   chemical: ChemicalPortfolio | null
   chemicalManual: ChemicalItem[]
@@ -151,6 +152,7 @@ export function createInitialAppState(): AppState {
     disposalRounds: [],
     rddaSnapshots: [],
     rddaReports: [],
+    analysisRequests: [],
     trends,
     chemical,
     chemicalManual: [],
@@ -253,6 +255,13 @@ export function saveRddaReports(list: RddaMonthlyReport[]): void {
   setAppState({ rddaReports: list })
   void saveCache("rddaReports", list)
   void logAction({ kind: "edit", screen: "rdda", changes: diffByKey(before, list, (item) => item.monthId) })
+}
+
+export function saveAnalysisRequests(list: AnalysisRequest[], kind: AuditKind = "edit"): void {
+  const before = useAppStore.getState().analysisRequests
+  setAppState({ analysisRequests: list })
+  void saveCache("analysisRequests", list)
+  void logAction({ kind, screen: "analysis", changes: diffByKey(before, list, (item) => item.id) })
 }
 
 export function addTeamEvent(event: CalendarEvent): void {

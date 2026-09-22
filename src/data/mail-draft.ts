@@ -54,6 +54,24 @@ export async function copyMailTable(columns: readonly string[], rows: readonly (
   return "text"
 }
 
+/** 첫 문장과 표를 함께 복사한다. mailto로 연 Outlook 본문 첫 줄에 붙여 넣기 위한 내용이다. */
+export async function copyMailBody(lines: readonly string[], columns: readonly string[], rows: readonly (readonly string[])[]): Promise<"html" | "text"> {
+  const table = mailTableHtml(columns, rows)
+  const html = mailBodyHtml(lines, table)
+  const plainLines = lines.map((line) => line === "{table}" ? mailTableTsv(columns, rows) : line)
+  const plain = plainLines.join("\n")
+  const htmlBlob = new Blob([html], { type: "text/html" })
+  const textBlob = new Blob([plain], { type: "text/plain" })
+  try {
+    if (typeof ClipboardItem !== "undefined") {
+      await navigator.clipboard.write([new ClipboardItem({ "text/html": htmlBlob, "text/plain": textBlob })])
+      return "html"
+    }
+  } catch { /* HTML 복사를 지원하지 않으면 일반 텍스트로 재시도한다. */ }
+  await navigator.clipboard.writeText(plain)
+  return "text"
+}
+
 const utf8Base64 = (value: string): string => {
   const bytes = new TextEncoder().encode(value)
   let binary = ""

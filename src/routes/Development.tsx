@@ -706,7 +706,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
   return (
     <section className="min-w-0 space-y-6">
       <PageHeader
-        title="DEVELOPMENT"
+        title="PROGRESS OVERVIEW"
         subtitle="샘플 개발 유형과 공정 도달률, 담당자별 현황을 한눈에 확인합니다."
       />
 
@@ -1481,7 +1481,7 @@ function DevelopmentList() {
   return (
     <section className="min-w-0 space-y-6">
       <PageHeader
-        title="DEVELOPMENT"
+        title="PROGRESS OVERVIEW"
         subtitle={view === "completed"
           ? "카테고리 라우트와 무관한 전체 완료 샘플 아카이브입니다."
           : routeCategory

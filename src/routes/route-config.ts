@@ -40,8 +40,8 @@ export interface NavigationGroup {
 
 export const routeDefinitions: RouteDefinition[] = [
   { path: "/", title: "HOME", subtitle: "원단 개발 업무 현황을 한눈에 확인합니다." },
-  { path: "/request", title: "FABRIC REQUEST", subtitle: "1팀 의뢰 건의 접수와 개발 현황을 한 원장에서 관리합니다." },
-  { path: "/development", title: "DEVELOPMENT", subtitle: "개발 건의 전체 진행 현황을 확인합니다." },
+  { path: "/request", title: "DEVELOPMENT REQUEST", subtitle: "1팀 의뢰 건의 접수와 개발 현황을 한 원장에서 관리합니다." },
+  { path: "/development", title: "PROGRESS OVERVIEW", subtitle: "개발 건의 전체 진행 현황을 확인합니다." },
   { path: "/development/workspace", title: "DD MASTER", subtitle: "Development Dashboard 전체 열과 샘플 관리 상태를 한 시트에서 관리합니다." },
   { path: "/development/eu", title: "DD MASTER · EU", subtitle: "EU 개발 건을 확인합니다." },
   { path: "/development/season", title: "DD MASTER · SEASON", subtitle: "시즌별 개발 건을 확인합니다." },
@@ -50,7 +50,7 @@ export const routeDefinitions: RouteDefinition[] = [
   { path: "/rdda", title: "RDDA REPORT", subtitle: "RDDA 보고 현황을 확인합니다." },
   { path: "/ts", title: "TROUBLE SHOOTING", subtitle: "Technical Service 업무를 관리합니다." },
   { path: "/study", title: "TECHNICAL REFERENCES", subtitle: "팀 학습 과제와 점검 현황을 확인합니다." },
-  { path: "/fabric-analysis", title: "FABRIC ANALYSIS", subtitle: "원단 분석 화면을 준비하고 있습니다." },
+  { path: "/fabric-analysis", title: "FABRIC ANALYSIS", subtitle: "원단 분석 의뢰와 결과를 관리합니다." },
   { path: "/warehouse", title: "WAREHOUSE", subtitle: "완료 샘플의 입고·보관·소진·폐기 이력을 관리합니다." },
   { path: "/calendar", title: "CALENDAR", subtitle: "팀 일정과 주요 납기를 확인합니다." },
   { path: "/setting", title: "SETTING", subtitle: "사용자 권한, 데이터 보호, 작업 이력, 연동을 관리합니다." },
@@ -72,8 +72,8 @@ export const navigationGroups: NavigationGroup[] = [
     label: "샘플 관리",
     accent: "#0d9488",
     items: [
-      { label: "FABRIC REQUEST", path: "/request", icon: ClipboardList },
-      { label: "DEVELOPMENT", path: "/development", icon: FlaskConical },
+      { label: "FABRIC ANALYSIS", path: "/fabric-analysis", icon: Microscope },
+      { label: "DEVELOPMENT REQUEST", path: "/request", icon: ClipboardList },
       {
         label: "DD MASTER",
         path: "/development/workspace",
@@ -85,6 +85,7 @@ export const navigationGroups: NavigationGroup[] = [
           { label: "PROJECT", path: "/development/project" },
         ],
       },
+      { label: "PROGRESS OVERVIEW", path: "/development", icon: FlaskConical },
       { label: "WAREHOUSE", path: "/warehouse", icon: Boxes },
     ],
   },
@@ -95,7 +96,6 @@ export const navigationGroups: NavigationGroup[] = [
       { label: "TROUBLE SHOOTING", path: "/ts", icon: Wrench },
       { label: "TECHNICAL REFERENCES", path: "/study", icon: BookOpenCheck },
       { label: "RDDA REPORT", path: "/rdda", icon: ClipboardList },
-      { label: "FABRIC ANALYSIS", path: "/fabric-analysis", icon: Microscope },
     ],
   },
   {

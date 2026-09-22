@@ -2119,7 +2119,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const { next, linked } = applyRequestLinks(before, freshStyle, pairs, fillEmpty)
     await writeDevelopmentRecords(next, false, "edit")
     setLinkRows(null)
-    notify(`${linked}행을 FABRIC REQUEST에 연결했습니다.`)
+    notify(`${linked}행을 DEVELOPMENT REQUEST에 연결했습니다.`)
   }
 
   // 요청 연결 도우미. 짝 규칙은 defaultLinkPairs 하나를 쓰고, 여러 스타일을 모아 스냅샷·쓰기를 한 번만 한다.
@@ -2162,7 +2162,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const unlinkSelectedRequests = async () => {
     if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const rows = linkTargetRows().filter((row) => row.tech?.requestLink)
-    if (!rows.length || !window.confirm(`선택한 ${rows.length}행의 FABRIC REQUEST 연결을 해제할까요? 입력한 값은 그대로 둡니다.`)) return
+    if (!rows.length || !window.confirm(`선택한 ${rows.length}행의 DEVELOPMENT REQUEST 연결을 해제할까요? 입력한 값은 그대로 둡니다.`)) return
     const before = useAppStore.getState().records
     pushUndoSnapshot(before)
     const { next, removed } = removeRequestLinks(before, new Set(rows.map(recordIdentity)))
@@ -2491,7 +2491,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       const z = await parseZaji(file)
       const recs = z.options.length ? z.options.map((_, index) => zajiToRecord(z, index)) : [applyZajiHeader(createBlankDevRecord(), z)]
       setAttached(z); setIntake(recs); setIntakeOpt(0); setIntakeRequest(null)
-      setIntakeError("작업지시서를 첨부해 FABRIC REQUEST 연결을 해제했습니다.")
+      setIntakeError("작업지시서를 첨부해 DEVELOPMENT REQUEST 연결을 해제했습니다.")
     } catch (err) {
       setAttachError(err instanceof Error ? err.message : "작지 파싱에 실패했습니다.")
     } finally {
@@ -2877,7 +2877,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                           </div>
                         </>
                       : column.id === "styleNo"
-                        ? (() => { const target = resolveRequestLink(requestIndex, record); return <span className="flex items-center gap-1 truncate" title={warnings.map((warning) => warning.label).join(" · ") || undefined}>{isRecent ? <span className="shrink-0 rounded-full bg-[linear-gradient(110deg,#06b6d4,#2563eb_55%,#7c3aed)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.04em] text-white">신규</span> : null}<span className="truncate">{text(record.styleNo)}</span>{target === "missing" ? <span title="연결된 요청 스타일 또는 옵션을 찾을 수 없습니다. 우클릭 > 요청 연결 해제로 정리하세요." className="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold tracking-wide text-[var(--destructive)] bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)]">REQ?</span> : target ? <button type="button" title={`FABRIC REQUEST · ${target.style.chart} · #${target.style.seq} · Opt ${target.option.no} · 클릭해서 열기`} onMouseDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); navigate(`/request?focus=${target.style.reqId}`) }} className="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold tracking-wide text-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--primary)_22%,transparent)]">REQ</button> : null}{warnings.length ? <TriangleAlert className="size-3.5 shrink-0 text-[var(--destructive)]" /> : null}</span> })()
+                        ? (() => { const target = resolveRequestLink(requestIndex, record); return <span className="flex items-center gap-1 truncate" title={warnings.map((warning) => warning.label).join(" · ") || undefined}>{isRecent ? <span className="shrink-0 rounded-full bg-[linear-gradient(110deg,#06b6d4,#2563eb_55%,#7c3aed)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.04em] text-white">신규</span> : null}<span className="truncate">{text(record.styleNo)}</span>{target === "missing" ? <span title="연결된 요청 스타일 또는 옵션을 찾을 수 없습니다. 우클릭 > 요청 연결 해제로 정리하세요." className="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold tracking-wide text-[var(--destructive)] bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)]">REQ?</span> : target ? <button type="button" title={`DEVELOPMENT REQUEST · ${target.style.chart} · #${target.style.seq} · Opt ${target.option.no} · 클릭해서 열기`} onMouseDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); navigate(`/request?focus=${target.style.reqId}`) }} className="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold tracking-wide text-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--primary)_22%,transparent)]">REQ</button> : null}{warnings.length ? <TriangleAlert className="size-3.5 shrink-0 text-[var(--destructive)]" /> : null}</span> })()
                         : <span className="truncate">{text(column.value(record, linked))}</span>}
                     <FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} />
                   </td>
@@ -2929,7 +2929,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             <span className="text-[11px] text-[var(--muted-foreground)]">{item.hint}</span>
           </button>)}
           {menu.kind === "cells" ? <><div className="my-1 h-px bg-[var(--border)]" />
-          <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); openRequestLink() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Link2 className="size-3.5" /></span><span className="flex-1">FABRIC REQUEST 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
+          <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); openRequestLink() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Link2 className="size-3.5" /></span><span className="flex-1">DEVELOPMENT REQUEST 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
           <button type="button" role="menuitem" disabled={!editEnabled || !linkTargetRows().some((row) => row.tech?.requestLink)} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); void unlinkSelectedRequests() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Unlink className="size-3.5" /></span><span className="flex-1">요청 연결 해제</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
           <div className="my-1 h-px bg-[var(--border)]" />
           <button type="button" role="menuitem" disabled={!undoStack.length} onClick={() => { setMenu(null); void undoLast() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40">
@@ -3100,11 +3100,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               <div className="flex flex-wrap items-center gap-2">
                 <input ref={zajiInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={(event) => void onAttachFile(event.target.files?.[0])} />
                 <Button type="button" size="sm" variant="outline" onClick={() => zajiInputRef.current?.click()} disabled={attaching}>{attaching ? <Loader2 className="size-4 animate-spin" /> : <Paperclip className="size-4" />}작업지시서 첨부</Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => { setRequestPickerInitialReqId(undefined); setRequestPickerOpen(true) }}><ClipboardList className="size-4" />FABRIC REQUEST에서 불러오기</Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => { setRequestPickerInitialReqId(undefined); setRequestPickerOpen(true) }}><ClipboardList className="size-4" />DEVELOPMENT REQUEST에서 불러오기</Button>
                 {attached ? <span className="font-mono text-xs text-[var(--muted-foreground)]">{attached.subFmt} · {attached.number} · 옵션 {attached.options.length}건{attached.dupRemoved ? ` · 중복 ${attached.dupRemoved} 제거` : ""}</span> : <span className="text-xs text-[var(--muted-foreground)]">GD 작지(Fabric sample request report .xlsx)를 지원합니다.</span>}
               </div>
               {attachError ? <p className="text-xs text-[var(--destructive)]">{attachError}</p> : null}
-              {requestSuggestion ? <div className="flex items-center gap-2 rounded-md bg-[color-mix(in_srgb,var(--primary)_8%,transparent)] px-2 py-1 text-xs"><span className="min-w-0 flex-1 truncate">FABRIC REQUEST에 같은 Garment No.가 있습니다 · {requestSuggestion.style.chart} · {requestSuggestion.style.garmentNo} · 미연결 옵션 {requestSuggestion.unlinked}건</span><Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={() => { setRequestPickerInitialReqId(requestSuggestion.style.reqId); setRequestPickerOpen(true) }}>불러오기</Button></div> : null}
+              {requestSuggestion ? <div className="flex items-center gap-2 rounded-md bg-[color-mix(in_srgb,var(--primary)_8%,transparent)] px-2 py-1 text-xs"><span className="min-w-0 flex-1 truncate">DEVELOPMENT REQUEST에 같은 Garment No.가 있습니다 · {requestSuggestion.style.chart} · {requestSuggestion.style.garmentNo} · 미연결 옵션 {requestSuggestion.unlinked}건</span><Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={() => { setRequestPickerInitialReqId(requestSuggestion.style.reqId); setRequestPickerOpen(true) }}>불러오기</Button></div> : null}
             </div>
           </DialogHeader>
           <DialogBody className="space-y-3">

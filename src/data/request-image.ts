@@ -11,6 +11,11 @@ const FULL_QUALITY = 0.82
 /** 목록 썸네일. 긴 변 400px */
 const THUMB_EDGE = 400
 const THUMB_QUALITY = 0.75
+const ANALYSIS_FULL_EDGE = 900
+const ANALYSIS_FULL_QUALITIES = [0.7, 0.55, 0.4] as const
+const ANALYSIS_FULL_TARGET_SIZE = 150 * 1024
+const ANALYSIS_THUMB_EDGE = 240
+const ANALYSIS_THUMB_QUALITY = 0.6
 /** storage.rules의 상한과 같은 값이다. 함께 고친다. */
 const MAX_SOURCE_SIZE = 3 * 1024 * 1024
 
@@ -23,9 +28,9 @@ const fullPathOf = (reqId: string): string => `requests/${reqId}/full.webp`
 const thumbPathOf = (reqId: string): string => `requests/${reqId}/thumb.webp`
 
 /** 통과하면 null, 막히면 사용자에게 보일 문구를 돌려준다. */
-export function validateRequestImage(file: File): string | null {
+export function validateRequestImage(file: File, maxSourceBytes = MAX_SOURCE_SIZE): string | null {
   if (!ALLOWED_TYPES.has(file.type.toLocaleLowerCase("en-US"))) return "JPG, PNG, WEBP 이미지만 첨부할 수 있습니다."
-  if (file.size > MAX_SOURCE_SIZE) return "사진은 3MB 이하여야 합니다."
+  if (file.size > maxSourceBytes) return `사진은 ${Math.round(maxSourceBytes / 1024 / 1024)}MB 이하여야 합니다.`
   return null
 }
 
@@ -63,12 +68,13 @@ async function drawToBlob(bitmap: ImageBitmap, edge: number, quality: number): P
 }
 
 /** 리사이즈 후 원본·썸네일을 올리고 레코드에 저장할 경로 두 개를 돌려준다. */
-export async function uploadRequestImage(reqId: string, file: File): Promise<{ imagePath: string; imageThumbPath: string }> {
-  const invalid = validateRequestImage(file)
+export async function uploadRequestImage(reqId: string, file: File, options?: { maxSourceBytes?: number; profile?: "request" | "analysis" }): Promise<{ imagePath: string; imageThumbPath: string }> {
+  const invalid = validateRequestImage(file, options?.maxSourceBytes)
   if (invalid) throw new Error(invalid)
 
   const imagePath = fullPathOf(reqId)
   const imageThumbPath = thumbPathOf(reqId)
+  const profile = options?.profile ?? "request"
   // 리사이즈가 불가능한 환경에서는 원본을 그대로 올린다. 사진이 빠지는 것보다 낫다.
   let full: Blob = file
   let thumb: Blob = file
@@ -82,12 +88,24 @@ export async function uploadRequestImage(reqId: string, file: File): Promise<{ i
     }
     if (bitmap) {
       try {
-        full = (await drawToBlob(bitmap, FULL_EDGE, FULL_QUALITY)) ?? file
-        thumb = (await drawToBlob(bitmap, THUMB_EDGE, THUMB_QUALITY)) ?? file
+        if (profile === "analysis") {
+          for (const quality of ANALYSIS_FULL_QUALITIES) {
+            full = (await drawToBlob(bitmap, ANALYSIS_FULL_EDGE, quality)) ?? file
+            if (full.size <= ANALYSIS_FULL_TARGET_SIZE) break
+          }
+          thumb = (await drawToBlob(bitmap, ANALYSIS_THUMB_EDGE, ANALYSIS_THUMB_QUALITY)) ?? file
+        } else {
+          full = (await drawToBlob(bitmap, FULL_EDGE, FULL_QUALITY)) ?? file
+          thumb = (await drawToBlob(bitmap, THUMB_EDGE, THUMB_QUALITY)) ?? file
+        }
       } finally {
         bitmap.close()
       }
     }
+  }
+
+  if (profile === "analysis" && file.size > MAX_SOURCE_SIZE && (full === file || thumb === file)) {
+    throw new Error("사진을 줄이지 못했습니다. 3MB 이하 사진을 올려 주세요.")
   }
 
   await uploadBytes(ref(appStorage(), imagePath), full, { contentType: full.type || file.type })
