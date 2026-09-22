@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   onSnapshot,
   runTransaction,
   serverTimestamp,
@@ -410,20 +411,25 @@ export function startStateSync(): Promise<void> {
   })
 }
 
-/**
- * 소유자가 현재 화면의 모든 데이터를 중앙 서버(Firestore)로 한 번에 올린다.
- * 로그인 직후 기존 데이터를 팀에 공유(초기 시딩)하거나 강제 재동기화할 때 사용.
- */
-export async function pushAllToFirestore(): Promise<{ pushed: number }> {
-  if (!currentUserIsOwner()) throw new Error("편집 권한이 있는 소유자만 올릴 수 있습니다.")
-  const state = useAppStore.getState()
-  let pushed = 0
-  for (const key of CACHE_KEYS) {
-    if (SKIP_SYNC_KEYS.has(key)) continue
-    await pushCache(key, state[key])
-    pushed += 1
-  }
-  return { pushed }
+/** 저장 방식. SETTING 데이터 보호 탭이 보여 준다(R241). */
+export function syncModeOf(key: string): "merge" | "replace" {
+  return isMergeKey(key) ? "merge" : "replace"
+}
+
+/** 지금 서버 반영이 실패해 재시도 중이거나 끝내 실패한 키. */
+export function getFailingSyncKeys(): string[] {
+  return [...failingKeys]
+}
+
+/** 키별 서버 meta 문서(n, updatedAt, updatedBy)만 읽는다. 청크는 읽지 않는다. */
+export async function readStateMetas(keys: readonly string[]): Promise<Record<string, { n: number; updatedAt: string; updatedBy: string } | null>> {
+  const entries = await Promise.all(keys.map(async (key) => {
+    const snap = await getDoc(metaRef(key))
+    if (!snap.exists()) return [key, null] as const
+    const data = snap.data()
+    return [key, { n: Number(data.n ?? 0), updatedAt: String(data.updatedAt ?? ""), updatedBy: String(data.updatedBy ?? "") }] as const
+  }))
+  return Object.fromEntries(entries)
 }
 
 /** 로그아웃 시 호출: 구독 해제 + 쓰기 훅 제거. */

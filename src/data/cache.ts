@@ -100,3 +100,14 @@ export async function clearCache(): Promise<void> {
   transaction.objectStore(ATTACHMENT_STORE_NAME).clear()
   await transactionDone(transaction)
 }
+
+/**
+ * 동기화 캐시(parsed)만 비운다. 화학 첨부(attachments)는 이 PC에만 있어 지우면 되살릴 수 없으므로 건드리지 않는다.
+ * 비운 뒤에는 반드시 새로 고친다. 새로 고치면 첫 스냅샷이 서버 값을 다시 내려 준다(R241).
+ */
+export async function clearSyncedCache(): Promise<void> {
+  const database = await openCacheDatabase()
+  const transaction = database.transaction(STORE_NAME, "readwrite")
+  transaction.objectStore(STORE_NAME).clear()
+  await transactionDone(transaction)
+}
