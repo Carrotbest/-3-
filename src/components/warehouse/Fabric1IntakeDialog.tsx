@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ClipboardEvent, type KeyboardEvent } from "react"
+import { useCallback, useEffect, useMemo, useState, type ClipboardEvent, type KeyboardEvent } from "react"
 import { Copy, Plus, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -33,27 +33,28 @@ interface IntakeRow {
   unknownYds: boolean
   roll: boolean
   flNo: string
-  millRef: string
   color: string
   construction: string
   content: string
-  actualWidth: string
   actualWeight: string
-  priceYd: string
-  priceLb: string
-  owner: string
-  requestDate: string
-  note: string
   supplier: string
+  owner: string
+  season: string
+  buyer: string
+  note: string
+  /** 칸이 없다. 입고한 날(오늘)로 저장한다(R242). 줄을 더할 때 앞 줄 값을 물려준다. */
+  requestDate: string
   defaults: { construction: string; owner: string; requestDate: string }
 }
 
 type TextField = Exclude<keyof IntakeRow, "id" | "unknownYds" | "roll" | "defaults">
 
-const requiredFields: TextField[] = ["flNo", "color", "construction", "content", "actualWidth", "actualWeight", "owner", "requestDate"]
+// 1팀 대장 순서(R242): FL No., Color, Construction, Content, Weight, Mill, Requester, Season, Brand, Remark.
+// Mill은 공급처(supplier), Requester는 입고담당자(owner), Brand는 buyer다.
+const requiredFields: TextField[] = ["flNo", "color", "construction", "content", "actualWeight", "owner"]
 const pasteColumns: Array<TextField | "roll"> = [
-  "storageNo", "yds", "roll", "flNo", "millRef", "color", "construction", "content", "actualWidth",
-  "actualWeight", "priceYd", "priceLb", "owner", "requestDate", "note", "supplier",
+  "storageNo", "yds", "roll", "flNo", "color", "construction", "content", "actualWeight",
+  "supplier", "owner", "season", "buyer", "note",
 ]
 const checkedPasteValues = new Set(["Y", "O", "1", "TRUE", "R", "ROLL"])
 
@@ -72,18 +73,16 @@ const makeRow = (defaults: IntakeRow["defaults"]): IntakeRow => ({
   unknownYds: false,
   roll: false,
   flNo: "",
-  millRef: "",
   color: "",
   construction: defaults.construction,
   content: "",
-  actualWidth: "",
   actualWeight: "",
-  priceYd: "",
-  priceLb: "",
-  owner: defaults.owner,
-  requestDate: defaults.requestDate,
-  note: "",
   supplier: "",
+  owner: defaults.owner,
+  season: "",
+  buyer: "",
+  note: "",
+  requestDate: defaults.requestDate,
   defaults,
 })
 
@@ -95,18 +94,15 @@ const isBlankRow = (row: IntakeRow): boolean =>
   && !row.unknownYds
   && !row.roll
   && !row.flNo.trim()
-  && !row.millRef.trim()
   && !row.color.trim()
   && row.construction.trim() === row.defaults.construction.trim()
   && !row.content.trim()
-  && !row.actualWidth.trim()
   && !row.actualWeight.trim()
-  && !row.priceYd.trim()
-  && !row.priceLb.trim()
-  && row.owner.trim() === row.defaults.owner.trim()
-  && row.requestDate === row.defaults.requestDate
-  && !row.note.trim()
   && !row.supplier.trim()
+  && row.owner.trim() === row.defaults.owner.trim()
+  && !row.season.trim()
+  && !row.buyer.trim()
+  && !row.note.trim()
 
 const cellKey = (rowId: string, field: string) => `${rowId}:${field}`
 
@@ -129,15 +125,20 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
     .map(storageNumberOf)
     .filter((value): value is number => value !== null)), [ledger])
 
-  const autoNumbers = useMemo(() => {
-    const manual = new Set(activeRows.map((row) => row.storageNo.trim()).filter(Boolean))
-    const candidates = suggestNumbers(activeRows.length + 30).map(String).filter((value) => !manual.has(value))
+  // 자동 번호를 위에서부터 차례로 붙인다. 손으로 친 번호는 건너뛴다.
+  const numberRows = useCallback((targets: readonly IntakeRow[]) => {
+    const manual = new Set(targets.map((row) => row.storageNo.trim()).filter(Boolean))
+    const candidates = suggestNumbers(targets.length + 30).map(String).filter((value) => !manual.has(value))
     const assigned = new Map<string, string>()
-    activeRows.forEach((row) => {
+    targets.forEach((row) => {
       if (!row.storageNo.trim()) assigned.set(row.id, candidates.shift() ?? "")
     })
     return assigned
-  }, [activeRows, suggestNumbers])
+  }, [suggestNumbers])
+  // 화면에는 빈 줄까지 모든 줄에 번호를 보인다. 팝업을 열거나 줄을 더하면 바로 다음 번호가 뜬다.
+  const displayNumbers = useMemo(() => numberRows(rows), [numberRows, rows])
+  // 저장은 실제로 입고하는 줄끼리 이어서 매긴다. 중간에 빈 줄이 있어도 번호가 비지 않는다.
+  const autoNumbers = useMemo(() => numberRows(activeRows), [numberRows, activeRows])
 
   const manualErrors = useMemo(() => {
     const counts = new Map<string, number>()
@@ -279,10 +280,6 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
       requiredFields.forEach((field) => { if (!row[field].trim()) nextInvalid.add(cellKey(row.id, field)) })
       const yds = Number(row.yds)
       if (!row.unknownYds && (!row.yds.trim() || !Number.isFinite(yds) || yds <= 0)) nextInvalid.add(cellKey(row.id, "yds"))
-      for (const field of ["priceYd", "priceLb"] as const) {
-        const value = row[field].trim()
-        if (value && (!Number.isFinite(Number(value)) || Number(value) < 0)) nextInvalid.add(cellKey(row.id, field))
-      }
       if (!row.storageNo.trim() && !autoNumbers.get(row.id)) nextInvalid.add(cellKey(row.id, "storageNo"))
     })
     if (nextInvalid.size) {
@@ -314,7 +311,6 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
       const autoPool = claimed.filter((value) => !manualNumbers.has(value))
       let autoIndex = 0
       const actual = targets.map((row) => row.storageNo.trim() || autoPool[autoIndex++])
-      const price = (value: string) => value.trim() && Number(value) > 0 ? value.trim() : ""
       await addFabric1Intake(targets.map((row, index) => ({
         storageNo: actual[index],
         flNo: row.flNo.trim(),
@@ -323,15 +319,13 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
         owner: row.owner.trim(),
         requestDate: row.requestDate,
         note: row.note.trim(),
+        season: row.season.trim(),
+        buyer: row.buyer.trim(),
         yds: row.unknownYds ? null : Number(row.yds),
         roll: row.roll,
         fields: {
-          millRef: row.millRef.trim(),
           content: row.content.trim(),
-          actualWidth: row.actualWidth.trim(),
           actualWeight: row.actualWeight.trim(),
-          priceYd: price(row.priceYd),
-          priceLb: price(row.priceLb),
           ...(row.supplier.trim() ? { supplier: row.supplier.trim() } : {}),
         },
       })))
@@ -340,7 +334,9 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
       const numbers = actual.map(Number)
       const consecutive = targets.every((row) => !row.roll) && numbers.every((value, index) => index === 0 || value === numbers[index - 1] + 1)
       const numberText = consecutive && labels.length > 1 ? `${labels[0]}~${labels.at(-1)}` : labels.join(", ")
-      const changes = actual.flatMap((value, index) => value !== assigned[index] ? [`예정 ${assigned[index]}, 실제 ${value}`] : [])
+      // 화면에 보이던 번호와 실제로 나간 번호가 다르면 알린다(다른 사람이 먼저 입고했거나, 중간 빈 줄을 건너뛰었을 때).
+      const shown = targets.map((row) => row.storageNo.trim() || displayNumbers.get(row.id) || "")
+      const changes = actual.flatMap((value, index) => value !== shown[index] ? [`예정 ${shown[index]}, 실제 ${value}`] : [])
       const notice = `R&D No. ${numberText} ${targets.length}건 입고했습니다.${changes.length ? ` ${changes.join("; ")}.` : ""}`
       onOpenChange(false)
       onSaved(actual[0], notice)
@@ -364,17 +360,16 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
           <table className="w-max min-w-full table-fixed border-collapse text-xs" onPaste={handlePaste}>
             <colgroup>
               <col className="w-9" /><col className="w-[84px]" /><col className="w-[120px]" /><col className="w-11" />
-              <col className="w-[120px]" /><col className="w-[110px]" /><col className="w-[110px]" /><col className="w-[130px]" />
-              <col className="w-[180px]" /><col className="w-[90px]" /><col className="w-[90px]" /><col className="w-[84px]" />
-              <col className="w-[84px]" /><col className="w-24" /><col className="w-[130px]" /><col className="w-[180px]" />
-              <col className="w-[140px]" /><col className="w-16" />
+              <col className="w-[120px]" /><col className="w-[120px]" /><col className="w-[140px]" /><col className="w-[200px]" />
+              <col className="w-[100px]" /><col className="w-[160px]" /><col className="w-[110px]" /><col className="w-[90px]" />
+              <col className="w-[120px]" /><col className="w-[220px]" /><col className="w-16" />
             </colgroup>
             <thead className="sticky top-0 z-10 bg-[var(--muted)] text-[var(--muted-foreground)]">
-              <tr>{["#", "R&D No.", "입고 수량 (YDS) *", "롤", "FL No. *", "Mill Ref.", "Color *", "Construction *", "Content *", "Width (INCH) *", "Weight (G/M2) *", "Price ($/YD)", "Price ($/LB)", "입고담당자 *", "입고 요청일 *", "Remark", "완사입 업체", ""].map((label, index) => <th key={`${label}-${index}`} className="h-9 whitespace-nowrap border-b border-r border-[var(--border)] px-1 text-center font-medium last:sticky last:right-0 last:z-10 last:border-l last:border-r-0 last:bg-[var(--muted)]">{label.endsWith(" *") ? <>{label.slice(0, -2)} <span className="text-[var(--destructive)]">*</span></> : label}</th>)}</tr>
+              <tr>{["#", "R&D No.", "입고 수량 (YDS) *", "롤", "FL No. *", "Color *", "Construction *", "Content *", "Weight (G/M2) *", "Mill", "Requester *", "Season", "Brand", "Remark", ""].map((label, index) => <th key={`${label}-${index}`} className="h-9 whitespace-nowrap border-b border-r border-[var(--border)] px-1 text-center font-medium last:sticky last:right-0 last:z-10 last:border-l last:border-r-0 last:bg-[var(--muted)]">{label.endsWith(" *") ? <>{label.slice(0, -2)} <span className="text-[var(--destructive)]">*</span></> : label}</th>)}</tr>
             </thead>
             <tbody>
               {rows.map((row, index) => {
-                const autoNo = autoNumbers.get(row.id) ?? ""
+                const autoNo = displayNumbers.get(row.id) ?? ""
                 const displayNo = row.storageNo || autoNo
                 const displayLabel = displayNo ? storageNoLabel({ storageNo: displayNo, roll: row.roll }) : ""
                 return <tr key={row.id} data-row-id={row.id} className="align-top">
@@ -386,18 +381,15 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
                   <td data-paste-column="1" className="border-b border-r border-[var(--border)] p-1"><div className="flex items-center gap-1"><Input aria-label={`${index + 1}행 입고 수량`} type="number" min="0.01" step="0.01" disabled={row.unknownYds} value={row.yds} onChange={(event) => setText(row.id, "yds", event.target.value)} className={inputClass(row.id, "yds", "min-w-0 flex-1")} /><label className="flex shrink-0 items-center gap-1 whitespace-nowrap text-[10px]"><Checkbox checked={row.unknownYds} onCheckedChange={(value) => setBoolean(row.id, "unknownYds", value === true)} />미상</label></div></td>
                   <td data-paste-column="2" className="border-b border-r border-[var(--border)] p-1 text-center"><Checkbox aria-label={`${index + 1}행 롤`} checked={row.roll} onCheckedChange={(value) => setBoolean(row.id, "roll", value === true)} /></td>
                   <td data-paste-column="3" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 FL No.`} value={row.flNo} onChange={(event) => setText(row.id, "flNo", event.target.value)} className={inputClass(row.id, "flNo")} /></td>
-                  <td data-paste-column="4" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Mill Ref.`} value={row.millRef} onChange={(event) => setText(row.id, "millRef", event.target.value)} className={inputClass(row.id, "millRef")} /></td>
-                  <td data-paste-column="5" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Color`} value={row.color} onChange={(event) => setText(row.id, "color", event.target.value)} className={inputClass(row.id, "color")} /></td>
-                  <td data-paste-column="6" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Construction`} list="fabric1-intake-constructions" value={row.construction} onChange={(event) => setText(row.id, "construction", event.target.value)} className={inputClass(row.id, "construction")} /></td>
-                  <td data-paste-column="7" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Content`} value={row.content} onChange={(event) => setText(row.id, "content", event.target.value)} className={inputClass(row.id, "content")} /></td>
-                  <td data-paste-column="8" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Width`} placeholder="53/55" value={row.actualWidth} onChange={(event) => setText(row.id, "actualWidth", event.target.value)} className={inputClass(row.id, "actualWidth")} /></td>
-                  <td data-paste-column="9" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Weight`} value={row.actualWeight} onChange={(event) => setText(row.id, "actualWeight", event.target.value)} className={inputClass(row.id, "actualWeight")} /></td>
-                  <td data-paste-column="10" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Price YD`} inputMode="decimal" value={row.priceYd} onChange={(event) => setText(row.id, "priceYd", event.target.value)} className={inputClass(row.id, "priceYd")} /></td>
-                  <td data-paste-column="11" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Price LB`} inputMode="decimal" value={row.priceLb} onChange={(event) => setText(row.id, "priceLb", event.target.value)} className={inputClass(row.id, "priceLb")} /></td>
-                  <td data-paste-column="12" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 입고담당자`} value={row.owner} onChange={(event) => setText(row.id, "owner", event.target.value)} className={inputClass(row.id, "owner")} /></td>
-                  <td data-paste-column="13" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 입고 요청일`} type="date" value={row.requestDate} onChange={(event) => setText(row.id, "requestDate", event.target.value)} className={inputClass(row.id, "requestDate")} /></td>
-                  <td data-paste-column="14" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Remark`} value={row.note} onChange={(event) => setText(row.id, "note", event.target.value)} className={inputClass(row.id, "note")} /></td>
-                  <td data-paste-column="15" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 완사입 업체`} value={row.supplier} onChange={(event) => setText(row.id, "supplier", event.target.value)} onKeyDown={(event) => handleLastTab(event, row, index)} className={inputClass(row.id, "supplier")} /></td>
+                  <td data-paste-column="4" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Color`} value={row.color} onChange={(event) => setText(row.id, "color", event.target.value)} className={inputClass(row.id, "color")} /></td>
+                  <td data-paste-column="5" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Construction`} list="fabric1-intake-constructions" value={row.construction} onChange={(event) => setText(row.id, "construction", event.target.value)} className={inputClass(row.id, "construction")} /></td>
+                  <td data-paste-column="6" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Content`} value={row.content} onChange={(event) => setText(row.id, "content", event.target.value)} className={inputClass(row.id, "content")} /></td>
+                  <td data-paste-column="7" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Weight`} value={row.actualWeight} onChange={(event) => setText(row.id, "actualWeight", event.target.value)} className={inputClass(row.id, "actualWeight")} /></td>
+                  <td data-paste-column="8" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Mill`} value={row.supplier} onChange={(event) => setText(row.id, "supplier", event.target.value)} className={inputClass(row.id, "supplier")} /></td>
+                  <td data-paste-column="9" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Requester`} value={row.owner} onChange={(event) => setText(row.id, "owner", event.target.value)} className={inputClass(row.id, "owner")} /></td>
+                  <td data-paste-column="10" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Season`} value={row.season} onChange={(event) => setText(row.id, "season", event.target.value)} className={inputClass(row.id, "season")} /></td>
+                  <td data-paste-column="11" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Brand`} value={row.buyer} onChange={(event) => setText(row.id, "buyer", event.target.value)} className={inputClass(row.id, "buyer")} /></td>
+                  <td data-paste-column="12" className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Remark`} value={row.note} onChange={(event) => setText(row.id, "note", event.target.value)} onKeyDown={(event) => handleLastTab(event, row, index)} className={inputClass(row.id, "note")} /></td>
                   <td className="sticky right-0 z-[1] border-b border-l border-[var(--border)] bg-[var(--card)] p-1"><div className="flex h-8 items-center justify-center gap-1"><button type="button" title="줄 복제" aria-label={`${index + 1}행 복제`} className="rounded p-1 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]" onClick={() => duplicateRow(row)}><Copy className="size-3.5" /></button><button type="button" title="줄 삭제" aria-label={`${index + 1}행 삭제`} className="rounded p-1 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--destructive)]" onClick={() => removeRow(row.id)}><Trash2 className="size-3.5" /></button></div></td>
                 </tr>
               })}

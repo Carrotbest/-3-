@@ -92,7 +92,7 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
   // 열 순서는 샘플관리대장 시트를 그대로 따른다. 재고만 웹에서 더한 칸이라 좌측에 고정한다.
   { key: "fixed", label: "고정", color: "var(--primary)", columns: [
     { id: "storageNo", label: "R&D No.", width: 86 },
-    { id: "stock", label: "재고", width: 96 },
+    { id: "stock", label: "Stock", width: 96 },
     { id: "confirm", label: "입고확인", width: 76 },
     // 빈 칸을 찾아 넣는 rack 관리(창고팀 협의 2026-09-14). 창고보관 탭에서만 보인다.
     { id: "rackNo", label: "Rack No.", width: 84 },
@@ -153,23 +153,21 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
   ] },
 ]
 
-// 1팀 열은 1팀 엑셀 순서를 따른다(2026-09-22). No., R&D Number, 위치, 폐기는 고정 열과 탭이 대신한다.
+// 1팀 열 순서(2026-09-22 R242 사용자 확정). Mill Ref., Width, Price 두 개, 입고 요청일은 표에서 뺐다. 값은 지우지 않고 숨긴다.
+// Mill은 공급처(supplier), Requester는 입고담당자(owner), Brand는 buyer다.
 const TEAM1_COLUMN_GROUPS: readonly WarehouseGroup[] = [
   COLUMN_GROUPS[0],
   { key: "ledger", label: "대장", color: "var(--chart-1)", columns: [
     { id: "flNo", label: "FL No.", width: 100 },
-    { id: "millRef", label: "Mill Ref.", width: 120 },
     { id: "color", label: "Color", width: 104 },
     { id: "construction", label: "Construction", width: 124 },
     { id: "content", label: "Content", width: 200 },
-    { id: "actualWidth", label: "Width (INCH)", width: 88 },
     { id: "actualWeight", label: "Weight (G/M2)", width: 92 },
-    { id: "priceYd", label: "Price ($/YD)", width: 88 },
-    { id: "priceLb", label: "Price ($/LB)", width: 88 },
-    { id: "owner", label: "입고담당자", width: 88 },
-    { id: "requestDate", label: "입고 요청일", width: 88 },
+    { id: "supplier", label: "Mill", width: 150 },
+    { id: "owner", label: "Requester", width: 96 },
+    { id: "season", label: "Season", width: 80 },
+    { id: "buyer", label: "Brand", width: 110 },
     { id: "note", label: "Remark", width: 200 },
-    { id: "supplier", label: "완사입 업체", width: 150 },
   ] },
 ]
 
@@ -179,7 +177,7 @@ const MIN_COL_WIDTH = 48
 
 /** 행 높이가 h-8 로 고정이라 보이는 구간만 그리면 된다. 이력 탭은 4,400행이 넘는다. */
 const MANUAL_EDITABLE = new Set(["styleNo", "flNo", "buyer", "season", "category", "owner", "construction", "content", "priceYd", "priceLb", "supplier", "note", "originalRef", "planner", "yarnDetail", "color", "dyeing"])
-const FABRIC1_SAMPLE_EDITABLE = new Set<WarehouseColumnId>(["flNo", "color", "construction", "owner", "requestDate", "note"])
+const FABRIC1_SAMPLE_EDITABLE = new Set<WarehouseColumnId>(["flNo", "color", "construction", "owner", "requestDate", "note", "season", "buyer"])
 const FABRIC1_OVERRIDE_EDITABLE = new Set<WarehouseColumnId>(["millRef", "content", "actualWidth", "actualWeight", "priceYd", "priceLb", "supplier"])
 const FABRIC1_EDITABLE = new Set<WarehouseColumnId>([...FABRIC1_SAMPLE_EDITABLE, ...FABRIC1_OVERRIDE_EDITABLE])
 const FABRIC1_ONLY_COLUMNS = new Set<WarehouseColumnId>(["millRef", "content", "flSource", "supplier", "priceYd", "priceLb"])
@@ -1443,7 +1441,7 @@ export function Warehouse() {
             const fabricCount = await clearFabric1Cells(fabricTargets)
             const count = rackCount + fabricCount
             const cleared = count ? `셀 ${count}개를 지웠습니다.` : "지울 수 있는 값이 없습니다."
-            const protectedNote = skippedProtected ? " R&D No., 재고, 입고확인 칸은 지우지 않습니다." : ""
+            const protectedNote = skippedProtected ? " R&D No., Stock, 입고확인 칸은 지우지 않습니다." : ""
             setSelectionNotice(`${cleared}${protectedNote}`)
           })().catch(() => setSelectionNotice("선택한 셀을 지우지 못했습니다."))
           return

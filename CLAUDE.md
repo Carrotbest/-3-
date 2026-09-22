@@ -104,7 +104,7 @@
   `주차 집계`는 전사 부서·팀 틀을 원본대로 만들되 **통합원단부 줄만 채우고 나머지는 0**이다. 다른 부서 숫자는 우리가 모른다. 창고팀이 합치는 자리다.
   요약 상단 표에는 건수 옆에 **입고 yds와 폐기 yds**가 붙는다. 폐기 수량은 상태가 폐기인 건만 세고 소진 건은 뺀다(다 써서 나간 원단이라 폐기 수량이 아니다).
   입고·소진/폐기 목록은 **R&D No.마다 최종 이력 1건만** 올리고, 그 위에 **현재 원장 상태와 대조**해 되돌리거나 취소한 건을 뺀다. 이력만 보면 입고했다 되돌린 건이 남는다. R&D No.가 없는 기록은 집계에서 빠진다.
-- 1팀 신규 입고(R237): 1팀은 입고 대기가 없다. 창고보관 탭 `신규 입고` 팝업에서 저장하는 순간 `FABRIC1_INTAKE_SHEET` 샘플, WAREHOUSE override, RECEIVE 이력(occurredAt=저장 시각)이 한 번에 생기고 R&D No.가 자동 채번된다(`addFabric1Intake`). 1팀 엑셀의 `Ref. No` 열은 실제로 FL No.다. 업체 번호는 `millRef` 필드다. 롤 표시는 입고할 때만 정하고 사후 토글 버튼은 없앴다.
+- 1팀 신규 입고(R237): 1팀은 입고 대기가 없다. 창고보관 탭 `신규 입고` 팝업에서 저장하는 순간 `FABRIC1_INTAKE_SHEET` 샘플, WAREHOUSE override, RECEIVE 이력(occurredAt=저장 시각)이 한 번에 생기고 R&D No.가 자동 채번된다(`addFabric1Intake`). 1팀 엑셀의 `Ref. No` 열은 실제로 FL No.다. 업체 번호는 `millRef` 필드다. 롤 표시는 입고할 때만 정하고 사후 토글 버튼은 없앴다. **1팀 표와 신규 입고 팝업 열 순서(R242)**: 고정 4열(R&D No., Stock, 입고확인, Rack No.) 다음 FL No., Color, Construction, Content, Weight, Mill(`supplier`), Requester(`owner`), Season, Brand(`buyer`), Remark. Mill Ref., Width, Price 두 개, 입고 요청일은 표에서 뺐고 값은 남긴다. 입고 요청일은 입고한 날로 자동 저장한다. 재고 열 이름은 두 팀 모두 Stock이다.
 
 ## RDDA (`src/routes/Rdda.tsx`, `src/data/rdda-dataset.ts`, `src/data/rdda-sync.ts`, `src/data/fabric-performance.ts`)
 - 수집: `/rdda` **RDDA 갱신**이 RDDA 창을 열고, 그 창에서 북마크 **RDDA 수집**(바탕화면 `RDDA_수집_v5.js`, 설치 `RDDA_수집_북마크설치.html`)을 누르면 postMessage로 데이터셋이 들어와 `state/rdda`에 저장된다. 수신은 origin `https://rdda.hansoll.com`과 연 창(source)만 받는다. **수집기에는 팀원 사번이 있어 저장소에 넣지 않는다.** JSON 업로드는 예비 경로다.

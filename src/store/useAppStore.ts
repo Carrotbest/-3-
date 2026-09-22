@@ -950,7 +950,7 @@ export async function saveFabricFields(item: FabricLedgerItem, patch: Record<str
   await saveCache("fabricOverrides", fabricOverrides)
 }
 
-const FABRIC1_SAMPLE_FIELDS = new Set(["flNo", "color", "construction", "owner", "requestDate", "note"])
+const FABRIC1_SAMPLE_FIELDS = new Set(["flNo", "color", "construction", "owner", "requestDate", "note", "season", "buyer"])
 const FABRIC1_OVERRIDE_FIELDS = new Set(["millRef", "content", "actualWidth", "actualWeight", "priceYd", "priceLb", "supplier"])
 
 /** 1팀 창고 표에서 선택한 여러 셀을 저장소별로 모아 한 번씩 비운다. */
@@ -988,6 +988,8 @@ export async function clearFabric1Cells(entries: ReadonlyArray<{ item: FabricLed
       else if (field === "owner" && next.owner) { next = { ...next, owner: "" }; changed += 1 }
       else if (field === "requestDate" && next.requestDate) { next = { ...next, requestDate: "", completedAt: "" }; changed += 1 }
       else if (field === "note" && next.process.remark) { next = { ...next, process: { ...next.process, remark: "" } }; changed += 1 }
+      else if (field === "season" && next.season) { next = { ...next, season: "" }; changed += 1 }
+      else if (field === "buyer" && next.buyer) { next = { ...next, buyer: "" }; changed += 1 }
     }
     if (next !== sample) completedChanged = true
     return next
@@ -1097,6 +1099,9 @@ export interface Fabric1IntakeInput {
   note: string
   yds: number | null
   roll: boolean
+  /** 1팀 대장 Season, Brand(= buyer). R242에서 표에 더했다. 비우면 빈 칸. */
+  season?: string
+  buyer?: string
   /** 입고 이력 시각. 비우면 지금이다. 기존 대장 이관은 입고 요청일을 넣어 이번 주 창고 보고에 잡히지 않게 한다. */
   occurredAt?: string
   /** 입고 이력 메모. 비우면 "1팀 신규 입고". */
@@ -1115,9 +1120,9 @@ export async function addFabric1Intake(inputs: readonly Fabric1IntakeInput[]): P
     storageNo: input.storageNo.trim(),
     styleNo: "",
     flNo: input.flNo.trim(),
-    season: "",
+    season: input.season?.trim() ?? "",
     category: "",
-    buyer: "",
+    buyer: input.buyer?.trim() ?? "",
     owner: input.owner.trim(),
     construction: input.construction.trim(),
     requestDate: input.requestDate,
