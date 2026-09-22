@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-21T23:43:58+00:00",
+"generated_at": "2026-09-22T00:13:08+00:00",
 "window_days": 120,
 "total": 1046,
 "translated": 1046,
@@ -9,15 +9,15 @@
 "days": {
 "7": {
 "sources": 20,
-"scanned": 737,
-"kept": 289,
-"material": 196
+"scanned": 622,
+"kept": 236,
+"material": 154
 },
 "30": {
 "sources": 23,
-"scanned": 2449,
-"kept": 924,
-"material": 681
+"scanned": 2446,
+"kept": 923,
+"material": 680
 }
 }
 },
@@ -334,14 +334,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-23",
-"total": 2,
-"by": {
-"ETC": 1,
-"MATERIAL": 1
-}
-},
 {
 "date": "2026-08-24",
 "total": 6,
@@ -661,6 +653,11 @@
 "YARN": 2,
 "CHEMICAL": 6
 }
+},
+{
+"date": "2026-09-22",
+"total": 0,
+"by": {}
 }
 ],
 "momentum": [
@@ -688,9 +685,9 @@
 {
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 60,
-"prior": 2,
-"delta": 58,
+"recent": 58,
+"prior": 4,
+"delta": 54,
 "weeks": [
 0,
 2,
@@ -709,9 +706,9 @@
 {
 "tag": "전시회",
 "label_en": "performance days",
-"recent": 39,
-"prior": 6,
-"delta": 33,
+"recent": 36,
+"prior": 8,
+"delta": 28,
 "weeks": [
 0,
 0,
@@ -730,9 +727,9 @@
 {
 "tag": "데님",
 "label_en": "denim",
-"recent": 31,
-"prior": 5,
-"delta": 26,
+"recent": 30,
+"prior": 6,
+"delta": 24,
 "weeks": [
 0,
 0,
@@ -770,32 +767,11 @@
 ]
 },
 {
-"tag": "스판덱스",
-"label_en": "spandex",
-"recent": 13,
-"prior": 0,
-"delta": 13,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-4,
-1,
-4,
-2,
-2
-]
-},
-{
 "tag": "탄소",
 "label_en": "carbon footprint",
-"recent": 13,
-"prior": 0,
-"delta": 13,
+"recent": 12,
+"prior": 1,
+"delta": 11,
 "weeks": [
 0,
 0,
@@ -812,11 +788,32 @@
 ]
 },
 {
+"tag": "T2T",
+"label_en": "textile-to-textile",
+"recent": 11,
+"prior": 0,
+"delta": 11,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+1,
+0,
+6,
+2,
+2
+]
+},
+{
 "tag": "제직",
 "label_en": "woven fabric",
-"recent": 15,
-"prior": 3,
-"delta": 12,
+"recent": 14,
+"prior": 4,
+"delta": 10,
 "weeks": [
 0,
 0,
@@ -857,8 +854,8 @@
 "tag": "렌징",
 "label_en": "lenzing",
 "recent": 2,
-"prior": 3,
-"delta": -1,
+"prior": 2,
+"delta": 0,
 "weeks": [
 0,
 0,
@@ -923,18 +920,6 @@
 "label_en": "wool",
 "n": 16,
 "first": "2026-08-27"
-},
-{
-"tag": "스판덱스",
-"label_en": "spandex",
-"n": 13,
-"first": "2026-08-25"
-},
-{
-"tag": "탄소",
-"label_en": "carbon footprint",
-"n": 13,
-"first": "2026-08-25"
 },
 {
 "tag": "T2T",

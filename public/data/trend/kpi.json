@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-21T23:43:58+00:00",
+"generated_at": "2026-09-22T00:13:08+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3656,14 +3656,14 @@
 },
 {
 "period": "2026-09",
-"value": 1350.121
+"value": 1357.345
 }
 ],
-"value": 1350.121,
+"value": 1357.345,
 "period": "2026-09",
 "period_end": null,
-"prev": -3.8,
-"yoy": -3.1,
+"prev": -3.3,
+"yoy": -2.6,
 "stale": false
 },
 {
@@ -3826,10 +3826,6 @@
 "source_url": "https://fred.stlouisfed.org/series/MRTSIR448USS",
 "points": [
 {
-"period": "2025-06",
-"value": 2.19
-},
-{
 "period": "2025-07",
 "value": 2.16
 },
@@ -3876,14 +3872,18 @@
 {
 "period": "2026-06",
 "value": 2.14
+},
+{
+"period": "2026-07",
+"value": 2.11
 }
 ],
-"value": 2.14,
-"period": "2026-06",
+"value": 2.11,
+"period": "2026-07",
 "period_end": null,
-"prev": 1.4,
+"prev": -1.4,
 "yoy": -2.3,
-"stale": true
+"stale": false
 },
 {
 "metric": "crude_brent",
