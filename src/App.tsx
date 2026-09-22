@@ -5,7 +5,7 @@ import { RouteErrorBoundary } from "@/components/RouteErrorBoundary"
 
 import { AppSidebar } from "@/components/layout/AppSidebar"
 import { Topbar } from "@/components/layout/Topbar"
-import { ReadOnlyGuard } from "@/components/layout/ReadOnlyGuard"
+import { ReadOnlyGuard, SyncStatusNotice } from "@/components/layout/ReadOnlyGuard"
 import { HomeGate } from "@/components/layout/HomeGate"
 import { UpdateBanner } from "@/components/layout/UpdateBanner"
 import { ParsingOverlay } from "@/components/upload/ParsingOverlay"
@@ -158,6 +158,7 @@ function AppLayout() {
         <Topbar onToggleSidebar={handleSidebarToggle} />
         <main ref={mainRef} className={cn("w-full", fullBleed ? "flex min-h-0 flex-1 flex-col overflow-hidden max-w-none p-0" : "mx-auto w-full max-w-[2200px] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6")}>
           {!isOwner ? <ReadOnlyGuard pathname={pathname} rootRef={mainRef} /> : null}
+          <SyncStatusNotice />
           {/* 렌더 예외를 여기서 막는다. 없으면 React 가 루트를 언마운트해 화면 전체가 백지가 된다.
               key 를 경로로 두어 다른 화면으로 옮기면 저절로 풀린다. */}
           {canViewCurrentPath ? <RouteErrorBoundary key={pathname}><Routes>

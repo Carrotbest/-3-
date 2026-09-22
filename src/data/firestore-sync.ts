@@ -2,6 +2,7 @@ import {
   collection,
   doc,
   onSnapshot,
+  runTransaction,
   serverTimestamp,
   writeBatch,
   type Unsubscribe,
@@ -10,7 +11,7 @@ import {
 import { db, auth } from "./firebase"
 import { CACHE_KEYS, saveCacheLocal, setFirestorePush, type CacheKey } from "./cache"
 import { currentUserIsOwner, currentUserCanWrite, currentUserCanEditKey } from "./auth"
-import { mergeKeyed } from "./sync-merge"
+import { mergeKeyed, mergeKeyedByList, occurrenceIds } from "./sync-merge"
 import { normalizeLoadedRecords, setAppState, useAppStore, type AppState, type AppStatePatch } from "../store/useAppStore"
 import type { TsRecord } from "./sample"
 import { isTsWellFormed } from "./ts-health"
@@ -33,6 +34,22 @@ const MERGE_IDS: Record<string, (item: never) => string> = {
   rddaReports: (item: { monthId: string }) => item.monthId,
 }
 
+/**
+ * 목록 문맥이 있어야 id가 서는 병합 키(R240).
+ *
+ * 샘플대장(completed)의 옛 대장 행은 id가 `rnd:번호`라 같은 id가 현황, 창고보관, 소진완료, 폐기 시트와
+ * 여러 채번 주기에 되풀이된다(2026-09-22 실측 5,497행 중 401그룹 740행). id 하나로 병합하면 겹친 행이
+ * 서로를 지운다. 그래서 `시트|id|같은 값 중 몇 번째`로 id를 세운다. 1팀 입고, 웹 등록 행은 id가 고유라
+ * 늘 `|1`이고, 새 행은 목록 끝에 붙으므로 옛 행의 순번을 밀지 않는다.
+ */
+const LIST_MERGE_IDS: Record<string, (list: readonly unknown[]) => string[]> = {
+  completed: (list) => occurrenceIds(list as readonly ({ sourceSheet?: string; id?: string } | null)[],
+    (item) => `${item?.sourceSheet ?? ""}|${item?.id ?? ""}`),
+}
+
+/** 이 키들은 화면에서 통째로 비울 일이 없다. 병합 결과가 비면 사고로 보고 쓰지 않는다. */
+const NEVER_EMPTY_KEYS = new Set<string>(["records", "completed", "fabricOverrides", "fabricEvents"])
+
 /** 이 클라이언트가 마지막으로 본 원격 값. 병합 기준선이다. */
 const baseline = new Map<string, unknown[]>()
 /** 스냅샷으로 받은 최신 원격 값. 로컬 적용 여부와 무관하게 항상 갱신한다. */
@@ -40,17 +57,33 @@ const lastRemote = new Map<string, unknown[]>()
 /** 키별 전송 직렬화. 같은 키의 쓰기가 겹치지 않게 한다. */
 const pushChains = new Map<string, Promise<void>>()
 
+/**
+ * 첫 스냅샷을 받을 때까지 전송을 미룬다. 기준선 없이 올리면 이 PC에 남은 옛 캐시가
+ * 팀원이 지운 항목을 되살리거나 팀원이 넣은 항목을 덮는다.
+ */
+let initialSync: Promise<void> = Promise.resolve()
+let releaseInitialSync: (() => void) | null = null
+
 function mergeIdOf(key: string): ((item: unknown) => string) | null {
   const fn = (MERGE_IDS as Record<string, ((item: unknown) => string) | undefined>)[key]
   return fn ?? null
 }
 
-/** 병합 대상 키이고 양쪽 다 배열일 때만 병합한다. */
-function mergeForKey(key: string, mine: unknown, theirs: unknown): unknown {
+function isMergeKey(key: string): boolean {
+  return Boolean(mergeIdOf(key)) || key in LIST_MERGE_IDS
+}
+
+/**
+ * 병합 대상 키이고 양쪽 다 배열일 때만 병합한다. 아니면 원격 값을 돌려준다.
+ * `base`를 넘기지 않으면 이 클라이언트의 기준선을 쓴다.
+ */
+function mergeForKey(key: string, mine: unknown, theirs: unknown, base: unknown[] | null = baseline.get(key) ?? null): unknown {
+  if (!Array.isArray(mine) || !Array.isArray(theirs)) return theirs
+  const listIds = LIST_MERGE_IDS[key]
+  if (listIds) return mergeKeyedByList(base, mine, theirs, listIds)
   const idOf = mergeIdOf(key)
-  if (!idOf || !Array.isArray(mine) || !Array.isArray(theirs)) return theirs
-  const base = baseline.get(key)
-  return mergeKeyed(Array.isArray(base) ? base : null, mine, theirs, idOf)
+  if (!idOf) return theirs
+  return mergeKeyed(base, mine, theirs, idOf)
 }
 
 // 각 키의 마지막으로 알려진 청크 수(오래된 청크 정리에 사용). 스냅샷/푸시로 갱신된다.
@@ -72,29 +105,28 @@ function splitChunks(text: string): string[] {
   return chunks
 }
 
-/** 소유자 또는 승인된 팀원이 값을 Firestore로 반영한다(청크 분할·원자적 배치). */
+/** 소유자 또는 승인된 팀원이 값을 Firestore로 반영한다(청크 분할·원자적 쓰기). */
 async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
   if (!currentUserCanWrite()) return
   // 화면 권한이 읽기면 중앙에 올리지 않고 화면 값을 마지막 중앙 값으로 되돌린다(R217).
   if (!currentUserCanEditKey(key)) { revertBlockedKey(key); return }
   if (SKIP_SYNC_KEYS.has(key)) return
   const previousChain = pushChains.get(key) ?? Promise.resolve()
-  const chained = previousChain.then(() => pushCacheNow(key, value)).catch(() => {})
+  const chained = previousChain
+    .then(() => initialSync)
+    .then(() => pushCacheNow(key, value))
+    .then(() => markPushSucceeded(key), (error) => handlePushFailure(key, error))
   pushChains.set(key, chained)
   return chained
 }
 
 async function pushCacheNow<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
-  // 쓰기 직전의 최신 원격 값과 합친다. 팀원이 방금 고친 행을 내 화면 값으로 덮지 않는다.
-  //
+  if (isMergeKey(key)) return pushMergedNow(key, value)
   // **병합 키가 아니면 합치지 않고 내 값을 그대로 올린다.**
   // mergeForKey 는 병합 대상이 아닐 때 theirs 를 돌려주는데, 쓰기 방향에서 theirs 는 원격 값이다.
   // 그대로 쓰면 방금 저장한 것이 빠진 예전 원격 값을 다시 올리고, 그 스냅샷이 내 화면을 덮어
   // 저장이 통째로 사라진다(2026-09-10 TROUBLE SHOOTING 신규 등록이 목록에 안 뜨던 사고).
-  // 병합 대상은 MERGE_IDS 네 개뿐이라 ts·study·events·rdda 등 나머지 키가 전부 이 경로였다.
-  const remote = mergeIdOf(key) ? lastRemote.get(key) : undefined
-  const merged = (remote === undefined ? value : mergeForKey(key, value, remote)) as AppState[K]
-  const json = JSON.stringify(merged ?? null)
+  const json = JSON.stringify(value ?? null)
   const chunks = splitChunks(json)
   const batch = writeBatch(db)
   batch.set(metaRef(key), {
@@ -106,33 +138,107 @@ async function pushCacheNow<K extends CacheKey>(key: K, value: AppState[K]): Pro
   chunks.forEach((c, i) => batch.set(chunkRef(key, i), { c }))
   const previous = lastChunkCount.get(key) ?? 0
   for (let i = chunks.length; i < previous; i += 1) batch.delete(chunkRef(key, i))
+  await batch.commit()
   lastChunkCount.set(key, chunks.length)
-  try {
-    await batch.commit()
-    // 쓰인 값이 곧 원격 값이다. 다음 병합의 기준선으로 올린다.
-    if (Array.isArray(merged)) {
-      baseline.set(key, merged as unknown[])
-      lastRemote.set(key, merged as unknown[])
-    }
-    // 병합 결과가 내 화면과 다르면(팀원의 변경이 섞였으면) 화면에도 반영한다.
-    //
-    // 단, 전송이 도는 사이 내가 또 저장했으면 되쓰지 않는다.
-    // value 는 전송을 시작할 때의 스냅샷이라 지금 store 값보다 뒤처져 있고,
-    // 그대로 넣으면 그 사이에 저장한 건들이 배열에서 빠진다.
-    // (창고에서 24건을 한 번에 확인 처리하면 일부만 처리되던 원인. R200)
-    // 건너뛰어도 잃는 것은 없다. 최신 값은 곧 다음 전송에서 병합되고,
-    // 팀원의 변경분은 이 커밋이 부르는 onSnapshot 이 따로 내려 준다.
-    const current = (useAppStore.getState() as unknown as Record<string, unknown>)[key]
-    if (current !== value) return
-    // 참조가 아니라 내용으로 비교한다. mergeKeyed 는 바뀐 것이 없어도 늘 새 배열을 만들어
-    // merged !== value 가 항상 참이 된다.
-    if (JSON.stringify(merged) === JSON.stringify(value)) return
-    setAppState(normalizeLoadedRecords({ [key]: merged } as AppStatePatch))
-    void saveCacheLocal(key, merged)
-  } catch (error) {
-    // 권한 거부·오프라인 등은 조용히 무시한다. 로컬 상태는 유지한다.
-    console.warn("[firestore-sync] push 실패:", (error as Error)?.message ?? error)
+  if (Array.isArray(value)) {
+    baseline.set(key, value as unknown[])
+    lastRemote.set(key, value as unknown[])
   }
+}
+
+/**
+ * 병합 키 저장. 서버의 지금 값을 트랜잭션 안에서 읽어 병합한 뒤 쓴다(R240).
+ *
+ * 예전에는 마지막으로 받은 스냅샷(lastRemote)과 병합해 서버 문서를 통째로 덮었다. 팀원이 방금 쓴 값이
+ * 아직 스냅샷으로 안 왔으면 그 값이 빠진 채 서버를 덮었고, 팀원 화면은 다음 스냅샷에서 그 항목을
+ * "원격에서 지워졌다"로 읽어 스스로 지웠다. 두 사람이 몇 초 안에 저장하면 한 건이 사라졌다.
+ * 트랜잭션은 읽은 문서가 커밋 전에 바뀌면 다시 읽고 다시 병합한다. 그래서 겹쳐 써도 빠지는 항목이 없다.
+ *
+ * `mine`과 `base`는 실행 시점의 화면 값과 기준선을 한 쌍으로 잡는다. 대기열에서 기다리는 사이 스냅샷이
+ * 기준선을 새로 바꿨는데 대기 중이던 예전 값을 올리면, 그 사이 팀원이 넣은 항목을 내가 지운 것으로 읽는다.
+ * 병합 키의 저장은 모두 `setAppState` 직후 같은 값으로 부르므로 화면 값이 곧 최신 저장 값이다.
+ */
+async function pushMergedNow<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {
+  const stored = (useAppStore.getState() as unknown as Record<string, unknown>)[key]
+  const mine = Array.isArray(stored) ? stored : value
+  if (!Array.isArray(mine)) return
+  const base = baseline.get(key) ?? null
+  const by = auth.currentUser?.email ?? auth.currentUser?.uid ?? "unknown"
+  const { merged, count } = await runTransaction(db, async (tx) => {
+    const meta = await tx.get(metaRef(key))
+    const previousCount = meta.exists() ? Number(meta.data().n ?? 0) : 0
+    let theirs: unknown
+    if (meta.exists()) {
+      const parts = await Promise.all(Array.from({ length: previousCount }, (_, index) => tx.get(chunkRef(key, index))))
+      let json = ""
+      for (const part of parts) {
+        // 청크가 빠진 채로 병합하면 서버 값을 잘린 배열로 알고 덮는다. 쓰지 않고 멈춘다.
+        if (!part.exists()) throw new Error(`${key} 청크가 비어 있어 저장을 멈췄습니다.`)
+        json += String(part.data().c ?? "")
+      }
+      theirs = JSON.parse(json)
+    }
+    // 기준선이 없으면(첫 스냅샷 실패, 새 키) 빈 기준선으로 합친다. 서버 항목은 하나도 빼지 않는다.
+    const next = Array.isArray(theirs) ? mergeForKey(key, mine, theirs, base ?? []) as unknown[] : mine
+    if (NEVER_EMPTY_KEYS.has(key) && next.length === 0 && Array.isArray(theirs) && theirs.length > 0) {
+      throw new Error(`${key} 병합 결과가 비어 저장을 멈췄습니다.`)
+    }
+    const chunks = splitChunks(JSON.stringify(next))
+    tx.set(metaRef(key), { n: chunks.length, updatedAt: new Date().toISOString(), updatedBy: by, ts: serverTimestamp() })
+    chunks.forEach((c, index) => tx.set(chunkRef(key, index), { c }))
+    for (let index = chunks.length; index < previousCount; index += 1) tx.delete(chunkRef(key, index))
+    return { merged: next, count: chunks.length }
+  })
+  // 쓰인 값이 곧 원격 값이다. 다음 병합의 기준선으로 올린다.
+  lastChunkCount.set(key, count)
+  baseline.set(key, merged)
+  lastRemote.set(key, merged)
+  lastRemoteValue.set(key, merged)
+  // 병합 결과가 내 화면과 다르면(팀원의 변경이 섞였으면) 화면에도 반영한다.
+  // 전송이 도는 사이 내가 또 저장했으면 되쓰지 않는다. 그 저장이 곧 다음 전송에서 다시 병합된다.
+  const current = (useAppStore.getState() as unknown as Record<string, unknown>)[key]
+  if (current !== stored) return
+  // 참조가 아니라 내용으로 비교한다. 병합은 바뀐 것이 없어도 늘 새 배열을 만든다.
+  if (JSON.stringify(merged) === JSON.stringify(current)) return
+  setAppState(normalizeLoadedRecords({ [key]: merged } as AppStatePatch))
+  void saveCacheLocal(key, merged as AppState[K])
+}
+
+/**
+ * 전송 실패. 로컬 값은 그대로 두고 잠시 뒤 지금 화면 값으로 다시 보낸다.
+ * 예전에는 조용히 버렸다. 새로 고치면 첫 스냅샷이 로컬을 원격 값으로 바꾸므로, 못 올린 저장은 그때 사라졌다.
+ */
+const RETRY_DELAYS_MS = [2_000, 5_000, 15_000, 30_000, 60_000]
+const retryAttempts = new Map<string, number>()
+const failingKeys = new Set<string>()
+const retryTimers = new Set<ReturnType<typeof setTimeout>>()
+
+function notifySync(type: "fabric:sync-failed" | "fabric:sync-recovered", detail: Record<string, unknown>): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(type, { detail }))
+}
+
+function markPushSucceeded(key: string): void {
+  retryAttempts.delete(key)
+  if (failingKeys.delete(key)) notifySync("fabric:sync-recovered", { key })
+}
+
+function handlePushFailure(key: CacheKey, error: unknown): void {
+  console.warn("[firestore-sync] push 실패:", key, (error as Error)?.message ?? error)
+  const attempt = retryAttempts.get(key) ?? 0
+  const final = (error as { code?: string })?.code === "permission-denied" || attempt >= RETRY_DELAYS_MS.length
+  failingKeys.add(key)
+  notifySync("fabric:sync-failed", { key, final })
+  if (final) {
+    retryAttempts.delete(key)
+    return
+  }
+  retryAttempts.set(key, attempt + 1)
+  const timer = setTimeout(() => {
+    retryTimers.delete(timer)
+    const current = (useAppStore.getState() as unknown as Record<string, unknown>)[key] as AppState[CacheKey]
+    void pushCache(key, current)
+  }, RETRY_DELAYS_MS[attempt])
+  retryTimers.add(timer)
 }
 
 const CACHE_KEY_SET = new Set<string>(CACHE_KEYS)
@@ -271,6 +377,12 @@ let started = false
 export function startStateSync(): Promise<void> {
   if (started) return Promise.resolve()
   started = true
+  // 첫 스냅샷이 기준선을 세울 때까지 전송을 붙잡아 둔다. 전송 훅보다 먼저 만든다.
+  initialSync = new Promise<void>((release) => { releaseInitialSync = release })
+  const openGate = () => {
+    releaseInitialSync?.()
+    releaseInitialSync = null
+  }
   setFirestorePush(pushCache)
   return new Promise<void>((resolve) => {
     let resolved = false
@@ -278,6 +390,7 @@ export function startStateSync(): Promise<void> {
       collection(db, COLLECTION),
       (snap) => {
         const remoteKeys = applySnapshot(snap.docs)
+        openGate()
         void autoSeedMissingKeys(remoteKeys)
         if (!resolved) {
           resolved = true
@@ -286,6 +399,8 @@ export function startStateSync(): Promise<void> {
       },
       (error) => {
         console.warn("[firestore-sync] 구독 오류:", error?.message ?? error)
+        // 구독이 실패해도 전송을 영영 막지는 않는다. 저장은 트랜잭션이 서버 값과 합친다.
+        openGate()
         if (!resolved) {
           resolved = true
           resolve()
@@ -320,6 +435,13 @@ export function stopStateSync(): void {
   }
   started = false
   autoSeedDone = false
+  releaseInitialSync?.()
+  releaseInitialSync = null
+  initialSync = Promise.resolve()
+  retryTimers.forEach((timer) => clearTimeout(timer))
+  retryTimers.clear()
+  retryAttempts.clear()
+  failingKeys.clear()
   lastChunkCount.clear()
   baseline.clear()
   lastRemote.clear()

@@ -70,3 +70,39 @@ export function ReadOnlyGuard({ pathname, rootRef }: { pathname: string; rootRef
     {notice ? <div role="status" aria-live="polite" className="fixed bottom-14 left-1/2 z-50 -translate-x-1/2 rounded-[10px] bg-[var(--foreground)] px-4 py-2 text-sm text-[var(--background)] shadow-lg lg:left-[calc(50%+9rem)]">{notice}</div> : null}
   </>
 }
+
+/**
+ * 팀 공유 저장이 서버에 닿지 않을 때의 경고(R240). 소유자를 포함해 모두에게 보인다.
+ * 로컬 값은 남아 있고 firestore-sync가 다시 보낸다. 마지막 재시도까지 실패하면 새로 고치기 전에 알려야 한다.
+ * 새로 고치면 첫 스냅샷이 로컬을 서버 값으로 바꾸므로 못 올린 저장은 그때 사라진다.
+ */
+export function SyncStatusNotice() {
+  const [syncWarning, setSyncWarning] = useState("")
+  const [recovered, setRecovered] = useState(false)
+  const timer = useRef<number | undefined>(undefined)
+  useEffect(() => {
+    const onFailed = (event: Event) => {
+      const final = Boolean((event as CustomEvent<{ final?: boolean }>).detail?.final)
+      setRecovered(false)
+      setSyncWarning(final
+        ? "저장이 서버에 반영되지 않았습니다. 새로 고치거나 창을 닫지 말고 연결을 확인한 뒤 같은 항목을 한 번 더 저장해 주세요."
+        : "저장을 서버에 반영하는 중 문제가 생겨 다시 보내고 있습니다. 창을 닫지 마세요.")
+    }
+    const onRecovered = () => {
+      setSyncWarning("")
+      setRecovered(true)
+      window.clearTimeout(timer.current)
+      timer.current = window.setTimeout(() => setRecovered(false), 2600)
+    }
+    window.addEventListener("fabric:sync-failed", onFailed)
+    window.addEventListener("fabric:sync-recovered", onRecovered)
+    return () => {
+      window.removeEventListener("fabric:sync-failed", onFailed)
+      window.removeEventListener("fabric:sync-recovered", onRecovered)
+      window.clearTimeout(timer.current)
+    }
+  }, [])
+  if (syncWarning) return <div role="alert" className="fixed left-1/2 top-3 z-50 max-w-[min(92vw,640px)] -translate-x-1/2 rounded-[10px] border border-[var(--destructive)] bg-[var(--card)] px-4 py-2 text-sm font-medium text-[var(--destructive)] shadow-lg lg:left-[calc(50%+9rem)]">{syncWarning}</div>
+  if (recovered) return <div role="status" aria-live="polite" className="fixed left-1/2 top-3 z-50 -translate-x-1/2 rounded-[10px] bg-[var(--foreground)] px-4 py-2 text-sm text-[var(--background)] shadow-lg lg:left-[calc(50%+9rem)]">저장이 서버에 반영되었습니다.</div>
+  return null
+}

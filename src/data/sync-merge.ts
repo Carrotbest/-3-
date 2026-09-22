@@ -42,3 +42,36 @@ export function mergeKeyed<T>(
   })
   return result
 }
+
+/**
+ * 같은 값이 여러 번 나오는 목록의 병합 id를 `값|몇 번째`로 만든다.
+ * 자연 키가 겹치는 행이 섞여 있어도 모든 행이 서로 다른 id를 갖는다.
+ * 목록 순서가 같으면 어느 클라이언트에서 계산해도 같은 id가 나온다.
+ */
+export function occurrenceIds<T>(list: readonly T[], baseOf: (item: T) => string): string[] {
+  const seen = new Map<string, number>()
+  return list.map((item) => {
+    const base = baseOf(item)
+    const occurrence = (seen.get(base) ?? 0) + 1
+    seen.set(base, occurrence)
+    return `${base}|${occurrence}`
+  })
+}
+
+/**
+ * 목록 문맥이 있어야 id가 서는 키의 3-way 병합. id를 목록마다 따로 계산해 붙인 뒤 `mergeKeyed`에 넘긴다.
+ * 항목마다 id를 구하는 함수로는 "같은 값 중 몇 번째"를 알 수 없어 따로 둔다.
+ */
+export function mergeKeyedByList<T>(
+  baseline: readonly T[] | null,
+  mine: readonly T[],
+  theirs: readonly T[],
+  idsOf: (list: readonly T[]) => string[],
+): T[] {
+  if (!baseline) return [...theirs]
+  const wrap = (list: readonly T[]) => {
+    const ids = idsOf(list)
+    return list.map((value, index) => ({ id: ids[index], value }))
+  }
+  return mergeKeyed(wrap(baseline), wrap(mine), wrap(theirs), (entry) => entry.id).map((entry) => entry.value)
+}

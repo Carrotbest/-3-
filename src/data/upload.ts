@@ -2,7 +2,7 @@ import * as XLSX from "xlsx"
 
 import type { DataMeta, HistoryState, RddaReport, RddaSnapshot } from "./sample"
 import type { CompletedSample, DevRecord } from "./schema"
-import { WEB_INTAKE_SHEET } from "./schema"
+import { FABRIC1_INTAKE_SHEET, WEB_INTAKE_SHEET } from "./schema"
 import { parseChemicalPortfolio } from "./chemical"
 import { reconcile, type ReconcileResult } from "./reconcile"
 import { loadTds } from "./tds-loader"
@@ -73,8 +73,10 @@ export async function ingestSamples(file: File): Promise<void> {
     const workbook = await workbookOf(file)
     setIngestState({ step: "parsing" })
     const parsed = parseSamples(workbook)
-    // 웹에서 직접 등록한 건은 대장에 없다. 재업로드가 통째로 갈아치우므로 따로 살려 붙인다.
-    const manual = useAppStore.getState().completed.filter((sample) => sample.sourceSheet === WEB_INTAKE_SHEET)
+    // 웹에서 직접 등록한 건과 1팀 입고 건은 대장 엑셀에 없다. 재업로드가 통째로 갈아치우므로 따로 살려 붙인다.
+    // 1팀 행을 빠뜨리면 대장을 한 번 올리는 순간 1팀 원단 전체가 팀 전원 화면에서 사라진다(R240).
+    const manual = useAppStore.getState().completed.filter((sample) =>
+      sample.sourceSheet === WEB_INTAKE_SHEET || sample.sourceSheet === FABRIC1_INTAKE_SHEET)
     const completed = [...parsed, ...manual]
     setIngestState({ step: "validating" })
     setAppState({ completed })
