@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx"
 
+import { normalizeRackNo } from "@/data/warehouse-rack"
 import type { Fabric1IntakeInput } from "@/store/useAppStore"
 
 type Cell = string | number | boolean | Date | null | undefined
@@ -45,8 +46,15 @@ export function extractFabric1Qty(remark: string): { yds: number | null; roll: b
   const roll = /ROLL/i.test(remark)
   if (remark.includes("전량")) return { yds: null, roll }
   const match = remark.match(/(\d+(?:\.\d+)?)\s*(?:YDS?|yards?)\b/i)
-  if (!match) return { yds: null, roll }
-  return { yds: Number(match[1]), roll }
+  if (match) return { yds: Number(match[1]), roll }
+  /*
+   * 단위 없이 숫자만 적은 칸도 잔량이다(1팀 대장의 "10", "7"). 칸 전체가 숫자일 때만 읽는다.
+   * 글 안에 섞인 숫자는 품번이나 날짜라 잔량이 아니다.
+   * 0은 잔량 0인지 미기입인지 갈리지 않아 수량 미상으로 둔다. 0을 넣으면 소진으로 읽힌다.
+   */
+  const bare = /^\d+(?:\.\d+)?$/.exec(remark.trim())
+  if (bare && Number(bare[0]) > 0) return { yds: Number(bare[0]), roll }
+  return { yds: null, roll }
 }
 
 export async function parseFabric1LedgerFile(file: File): Promise<{ inputs: Fabric1IntakeInput[]; warnings: string[] }> {
@@ -68,6 +76,12 @@ export async function parseFabric1LedgerFile(file: File): Promise<{ inputs: Fabr
   if (missing.length) throw new Error(`필수 열을 찾을 수 없습니다: ${missing.join(", ")}`)
   const valueAt = (row: Cell[], header: typeof REQUIRED_HEADERS[number]): Cell => row[headerIndex.get(header) as number]
 
+  /**
+   * Rack No.는 필수가 아니다. 1팀 대장은 예전에 이 열이 없었고 지금도 빈 행이 있다.
+   * 표기 흔들림(`Rack NO.`, `Rack No.`, `RACK NO`)을 견디려고 이름을 정확히 맞추지 않고 찾는다.
+   */
+  const rackIndex = rows[0].findIndex((value) => /^rack\s*no\.?$/i.test(normalizeHeader(value)))
+
   const warnings: string[] = []
   const inputs: Fabric1IntakeInput[] = []
   rows.slice(1).forEach((row, offset) => {
@@ -82,6 +96,8 @@ export async function parseFabric1LedgerFile(file: File): Promise<{ inputs: Fabr
     const owner = cellText(valueAt(row, "입고담당자"))
     const requestDate = normalizeDate(valueAt(row, "입고 요청일"))
     const note = cellText(valueAt(row, "Remark"))
+    // `V11`처럼 K/L 규칙 밖의 값은 대문자로만 정리돼 그대로 들어온다. 형식은 강제하지 않는다(2026-09-22).
+    const rackNo = rackIndex < 0 ? "" : normalizeRackNo(cellText(row[rackIndex])) ?? ""
     const quantity = extractFabric1Qty(note)
 
     const required = [
@@ -103,6 +119,7 @@ export async function parseFabric1LedgerFile(file: File): Promise<{ inputs: Fabr
       flNo,
       color,
       construction,
+      rackNo,
       owner,
       requestDate,
       occurredAt: requestDate,

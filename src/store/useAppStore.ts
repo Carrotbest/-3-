@@ -1111,6 +1111,8 @@ export interface Fabric1IntakeInput {
   /** 1팀 대장 Season, Brand(= buyer). R242에서 표에 더했다. 비우면 빈 칸. */
   season?: string
   buyer?: string
+  /** 창고 칸 번호. 1팀 대장에 `Rack NO.` 열이 생겨 이관·교체에서 같이 들여온다(2026-09-23). 비우면 빈 칸. */
+  rackNo?: string
   /** 입고 이력 시각. 비우면 지금이다. 기존 대장 이관은 입고 요청일을 넣어 이번 주 창고 보고에 잡히지 않게 한다. */
   occurredAt?: string
   /** 입고 이력 메모. 비우면 "1팀 신규 입고". */
@@ -1159,6 +1161,8 @@ export async function addFabric1Intake(inputs: readonly Fabric1IntakeInput[]): P
       storageNo: input.storageNo.trim(),
       ...(input.yds === null ? {} : { yds: input.yds }),
       ...(input.roll ? { roll: true } : {}),
+      // override를 새로 만드는 곳마다 rackNo를 넣어야 한다. 빠뜨리면 창고 동작 한 번에 칸 번호가 지워진다.
+      ...(input.rackNo?.trim() ? { rackNo: input.rackNo.trim() } : {}),
       fields: Object.fromEntries(Object.entries(input.fields).filter(([, value]) => value.trim())),
       updatedAt: now,
       updatedBy: input.owner.trim() || "관리자",
@@ -1248,6 +1252,8 @@ export async function replaceFabric1Ledger(inputs: readonly Fabric1IntakeInput[]
       storageNo: input.storageNo.trim(),
       ...(input.yds === null ? {} : { yds: input.yds }),
       ...(input.roll ? { roll: true } : {}),
+      // override를 새로 만드는 곳마다 rackNo를 넣어야 한다. 빠뜨리면 창고 동작 한 번에 칸 번호가 지워진다.
+      ...(input.rackNo?.trim() ? { rackNo: input.rackNo.trim() } : {}),
       fields: Object.fromEntries(Object.entries(input.fields).filter(([, value]) => value.trim())),
       updatedAt: now,
       updatedBy: input.owner.trim() || "관리자",
