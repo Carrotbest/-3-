@@ -34,6 +34,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { buildFabricLedger, FABRIC1_STORAGE_NO_MAX, FABRIC1_STORAGE_NO_MIN, fabricRecordIdentity, isFabric1Item, latestActiveOutbound, STORAGE_NO_MAX, STORAGE_NO_WRAP, storageNoLabel, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
+import { departmentMailLabel } from "@/data/departments"
 import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
 import { downloadBlob } from "@/data/dd-export"
 import { DISPOSAL_REASONS, type DisposalReason } from "@/data/disposal-round"
@@ -511,6 +512,7 @@ export function Warehouse() {
   const authUser = useAuthStore((state) => state.user)
   const canWrite = useAuthStore((state) => state.isOwner || (state.status === "signed-in" && state.approval === "approved"))
   const defaultRequester = useAuthStore((state) => state.user?.displayName || state.user?.email?.split("@")[0] || "")
+  const defaultDivision = useAuthStore((state) => departmentMailLabel(state.department))
   const records = useAppStore((state) => state.records)
   const samples = useAppStore((state) => state.completed)
   const overrides = useAppStore((state) => state.fabricOverrides)
@@ -1931,7 +1933,7 @@ export function Warehouse() {
         setSelectionNotice(notice ?? `R&D No. ${storageNo} 입고했습니다.`)
       }}
     />
-    <OutboundRequestMailDialog open={outboundMailOpen} onOpenChange={setOutboundMailOpen} items={selectedRows} defaultRequester={defaultRequester} />
+    <OutboundRequestMailDialog open={outboundMailOpen} onOpenChange={setOutboundMailOpen} items={selectedRows} defaultRequester={defaultRequester} defaultDivision={defaultDivision} />
     <InboundRequestMailDialog open={inboundMailKeys.length > 0} onOpenChange={(open) => { if (!open) setInboundMailKeys([]) }} items={inboundMailItems} defaultRequester={defaultRequester} />
     <FlEntryCheckDialog
       check={flEntryCheck?.check ?? null}

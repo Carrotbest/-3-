@@ -1,9 +1,10 @@
 /**
  * Outlook 메일 초안 파일(.eml)과 메일용 표 HTML.
  *
- * mailto:는 본문에 글자만 넣을 수 있어 표가 안 들어간다. 그래서 HTML 본문을 담은 .eml을 만들고
- * `X-Unsent: 1`을 붙여 Outlook이 받은 메일이 아니라 보내기 전 새 메일로 열게 한다.
- * 자동 발송이 아니다. 사람이 파일을 열어 확인하고 보낸다.
+ * 기본은 `composeMail`이다. 본문과 표를 클립보드에 담고 `mailto:`로 Outlook 새 메일 창을 연다.
+ * 서명이 붙은 빈 본문이 뜨고 사람이 붙여넣는다. 클립보드가 막히면 본문이 완성된 `.eml`로 떨어지는데,
+ * 이때는 `X-Unsent: 1`이 붙어 보내기 전 새 메일로 열리는 대신 서명이 붙지 않는다.
+ * 어느 쪽도 자동 발송이 아니다. 사람이 확인하고 보낸다.
  */
 export interface MailAddress {
   name: string
@@ -111,6 +112,53 @@ export function downloadEml(fileName: string, eml: string): void {
   anchor.click()
   anchor.remove()
   setTimeout(() => URL.revokeObjectURL(url), 5000)
+}
+
+/**
+ * mailto: 주소 목록은 **세미콜론으로 잇는다.** RFC 6068은 쉼표지만 Outlook은 쉼표로 이으면
+ * 세 주소를 주소 하나로 읽어 받는 사람 확인이 안 된다(2026-09-23 실측). 쉼표로 되돌리지 말 것.
+ * `.eml`의 `To:` 머리글은 RFC 5322를 따라 쉼표 그대로다(`buildEml`). 둘은 규칙이 다르다.
+ */
+const addressValue = (addresses: readonly MailAddress[]): string =>
+  addresses.map((item) => item.email.trim()).filter(Boolean).join(";")
+
+export interface ComposeDraft {
+  /** 클립보드가 막혔을 때 떨구는 .eml 파일 이름 */
+  fileName: string
+  subject: string
+  to: readonly MailAddress[]
+  cc?: readonly MailAddress[]
+  /** 본문 글 줄. `{table}` 자리에 표가 들어간다 */
+  lines: readonly string[]
+  columns: readonly string[]
+  rows: readonly (readonly string[])[]
+}
+
+/** 받는 사람·참조·제목만 담아 Outlook 새 메일 창을 연다. 본문은 비어 있고 서명이 붙는다. */
+export function openMailto(draft: Pick<ComposeDraft, "to" | "cc" | "subject">): void {
+  const cc = addressValue(draft.cc ?? [])
+  // 주소는 EMAIL_PATTERN을 통과한 값이라 인코딩하지 않는다. %40, %2C로 바꾸면 Outlook 버전에 따라 주소를 못 읽는다.
+  const query = [...(cc ? [`cc=${cc}`] : []), `subject=${encodeURIComponent(draft.subject)}`]
+  window.location.href = `mailto:${addressValue(draft.to)}?${query.join("&")}`
+}
+
+/**
+ * 본문과 표를 클립보드에 담고 Outlook 새 메일 창을 연다. 사람이 본문 첫 줄에 붙여넣는다.
+ * 클립보드가 막히면 본문이 완성된 .eml을 내려받는다(서명은 안 붙는다).
+ *
+ * 호출부는 클릭 핸들러에서 **첫 await 없이 바로** 불러야 한다. 클립보드 쓰기는 사용자 제스처
+ * 안에서만 허용되고, 앞에 다른 await이 끼면 제스처가 끊겨 복사가 조용히 실패한다.
+ */
+export async function composeMail(draft: ComposeDraft): Promise<"mailto" | "eml"> {
+  try {
+    await copyMailBody(draft.lines, draft.columns, draft.rows)
+    openMailto(draft)
+    return "mailto"
+  } catch {
+    const html = mailBodyHtml(draft.lines, mailTableHtml(draft.columns, draft.rows))
+    downloadEml(draft.fileName, buildEml({ to: draft.to, cc: draft.cc, subject: draft.subject, html }))
+    return "eml"
+  }
 }
 
 export const shortDate = (value: string): string => {

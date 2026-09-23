@@ -3,7 +3,7 @@ import { mailBodyHtml, mailTableHtml, shortDate, storageNoSummary } from "@/data
 
 /**
  * 창고 입고 요청 메일. 입고대기에서 선택 입고로 R&D No.를 매긴 원단을 정산관리팀에 넘길 때 쓴다.
- * 받는 사람은 `mail-recipients.ts`의 고정 목록이다. Rack No. 열은 창고팀이 보관한 칸을 적어 회신하도록 비워 둔다.
+ * 받는 사람은 `mail-recipients.ts`의 창고 공용 고정 목록이다. Rack No. 열은 창고팀이 보관한 칸을 적어 회신하도록 비워 둔다.
  */
 export interface InboundRequestMeta {
   requester: string
@@ -31,7 +31,8 @@ export function inboundRequestSubject(items: readonly FabricLedgerItem[], today 
   return `[원단 입고 요청] R&D No. ${storageNoSummary(items.map((item) => item.storageNo))} (${today.getMonth() + 1}/${today.getDate()})`
 }
 
-export function inboundRequestHtml(meta: InboundRequestMeta, items: readonly FabricLedgerItem[]): string {
+/** 메일 본문 글 줄. `{table}` 자리에 표가 들어간다. */
+export function inboundRequestLines(meta: InboundRequestMeta, items: readonly FabricLedgerItem[]): string[] {
   const lines = [
     "정산관리팀 담당자님,",
     "",
@@ -44,5 +45,9 @@ export function inboundRequestHtml(meta: InboundRequestMeta, items: readonly Fab
   if (meta.deliveryDate) lines.push(`전달 예정일: ${shortDate(meta.deliveryDate)}`)
   if (meta.note.trim()) lines.push(`비고: ${meta.note.trim()}`)
   lines.push("", meta.requester.trim() ? `${meta.requester.trim()} 드림` : "감사합니다.")
-  return mailBodyHtml(lines, mailTableHtml(INBOUND_REQUEST_COLUMNS, inboundRequestRows(items)))
+  return lines
+}
+
+export function inboundRequestHtml(meta: InboundRequestMeta, items: readonly FabricLedgerItem[]): string {
+  return mailBodyHtml(inboundRequestLines(meta, items), mailTableHtml(INBOUND_REQUEST_COLUMNS, inboundRequestRows(items)))
 }

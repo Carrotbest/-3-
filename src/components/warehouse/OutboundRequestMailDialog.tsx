@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react"
 import { Copy, Mail } from "lucide-react"
 
+import { MailRecipientsField } from "@/components/warehouse/MailRecipientsField"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { buildEml, copyMailTable, downloadEml, fileDateStamp } from "@/data/mail-draft"
+import { composeMail, copyMailTable, fileDateStamp, type MailAddress } from "@/data/mail-draft"
 import {
   OUTBOUND_REQUEST_COLUMNS,
-  outboundRequestHtml,
+  outboundRequestLines,
   outboundRequestRows,
   outboundRequestSubject,
   stockYds,
@@ -23,6 +24,8 @@ interface OutboundRequestMailDialogProps {
   onOpenChange: (open: boolean) => void
   items: readonly FabricLedgerItem[]
   defaultRequester: string
+  /** 로그인한 사람의 부서. 창을 열 때 부서 칸에 채우고 사람이 고칠 수 있다 */
+  defaultDivision: string
 }
 
 /** 오늘 날짜(yyyy-mm-dd). toISOString은 UTC라 한국 시간 오전 9시 전에 어제로 나온다. 현지 날짜로 만든다. */
@@ -34,15 +37,17 @@ const todayValue = (): string => {
 const EMPTY_META: OutboundRequestMeta = { division: "", requester: "", wantedDate: "" }
 
 /** 창고보관 원단의 컷팅·출고 요청 메일 초안. 메일은 사람이 Outlook에서 받는 사람을 넣고 보낸다(C형). */
-export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRequester }: OutboundRequestMailDialogProps) {
+export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRequester, defaultDivision }: OutboundRequestMailDialogProps) {
   const [meta, setMeta] = useState<OutboundRequestMeta>(EMPTY_META)
   const [lines, setLines] = useState<Record<string, { qty: string; note: string }>>({})
+  const [recipients, setRecipients] = useState<MailAddress[]>([])
+  const [recipientsEditing, setRecipientsEditing] = useState(false)
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
   const [teamsNotice, setTeamsNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
 
   useEffect(() => {
     if (!open) return
-    setMeta({ ...EMPTY_META, requester: defaultRequester, wantedDate: todayValue() })
+    setMeta({ ...EMPTY_META, division: defaultDivision, requester: defaultRequester, wantedDate: todayValue() })
     setLines(Object.fromEntries(items.map((item) => [item.key, { qty: "", note: "" }])))
     setNotice(null)
     setTeamsNotice(null)
@@ -80,9 +85,17 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
   const makeMail = async () => {
     setTeamsNotice(null)
     if (invalid) { setNotice({ kind: "error", text: "요청 수량을 모두 입력하세요." }); return }
-    const eml = buildEml({ to: [], subject: outboundRequestSubject(meta, requestLines), html: outboundRequestHtml(meta, requestLines) })
-    downloadEml(`원단출고요청_${fileDateStamp()}.eml`, eml)
-    setNotice({ kind: "ok", text: "메일 파일을 내려받았습니다. 파일을 열면 표가 들어간 Outlook 새 메일 창이 뜹니다. 받는 사람을 입력하고 보내세요." })
+    const mode = await composeMail({
+      fileName: `원단출고요청_${fileDateStamp()}.eml`,
+      subject: outboundRequestSubject(requestLines),
+      to: recipients,
+      lines: outboundRequestLines(meta, requestLines),
+      columns: OUTBOUND_REQUEST_COLUMNS,
+      rows: outboundRequestRows(requestLines),
+    })
+    setNotice(mode === "mailto"
+      ? { kind: "ok", text: "Outlook 새 메일 창을 열었습니다. 본문 첫 줄에 Ctrl+V로 붙여넣고 보내세요. 서명은 그대로 남습니다." }
+      : { kind: "ok", text: "클립보드 복사에 실패해 .eml 파일을 내려받았습니다. 파일을 열면 표까지 채워진 새 메일이 뜹니다(서명 없음)." })
   }
 
   const sendTeamsNotice = async () => {
@@ -102,9 +115,11 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
     <DialogContent className="w-[94vw] max-w-4xl">
       <DialogHeader>
         <DialogTitle>출고 요청 메일</DialogTitle>
-        <DialogDescription>선택한 원단 {items.length}건의 컷팅·출고 요청 메일 초안을 만듭니다. 받는 사람은 Outlook에서 직접 입력합니다.</DialogDescription>
+        <DialogDescription>선택한 원단 {items.length}건의 컷팅·출고 요청 메일을 만듭니다. 받는 사람과 제목이 채워진 Outlook 새 메일 창이 뜨고, 본문은 클립보드에 담아 둡니다.</DialogDescription>
       </DialogHeader>
       <DialogBody className="space-y-4">
+        <MailRecipientsField open={open} onRecipientsChange={setRecipients} onEditingChange={setRecipientsEditing} />
+
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="grid gap-1.5">
             <Label htmlFor="outbound-division">부서</Label>
@@ -151,7 +166,7 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
         </div>
 
         <p className="text-[11px] leading-relaxed text-[var(--muted-foreground)]">
-          메일은 자동으로 보내지 않습니다. Outlook 메일 만들기를 누르면 제목과 표가 채워진 메일 파일을 내려받습니다. 파일을 열어 받는 사람을 입력하고 보내세요. 실제 출고 기록은 정산관리팀 컷팅 회신 뒤 기존 출고 버튼으로 남깁니다.
+          메일은 자동으로 보내지 않습니다. 메일로 작성을 누르면 받는 사람과 제목이 채워진 Outlook 새 메일 창이 뜹니다. 본문 첫 줄에 Ctrl+V로 붙여넣고 확인한 뒤 보내세요. 실제 출고 기록은 정산관리팀 컷팅 회신 뒤 기존 출고 버튼으로 남깁니다.
         </p>
         {notice ? <p role="status" className={`text-xs leading-relaxed ${notice.kind === "error" ? "text-[var(--destructive)]" : "text-[var(--chart-2)]"}`}>{notice.text}</p> : null}
         {teamsNotice ? <p role="status" className={`text-xs leading-relaxed ${teamsNotice.kind === "error" ? "text-[var(--warning)]" : "text-[var(--chart-2)]"}`}>{teamsNotice.text}</p> : null}
@@ -159,7 +174,7 @@ export function OutboundRequestMailDialog({ open, onOpenChange, items, defaultRe
       <DialogFooter>
         <Button type="button" size="sm" variant="outline" onClick={() => onOpenChange(false)}>닫기</Button>
         <Button type="button" size="sm" variant="outline" disabled={!items.length} onClick={() => void copyTable()}><Copy className="size-4" />표 복사</Button>
-        <Button type="button" size="sm" variant="outline" disabled={!items.length} onClick={() => void makeMail()}><Mail className="size-4" />메일로 작성</Button>
+        <Button type="button" size="sm" variant="outline" disabled={!items.length || recipientsEditing} onClick={() => void makeMail()}><Mail className="size-4" />메일로 작성</Button>
         <Button type="button" size="sm" disabled={!items.length} onClick={() => void sendTeamsNotice()}>Teams 알림 보내기</Button>
       </DialogFooter>
     </DialogContent>

@@ -40,6 +40,13 @@ export const DEPARTMENTS: { id: DepartmentId; label: string; short: string; hint
 
 export const departmentById = (id: unknown) => DEPARTMENTS.find((department) => department.id === id) ?? null
 
+/**
+ * 메일 본문에 적는 부서 이름. `label`에서 괄호 설명을 뺀 값이다("통합원단부 3팀(원단 R&D)" → "통합원단부 3팀").
+ * `short`("3팀")는 화면 배지용이라 외부로 나가는 문서에는 쓰지 않는다.
+ */
+export const departmentMailLabel = (id: unknown): string =>
+  departmentById(id)?.label.replace(/\s*\(.*\)\s*$/, "") ?? ""
+
 /** access가 부서 기본값과 같으면 true. 다르면 화면에서 "직접 설정" 표시를 붙인다. */
 export function matchesDepartment(id: unknown, access: ScreenAccessMap): boolean {
   const department = departmentById(id)
