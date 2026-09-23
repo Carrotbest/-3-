@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-09-22T23:21:00+00:00",
+"generated_at": "2026-09-23T23:17:16+00:00",
 "window_days": 120,
-"total": 1095,
-"translated": 1095,
-"filtered_out": 1923,
+"total": 1131,
+"translated": 1131,
+"filtered_out": 1997,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 20,
-"scanned": 747,
-"kept": 285,
+"scanned": 744,
+"kept": 276,
 "material": 187
 },
 "30": {
 "sources": 23,
-"scanned": 2573,
-"kept": 972,
-"material": 713
+"scanned": 2674,
+"kept": 1006,
+"material": 737
 }
 }
 },
@@ -25,23 +25,23 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 351
+"n": 363
 },
 {
 "key": "RETAIL",
-"n": 264
+"n": 274
 },
 {
 "key": "FABRIC",
-"n": 211
+"n": 217
 },
 {
 "key": "ETC",
-"n": 142
+"n": 149
 },
 {
 "key": "CHEMICAL",
-"n": 94
+"n": 95
 },
 {
 "key": "YARN",
@@ -51,55 +51,55 @@
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 293
+"n": 302
 },
 {
 "key": "Fibre2Fashion",
-"n": 186
+"n": 190
 },
 {
 "key": "국제섬유신문",
-"n": 82
+"n": 83
 },
 {
 "key": "Textile Focus",
-"n": 70
+"n": 73
 },
 {
 "key": "Ecotextile News",
-"n": 63
+"n": 66
 },
 {
 "key": "주제검색 · 국내소재",
-"n": 60
+"n": 64
 },
 {
 "key": "Textile Today",
-"n": 59
+"n": 62
 },
 {
 "key": "Innovation in Textiles",
-"n": 51
+"n": 52
 },
 {
 "key": "주제검색 · 신소재",
-"n": 51
+"n": 52
 },
 {
 "key": "Indian Textile Magazine",
-"n": 48
+"n": 49
 },
 {
 "key": "Textile World",
-"n": 31
+"n": 33
 },
 {
 "key": "Knitting Industry",
-"n": 30
+"n": 32
 },
 {
 "key": "Apparel Insider",
-"n": 21
+"n": 22
 },
 {
 "key": "Apparel Resources",
@@ -111,7 +111,7 @@
 },
 {
 "key": "WWD",
-"n": 3
+"n": 4
 },
 {
 "key": "Just Style",
@@ -141,11 +141,11 @@
 "tags": [
 {
 "key": "방글라데시",
-"n": 71
+"n": 73
 },
 {
 "key": "리사이클",
-"n": 68
+"n": 69
 },
 {
 "key": "전시회",
@@ -153,11 +153,15 @@
 },
 {
 "key": "데님",
-"n": 38
+"n": 39
 },
 {
 "key": "제직",
-"n": 19
+"n": 21
+},
+{
+"key": "탄소",
+"n": 18
 },
 {
 "key": "울",
@@ -168,28 +172,24 @@
 "n": 17
 },
 {
-"key": "탄소",
-"n": 15
-},
-{
 "key": "스판덱스",
 "n": 15
 },
 {
 "key": "부직포",
-"n": 12
+"n": 13
 },
 {
 "key": "T2T",
+"n": 12
+},
+{
+"key": "관세",
 "n": 11
 },
 {
 "key": "베트남",
 "n": 10
-},
-{
-"key": "관세",
-"n": 9
 },
 {
 "key": "스트레치",
@@ -208,6 +208,10 @@
 "n": 8
 },
 {
+"key": "리오셀",
+"n": 7
+},
+{
 "key": "코팅라미",
 "n": 7
 },
@@ -220,15 +224,19 @@
 "n": 7
 },
 {
+"key": "인도네시아",
+"n": 6
+},
+{
+"key": "효성",
+"n": 6
+},
+{
 "key": "환편",
 "n": 6
 },
 {
 "key": "PFAS",
-"n": 6
-},
-{
-"key": "리오셀",
 "n": 6
 },
 {
@@ -256,10 +264,6 @@
 "n": 5
 },
 {
-"key": "인도네시아",
-"n": 5
-},
-{
 "key": "난연",
 "n": 5
 },
@@ -281,10 +285,6 @@
 },
 {
 "key": "폐수",
-"n": 4
-},
-{
-"key": "효성",
 "n": 4
 },
 {
@@ -339,14 +339,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-24",
-"total": 6,
-"by": {
-"FABRIC": 4,
-"MATERIAL": 2
-}
-},
 {
 "date": "2026-08-25",
 "total": 20,
@@ -568,12 +560,12 @@
 },
 {
 "date": "2026-09-14",
-"total": 53,
+"total": 54,
 "by": {
 "RETAIL": 11,
 "CHEMICAL": 5,
 "YARN": 4,
-"MATERIAL": 12,
+"MATERIAL": 13,
 "ETC": 10,
 "FABRIC": 11
 }
@@ -661,14 +653,25 @@
 },
 {
 "date": "2026-09-22",
-"total": 46,
+"total": 47,
 "by": {
 "YARN": 2,
 "CHEMICAL": 5,
-"RETAIL": 16,
+"RETAIL": 17,
 "MATERIAL": 10,
 "ETC": 5,
 "FABRIC": 8
+}
+},
+{
+"date": "2026-09-23",
+"total": 34,
+"by": {
+"ETC": 7,
+"MATERIAL": 11,
+"RETAIL": 9,
+"FABRIC": 6,
+"CHEMICAL": 1
 }
 }
 ],
@@ -676,9 +679,9 @@
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 70,
+"recent": 72,
 "prior": 0,
-"delta": 70,
+"delta": 72,
 "weeks": [
 0,
 0,
@@ -691,15 +694,15 @@
 14,
 23,
 20,
-6
+8
 ]
 },
 {
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 61,
-"prior": 4,
-"delta": 57,
+"recent": 60,
+"prior": 6,
+"delta": 54,
 "weeks": [
 0,
 2,
@@ -712,7 +715,7 @@
 4,
 28,
 12,
-7
+8
 ]
 },
 {
@@ -739,9 +742,9 @@
 {
 "tag": "데님",
 "label_en": "denim",
-"recent": 32,
+"recent": 33,
 "prior": 6,
-"delta": 26,
+"delta": 27,
 "weeks": [
 0,
 0,
@@ -754,7 +757,7 @@
 9,
 12,
 6,
-3
+4
 ]
 },
 {
@@ -781,9 +784,9 @@
 {
 "tag": "탄소",
 "label_en": "carbon footprint",
-"recent": 14,
-"prior": 1,
-"delta": 13,
+"recent": 16,
+"prior": 2,
+"delta": 14,
 "weeks": [
 0,
 0,
@@ -796,14 +799,35 @@
 4,
 4,
 0,
-5
+8
+]
+},
+{
+"tag": "T2T",
+"label_en": "textile-to-textile",
+"recent": 12,
+"prior": 0,
+"delta": 12,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+1,
+0,
+6,
+2,
+3
 ]
 },
 {
 "tag": "제직",
 "label_en": "woven fabric",
-"recent": 15,
-"prior": 4,
+"recent": 16,
+"prior": 5,
 "delta": 11,
 "weeks": [
 0,
@@ -817,28 +841,7 @@
 1,
 7,
 5,
-1
-]
-},
-{
-"tag": "스판덱스",
-"label_en": "spandex",
-"recent": 13,
-"prior": 2,
-"delta": 11,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-4,
-1,
-4,
-2,
-4
+3
 ]
 },
 {
@@ -863,48 +866,6 @@
 ]
 },
 {
-"tag": "렌징",
-"label_en": "lenzing",
-"recent": 2,
-"prior": 2,
-"delta": 0,
-"weeks": [
-0,
-0,
-0,
-2,
-0,
-0,
-1,
-1,
-0,
-1,
-0,
-0
-]
-},
-{
-"tag": "인도네시아",
-"label_en": "indonesia",
-"recent": 3,
-"prior": 2,
-"delta": 1,
-"weeks": [
-0,
-0,
-0,
-1,
-1,
-0,
-0,
-0,
-1,
-2,
-0,
-0
-]
-},
-{
 "tag": "리넨",
 "label_en": "linen",
 "recent": 3,
@@ -924,6 +885,48 @@
 2,
 0
 ]
+},
+{
+"tag": "자카드",
+"label_en": "jacquard",
+"recent": 2,
+"prior": 1,
+"delta": 1,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+2,
+0,
+0,
+1,
+0
+]
+},
+{
+"tag": "렌징",
+"label_en": "lenzing",
+"recent": 2,
+"prior": 1,
+"delta": 1,
+"weeks": [
+0,
+0,
+0,
+2,
+0,
+0,
+1,
+1,
+0,
+1,
+0,
+0
+]
 }
 ],
 "fresh": [
@@ -936,7 +939,7 @@
 {
 "tag": "T2T",
 "label_en": "textile-to-textile",
-"n": 11,
+"n": 12,
 "first": "2026-08-27"
 },
 {
@@ -950,12 +953,6 @@
 "label_en": "traceability",
 "n": 8,
 "first": "2026-09-02"
-},
-{
-"tag": "경편",
-"label_en": "warp knit",
-"n": 8,
-"first": "2026-08-26"
 },
 {
 "tag": "r-PET",
@@ -1006,22 +1003,10 @@
 "first": "2026-09-02"
 },
 {
-"tag": "효성",
-"label_en": "hyosung",
-"n": 4,
-"first": "2026-08-26"
-},
-{
 "tag": "DPP",
 "label_en": "digital product passport",
 "n": 4,
 "first": "2026-09-02"
-},
-{
-"tag": "자카드",
-"label_en": "jacquard",
-"n": 3,
-"first": "2026-08-26"
 },
 {
 "tag": "면가",
@@ -1103,6 +1088,751 @@
 }
 ],
 "articles": [
+{
+"id": "fe4e1a0d41913cdd",
+"d": "2026-09-23",
+"t": "기후 금융을 목표로 하는 새로운 패션 연합",
+"o": "New fashion coalition targets climate finance",
+"u": "https://www.ecotextile.com/2026092365831/news/environment/new-fashion-coalition-targets-climate-finance/",
+"s": "Amazon, Stella McCartney and Canopy launch a coalition to advance lower-carbon materials and manufacturing at commercial scale NEW YORK — […] The post New fashion coalition targets climate finance appeared first on Ecotextile News .",
+"c": "ETC",
+"x": "Amazon, Stella McCartney and Canopy launch a coalition to advance lower-carbon materials and manufacturing at commercial scale NEW YORK — […] The post New fashion coalition targets climate finance appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/09/Climate-coalition_Credit_BFA-_-Madison-McGraw.jpg",
+"g": [],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "ed37c8034c61fdd2",
+"d": "2026-09-23",
+"t": "나이지리아, 전기 접근성 확대를 위해 3억 달러 규모의 분산 재생 에너지 기금 출시",
+"o": "Nigeria Launches $300 Million Distributed Renewable Energy Fund to Expand Electricity Access",
+"u": "https://textilefocus.com/nigeria-launches-300-million-distributed-renewable-energy-fund-to-expand-electricity-access/",
+"s": "The Nigeria Sovereign Investment Authority (NSIA) and its partners have commercially launched a $300 million Distributed Renewable Energy (DRE) Fund to mobilize private-sector investment in renewable energy and expand electricity access for underserved communities and businesses. The launch, announc",
+"c": "ETC",
+"x": "The Nigeria Sovereign Investment Authority (NSIA) and its partners have commercially launched a $300 million Distributed Renewable Energy (DRE) Fund to mobilize private-sector investment in renewable energy and expand electricity access for underserved communities and businesses. The launch, announced on the sidelines of the United Nations General Assembly in New York, marks the transition of the fund from its structuring phase to active capital deployment. The initiative brings together the NSIA, Sustainable Energy for All (SEforALL) and Africa50 , an infrastructure investment platform established by the African Development Bank and African states. The fund is designed to finance distributed renewable energy solutions, including mini-grids and standalone solar systems, particularly in communities and businesses that remain underserved by conventional electricity infrastructure. It also supports Mission 300, the initiative to connect around 300 million people across Africa to electricity by 2030. World Bank commits initial $25 million The World Bank Group is a founding partner of the initiative and has committed an initial $25 million through the International Development Association (IDA), according to the NSIA. Aminu Umar-Sadiq, Managing Director and Chief Executive Officer of NSIA, said the commercial launch reflects the growing investment potential of Nigeria’s distributed renewable energy market. He said the fund comes at a critical point as distributed renewable energy becomes increasingly important to closing electricity-access gaps, supporting economic activity and strengthening energy security. Alain Ebobissé, Group Chief Executive Officer of Africa50, said the partnership combines local market expertise, pan-African investment capabilities, energy-access knowl",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Nigeria.jpg",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "d0cd2519ab0e0af4",
+"d": "2026-09-23",
+"t": "아이메디텍·모빅신소재기술, CNF 적용 메디컬 소재 개발 협약",
+"o": "아이메디텍·모빅신소재기술, CNF 적용 메디컬 소재 개발 협약",
+"u": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE9QalN6RGYxdUJESTJwbmNlUnM1R0hUalhvNVpoZjAyVlgwdW82aWlzNnhzQU1nSHR4REtHTUs3QVJWSnlfNFQ3dVdoYUxMd2luLXJqZlM3UlVCRHJZ?oc=5",
+"s": "아이메디텍·모빅신소재기술, CNF 적용 메디컬 소재 개발 협약 supple.kr",
+"c": "MATERIAL",
+"x": "아이메디텍·모빅신소재기술, CNF 적용 메디컬 소재 개발 협약 supple.kr",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
+{
+"id": "cefabfe3e3c53f72",
+"d": "2026-09-23",
+"t": "8월 패션 소비 ‘양극화’…백화점 두 자릿수 성장, 온라인은 역성장",
+"o": "8월 패션 소비 ‘양극화’…백화점 두 자릿수 성장, 온라인은 역성장",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148841",
+"s": "국내 유통시장이 추석 조기 수요와 폭염에 따른 온라인 서비스 소비 증가에 힘입어 성장세를 이어갔지만, 패션 소비에서는 채널별 온도차가 한층 뚜렷해졌다. 백화점에서는 여성캐주얼과 잡화, 아동·스포츠, 해외 유명 브랜드 등 대부분 패션 품목이 성장한 반면 온라인 패션·의류와 스포츠 매출은 나란히 감소했다. 전체 소비가 살아나는 가운데서도 패션 수요는 백화점과 일부 프리미엄 채널에 상대적으로 집중되는 양상이다.백화점 11.9% 성장…여성캐주얼·명품이 패션시장 견인산업통상부가 23일 발표한 ‘2026년 8월 주요 유통업체 매출 동향’에 따",
+"c": "RETAIL",
+"x": "국내 유통시장이 추석 조기 수요와 폭염에 따른 온라인 서비스 소비 증가에 힘입어 성장세를 이어갔지만, 패션 소비에서는 채널별 온도차가 한층 뚜렷해졌다. 백화점에서는 여성캐주얼과 잡화, 아동·스포츠, 해외 유명 브랜드 등 대부분 패션 품목이 성장한 반면 온라인 패션·의류와 스포츠 매출은 나란히 감소했다. 전체 소비가 살아나는 가운데서도 패션 수요는 백화점과 일부 프리미엄 채널에 상대적으로 집중되는 양상이다.백화점 11.9% 성장…여성캐주얼·명품이 패션시장 견인산업통상부가 23일 발표한 ‘2026년 8월 주요 유통업체 매출 동향’에 따",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148841_130921_4343_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 9,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "bf2391f1befb262b",
+"d": "2026-09-23",
+"t": "전 세계 섬유 생산량은 1억 3900만 톤을 기록했습니다.",
+"o": "Global fibre output hits record 139 million tonnes",
+"u": "https://apparelinsider.com/global-fibre-output-hits-record-139-million-tonnes/",
+"s": "TEXAS – Textile Exchange says global fibre output increased by seven million tonnes in 2025, driven mainly by growth in synthetics. Global textile fibre production reached a record 139 million tonnes, up from approximately 132 million tonnes a year earlier, according to Textile Exchange’s 2026 Mater",
+"c": "MATERIAL",
+"x": "TEXAS – Textile Exchange says global fibre output increased by seven million tonnes in 2025, driven mainly by growth in synthetics. Global textile fibre production reached a record 139 million tonnes, up from approximately 132 million tonnes a year earlier, according to Textile Exchange’s 2026 Materials Market Report. The annual increase of around 5.3 per cent was predominantly driven by greater production of virgin fossil-based fibres. This is Premium Content Only users with Online and Print subscription can access this. If you are a Free Subscriber, click here to upgrade. If you already have Online or Print subscription Login To Unlock The Content! Remember Me Lost your password? Don't have an account? Register The post Global fibre output hits record 139 million tonnes appeared first on Apparel Insider .",
+"i": "https://apparelinsider.com/wp-content/uploads/2026/09/MMR26_Global-Fiber-Production-1-scaled.png",
+"g": [],
+"m": "Apparel Insider",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Apparel Insider"
+]
+},
+{
+"id": "be3fcf8c1e1aabd0",
+"d": "2026-09-23",
+"t": "더욱 스마트한 섬유 생산을 조명하는 HanoiTex & HanoiFabric 2026",
+"o": "HanoiTex & HanoiFabric 2026 to spotlight smarter textile production",
+"u": "https://textiletoday.com.bd/hanoitex-hanoifabric-2026-to-spotlight-smarter-textile-production",
+"s": "The HanoiTex &amp; HanoiFabric 2026 International Exhibition on the Textile and Garment Industry, Equipment, Materials, and Fabrics will take place October 21–23 at the International Exhibition Centre...",
+"c": "FABRIC",
+"x": "The HanoiTex & HanoiFabric 2026 International Exhibition on the Textile and Garment Industry, Equipment, Materials, and Fabrics will take place October 21–23 at the International Exhibition Centre in Hanoi, Vietnam. Figure: HanoiTex & HanoiFabric 2026 to spotlight smarter textile production.Courtesy: Collected The annual event will bring together machinery manufacturers, technology providers, material suppliers and other companies across the textile and garment supply chain. The exhibition will have two main sections. HanoiTex will focus on textile and garment machinery, equipment and production technologies. HanoiFabric will showcase fabrics, yarns and materials for textile, garment and embroidery production. Exhibits will include machinery, yarns, fabrics, accessories, dyeing and finishing technologies, automation systems and solutions for greener production. The event will also feature technologies designed to reduce water, chemical, and energy use. The event comes as textile manufacturers face growing pressure to improve efficiency while meeting sustainability and traceability requirements. Flexible production, lower inventory costs and digital production systems will therefore be key areas of focus. Truong Van Cam, Vice Chairman of the Vietnam Textile and Apparel Association (VITAS), said the exhibition will help businesses access new machinery and production solutions and connect with international suppliers and partners. The event will also highlight broader industry shifts toward automation, smart manufacturing, circular production, and digital transformation. With support from VITAS, Vietnam National Textile and Garment Group (VINATEX), Vietnam Chamber of Commerce and Industry (VCCI), and other industry bodies, HanoiTex & HanoiFabric 2026 is expected to strengt",
+"i": "/storage/uploads/2026/9/hanoitexhanoifabric_17901368505698.png",
+"g": [],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "bc7c1bd21b83b6a7",
+"d": "2026-09-23",
+"t": "영국 소매업체는 target 원형 직물과 연결됩니다.",
+"o": "UK retailers link up to target circular textiles",
+"u": "https://www.ecotextile.com/2026092365813/news/fashion-retail/uk-retailers-link-up-to-target-circular-textiles/",
+"s": "Leading retailers and Oxfam charity to test automated sorting to prepare UK textile waste for fibre-to-fibre recycling LONDON — M&S, […] The post UK retailers link up to target circular textiles appeared first on Ecotextile News .",
+"c": "MATERIAL",
+"x": "Leading retailers and Oxfam charity to test automated sorting to prepare UK textile waste for fibre-to-fibre recycling LONDON — M&S, […] The post UK retailers link up to target circular textiles appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/09/Clothes-bins.jpg",
+"g": [
+"T2T",
+"리사이클"
+],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "b99af2b7ce0a6aec",
+"d": "2026-09-23",
+"t": "수원삼성·엄브로·디키즈, 3자 협업 컬렉션 ‘블루 라이츠 에브리웨어’ 출시",
+"o": "수원삼성·엄브로·디키즈, 3자 협업 컬렉션 ‘블루 라이츠 에브리웨어’ 출시",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148824",
+"s": "수원삼성블루윙즈(Suwon Samsung Bluewings)와 영국 축구 브랜드 엄브로(UMBRO), 글로벌 스트리트 웨어 브랜드 디키즈(Dickies)가 손잡고 3자 협업 컬렉션을 선보인다.세 브랜드는 ‘블루 라이츠 에브리웨어(BLUE LIGHTS EVERYWHERE)’를 슬로건으로 내세우고 경기장을 향하는 수원삼성 팬들의 열정과 응원 문화를 축구와 스트리트 패션의 언어로 풀어낸다.이번 협업은 수원삼성블루윙즈가 가진 축구 문화와 팬덤, 축구 헤리티지를 바탕으로 엄브로(UMBRO)의 스포츠 감성과 디키즈(Dickies)의 스트리트·",
+"c": "RETAIL",
+"x": "수원삼성블루윙즈(Suwon Samsung Bluewings)와 영국 축구 브랜드 엄브로(UMBRO), 글로벌 스트리트 웨어 브랜드 디키즈(Dickies)가 손잡고 3자 협업 컬렉션을 선보인다.세 브랜드는 ‘블루 라이츠 에브리웨어(BLUE LIGHTS EVERYWHERE)’를 슬로건으로 내세우고 경기장을 향하는 수원삼성 팬들의 열정과 응원 문화를 축구와 스트리트 패션의 언어로 풀어낸다.이번 협업은 수원삼성블루윙즈가 가진 축구 문화와 팬덤, 축구 헤리티지를 바탕으로 엄브로(UMBRO)의 스포츠 감성과 디키즈(Dickies)의 스트리트·워",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148824_130894_4419_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "b6ad2cd04cd87548",
+"d": "2026-09-23",
+"t": "미케네, 첫 단독 팝업서 ‘상위권 매출’…백화점 입점 노린다",
+"o": "미케네, 첫 단독 팝업서 ‘상위권 매출’…백화점 입점 노린다",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148829",
+"s": "2030 여성 고객층을 중심으로 입지를 다져온 디자이너 브랜드 미케네(MICANE)가 첫 단독 팝업스토어에서 상위권 매출을 기록하며 오프라인 시장 확대 가능성을 확인했다.미케네는 지난 8월 28일부터 9월 3일까지 현대백화점 판교점에서 7일간 첫 단독 팝업스토어를 운영했다. 온라인을 통해 브랜드를 접해온 고객들이 제품의 소재와 실루엣, 핏을 직접 경험할 수 있도록 2026년 가을 컬렉션을 중심으로 공간을 구성했다.행사 기간 가을 신상품을 직접 착용하려는 방문객이 몰리면서 피팅룸 대기가 지속됐다. 한정 프로모션과 구매 금액대별 사은",
+"c": "RETAIL",
+"x": "2030 여성 고객층을 중심으로 입지를 다져온 디자이너 브랜드 미케네(MICANE)가 첫 단독 팝업스토어에서 상위권 매출을 기록하며 오프라인 시장 확대 가능성을 확인했다.미케네는 지난 8월 28일부터 9월 3일까지 현대백화점 판교점에서 7일간 첫 단독 팝업스토어를 운영했다. 온라인을 통해 브랜드를 접해온 고객들이 제품의 소재와 실루엣, 핏을 직접 경험할 수 있도록 2026년 가을 컬렉션을 중심으로 공간을 구성했다.행사 기간 가을 신상품을 직접 착용하려는 방문객이 몰리면서 피팅룸 대기가 지속됐다. 한정 프로모션과 구매 금액대별 사은",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148829_130903_4951_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 8,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "b2ac40466c41d721",
+"d": "2026-09-23",
+"t": "MMCF 부문은 공급, 투자 동향의 변화를 보고 있습니다.",
+"o": "MMCF sector sees changing supply, investment trends",
+"u": "https://textiletoday.com.bd/mmcf-sector-sees-changing-supply-investment-trends",
+"s": "The global man-made cellulosic fiber (MMCF) sector is going through a period of change as feedstock supply risks and concerns over oversupply affect investment decisions, according to Canopy’s 2026 Ho...",
+"c": "MATERIAL",
+"x": "The global man-made cellulosic fiber (MMCF) sector is going through a period of change as feedstock supply risks and concerns over oversupply affect investment decisions, according to Canopy’s 2026 Hot Button Progress Report. Figure: Canopy’s assessment comes as the MMCF industry faces uncertainty around conventional feedstock supply. Concerns about oversupply are also influencing investment across the sector. The environmental nonprofit is calling for faster adoption of next-generation fibers as the industry responds to changing market and environmental pressures. According to the report, green shirt-rated producers now represent 53% of global MMCF capacity. This is down one percentage point from 2025. However, the performance of individual producers improved. Of the 28 producers assessed by Canopy, 22 achieved green shirt status in 2026. This means 79% of the assessed producers qualified for green shirt status, compared with 70% in 2025. The results show a mixed picture for the MMCF sector. Canopy’s assessment comes as the MMCF industry faces uncertainty around conventional feedstock supply. Concerns about oversupply are also influencing investment across the sector. The report highlights the need for the industry to accelerate the development and adoption of next-generation fiber solutions. These technologies are expected to play a growing role in reducing pressure on conventional forest-based feedstocks and supporting a more sustainable fiber supply. The latest findings also underline the importance of looking beyond the number of companies meeting sustainability benchmarks. The capacity represented by those producers remains a key factor in measuring the overall progress of the MMCF industry.",
+"i": "/storage/uploads/2026/9/mmcfsectorseescha_1790136241794.png",
+"g": [],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today",
+"주제검색 · 신소재"
+]
+},
+{
+"id": "b0fd3dde67f9f765",
+"d": "2026-09-23",
+"t": "아이메디텍·모빅신소재기술, CNF 적용 메디컬 소재 개발 협약 - 머니투데이",
+"o": "아이메디텍·모빅신소재기술, CNF 적용 메디컬 소재 개발 협약 - 머니투데이",
+"u": "https://news.google.com/rss/articles/CBMickFVX3lxTE9OV3JvOGF6Z2U3aGRNNFl2WGJEcm9pWDFfS1V0Um94YVkwRFVJQTc2aUZ1cHFuTU5ESjF6dzBhSDVBUUdTVjJjV0t3XzZhZU03UC1iQjl1c3hRd0l6UHFzQlZNX0RjNXcyRWwyTFJNeGEwZ9IBckFVX3lxTE9OV3JvOGF6Z2U3aGRNNFl2WGJEcm9pWDFfS1V0Um94YVkwRFVJQTc2aUZ1cHFuTU5ESjF6dzBhSDVBUUdTVjJjV0t3XzZhZU03UC1iQjl1c3hRd0l6UHFzQlZNX0RjNXcyRWwyTFJNeGEwZw?oc=5",
+"s": "아이메디텍·모빅신소재기술, CNF 적용 메디컬 소재 개발 협약 - 머니투데이 머니투데이",
+"c": "MATERIAL",
+"x": "아이메디텍·모빅신소재기술, CNF 적용 메디컬 소재 개발 협약 - 머니투데이 머니투데이",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
+{
+"id": "a6de87d8fc30d415",
+"d": "2026-09-23",
+"t": "Filo는 더 강력한 공급망에 중점을 둡니다.",
+"o": "Filo focuses on stronger supply chains",
+"u": "https://knittingindustry.com/filo-focuses-on-stronger-supply-chains/",
+"s": "The need for a more united, innovative and responsible textile and fashion sector was placed firmly in the spotlight at the opening ceremony of the 66th edition of Filo, held at Fiera Milano Rho earlier this month. Under the theme ‘Weaving the Future: balance for a stronger, more competitive textile",
+"c": "FABRIC",
+"x": "The need for a more united, innovative and responsible textile and fashion sector was placed firmly in the spotlight at the opening ceremony of the 66th edition of Filo, held at Fiera Milano Rho earlier this month. Under the theme ‘Weaving the Future: balance for a stronger, more competitive textile and fashion supply chain’, industry representatives explored how closer collaboration across the value chain could help companies navigate challenging market conditions while maintaining investment in innovation, sustainability and skills. Opening the event, Filo head Paolo Monfermoso acknowledged the difficult environment currently facing the industry, although he pointed to encouraging participation at the exhibition. “The sector is going through a challenging situation, with circumstances varying from company to company,” Monfermoso said. He added that exhibitor numbers were in line with the February edition, while buyer registrations on the opening morning provided grounds for optimism. Pier Francesco Corcione, general director of Biella Industrial Union (UIB), stressed the continuing importance of B2B exhibitions as practical business development platforms. According to Corcione, growing demands for innovation and collaboration make opportunities for meaningful networking increasingly important. Filo, he said, places the textile supply chain at the centre of this process by encouraging dialogue between its different participants and promoting expertise, sustainability and research. Emanuele Ramella Pralungo, president of the Province of Biella, highlighted Filo’s role in showcasing Italian yarn expertise and Made in Italy manufacturing, while calling for collaboration between different parts of the sector to address increasingly complex challenges. Fulvia Bacchi, CEO of",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/09/P1115336.jpg",
+"g": [
+"제직"
+],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry"
+]
+},
+{
+"id": "a4586f6e1cd4f270",
+"d": "2026-09-23",
+"t": "마무트, 롯데월드몰서 경량 다운 팝업…‘루프틱 3.0’ 전면에",
+"o": "마무트, 롯데월드몰서 경량 다운 팝업…‘루프틱 3.0’ 전면에",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148808",
+"s": "크리스에프앤씨(대표 우진석)가 전개하는 스위스 프리미엄 아웃도어 브랜드 마무트(MAMMUT)가 서울 잠실 롯데월드몰 지하 1층에서 2026 FW 경량 다운 컬렉션 팝업스토어를 운영한다. 오는 10월 21일까지 진행되는 이번 팝업은 26FW 캠페인의 핵심 콘셉트인 ‘ABSOLUTE LIGHT’를 오프라인 공간에 구현하고, 주력 제품인 ‘루프틱 3.0’을 중심으로 경량 다운 라인업을 선보인다.팝업스토어는 마무트의 알파인 헤리티지를 상징하는 설산과 파스텔 톤의 하늘, 구름을 활용해 경량 다운의 가벼운 이미지를 시각화했다. 10D 립스탑",
+"c": "RETAIL",
+"x": "크리스에프앤씨(대표 우진석)가 전개하는 스위스 프리미엄 아웃도어 브랜드 마무트(MAMMUT)가 서울 잠실 롯데월드몰 지하 1층에서 2026 FW 경량 다운 컬렉션 팝업스토어를 운영한다. 오는 10월 21일까지 진행되는 이번 팝업은 26FW 캠페인의 핵심 콘셉트인 ‘ABSOLUTE LIGHT’를 오프라인 공간에 구현하고, 주력 제품인 ‘루프틱 3.0’을 중심으로 경량 다운 라인업을 선보인다.팝업스토어는 마무트의 알파인 헤리티지를 상징하는 설산과 파스텔 톤의 하늘, 구름을 활용해 경량 다운의 가벼운 이미지를 시각화했다. 10D 립스탑",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148808_130866_1632_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "a2ba6d156f2c5aa1",
+"d": "2026-09-23",
+"t": "美 고소득층, 패션·명품 소비 늘었다",
+"o": "美 고소득층, 패션·명품 소비 늘었다",
+"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81928",
+"s": "관세와 물가 부담에도 미국 중산층과 고소득층의 소비가 견조한 흐름을 이어가고 있다. 기본 상품보다 새로운 패션 상품에 수요가 몰리고 프리미엄 백화점과 뷰티 부문의 판매도 크게 늘면서 메이시스(Macy's)는 연간 실적 전망을 상향했다.지난 10일 로이터에 따르면 메이시스가 운영하는 블루밍데일스의 2분기 동일점포 매출은 11.3% 증가했다. 뷰티 체인 블루머큐리도 6.2% 늘어 메이시스 자체 브랜드 매장의 동일점포 매출 증가율 1.1%를 크게 웃돌았다. 토니 스프링(Tony Spring) 메이시스 최고경영자(CEO)는 중산층과 고소득",
+"c": "RETAIL",
+"x": "관세와 물가 부담에도 미국 중산층과 고소득층의 소비가 견조한 흐름을 이어가고 있다. 기본 상품보다 새로운 패션 상품에 수요가 몰리고 프리미엄 백화점과 뷰티 부문의 판매도 크게 늘면서 메이시스(Macy's)는 연간 실적 전망을 상향했다.지난 10일 로이터에 따르면 메이시스가 운영하는 블루밍데일스의 2분기 동일점포 매출은 11.3% 증가했다. 뷰티 체인 블루머큐리도 6.2% 늘어 메이시스 자체 브랜드 매장의 동일점포 매출 증가율 1.1%를 크게 웃돌았다. 토니 스프링(Tony Spring) 메이시스 최고경영자(CEO)는 중산층과 고소득",
+"i": "https://cdn.itnk.co.kr/news/photo/202609/81928_53552_2951.png",
+"g": [
+"관세"
+],
+"m": "국제섬유신문",
+"r": "국내",
+"v": 12,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"국제섬유신문"
+]
+},
+{
+"id": "9a5addbb0e78d9e0",
+"d": "2026-09-23",
+"t": "온, 2029년 매출 9조원 정조준…축구·골프까지 스포츠웨어 영토 확장",
+"o": "온, 2029년 매출 9조원 정조준…축구·골프까지 스포츠웨어 영토 확장",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148825",
+"s": "스위스 프리미엄 스포츠웨어 브랜드 '온(On)'이 2029년 매출 56억 스위스프랑(CHF·약 9조원)을 목표로 글로벌 사업 확장에 속도를 낸다.러닝을 중심으로 성장해온 사업 영역을 스니커즈와 어패럴로 넓힌 데 이어 축구와 골프 시장까지 진출하며 스포츠웨어 전반으로 영역을 확대한다.온은 23일 2029년까지의 중장기 성장 전략을 공개하고 최근 진출을 공식화한 축구에 이어 골프 시장에도 진출한다고 밝혔다.온이 겨냥하는 핵심 소비층은 스포츠와 일상의 경계를 허물고 ‘움직임’을 라이프스타일이자 자기표현의 수단으로 받아들이는 이른바 ‘무브",
+"c": "RETAIL",
+"x": "스위스 프리미엄 스포츠웨어 브랜드 '온(On)'이 2029년 매출 56억 스위스프랑(CHF·약 9조원)을 목표로 글로벌 사업 확장에 속도를 낸다.러닝을 중심으로 성장해온 사업 영역을 스니커즈와 어패럴로 넓힌 데 이어 축구와 골프 시장까지 진출하며 스포츠웨어 전반으로 영역을 확대한다.온은 23일 2029년까지의 중장기 성장 전략을 공개하고 최근 진출을 공식화한 축구에 이어 골프 시장에도 진출한다고 밝혔다.온이 겨냥하는 핵심 소비층은 스포츠와 일상의 경계를 허물고 ‘움직임’을 라이프스타일이자 자기표현의 수단으로 받아들이는 이른바 ‘무브",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148825_130896_5627_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "9893973a6d7ec8d0",
+"d": "2026-09-23",
+"t": "Monforts ATC는 마감 혁신을 앞당기도록 지원합니다.",
+"o": "Monforts ATC helps advance finishing innovation",
+"u": "https://knittingindustry.com/monforts-atc-helps-advance-finishing-innovation/",
+"s": "Monforts is helping textile manufacturers turn new ideas into industrial reality at its Advanced Technology Centre (ATC) in Mönchengladbach, where customers can trial fabrics, finishing technologies and new processes under full-scale production conditions. Covering 1,200 square metres at the company",
+"c": "CHEMICAL",
+"x": "Monforts is helping textile manufacturers turn new ideas into industrial reality at its Advanced Technology Centre (ATC) in Mönchengladbach, where customers can trial fabrics, finishing technologies and new processes under full-scale production conditions. Covering 1,200 square metres at the company’s headquarters, the ATC houses two full Montex finishing lines engineered to accommodate a diverse range of processes. The centre also includes a Thermex range for the continuous dyeing of denim and other woven fabrics, a full colour kitchen and several laboratory-scale systems for smaller batch trials. “The ATC allows our customers to test their own textiles and technical fabrics on Monforts dyeing and finishing machines under fully confidential, real production conditions,” said Monforts Marketing Manager Nicole Croonenbroek. “Using the results from these trials, we are also able to make recommendations for improving many fabric finishes.” Technical textiles One of the centre’s Montex lines is specifically configured for technical textiles, where flexibility is increasingly important because manufacturers can be required to process materials with very different properties and performance requirements in rapid succession. Applications range from substrates for digitally printed soft signage and carbon fabrics for high-performance composites to filter media designed for extreme temperatures and flame-retardant barrier fabrics. The technical textiles line incorporates a Montex four-chamber horizontal-chain stenter and an explosion-proof coating application chamber, enabling treatments involving organic solvents and other volatile materials. It can process materials at temperatures of up to 320°C and allows the top and bottom surfaces of certain materials to be treated at diff",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/09/ATC1.jpg",
+"g": [],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 18,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry",
+"주제검색 · 염색가공"
+]
+},
+{
+"id": "9748ccd8e632f274",
+"d": "2026-09-23",
+"t": "완벽한 리틀 블랙 드레스 뒤에 숨은 TMAS 기술",
+"o": "TMAS technology behind the perfect little black dress",
+"u": "https://innovationintextiles.com/tmas-technology-behind-the-perfect-little-black-dress/",
+"s": "The little black dress may be one of fashion’s simplest and most enduring garments, but achieving its characteristic clean lines depends on manufacturing precision of the kind supplied by Swedish textile machinery specialist and TMAS member Svegea. Ever since Audrey Hepburn appeared in Givenchy’s ce",
+"c": "FABRIC",
+"x": "The little black dress may be one of fashion’s simplest and most enduring garments, but achieving its characteristic clean lines depends on manufacturing precision of the kind supplied by Swedish textile machinery specialist and TMAS member Svegea. Ever since Audrey Hepburn appeared in Givenchy’s celebrated creation in Breakfast at Tiffany’s, the LBD has become a wardrobe staple across generations. Its appeal lies partly in its apparent simplicity, but producing a dress that retains its shape, sits cleanly around the neckline and withstands repeated wear requires considerable attention to details that are largely invisible to the wearer. One of those details is bias binding. Bias binding is produced from strips of fabric cut diagonally across the material rather than along its straight grain. Cutting on the bias gives the strip greater flexibility, allowing it to follow curved necklines, armholes and other edges without puckering or distorting the garment. It can be used to enclose raw edges, reinforce areas subjected to movement and provide a clean internal finish. While largely unnoticed by the wearer, accurately produced and applied binding can consequently make an important contribution to both the appearance and durability of a garment. For a home sewer, bias strips can be cut and prepared manually but in industrial garment production, where thousands of identical pieces may be required, the challenge is quite different. Consistency of width and cut becomes critical, while manufacturers must also control material use and maintain production speeds. It is here that TMAS member Svegea has established a specialist position with automated equipment for bias binding and other fabric cutting operations. From roll to binding Svegea’s system is designed to convert fabric r",
+"i": "https://innovationintextiles.com/wp-content/uploads/2026/09/LBD.jpg",
+"g": [],
+"m": "Innovation in Textiles",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Innovation in Textiles"
+]
+},
+{
+"id": "8c92ebacec51791b",
+"d": "2026-09-23",
+"t": "마르디 메크르디, 27SS 수주회 성료…중국·일본·동남아 공략 가속",
+"o": "마르디 메크르디, 27SS 수주회 성료…중국·일본·동남아 공략 가속",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148818",
+"s": "피스피스스튜디오(대표 박화목·서승완)가 전개하는 패션 브랜드 마르디 메크르디가 2027년 봄·여름 시즌(27SS) 글로벌 수주회를 성황리에 마쳤다. 중국·대만·동남아 주요국 바이어와 일본·중국 법인 관계자들이 참석한 가운데 신제품 370여 종을 공개하고, 국가별 맞춤형 상품 기획과 해외 유통 확대를 위한 현지화 전략을 강화한다.마르디 메크르디는 지난 21~22일 서울 피스피스스튜디오 본사에서 글로벌 수주회를 개최했다. 중국, 대만, 말레이시아, 태국, 인도네시아 등 주요 국가의 바이어와 일본 및 중국 법인 관계자들이 대거 참석했다.",
+"c": "RETAIL",
+"x": "피스피스스튜디오(대표 박화목·서승완)가 전개하는 패션 브랜드 마르디 메크르디가 2027년 봄·여름 시즌(27SS) 글로벌 수주회를 성황리에 마쳤다. 중국·대만·동남아 주요국 바이어와 일본·중국 법인 관계자들이 참석한 가운데 신제품 370여 종을 공개하고, 국가별 맞춤형 상품 기획과 해외 유통 확대를 위한 현지화 전략을 강화한다.마르디 메크르디는 지난 21~22일 서울 피스피스스튜디오 본사에서 글로벌 수주회를 개최했다. 중국, 대만, 말레이시아, 태국, 인도네시아 등 주요 국가의 바이어와 일본 및 중국 법인 관계자들이 대거 참석했다.",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148818_130884_4257_v150.jpg",
+"g": [
+"인도네시아"
+],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "8af414011e797ed1",
+"d": "2026-09-23",
+"t": "Benninger는 Bangladesh에서 FabricMaster 및 SynthMaster를 사용하여 지속 가능한 염색을 발전시킵니다.",
+"o": "Benninger Advances Sustainable Dyeing with FabricMaster and SynthMaster in Bangladesh",
+"u": "https://textilefocus.com/benninger-advances-sustainable-dyeing-with-fabricmaster-and-synthmaster-in-bangladesh/",
+"s": "Swiss textile machinery manufacturer Benninger has introduced its latest discontinuous dyeing technologies, FabricMaster and SynthMaster, to the Bangladesh textile industry, focusing on resource efficiency, process consistency, and gentle fabric handling. The technologies were showcased at a technic",
+"c": "FABRIC",
+"x": "Swiss textile machinery manufacturer Benninger has introduced its latest discontinuous dyeing technologies, FabricMaster and SynthMaster, to the Bangladesh textile industry, focusing on resource efficiency, process consistency, and gentle fabric handling. The technologies were showcased at a technical seminar titled “The sustainable way of discontinuous dyeing: Fast, cost-effective, and zero footprints,” held on 17 September 2026 at Hotel Le Méridien Dhaka. Benninger and its agent for discontinuous dyeing machinery in Bangladesh, Global Hitech, jointly organized the seminar. Photo: A portion of the team from Global HiTech More than 120 textile industry professionals attended the event, including representatives from dyeing, finishing, and textile manufacturing companies. The seminar provided an opportunity for industry professionals to learn about the latest developments in discontinuous dyeing and the technologies being developed to address the changing requirements of modern textile production. With more than 160 years of experience in textile machinery and finishing technologies, Benninger presented FabricMaster and SynthMaster as solutions for dyehouses facing increasingly diverse fabric types, rising resource-efficiency requirements, and the need for consistent quality. Industry focus on efficient and controlled dyeing Opening the seminar, Saad Omar Fahim, CEO of Global Hitech, highlighted the growing importance of reducing water and energy consumption in Bangladesh’s textile processing sector while maintaining productivity and product quality. He said that investment in advanced machinery alone is not enough to achieve sustainable improvements at factory level. He added that technical expertise, proper machine operation, after-sales service, and long-term industry",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/A-portion-of-the-team-from-Global-HiTech.jpeg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 14,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "8663173fb937565f",
+"d": "2026-09-23",
+"t": "ITMF는 순환 섬유 혁신가에게 보상을 제공합니다.",
+"o": "ITMF rewards circular textile innovators",
+"u": "https://www.ecotextile.com/2026092365823/news/environment/itmf-rewards-circular-textile-innovators/",
+"s": "Epoch Biodesign, Huvis and Simabo Technology have been named winners of ITMF’s 2026 Sustainability & Innovation Award for textile circularity […] The post ITMF rewards circular textile innovators appeared first on Ecotextile News .",
+"c": "ETC",
+"x": "Epoch Biodesign, Huvis and Simabo Technology have been named winners of ITMF’s 2026 Sustainability & Innovation Award for textile circularity […] The post ITMF rewards circular textile innovators appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/02/Epoch-Biodesign-Mylon-66-Plastic-Recycling-Enzyme.png",
+"g": [],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "7d54e8f6deaa9b9d",
+"d": "2026-09-23",
+"t": "SIMA 회장, 섬유 산업에 자동화 및 가치 창출 가속화 촉구",
+"o": "SIMA Chairman urges Textile Industry to accelarate automation and value addition",
+"u": "https://www.indiantextilemagazine.in/sima-chairman-urges-textile-industry-to-accelarate-automation-and-value-addition/",
+"s": "Indian textile industry is entering a new phase of transformation where diversification, technology adoption, sustainability and value addition will be the key drivers of long term global competitiveness. While India… The post SIMA Chairman urges Textile Industry to accelarate automation and value a",
+"c": "ETC",
+"x": "Indian textile industry is entering a new phase of transformation where diversification, technology adoption, sustainability and value addition will be the key drivers of long term global competitiveness. While India has traditionally has been built on natural fibres, particularly cotton, the rapidly evolving global market demands a stronger presence across the entire textile value chain including MMF, Technical Textiles, Recycled Fibres, Sustainable products and value-addition to further strengthen India’s position in the global Textile and Apparel market. The future growth of the Indian textile industry will depend not only on expanding capacity, but producing high value products with greater efficiency through Innovation, productivity, advanced technology, sustainability and market diversification. These measures will enable the industry to maximise the emerging opportunities arising from India’s Free Trade Agreements. In a Press Release issued recently, the re-elected Chairman of SIMA, Mr Durai Palanisamy, expressed this gratitude to the NDA Government for always giving high priority for the textile industry by announcing numerous growth oriented policies including • Rationalisation of GST across the textile value chain. • Withdrawal of QCOs on cotton, MMF fibres, filaments and yarns. • Retention of the annual banking system and reduction of related charges, in relation to power. • Extension of export obligation period under Advance Authorisation. • Launch of the Mission for Cotton Productivity. • Revisions to the PLI Scheme, including lower investment and turnover thresholds. • Progress on FTAs with the EU, UK, New Zealand, Oman and other countries. • Export credit support, RoDTEP restoration and extension of RoSCTL. • Temporary exemption of cotton from 11% import ",
+"i": "https://www.indiantextilemagazine.in/wp-content/uploads/2025/09/SIMA-Chief.jpg",
+"g": [],
+"m": "Indian Textile Magazine",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Indian Textile Magazine"
+]
+},
+{
+"id": "714d355f01171a01",
+"d": "2026-09-23",
+"t": "Fabric.AI는 Kopin과 함께 개발된 광섬유 결합 및 커넥터가 없는 MicroLED 광학 인터커넥트에 대한 두 가지 특허 출원을 신청했습니다.",
+"o": "Fabric.AI Files Two Patent Applications Covering Fiber-Coupled and Connector-Free MicroLED Optical Interconnect, Developed with Kopin",
+"u": "https://news.google.com/rss/articles/CBMirgJBVV95cUxNZk0xUDdna1hKNnBsZkJxcHdjVV8wM29PMUxUTGsyTjlMRklRNy1BMERIMkdxd2g1bmdsbkdhYmI1czNWRmxUZ1JWWGFweDcySm95SjB2UnZHcXFaSjNCUUNVZjg1TmNWM2VXY045MlA5MThTN2stUGhLT05mZnFHVWNQYUlKaU1LZWFySjhGSzNxQzF6dFl3OVJkY1hWcnFlWEYzeVZ0QnJQcEtxSE5HZkhqUjVtUENZZGZ4RVFQcmRBQVdwVlFoSEhORzhYTnhJdDVSRHJyN3lwWGVWSzFPZHhfd19hMmFlOFhCY3hGX0dJamF4M05IYUI4U3dQa04zNUloelpjbjZOZ0tfZkk3THlScnBRTWs2ZzU5Ri1wZ212bW94RDdDYjkwTkVWZ9IBswJBVV95cUxPT3pUbXpfSHlXbU9zeWxBakh2TW1aYVZ6UzY1SVFyWmpCOHNpM3lGOW5jUXR2a1I4aXJPQnQ4eGl2RjF0Rmdfa1RDWTZ3ZmtkWmhSNmF6MzdVRDE2YndOU1RaTnRUN0U5M1o2Ul9ZbTRkbDZjcmx1ZjBWd0xJSEtPY2lKbjBtdTRIb3RQMGQ0UDJmdGl3WktUTU5kaV9MSnVNc3lCaHJQeFhyUG9uTGZsR2dEWnZRZ2UwVkpMdkZjM29IekEwdFZnZ1gxN21lcm9obGRGYm52WDRIeF9BV25kZVBJRmNiZzQzTUM3aUdxYjZjRUMyQW1iMEVRXzJWMk5rbHJCQlJ5ZVRRc09xXzVaam8xVGZuMGNTQjUzSktESjUxM1c5NEVWaFUyMHY0QUFNSnpB?oc=5",
+"s": "Fabric.AI Files Two Patent Applications Covering Fiber-Coupled and Connector-Free MicroLED Optical Interconnect, Developed with Kopin The Manila Times",
+"c": "FABRIC",
+"x": "Fabric.AI Files Two Patent Applications Covering Fiber-Coupled and Connector-Free MicroLED Optical Interconnect, Developed with Kopin The Manila Times",
+"i": "",
+"g": [],
+"m": "주제검색 · 신소재",
+"r": "해외",
+"v": 13,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 신소재"
+]
+},
+{
+"id": "5d71dc2a6b0a249e",
+"d": "2026-09-23",
+"t": "ADB, 아시아 개발도상국의 2026년 성장 전망을 5%로 상향",
+"o": "ADB raises developing Asia's 2026 growth forecast to 5%",
+"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxQRnAwZ05ob21oVC1yYjNHTEZIUS1TUkRGZEgzSWRWVVduYlRjb2x1VHpHVGNPQzdyeGkwamV4ZGVudkdOZHBjM1JISjExQ213R2gxZGp5djNybWVKVGFodXVPM0xWXzNMcGdIM19oMy0tdU1Uc0RISDV6TFl6OU1oRUMzOVFOMzdFVEVLRlBLZzNPN3pVbTVvUUt2bkJkZHRObnpIUjd3YkVKN3pna2Q4M1lldzJJU0pMTmQzUEFxTk1iaG1mNnZySkJVb2E?oc=5",
+"s": "ADB raises developing Asia's 2026 growth forecast to 5% fibre2fashion.com",
+"c": "MATERIAL",
+"x": "ADB raises developing Asia's 2026 growth forecast to 5% fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "5b28f5709ea2a735",
+"d": "2026-09-23",
+"t": "HS효성첨단소재, ′꿈의 신소재′로 우주 간다…탄소섬유 영토 확장",
+"o": "HS효성첨단소재, ′꿈의 신소재′로 우주 간다…탄소섬유 영토 확장",
+"u": "https://news.google.com/rss/articles/CBMickFVX3lxTFBoNWdpWkxjRDc5Tm1ZeXBOQTFIdnREcUFwMmt6MXl0OFE4TXcwd2NfZzVVY1h5MmQ0UUxOd1FvLVhZelFxeDJ2NExWYVl3Rlpub3E2MGxoUGc1bFJDZU1zd0Jqd3NweDFXckdfTlRzdXM5QdIBckFVX3lxTFBoNWdpWkxjRDc5Tm1ZeXBOQTFIdnREcUFwMmt6MXl0OFE4TXcwd2NfZzVVY1h5MmQ0UUxOd1FvLVhZelFxeDJ2NExWYVl3Rlpub3E2MGxoUGc1bFJDZU1zd0Jqd3NweDFXckdfTlRzdXM5QQ?oc=5",
+"s": "HS효성첨단소재, ′꿈의 신소재′로 우주 간다…탄소섬유 영토 확장 megaeconomy.co.kr",
+"c": "MATERIAL",
+"x": "HS효성첨단소재, ′꿈의 신소재′로 우주 간다…탄소섬유 영토 확장 megaeconomy.co.kr",
+"i": "",
+"g": [
+"탄소",
+"효성"
+],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
+{
+"id": "584fbf9552377d18",
+"d": "2026-09-23",
+"t": "INDA와 International Filtration News, Filtxpo™ 2026 혁신상 최종 후보 발표",
+"o": "INDA And International Filtration News Announce Finalists For The Filtxpo™ 2026 Innovation Awards",
+"u": "https://www.textileworld.com/textile-world/nonwovens-technical-textiles/2026/09/inda-and-international-filtration-news-announce-finalists-for-the-filtxpo-2026-innovation-awards/",
+"s": "CARY, N.C. — September 23, 2026 — INDA, the Association of the Nonwoven Fabrics Industry, in partnership with International Filtration News, has announced the finalists for the FiltXPO™ 2026 Innovation Awards. The awards recognize innovative new products introduced to the filtration industry since t",
+"c": "FABRIC",
+"x": "CARY, N.C. — September 23, 2026 — INDA, the Association of the Nonwoven Fabrics Industry, in partnership with International Filtration News, has announced the finalists for the FiltXPO 2026 Innovation Awards. The awards recognize innovative new products introduced to the filtration industry since the last FiltXPO event in 2025. The FiltXPO Innovation Awards celebrate advancements in filtration technology for air and gas and water and liquid applications. Entries are evaluated on creativity, novelty of approach, uniqueness and technical sophistication. The winners will be announced during FiltXPO 2026, the premier global event for the filtration industry, Oct. 28-29 at the Minneapolis Convention Center in Minneapolis. The FiltXPO 2026 Innovation Award finalists are: FiltXPO Innovation in Air/Gas Filtration Award Hifyber: CombiNano Leanfil Oy: Leanfil® Solberg Manufacturing, Inc.: Fully Automated Liquid Management System FiltXPO Innovation in Water/Liquid Filtration Award Acuriant Technologies Inc.: CUF Flow – More Water, Same Footprint Ahlstrom: Ahlstrom OptiPad Gessner, a Mativ Brand: GESSNER PFAS Filter Media Voting for the winner in each category is open on the International Filtration News website. Winners will be announced Oct. 28 at FiltXPO 2026. To vote, visit: https://www.filtnews.com/filtxpo-innovation-awards/ For more information about the Finalists, visit: https://www.filtxpo.com/awards To register for FiltXPO 2026, visit: https://www.filtxpo.com/ Posted: September 23, 2026 Source: INDA, the Association of the Nonwoven Fabrics Industry",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/09/FiltXPO-2026-Finalists-Announced-PR-graphic.png",
+"g": [
+"제직",
+"부직포"
+],
+"m": "Textile World",
+"r": "해외",
+"v": 18,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "4d4d68ea7a4484e8",
+"d": "2026-09-23",
+"t": "인도의 섬유 부문은 러시아의 제재 강화로 인해 미국의 새로운 관세 위험에 직면해 있습니다.",
+"o": "India’s textile sector faces fresh US tariff risk as Russia sanctions tighten",
+"u": "https://textiletoday.com.bd/indias-textile-sector-faces-fresh-us-tariff-risk-as-russia-sanctions-tighten",
+"s": "India’s textile and apparel industry is facing a fresh export risk as new US legislation gives Washington authority to impose additional tariffs of up to 100% on countries buying Russian oil and gas....",
+"c": "ETC",
+"x": "India’s textile and apparel industry is facing a fresh export risk as new US legislation gives Washington authority to impose additional tariffs of up to 100% on countries buying Russian oil and gas. Figure: India’s apparel exports declined 2.74% year over year to $1.20 billion, even as textile exports recorded stronger growth, according to data cited by the Confederation of Indian Textile Industry (CITI). The Lindsey O. Graham Sanctioning Russia and Iran Act of 2026 , signed into law on September 18 , gives the US President this tariff authority. However, the additional duty is not automatic. The US has yet to determine the targeted countries, tariff rates, product coverage, or implementation schedule. For India’s textile and apparel exporters, the uncertainty comes at a sensitive time. The US is a major export market, while India’s apparel shipments are already losing momentum. India’s combined textile and apparel exports declined 0.24% year over year to $15.08 billion during April–August 2026. Textile exports increased 6.94% to $8.93 billion, but apparel exports fell 9.1% to $6.15 billion, according to industry data. Apparel weakness raises exposure The latest figures show a clear divergence between India’s textile and apparel performance. Upstream textile exports are growing, while finished apparel exports are contracting. The pressure continued in August. India’s apparel exports declined 2.74% year over year to $1.20 billion, even as textile exports recorded stronger growth, according to data cited by the Confederation of Indian Textile Industry (CITI). This makes the potential US tariff risk more significant for garment manufacturers. Any additional duty could increase the landed cost of Indian products and put further pressure on supplier margins. CITI has warned",
+"i": "/storage/uploads/2026/9/indiastextilesecto_17901366539217.png",
+"g": [
+"관세"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "3f49894a9f7dd55b",
+"d": "2026-09-23",
+"t": "에이피알 포토그레이, KCON 아티스트 7팀과 글로벌 팬덤 공략",
+"o": "에이피알 포토그레이, KCON 아티스트 7팀과 글로벌 팬덤 공략",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148819",
+"s": "글로벌 뷰티 기업 에이피알(대표 김병훈)의 즉석 포토부스 브랜드 ‘포토그레이’가 KCON LA 2026에 참여한 아티스트 7팀과 협업한 한정판 포토프레임 52종을 선보이며 글로벌 K팝 팬덤 공략에 나선다. 국내를 비롯해 일본·미국·중국 등 글로벌 전 매장에서 동시 운영하고, 일본 하라주쿠 팝업스토어와 팬 참여 이벤트를 통해 해외 소비자와의 접점을 확대한다.에이피알은 23일 ‘KCON LA 2026 X 포토그레이’ 한정판 포토프레임을 공개했다. 운영 기간은 이날부터 10월 말까지다. KCON은 CJ ENM이 2012년부터 이어온 글로",
+"c": "RETAIL",
+"x": "글로벌 뷰티 기업 에이피알(대표 김병훈)의 즉석 포토부스 브랜드 ‘포토그레이’가 KCON LA 2026에 참여한 아티스트 7팀과 협업한 한정판 포토프레임 52종을 선보이며 글로벌 K팝 팬덤 공략에 나선다. 국내를 비롯해 일본·미국·중국 등 글로벌 전 매장에서 동시 운영하고, 일본 하라주쿠 팝업스토어와 팬 참여 이벤트를 통해 해외 소비자와의 접점을 확대한다.에이피알은 23일 ‘KCON LA 2026 X 포토그레이’ 한정판 포토프레임을 공개했다. 운영 기간은 이날부터 10월 말까지다. KCON은 CJ ENM이 2012년부터 이어온 글로",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148819_130885_4432_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 11,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "376cf07624ebde95",
+"d": "2026-09-23",
+"t": "인도의 섬유 성장은 부가가치와 자동화에 달려 있습니다.",
+"o": "India's textile growth hinges on value addition & automation",
+"u": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxNZHl2M0NPek1ZY2JxbERfQWQ4YU5xNUlWTXVETEkxMjhvdjBmWjhlUWh0ZDk0VklNNDhNQmVaUk5FLXBmVm52YWhCVy1IYmxDRzdpci10S3E5UXRLM1FEa21YVE00ZnVjZ0d1VUE1UjEtbE9YTl9BNDZONEIxLU1KYU40akZybmktcVdwVTZZLUVVNEY3eFp6ZjBKYjF0QUhYdlpYMUFocVVWcDNRQzVRaGtUUDZkdk51ekg0UV9JYTFlUHdXVlB4N3c5RTQxblpjbkhiRUJfSVk0M01DMUZpekR4SWE?oc=5",
+"s": "India's textile growth hinges on value addition & automation fibre2fashion.com",
+"c": "MATERIAL",
+"x": "India's textile growth hinges on value addition & automation fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "227d42a9f05f14f9",
+"d": "2026-09-23",
+"t": "AAFA, 패션 공급망 ‘열 스트레스 툴킷’ 출시…폭염 대응 본격화",
+"o": "AAFA, 패션 공급망 ‘열 스트레스 툴킷’ 출시…폭염 대응 본격화",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148840",
+"s": "미국의류신발협회(American Apparel & Footwear Association·AAFA)가 글로벌 의류·신발 공급망의 폭염 리스크를 실제 생산 현장에서 관리하기 위한 ‘열스트레스 툴킷(Heat Stress Toolkit)’을 내놨다. 기후변화 대응을 탄소 감축 중심의 환경 이슈에서 작업장 안전과 생산성, 납기, 소싱 전략을 포괄하는 공급망 리스크 관리로 확장했다는 점이 핵심이다. 특히 공장에 추가적인 감사와 데이터 제출 의무를 부과하는 방식에서 벗어나 브랜드가 납기 조정과 구매 약정, 투자비 분담까지 책임져야 한다는 원칙을",
+"c": "RETAIL",
+"x": "미국의류신발협회(American Apparel & Footwear Association·AAFA)가 글로벌 의류·신발 공급망의 폭염 리스크를 실제 생산 현장에서 관리하기 위한 ‘열스트레스 툴킷(Heat Stress Toolkit)’을 내놨다. 기후변화 대응을 탄소 감축 중심의 환경 이슈에서 작업장 안전과 생산성, 납기, 소싱 전략을 포괄하는 공급망 리스크 관리로 확장했다는 점이 핵심이다. 특히 공장에 추가적인 감사와 데이터 제출 의무를 부과하는 방식에서 벗어나 브랜드가 납기 조정과 구매 약정, 투자비 분담까지 책임져야 한다는 원칙을",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148840_130920_4016_v150.jpg",
+"g": [
+"탄소"
+],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 8,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "1560b121f9a58900",
+"d": "2026-09-23",
+"t": "Denim Mills 세부사항 Modal의 제품 개발 잠재력, 1부",
+"o": "Denim Mills Detail Modal’s Product Development Potential, Part 1",
+"u": "https://wwd.com/sourcing-journal/sj-denim/denim-mills-tencel-modal-product-development-1239257429/",
+"s": "In denim, the more predominant wood-based fiber is lyocell. Here is how some mills are using modal for denim fabrics to achieve different qualities.",
+"c": "MATERIAL",
+"x": "In denim, the more predominant wood-based fiber is lyocell. Here is how some mills are using modal for denim fabrics to achieve different qualities.",
+"i": "",
+"g": [
+"리오셀",
+"데님"
+],
+"m": "WWD",
+"r": "해외",
+"v": 13,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"WWD"
+]
+},
+{
+"id": "070d0662dbbc254a",
+"d": "2026-09-23",
+"t": "미국 Hexcel, CAMX 2026에서 첨단 복합 솔루션 공개",
+"o": "US' Hexcel to unveil advanced composite solutions at CAMX 2026",
+"u": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxQbm1pMTQ1NWJ6d19EaFdUYXF0bzE1VXp4R1hMVzV4SGp3VzRCdFV1NG5qdVZ1OUw0OURkWjBvSUpjcm90ZXBkSTdiREVZOGx5MzRpREVaYjN4NGJDWEhQd1pncEhWSkdnQllGU0VXdVR3N2ZaX3Y3YWI5c05ncmh5TnNaSTNLbXh1dnlhMFN1RzEtTkRDa1FfbWZzd0hEcVZ1MzZnckJNLW1FU0o0X0Z5X3dGMzRQX0pfRTNpR2RXdkxQOTVhZHJQNVBCa2RqM3pSWlBZRE5TMXhQWFZWZWFjSmM3MGVtRlFKaE03dThhOXpSc3lNX0E?oc=5",
+"s": "US' Hexcel to unveil advanced composite solutions at CAMX 2026 fibre2fashion.com",
+"c": "MATERIAL",
+"x": "US' Hexcel to unveil advanced composite solutions at CAMX 2026 fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "04d8661141353d13",
+"d": "2026-09-23",
+"t": "ITMF, 2026년 ITMF 지속 가능성 및 혁신상 수상자를 발표",
+"o": "ITMF Announces Winners Of The ITMF Sustainability & Innovation Award 2026",
+"u": "https://www.textileworld.com/textile-world/2026/09/itmf-announces-winners-of-the-itmf-sustainability-innovation-award-2026/",
+"s": "ZÜRICH, Switzerland — September 22, 2026 — The winners of the ITMF Sustainability & Innovation Awards 2026 will present their project at the upcoming ITMF & IAF Conference 2026 which will be held from 14 – 15 October 2026 in Fortaleza, Brazil and will be co-hosted by ABIT (Brazilian Textile & Indust",
+"c": "ETC",
+"x": "ZÜRICH, Switzerland — September 22, 2026 — The winners of the ITMF Sustainability & Innovation Awards 2026 will present their project at the upcoming ITMF & IAF Conference 2026 which will be held from 14 – 15 October 2026 in Fortaleza, Brazil and will be co-hosted by ABIT (Brazilian Textile & Industry Industry Association). The objectives of the ITMF Sustainability & Innovation Awards are to recognize sustainable and innovative achievements in the textile industry with focus on innovation, design, development, and production under the strictest standards of sustainability and respect for the environment. The 3 winners of the ITMF Sustainability & Innovation Award 2026 are (in alphabetical order): Epoch Biodesign, UK : epochbiodesign.com/ Project: Scaling AI-driven enzymatic depolymerization to turn textile waste into fibergrade nylon 6,6 Huvis, Korea : huvis.com/eng/ Project: Polyester Chemical Recycling Technology for Sustainable Automotive Textiles Simabo Technology Co., Ltd and Wuhan Textile University, China : wtu.edu.cn/ Project: Desert-Mulberry – Bioactive Silk Eco-Regenerative Cycle For more information about ITMF visit: https://www.itmf.org/ or contact secretariat@itmf.org. Posted: September 23, 2026 Source: The International Textile Manufacturers Federation (ITMF)",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/03/ITMF-CONF-2026-logo.png",
+"g": [],
+"m": "Textile World",
+"r": "해외",
+"v": 9,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "045e75d297eaef99",
+"d": "2026-09-23",
+"t": "영국 부고등판무관은 BD의 LDC 졸업 후에도 영국 시장은 계속 열려 있다고 밝혔습니다.",
+"o": "UK Market to Remain Open After BD’s LDC Graduation, Says British Deputy High Commissioner",
+"u": "https://textilefocus.com/uk-market-to-remain-open-after-bds-ldc-graduation-says-british-deputy-high-commissioner/",
+"s": "UK delegation visits Vancot Limited; a concern of Shin Shin Group, highlights strong UK market engagement and sustainability ambitions. The British High Commission has reaffirmed its commitment to maintaining strong trade relations with Bangladesh, with the UK market set to remain open to Bangladesh",
+"c": "ETC",
+"x": "UK delegation visits Vancot Limited; a concern of Shin Shin Group, highlights strong UK market engagement and sustainability ambitions. The British High Commission has reaffirmed its commitment to maintaining strong trade relations with Bangladesh, with the UK market set to remain open to Bangladeshi exporters following the country’s graduation from Least Developed Country (LDC) status. The assurance came during a visit by the British High Commission delegation, led by the Deputy High Commissioner James Goldman, to Vancot Limited, a manufacturing facility of Shin Shin Group, where the delegation held discussions on Bangladesh’s apparel exports, sustainability, technological advancement, investment and future UK-Bangladesh trade relations. During the visit, the Deputy High Commissioner highlighted the benefits available to Bangladeshi exporters under the UK’s Developing Countries Trading Scheme (DCTS) and said the existing level of market access would remain unchanged during the three-year transition period following Bangladesh’s LDC graduation. “Bangladesh enjoys duty-free access for 99.8% of products exported to the UK under our Developing Countries Trading Scheme, and that access will stay exactly the same during the three-year transition period after Bangladesh graduates from LDC status,” the Deputy High Commissioner said. He further noted that after the transition period, 92% of products, including garments, will continue to enter the UK market duty-free. “What does that mean for businesses in Bangladesh and their UK partners? It means certainty and confidence to invest, grow and plan for the future,” he said. The Deputy High Commissioner added: “My message to Bangladeshi exporters is simple: the UK market will remain open to Bangladesh after LDC graduation, and we ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Shin-SHin-01.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "023258e0844ad5f2",
+"d": "2026-09-23",
+"t": "HS효성첨단소재, '꿈의 신소재' 탄소섬유로 우주항공 시장 노크",
+"o": "HS효성첨단소재, '꿈의 신소재' 탄소섬유로 우주항공 시장 노크",
+"u": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5BbmhuQzlFZkZzNE80YUJpeTJrYjNCSkx0eGhuUTBDeUNXT3lYMVNyRWdZaERGWEhueFhQYlRLak1IWGlSaTBqNWRvaTdmUVdQZGdnUGtwdEhEZHE1Y0hNNzZIMWpBandzSjItLUg5VUw?oc=5",
+"s": "HS효성첨단소재, '꿈의 신소재' 탄소섬유로 우주항공 시장 노크 비즈트리뷴",
+"c": "MATERIAL",
+"x": "HS효성첨단소재, '꿈의 신소재' 탄소섬유로 우주항공 시장 노크 비즈트리뷴",
+"i": "",
+"g": [
+"탄소",
+"효성"
+],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
 {
 "id": "fa7f11306cf33561",
 "d": "2026-09-22",
@@ -1517,6 +2247,27 @@
 "e": [],
 "ms": [
 "Knitting Industry"
+]
+},
+{
+"id": "a1cbfd2df1485ddd",
+"d": "2026-09-22",
+"t": "보테가 베네타 2026 윈터 컬렉션 “거친 표면 아래 발견한 아름다움”",
+"o": "보테가 베네타 2026 윈터 컬렉션 “거친 표면 아래 발견한 아름다움”",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148800",
+"s": "이탈리아 럭셔리 브랜드 보테가 베네타(Bottega Veneta)가 포토그래퍼 유르겐 텔러(Juergen Teller)와 함께한 2026 겨울 캠페인을 공개했다. 앞서 8명의 포토그래퍼의 시선으로 겨울 컬렉션을 담아낸 ‘진 002(Zine 002)’에 이어 선보인 예술적 프로젝트다.이번 캠페인은 밀라노를 배경으로 친밀한 실내 공간부터 유기적인 건축물, 야외 조각 작품과 자연 풍경까지 다양한 장소를 오가며 전개됐다. 빌라 테렌치오 벨롤리(Villa Terenzio Belloli)와 폰다치오네 파가니(Fondazione Pagani)",
+"c": "RETAIL",
+"x": "이탈리아 럭셔리 브랜드 보테가 베네타(Bottega Veneta)가 포토그래퍼 유르겐 텔러(Juergen Teller)와 함께한 2026 겨울 캠페인을 공개했다. 앞서 8명의 포토그래퍼의 시선으로 겨울 컬렉션을 담아낸 ‘진 002(Zine 002)’에 이어 선보인 예술적 프로젝트다.이번 캠페인은 밀라노를 배경으로 친밀한 실내 공간부터 유기적인 건축물, 야외 조각 작품과 자연 풍경까지 다양한 장소를 오가며 전개됐다. 빌라 테렌치오 벨롤리(Villa Terenzio Belloli)와 폰다치오네 파가니(Fondazione Pagani)",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148800_130853_949_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
 ]
 },
 {
@@ -8416,6 +9167,27 @@
 "e": [],
 "ms": [
 "Textile Today"
+]
+},
+{
+"id": "0691f6260660eba5",
+"d": "2026-09-14",
+"t": "섬유 예측이 종종 잘못되는 이유",
+"o": "Why Textile Forecasting Often Goes Wrong",
+"u": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxOa0l1Wkg0YUVPVHM3UVJXdW5zem5xOWlZak1iQjdpRDBuTzIxNloxRW11bS1RTU12RWJTU0RZemtFSHNFWXVyLVpyd1dLVGtTU1RDeldiTnAtdzNaMWk0SDZLUzZrTnprYzdJejhGMGlYTDl1QnVwWkdNV1hEeTgwRVMxS05ZN2praU4zRDRZOGpGVE1NeHlvVnpPRW5EWERqWkVjQVI1bEFYV05GdkFEdjdMWjlFdU5iRmszajg3YnFpTTByeGJFN0t2LXlxRVR2RGlv?oc=5",
+"s": "Why Textile Forecasting Often Goes Wrong fibre2fashion.com",
+"c": "MATERIAL",
+"x": "Why Textile Forecasting Often Goes Wrong fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {

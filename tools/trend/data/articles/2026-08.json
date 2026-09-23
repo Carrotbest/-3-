@@ -2946,6 +2946,30 @@
   ]
  },
  {
+  "key": "8c08415c88ec72ec",
+  "title": "KSS Q2 2026 Earnings: EPS Misses by 46.5%, Stock Falls 3.58% - Consensus Forecast Report",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPRlRCTG9xWjNxRlV5aUZ1QnhnaXNtMFBNOHpoWk1LSjRjUTBHMkExQXZ2SWg1b2p0Q3lVdGtaOXhoZUVoTG1sWldSNTJCSmZpQmFGREdmV0J6OWloUy1qOFl6ZDNOcWVUTmtrUXFRYUhSSGNqUU96bElObVhBM2d1anVhQ3BxQS11STRVei15YkpWYzNyM181b3cxaTg?oc=5",
+  "published": "2026-08-30",
+  "collected": "2026-09-23",
+  "summary": "KSS Q2 2026 Earnings: EPS Misses by 46.5%, Stock Falls 3.58% - Consensus Forecast Report dars.gov.et",
+  "content": "KSS Q2 2026 Earnings: EPS Misses by 46.5%, Stock Falls 3.58% - Consensus Forecast Report dars.gov.et",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Kohl's",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Kohl's"
+  ]
+ },
+ {
   "key": "79deec55e8052fe1",
   "title": "Bangladesh’s new import policy brings wider sourcing flexibility for textiles and apparel",
   "title_ko": "Bangladesh의 새로운 수입 정책으로 직물 및 의류에 대한 소싱 유연성이 더욱 확대되었습니다.",
@@ -6312,9 +6336,10 @@
   "score": 1,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "주제검색 · 염색가공"
+   "주제검색 · 염색가공",
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -21467,6 +21492,32 @@
   ]
  },
  {
+  "key": "90172ae1a5803b6a",
+  "title": "Walmart Fiscal Q2 Adjusted Earnings, Revenue Rise; Shares Down Pre-Bell",
+  "title_ko": "Walmart 회계연도 2분기 조정 수익, 수익 증가; 프리벨 주식 하락",
+  "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPUnloVC1pb05iWWVQbDZTa2RvTVRnV2doSWhNMWZpWFRIUlMxRTRLUldLQ21fS2VZYzZmX1BBQUt4SFVLYnY1cE5WZy1WVGtTU0otc3JfLXAydExZV3U1bjJZR3pscHp6Wk9BNHd1SkNIRUNhZlgyWHRVZVYtdXQ2SGVSRHIxMngtVy1GaUZteFlRMXMtOEZqREJ6czRlQ0ZFb1E?oc=5",
+  "published": "2026-08-20",
+  "collected": "2026-09-23",
+  "summary": "Walmart Fiscal Q2 Adjusted Earnings, Revenue Rise; Shares Down Pre-Bell Yahoo Finance",
+  "content": "Walmart Fiscal Q2 Adjusted Earnings, Revenue Rise; Shares Down Pre-Bell Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "8f22daaf4f544bba",
   "title": "Walmart posts Q2 revenue $187.9B, operating income $9.38B, adjusted EPS $0.81",
   "title_ko": "Walmart는 2분기 매출 1,879억 달러, 영업이익 93억 8,000만 달러, 조정 EPS 0.81달러를 기록했습니다.",
@@ -21696,6 +21747,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Walmart"
+  ]
+ },
+ {
+  "key": "7a604034b810c820",
+  "title": "Why Abercrombie (ANF) is Poised to Beat Earnings Estimates Again",
+  "title_ko": "Abercrombie(ANF)가 다시 수익 추정치를 상회할 준비가 되어 있는 이유",
+  "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPeXBRbmVTN2tScEJLY0ZqSERXWkZuS3pMcjZ6OVBGSThqVlRaNTZtOWdXblhwYXRCYnhqSXlDU0pnRmRPaUtjTVVJdU5iWnc5YzRmZU4yM2h1cDdLUGc2T3hNOEtfamRhV0Nqdkw3bXdUalh3VEhJN1lpa3FjTERpR0dPV0xtei1RM25fZXNobjlXVWp3WGVWMkQyRi0?oc=5",
+  "published": "2026-08-20",
+  "collected": "2026-09-23",
+  "summary": "Why Abercrombie (ANF) is Poised to Beat Earnings Estimates Again Yahoo Finance",
+  "content": "Why Abercrombie (ANF) is Poised to Beat Earnings Estimates Again Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
   ]
  },
  {
@@ -23779,6 +23856,32 @@
   ]
  },
  {
+  "key": "cc1252d0a732ff54",
+  "title": "Target Corp (TGT) (Q2 2026) Earnings Call Highlights: Comparable Sales Surge 3. ...",
+  "title_ko": "Target Corp(TGT)(2026년 2분기) 실적 발표 하이라이트: 비교 가능한 매출 급증 3. ...",
+  "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPdHdLNzRoeElNQzJlZnBERG5hWWZCYk5LQzZvc3ZaMHFJQ1M5a29mbmVZVFZheE03UFVoWVRIdUVtWTV1TjlIUmFPS0xyazY4bjRNWHdyWnJ3YkU4Tlllemt6bWNoTkZCek1HdHQtdGxLUU40NzdJaXNseDRGRGUxakhta0VzRGRyWldtLWJkSC1qQQ?oc=5",
+  "published": "2026-08-19",
+  "collected": "2026-09-23",
+  "summary": "Target Corp (TGT) (Q2 2026) Earnings Call Highlights: Comparable Sales Surge 3. ... Yahoo Finance",
+  "content": "Target Corp (TGT) (Q2 2026) Earnings Call Highlights: Comparable Sales Surge 3. ... Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Target",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "target"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Target"
+  ]
+ },
+ {
   "key": "c53bee6a57aa2b41",
   "title": "Target Shares Jump 5% as Q2 Sales Rebound and Profit Doubles - Banking Earnings Report",
   "title_ko": "Target 주가는 2분기 판매 반등과 이익 두 배로 5% 상승 - 은행 수익 보고서",
@@ -24131,6 +24234,33 @@
   "hits": 1,
   "sources": [
    "바이어 · Target"
+  ]
+ },
+ {
+  "key": "94d528f3c6be011c",
+  "title": "Walmart Q2 Preview: Retailer Beats Revenue 25 Straight Quarters, Could Streak Extension Help Close Gap with Target Stock?",
+  "title_ko": "Walmart Q2 미리보기: 소매업체가 25분기 연속 매출을 기록했습니다. Streak Extension이 Target 주식과의 격차를 줄이는 데 도움이 될 수 있을까요?",
+  "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPLVlHYjBTdGhiZHRlRFBKVWFLMkJrUExQTjI2ekJYWHJnaDdvWHVyVFlFeTF0WTRYNTdvbGFtTElJcktWaFI5ZWl0c24xZ0FiSlhOVWJtV0phMG5ncUl5TzRQUkYzOGtZbU9zV0pkU3NLZkFrOWJvX2N0R0tPUHppOHhiellSNEQ0bnBfdGtKVFNTVDNqd0p1d0Z5dzFWdVU?oc=5",
+  "published": "2026-08-19",
+  "collected": "2026-09-23",
+  "summary": "Walmart Q2 Preview: Retailer Beats Revenue 25 Straight Quarters, Could Streak Extension Help Close Gap with Target Stock? Yahoo Finance",
+  "content": "Walmart Q2 Preview: Retailer Beats Revenue 25 Straight Quarters, Could Streak Extension Help Close Gap with Target Stock? Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart",
+   "target"
+  ],
+  "score": 6,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
@@ -24662,6 +24792,32 @@
   ]
  },
  {
+  "key": "34c19675d9cc033e",
+  "title": "Here’s How Much Traders Expect Walmart Stock to Move After Earnings",
+  "title_ko": "거래자들이 Walmart 주식이 수익 이후 움직일 것으로 예상하는 금액은 다음과 같습니다.",
+  "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxPeUNnekUtT0NUVTBPdkRiWGFpNEp5d0djMEFXa1NFU043UUxjOFBrR281TkFGRVpURFBEMlZfUG05X1BoanlobjRPRFFnS1RQVExpUUJlZjdMbnhpT2FSbFVfeFBCb0JQSTVwUjlQSGZ3enNEV3BZZGZpblp6RFRrS3Vyc29MRFBEbGUyb0tjNDJwVVd0R3BoQUVKQ2ZEMG85VmUtYkpNYkVnUmpRcDVNYXdNZHVKZHc2b1E?oc=5",
+  "published": "2026-08-19",
+  "collected": "2026-09-23",
+  "summary": "Here’s How Much Traders Expect Walmart Stock to Move After Earnings Investopedia",
+  "content": "Here’s How Much Traders Expect Walmart Stock to Move After Earnings Investopedia",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "3391558bd88a6f19",
   "title": "Movado Group schedules Q2 FY27 earnings call for August 26",
   "title_ko": null,
@@ -25064,6 +25220,32 @@
   ]
  },
  {
+  "key": "ec98df4d35a84f7e",
+  "title": "Is Walmart (WMT) A Bargain As Q2 Earnings Expectations Build?",
+  "title_ko": "Walmart(WMT)는 2분기 실적 기대치가 높아지면서 거래가 가능합니까?",
+  "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQQVpSSGhkalFZNmpzaVJDdjB1SlR6dHlaVlV3UVFqZ0NVRWVaTkNpb2Jva1hISzVWQjhvOXhrVWNSWFAzYWxfZW1GczlCOWJNdllmM1ZPN1hXeUJxaHlZekx2dG5HOGdvTHJYblpQeGoyeS1Ram9qbS1vQjVIMUctOUNRTXRONUxwNUhlZWM4X1VTeW14YklkQi14X2E?oc=5",
+  "published": "2026-08-18",
+  "collected": "2026-09-23",
+  "summary": "Is Walmart (WMT) A Bargain As Q2 Earnings Expectations Build? Yahoo Finance",
+  "content": "Is Walmart (WMT) A Bargain As Q2 Earnings Expectations Build? Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "eade03f46f77738b",
   "title": "경상국립대–한국섬유개발연구원, 친환경 첨단소재 기반 지·산·학·연 협력 강화",
   "title_ko": "경상국립대–한국섬유개발연구원, 친환경 첨단소재 기반 지·산·학·연 협력 강화",
@@ -25215,6 +25397,32 @@
   ]
  },
  {
+  "key": "cc61edc868da66f8",
+  "title": "Walmart (WMT) Q2 Earnings Report Preview: What To Look For",
+  "title_ko": "Walmart (WMT) 2분기 수익 보고서 미리보기: 찾아야 할 사항",
+  "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPaENfZDNoYzBYaTBoOUt1NVJLMGY1RTNoZkd4bEZ0TjctOHRST0xzUUljQjl4Zkk4b04zT0Znbm5rRXV2VENtelJ1eTRmLTVZVlNDOU9FbXZBM2t0aTNIU2VTcmdmZ1h3c0h2WGcwdm9jSDV5bmlROGtkRVlKcHNnODRYWWlldzBtaTZBVU1Bc2MtQk9BSVV0NE4tSQ?oc=5",
+  "published": "2026-08-18",
+  "collected": "2026-09-23",
+  "summary": "Walmart (WMT) Q2 Earnings Report Preview: What To Look For Yahoo Finance",
+  "content": "Walmart (WMT) Q2 Earnings Report Preview: What To Look For Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "c0ee3ce3bd30a5bb",
   "title": "TechnoSport Expands Manufacturing Capacity in Tamil Nadu",
   "title_ko": null,
@@ -25310,6 +25518,33 @@
   "hits": 1,
   "sources": [
    "Apparel Resources"
+  ]
+ },
+ {
+  "key": "ad1182ab6b5fc188",
+  "title": "Top Retail Analyst: Target Offers More Upside Than Walmart Today Ahead of Earnings This Week",
+  "title_ko": "최고의 소매 분석가: Target는 이번 주 수익을 앞두고 오늘 Walmart보다 더 많은 상승 여력을 제공합니다",
+  "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxPWHRfeWt4S3VrSmNMLW52dDdVLWM2S0x3TTJST1Q3UkFNR1hTak81M2RpNF9iZGFaX20wSVIwR3h5YkoyQ2VOUXI1c2N4TmRUMlhzVGVaOUZnaHMwT2xKRTdzWDEyaEpPNU9RMGJwYU5BS3dXNVZ1aVh5UWdJaTh2VDU5eUhVamhRc25WUmx5QWw3WHlhMzdHdUxQVms3UQ?oc=5",
+  "published": "2026-08-18",
+  "collected": "2026-09-23",
+  "summary": "Top Retail Analyst: Target Offers More Upside Than Walmart Today Ahead of Earnings This Week Yahoo Finance",
+  "content": "Top Retail Analyst: Target Offers More Upside Than Walmart Today Ahead of Earnings This Week Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart",
+   "target"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
@@ -25586,6 +25821,32 @@
   ]
  },
  {
+  "key": "5c975a1b0e8bc244",
+  "title": "Why Walmart (WMT) Could Beat Earnings Estimates Again",
+  "title_ko": "Walmart(WMT)가 수익 추정치를 다시 이길 수 있는 이유",
+  "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxQQ3FMSFJodGRJZlE2blhXMTQ1dTdLT2RZeWhXWHExUU9LZkh2U0k4aWxsTHhfcWtNWXFTczV1SUI5bWN6ZnNfdFVHczEzb3I3OWNiZjVjRWJaOVh5VDJkYVJtU2VWWUkzcGlJdVFlaTNZRGEwblpGc19rQUlCMkcwT0pqTUd5dzRDMjhacFIyTzZWUnNjQUE?oc=5",
+  "published": "2026-08-18",
+  "collected": "2026-09-23",
+  "summary": "Why Walmart (WMT) Could Beat Earnings Estimates Again Yahoo Finance",
+  "content": "Why Walmart (WMT) Could Beat Earnings Estimates Again Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "56e4717812b39928",
   "title": "World Collective, Denim Deal, and Green Story launch textile DPP pilot",
   "title_ko": null,
@@ -25613,6 +25874,58 @@
   ]
  },
  {
+  "key": "522878e036663d2c",
+  "title": "Walmart Stock Rises to Nearly $1 Trillion Before Thursday's $187 Billion Earnings Test",
+  "title_ko": "Walmart 주식은 목요일 1,870억 달러 수익 테스트 전에 거의 1조 달러로 상승합니다.",
+  "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPMkVZU0stMUVvdkRUc0VoSDEybDJWbDYzcFhSTDhYbHNGTllEdFUyYVhTMmVMRHNzbDIyOVo0V295QzdEZDlnUlpBaUF5dkZhX3RUd2xkenZLcWdjcEFfSFNfdDlTYnlOOGZOeHRVSG92b2VTdHljTlpHcGcwT2U0TDNTQ3JSbE5NTW9wUEY0MVVreEdVVjlqTA?oc=5",
+  "published": "2026-08-18",
+  "collected": "2026-09-23",
+  "summary": "Walmart Stock Rises to Nearly $1 Trillion Before Thursday's $187 Billion Earnings Test Yahoo Finance",
+  "content": "Walmart Stock Rises to Nearly $1 Trillion Before Thursday's $187 Billion Earnings Test Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
+  "key": "5193ee3ce1df0c05",
+  "title": "Ahead of Walmart Earnings, Here's What Barchart Data Says Comes Next for WMT Stock",
+  "title_ko": "Walmart 수익에 앞서 Barchart 데이터에 따르면 WMT 주식에 대한 다음 내용은 다음과 같습니다.",
+  "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPcFdSdGpId2VsTm9fU0xRd0hGejVfZnVYRU1SVnQ1d0VqajBlLTVqRHZKVmtnXzQxX3BvRlVSMjJKbXJ0TTNPMXkzV0ZRdVo0Zkl4M1U1MmpYVkFzR0pYQkN6bFFtb1BhNlU3ekxFOWZ1d1JydFhETnNDYzRMZExsQlE4TkJFZ2I1OVdkZHZUcjZPS19tTUZjVlpTeU12RWViaFZoMg?oc=5",
+  "published": "2026-08-18",
+  "collected": "2026-09-23",
+  "summary": "Ahead of Walmart Earnings, Here's What Barchart Data Says Comes Next for WMT Stock Yahoo Finance",
+  "content": "Ahead of Walmart Earnings, Here's What Barchart Data Says Comes Next for WMT Stock Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "517dfcbea34a3f61",
   "title": "A Dozen Tennis Obsessives on Their Favorite Gear and Apparel",
   "title_ko": null,
@@ -25634,6 +25947,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Amazon"
+  ]
+ },
+ {
+  "key": "4ab5ac1b1817b8a7",
+  "title": "Walmart Q2 Earnings Will Put Its 54-Year Dividend Streak to the Test",
+  "title_ko": "Walmart 2분기 수익으로 54년 연속 배당금이 시험대에 오를 것입니다",
+  "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxQZnBYcFlsYlNoWVg0RnV2cXI0RmNXLTJfTVRreEt6TXR1VGRFenhGZkJXWFpBUTg2MEhhQURiM1E2MmxULUUzZFBNeU5RQzl0SW5RTkEyeWdCcEt5a3JpQzhMSjd5T05acmhaOVNIdHkyZFluY2hJTkJvR2V4M2thOU5CR1JkZ3FqMUFMREZBRXo3T0ZYOGc?oc=5",
+  "published": "2026-08-18",
+  "collected": "2026-09-23",
+  "summary": "Walmart Q2 Earnings Will Put Its 54-Year Dividend Streak to the Test Yahoo Finance",
+  "content": "Walmart Q2 Earnings Will Put Its 54-Year Dividend Streak to the Test Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
@@ -26291,6 +26630,32 @@
   ]
  },
  {
+  "key": "bc17953cd8829d7d",
+  "title": "Walmart and Target's Earnings This Week Are Really a Check-Up on Latino Household Budgets",
+  "title_ko": "Walmart 및 Target의 이번 주 수입은 실제로 라틴계 가계 예산을 점검하는 것입니다.",
+  "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxOLVJURjkwN3liSUlpQ0FYX2s0dFZiLTBMOUhjdC0xVUlTX29ELUotV19taUZMMURLVktaS2JCbTFad29lNFduQTNiWl9Gd3ZKTTIyNVQwWlVGQ2ZJckNIVGlsbGdqQ1dZU19vOWVkM0VYalJoVkVOU1lsYXM1MWV6LWNyMDVhLXlUS0xwNTF4OVZMZ2FHcUdURURuQ215cXl1c25lZUl4dmpDZkpLYXI0?oc=5",
+  "published": "2026-08-17",
+  "collected": "2026-09-23",
+  "summary": "Walmart and Target's Earnings This Week Are Really a Check-Up on Latino Household Budgets Latin Times",
+  "content": "Walmart and Target's Earnings This Week Are Really a Check-Up on Latino Household Budgets Latin Times",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "b140aace46136b74",
   "title": "Mothercare swings to FY loss as Middle East crisis, Boots exit weigh",
   "title_ko": null,
@@ -26390,6 +26755,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Target"
+  ]
+ },
+ {
+  "key": "5d20c0ccc14322e3",
+  "title": "Walmart: Strong Company, But Overvalued Before Earnings",
+  "title_ko": "Walmart: 강력한 회사이지만 수익 창출 전 과대평가됨",
+  "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQTHVTYm9HOWNfNzR3Ry13dXdNU09mRm5QdUJacW1NcmV3V0JNRW1pLUh4eTBPOThZWEtDSEhkZTdCOS1mRC1zTGpZajh0Wlo5cU51R2pZQ2M1UmJqZ0J4RXdkWkhFUm5sMkN0YnpSMjB2Vml6Yk1uaWxZUk9kQ0tEamtFUXVTOWhnUlZjQnRvRWtEdGhRVHJDb1dB?oc=5",
+  "published": "2026-08-17",
+  "collected": "2026-09-23",
+  "summary": "Walmart: Strong Company, But Overvalued Before Earnings Seeking Alpha",
+  "content": "Walmart: Strong Company, But Overvalued Before Earnings Seeking Alpha",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
@@ -26752,6 +27143,33 @@
   "hits": 1,
   "sources": [
    "바이어 · Under Armour"
+  ]
+ },
+ {
+  "key": "099e93144c9ae8c4",
+  "title": "Big Box Earnings Preview: Walmart, Target Poised to Benefit From Value Shoppers",
+  "title_ko": "Big Box Earnings Preview: Walmart, Target는 가치 구매자로부터 이익을 얻을 태세입니다.",
+  "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxQZmxGUUZJYk5NUGZjWGNVT3RSbzFYeVNIeFRmS005ancxaVZCNEFoNlZmSlpXWGdkdk9kV3Q0bjhjSERxQTVVMGZGTmVoVER2NDExdnVBVTlPaXZuQ0lyalpxSF92WW1HTE54WGo5WjdJb1MyakFUVGpKQ2x1ZjJCX19uTXVyRm9DWVluVTdvVnI4d181WGRpV2U0RGlEZw?oc=5",
+  "published": "2026-08-16",
+  "collected": "2026-09-23",
+  "summary": "Big Box Earnings Preview: Walmart, Target Poised to Benefit From Value Shoppers Yahoo Finance",
+  "content": "Big Box Earnings Preview: Walmart, Target Poised to Benefit From Value Shoppers Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart",
+   "target"
+  ],
+  "score": 6,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
