@@ -11,7 +11,7 @@ import { RecommendTab } from "@/components/rdda/RecommendTab"
 import { SupplierTab } from "@/components/rdda/SupplierTab"
 import { TeamTab } from "@/components/rdda/TeamTab"
 import { TrendTab } from "@/components/rdda/TrendTab"
-import { Button } from "@/components/ui/button"
+import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { DataUpload } from "@/components/upload/DataUpload"
 import { addMonths, buildRddaReport, defaultRange, isRddaDataset, monthsOf, periodRates, type RddaDataset } from "@/data/rdda-dataset"
 import { sampleRddaReport, type RddaReportV2 } from "@/data/rdda-report"
@@ -106,7 +106,7 @@ export function Rdda() {
           <div className="self-center"><div className="flex flex-wrap items-center gap-2.5"><h1 className="text-lg font-semibold uppercase tracking-[0.14em] text-[var(--gradient-1)]">Fabric intelligence</h1><span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${usingSample ? "border-amber-200 bg-amber-50/80 text-amber-700" : "border-emerald-200 bg-emerald-50/80 text-emerald-700"}`}>{usingSample ? "SAMPLE DATA" : "LIVE DATA"}</span></div></div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" size="sm" onClick={startRddaSync}><RefreshCw aria-hidden="true" />RDDA 갱신</Button>
+          <ShinyActionButton tone="sky" size="sm" iconMotion="spin" icon={<RefreshCw aria-hidden="true" />} onClick={startRddaSync}>RDDA 갱신</ShinyActionButton>
           <DataUpload kind="rdda-report" label="집계 JSON 업로드" accept=".json,application/json" compact onFiles={(files) => void ingestRddaReport(files)} />
         </div>
       </div>

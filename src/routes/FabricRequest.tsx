@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -1564,9 +1565,6 @@ export function FabricRequest() {
           {!readOnly ? <Button type="button" size="sm" variant="outline" onClick={() => uploadRef.current?.click()}>
             <Upload className="size-4" />업로드
           </Button> : null}
-          {!readOnly ? <Button type="button" size="sm" onClick={() => setDraft(blankStyle())}>
-            <Plus className="size-4" />신규 의뢰
-          </Button> : null}
         </div> : null}
       </div>
 
@@ -1593,6 +1591,9 @@ export function FabricRequest() {
           <span className="shrink-0 text-xs text-[var(--muted-foreground)]">
             스타일 <strong className="text-[var(--foreground)]">{visible.length.toLocaleString("ko-KR")}</strong> · 옵션 <strong className="text-[var(--foreground)]">{optionCount.toLocaleString("ko-KR")}</strong>
           </span>
+          {!readOnly ? (
+            <ShinyActionButton tone="aurora" size="xs" rounded="full" className="ml-3" icon={<Plus />} onClick={() => setDraft(blankStyle())}>신규 의뢰</ShinyActionButton>
+          ) : null}
           <div className="ml-auto flex items-center gap-1">
             {COLUMN_GROUPS.map((group) => (
               <button

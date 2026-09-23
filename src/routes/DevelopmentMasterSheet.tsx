@@ -6,6 +6,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { ColumnFilterMenu } from "@/components/data-table/ColumnFilterMenu"
 import { RequestPickerDialog } from "@/components/dd/RequestPickerDialog"
 import { StyleHoverLayer, type StyleHoverLayerHandle } from "@/components/data-table/StyleHoverLayer"
@@ -2716,7 +2717,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
         {/* 접수는 이 화면에서 유일하게 데이터를 새로 만드는 동작이라 혼자 채운 버튼으로 둔다. */}
-        <Button type="button" size="sm" onClick={openNew}><Plus className="size-4" />신규 작지 접수</Button>
+        <ShinyActionButton tone="indigo" size="sm" icon={<Plus />} onClick={openNew}>신규 작지 접수</ShinyActionButton>
         {/* 보기 전환 3종. 서로 배타적이라 붙여 놓고 하나의 스위치처럼 보이게 한다. */}
         <div className="inline-flex shrink-0 overflow-hidden rounded-[calc(var(--radius)-2px)] border border-[var(--border)]" role="group" aria-label="열 보기 전환">
           <Button type="button" size="sm" variant="ghost" className="rounded-none border-r border-[var(--border)]" onClick={() => applyPreset("core")}>핵심 보기</Button>

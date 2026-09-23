@@ -3,6 +3,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Plus, Repeat, Trash2, X } from
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -348,7 +349,7 @@ export function Calendar() {
             <SelectTrigger className="w-36" aria-label="담당자 필터"><SelectValue placeholder="전체 담당자" /></SelectTrigger>
             <SelectContent><SelectItem value={ALL}>전체 담당자</SelectItem>{MEMBERS.map((member) => <SelectItem key={member.id} value={member.name}>{member.name}</SelectItem>)}</SelectContent>
           </Select>
-          <Button type="button" onClick={() => openCreateDialog()}><Plus aria-hidden="true" />일정 추가</Button>
+          <ShinyActionButton tone="rose" icon={<Plus aria-hidden="true" />} onClick={() => openCreateDialog()}>일정 추가</ShinyActionButton>
         </div>
       </header>
 

@@ -15,6 +15,7 @@ import { GRADE_ROW_CLASS, PerfBadge, PerfCounts, usePerformanceIndex } from "@/c
 import { GRADE_META, lookupPerformance, type FabricPerformance } from "@/data/fabric-performance"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
@@ -1856,7 +1857,7 @@ export function Warehouse() {
 
     {rackView ? <RackMap items={storedItems} onOpenSlot={openRackSlot} /> : <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>
       <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2">
-        {teamScope === "team1" && tab === "WAREHOUSE" && canEditScope ? <Button type="button" size="sm" className="shrink-0" onClick={() => setFabric1IntakeOpen(true)}><Plus />신규 입고</Button> : null}
+        {teamScope === "team1" && tab === "WAREHOUSE" && canEditScope ? <ShinyActionButton tone="amber" size="sm" icon={<Plus />} onClick={() => setFabric1IntakeOpen(true)}>신규 입고</ShinyActionButton> : null}
         <label className="relative block min-w-52 flex-1"><span className="sr-only">창고 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="R&D No., Style, FL, Buyer 검색" className="pl-9" /></label>
         <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{TAB_META[tab].label} <strong className="text-[var(--foreground)]">{rows.length.toLocaleString("ko-KR")}</strong>건 · 선택 {selectedRows.length}건</span>
         {tab === "READY" && !hiddenOnly && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RECEIVE", selectedRows)}><PackageCheck />선택 입고</Button> : null}

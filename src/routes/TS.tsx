@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/data-table/StatusBadge"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Reveal } from "@/components/motion/Reveal"
 import { Button } from "@/components/ui/button"
+import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -603,23 +604,10 @@ export function TS() {
         <aside className="xl:col-span-1"><TsStagePanel counts={counts} activeState={activeState} onSelect={setActiveState} /></aside>
       </div>
 
+      {formOpen ? (
       <Reveal delay={75}>
         <Card className="border-[var(--primary)] bg-[var(--accent)]/40 shadow-lg ring-1 ring-[var(--ring)]">
-          <CardHeader className="flex-col items-start justify-start gap-4 space-y-0 sm:flex-row sm:items-center">
-            <Button
-              type="button"
-              size="lg"
-              className="group relative shrink-0 overflow-hidden rounded-full border-0 bg-[linear-gradient(110deg,#5B6CFF,#8B5CF6_55%,#EC4899)] bg-[length:200%_100%] text-white shadow-[0_8px_24px_-8px_rgba(91,108,255,0.7)] transition-[transform,box-shadow,background-position] duration-300 hover:-translate-y-0.5 hover:bg-[position:100%_0] hover:shadow-[0_14px_32px_-8px_rgba(139,92,246,0.85)] active:translate-y-0 active:scale-[0.96] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transform-none motion-reduce:transition-none"
-              aria-expanded={formOpen}
-              aria-controls="ts-intake-form"
-              onClick={() => setFormOpen((open) => !open)}
-            >
-              <span aria-hidden="true" className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent)] transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden" />
-              <span className="relative z-10 inline-flex items-center gap-2">{formOpen ? <ChevronUp aria-hidden="true" /> : <Plus aria-hidden="true" />}{formOpen ? "접기" : "신규 등록 입력"}</span>
-            </Button>
-          </CardHeader>
-          {formOpen ? (
-            <CardContent id="ts-intake-form">
+            <CardContent id="ts-intake-form" className="pt-4">
               <form className="space-y-7" noValidate onSubmit={submit}>
                 <datalist id="ts-people">{peopleOptions.map((person) => <option key={person} value={person} />)}</datalist>
                 <fieldset>
@@ -665,14 +653,26 @@ export function TS() {
                 <div className="flex justify-start"><Button type="submit">등록</Button></div>
               </form>
             </CardContent>
-          ) : null}
         </Card>
       </Reveal>
+      ) : null}
 
       <SectionCard
         title="TS 목록"
         subtitle={`현재 보기 ${filteredRows.length}건`}
         contentClassName="p-0"
+        actions={(
+          <ShinyActionButton
+            tone="violet"
+            size="sm"
+            rounded="full"
+            iconMotion={formOpen ? "none" : "rotate"}
+            icon={formOpen ? <ChevronUp aria-hidden="true" /> : <Plus aria-hidden="true" />}
+            aria-expanded={formOpen}
+            aria-controls="ts-intake-form"
+            onClick={() => setFormOpen((open) => !open)}
+          >{formOpen ? "접기" : "신규 등록 입력"}</ShinyActionButton>
+        )}
       >
         <DataTable
           columns={columns}
