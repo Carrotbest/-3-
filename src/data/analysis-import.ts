@@ -1,5 +1,7 @@
+import type ExcelJS from "exceljs"
+
 import { matchConstruction } from "./constructions"
-import { DD_SEASON_OPTIONS } from "./dd-workflow"
+import { ANALYSIS_SEASON_OPTIONS } from "./fabric-analysis"
 
 export const ANALYSIS_IMPORT_COLUMNS = {
   anNo: ["Analysis request number"],
@@ -9,14 +11,14 @@ export const ANALYSIS_IMPORT_COLUMNS = {
   objective: ["Objective of analysis"],
   description: ["Analysis Description", "Request item"],
   requesterComment: ["Comment (Requester)", "Comment"],
-  source: ["Original Fabric Source"],
-  sourceCode: ["Source code"],
+  source: ["Original Fabric Source", "Type"],
+  sourceCode: ["Source code", "Number"],
   season: ["Season/Year", "Season"],
   gender: ["Gender/Age", "Gender"],
   brand: ["Brand"],
-  construction: ["Construction Name", "Construction"],
-  contents: ["Fabric Content", "Contents"],
-  weight: ["Fabric weight (gsm)", "Weight"],
+  construction: ["Construction Name", "Construction", "Fabric Construction"],
+  contents: ["Fabric Content", "Contents", "Fabric Contents"],
+  weight: ["Fabric weight (gsm)", "Weight", "Weight (g/m2)"],
   requestType: ["Request type"],
 } as const
 
@@ -44,6 +46,16 @@ export interface AnalysisImportRow {
 const normalizeHeader = (value: string): string => value.toLocaleLowerCase("en-US").replace(/[\s()*]/g, "")
 const aliasEntries = Object.entries(ANALYSIS_IMPORT_COLUMNS).flatMap(([field, aliases]) => aliases.map((alias) => [normalizeHeader(alias), field] as const))
 const aliasByHeader = new Map(aliasEntries)
+const SEASON_PREFIX: Record<string, string> = { spring: "SPR", summer: "SS", fall: "FW", autumn: "FW", winter: "FW", holiday: "HOL" }
+
+function convertRddaSeasonToWeb(raw: string): string {
+  const value = raw.trim()
+  const match = value.match(/^(Spring|Summer|Fall|Autumn|Winter|Holiday)\s+'?(\d{2,4})$/i)
+  if (!match) return value
+  const prefix = SEASON_PREFIX[match[1].toLowerCase()]
+  const year = match[2].slice(-2)
+  return prefix ? `${prefix}'${year}` : value
+}
 
 const cellText = (value: unknown): string => {
   if (value == null) return ""
@@ -57,6 +69,11 @@ const cellText = (value: unknown): string => {
   return String(value).trim()
 }
 
+function ownCellText(cell: ExcelJS.Cell): string {
+  if (cell.isMerged && cell.master && (cell.master.row !== cell.row || cell.master.col !== cell.col)) return ""
+  return cellText(cell.value)
+}
+
 export async function parseAnalysisWorkbook(file: File): Promise<{ rows: AnalysisImportRow[]; warnings: string[] }> {
   const loaded = await import("exceljs")
   const ExcelJS = ((loaded as unknown as { default?: typeof loaded }).default ?? loaded)
@@ -67,39 +84,53 @@ export async function parseAnalysisWorkbook(file: File): Promise<{ rows: Analysi
 
   let headerRow = 0
   let columns = new Map<number, keyof typeof ANALYSIS_IMPORT_COLUMNS>()
-  for (let rowNumber = 1; rowNumber <= Math.min(10, worksheet.rowCount); rowNumber += 1) {
+  const matchHeaderRow = (rowNumber: number) => {
     const found = new Map<number, keyof typeof ANALYSIS_IMPORT_COLUMNS>()
     worksheet.getRow(rowNumber).eachCell({ includeEmpty: false }, (cell, columnNumber) => {
       const field = aliasByHeader.get(normalizeHeader(cellText(cell.value)))
       if (field) found.set(columnNumber, field as keyof typeof ANALYSIS_IMPORT_COLUMNS)
     })
+    return found
+  }
+  for (let rowNumber = 1; rowNumber <= Math.min(10, worksheet.rowCount); rowNumber += 1) {
+    const found = matchHeaderRow(rowNumber)
     if (new Set(found.values()).size >= 3) { headerRow = rowNumber; columns = found; break }
   }
   if (!headerRow) return { rows: [], warnings: ["1~10행에서 분석 양식 머리글을 찾지 못했습니다."] }
 
   const imagesByRow = new Map<number, File>()
+  const photoColumn = [...columns.entries()].find(([, field]) => field === "photo")?.[0]
   for (const placed of worksheet.getImages()) {
     const image = workbook.getImage(Number(placed.imageId)) as { buffer?: ArrayBuffer | Uint8Array; extension?: string } | undefined
-    const nativeRow = (placed.range as { tl?: { nativeRow?: number } }).tl?.nativeRow
-    if (nativeRow == null || !image?.buffer || imagesByRow.has(nativeRow + 1)) continue
+    const anchor = (placed.range as { tl?: { nativeRow?: number; nativeCol?: number } }).tl
+    if (anchor?.nativeRow == null || anchor.nativeCol == null || photoColumn == null || anchor.nativeCol !== photoColumn - 1 || !image?.buffer || imagesByRow.has(anchor.nativeRow + 1)) continue
     const extension = image.extension?.toLocaleLowerCase("en-US") === "png" ? "png" : "jpeg"
     const type = extension === "png" ? "image/png" : "image/jpeg"
     const source = image.buffer instanceof ArrayBuffer ? new Uint8Array(image.buffer) : Uint8Array.from(image.buffer)
     const copy = new Uint8Array(source.byteLength)
     copy.set(source)
-    imagesByRow.set(nativeRow + 1, new File([copy.buffer], `analysis-import-${nativeRow + 1}.${extension === "png" ? "png" : "jpg"}`, { type }))
+    imagesByRow.set(anchor.nativeRow + 1, new File([copy.buffer], `analysis-import-${anchor.nativeRow + 1}.${extension === "png" ? "png" : "jpg"}`, { type }))
   }
 
   const warnings: string[] = []
   let warnedAnNo = false
   const rows: AnalysisImportRow[] = []
+  let carriedImage: File | undefined
   for (let rowNumber = headerRow + 1; rowNumber <= worksheet.rowCount; rowNumber += 1) {
+    if (new Set(matchHeaderRow(rowNumber).values()).size >= 3) continue
     const values = {} as Record<ImportField | "anNo", string>
     columns.forEach((field, columnNumber) => {
-      if (field !== "photo") values[field] = cellText(worksheet.getCell(rowNumber, columnNumber).value)
+      if (field !== "photo") values[field] = ownCellText(worksheet.getCell(rowNumber, columnNumber))
     })
     const contentValues = Object.entries(values).filter(([field]) => field !== "anNo").map(([, value]) => value)
-    if (!contentValues.some(Boolean) && !imagesByRow.has(rowNumber)) continue
+    const hasContent = contentValues.some(Boolean)
+    const rowImage = imagesByRow.get(rowNumber)
+    if (!hasContent) {
+      if (rowImage && !carriedImage) carriedImage = rowImage
+      continue
+    }
+    const image = rowImage ?? carriedImage
+    carriedImage = undefined
     if (values.anNo && !warnedAnNo) {
       warnings.push("엑셀의 AN 번호는 쓰지 않고 새로 매깁니다")
       warnedAnNo = true
@@ -108,19 +139,19 @@ export async function parseAnalysisWorkbook(file: File): Promise<{ rows: Analysi
     const constructionMatch = matchConstruction(values.construction ?? "")
     const construction = constructionMatch == null ? values.construction ?? "" : constructionMatch
     if (constructionMatch == null) rowWarnings.push(`Construction 목록에 없는 값: ${construction}`)
-    const season = values.season ?? ""
-    if (season && !(DD_SEASON_OPTIONS as readonly string[]).includes(season)) rowWarnings.push(`Season 목록에 없는 값: ${season}`)
+    const season = convertRddaSeasonToWeb(values.season ?? "")
+    if (season && !ANALYSIS_SEASON_OPTIONS.includes(season)) rowWarnings.push(`Season 목록에 없는 값: ${season}`)
     const rawWeight = values.weight ?? ""
     const weightNumber = rawWeight === "" ? "" : Number(rawWeight.replace(/,/g, ""))
     const validWeight = typeof weightNumber === "number" && Number.isFinite(weightNumber)
     if (rawWeight && !validWeight) rowWarnings.push(`Weight를 숫자로 읽지 못함: ${rawWeight}`)
     rows.push({
-      department: values.department ?? "", customer: values.customer ?? "", objective: values.objective ?? "",
+      department: values.department ?? "", customer: values.customer ?? "", objective: values.objective || "Reference",
       description: values.description ?? "", requesterComment: values.requesterComment ?? "", source: values.source ?? "",
       sourceCode: values.sourceCode ?? "", season, gender: values.gender ?? "", brand: values.brand ?? "",
       construction, contents: values.contents ?? "", weight: validWeight ? weightNumber : "",
       requestType: (values.requestType ?? "").toLocaleLowerCase("en-US").includes("urgent") ? "Urgent" : "Normal",
-      image: imagesByRow.get(rowNumber), warnings: rowWarnings,
+      image, warnings: rowWarnings,
     })
     rowWarnings.forEach((warning) => warnings.push(`${rowNumber}행: ${warning}`))
   }

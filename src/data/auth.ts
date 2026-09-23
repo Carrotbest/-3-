@@ -4,6 +4,7 @@ import {
   EmailAuthProvider,
   onAuthStateChanged,
   reauthenticateWithCredential,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   updatePassword,
@@ -231,6 +232,38 @@ export async function signUp(email: string, password: string, name: string, depa
 
 export async function signOutUser(): Promise<void> {
   await signOut(auth)
+}
+
+/** 로그인 화면의 "비밀번호 찾기". 가입 여부와 무관하게 항상 같은 안내를 보인다(계정 존재 유출 방지). */
+export async function requestPasswordReset(email: string): Promise<void> {
+  const trimmed = email.trim()
+  if (!trimmed) throw new Error("이메일을 입력하세요.")
+  try {
+    await sendPasswordResetEmail(auth, trimmed)
+  } catch (error) {
+    const code = (error as { code?: string }).code
+    // 계정 존재 여부를 알려주는 신호라 성공과 같은 화면으로 둔다.
+    if (code === "auth/invalid-email") throw new Error("이메일 형식이 올바르지 않습니다.")
+    if (code === "auth/too-many-requests") throw new Error("시도가 너무 많습니다. 잠시 후 다시 시도하세요.")
+    if (code === "auth/user-not-found") return
+    throw new Error("요청을 처리하지 못했습니다. 잠시 후 다시 시도하세요.")
+  }
+}
+
+/** 로그인한 사용자가 자신의 표시 이름(담당자 이름)을 바꾼다. */
+export async function changeOwnName(name: string): Promise<void> {
+  const trimmed = name.trim()
+  if (!trimmed) throw new Error("이름을 입력하세요.")
+  const user = auth.currentUser
+  if (!user) throw new Error("로그인이 필요합니다.")
+  try {
+    await updateProfile(user, { displayName: trimmed })
+    await setDoc(doc(db, "users", user.uid), { name: trimmed }, { merge: true })
+    useAuthStore.setState({ user: auth.currentUser })
+  } catch (error) {
+    const code = (error as { code?: string }).code
+    throw new Error(code ? accountActionError(code) : (error as Error).message)
+  }
 }
 
 /** 민감한 계정 변경 전에 현재 비밀번호로 다시 확인한다. 오래된 로그인 세션에서도 막히지 않게 한다. */

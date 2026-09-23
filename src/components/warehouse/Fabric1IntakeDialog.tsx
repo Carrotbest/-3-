@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState, type ClipboardEvent, type KeyboardEvent } from "react"
-import { Copy, Plus, Trash2 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react"
+import { Copy, FileSpreadsheet, Plus, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { CONSTRUCTIONS } from "@/data/constructions"
+import { parseFabric1IntakeExcel } from "@/data/fabric1-intake-excel"
 import {
   FABRIC1_STORAGE_NO_MAX,
   FABRIC1_STORAGE_NO_MIN,
@@ -110,7 +111,9 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
   const [rows, setRows] = useState<IntakeRow[]>(() => [initialRow(defaultOwner)])
   const [invalid, setInvalid] = useState<Set<string>>(() => new Set())
   const [saving, setSaving] = useState(false)
+  const [importing, setImporting] = useState(false)
   const [error, setError] = useState("")
+  const excelInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!open) return
@@ -265,6 +268,34 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
     setError("")
   }
 
+  const loadExcel = async (file: File | null) => {
+    if (!file) return
+    setImporting(true)
+    setError("")
+    try {
+      const parsed = await parseFabric1IntakeExcel(file)
+      if (!parsed.rows.length) {
+        setError(parsed.warning ?? "가져올 행이 없습니다.")
+        return
+      }
+      const imported = parsed.rows.map((value) => ({
+        ...makeRow({ construction: "", owner: defaultOwner, requestDate: todayValue() }),
+        flNo: value.flNo,
+        construction: value.construction,
+        content: value.content,
+        actualWeight: value.actualWeight,
+        supplier: value.supplier,
+      }))
+      setRows((current) => current.length === 1 && isBlankRow(current[0]) ? imported : [...current, ...imported])
+      setInvalid(new Set())
+    } catch (cause) {
+      setError(`엑셀을 읽지 못했습니다. ${cause instanceof Error ? cause.message : ""}`.trim())
+    } finally {
+      setImporting(false)
+      if (excelInput.current) excelInput.current.value = ""
+    }
+  }
+
   const inputClass = (rowId: string, field: string, extra = "") => `${extra} h-8 rounded-none px-2 text-center text-xs ${invalid.has(cellKey(rowId, field)) ? "border-[var(--destructive)] ring-1 ring-[var(--destructive)]" : ""}`
 
   const save = async () => {
@@ -398,7 +429,11 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
           <datalist id="fabric1-intake-constructions">{CONSTRUCTIONS.map((value) => <option key={value} value={value} />)}</datalist>
         </div>
         <div className="mt-3 flex items-center justify-between">
-          <Button type="button" size="sm" variant="outline" disabled={saving} onClick={() => appendRow()}><Plus className="size-4" />줄 추가</Button>
+          <div className="flex gap-2">
+            <input ref={excelInput} type="file" className="hidden" accept=".xlsx,.xlsm,.xls" onChange={(event) => void loadExcel(event.target.files?.[0] ?? null)} />
+            <Button type="button" size="sm" variant="outline" disabled={importing || saving} onClick={() => excelInput.current?.click()}><FileSpreadsheet className="size-4" />{importing ? "읽는 중…" : "엑셀 업로드"}</Button>
+            <Button type="button" size="sm" variant="outline" disabled={saving} onClick={() => appendRow()}><Plus className="size-4" />줄 추가</Button>
+          </div>
           <p className="text-sm text-[var(--muted-foreground)]"><strong className="text-[var(--foreground)]">{activeRows.length}건</strong> 입고 예정</p>
         </div>
       </DialogBody>

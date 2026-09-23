@@ -1,4 +1,9 @@
 import type { AnalysisRequest } from "./schema"
+import { DD_SEASON_OPTIONS } from "./dd-workflow"
+
+const SEASON_YEARS = [...new Set(DD_SEASON_OPTIONS.map((value) => value.slice(-2)))]
+/** DD 시즌(SS/FW)에 봄(SPR)과 홀리데이(HOL)를 더한 분석 화면 전용 목록. */
+export const ANALYSIS_SEASON_OPTIONS = SEASON_YEARS.flatMap((yy) => [`SPR'${yy}`, `SS'${yy}`, `FW'${yy}`, `HOL'${yy}`])
 
 export const AN_NO_PATTERN = /^AN\d{8}$/
 export const ANALYSIS_OBJECTIVES = ["Development", "Quality check", "Reference"] as const

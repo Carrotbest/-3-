@@ -1,14 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { DatabaseBackup, RefreshCw, RotateCcw } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react"
+import { DatabaseBackup, FileSpreadsheet, RefreshCw, RotateCcw } from "lucide-react"
 
 import { SectionCard } from "@/components/dashboard/SectionCard"
 import { Button } from "@/components/ui/button"
 import { backupFileName, buildJsonBackup } from "@/data/backup-export"
 import { CACHE_KEYS, clearSyncedCache } from "@/data/cache"
 import { downloadBlob } from "@/data/dd-export"
+import { parseFabric1LedgerFile } from "@/data/fabric1-ledger-import"
 import { getFailingSyncKeys, readStateMetas, syncModeOf } from "@/data/firestore-sync"
 import { fmtDateFull, fmtTime } from "@/data/format"
-import { useAppStore } from "@/store/useAppStore"
+import { FABRIC1_INTAKE_SHEET } from "@/data/schema"
+import { replaceFabric1Ledger, useAppStore, type Fabric1IntakeInput } from "@/store/useAppStore"
 
 /** Firestore 커밋 한 번의 요청 크기 한도. 한 키가 이것을 넘으면 서버에 저장할 수 없다. */
 const COMMIT_LIMIT_BYTES = 10 * 1024 * 1024
@@ -44,6 +46,12 @@ const KEY_LABELS: Record<string, string> = {
 const labelOf = (key: string) => KEY_LABELS[key] ?? key
 
 type ServerMeta = Record<string, { n: number; updatedAt: string; updatedBy: string } | null>
+type Fabric1Preview = {
+  fileName: string
+  inputs: Fabric1IntakeInput[]
+  warnings: string[]
+  previousCount: number
+}
 
 /**
  * SETTING 데이터 보호 탭(R241). 키별 저장 방식과 크기, 서버 마지막 저장, 저장 실패, 백업과 캐시를 한곳에서 본다.
@@ -56,6 +64,10 @@ export function DataProtectionPanel({ isOwner }: { isOwner: boolean }) {
   const [loadingMeta, setLoadingMeta] = useState(false)
   const [failing, setFailing] = useState<string[]>(() => getFailingSyncKeys())
   const [backupMessage, setBackupMessage] = useState("")
+  const fabric1InputRef = useRef<HTMLInputElement>(null)
+  const [fabric1Preview, setFabric1Preview] = useState<Fabric1Preview | null>(null)
+  const [fabric1Message, setFabric1Message] = useState("")
+  const [replacingFabric1, setReplacingFabric1] = useState(false)
 
   const refreshMeta = useCallback(async () => {
     setLoadingMeta(true)
@@ -121,6 +133,39 @@ export function DataProtectionPanel({ isOwner }: { isOwner: boolean }) {
     }
   }
 
+  const selectFabric1Ledger = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ""
+    if (!file) return
+    setFabric1Message("")
+    setFabric1Preview(null)
+    try {
+      const parsed = await parseFabric1LedgerFile(file)
+      setFabric1Preview({
+        fileName: file.name,
+        ...parsed,
+        previousCount: useAppStore.getState().completed.filter((sample) => sample.sourceSheet === FABRIC1_INTAKE_SHEET).length,
+      })
+    } catch (error) {
+      setFabric1Message(error instanceof Error ? error.message : "파일을 읽지 못했습니다.")
+    }
+  }
+
+  const executeFabric1Replace = async () => {
+    if (!fabric1Preview) return
+    setReplacingFabric1(true)
+    setFabric1Message("")
+    try {
+      await replaceFabric1Ledger(fabric1Preview.inputs)
+      setFabric1Message(`1팀 창고 데이터를 ${fabric1Preview.inputs.length.toLocaleString("ko-KR")}건으로 교체했습니다.`)
+      setFabric1Preview(null)
+    } catch (error) {
+      setFabric1Message(error instanceof Error ? error.message : "1팀 창고 데이터를 교체하지 못했습니다.")
+    } finally {
+      setReplacingFabric1(false)
+    }
+  }
+
   const when = (value: string) => value ? `${fmtDateFull(value)} ${fmtTime(value)}` : "-"
 
   return <div className="space-y-4">
@@ -176,6 +221,37 @@ export function DataProtectionPanel({ isOwner }: { isOwner: boolean }) {
           <p className="text-xs text-[var(--muted-foreground)]">창을 닫거나 새로 고치지 마세요. 자동으로 다시 보냅니다.</p>
         </div>}
     </SectionCard>
+
+    {isOwner ? <SectionCard title="1팀 창고 데이터 일괄 교체" subtitle="새 파일로 현재 1팀 창고 데이터를 전부 바꿉니다. 되돌릴 수 없습니다.">
+      <div className="space-y-3">
+        <input
+          ref={fabric1InputRef}
+          type="file"
+          accept=".xlsx"
+          className="sr-only"
+          onChange={(event) => void selectFabric1Ledger(event)}
+        />
+        <Button type="button" variant="outline" disabled={replacingFabric1} onClick={() => fabric1InputRef.current?.click()}>
+          <FileSpreadsheet aria-hidden="true" />원장 파일 선택
+        </Button>
+        {fabric1Preview ? <div className="space-y-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-3">
+          <p className="text-sm font-medium text-[var(--foreground)]">{fabric1Preview.fileName}</p>
+          <p className="text-sm text-[var(--foreground)]">
+            기존 {fabric1Preview.previousCount.toLocaleString("ko-KR")}건을 지우고 새 {fabric1Preview.inputs.length.toLocaleString("ko-KR")}건으로 교체합니다.
+          </p>
+          {fabric1Preview.warnings.length ? <div role="alert" className="space-y-1 text-xs text-amber-700">
+            <p className="font-semibold">경고 {fabric1Preview.warnings.length.toLocaleString("ko-KR")}건</p>
+            <ul className="list-disc space-y-0.5 pl-5">
+              {fabric1Preview.warnings.map((warning, index) => <li key={`${index}:${warning}`}>{warning}</li>)}
+            </ul>
+          </div> : null}
+          <Button type="button" variant="destructive" disabled={replacingFabric1} onClick={() => void executeFabric1Replace()}>
+            {replacingFabric1 ? "교체 중…" : "교체 실행"}
+          </Button>
+        </div> : null}
+        {fabric1Message ? <p role="status" aria-live="polite" className="text-xs text-[var(--foreground)]">{fabric1Message}</p> : null}
+      </div>
+    </SectionCard> : null}
 
     {isOwner ? <SectionCard title="백업과 캐시" subtitle="소유자만 볼 수 있습니다.">
       <div className="space-y-4">

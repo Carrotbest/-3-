@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { initAuth, signIn, signOutUser, signUp, useAuthStore } from "@/data/auth"
+import { changeOwnName, initAuth, requestPasswordReset, signIn, signOutUser, signUp, useAuthStore } from "@/data/auth"
 import { CAPTURE } from "@/data/capture"
 import { DEPARTMENTS } from "@/data/departments"
 
@@ -121,6 +121,9 @@ function AuthDialog({ open, mode, onOpenChange, onModeChange }: { open: boolean;
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [passwordResetOpen, setPasswordResetOpen] = useState(false)
+  const [resetEmail, setResetEmail] = useState("")
+  const [resetMessage, setResetMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [notice, setNotice] = useState("")
   const error = useAuthStore((state) => state.error)
@@ -138,7 +141,35 @@ function AuthDialog({ open, mode, onOpenChange, onModeChange }: { open: boolean;
     } finally { setSubmitting(false) }
   }
 
-  const switchMode = (next: Mode) => { onModeChange(next); setNotice(""); useAuthStore.setState({ error: null }) }
+  const handlePasswordReset = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (submitting) return
+    setSubmitting(true)
+    setResetMessage(null)
+    try {
+      await requestPasswordReset(resetEmail)
+      setResetMessage({ kind: "ok", text: "입력하신 이메일로 비밀번호 재설정 메일을 보냈습니다. 메일함을 확인하세요(가입되지 않은 이메일이면 메일이 오지 않습니다)." })
+    } catch (resetError) {
+      setResetMessage({ kind: "error", text: (resetError as Error).message })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const switchMode = (next: Mode) => {
+    onModeChange(next)
+    setPasswordResetOpen(false)
+    setResetMessage(null)
+    setNotice("")
+    useAuthStore.setState({ error: null })
+  }
+
+  const openPasswordReset = () => {
+    setResetEmail(email)
+    setResetMessage(null)
+    setPasswordResetOpen(true)
+    useAuthStore.setState({ error: null })
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -149,20 +180,27 @@ function AuthDialog({ open, mode, onOpenChange, onModeChange }: { open: boolean;
           <div className="relative"><BrandMark compact /><p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-600">Private team workspace</p><h2 className="mt-1 text-2xl font-semibold tracking-[-0.035em] text-slate-950">Access Fabric Intelligence.</h2><p className="mt-2 text-sm leading-6 text-slate-500">Sign in or request access from the same secure workspace.</p></div>
         </div>
 
-        <DialogHeader className="sr-only"><DialogTitle>{mode === "login" ? "Sign in" : "Request access"}</DialogTitle><DialogDescription>Fabric R&amp;D workspace authentication</DialogDescription></DialogHeader>
+        <DialogHeader className="sr-only"><DialogTitle>{passwordResetOpen ? "Reset password" : mode === "login" ? "Sign in" : "Request access"}</DialogTitle><DialogDescription>Fabric R&amp;D workspace authentication</DialogDescription></DialogHeader>
         <DialogBody className="min-h-0 flex-1 overflow-y-auto px-6 pb-7 pt-6 sm:px-7 [scrollbar-gutter:stable]">
           <div className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">{(["login", "signup"] as Mode[]).map((item) => <button key={item} type="button" onClick={() => switchMode(item)} className={`h-10 rounded-lg px-3 text-sm font-semibold outline-none transition-all focus-visible:ring-2 focus-visible:ring-slate-900 ${mode === item ? "bg-white text-slate-950 shadow-sm" : "text-slate-400 hover:text-slate-700"}`}>{item === "login" ? "Sign in" : "Request access"}</button>)}</div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {passwordResetOpen && mode === "login" ? <form onSubmit={handlePasswordReset} className="space-y-4">
+            <div><h3 className="text-lg font-semibold text-slate-950">비밀번호 재설정</h3><p className="mt-1 text-xs leading-5 text-slate-500">가입할 때 사용한 이메일을 입력하세요.</p></div>
+            <div className="space-y-2"><Label htmlFor="reset-email" className="text-xs font-semibold text-slate-700">Email</Label><div className="relative"><Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input id="reset-email" type="email" autoComplete="email" autoFocus value={resetEmail} onChange={(event) => setResetEmail(event.target.value)} placeholder="name@company.com" required className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 text-slate-950 shadow-none placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-slate-900" /></div></div>
+            {resetMessage ? <div className={`rounded-xl border px-3.5 py-3 text-sm ${resetMessage.kind === "error" ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`} role={resetMessage.kind === "error" ? "alert" : "status"}>{resetMessage.text}</div> : null}
+            <Button type="submit" className="h-11 w-full rounded-xl bg-slate-950 text-white hover:bg-teal-700 hover:opacity-100" disabled={submitting}>{submitting ? <><span className="size-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />Processing…</> : "재설정 메일 보내기"}</Button>
+            <button type="button" onClick={() => { setPasswordResetOpen(false); setResetMessage(null) }} className="mx-auto block text-xs font-semibold text-teal-700 hover:text-teal-900">로그인으로 돌아가기</button>
+          </form> : <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" ? <div className="space-y-2"><Label htmlFor="signup-name" className="text-xs font-semibold text-slate-700">Name</Label><div className="relative"><UserRound className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input id="signup-name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Enter your name" className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 text-slate-950 shadow-none placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-slate-900" /></div></div> : null}
             {mode === "signup" ? <div className="space-y-2"><Label htmlFor="signup-department" className="text-xs font-semibold text-slate-700">Department</Label><div className="relative"><Building2 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><select id="signup-department" required value={department} onChange={(event) => setDepartment(event.target.value)} className={`h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-9 text-sm shadow-none outline-none focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-slate-900 ${department ? "text-slate-950" : "text-slate-400"}`}><option value="" disabled>Select your department</option>{DEPARTMENTS.map((item) => <option key={item.id} value={item.id} className="text-slate-950">{item.label}</option>)}</select><span aria-hidden="true" className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">▾</span></div><p className="text-[11px] leading-4 text-slate-400">Screen access for your department is applied once the administrator approves.</p></div> : null}
             <div className="space-y-2"><Label htmlFor="auth-email" className="text-xs font-semibold text-slate-700">Email</Label><div className="relative"><Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input id="auth-email" type="email" autoComplete="username" autoFocus value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@company.com" required className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 text-slate-950 shadow-none placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-slate-900" /></div></div>
-            <div className="space-y-2"><Label htmlFor="auth-password" className="text-xs font-semibold text-slate-700">Password</Label><div className="relative"><LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input id="auth-password" type={showPassword ? "text" : "password"} autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(event) => setPassword(event.target.value)} placeholder={mode === "signup" ? "At least 6 characters" : "Enter your password"} required className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 pr-11 text-slate-950 shadow-none placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-slate-900" /><button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-slate-400 outline-none hover:bg-slate-200 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-slate-900" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button></div></div>
+            {mode === "login" ? <p className="-mt-2 text-[11px] leading-4 text-slate-400">아이디를 잊으셨나요? 로그인 아이디는 가입할 때 쓴 이메일입니다. 확인이 어려우면 관리자에게 문의하세요.</p> : null}
+            <div className="space-y-2"><div className="flex items-center justify-between"><Label htmlFor="auth-password" className="text-xs font-semibold text-slate-700">Password</Label>{mode === "login" ? <button type="button" onClick={openPasswordReset} className="text-[11px] font-semibold text-teal-700 hover:text-teal-900">Forgot password?</button> : null}</div><div className="relative"><LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input id="auth-password" type={showPassword ? "text" : "password"} autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(event) => setPassword(event.target.value)} placeholder={mode === "signup" ? "At least 6 characters" : "Enter your password"} required className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 pr-11 text-slate-950 shadow-none placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-slate-900" /><button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-slate-400 outline-none hover:bg-slate-200 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-slate-900" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button></div></div>
             {error ? <div className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700" role="alert">{error}</div> : null}
             {notice ? <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-sm text-emerald-700" role="status">{notice}</div> : null}
             <Button type="submit" className="h-11 w-full rounded-xl bg-slate-950 text-white shadow-[0_0.75rem_1.8rem_-0.8rem_rgba(13,148,136,0.65)] hover:bg-teal-700 hover:opacity-100" disabled={submitting}>{submitting ? <><span className="size-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />Processing…</> : <>{mode === "login" ? "Open workspace" : "Submit access request"}<ArrowRight className="size-4" /></>}</Button>
-          </form>
-          <div className="mt-5 flex items-start gap-2.5 rounded-xl bg-slate-50 px-3.5 py-3 text-xs leading-5 text-slate-500"><Fingerprint className="mt-0.5 size-4 shrink-0 text-teal-600" /><span>{mode === "login" ? "New here? Switch to Request access above. An administrator will review your account." : "Team data remains private until approval. After approval, only assigned screens will be available."}</span></div>
+          </form>}
+          <div className="mt-5 flex items-start gap-2.5 rounded-xl bg-slate-50 px-3.5 py-3 text-xs leading-5 text-slate-500"><Fingerprint className="mt-0.5 size-4 shrink-0 text-teal-600" /><span>{passwordResetOpen ? "For security, the same confirmation is shown whether or not the account exists." : mode === "login" ? "New here? Switch to Request access above. An administrator will review your account." : "Team data remains private until approval. After approval, only assigned screens will be available."}</span></div>
         </DialogBody>
       </DialogContent>
     </Dialog>
@@ -212,6 +250,43 @@ function StatusScreen({ title, description, rejected = false }: { title: string;
   )
 }
 
+function NameRequiredScreen() {
+  const [name, setName] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState("")
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (submitting) return
+    setSubmitting(true)
+    setError("")
+    try {
+      await changeOwnName(name)
+    } catch (submitError) {
+      setError((submitError as Error).message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-4 text-slate-950">
+      <LandingBackdrop />
+      <div className="relative w-full max-w-md overflow-hidden rounded-[1.6rem] border border-slate-200/80 bg-white/80 p-8 shadow-[0_2rem_7rem_-2rem_rgba(15,23,42,0.3)] backdrop-blur-2xl">
+        <span className="mx-auto grid size-14 place-items-center rounded-2xl border border-teal-200 bg-teal-50 text-teal-700"><UserRound className="size-6" /></span>
+        <h1 className="mt-6 text-center text-2xl font-semibold tracking-tight">담당자 이름을 입력하세요</h1>
+        <p className="mt-3 text-center text-sm leading-6 text-slate-500">화면에 표시되는 담당자 이름을 아직 넣지 않았습니다. 계속하려면 이름을 입력하세요.</p>
+        <form className="mt-6 space-y-3" onSubmit={submit}>
+          <div className="grid gap-1.5"><Label htmlFor="required-name">이름</Label><Input id="required-name" type="text" autoComplete="name" autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="담당자 이름" /></div>
+          {error ? <p className="text-xs text-red-600" role="alert">{error}</p> : null}
+          <Button type="submit" className="h-10 w-full rounded-full bg-slate-950 text-white hover:bg-teal-700 hover:opacity-100" disabled={submitting || !name.trim()}>{submitting ? <><span className="size-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />저장 중…</> : "저장하고 계속"}</Button>
+        </form>
+        <button type="button" disabled={submitting} onClick={() => { void signOutUser() }} className="mx-auto mt-4 block text-xs font-semibold text-slate-500 hover:text-slate-900 disabled:opacity-50">다른 계정으로 로그인</button>
+      </div>
+    </div>
+  )
+}
+
 function LoadingScreen() {
   return <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white text-slate-950"><LandingBackdrop /><div className="relative flex flex-col items-center"><span className="grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-xs font-semibold tracking-[-0.08em] shadow-xl">F/RD</span><span className="mt-5 size-5 animate-spin rounded-full border-2 border-slate-200 border-t-teal-500" /><span className="mt-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Loading workspace</span></div></div>
 }
@@ -221,13 +296,17 @@ export function LoginGate({ children }: { children: ReactNode }) {
   const status = useAuthStore((state) => state.status)
   const isOwner = useAuthStore((state) => state.isOwner)
   const approval = useAuthStore((state) => state.approval)
+  const displayName = useAuthStore((state) => state.user?.displayName)
 
   useEffect(() => { if (!CAPTURE) initAuth() }, [])
 
   if (CAPTURE) return <>{children}</>
   if (status === "loading") return <LoadingScreen />
   if (status === "signed-out") return <AuthScreen />
-  if (isOwner || approval === "approved") return <>{children}</>
+  if (isOwner || approval === "approved") {
+    if (!isOwner && !displayName?.trim()) return <NameRequiredScreen />
+    return <>{children}</>
+  }
   if (approval === "rejected") return <StatusScreen rejected title="Access request declined" description="This account does not currently have workspace access. Please contact the administrator, Hyanggeun Park." />
   if (approval === "pending") return <StatusScreen title="Approval pending" description="Your access request has been received. The workspace will open automatically after administrator approval." />
   return <LoadingScreen />

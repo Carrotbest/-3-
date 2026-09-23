@@ -1186,6 +1186,95 @@ export async function addFabric1Intake(inputs: readonly Fabric1IntakeInput[]): P
   await saveCache("fabricEvents", fabricEvents)
 }
 
+/** 기존 1팀 창고 원장을 완전히 지우고 업로드한 원장으로 한 번에 교체한다. */
+export async function replaceFabric1Ledger(inputs: readonly Fabric1IntakeInput[]): Promise<void> {
+  if (!inputs.length) return
+  const seenStorageNos = new Set<string>()
+  for (const input of inputs) {
+    const storageNo = input.storageNo.trim()
+    if (seenStorageNos.has(storageNo)) throw new Error(`R&D Number가 중복되었습니다: ${storageNo || "(빈 값)"}`)
+    seenStorageNos.add(storageNo)
+  }
+
+  const state = useAppStore.getState()
+  const previousLedger = buildFabricLedger(
+    state.records,
+    state.completed,
+    state.fabricOverrides,
+    state.fabricEvents,
+    { includeRemoved: true },
+  )
+  const oldKeys = new Set(previousLedger
+    .filter((item) => item.sourceSheet === FABRIC1_INTAKE_SHEET)
+    .map((item) => item.key))
+  const keptOverrides = state.fabricOverrides.filter((entry) => !oldKeys.has(entry.key))
+  const keptEvents = state.fabricEvents.filter((entry) => !oldKeys.has(entry.fabricKey))
+  const now = new Date().toISOString()
+  const samples: CompletedSample[] = inputs.map((input, index) => ({
+    id: `f1:${Date.now()}:${index}:${Math.random().toString(36).slice(2, 8)}`,
+    storageNo: input.storageNo.trim(),
+    styleNo: "",
+    flNo: input.flNo.trim(),
+    season: input.season?.trim() ?? "",
+    category: "",
+    buyer: input.buyer?.trim() ?? "",
+    owner: input.owner.trim(),
+    construction: input.construction.trim(),
+    requestDate: input.requestDate,
+    sourceSheet: FABRIC1_INTAKE_SHEET,
+    ledger: { color: input.color.trim() },
+    process: { knit: "", dye: "", finish: "", remark: input.note.trim() },
+    inhouse: { widthCm: null, weightGsm: null, shrinkagePct: { length: null, width: null }, pilling: null },
+    completedAt: input.requestDate,
+  }))
+  const completed = [
+    ...state.completed.filter((sample) => sample.sourceSheet !== FABRIC1_INTAKE_SHEET),
+    ...samples,
+  ]
+  setAppState({ completed })
+  await saveCache("completed", completed)
+
+  const created = buildFabricLedger(state.records, completed, keptOverrides, keptEvents, { includeRemoved: true })
+  const keys = inputs.map((input) => created.find((item) =>
+    item.storageNo === input.storageNo.trim() && item.sourceSheet === FABRIC1_INTAKE_SHEET)?.key)
+  if (keys.some((key) => !key)) throw new Error("교체한 1팀 원단을 원장에서 찾지 못했습니다.")
+
+  const replacements = new Map<string, FabricLedgerOverride>()
+  inputs.forEach((input, index) => {
+    const key = keys[index] as string
+    replacements.set(key, {
+      key,
+      status: "WAREHOUSE",
+      storageNo: input.storageNo.trim(),
+      ...(input.yds === null ? {} : { yds: input.yds }),
+      ...(input.roll ? { roll: true } : {}),
+      fields: Object.fromEntries(Object.entries(input.fields).filter(([, value]) => value.trim())),
+      updatedAt: now,
+      updatedBy: input.owner.trim() || "관리자",
+    })
+  })
+  const fabricOverrides = [...replacements.values(), ...keptOverrides.filter((entry) => !replacements.has(entry.key))]
+  setAppState({ fabricOverrides })
+  await saveCache("fabricOverrides", fabricOverrides)
+
+  const newEvents: FabricLedgerEvent[] = inputs.map((input, index) => ({
+    id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${index}-${Math.random().toString(36).slice(2)}`,
+    fabricKey: keys[index] as string,
+    action: "RECEIVE",
+    fromStatus: "READY",
+    toStatus: "WAREHOUSE",
+    occurredAt: input.requestDate,
+    recordedAt: now,
+    actor: input.owner.trim() || "관리자",
+    note: "1팀 창고 데이터 일괄 교체(R245)",
+    storageNo: input.storageNo.trim(),
+    qty: input.yds ?? undefined,
+  }))
+  const fabricEvents = [...newEvents].reverse().concat(keptEvents)
+  setAppState({ fabricEvents })
+  await saveCache("fabricEvents", fabricEvents)
+}
+
 /**
  * 선택한 원단의 롤 표시를 한 번에 켜고 끈다.
  * 원단마다 따로 저장하면 앞 저장을 뒤 저장이 덮어쓸 수 있어 새 배열을 한 번만 만든다.
