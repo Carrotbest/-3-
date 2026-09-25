@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-09-24T23:37:51+00:00",
+"generated_at": "2026-09-25T23:41:30+00:00",
 "window_days": 120,
-"total": 1159,
-"translated": 1159,
-"filtered_out": 2035,
+"total": 1177,
+"translated": 1177,
+"filtered_out": 2062,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 19,
-"scanned": 696,
-"kept": 262,
-"material": 186
+"scanned": 632,
+"kept": 246,
+"material": 183
 },
 "30": {
 "sources": 23,
-"scanned": 2706,
-"kept": 1028,
-"material": 758
+"scanned": 2703,
+"kept": 1026,
+"material": 754
 }
 }
 },
@@ -25,23 +25,23 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 377
+"n": 386
 },
 {
 "key": "RETAIL",
-"n": 275
+"n": 278
 },
 {
 "key": "FABRIC",
-"n": 223
+"n": 226
 },
 {
 "key": "ETC",
-"n": 153
+"n": 155
 },
 {
 "key": "CHEMICAL",
-"n": 96
+"n": 97
 },
 {
 "key": "YARN",
@@ -51,11 +51,11 @@
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 304
+"n": 305
 },
 {
 "key": "Fibre2Fashion",
-"n": 196
+"n": 202
 },
 {
 "key": "국제섬유신문",
@@ -67,7 +67,7 @@
 },
 {
 "key": "Ecotextile News",
-"n": 69
+"n": 73
 },
 {
 "key": "Textile Today",
@@ -79,7 +79,7 @@
 },
 {
 "key": "주제검색 · 신소재",
-"n": 55
+"n": 57
 },
 {
 "key": "Innovation in Textiles",
@@ -91,11 +91,11 @@
 },
 {
 "key": "Knitting Industry",
-"n": 36
+"n": 38
 },
 {
 "key": "Textile World",
-"n": 34
+"n": 35
 },
 {
 "key": "Apparel Insider",
@@ -110,12 +110,12 @@
 "n": 16
 },
 {
-"key": "WWD",
+"key": "Retail Dive",
 "n": 4
 },
 {
-"key": "Retail Dive",
-"n": 3
+"key": "WWD",
+"n": 4
 },
 {
 "key": "Just Style",
@@ -126,12 +126,12 @@
 "n": 3
 },
 {
-"key": "Textile Exchange",
+"key": "The Interline",
 "n": 2
 },
 {
-"key": "The Interline",
-"n": 1
+"key": "Textile Exchange",
+"n": 2
 },
 {
 "key": "EURATEX",
@@ -145,11 +145,11 @@
 },
 {
 "key": "리사이클",
-"n": 74
+"n": 75
 },
 {
 "key": "전시회",
-"n": 49
+"n": 50
 },
 {
 "key": "데님",
@@ -157,7 +157,7 @@
 },
 {
 "key": "제직",
-"n": 21
+"n": 22
 },
 {
 "key": "탄소",
@@ -192,6 +192,10 @@
 "n": 10
 },
 {
+"key": "경편",
+"n": 9
+},
+{
 "key": "나일론",
 "n": 8
 },
@@ -201,10 +205,6 @@
 },
 {
 "key": "추적성",
-"n": 8
-},
-{
-"key": "경편",
 "n": 8
 },
 {
@@ -248,6 +248,10 @@
 "n": 6
 },
 {
+"key": "GOTS",
+"n": 5
+},
+{
 "key": "보온",
 "n": 5
 },
@@ -269,10 +273,6 @@
 },
 {
 "key": "BCI코튼",
-"n": 4
-},
-{
-"key": "GOTS",
 "n": 4
 },
 {
@@ -339,16 +339,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-26",
-"total": 16,
-"by": {
-"CHEMICAL": 3,
-"MATERIAL": 7,
-"ETC": 1,
-"FABRIC": 5
-}
-},
 {
 "date": "2026-08-27",
 "total": 16,
@@ -655,25 +645,36 @@
 },
 {
 "date": "2026-09-23",
-"total": 35,
+"total": 37,
 "by": {
 "ETC": 7,
-"FABRIC": 7,
-"MATERIAL": 11,
+"FABRIC": 8,
+"MATERIAL": 12,
 "RETAIL": 9,
 "CHEMICAL": 1
 }
 },
 {
 "date": "2026-09-24",
-"total": 26,
+"total": 27,
 "by": {
 "MATERIAL": 14,
 "YARN": 2,
 "FABRIC": 5,
 "RETAIL": 1,
 "CHEMICAL": 1,
-"ETC": 3
+"ETC": 4
+}
+},
+{
+"date": "2026-09-25",
+"total": 15,
+"by": {
+"MATERIAL": 8,
+"FABRIC": 2,
+"RETAIL": 3,
+"ETC": 1,
+"CHEMICAL": 1
 }
 }
 ],
@@ -702,9 +703,9 @@
 {
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 63,
-"prior": 8,
-"delta": 55,
+"recent": 59,
+"prior": 12,
+"delta": 47,
 "weeks": [
 0,
 2,
@@ -717,36 +718,15 @@
 4,
 28,
 12,
-13
-]
-},
-{
-"tag": "전시회",
-"label_en": "performance days",
-"recent": 39,
-"prior": 9,
-"delta": 30,
-"weeks": [
-0,
-0,
-0,
-1,
-1,
-0,
-4,
-9,
-6,
-20,
-3,
-5
+14
 ]
 },
 {
 "tag": "데님",
 "label_en": "denim",
-"recent": 33,
+"recent": 32,
 "prior": 6,
-"delta": 27,
+"delta": 26,
 "weeks": [
 0,
 0,
@@ -760,6 +740,27 @@
 12,
 6,
 4
+]
+},
+{
+"tag": "전시회",
+"label_en": "performance days",
+"recent": 37,
+"prior": 12,
+"delta": 25,
+"weeks": [
+0,
+0,
+0,
+1,
+1,
+0,
+4,
+9,
+6,
+20,
+3,
+6
 ]
 },
 {
@@ -807,9 +808,9 @@
 {
 "tag": "제직",
 "label_en": "woven fabric",
-"recent": 16,
+"recent": 17,
 "prior": 5,
-"delta": 11,
+"delta": 12,
 "weeks": [
 0,
 0,
@@ -822,7 +823,7 @@
 1,
 7,
 5,
-3
+4
 ]
 },
 {
@@ -889,6 +890,27 @@
 ]
 },
 {
+"tag": "BCI코튼",
+"label_en": "better cotton",
+"recent": 2,
+"prior": 2,
+"delta": 0,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+3,
+0,
+0,
+0,
+1
+]
+},
+{
 "tag": "리넨",
 "label_en": "linen",
 "recent": 3,
@@ -908,27 +930,6 @@
 2,
 0
 ]
-},
-{
-"tag": "자카드",
-"label_en": "jacquard",
-"recent": 2,
-"prior": 1,
-"delta": 1,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-2,
-0,
-0,
-1,
-0
-]
 }
 ],
 "fresh": [
@@ -945,22 +946,16 @@
 "first": "2026-09-02"
 },
 {
-"tag": "r-PET",
-"label_en": "recycled polyester",
-"n": 8,
-"first": "2026-08-28"
-},
-{
-"tag": "코팅라미",
-"label_en": "coating",
-"n": 7,
-"first": "2026-08-28"
-},
-{
 "tag": "캐시미어",
 "label_en": "cashmere",
 "n": 7,
 "first": "2026-09-07"
+},
+{
+"tag": "GOTS",
+"label_en": "gots",
+"n": 5,
+"first": "2026-09-14"
 },
 {
 "tag": "보온",
@@ -973,12 +968,6 @@
 "label_en": "modal fiber",
 "n": 5,
 "first": "2026-09-07"
-},
-{
-"tag": "GOTS",
-"label_en": "gots",
-"n": 4,
-"first": "2026-09-14"
 },
 {
 "tag": "플리스",
@@ -1003,6 +992,12 @@
 "label_en": "oeko-tex",
 "n": 3,
 "first": "2026-09-02"
+},
+{
+"tag": "횡편",
+"label_en": "flat knit",
+"n": 2,
+"first": "2026-09-16"
 },
 {
 "tag": "ZDHC",
@@ -1035,12 +1030,6 @@
 "first": "2026-09-22"
 },
 {
-"tag": "횡편",
-"label_en": "flat knit",
-"n": 1,
-"first": "2026-09-16"
-},
-{
 "tag": "원사가격",
 "label_en": "yarn price",
 "n": 1,
@@ -1063,15 +1052,336 @@
 "label_en": "cooling fabric",
 "n": 1,
 "first": "2026-09-01"
-},
-{
-"tag": "해양유래",
-"label_en": "ocean plastic",
-"n": 1,
-"first": "2026-08-28"
 }
 ],
 "articles": [
+{
+"id": "bdd870537357766e",
+"d": "2026-09-25",
+"t": "인도의 5F 비전: 면화와 직물의 새로운 시대를 열다",
+"o": "India’s 5F Vision: Weaving a New Era for Cotton and Textiles",
+"u": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQSWlOTEtqLTE3YTFKM2psRkE5WDRpQnB3Zk9FMXNDdmdxX0FxZElJeVJhaXZTT0w5RE5YLUdrSW9lOU1WT3lFdkhXRTR2MGxWVUp5NzVVckllNXhhNjZUTERORjNfbTZWVmtEbzJqU25zaXZGT054VzUyMURwZi1Ua1BURUFHcVlpNVA4VjEySGxWSFBOalpIYWgxYnFRNlVvaWJ2MnRJSkNucFVZV0ltT3F30gG-AUFVX3lxTE1pTUZ0LXFwWXVEdnJ6a212NGpXWWs5WXByc0YxSTZTblNsZDBFU0F2SFVvOC1uR05XeUcya3BpU2F5Q1JsNFR6cEd0dUM0NTdnNmwxenNMVGEzaVNfOWFlSXVQdVhaTnJjbVRncEdFaEZoZDZ1R3RobXFlNVJHekdnSWtmWDIwd0E2VlpFQWQ2YkhSZUlyd1dQdWx2N3pNdUxfNVBrOVRLd0dKNHFXRERjOVVnd1dfYVBEZWlGN2c?oc=5",
+"s": "India’s 5F Vision: Weaving a New Era for Cotton and Textiles Fibre2Fashion",
+"c": "MATERIAL",
+"x": "India’s 5F Vision: Weaving a New Era for Cotton and Textiles Fibre2Fashion",
+"i": "",
+"g": [
+"제직"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "ae27c6c74054dca5",
+"d": "2026-09-25",
+"t": "칼 메이어(Karl Mayer)는 기념일을 계획합니다. event",
+"o": "Karl Mayer plans anniversary event",
+"u": "https://knittingindustry.com/karl-mayer-plans-anniversary-event/",
+"s": "Karl Mayer is preparing to mark its 90th anniversary in 2027 with a major event series at its headquarters in Obertshausen, near Frankfurt, bringing together customers, partners and textile industry experts from around the world. Scheduled for September 2027, the anniversary programme will focus on ",
+"c": "FABRIC",
+"x": "Karl Mayer is preparing to mark its 90th anniversary in 2027 with a major event series at its headquarters in Obertshausen, near Frankfurt, bringing together customers, partners and textile industry experts from around the world. Scheduled for September 2027, the anniversary programme will focus on innovation across warp knitting, technical textiles and warp preparation, with Karl Mayer planning to showcase new technologies, textile developments and opportunities for manufacturers. “Our anniversary activities are about much more than individual machines or new features. They are about the next major technical breakthrough developments and true textile innovations across warp knitting, technical textiles and warp preparation,” said Lutz Wolf, CEO of Karl Mayer. “Above all, they highlight the opportunities for our customers: stronger growth, new market opportunities, higher productivity and efficiency, as well as additional potential for sustainable business success.” Lutz Wolf, CEO of Karl Mayer. © Karl Mayer The programme will make extensive use of Karl Mayer’s Textile Innovation Center (TIC) and Product Innovation Center (PIC) in Obertshausen, facilities designed to support textile development, applications and technology transfer. Across more than 5,000 square metres, visitors will be able to experience innovations in production environments and business scenarios. Karl Mayer said the programme will include new machine generations addressing challenges facing the global textile industry, with equipment demonstrated in live operation. The company will also present solutions aimed at helping customers optimise textile value creation and improve product quality, alongside future-oriented textile applications and new fabric concepts intended to inspire product development",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/09/KARL_MAYER_Headquarters.jpg",
+"g": [
+"경편"
+],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry"
+]
+},
+{
+"id": "9294e935b3daafdd",
+"d": "2026-09-25",
+"t": "멕시코가 고지대 구매를 주도함에 따라 미국 면화 판매 급증: USDA",
+"o": "US cotton sales surge as Mexico leads Upland buying: USDA",
+"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxNVmVUS24yWU9DQUZMc0pscDkxMm45NjhWb2VHVVExREUwR3J2UjJuaHdmMUwwbEd4ZVR1LUQ3enpfakQ2YnBjd2NxTmhQU3FDUVQ4NWNEdUVVd2dQZDkxdllCUllVcHFoXzB0SmM4end0YWRUSjZfYi16ZHo4QXhjdklXS1AwR0g0VjA2WnlETm8zb1huZ2xnRVQ2Q2F0SEJzNWw3MHdIbXpBcGV5aHdxMlRPdGs0dVNTcDk4cmRVM2JIZU5FeXNRaUczdnZobVFx?oc=5",
+"s": "US cotton sales surge as Mexico leads Upland buying: USDA Fibre2Fashion",
+"c": "MATERIAL",
+"x": "US cotton sales surge as Mexico leads Upland buying: USDA Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "6ea18f2a3d861d0c",
+"d": "2026-09-25",
+"t": "가장 작은 에이전트 쇼핑객",
+"o": "The Littlest Agentic Shopper",
+"u": "https://www.theinterline.com/2026/09/25/the-littlest-agentic-shopper/",
+"s": "Accessible software, accessorise-able hardware, and an adorable mascot are the faces of the next coordinated push for a new kind of online selling. But the longer-term incentives have little to do with cuteness or consumer empowerment. The post The Littlest Agentic Shopper appeared first on The Inte",
+"c": "RETAIL",
+"x": "[Featured image depicting Meta’s Muse agent mascot, Jolly.] Key Takeaways: A friendly face and a fun new potential device category are the standard-bearers for the promise of “personal superintelligence,” which sounds more grandiose than the current reality: everyday automation and shopping assistance. With AI already influencing more than 40% of in-store purchasing decisions, and potentially ushering in a wave of “showrooming,” greater adoption of AI agents capable of shopping could fast-track fashion’s AEO / GEO strategies. While big banks are concerned about insecurities on the payments side of agentic shopping, the far bigger concerns remain the influence that friendly AI can exert over consumers’ purchasing behaviours, and the incentives that the world’s biggest advertising platform-holder has to encourage transactions to take place within its closed loop. Summarise and debate with AI: Take the content and context of this article into a new, private debate with your AI chatbot of choice, as a prompt for your own thinking. ( Requires an active account for Claude; works without login for ChatGPT, Perplexity, and Gemini. The Interline has no visibility into your conversations. ) We’ll get this out of the way up-front: The Interline is all in favour of cute mascots. Just a few weeks ago, the team tried (and failed) to find enough of a technology slant to allow us to dedicate a segment of The Edit – our weekly quickfire news analysis show – to Niles, the new Crocs mascot . And at least one member of the team has gone to the bother of “hatching” a personalised pet to keep tabs on the agents they have running in Codex. There’s a complicated conversation about the infantilisation of culture and media that’s way above the paygrade of this weekly analysis, but broadly speaki",
+"i": "https://www.theinterline.com/wp-content/uploads/2026/09/Newsletter-25-Sept-Header.jpg",
+"g": [],
+"m": "The Interline",
+"r": "해외",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"The Interline"
+]
+},
+{
+"id": "6c633b0546837794",
+"d": "2026-09-25",
+"t": "ITMA 2027에서 CEMATEX 스타트업 보조금 대상으로 20개 스타트업 선정",
+"o": "20 Start-Ups Selected For CEMATEX Start-Up Grant At ITMA 2027",
+"u": "https://www.textileworld.com/textile-world/2026/09/20-start-ups-selected-for-cematex-start-up-grant-at-itma-2027/",
+"s": "BRUSSELS — September 24, 2026 — CEMATEX has selected 20 emerging start-ups from nine countries to receive the CEMATEX Start-Up Grant and showcase their innovations at Start-Up Valley during ITMA 2027 in Hanover. Their participation will be fully funded by CEMATEX, giving promising early-stage compan",
+"c": "ETC",
+"x": "BRUSSELS — September 24, 2026 — CEMATEX has selected 20 emerging start-ups from nine countries to receive the CEMATEX Start-Up Grant and showcase their innovations at Start-Up Valley during ITMA 2027 in Hanover. Their participation will be fully funded by CEMATEX, giving promising early-stage companies access to the world’s leading textile and garment technology platform. The selected start-ups span six product areas: Colourants & Chemicals, Fibres, Yarns & Fabrics, Garment Making, Recycling, Software & Automation, and Testing. While they address different challenges across the value chain, they share a common focus on sustainability and circularity. Across their technologies, sustainability is increasingly embedded in the way new materials, processes and production systems are being developed, rather than treated as a standalone consideration. The innovations address challenges ranging from chemistry and resource consumption to textile recycling, traceability, and production efficiency. Meet the 20 start-ups The 20 recipients of the CEMATEX Start-Up Grant are: Amphico, BioFluff, Eeden, EverDye, Fibarcode, Gemell Technology, Innovo Fiber, NunoX, Re.Solution, Recyc’Elit, Refiberd, ReSpin, Revoltech, RubyLab, Sages, Silana, Solena Materials, Sparxell, SwitchDye and Tintte . Their innovations can be seen in solutions addressing some of the textile and garment industry’s persistent sustainability challenges. Amphico is developing alternatives to substances the industry has long relied upon. Its PFAS-free membrane is designed to keep performance fabrics waterproof and breathable, while its colour platform introduces colour through weaving rather than dyeing. PFAS (per- and polyfluoroalkyl substances), often called “forever chemicals”, do not readily break down in the environ",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2025/04/ITMA-2027-logo.png",
+"g": [
+"전시회"
+],
+"m": "Textile World",
+"r": "해외",
+"v": 14,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "616c266c75bfdb27",
+"d": "2026-09-25",
+"t": "영국 ASOS, 장애인 고객을 위한 최초의 적응형 패션 제품군 출시",
+"o": "UK's ASOS launches first adaptive fashion range for disabled customers",
+"u": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxPVWYtbElseS1NemlpR05KWjl1Rjk2aTdQMzNaclZaOXdJbkJBSkQtUDc1YmYtejZZQTZmNmdEUUptRDVxX1JTbUYtYnBYMFc3dVBjb0NfWVVHc0IzREJ3bHhlRWVaS2k0eFFSYk83T2xfc09MUUJCaGpsQThXNUtaTGlFYmRpWkdBdnU5bWhvcW9EbXNvYmZfam0tWHptQXNNWjF6Wm1VclZyVC10R0FXQ2xzUG5FVjVLRlpRdm1mWmNGVVpKVTM3ZVNJeUM1NGpxY1Y3dlE0d3NXcFBwdW1EUEc1aGFCdWNZR0dGczNRRUdVTTRYNW1J?oc=5",
+"s": "UK's ASOS launches first adaptive fashion range for disabled customers Fibre2Fashion",
+"c": "MATERIAL",
+"x": "UK's ASOS launches first adaptive fashion range for disabled customers Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "58de65cc44420650",
+"d": "2026-09-25",
+"t": "면화의 지속 가능한 생산 격차 매핑",
+"o": "Mapping cotton’s sustainable production gaps",
+"u": "https://www.ecotextile.com/2026092565940/news/features/mapping-cottons-sustainable-production-gaps/",
+"s": "Our latest Cotton Horizons maps the 70% of global cotton still outside recognised sustainability standards and, as PAN UK turns […] The post Mapping cotton’s sustainable production gaps appeared first on Ecotextile News .",
+"c": "MATERIAL",
+"x": "Our latest Cotton Horizons maps the 70% of global cotton still outside recognised sustainability standards and, as PAN UK turns […] The post Mapping cotton’s sustainable production gaps appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/09/mappingcotton.png",
+"g": [],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "55ea6eb5cc9b9cd9",
+"d": "2026-09-25",
+"t": "카리나 광고 ‘인종차별’ 논란 안 꺼져…컨버스 CEO 직접 사과",
+"o": "카리나 광고 ‘인종차별’ 논란 안 꺼져…컨버스 CEO 직접 사과",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=148844",
+"s": "인종차별 광고 논란에 휩싸인 컨버스가 CEO 사과에 이어 내부 광고 검토 절차를 재점검하고 외부기관까지 투입하기로 했다. K팝 그룹 에스파의 카리나가 등장한 캠페인 이미지가 백인우월주의 단체의 복장과 흑인 린칭을 연상시킨다는 지적을 받으며 시작된 이번 논란은 소셜미디어를 넘어 미국 정치권으로 확산됐으며, 13분기 연속 매출 감소를 겪고 있는 컨버스의 브랜드 회복 전략에도 새로운 부담으로 작용하고 있다.문제가 된 이미지는 지난 8월 27일 글로벌 출시된 척 70 X를 홍보하기 위한 캠페인의 일부였다. 카리나가 흰색 스커트를 입고 검은",
+"c": "RETAIL",
+"x": "인종차별 광고 논란에 휩싸인 컨버스가 CEO 사과에 이어 내부 광고 검토 절차를 재점검하고 외부기관까지 투입하기로 했다. K팝 그룹 에스파의 카리나가 등장한 캠페인 이미지가 백인우월주의 단체의 복장과 흑인 린칭을 연상시킨다는 지적을 받으며 시작된 이번 논란은 소셜미디어를 넘어 미국 정치권으로 확산됐으며, 13분기 연속 매출 감소를 겪고 있는 컨버스의 브랜드 회복 전략에도 새로운 부담으로 작용하고 있다.문제가 된 이미지는 지난 8월 27일 글로벌 출시된 척 70 X를 홍보하기 위한 캠페인의 일부였다. 카리나가 흰색 스커트를 입고 검은",
+"i": "http://www.ktnews.com/news/thumbnail/202609/148844_130927_359_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 10,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "4e38afae0e9007e3",
+"d": "2026-09-25",
+"t": "TJX CEO: 유통 모델이 엘니뇨 날씨에 도움이 될 것입니다",
+"o": "TJX CEO: Distribution model will help weather El Niño",
+"u": "https://www.retaildive.com/news/tjx-ceo-distribution-model-el-nino/831118/",
+"s": "The off-price retailer’s supply chain strategy allows it to hold inventory instead of going straight to stores.",
+"c": "RETAIL",
+"x": "The off-price retailer’s supply chain strategy allows it to hold inventory instead of going straight to stores.",
+"i": "https://imgproxy.divecdn.com/KdVOIWl-SMzhIjS4idPmMNpDLvaIByb9AJVsDjCZBmI/g:ce/rs:fill:1600:900:1/Z3M6Ly9kaXZlc2l0ZS1zdG9yYWdlL2RpdmVpbWFnZS9USl9NYXh4LmpwZw==.webp",
+"g": [],
+"m": "Retail Dive",
+"r": "해외",
+"v": 9,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"Retail Dive"
+]
+},
+{
+"id": "4aaed914e0c994bc",
+"d": "2026-09-25",
+"t": "영국 의회는 직물 폐기물을 사용하여 움푹 들어간 곳을 수리합니다.",
+"o": "UK council uses textile waste to repair potholes",
+"u": "https://www.ecotextile.com/2026092565935/radar/uk-council-uses-textile-waste-to-repair-potholes/",
+"s": "Maidstone Borough Council and materials company Recool have launched a trial to use recycled textile waste to repair potholes. The […] The post UK council uses textile waste to repair potholes appeared first on Ecotextile News .",
+"c": "MATERIAL",
+"x": "Maidstone Borough Council and materials company Recool have launched a trial to use recycled textile waste to repair potholes. The […] The post UK council uses textile waste to repair potholes appeared first on Ecotextile News .",
+"i": "",
+"g": [
+"리사이클"
+],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "4a0798fb8602f5fa",
+"d": "2026-09-25",
+"t": "팟캐스트: 글로벌 책임 섬유 표준(Global Responsible Textile Standard) 계획 공개",
+"o": "Podcast: Global Responsible Textile Standard reveals plans",
+"u": "https://www.ecotextile.com/2026092565914/podcasts/podcast-global-responsible-textile-standard-reveals-plans/",
+"s": "How the creator of the Global Organic Textile Standard (GOTS) aims to extend its reach beyond organic fibres YORK – […] The post Podcast: Global Responsible Textile Standard reveals plans appeared first on Ecotextile News .",
+"c": "MATERIAL",
+"x": "How the creator of the Global Organic Textile Standard (GOTS) aims to extend its reach beyond organic fibres YORK – […] The post Podcast: Global Responsible Textile Standard reveals plans appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2025/08/Ecotextile-talks-wide-800x560-1-1.webp",
+"g": [
+"GOTS"
+],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 9,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "3458dcef93d1196f",
+"d": "2026-09-25",
+"t": "하이브리드 입자로 발유성 직물 마감 가능",
+"o": "Hybrid particles enable oil-repellent textile finish",
+"u": "https://www.ecotextile.com/2026092565937/news/materials-production-news/hybrid-particles-enable-oil-repellent-textile-finish/",
+"s": "German researchers say a fluorine-free textile finish repels both water and oil, though its durability and performance against some oils […] The post Hybrid particles enable oil-repellent textile finish appeared first on Ecotextile News .",
+"c": "CHEMICAL",
+"x": "German researchers say a fluorine-free textile finish repels both water and oil, though its durability and performance against some oils […] The post Hybrid particles enable oil-repellent textile finish appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/09/oil.png",
+"g": [],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "289ac96e58e5261d",
+"d": "2026-09-25",
+"t": "ICE 면화는 미국 수출 판매로 이익을 얻었습니다. 수확 압력이 지속됨",
+"o": "ICE cotton gains on US export sales; harvest pressure persists",
+"u": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxNeHBoQkhPNEFWR2M2dDBhRFJ2WXJRMnJHYldWbzdHUjhNdWFyRGJlTVNDVUZwdGlwQ0h0UjNwdTk1eGUwcnpnNGJPWHI2c1NoaVpxcTlLZThBVkZfVVRfMzVjOHB4QXhLRl91T2tvSHMzVVVxYTZQRTQ4NGJyMnJ1YmpBWC1ob1E2X0VZNHRfN2ZzLTI5NVUwOVFKTDQ0aEo3YVRnNFJpbWJHSmpPenNDTVc4cXBEdXJ6aVZnNUxnS1VEakxsNlJXMzZNeW1FSEkydU5Cb25XQQ?oc=5",
+"s": "ICE cotton gains on US export sales; harvest pressure persists Fibre2Fashion",
+"c": "MATERIAL",
+"x": "ICE cotton gains on US export sales; harvest pressure persists Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "068a6de9daa3b3b0",
+"d": "2026-09-25",
+"t": "칼 메이어(Karl Mayer), 섬유 혁신 프로그램 90주년 기념",
+"o": "Karl Mayer marks 90 years with textile innovation programme",
+"u": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxPOUpIc1VwcExjMjBSR3lCS0pHUzZCTS1neld6SG9la21xZTZhXzVuakZRcnYyNmdvNy1uRzIzVl9vNjRuU0hMRzZSU0xaUlgwZ2IwS2xWM0JWUDdRdjB6YlRVWC1BMHNYdlRNS3pNTkZZNW5JVEV2N1k5V3ZTSk5ZNy03NmE4MFRidW91WnRETjlVRm9MUXJYMGFWZXE3S2pmWWN5NkRNZVZtR19QbnNjMlNFdUVnUWhsY09mazlWdGpsaC1ucms5QWM0RkpRdFhRRW1MYmxR?oc=5",
+"s": "Karl Mayer marks 90 years with textile innovation programme Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Karl Mayer marks 90 years with textile innovation programme Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "0480b4848b700537",
+"d": "2026-09-25",
+"t": "Shima Seiki는 University of Technology Sydney 혁신을 지원합니다.",
+"o": "Shima Seiki supports University of Technology Sydney innovation",
+"u": "https://knittingindustry.com/shima-seiki-supports-university-of-technology-sydney-innovation/",
+"s": "Shima Seiki’s advanced flat knitting technology is helping researchers and students at the University of Technology Sydney (UTS) explore new possibilities in 3D knitting, sustainable manufacturing and interdisciplinary design. The university’s Advanced Fabrication Research Lab (AFRL) is using a Shim",
+"c": "FABRIC",
+"x": "Shima Seiki’s advanced flat knitting technology is helping researchers and students at the University of Technology Sydney (UTS) explore new possibilities in 3D knitting, sustainable manufacturing and interdisciplinary design. The university’s Advanced Fabrication Research Lab (AFRL) is using a Shima Seiki SWG-XR WHOLEGARMENT flat knitting machine and SDS-ONE APEX4 design system to support research, education and collaboration with industry. AFRL applies advanced digital manufacturing technologies including 3D knitting, robotics and 3D printing across fields extending beyond fashion and textiles to architecture, product design, engineering, healthcare and sustainability. As research and industry collaboration at the facility expanded, AFRL identified a need for technology capable of developing and prototyping seam-free knitted products and complex structures. The installation of the SWG-XR and APEX4 established an integrated environment extending from design through to prototyping. © Shima Seiki The SWG-XR is now used daily at the facility and enables researchers to develop three-dimensional knitted products featuring complex structures without conventional cutting and sewing processes. According to Shima Seiki, AFRL selected its technology because of the capabilities of WHOLEGARMENT knitting, the compatibility between the SWG-XR machine and APEX4 design system, and the company’s track record in the textile industry. Support from Shima Seiki’s Australian distributor Ramsay McDonald Australia also influenced the university’s decision. Researchers and technical staff have subsequently received training at Shima Seiki’s headquarters and through the company’s Shimanavi e-learning system. The installation has helped generate new research themes among researchers and students",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/09/img1.jpg",
+"g": [
+"횡편"
+],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry"
+]
+},
 {
 "id": "fbf7f94ec503ddcb",
 "d": "2026-09-24",
@@ -1379,6 +1689,27 @@
 "e": [],
 "ms": [
 "Ecotextile News"
+]
+},
+{
+"id": "58996f13ed4888d8",
+"d": "2026-09-24",
+"t": "Sunwin, 차세대 모피 선보여",
+"o": "Sunwin showcases next-generation fur",
+"u": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOcmVlTVZBeHVQcnhjU3ZGT3FJN0RPQUJPNW1QV09WUnN4blBtVC1hSFpWaGlRLTUzTVJmUXlBUUd4NjkzamJTUmJJV2ZJR1pyUjNhaHNLenlfR3BWbFp5VHNLY3ByOEk5dHFuQmFNYmVLT3VuZ212ckNPN2E5VUlTOGpoZFFyTGx5OHZnTA?oc=5",
+"s": "Sunwin showcases next-generation fur hometextilestoday.com",
+"c": "ETC",
+"x": "Sunwin showcases next-generation fur hometextilestoday.com",
+"i": "",
+"g": [],
+"m": "주제검색 · 신소재",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 신소재"
 ]
 },
 {
@@ -2110,6 +2441,27 @@
 ]
 },
 {
+"id": "8515bad4079a57c7",
+"d": "2026-09-23",
+"t": "폴리에스터 원단 구매자",
+"o": "Polyester Fabric Buyers",
+"u": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPX3lhOHlwQjNEc194UTVpOVN2TnBVWjBwT1dqdG9PemRub3lyOGVIMFBEZWQ5OFZTTXRxUXZydVVMVTJrTnQ1VFhaQlh4RWZpQk95TXpjMlZUdFZTdjk5WkV2M0NJQnBpdlVYUmFxTHBFdC1qZkM3bXgyX0dnTmt6SzROYnloZU1HWWFPTnM2YmZoT21IclZ1WA?oc=5",
+"s": "Polyester Fabric Buyers Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Polyester Fabric Buyers Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "7d54e8f6deaa9b9d",
 "d": "2026-09-23",
 "t": "SIMA 회장, 섬유 산업에 자동화 및 가치 창출 가속화 촉구",
@@ -2330,6 +2682,27 @@
 "e": [],
 "ms": [
 "WWD"
+]
+},
+{
+"id": "09bb98dbc2f3f5c3",
+"d": "2026-09-23",
+"t": "Fabric.AI, 마이크로 LED 광 인터커넥트 아키텍처에 대한 USPTO 특허 출원 2건 접수",
+"o": "Fabric.AI Files Two USPTO Patent Applications for Micro-LED Optical Interconnect Architecture",
+"u": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxOdmRNWkMzRG4xRGdKYkEwRkx4encxX2JzMTE4MVBMS1BVLXFyVUVEeUlnazZFVmdxZjgtTjlCSXJxVTQzUHlIQkxIZ2pLdHB1WFprVlV6blFnMUpJVWozMFpiLXFwbHRXUzRBSGI5V2RibTFIa3BweWpLVXBxSVJsRHF6amlIa0NldFFjOEhHQUxUMTJqMGFEM1NjWnJXMzBkYzZvM1pxMFBBY2FBTG9aZE1xVV9kc2t5OUExdjNRbURxVzRhUUlYQg?oc=5",
+"s": "Fabric.AI Files Two USPTO Patent Applications for Micro-LED Optical Interconnect Architecture Quiver Quantitative",
+"c": "FABRIC",
+"x": "Fabric.AI Files Two USPTO Patent Applications for Micro-LED Optical Interconnect Architecture Quiver Quantitative",
+"i": "",
+"g": [],
+"m": "주제검색 · 신소재",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 신소재"
 ]
 },
 {

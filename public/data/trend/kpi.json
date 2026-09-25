@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-24T23:37:51+00:00",
+"generated_at": "2026-09-25T23:41:30+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -4257,6 +4257,13 @@
 ],
 "urban": [
 {
+"d": "2026-09-25",
+"t": "Urban Outfitters(URBN)가 지난 수익 보고서 이후 5.1% 하락한 이유는 무엇입니까?",
+"o": "Why Is Urban Outfitters (URBN) Down 5.1% Since Last Earnings Report?",
+"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPMDdkdE0tMTFmSjRLbWZPalU5bnVhRU9tMlpOb3ZyTEpBV2NmMEU4bS02SXB6aXZPLTNFczVqNDhDMDcyck1WTHR6dkFXbzBVcHhpVFp6Ny1YcVlPVkVxdWhodFlWVVR6eFpLOE5nRDZGQWJDT2pkdlBGRThrYXJ5UHNMb01mV0FrSXRLZnh0anc1MkpkUnZZTUw4bw?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
 "d": "2026-09-18",
 "t": "낙관적인 수익 전망 및 분석가 목표로 Urban Outfitters 주가 상승",
 "o": "Urban Outfitters stock gains on upbeat earnings outlook and analyst targets",
@@ -4304,16 +4311,23 @@
 "o": "Apparel Van Gogh Sweatshirt Urban Outfitters Top Van Gogh Sweatshirt Urban Outfitters 2026 Van Gogh Sunflowers",
 "u": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE0xYV9FY2wwNjZIdVFSQ0otTDhSQ2E1TGpfQVczS3hvU3VnN0Mtd29VR3lBZkIxdWlHbDlEZFpJUmR0clpIeXdXUmJLNm1CZjh6RjFic29DZVY?oc=5",
 "m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-09-06",
-"t": "강력한 2분기 결과와 Nuuly 물류 지출이 Urban Outfitters(URBN)의 상승세를 바꿀까요?",
-"o": "Does Strong Q2 Results And Nuuly Logistics Spend Change The Bull Case For Urban Outfitters (URBN)?",
-"u": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPUEZhV3U2dllKR0ZYV19fS3ExbktfdVJVd19tUmpmckItUERQVlg5UVppb1NldllXaGNCdlJYcWJOaFR5d1FGSHVLWnFoY1YxeHFCYkd2eWk0TFBfWm9BaUtVaElyT3RxZzA1TzBfUVhXLVVrTnhLSmFXc3BQd3V0SU1NTV90TXNWYnd1NXVOM2x4eG9CSHlYcQ?oc=5",
-"m": "바이어 · Urban Outfitters"
 }
 ],
 "amazon": [
+{
+"d": "2026-09-25",
+"t": "Amazon에서 수분 흡수 골프 폴로 $26에 43% 할인",
+"o": "Moisture-Wicking Golf Polo 43% Off at $26 on Amazon",
+"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQbkYyeVE4VHhNOVZuTENuNUppT3RoWGZsaDBtSXVvSVk2UWM1WnJ3UHRkVTc4UWpqeHc4OHJRTDhoUVAwRWFrdndLMnZiUGRLZ3ZKU25Fd0NCU2Z4a0Zjc1NuT1g1OXJCYS1nTDZ1LWlRcjlCejdxaUpjbUJVbE1nRzVYYjFyZ0w2U0JGRF8tb1VLYnZJUWFkd1QxVWFEWjRQY0dxYVhNM21vTkkzVWpIMWJaM0E?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-09-25",
+"t": "이 질감 있는 니트 폴로는 Amazon에서 15달러까지 할인됩니다.",
+"o": "This Textured Knit Polo Is Down to $15 on Amazon",
+"u": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPNVFMQVMxRHZIUjFuMThoUHVmOVJNM2VKUDZUcjB3ZlBjTU14cjlPUDJ1dXN2NGg4OVI0bnpNUU1IQWtjYnRtaXVQWlhPcXMwdVd2aU1ZQnU3cERvZFNwR0I2dVJNNzB4R0tlR01PblhmOEdCM2N5eC1zRkNSYUdFVUl0SHlwS1RFSzNic0k2Wmdxa1I0WmhuOG9KQkRicTg0UDhfRkdR?oc=5",
+"m": "바이어 · Amazon"
+},
 {
 "d": "2026-09-23",
 "t": "Ralph Lauren 옥스포드 셔츠 Amazon에서 $ 135까지 할인",
@@ -4355,23 +4369,51 @@
 "o": "Ralph Lauren Classic Oxford Shirt Down to $123 on Amazon",
 "u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPQ3A3eGxoTXFMd0YwTEFQUEgteHYwOElpYVZRUUhCTkJUQ0RDZWw5R1Y0RDZDcHplcFdvSGUwUTZJNUEzZzF3QjJqc1hEVDNJN25pUUNZYUdiZlJHaFdnQ1JGeDd1RG1BRGdQRVJrenU2VkU0WHZmWHBHd0RLNzlUWW1ycEZqRWZtMUxEMlItNU5HbzZtcDBlSXg4eURyNFZHNWZiRXVWNmpLb01tNnpwZFYtRU8?oc=5",
 "m": "바이어 · Amazon"
-},
-{
-"d": "2026-09-20",
-"t": "Dockers Gordon Leather Oxfords는 Amazon에서 49달러에 불과합니다.",
-"o": "Dockers Gordon Leather Oxfords Are Just $49 on Amazon",
-"u": "https://news.google.com/rss/articles/CBMirgFBVV95cUxNYzJkZGJGYS1fY1N2UEdnRU1kN1hlR3NCNEdMVGFhN2p5c1R5ZWFTVjk2R0pXQnpMVHFVM3BIWTZYc1dXbDRCY2RBdXY3OTBJYTUzd0tiR0lpbmhoSkI0QXEtd3hyVXRWM3FkYTVIVTlyZHVBdlRxSi1naDVLQnVqSlBBWVFhV1EwMG9MWnNFYUVPVjN3RVVnWlpSME1WRmdxck1VY3BhaVhJZm4yamc?oc=5",
-"m": "바이어 · Amazon"
-},
-{
-"d": "2026-09-18",
-"t": "$25 Amazon 에센셜 더비 정장용 드레스 슈즈",
-"o": "$25 Amazon Essentials Derby Dress Shoes for Formal Wear",
-"u": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNemwza3JQZk5udWp2bWdEajFJNkRnNnY0cDU0ZG1xVnROb2ZoRlBGNlpEUEx1RmNPdlpOeDZ2SkMyRHI0dWZpUUdicGZxaWZxNXloU1lydWdtcVpLN3UxRk1Ia3BxMHE1LXdFV0R6WWljOF9seHFCMkpkT2tJaUpYeXNfajNKX00tVWhz?oc=5",
-"m": "바이어 · Amazon"
 }
 ],
 "nike": [
+{
+"d": "2026-09-25",
+"t": "Micron 헤드라인 수익 달력; Jabil, Nike도 갑판에 있습니다",
+"o": "Micron Headlines Earnings Calendar; Jabil, Nike Also On Deck",
+"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPY25hcnZwQl93aW8zR3NLQWl5TFVkemc0TW13bm1NM2FFZGtUM3Bwel9ETUZnOWJlMGRDWEVzRW1Yd2wzWV9Dczk0VDF1UnlVLXZ4OXEzOU5KM0dwNUhPNUxKeU02VnYwRUxNUGs2M3FnNU5NTXFDRjRmc0RyQVRNYnY1QTFZN2ZpazVoYkNVdUN3S2NQNDV4S2UyTQ?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-09-25",
+"t": "BofA, 실적에 앞서 Nike 등급을 하향 조정",
+"o": "BofA Downgrades Nike to Underperform Ahead of Earnings",
+"u": "https://news.google.com/rss/articles/CBMipwFBVV95cUxORUthR0Jhc0FZXzdla2pQR1hhaF9WZ2xuaEU1RkZrRVFYRDdlOU9hZ0sta2VkMlphSUJibDdxWVVDSmhUeEgzb0Faa2FaaVoxR1RldUJJcklKb29PS3A5amhLc1A1SEJ3VDc2emlqaHlEYnQtZ2tsc05CQzFWQmhDbkM2Yzk5UTExbW9ZV2hWREFhcHNpOFhCQkxTSEZmaXV1RjRPUXBCaw?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-09-25",
+"t": "Nike 주가는 분석가가 수익으로 하향조정되면서 10년 만에 최저치를 기록했습니다.",
+"o": "Nike Shares Hit 10-Year Low As Analyst Downgrades Into Earnings",
+"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOb04yUjlRZ1FUZy1BSEVFRlNjOVpQOWpKa3ZLNFdkekh4NFJ2TmdEOG9xREpMN3ltRWxIS0IzUlFMdjdXYnZXZlFJblJFckl3MldXR3dvNGZwcmU0S0tST0lPVTlRVEdHVjNYOW1VZFhqRkFqd3dxLW5XcS10eDEzWTJYdVYtQjZyS2JMRnNVdVBRMC14dG84SG1JWQ?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-09-25",
+"t": "Nike 주식: FQ1 실적이 불투명하므로 주의 깊게 살펴보세요. (NYSE:NKE)",
+"o": "Nike Stock: Tread Carefully As FQ1 Earnings Loom (NYSE:NKE)",
+"u": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPTzNiMmdoN3R0UHo0SEItb0QxaFBacWJINVhPZDZZWVFPaHNTT2JsUEtEUFhWaVJubkhzVFZoVWk2SXhXUU1IQ254STBFWUo1VTNGUGFsekVOUDhBVGl0Y0RoeHZCVHJjbGdUYzNOTF8zdzIwVG0tWGxfNU1QeUhReXpvODNZMlFfV05PbGVDUko?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-09-25",
+"t": "BofA, Nike를 실적이 저조한 수준으로 하향 조정하고 매출 회복을 2028년으로 연기",
+"o": "BofA Downgrades Nike to Underperform, Pushes Sales Recovery to 2028",
+"u": "https://news.google.com/rss/articles/CBMidkFVX3lxTFAxNUVIZmU5UmNMRmRBRms5YjhXYmp5aTNxemM3VEJYa3RndlZsWEd2YXZDRDBxTUJuaTR2ZVhmNDBJcEFxSF9WTGpmbWRSaTNWcmVqcHhoRGI1NFRoaURRdjNtbDdPMjNLc1hRNXlmQUJabzZ3TkE?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-09-25",
+"t": "Nike 거래가 12년 만에 최저치로 1분기 수익 기록: 10월 1일에 제대로 진행되어야 할 사항은 다음과 같습니다.",
+"o": "Nike Trades at a 12-Year Low Into Q1 Earnings: Here’s What Has to Go Right on October 1",
+"u": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPaUtaUVpkbWdjZklCcG9BVHRJUW9IeEQ2aWpGSGt5bjM1MW5wQ2l6b2tfSE1saU80UmluRkM4dTItSnlTdl9zMXhERlMwY1hpZ05HUUN0SnF2UFRTZEhsZk5vaER6MWM3d292ZzVJOVhsWWlma0NZMVZTM0FFekowVG1OLU5zRnZUMFo4aUdDNkdnR2VDeWRZS2JYR0VQX3RVV0pHSjZmRzJzT1pSZ05hSg?oc=5",
+"m": "바이어 · Nike"
+},
 {
 "d": "2026-09-24",
 "t": "Nike 주식은 다가오는 수익 보고서에서 7% 움직일 수도 있습니다. 부터 Investing.com",
@@ -4385,48 +4427,6 @@
 "o": "Suspects attempt to steal Nike apparel from freight train in Whittier",
 "u": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQTHZLZUxQS3p4ekFrNlBfQTRScnRZYVUtWExKNTl4YzJEa0dPTUZXam5UbElwUjJNdnpTSU85TjRKeWEtOEVrMW1wOWg4bExJelRxZVRCWkdGRlNZVkxXOERBV2FDTDlKMXhEY1BwTmNYSDhxTThHT1U0RTEzUGpsU0J6MEduT0YzOWZPOXkzdTFBbjRYQjh6NDE1R2xPZmRpbkRvZ2Ziczd0RGFC?oc=5",
 "m": "바이어 · Nike"
-},
-{
-"d": "2026-09-24",
-"t": "수익 미리보기: Nike (NKE) 1분기 수익 감소 예상",
-"o": "Earnings Preview: Nike (NKE) Q1 Earnings Expected to Decline",
-"u": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQcF9OVEtNMkFMM0Y3SGxhVUNzcFlaX2xqNlJUYWtRU19FRWdra19EQk4ySUlzVk9sU2l6alFVOFNtTUxydnFoeEl4MkdraXZmS2E0SU9hc2FNZ0xzNVpqR1pwUl9uOENjWVh6aWpvNTI1aGVEYVVRcGdva1g0Qk8zRkdQWGMtNm52c1duNkJra2dyMEFDZ3U5RQ?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-09-24",
-"t": "Nike, 소호 팝업에서 중고 운동화, 의류에 제2의 삶을 선사하다",
-"o": "Nike Offers a Second Life to Its Used Sneakers, Apparel at SoHo Pop-up",
-"u": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQLUg0LXhfUjZfTFgwZzhpSUItLURGMGJ2dGRkNVJkcERTbVc4b2FNMi1ZVkh1R3cxanBaUzFHUnVmOHUwRVJfdHhOSmdzc1kwenhweXhoc2hiSTBfNEhlRm1zTmlhbTVYYzk4U3RUbmYxYjhCVldEMzZjQU55SkpFY2piLWlKc0tIdzE5YlNxdkNjNWUwRTVPYVY1RDVnUWZKRjF2T0VWSjVfcTc5?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-09-24",
-"t": "Nike 주식은 다가오는 수익 보고서에서 7% 움직일 수 있습니다",
-"o": "Nike stock may move 7% on upcoming earnings report",
-"u": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPSDVYNUJobFRiOUtmaUxTdHVmUlZuMWxqa1FHX1pTSndmNjQ5VUpIX3dBSGoyTFJ4bml5TE9yYkU0cGV5WHR5R2tsaFVGeDd1dThJa2kwcERGckw5bWNucFFHcnl1VTg3a3NhNlRjbUh5UXRuV0VXQ29fQmFpYUhmSnVCeTN2dldxVFh4T1V3YVJzOTB6aU54YzY0UkVCd1FXVmVRYmczRFE2LWJjLTlmbA?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-09-23",
-"t": "Nike는 \"쓰레기통 화재\" 운동복 시장에서 매수인가요?",
-"o": "Is Nike a Buy in a \"Dumpster Fire\" Athletic-Apparel Market?",
-"u": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPdHFkNXJNdUhGN2ctNUhpc3MyT3hJV1I5dTRaY0paVVpuRm9kSGFtMVBGYjdHMHcweDltUlJ0UTNLcnZNbEdmeEs0cVVOWUJ0WmRYeDNPbGlLdmxtZVlEV3VyUFdPd1d6cWZKS1FKeTEyeWFTc0pnOW1aVkQwZ2hhal81ME9BZkloTUZ1enQ1eTlLWC0zRzZF?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-09-23",
-"t": "Nike(NKE)는 '매우 강력한 브랜드'로 남아 있다고 주요 소매 파트너가 1분기 실적을 앞두고 밝혔습니다.",
-"o": "Nike (NKE) Remains ‘a Very Strong Brand,’ Says Major Retail Partner Ahead of Q1 Earnings",
-"u": "https://news.google.com/rss/articles/CBMiswFBVV95cUxOMkdRZ2dLMjBmWDl2UVN2Wi1HZGpiWkdHWmdaNUE1LW03dnhhNlJpRV95SXVIdy1yajAwdGF1ekFTbVVxdS01bUNuYm5CWG9RdUVTNGlkNXBVZkRjc1M5bHFwck9vTFdFM2k5Wk95cE1OTFcxLUo4aHFIYlAwRUp6T2VXckFybDJ4ZzEyb0FCcTdnRFgyY0o1R0RjX01SOVQwUjBIc0J2OVZGUUE4NE9DWlk0TQ?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-09-23",
-"t": "나이키스킴스, 29CM서 10분 만에 일부 완판…래플엔 1만 명 응모",
-"o": "나이키스킴스, 29CM서 10분 만에 일부 완판…래플엔 1만 명 응모",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148822",
-"m": "한국섬유신문"
 }
 ],
 "pvh": [
@@ -4489,59 +4489,59 @@
 ],
 "costco": [
 {
-"d": "2026-09-24",
-"t": "Costco 수익 예측 시장 미리보기: Ron Vachris CEO는 뭐라고 말할까요?",
-"o": "Costco Earnings Prediction Market Preview: What Will CEO Ron Vachris Say?",
-"u": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOWEMtWXBGaFlOUWYtbG9ZcS13WUVCSlk0U09IMkVPaVQ1aE0ydXBTekpUdGZGUUV0NTF0cEZMTUlXYkxDaDQ3Zk1Wb1EwNDc0R1hBYXp1VnU3MjAtNTRCeG5yOXFVVXh5WDBoRngyT3hMUUp6cGlWa0d3ekFLNk1pTlFvUVdadmF4dW9NV3YxZklad0w5ZVh6MTFfRHIzOXpjRExpeW8tZ2lPMklwT1Y3ZEdR?oc=5",
+"d": "2026-09-25",
+"t": "Costco(COST), 탄탄한 매출 성장과 마진 개선으로 강력한 4분기 수익 보고",
+"o": "Costco (COST) Reports Strong Q4 Earnings with Solid Sales Growth and Improved Margins",
+"u": "https://news.google.com/rss/articles/CBMivwFBVV95cUxQV2dDSFdyZHl0VTh6NzFrclZQelRFb01EYXhBQ2JnU25ZOWtjcy1nay1SVlF3dEU3amJ5akR1di1uSTZVUTd5MkVielk4RnNjZ0VYSlRwaUZ5RW1MUmFlZ1ROMk9JSWROZUMyYm1Tdy1mSldrdnBoRnU4Y3Q0NnZJamIySkRfWThkb01SVWtiWEdpQTlCd2NWbl9wWGJtVGpJYm83aXAzaUVkcEg2ajBYdTlpTWNPdmstZWttRnBOQQ?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-24",
-"t": "관세환급 덕분에 Costco 실적이 기대치를 뛰어넘었습니다.",
-"o": "Costco earnings beat expectations, thanks to tariff refunds",
-"u": "https://news.google.com/rss/articles/CBMiowFBVV95cUxPOTBNVlZNc1BvajJxMzF1ckpzeF9ITk5YczJaNUlmLU1QT28tZWxYa3R1dGhmQVNCZTFpM0tOUUFnSnBhUU5zclFFWnkwZks3am5hSDJoWmo2RThTX3pEaTJrb3pxSXJmbE04elJWYVNVdHBiQlVjRV9iX2NobTBoNWdYdDJ1QWtacWMyTHBDMHZkS3ZJc3RxRHBTQ1BPQXpsNHRB?oc=5",
+"d": "2026-09-25",
+"t": "Costco, 주당순이익과 매출에서 4분기 승리 달성",
+"o": "Costco Delivers Q4 Wins on Earnings Per Share and Revenue",
+"u": "https://news.google.com/rss/articles/CBMilgFBVV95cUxNdk9MeHhlZ2RULUVCYVlTMmlEeG1DZEFMZmZkdXhEcTl4MmhvdGxGN09valVhV05jZUlYVnhDWHJ3c2ZDZUo1QjlDcUJQRG9yMk54UERzdWxvazliWWlyMVpHNmhSUnhCVkxCekF3a3ZvMkJGeGJ1OHJhajVmTjJQYVdkLS12Q2lIVm5KY1J3NXJ6cVU5VWc?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-24",
-"t": "Costco: 회계연도 4분기 수익 스냅샷",
-"o": "Costco: Fiscal Q4 Earnings Snapshot",
-"u": "https://news.google.com/rss/articles/CBMizwFBVV95cUxNcEt5bmZZTDZYaXpqUUxsajI5Y3M0ZnF4WDUzSUxQcGVwdHR4Q0F0YlpMalRENFVxWC0zek83U05NNlBidzlvRm5ReFJ3TnBEdFFDZzdxSEVkWF9ZWDN0NXBJTWVIV1d4QkxOSkc0T3pHU3JkdDh3MjhadnNLeFVyZGJ2Z0NQTVZyS1ptXzVKT2RweGxmTmFyRGhPQ21MY25MOUw0Yno4S1czVjZrdHNRakFZd2ZzNVNiRjczVTlnMHlXRktQX0Q1TXdvSG9YSU0?oc=5",
+"d": "2026-09-25",
+"t": "Costco는 방금 강력한 수익을 보고했습니다. 골드만삭스, 주가 급등세 예상",
+"o": "Costco just reported strong earnings. Goldman Sachs sees a sharp move higher for the stock",
+"u": "https://news.google.com/rss/articles/CBMipAFBVV95cUxONy1jMjAyRXpOR3N4VlMzdjlzWkVhXzFkbHczaExNbEEzbHF1Q3lwSElUMzRwYV9GU0V2RzFZa1JpZlNtMVlmRGhuMU1mVGZWd2YtWFhzX2NnWnFCdEFKT0ZtbmdNdTdHQ2hwcTBxd1plSUI3N3RaX1U2MjJBd0F0a2xiNzRJNURtdW1aQmdCdnNoUEVKYmFRVlFqUEdVbWM5ZWtCZQ?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-24",
-"t": "Costco는 필수품에 대한 탄력적인 수요로 인해 분기별 매출 추정치를 상회했습니다.",
-"o": "Costco tops quarterly sales estimates on resilient demand for essentials",
-"u": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOMnpjM0tFaFdyVk1LQnVDTzk5SXJhclFZSnlKakxfLTdUTmZfam43VGtBeHl1M01iN1FDV0ZZNkdVb1hmMmJ1YU9CMXJjSzlyZ0VvYkZXZHJsTEh2QnlURFVKekdXMFFiazhZOGZBeFVreGJxR1pzYk9DNDBqQXNwNTVjZE95dw?oc=5",
+"d": "2026-09-25",
+"t": "Costco는 방금 강력한 수익을 보고했습니다. Goldman Sachs, 주가 급등세 예상 - CNBC TV18",
+"o": "Costco just reported strong earnings. Goldman Sachs sees a sharp move higher for the stock - CNBC TV18",
+"u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxONWhWR1MtM3BPeDAwWXF5SkV1b2JSYTVibldqaDlMV0ppYTRWRHQtV1dPLUlvWmdiN21RdHljVWMzbldPV09xV0htRkQ1bjJaSnhfN043TW1lQ0RFaURPOWdidjlUaXZTTTJmcUtGYWwxYWJTRzFCYUNrWF9MZmhXa2ZYM04zYV9CbnRJRkNNOEZFdlFsZnRieTg4eEt1akR0Y2hBMk0xLTJBaDhWR0F3OUZsTDBpOEF1VDUw?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-24",
-"t": "Costco 도매 회계 Q4 수익, 수익 증가",
-"o": "Costco Wholesale Fiscal Q4 Earnings, Revenue Rise",
-"u": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNck9oOVF5QkgwbFZxcmlDbkNEdnFndmE4MjBjWjktWmdzNTJCQnNXbmVHOXNyLTVEaUZwTmJXMS0xNUtMaGdpNjYzdzZBOHhwUE1Md0tyOHJJZldmakl4aEN2LTlZdkZXaDhvTk01SXFUR0hRdTRzSWptNTJSSTZQa0dvQndKOF9MWDI0QzBKbWJyNzF1bW5Fbm00SXdVS0hQenRN?oc=5",
+"d": "2026-09-25",
+"t": "Costco는 수익 추정치를 상회한 후 상승",
+"o": "Costco rises after beating earnings estimates",
+"u": "https://news.google.com/rss/articles/CBMikgFBVV95cUxQOVpidUxaQnhxYXZIWDg5ZWRUZHg4ZWxJZEp0cDZjT0F2eS1GUkRRNmcwRGx3WU5oU0lOY19WOTZueWJ4Z0RxQmNXazFxZGp6VzBqYTBnY1JxN2RyYVBGQzNuQkZYWk9iZzVfbi1UNG9UbG15R2VoU3JWUHp1MVBraDM5aDNOdzdQNFM2OThGam41UQ?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-24",
-"t": "Earnings Flash (COST) Costco Wholesale Corporation, Q4 매출 938억 7천만 달러, FactSet 추정치 949억 7천만 달러 보고",
-"o": "Earnings Flash (COST) Costco Wholesale Corporation Reports Q4 Revenue $93.87B, vs. FactSet Est of $94.97B",
-"u": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxPel9YYndwTVlJWU9jVWlsd3VLVmtpUFozQkRNcnV3a3JJUVpFWklXNXlnWUVEcjF0WHNheUJwd21SMHlmWjlWRDRocnZaejF5MHNYRVhGb0FDeGptbnZSeXNKTkk0NkROUW0yYUNwcVBnR3lvb0w5bGpabC1TVUU1YnpHUGJ4ZmJYQWV4ZU9yNjQyTHU0dS1zSzN6NzM0OURIYVFXNTI5d1k0Y29Vb0tHTm5DbTJDSXI0R0RoSGQtM2tZMkdtOWQ4cWNwdzFCaTExazl5RVRtaDVILVlYZ25LWg?oc=5",
+"d": "2026-09-25",
+"t": "Costco 주식: 4분기 수익이 예상치를 상회하고 매출이 957억 2천만 달러를 넘어섰습니다.",
+"o": "Costco stock: Q4 earnings beat estimates, revenue tops $95.72B",
+"u": "https://news.google.com/rss/articles/CBMiY0FVX3lxTFAtMXNwSXFtOTZaVjNleDdDQzcyTzRvMlI1bTlaRWF5TkV3Rmo2bHNtMm9LYzFfQmJ3UGZlamlCbHFhQTlGMjNzSl9wNkNTU3pYX3AwR3Q1cjV0bWRBbTdyTF9jOA?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-24",
-"t": "Costco 수익이 0.20달러 상회하고 수익이 예상치를 상회했습니다.",
-"o": "Costco earnings beat by $0.20, revenue topped estimates",
-"u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxOQzduZWxpVS1mejRJejNTN3RaejZKTGdwWm81TktSRnUtM3dDeF9KbXY4eTc0MnhWZXlmTVV4eHdseUNCeGRaNEZGdUI2dmlYdG1VNkJtY25nN0JCUWM3djVZVmprV2pvOE84S193ODFtZlZIVXR3RUE0eWFRVnlvRFZ5N3RTSFN2Mi1QcFVHbTBKZmFGY3JleUxjMDVXYTduNGc?oc=5",
+"d": "2026-09-25",
+"t": "Akamai Technologies가 인류를 위한 거래로 급증하는 모습을 지켜보세요. Costco 수입 비트 | 주식 발동기",
+"o": "Watch Akamai Technologies Soars on Anthropic Deal; Costco Earnings Beat | Stock Movers",
+"u": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQRF9XakpsSWtTdFBaUlA4bEgxeHZ6OC1ueXJVV0dDR0hyb1BLNC13Sy12RVc5VzhMYWhUbElrclpXZnYzRVFDV3RsUWVPR091ejBlcE05UjVMTzBhcllhMlFMZW4tdFo0QlBERnBQY1NkS2pFczVCS3pPaW5MOEZRZzM2bDVqcU05X1d1V0VsckZIOF9idHVZZ3I2aDNvdmNqelc4V0sxWmtJWUNHdUgw?oc=5",
 "m": "바이어 · Costco"
 },
 {
-"d": "2026-09-24",
-"t": "Costco 2026년 4분기: 매출 957억 달러, 컴포지션 매출 성장 9.4%",
-"o": "Costco Q4 2026: $95.7B revenue, 9.4% comp sales growth",
-"u": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNUkt6VjN1aEhPOEVoZEFXVTRIOEs3VjZXOGFjS0NzX1RrMzhzWkR1WkJ2S2FpVF9XWDFZSkFXZlItcDVGMU1IZVZpTm5ES3lSQWg2TTNTMFAzUEJiZ2x3QmJPb1BiTnBETlZsUGlZZmRRMS1mMDRTendzRGk5V29Sd3U1aVhuN0YwYnY4?oc=5",
+"d": "2026-09-25",
+"t": "Costco 주식 예측: 4분기 실적에 따라 COST의 다음 주요 움직임이 결정될 수 있습니다.",
+"o": "Costco Stock Forecast: Q4 Earnings Could Decide COST’s Next Major Move",
+"u": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxQLTBPZEd3clUyNlZkWW9wWnhuLS1EbVZNNjdwenNKM24tLUxIMy1KUUNlS2RkSjdjX2REV0NUYVZJZjZ1aXJwQTJUWHFuejZlU0ZRbzdnT0J1dzBlZHZmaTA4bFpWVGhZUEdfb05zRjZ5VnloV00wVTdsamV3bm55UlMwbHJNMHFrb0NwcU5yX3lVTWFsMnZ4bU9acEJhTUpveUV2ZWRXWUlwVlV0Wm5zYktfSlpmcFJ5?oc=5",
 "m": "바이어 · Costco"
 }
 ],
@@ -4663,6 +4663,13 @@
 ],
 "target": [
 {
+"d": "2026-09-25",
+"t": "Target 머천다이징 업데이트로 트래픽과 마진이 증가할 수 있다고 Jefferies는 말합니다.",
+"o": "Target merchandising refresh could drive traffic and margins, Jefferies says",
+"u": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxPNG80NldKd1pKME1GSUptRVlOdVNReG5rVHpmOGdqSUR6akJTZXJ4ZDh0dXJOYmNhMTV5ZXhCUy1ic2NPbTBYSXpBb1Z3NUMzYWZhalBYT3F6YmZTY3VfVEJWdmVYemxjanZJQWUwbV9wUmZZSTkweXBzZ0k1Qy1KT3RxOFM1YUJ3NlRwX05fUW4yX3FCRHRfVlR5SEVDdElIaDliQzZLaVVHZTJJVHdreVZfbEpVQWIxSzNyS3JiZDNCVlRYTzFySU5nRVpxcDduNTM5VkNQUkotTGVTWm8w?oc=5",
+"m": "바이어 · Target"
+},
+{
 "d": "2026-09-20",
 "t": "Target Corp 주식은 여름 판매 강세와 분석가 Target 인상으로 하락",
 "o": "Target Corp. stock edges lower after strong summer sales and analyst target hike",
@@ -4710,13 +4717,6 @@
 "o": "미미박스 누니, 美 타깃 1778개 매장 입점…오프라인 유통망 확대",
 "u": "http://www.ktnews.com/news/articleView.html?idxno=148298",
 "m": "한국섬유신문"
-},
-{
-"d": "2026-09-02",
-"t": "고객 돌아온 타겟, 매출 전망 또 높여",
-"o": "고객 돌아온 타겟, 매출 전망 또 높여",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81776",
-"m": "국제섬유신문"
 }
 ],
 "walmart": [
@@ -4822,16 +4822,16 @@
 },
 {
 "d": "2026-09-04",
-"t": "수익 증가에 대한 주식 스캔을 실시했고 빅토리아 시크릿(NYSE:VSXY)이 쉽게 통과되었습니다.",
-"o": "We Ran A Stock Scan For Earnings Growth And Victoria's Secret (NYSE:VSXY) Passed With Ease",
-"u": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQXzF0LUdnX2FkS3pvbThlMGhqeGU0djEzVnFablJwTmNIMEhZWEtDanFoTFJmWGpPSU9uTGVDRDRVbHQ2d3VZRUM0ajNkSDUxTmhOS3BSd29JdE5YVlVVanJYMnBSc0tjUTc2SUtFU2lUMlhPLVFPZ1pjdmExLThFUlNqZEdvZDJ3bUxkcERWZVk2RUFRdnBuVHpn?oc=5",
+"t": "빅토리아 시크릿(VSXY) 연간 가이던스 인상, 아직도 20% 저평가됐나?",
+"o": "Victoria's Secret (VSXY) Raised Full Year Guidance, Is It Still 20% Undervalued?",
+"u": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNYU5MTkM2MlFuNGxORmtSRHlzVFZaWWlxVnFRTW1GVGZhN08tTU54QjJFNDY4R1M1c1BfNmFwUVNFWmNVZEd4bWVfOTZabW0xcGhDanFVWXlWNTZQcnhjMU9uZ2FwLVpSY1o5X0NuZHhxb0hjekIzbm94NGVlaFI5eGxHYklRbGo1R2VrcS1iTDF2UlRjZkp3Z3NlTEVYSW8?oc=5",
 "m": "바이어 · Victoria's Secret"
 },
 {
 "d": "2026-09-04",
-"t": "Victoria's Secret & Co. 2026 Q2 - 결과 - 수익 보고 프레젠테이션(NYSE:VSXY) 2026-09-03",
-"o": "Victoria's Secret & Co. 2026 Q2 - Results - Earnings Call Presentation (NYSE:VSXY) 2026-09-03",
-"u": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxQTTlhSUtLMWc4MDNXcERoRDVpYjJyNm9WUE9YQTUzWWlaZ1lpNjhLcmdJS3hXRy1HQ2FvNXhWTFQ2WEdRbW9RX3RnUTNySzFrU1VxdkVvWTVsOEx6ZkU4bVJpY3NtX2xFVlpVZUxlUkl4REYxMkd1QmREdDZPSll4YWtMaTMxRk5nTlFObmNFUDdCWFJkX1dtd3BRLVZQZ0lYLUtLMUZCYVhzRUk?oc=5",
+"t": "수익 증가에 대한 주식 스캔을 실시했고 빅토리아 시크릿(NYSE:VSXY)이 쉽게 통과되었습니다.",
+"o": "We Ran A Stock Scan For Earnings Growth And Victoria's Secret (NYSE:VSXY) Passed With Ease",
+"u": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQXzF0LUdnX2FkS3pvbThlMGhqeGU0djEzVnFablJwTmNIMEhZWEtDanFoTFJmWGpPSU9uTGVDRDRVbHQ2d3VZRUM0ajNkSDUxTmhOS3BSd29JdE5YVlVVanJYMnBSc0tjUTc2SUtFU2lUMlhPLVFPZ1pjdmExLThFUlNqZEdvZDJ3bUxkcERWZVk2RUFRdnBuVHpn?oc=5",
 "m": "바이어 · Victoria's Secret"
 }
 ],
