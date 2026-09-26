@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-09-25T23:41:30+00:00",
+"generated_at": "2026-09-26T23:13:55+00:00",
 "window_days": 120,
-"total": 1177,
-"translated": 1177,
-"filtered_out": 2062,
+"total": 1187,
+"translated": 1187,
+"filtered_out": 2088,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 19,
-"scanned": 632,
-"kept": 246,
-"material": 183
+"scanned": 562,
+"kept": 219,
+"material": 171
 },
 "30": {
 "sources": 23,
-"scanned": 2703,
-"kept": 1026,
-"material": 754
+"scanned": 2685,
+"kept": 1020,
+"material": 747
 }
 }
 },
@@ -25,19 +25,19 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 386
+"n": 390
 },
 {
 "key": "RETAIL",
-"n": 278
+"n": 279
 },
 {
 "key": "FABRIC",
-"n": 226
+"n": 228
 },
 {
 "key": "ETC",
-"n": 155
+"n": 158
 },
 {
 "key": "CHEMICAL",
@@ -55,7 +55,7 @@
 },
 {
 "key": "Fibre2Fashion",
-"n": 202
+"n": 206
 },
 {
 "key": "국제섬유신문",
@@ -63,7 +63,7 @@
 },
 {
 "key": "Textile Focus",
-"n": 76
+"n": 81
 },
 {
 "key": "Ecotextile News",
@@ -71,7 +71,7 @@
 },
 {
 "key": "Textile Today",
-"n": 65
+"n": 66
 },
 {
 "key": "주제검색 · 국내소재",
@@ -141,7 +141,7 @@
 "tags": [
 {
 "key": "방글라데시",
-"n": 76
+"n": 77
 },
 {
 "key": "리사이클",
@@ -149,7 +149,7 @@
 },
 {
 "key": "전시회",
-"n": 50
+"n": 51
 },
 {
 "key": "데님",
@@ -160,16 +160,16 @@
 "n": 22
 },
 {
-"key": "탄소",
-"n": 19
+"key": "바이오소재",
+"n": 20
 },
 {
-"key": "바이오소재",
-"n": 19
+"key": "탄소",
+"n": 20
 },
 {
 "key": "울",
-"n": 17
+"n": 18
 },
 {
 "key": "스판덱스",
@@ -339,17 +339,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-08-27",
-"total": 16,
-"by": {
-"FABRIC": 6,
-"ETC": 2,
-"MATERIAL": 6,
-"CHEMICAL": 1,
-"RETAIL": 1
-}
-},
 {
 "date": "2026-08-28",
 "total": 25,
@@ -656,11 +645,11 @@
 },
 {
 "date": "2026-09-24",
-"total": 27,
+"total": 28,
 "by": {
 "MATERIAL": 14,
 "YARN": 2,
-"FABRIC": 5,
+"FABRIC": 6,
 "RETAIL": 1,
 "CHEMICAL": 1,
 "ETC": 4
@@ -668,13 +657,23 @@
 },
 {
 "date": "2026-09-25",
-"total": 15,
+"total": 18,
 "by": {
-"MATERIAL": 8,
+"MATERIAL": 11,
 "FABRIC": 2,
 "RETAIL": 3,
 "ETC": 1,
 "CHEMICAL": 1
+}
+},
+{
+"date": "2026-09-26",
+"total": 6,
+"by": {
+"ETC": 3,
+"MATERIAL": 1,
+"FABRIC": 1,
+"RETAIL": 1
 }
 }
 ],
@@ -682,9 +681,9 @@
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 74,
-"prior": 1,
-"delta": 73,
+"recent": 73,
+"prior": 3,
+"delta": 70,
 "weeks": [
 0,
 0,
@@ -697,15 +696,15 @@
 14,
 23,
 20,
-11
+12
 ]
 },
 {
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 59,
-"prior": 12,
-"delta": 47,
+"recent": 58,
+"prior": 13,
+"delta": 45,
 "weeks": [
 0,
 2,
@@ -745,9 +744,9 @@
 {
 "tag": "전시회",
 "label_en": "performance days",
-"recent": 37,
-"prior": 12,
-"delta": 25,
+"recent": 36,
+"prior": 14,
+"delta": 22,
 "weeks": [
 0,
 0,
@@ -760,15 +759,15 @@
 6,
 20,
 3,
-6
+7
 ]
 },
 {
 "tag": "탄소",
 "label_en": "carbon footprint",
-"recent": 17,
+"recent": 18,
 "prior": 2,
-"delta": 15,
+"delta": 16,
 "weeks": [
 0,
 0,
@@ -781,15 +780,15 @@
 4,
 4,
 0,
-9
+10
 ]
 },
 {
 "tag": "울",
 "label_en": "wool",
-"recent": 16,
+"recent": 17,
 "prior": 1,
-"delta": 15,
+"delta": 16,
 "weeks": [
 0,
 0,
@@ -802,7 +801,7 @@
 3,
 7,
 4,
-2
+3
 ]
 },
 {
@@ -848,6 +847,27 @@
 ]
 },
 {
+"tag": "BCI코튼",
+"label_en": "better cotton",
+"recent": 1,
+"prior": 3,
+"delta": -2,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+3,
+0,
+0,
+0,
+1
+]
+},
+{
 "tag": "난연",
 "label_en": "flame retardant",
 "recent": 2,
@@ -887,27 +907,6 @@
 1,
 0,
 0
-]
-},
-{
-"tag": "BCI코튼",
-"label_en": "better cotton",
-"recent": 2,
-"prior": 2,
-"delta": 0,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-3,
-0,
-0,
-0,
-1
 ]
 },
 {
@@ -1056,6 +1055,161 @@
 ],
 "articles": [
 {
+"id": "ecf6254f6c624dc4",
+"d": "2026-09-26",
+"t": "2026년 신입생 리셉션 및 송별식 DUET 섬유공학과에서 개최",
+"o": "Freshers’ Reception and Farewell Ceremony 2026 Held at DUET Textile Engineering Department",
+"u": "https://textilefocus.com/freshers-reception-and-farewell-ceremony-2026-held-at-duet-textile-engineering-department/",
+"s": "The Freshers’ Reception and Farewell Ceremony 2026 of the Department of Textile Engineering, Dhaka University of Engineering & Technology (DUET), Gazipur, was held under the theme “Nabaruner Notun Aloy Shongshopto Kher Otut Pran, Abhyudoyer Utthane Aniruddher Obhijan”. The day-long programme was ina",
+"c": "ETC",
+"x": "The Freshers’ Reception and Farewell Ceremony 2026 of the Department of Textile Engineering, Dhaka University of Engineering & Technology (DUET), Gazipur, was held under the theme “Nabaruner Notun Aloy Shongshopto Kher Otut Pran, Abhyudoyer Utthane Aniruddher Obhijan”. The day-long programme was inaugurated on Thursday, September 24, 2026, in the morning by the Vice-Chancellor of DUET, Professor Dr. Engineer Mohammad Iqbal, through the release of pigeons, cake cutting, a colourful rally, and tree plantation activities. Later in the afternoon, the Freshers’ Reception for newly admitted students and the Farewell Ceremony for graduating students of the Department of Textile Engineering were held at the Shaheed Shakil Parvez Auditorium of the university. The Vice-Chancellor, Professor Dr. Engineer Mohammad Iqbal, attended the programme as the Chief Guest. In his guidance-oriented speech, the Vice-Chancellor congratulated and extended his best wishes to the graduating students. He said that after completing four years of academic education and laboratory-based training, the students were now prepared to enter the Ready-Made Garments and Textile sector, one of the most important sectors of Bangladesh’s economic development. He highlighted the growing demand for skilled textile engineers throughout the entire value chain of the industry, from spinning, weaving, knitting and wet processing to garment manufacturing. He also emphasized the importance of sustainable and environmentally friendly production, recyclable fibres, smart textiles, automation and artificial intelligence-based quality control in the rapidly changing global textile industry. The Vice-Chancellor also highlighted various initiatives for further development of DUET’s departments, improvement of the university’",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/WhatsApp-Image-2026-09-26-at-3.05.42-PM-1.jpeg",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "dd1ecbd1d1df3dbd",
+"d": "2026-09-26",
+"t": "섬유 ETP는 2050년까지 EU에서 50%의 바이오 기반 원형 섬유를 목표로 하고 있습니다.",
+"o": "Textile ETP targets 50% biobased, circular fibers in the EU by 2050",
+"u": "https://textiletoday.com.bd/textile-etp-targets-50-biobased-circular-fibers-in-the-eu-by-2050",
+"s": "Key insights Biobased and circular materials should reach at least half of EU fiber consumption by 2050. Textile ETP wants the supporting value chain anchored in Europe. Asia concentration: More than...",
+"c": "MATERIAL",
+"x": "Key insights Biobased and circular materials should reach at least half of EU fiber consumption by 2050. Textile ETP wants the supporting value chain anchored in Europe. Asia concentration: More than 90% of global polyester capacity is in Asia. The strategy models seven end markets and 11 fiber types through 2050. The transition could mobilize tens of billions of euros annually and create tens of thousands of direct jobs. Figure: Textile ETP’s model covers EU-27 fiber consumption from 2000 to 2050 across seven end markets and 11 fiber types. Textile ETP is targeting a major shift in Europe’s fiber mix, calling for biobased and circular materials to account for at least 50% of EU fiber consumption by 2050. It also wants to anchor the value chains producing these materials in Europe. The target is part of Textile ETP’s Bioeconomy Innovation Strategy, launched on September 22. The strategy links the shift away from fossil-based fibers with supply-chain resilience, industrial competitiveness and new manufacturing capacity. The strategy says more than 90% of global polyester capacity is located in Asia. Textile ETP says this concentration leaves Europe dependent on non-European suppliers for strategic textile materials. The roadmap focuses on five areas: biobased feedstocks and biorefineries, sustainable man-made cellulosic fibers, biosynthetic and novel biopolymers, sustainably sourced natural fibres, and biobased processing. Textile ETP’s model covers EU-27 fiber consumption from 2000 to 2050 across seven end markets and 11 fiber types. It compares business-as-usual, circular biobased and aggressive bioeconomy pathways. The group calls for a pathway between the latter two, with renewable materials becoming the majority of Europe’s fiber consumption by 2050. The strategy es",
+"i": "/storage/uploads/2026/9/textileetptargets_17903972143358.jpg",
+"g": [
+"바이오소재"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "a66bc6e6a3011f63",
+"d": "2026-09-26",
+"t": "Fakir Fashion, 탄소 배출 제어 분야 ESG Excellence Awards 2026에서 수상",
+"o": "Fakir Fashion Honored at ESG Excellence Awards 2026 for Carbon Emission Control",
+"u": "https://textilefocus.com/fakir-fashion-honored-at-esg-excellence-awards-2026-for-carbon-emission-control/",
+"s": "Fakir Fashion Ltd. has turned its decarbonisation ambition into tangible industrial investments, earning recognition at the ESG Excellence Awards 2026 for its efforts in Carbon Emission Control. Fakir Fashion Ltd. received the ‘’Jury’s Choice Award’’ among the leading initiatives in the Carbon Emiss",
+"c": "ETC",
+"x": "Fakir Fashion Ltd. has turned its decarbonisation ambition into tangible industrial investments, earning recognition at the ESG Excellence Awards 2026 for its efforts in Carbon Emission Control. Fakir Fashion Ltd. received the ‘’Jury’s Choice Award’’ among the leading initiatives in the Carbon Emission Control Category at the ESG Excellence Awards 2026, held on 5 September 2026 at La Vita Hall, Lakeshore Grand. The award recognizes the company’s continued efforts and investments towards reducing carbon emissions and advancing sustainable manufacturing. Organized by UNGC Bangladesh and ESG Institute, the awards ceremony brought together representatives from industry, development organizations and other stakeholders working towards sustainable development in Bangladesh. The event was honored by the presence of Honorable Minister for Environment, Forest and Climate Change, Mr. Abdul Awal Mintoo, along with distinguished Ambassadors of the European Union, Denmark, Sweden, and Australia. For Fakir Fashion, the recognition reflects a sustainability journey that extends beyond commitments and targets. The company has been steadily investing in technologies and infrastructure designed to reduce emissions, improve energy efficiency and accelerate its transition towards lower-carbon manufacturing. The recognition also reflects the continued commitment of Fakir Fashion’s leadership. The company attributes its sustainability progress to the visionary leadership of Managing Director, Mr. Fakir Kamruzzaman Nahid and Deputy Managing Director, Mr. Fakir Wahiduzzaman Riyead, whose consistent focus on green initiatives has positioned environmental responsibility at the center of Fakir Fashion’s growth strategy. Among the key investments contributing to this journey are 4.5 MW of solar po",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/WhatsApp-Image-2026-09-26-at-3.19.50-PM.jpeg",
+"g": [
+"탄소"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "2b5732253da2b957",
+"d": "2026-09-26",
+"t": "Bangladesh RMG의 보안, 지속 가능성 및 성장 강화",
+"o": "Powering Security, Sustainability & Growth in Bangladesh RMG",
+"u": "https://textilefocus.com/powering-security-sustainability-growth-in-bangladesh-rmg/",
+"s": "Ethical Trading Initiative Bangladesh organized a Rapid Energy Transition Conference in Dhaka focusing on “Powering Security, Sustainability & Growth in Bangladesh RMG”, at the Bangladesh Military Museum in Dhaka. The event brought together Business Associations, Manufacturers, Brands and Sectoral e",
+"c": "ETC",
+"x": "Ethical Trading Initiative Bangladesh organized a Rapid Energy Transition Conference in Dhaka focusing on “Powering Security, Sustainability & Growth in Bangladesh RMG”, at the Bangladesh Military Museum in Dhaka. The event brought together Business Associations, Manufacturers, Brands and Sectoral experts to discuss how Bangladesh’s RMG sector can accelerate the transition towards renewable energy and industrial decarbonization. Nishat Hamid , Chairman, Standing Committee on Energy Optimization, BGMEA and Director, Shasha Garments & EOS Textile Mills, stressed that the next few years will be decisive for Bangladesh’s competitiveness following LDC graduation stating: “RE is no longer just an environmental agenda, buyer requirement or a CSR strategy, it is fundamental to our core cost and market competitiveness for global survival.” She highlighted the need for predictable tariffs, access to technically viable renewable energy solutions and green finance, effective regulatory frameworks, and bankable Power Purchase Agreements (PPAs) as critical pillars for enabling factories to make the transition. Kazy Mohammad Iqbal Hossain, South Asia Regional Sustainability Manager, Lindex HK Ltd, also spoke at the event. The session was further enriched by keynotes from Priyong Sabastini from ETI Bangladesh and Chief Executive, Hasan Mehedi from CLEAN BD, alongside a solidarity address by Development Anthropologist, Dr. UKM Shawkat Ara Begum, who all highlighted the profound social and economic dividends of moving toward a low-carbon sector. The post Powering Security, Sustainability & Growth in Bangladesh RMG appeared first on Textile Focus .",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/Rapid-Energy-Transition-Conference.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "1199fa030a912b79",
+"d": "2026-09-26",
+"t": "Intertextile Apparel은 강력한 글로벌 참여와 미래 지향적 소싱 모멘텀으로 마무리",
+"o": "Intertextile Apparel concludes with strong global engagement and future-focused sourcing momentum",
+"u": "https://textilefocus.com/intertextile-apparel-concludes-with-strong-global-engagement-and-future-focused-sourcing-momentum/",
+"s": "Textile innovation in the form of widely applicable, scalable solutions was on show as Intertextile Shanghai Apparel Fabrics – Autumn Edition 2026 concluded on 27 August. The show brought together over 3,500 exhibitors from 30 countries and regions across 240,000 sqm at the National Exhibition and C",
+"c": "FABRIC",
+"x": "Textile innovation in the form of widely applicable, scalable solutions was on show as Intertextile Shanghai Apparel Fabrics – Autumn Edition 2026 concluded on 27 August. The show brought together over 3,500 exhibitors from 30 countries and regions across 240,000 sqm at the National Exhibition and Convention Center (Shanghai), and welcomed over 100,000 visitors. Across three days, the fair served as a dynamic platform for sourcing, product discovery, and industry exchange, reflecting demand for materials and solutions that balance creativity, functionality, responsibility, and efficiency. “The response from fairgoers this autumn reflected strong demand for practical solutions and meaningful industry exchange,” said Ms Wilmet Shea, General Manager of Messe Frankfurt (HK) Ltd . “Across design, performance, sustainability and digitalisation, the fair helped visitors navigate a complex market, connect with relevant partners, and procure the ideas and technologies needed for their next stage of development.” This edition, the fair catered to diverse sourcing needs through its four key themes: Fashion Forward , Performance Textiles , Sustainability , and Textile Future (Source: Messe Frankfurt). The fair’s four key pillars – Fashion Forward, Performance Textiles, Sustainability, and Textile Future – helped organise a wide spectrum of exhibitor showcases, better shaping buyer discussions. Together, they reflected how today’s textile sourcing decisions increasingly take into account blends of creativity, technical performance, environmental responsibility, and digital capability. This edition made clear that these pillars do not act in isolation but often combine to great effect across various product categories. Under Fashion Forward, exhibitors presented seasonal collections,",
+"i": "https://textilefocus.com/wp-content/uploads/2026/09/unnamed-1-1.png",
+"g": [
+"전시회"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 13,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "060cdd1c597da5d7",
+"d": "2026-09-26",
+"t": "RAI-Innoviti SANKET: 8월 소매 지출이 9.6%를 기록하며 2분기 회복이 광범위하다는 것을 확인",
+"o": "RAI-Innoviti SANKET: Retail Spends Hit 9.6% in August, Confirming Q2 Recovery Is Broad-Based",
+"u": "https://textilefocus.com/rai-innoviti-sanket-retail-spends-hit-9-6-in-august-confirming-q2-recovery-is-broad-based/",
+"s": "Same-store retail spends across India climbed 9.6% year-on-year in August, up from 7.1% in July. That is the finding of the second edition of SANKET (Spends & Key Emerging Trends), the quarterly like-for-like tracker published jointly by the Retailers Association of India (RAI) and Innoviti. The rep",
+"c": "RETAIL",
+"x": "Same-store retail spends across India climbed 9.6% year-on-year in August, up from 7.1% in July. That is the finding of the second edition of SANKET (Spends & Key Emerging Trends), the quarterly like-for-like tracker published jointly by the Retailers Association of India (RAI) and Innoviti. The report draws on more than 70 million transactions at over 100,000 checkout points, across 2,800-plus towns and 10,000-plus PIN codes. It is the strongest monthly reading since April, and it settles a question that had hung over Q1: whether the slowdown earlier this year reflected weakening demand or simply a run of bad timing. The August numbers say the latter. The strength is not confined to one category or one region. Grocery & General Retail led the field at 9.9%, up from 7.5% in July. Fashion & Lifestyle turned around sharply, from 4.5% to 8.5%, the biggest swing of any category this quarter. Jewellery & Accessories climbed to 8.4%, its best reading since April’s Akshaya Tritiya spike. Consumer Electronics was the outlier, holding flat at 5.0% — a category still working through the drag of a weak rupee on import costs, even as festive demand starts to build. Geographically, the West (10.7%) and South (9.7%) kept their lead, but the North posted the sharpest single-month rebound of any zone, up 3.0 percentage points from July. “ These numbers tell us business is promising right now, and the recovery is genuinely encouraging — it’s broad enough to trust, not a one-category story ,” said Kumar Rajagopalan, CEO, Retailers Association of India . “ August is really a precursor to the festive season, and if this pace holds, retailers have good reason to plan with confidence heading into it. At the same time, we’re keeping an eye on the global turmoil. India’s consumption story stan",
+"i": "https://textilefocus.com/wp-content/uploads/2026/08/rai.png",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 9,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "eb63aa4926c8a386",
+"d": "2026-09-25",
+"t": "malaysia-urges의 최신 산업 뉴스를 모두 읽어보세요.",
+"o": "Read all Latest Industrial News in malaysia-urges",
+"u": "https://news.google.com/rss/articles/CBMicEFVX3lxTE04eEtwY2UtdHg4SFVSbUN5d2QzWUMtX0dhQ1VCZlh2VmJGb0ltVVFFQVpqSmN3clVSRXN2dXVxTUFkNXRueUNNQXJwX3JLN19JbXNCYkRUUi0tVGRFLUdXeTRnVmx4WGllamMzb3BSMEU?oc=5",
+"s": "Read all Latest Industrial News in malaysia-urges fibre2fashion.com",
+"c": "MATERIAL",
+"x": "Read all Latest Industrial News in malaysia-urges fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "bdd870537357766e",
 "d": "2026-09-25",
 "t": "인도의 5F 비전: 면화와 직물의 새로운 시대를 열다",
@@ -1071,6 +1225,29 @@
 "m": "Fibre2Fashion",
 "r": "해외",
 "v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "b6ac1829f15946e7",
+"d": "2026-09-25",
+"t": "호주 양모 시장은 소면 수요 증가에도 불구하고 이번 주 약세",
+"o": "Australian wool market weakens this week despite firmer carding demand",
+"u": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxNVm5fcmlwblpNWEZ0RmZGUnk2V2NNTmxlUnk3YWVHRzBQU0JUN0F2ZDhrZVpfVE9yV0hONXRKTkVGMzdEYktzMXJ0Sm1WZ0p2WHZYajQ1OG4tbUdtdGowNUxZblhtWGYyN1JIZXhZTDhHT2JUZmxNLVI2emZOcngzUnBFTk9NbTRuRFVMVk5QbDhWenJDZGtUeHJfUWx4VG9sNVQ2dVZUQm9ndTRqWmI5bzE2ekxiQnBTTV85TEtvYkltZVowaTRNSGxHUF80TDFMT3NqeEtJQ3dReVUycnJoUg?oc=5",
+"s": "Australian wool market weakens this week despite firmer carding demand fibre2fashion.com",
+"c": "MATERIAL",
+"x": "Australian wool market weakens this week despite firmer carding demand fibre2fashion.com",
+"i": "",
+"g": [
+"울"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
 "h": 1,
 "w": "material",
 "e": [],
@@ -1110,6 +1287,27 @@
 "s": "US cotton sales surge as Mexico leads Upland buying: USDA Fibre2Fashion",
 "c": "MATERIAL",
 "x": "US cotton sales surge as Mexico leads Upland buying: USDA Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "7874b6eef2980a5c",
+"d": "2026-09-25",
+"t": "섬유 조달에 실시간 인텔리전스가 필요한 이유",
+"o": "Why Textile Procurement Needs Real-Time Intelligence",
+"u": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxNYlRDNk9lZVJlVEM0S0FKUHE5eUR2NkE4bm9sY2YtNG5kak95MUxzWllLZWJtcm5VRDZhOUJWcmI1RlpSTG9RVGdIUl9Md2JoeEduLWZyNzkyX2E0RlJNSmNSVVBHcVF3eGdZTkllNTZJbG5ieTlyRG9lSnlKRUNCUW1yQTQyb2xXZE9henRWTWlySHlYRjctS2hBNnR2QVhoY2NWcWhydHA2cExBczFpVXdCRE9uRmhiMlhLOVM1dDJjSjU3WXNQYkUtTDdGR19RcjhDMi1vUnRYc3o4dWttMWtXQQ?oc=5",
+"s": "Why Textile Procurement Needs Real-Time Intelligence fibre2fashion.com",
+"c": "MATERIAL",
+"x": "Why Textile Procurement Needs Real-Time Intelligence fibre2fashion.com",
 "i": "",
 "g": [],
 "m": "Fibre2Fashion",
@@ -1938,6 +2136,28 @@
 "e": [],
 "ms": [
 "Ecotextile News"
+]
+},
+{
+"id": "03774078c7b2ae22",
+"d": "2026-09-24",
+"t": "기능성 직물 박람회 2026, 섬유 전문가들을 포틀랜드로 초대",
+"o": "Functional Fabric Fair 2026 brings textile experts to Portland",
+"u": "https://news.google.com/rss/articles/CBMi8wFBVV95cUxPaDFUbDlyY1VONExmSzFnLUc0TnNZZXRKM3VkTG5LOGNiOG96amtJSXg2RVBlalVhdjEyNDIyc0s4MVE1NEVCTllZYk9Yb0VnZlpnSGRSS2JSVm9WZkM2SnpJQzZSdk41R3FqVXJ5SHVIajRjN0ZoZDBCcjZVaU9tb3lIdFpkdlljaHotRmNEOHVPdFVsUHZIckl1VkF3bW02OUJmVXRjQUlzMmdISVBzam9QT3U1TGd5MzdlQVR0cXNiZ2NFcGxlRFZYYVdmRk9NamtPSUxzZ3RfRUloTXozc25hODRyOVRWeXBxYWp5NVdXcVU?oc=5",
+"s": "Functional Fabric Fair 2026 brings textile experts to Portland fibre2fashion.com",
+"c": "FABRIC",
+"x": "Functional Fabric Fair 2026 brings textile experts to Portland fibre2fashion.com",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -5442,12 +5662,13 @@
 "m": "Textile World",
 "r": "해외",
 "v": 17,
-"h": 2,
+"h": 3,
 "w": "material",
 "e": [],
 "ms": [
 "Textile World",
-"주제검색 · 신소재"
+"주제검색 · 신소재",
+"Textile Focus"
 ]
 },
 {
