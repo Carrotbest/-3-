@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { FileSpreadsheet, ImagePlus, Plus, Trash2, Upload } from "lucide-react"
+import { Check, FileSpreadsheet, ImagePlus, Plus, Trash2, Upload } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -124,6 +124,7 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
   const [removePhoto, setRemovePhoto] = useState(false)
   const [savedThisTime, setSavedThisTime] = useState<AnalysisRequest[]>([])
   const [rows, setRows] = useState<BatchRow[]>([])
+  const [common, setCommon] = useState({ department: DEFAULT_DEPARTMENT, requester, customer: DEFAULT_CUSTOMER, objective: "" })
   const [invalid, setInvalid] = useState<Set<string>>(() => new Set())
   const [focusedRowId, setFocusedRowId] = useState("")
   const [fillDownDescription, setFillDownDescription] = useState(false)
@@ -132,16 +133,26 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
   const [batchError, setBatchError] = useState("")
   const [saving, setSaving] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [savedNotice, setSavedNotice] = useState<"visible" | "fading" | null>(null)
+  const [savedMessage, setSavedMessage] = useState("")
   const imageInput = useRef<HTMLInputElement>(null)
   const excelInput = useRef<HTMLInputElement>(null)
+  const savedFadeTimer = useRef<number | null>(null)
+  const savedCloseTimer = useRef<number | null>(null)
+
+  useEffect(() => () => {
+    if (savedFadeTimer.current !== null) window.clearTimeout(savedFadeTimer.current)
+    if (savedCloseTimer.current !== null) window.clearTimeout(savedCloseTimer.current)
+  }, [])
 
   useEffect(() => {
     if (!open) return
     const current = useAppStore.getState().analysisRequests
     setForm(record ? { ...record } : blankAnalysisRequest({ requester, requesterEmail, list: current }))
     setRows(record ? [] : [makeBatchRow(requester, requesterEmail, current)])
+    setCommon({ department: DEFAULT_DEPARTMENT, requester, customer: DEFAULT_CUSTOMER, objective: "" })
     setFile(null); setRemovePhoto(false); setSavedThisTime([]); setInvalid(new Set()); setFocusedRowId(""); setFillDownDescription(false)
-    setImportWarnings([]); setNotice(""); setBatchError("")
+    setImportWarnings([]); setNotice(""); setBatchError(""); setSavedNotice(null); setSavedMessage("")
   }, [open, record, requester, requesterEmail])
 
   useEffect(() => {
@@ -246,6 +257,14 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
     clearInvalid(rowKey, key as BatchField)
   }
 
+  const setCommonField = (field: "department" | "requester" | "customer" | "objective", value: string) => {
+    const previous = common[field]
+    setCommon((current) => ({ ...current, [field]: value }))
+    setRows((current) => current.map((row) => row.form[field] === previous
+      ? { ...row, form: { ...row.form, [field]: value } }
+      : row))
+  }
+
   const applyQuickItem = (item: string) => {
     const targetIndex = rows.findIndex((row) => row.key === focusedRowId)
     if (targetIndex < 0) return
@@ -271,7 +290,11 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
     setRows((current) => current.map((row) => row.key === rowKey ? { ...row, image: next } : row))
   }
 
-  const appendRow = () => setRows((current) => [...current, makeBatchRow(requester, requesterEmail, analysisRequests)])
+  const appendRow = () => setRows((current) => {
+    const next = makeBatchRow(requester, requesterEmail, analysisRequests)
+    next.form = { ...next.form, ...common }
+    return [...current, next]
+  })
   const removeRow = (rowKey: string) => {
     setRows((current) => current.length === 1 ? [makeBatchRow(requester, requesterEmail, analysisRequests)] : current.filter((row) => row.key !== rowKey))
     setInvalid((current) => new Set([...current].filter((key) => !key.startsWith(`${rowKey}:`))))
@@ -282,9 +305,10 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
     const next = makeBatchRow(requester, requesterEmail, analysisRequests)
     next.form = {
       ...next.form,
-      department: row.department || DEFAULT_DEPARTMENT,
-      customer: row.customer || DEFAULT_CUSTOMER,
-      objective: row.objective || "Reference",
+      department: row.department || common.department,
+      requester: common.requester,
+      customer: row.customer || common.customer,
+      objective: row.objective || common.objective,
       source: row.source,
       sourceCode: row.sourceCode,
       season: row.season,
@@ -319,7 +343,9 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
     try {
       const parsed = await parseAnalysisWorkbook(selectedFile)
       setImportWarnings(parsed.warnings)
-      if (parsed.rows.length) setRows((current) => [...current, ...parsed.rows.map(importedBatchRow)])
+      if (parsed.rows.length) setRows((current) => {
+        return [...current, ...parsed.rows.map(importedBatchRow)]
+      })
       else setNotice(parsed.warnings[0] ?? "가져올 행이 없습니다.")
     } catch (importError) {
       setNotice(`엑셀을 읽지 못했습니다. ${importError instanceof Error ? importError.message : ""}`)
@@ -370,7 +396,14 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
       uploaded.forEach((item) => onSaved?.(item))
       setRows([makeBatchRow(requester, requesterEmail, useAppStore.getState().analysisRequests)])
       setInvalid(new Set()); setFocusedRowId(""); setImportWarnings([])
-      setNotice(failures.length ? `${uploaded.length}건을 저장했습니다. 사진 실패: ${failures.join(", ")}` : `${uploaded.length}건을 저장했습니다.`)
+      setSavedMessage(failures.length ? `${uploaded.length}건을 저장했습니다. 사진 실패 ${failures.length}건` : `${uploaded.length}건을 저장했습니다.`)
+      setSavedNotice("visible")
+      savedFadeTimer.current = window.setTimeout(() => { setSavedNotice("fading"); savedFadeTimer.current = null }, 900)
+      savedCloseTimer.current = window.setTimeout(() => {
+        savedCloseTimer.current = null
+        if (failures.length) setSavedNotice(null)
+        else onOpenChange(false)
+      }, 1200)
     } finally {
       setSaving(false)
     }
@@ -413,42 +446,49 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
       <label className="ml-2 flex items-center gap-1.5 whitespace-nowrap text-xs text-[var(--muted-foreground)]"><Checkbox checked={fillDownDescription} onCheckedChange={(value) => setFillDownDescription(value === true)} />아래 줄에도 함께 채우기</label>
       {!focusedRowId ? <span className="ml-1 text-xs text-[var(--muted-foreground)]">Request item 칸을 먼저 선택하세요.</span> : null}
     </div>
+    <div className="flex shrink-0 flex-wrap items-end gap-2 rounded-[var(--radius)] border border-[var(--border)]/60 bg-[var(--muted)]/20 p-2">
+      <div className="w-[180px] space-y-1"><Label className="text-[11px]">Department</Label><Input value={common.department} onChange={(event) => setCommonField("department", event.target.value)} className="h-8 text-xs" /></div>
+      <div className="w-[160px] space-y-1"><Label className="text-[11px]">Requester</Label><Input value={common.requester} onChange={(event) => setCommonField("requester", event.target.value)} className="h-8 text-xs" /></div>
+      <div className="w-[180px] space-y-1"><Label className="text-[11px]">Customer</Label><Input value={common.customer} onChange={(event) => setCommonField("customer", event.target.value)} className="h-8 text-xs" /></div>
+      <div className="w-[180px] space-y-1"><Label className="text-[11px]">Objective</Label><select value={common.objective} onChange={(event) => setCommonField("objective", event.target.value)} className="h-8 w-full rounded-sm border border-[var(--input)] bg-transparent px-2 text-xs outline-none"><option value="">선택 안 함</option>{ANALYSIS_OBJECTIVES.map((item) => <option key={item} value={item}>{item}</option>)}</select></div>
+    </div>
     {batchError ? <p role="alert" className="shrink-0 text-sm text-[var(--destructive)]">{batchError}</p> : null}
     <div className="min-h-0 flex-1 overflow-auto rounded-[var(--radius)] border border-[var(--border)]">
       <table className="w-max min-w-full table-fixed border-collapse text-xs">
         <colgroup>
-          <col className="w-9" /><col className="w-14" /><col className="w-[105px]" /><col className="w-[95px]" />
-          <col className="w-[80px]" /><col className="w-[130px]" /><col className="w-[90px]" /><col className="w-[95px]" />
-          <col className="w-[105px]" /><col className="w-[100px]" /><col className="w-[110px]" /><col className="w-[145px]" />
-          <col className="w-[165px]" /><col className="w-[60px]" /><col className="w-[105px]" /><col className="w-[185px]" />
-          <col className="w-[70px]" /><col className="w-[60px]" /><col className="w-16" />
+          <col className="w-8" /><col className="w-11" /><col className="w-[100px]" /><col className="w-[110px]" />
+          <col className="w-[130px]" /><col className="w-[100px]" /><col className="w-[100px]" /><col className="w-[95px]" />
+          <col className="w-[140px]" /><col className="w-[150px]" /><col className="w-16" /><col className="w-[100px]" />
+          <col className="w-[300px]" /><col className="w-14" /><col className="w-[150px]" /><col className="w-10" />
         </colgroup>
         <thead className="sticky top-0 z-10 bg-[var(--muted)] text-[var(--muted-foreground)]">
-          <tr>{["#", "사진", "AN No.", "Department", "Requester", "Customer", "Objective", "Source *", "Source code", "Season/Year", "Brand", "Construction", "Contents", "Weight", "Gender/Age", "Request item *", "Comment", "Urgent", ""].map((label, index) => <th key={`${label}-${index}`} className="h-9 whitespace-nowrap border-b border-r border-[var(--border)] px-1 text-center font-medium last:sticky last:right-0 last:z-10 last:border-l last:border-r-0 last:bg-[var(--muted)]">{requiredLabel(label)}</th>)}</tr>
+          <tr>{["#", "사진", "AN No.", "Source *", "Source code", "Brand", "Season/Year", "Gender/Age", "Construction", "Contents", "Weight", "Objective", "Request item *", "Urgent", "Comment", ""].map((label, index) => <th key={`${label}-${index}`} className="h-9 whitespace-nowrap border-b border-r border-[var(--border)] px-1 text-center font-medium last:sticky last:right-0 last:z-10 last:border-l last:border-r-0 last:bg-[var(--muted)]">{requiredLabel(label)}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((row, index) => {
             const rowInvalid = REQUIRED_BATCH_FIELDS.some((field) => invalid.has(cellKey(row.key, field)))
             const selectItems = (current: string, choices: readonly string[]) => current && !choices.includes(current) ? [current, ...choices] : choices
+            const overrides = [
+              row.form.department !== common.department ? `Dept ${row.form.department}` : "",
+              row.form.requester !== common.requester ? `Requester ${row.form.requester}` : "",
+              row.form.customer !== common.customer ? `Customer ${row.form.customer}` : "",
+            ].filter(Boolean)
             return <tr key={row.key} className={`align-top ${rowInvalid ? "bg-rose-50/40 dark:bg-rose-950/10" : ""}`}>
               <td className="border-b border-r border-[var(--border)] px-1 py-3 text-center text-[var(--muted-foreground)]">{index + 1}</td>
               <td className="border-b border-r border-[var(--border)] p-1"><BatchImageCell file={row.image} highlighted={row.parsedFields.has("image")} onChoose={(next) => chooseBatchImage(row.key, next)} /></td>
-              <td className="border-b border-r border-[var(--border)] p-1"><div className="flex h-8 items-center justify-center bg-[var(--muted)]/30 px-2 font-mono text-[11px] text-[var(--muted-foreground)]">{displayNumbers.get(row.key)}</div></td>
-              <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Department`} value={row.form.department} onChange={(event) => setBatchField(row.key, "department", event.target.value)} className={batchInputClass(row, "department")} /></td>
-              <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Requester`} value={row.form.requester} onChange={(event) => setBatchField(row.key, "requester", event.target.value)} className={batchInputClass(row, "requester")} /></td>
-              <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Customer`} value={row.form.customer} onChange={(event) => setBatchField(row.key, "customer", event.target.value)} className={batchInputClass(row, "customer")} /></td>
-              <td className="border-b border-r border-[var(--border)] p-1"><select aria-label={`${index + 1}행 Objective`} value={row.form.objective} onChange={(event) => setBatchField(row.key, "objective", event.target.value)} className={batchSelectClass(row, "objective")}><option value="">선택 안 함</option>{ANALYSIS_OBJECTIVES.map((item) => <option key={item} value={item}>{item}</option>)}</select></td>
+              <td className="border-b border-r border-[var(--border)] p-1"><div className="flex min-h-8 flex-col items-center justify-center bg-[var(--muted)]/30 px-1"><span className="font-mono text-[11px] text-[var(--muted-foreground)]">{displayNumbers.get(row.key)}</span>{overrides.map((item) => <span key={item} className="break-words text-center text-[10px] leading-tight text-amber-700 dark:text-amber-300">{item}</span>)}</div></td>
               <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Source`} list="analysis-batch-sources" value={row.form.source} onChange={(event) => setBatchField(row.key, "source", event.target.value)} className={batchInputClass(row, "source")} /></td>
               <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Source code`} placeholder="ex) HMP123456 / FL26090001" value={row.form.sourceCode} onChange={(event) => setBatchField(row.key, "sourceCode", event.target.value)} className={batchInputClass(row, "sourceCode", "placeholder:text-[var(--muted-foreground)]/60")} /></td>
-              <td className="border-b border-r border-[var(--border)] p-1"><select aria-label={`${index + 1}행 Season/Year`} value={row.form.season} onChange={(event) => setBatchField(row.key, "season", event.target.value)} className={batchSelectClass(row, "season")}><option value="">선택 안 함</option>{selectItems(row.form.season, ANALYSIS_SEASON_OPTIONS).map((item) => <option key={item} value={item}>{item}</option>)}</select></td>
               <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Brand`} value={row.form.brand} onChange={(event) => setBatchField(row.key, "brand", event.target.value)} className={batchInputClass(row, "brand")} /></td>
+              <td className="border-b border-r border-[var(--border)] p-1"><select aria-label={`${index + 1}행 Season/Year`} value={row.form.season} onChange={(event) => setBatchField(row.key, "season", event.target.value)} className={batchSelectClass(row, "season")}><option value="">선택 안 함</option>{selectItems(row.form.season, ANALYSIS_SEASON_OPTIONS).map((item) => <option key={item} value={item}>{item}</option>)}</select></td>
+              <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Gender/Age`} list="analysis-batch-genders" value={row.form.gender} onChange={(event) => setBatchField(row.key, "gender", event.target.value)} className={batchInputClass(row, "gender")} /></td>
               <td className="border-b border-r border-[var(--border)] p-1"><select aria-label={`${index + 1}행 Construction`} value={row.form.construction} onChange={(event) => setBatchField(row.key, "construction", event.target.value)} className={batchSelectClass(row, "construction")}><option value="">선택 안 함</option>{selectItems(row.form.construction, CONSTRUCTIONS).map((item) => <option key={item} value={item}>{item}</option>)}</select></td>
               <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Contents`} value={row.form.contents} onChange={(event) => setBatchField(row.key, "contents", event.target.value)} className={batchInputClass(row, "contents")} /></td>
               <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Weight`} type="number" value={row.form.weight} onChange={(event) => setBatchField(row.key, "weight", event.target.value === "" ? "" : Number(event.target.value))} className={batchInputClass(row, "weight")} /></td>
-              <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Gender/Age`} list="analysis-batch-genders" value={row.form.gender} onChange={(event) => setBatchField(row.key, "gender", event.target.value)} className={batchInputClass(row, "gender")} /></td>
-              <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Request item`} value={row.form.description} onFocus={() => setFocusedRowId(row.key)} onChange={(event) => setBatchField(row.key, "description", event.target.value)} className={batchInputClass(row, "description")} /></td>
-              <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Comment`} value={row.form.requesterComment} onChange={(event) => setBatchField(row.key, "requesterComment", event.target.value)} className={batchInputClass(row, "requesterComment")} /></td>
+              <td className="border-b border-r border-[var(--border)] p-1"><select aria-label={`${index + 1}행 Objective`} value={row.form.objective} onChange={(event) => setBatchField(row.key, "objective", event.target.value)} className={batchSelectClass(row, "objective")}><option value="">선택 안 함</option>{ANALYSIS_OBJECTIVES.map((item) => <option key={item} value={item}>{item}</option>)}</select></td>
+              <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Request item`} value={row.form.description} onFocus={() => setFocusedRowId(row.key)} onChange={(event) => setBatchField(row.key, "description", event.target.value)} className={batchInputClass(row, "description", "bg-teal-50 dark:bg-teal-950/20")} /></td>
               <td className="border-b border-r border-[var(--border)] p-1 text-center"><Checkbox aria-label={`${index + 1}행 긴급 요청`} checked={row.form.requestType === "Urgent"} onCheckedChange={(value) => setBatchField(row.key, "requestType", value === true ? "Urgent" : "Normal")} /></td>
+              <td className="border-b border-r border-[var(--border)] p-1"><Input aria-label={`${index + 1}행 Comment`} value={row.form.requesterComment} onChange={(event) => setBatchField(row.key, "requesterComment", event.target.value)} className={batchInputClass(row, "requesterComment")} /></td>
               <td className="sticky right-0 z-[1] border-b border-l border-[var(--border)] bg-[var(--card)] p-1"><div className="flex h-8 items-center justify-center"><button type="button" title="줄 삭제" aria-label={`${index + 1}행 삭제`} className="rounded p-1 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--destructive)]" onClick={() => removeRow(row.key)}><Trash2 className="size-3.5" /></button></div></td>
             </tr>
           })}
@@ -468,17 +508,18 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
     {importWarnings.length ? <p className="shrink-0 text-xs text-amber-700 dark:text-amber-300">{importWarnings.join(" · ")}</p> : null}
   </div>
 
-  return <Dialog open={open} onOpenChange={(next) => { if (!saving) onOpenChange(next) }}><DialogContent className={record ? "w-[96vw] max-w-5xl" : "flex max-h-[88vh] w-[min(96vw,1680px)] max-w-none flex-col"}>
+  return <Dialog open={open} onOpenChange={(next) => { if (!saving && savedNotice === null) onOpenChange(next) }}><DialogContent className={record ? "w-[96vw] max-w-5xl" : "flex max-h-[88vh] w-[98vw] max-w-none flex-col"}>
+    {savedNotice ? <div className={`pointer-events-none absolute inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${savedNotice === "fading" ? "opacity-0" : "opacity-100"}`}><div className="flex items-center gap-2 rounded-full bg-teal-600 px-5 py-3 text-sm font-medium text-white shadow-lg"><Check className="size-5" />{savedMessage}</div></div> : null}
     <DialogHeader><DialogTitle>{record ? "의뢰 정보 수정" : "새 분석 의뢰"}</DialogTitle><DialogDescription>의뢰는 작성 상태로 저장됩니다. 목록에서 선택한 뒤 의뢰를 확정하세요.</DialogDescription></DialogHeader>
     <DialogBody className={record ? "space-y-4" : "flex min-h-0 flex-col overflow-hidden"}>
       {record ? editForm : batchTable}
       {notice ? <p className="mt-3 text-sm text-[var(--muted-foreground)]">{notice}</p> : null}
     </DialogBody>
     <DialogFooter>
-      <Button type="button" variant="outline" disabled={saving} onClick={() => onOpenChange(false)}>{record ? "닫기" : "취소"}</Button>
+      <Button type="button" variant="outline" disabled={saving || savedNotice !== null} onClick={() => onOpenChange(false)}>{record ? "닫기" : "취소"}</Button>
       {record
         ? <Button type="button" disabled={Boolean(error) || saving} onClick={() => void saveOne(false)}>{saving ? "저장 중…" : "저장"}</Button>
-        : <Button type="button" disabled={saving || activeRows.length === 0} onClick={() => void saveBatch()}>{saving ? "저장 중…" : `${activeRows.length}건 저장`}</Button>}
+        : <Button type="button" disabled={saving || savedNotice !== null || activeRows.length === 0} onClick={() => void saveBatch()}>{saving ? "저장 중…" : `${activeRows.length}건 저장`}</Button>}
     </DialogFooter>
   </DialogContent></Dialog>
 }

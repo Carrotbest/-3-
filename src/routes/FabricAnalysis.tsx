@@ -49,7 +49,7 @@ export function FabricAnalysis() {
   const canEdit = access === "edit"
   const user = useAuthStore((state) => state.user)
   const defaultName = user?.displayName || user?.email?.split("@")[0] || ""
-  const [activeState, setActiveState] = useState<AnalysisState | typeof ALL>("의뢰")
+  const [activeState, setActiveState] = useState<AnalysisState | typeof ALL>(ALL)
   const [urgentOnly, setUrgentOnly] = useState(false)
   const [search, setSearch] = useState("")
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -70,6 +70,7 @@ export function FabricAnalysis() {
   }, [rows, activeState, urgentOnly, search])
   const selectedRows = rows.filter((item) => selected.has(item.id))
   const draftSelected = selectedRows.filter((item) => item.state === "작성")
+  const requestedSelected = selectedRows.filter((item) => item.state === "의뢰")
   const finishedSelected = selectedRows.filter((item) => item.state === "완료")
   const monthPrefix = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
   const recentStart = Date.now() - 90 * 86_400_000
@@ -89,17 +90,39 @@ export function FabricAnalysis() {
     saveAnalysisRequests(current.map((item) => item.id === record.id ? record : item))
     setDetail(record)
   }
-  const confirmRequests = () => {
-    if (!draftSelected.length) return
-    const ids = new Set(draftSelected.map((item) => item.id))
+  const confirmRequests = (targets: AnalysisRequest[]) => {
+    const drafts = targets.filter((item) => item.state === "작성")
+    if (!drafts.length) return
+    const ids = new Set(drafts.map((item) => item.id))
     const today = analysisTodayValue()
     const now = new Date().toISOString()
-    const confirmed = draftSelected.map((item) => ({ ...item, state: "의뢰" as const, requestedAt: today, updatedAt: now }))
+    const confirmed = drafts.map((item) => ({ ...item, state: "의뢰" as const, requestedAt: today, updatedAt: now }))
     const confirmedById = new Map(confirmed.map((item) => [item.id, item]))
     saveAnalysisRequests(useAppStore.getState().analysisRequests.map((item) => ids.has(item.id) ? confirmedById.get(item.id) ?? item : item))
     setSelected((current) => new Set([...current].filter((id) => !ids.has(id))))
     void openAnalysisRequestMail(confirmed, recipients).then((result) => showNotice(result === "mailto"
       ? `본문을 복사했습니다. Outlook 새 메일 본문 첫 줄에서 Ctrl+V 하세요. 서명은 그 아래 그대로 남습니다.${recipients.length ? "" : " 받는 사람 목록이 비어 있습니다."}`
+      : "클립보드 복사에 실패해 .eml 파일을 내려받았습니다."))
+  }
+  const completeRequests = (targets: AnalysisRequest[]) => {
+    const requested = targets.filter((item) => item.state === "의뢰")
+    if (!requested.length) return
+    const blankResults = requested.filter((item) => !item.yarnDescription.trim() && !item.commentRnd.trim()).length
+    if (blankResults && !confirm(`분석 결과가 비어 있는 건이 ${blankResults}건 있습니다. 완료 메일 표가 비어 나갑니다. 계속할까요?`)) return
+    const ids = new Set(requested.map((item) => item.id))
+    const now = new Date().toISOString()
+    const completed = requested.map((item) => ({
+      ...item,
+      state: "완료" as const,
+      finishedAt: item.finishedAt || analysisTodayValue(),
+      inCharge: item.inCharge || defaultName,
+      updatedAt: now,
+    }))
+    const completedById = new Map(completed.map((item) => [item.id, item]))
+    saveAnalysisRequests(useAppStore.getState().analysisRequests.map((item) => ids.has(item.id) ? completedById.get(item.id) ?? item : item))
+    setSelected((current) => new Set([...current].filter((id) => !ids.has(id))))
+    void openAnalysisFinishedMail(completed, recipients).then((result) => showNotice(result === "mailto"
+      ? "본문을 복사했습니다. Outlook 새 메일 본문 첫 줄에서 Ctrl+V 하세요. 서명은 그 아래 그대로 남습니다."
       : "클립보드 복사에 실패해 .eml 파일을 내려받았습니다."))
   }
   const finishedMail = () => {
@@ -132,16 +155,16 @@ export function FabricAnalysis() {
     <Card className="border-[var(--border)]/60 shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:translate-y-0 hover:shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <CardHeader className="gap-3"><CardTitle className="text-base font-medium">분석 의뢰 목록</CardTitle><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><Tabs value={activeState} onValueChange={(value) => { setActiveState(value as AnalysisState | typeof ALL); setUrgentOnly(false) }}><TabsList className="bg-transparent">{[ALL, ...ANALYSIS_STATES].map((state) => <TabsTrigger key={state} value={state} className="rounded-none border-b-2 border-transparent px-3 data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:text-teal-700 data-[state=active]:shadow-none dark:data-[state=active]:border-teal-400 dark:data-[state=active]:text-teal-300">{state}</TabsTrigger>)}</TabsList></Tabs><div className="flex items-center gap-2 lg:w-full lg:max-w-xl">{canEdit ? <ShinyActionButton tone="teal" icon={<Plus />} onClick={() => { setEditRecord(null); setRequestOpen(true) }}>새 분석 의뢰</ShinyActionButton> : null}<Input className="min-w-0 flex-1" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="AN No. · Source code · Brand · Requester 검색" /></div></div>
         {urgentOnly ? <p className="text-xs text-rose-600">Urgent 대기만 표시 중</p> : null}
-        {selected.size ? <div className="flex flex-wrap items-center gap-2 rounded-md bg-teal-500/5 p-2 text-sm"><span className="px-1">{selected.size}건 선택</span>{canEdit ? <Button size="sm" disabled={!draftSelected.length} className="bg-teal-600 text-white hover:bg-teal-700" onClick={confirmRequests}><Mail />의뢰 확정</Button> : null}<Button size="sm" variant="outline" disabled={!finishedSelected.length} onClick={finishedMail}>완료 메일</Button>{canEdit ? <Button size="sm" variant="outline" disabled={!draftSelected.length} onClick={deleteDrafts}><Trash2 />삭제</Button> : null}<Button size="sm" variant="ghost" disabled={!draftSelected.length && !finishedSelected.length} onClick={downloadSelectedEml}><FileDown />.eml로 받기</Button></div> : null}
+        {selected.size ? <div className="flex flex-wrap items-center gap-2 rounded-md bg-teal-500/5 p-2 text-sm"><span className="px-1">{selected.size}건 선택</span>{canEdit ? <Button size="sm" disabled={!draftSelected.length} className="bg-teal-600 text-white hover:bg-teal-700" onClick={() => confirmRequests(draftSelected)}><Mail />의뢰 확정</Button> : null}{canEdit ? <Button size="sm" variant="outline" disabled={!requestedSelected.length} onClick={() => completeRequests(requestedSelected)}>완료 처리</Button> : null}<Button size="sm" variant="outline" disabled={!finishedSelected.length} onClick={finishedMail}>완료 메일</Button>{canEdit ? <Button size="sm" variant="outline" disabled={!draftSelected.length} onClick={deleteDrafts}><Trash2 />삭제</Button> : null}<Button size="sm" variant="ghost" disabled={!draftSelected.length && !finishedSelected.length} onClick={downloadSelectedEml}><FileDown />.eml로 받기</Button></div> : null}
         {notice ? <p className="text-sm text-[var(--muted-foreground)]">{notice}</p> : null}
       </CardHeader>
       <CardContent className="p-0"><div className="overflow-x-auto"><Table className="min-w-[1700px] text-[13px]"><TableHeader className="bg-[var(--muted)]/40"><TableRow className="border-[var(--border)]/50">
         <TableHead className="w-10 text-[11px] font-medium tracking-wide text-[var(--muted-foreground)]"><Checkbox className="data-[state=checked]:border-teal-600 data-[state=checked]:bg-teal-600" checked={allVisibleSelected} onCheckedChange={() => setSelected((current) => { const next = new Set(current); if (allVisibleSelected) visibleIds.forEach((id) => next.delete(id)); else visibleIds.forEach((id) => next.add(id)); return next })} aria-label="현재 목록 전체 선택" /></TableHead>
-        {['사진','AN No.','의뢰일','구분','Requester','Brand','Source code','Construction','Contents','Weight','Request item','상태','In charge','완료일','Analysis result'].map((head) => <TableHead key={head} className="text-[11px] font-medium tracking-wide text-[var(--muted-foreground)]">{head}</TableHead>)}
+        {['사진','AN No.','의뢰일','구분','Requester','Brand','Source code','Construction','Contents','Weight','Request item','상태','In charge','완료일','Analysis result',''].map((head, index) => <TableHead key={`${head}-${index}`} className="text-[11px] font-medium tracking-wide text-[var(--muted-foreground)]">{head}</TableHead>)}
       </TableRow></TableHeader><TableBody>{filtered.length ? filtered.map((item) => <TableRow key={item.id} className={`cursor-pointer border-[var(--border)]/50 font-normal transition-colors duration-150 hover:bg-teal-500/[0.06] dark:hover:bg-teal-400/10 ${selected.has(item.id) ? "bg-teal-500/10" : ""} ${item.requestType === "Urgent" ? "shadow-[inset_2px_0_0_#f43f5e]" : ""}`} onClick={() => setDetail(item)}>
         <TableCell onClick={(event) => event.stopPropagation()}><Checkbox className="data-[state=checked]:border-teal-600 data-[state=checked]:bg-teal-600" checked={selected.has(item.id)} onCheckedChange={() => setSelected((current) => { const next = new Set(current); next.has(item.id) ? next.delete(item.id) : next.add(item.id); return next })} aria-label={`${item.anNo} 선택`} /></TableCell>
-        <TableCell><ImageThumb path={item.imageThumbPath || item.imagePath} label={item.anNo} /></TableCell><TableCell className="font-medium tabular-nums">{item.anNo}</TableCell><TableCell>{item.requestedAt || "-"}</TableCell><TableCell>{item.requestType === "Urgent" ? <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[11px] text-rose-700 dark:text-rose-300">Urgent</span> : "Normal"}</TableCell><TableCell>{item.requester}</TableCell><TableCell>{item.brand || "-"}</TableCell><TableCell>{item.sourceCode || "-"}</TableCell><TableCell>{item.construction || "-"}</TableCell><TableCell>{item.contents || "-"}</TableCell><TableCell>{item.weight === "" ? "-" : item.weight}</TableCell><TableCell className="max-w-56 truncate">{item.description}</TableCell><TableCell><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] ${stateClass[item.state]}`}><i className={`size-1.5 rounded-full ${stateDot[item.state]}`} />{item.state}</span></TableCell><TableCell>{item.inCharge || "-"}</TableCell><TableCell>{item.finishedAt || "-"}</TableCell><TableCell className="max-w-64 truncate">{item.yarnDescription || item.commentRnd || "-"}</TableCell>
-      </TableRow>) : <TableRow><TableCell colSpan={16} className="h-32 text-center text-[var(--muted-foreground)]">표시할 분석 의뢰가 없습니다.</TableCell></TableRow>}</TableBody></Table></div></CardContent>
+        <TableCell><ImageThumb path={item.imageThumbPath || item.imagePath} label={item.anNo} /></TableCell><TableCell className="font-medium tabular-nums">{item.anNo}</TableCell><TableCell>{item.requestedAt || "-"}</TableCell><TableCell>{item.requestType === "Urgent" ? <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[11px] text-rose-700 dark:text-rose-300">Urgent</span> : "Normal"}</TableCell><TableCell>{item.requester}</TableCell><TableCell>{item.brand || "-"}</TableCell><TableCell>{item.sourceCode || "-"}</TableCell><TableCell>{item.construction || "-"}</TableCell><TableCell>{item.contents || "-"}</TableCell><TableCell>{item.weight === "" ? "-" : item.weight}</TableCell><TableCell className="max-w-56 truncate">{item.description}</TableCell><TableCell><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] ${stateClass[item.state]}`}><i className={`size-1.5 rounded-full ${stateDot[item.state]}`} />{item.state}</span></TableCell><TableCell>{item.inCharge || "-"}</TableCell><TableCell>{item.finishedAt || "-"}</TableCell><TableCell className="max-w-64 truncate">{item.yarnDescription || item.commentRnd || "-"}</TableCell><TableCell onClick={(event) => event.stopPropagation()}>{item.state === "작성" && canEdit ? <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={(event) => { event.stopPropagation(); confirmRequests([item]) }}>의뢰</Button> : item.state === "의뢰" && canEdit ? <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={(event) => { event.stopPropagation(); completeRequests([item]) }}>완료</Button> : item.state === "완료" ? <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={(event) => { event.stopPropagation(); void openAnalysisFinishedMail([item], recipients).then((result) => showNotice(result === "mailto" ? "본문을 복사했습니다. Outlook 새 메일 본문 첫 줄에서 Ctrl+V 하세요. 서명은 그 아래 그대로 남습니다." : "클립보드 복사에 실패해 .eml 파일을 내려받았습니다.")) }}>메일</Button> : null}</TableCell>
+      </TableRow>) : <TableRow><TableCell colSpan={17} className="h-32 text-center text-[var(--muted-foreground)]">표시할 분석 의뢰가 없습니다.</TableCell></TableRow>}</TableBody></Table></div></CardContent>
     </Card>
 
     <AnalysisRequestDialog open={requestOpen} onOpenChange={setRequestOpen} record={editRecord} requester={defaultName} requesterEmail={user?.email ?? ""} onSaved={(saved) => { if (editRecord) setDetail(saved) }} />
