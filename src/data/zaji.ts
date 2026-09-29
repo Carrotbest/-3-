@@ -16,6 +16,13 @@ const NAME_MAP: Record<string, string> = {
   박향근: "박향근", 진영은: "진영은", 변재휘: "변재휘", 김지현: "김지현",
 }
 
+/** 작성자 표기를 담당자 이름으로 바꾼다. 국내 결재 양식은 쉼표 대신 마침표를 쓴다. */
+function mapName(raw: string): string {
+  const key = String(raw ?? "").trim().replace(/\s+/g, " ")
+  if (NAME_MAP[key]) return NAME_MAP[key]
+  return NAME_MAP[key.replace(/\.\s*/, ", ")] ?? ""
+}
+
 const SEASON_PREFIX: Record<string, string> = {
   spring: "SS", summer: "SS", fall: "FW", autumn: "FW", winter: "FW", holiday: "FW",
 }
@@ -39,8 +46,12 @@ export function cellSafe(value: Cell): string | number {
 
 function fmtDate(value: Cell): string {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    const y = value.getFullYear(), m = value.getMonth() + 1, d = value.getDate()
-    return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`
+    // SheetJS는 엑셀 일련번호를 자정보다 약 52초 이른 Date로 만든다.
+    // 그대로 getDate()를 읽으면 날짜가 하루 당겨진다(GD Due date 10/9 → 10-08).
+    // 로컬 시각으로 옮긴 뒤 가장 가까운 자정으로 반올림해서 읽는다.
+    const shifted = value.getTime() - value.getTimezoneOffset() * 60000
+    const day = new Date(Math.round(shifted / 86400000) * 86400000)
+    return `${day.getUTCFullYear()}-${String(day.getUTCMonth() + 1).padStart(2, "0")}-${String(day.getUTCDate()).padStart(2, "0")}`
   }
   const text = String(value ?? "").trim()
   let m = text.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/)
@@ -118,6 +129,10 @@ export interface Zaji {
   co: string
   options: ZajiOption[]
   notes: string[]
+  /** 국내 양식 공정 블록에서 읽은 (공정명, 업체) 쌍. 화면 표시는 아직 없다. */
+  processLabels: [string, string][]
+  /** 파일명에서 Style No.를 주웠는지. 사람이 확인해야 한다는 뜻이다. */
+  styleFromFilename: boolean
   dupRemoved: number
 }
 
@@ -173,6 +188,12 @@ function makeGrid(rows: Grid) {
     }
     return ""
   }
+  const millOf = (label: string): string => {
+    for (const text of [rightOf(label), belowOf(label)]) {
+      if (text && !MILL_NOISE.test(text)) return text
+    }
+    return ""
+  }
   const headerMap = (r: number): Record<string, number> => {
     const out: Record<string, number> = {}
     const row = r < rows.length ? rows[r] ?? [] : []
@@ -185,7 +206,7 @@ function makeGrid(rows: Grid) {
     return out
   }
   const rowTexts = (r: number): string[] => (r < rows.length ? rows[r] ?? [] : []).map((v) => (v === null || v === undefined ? "" : String(v).trim()))
-  return { rows, at, raw, find, rawRightOf, rightOf, belowOf, headerMap, rowTexts }
+  return { rows, at, raw, find, rawRightOf, rightOf, belowOf, millOf, headerMap, rowTexts }
 }
 
 // ─────────────────────────────────────────────── 양식 판별
@@ -204,9 +225,9 @@ function parseGd(rows: Grid): Zaji {
     dept: g.rightOf("Department"), created: fmtDate(g.rawRightOf("Created date")), due: fmtDate(g.rawRightOf("Due date")),
     author: g.rightOf("Created by"), developer: "", style: g.rightOf("Main style number"),
     season: convertSeason(g.rightOf("Year / Season")), brand: g.rightOf("Brand name"), co: "",
-    options: [], notes: [], dupRemoved: 0,
+    options: [], notes: [], dupRemoved: 0, processLabels: [], styleFromFilename: false,
   }
-  z.developer = NAME_MAP[z.author] ?? ""
+  z.developer = mapName(z.author)
   const requestTo = g.rightOf("Request to")
   z.co = /global\s*dyeing/i.test(requestTo) ? "GD" : "국내"
 
@@ -286,23 +307,152 @@ function parseGd(rows: Grid): Zaji {
   return z
 }
 
+// ─────────────────────────────────────────────── 국내 양식
+// 원본: 작지변환기_배포/zaji/parser.py 의 parse_domestic. 동작을 바꾸지 말 것.
+
+/** 공정 블록 Color Name 칸에 색상 대신 들어가는 일반 단어. 색상으로 쓰지 않는다. */
+const GENERIC_COLOR = /^(color|colour|ground color|color name)$/i
+
+function parseDomestic(rows: Grid, sheetName: string, filename: string): Zaji {
+  const g = makeGrid(rows)
+  const isYarnDye = /yarn\s*dyeing\s*work\s*sheet/i.test(g.at(0, 0))
+  const z: Zaji = {
+    fmt: "국내", subFmt: isYarnDye ? "Yarn Dyeing Work Sheet" : "Outsourcing Production Order",
+    number: sheetName.trim(), dept: "", created: "", due: "", author: "", developer: "",
+    style: "", season: "", brand: "", co: "국내",
+    options: [], notes: [], dupRemoved: 0, processLabels: [], styleFromFilename: false,
+  }
+  z.author = g.rightOf("Production Order Creater")
+  z.developer = mapName(z.author)
+  z.created = fmtDate(g.rawRightOf("Production Order Created D"))
+  z.due = fmtDate(g.rawRightOf("Fabric Delivery Date"))
+
+  // 원단 표 = Part 와 Fabric Content 가 같이 있는 행이 헤더. 빈 행이 나오면 끝이다.
+  let header: number | null = null
+  for (let r = 0; r < rows.length; r++) {
+    const texts = g.rowTexts(r)
+    if (texts.includes("Part") && texts.some((t) => t.toLowerCase() === "fabric content")) { header = r; break }
+  }
+  if (header !== null) {
+    const cols = g.headerMap(header)
+    const cFabric = cols["Fabric"] ?? 1
+    const cGsm = cols["g/㎡"] ?? cols["g/m2"] ?? 22
+    for (let r = header + 1; r < rows.length; r++) {
+      const fabric = g.at(r, cFabric)
+      if (!fabric) break
+      const [yarn, cons] = splitYarn(fabric)
+      // Part 칸이 비어 있는 양식이라 순번으로 BODY 번호를 만든다.
+      z.options.push({
+        part: `B0${z.options.length + 1}`, color: g.at(r, cols["Color name"]),
+        weight: g.at(r, cGsm), yarn, cons, rawName: fabric, remark: "", dyeing: "",
+        mills: { yarn: "", knit: "", dye: "", finish: "" },
+      })
+    }
+  }
+
+  // 공정 블록 = Part 와 COLOR 가 같이 있는 행. 블록이 여럿이어도 첫 블록만 쓴다.
+  // 블록 순서와 원단 순서가 대응하지 않는다(MODAL SUN 3번 블록 정우 vs Yarn Detail 송림).
+  const mills = { yarn: "", knit: "", dye: "", finish: "" }
+  let dyeing = isYarnDye ? "YD" : ""
+  let blockColor = ""
+  for (let r = 0; r < rows.length; r++) {
+    const texts = g.rowTexts(r)
+    if (!texts.includes("Part") || !texts.some((t) => t.toUpperCase() === "COLOR")) continue
+    texts.forEach((label, i) => {
+      if (!label || /^(Part|COLOR|Ground Color|Color Name|OUTPUT|GARMENT)$/i.test(label)) return
+      const mill = g.at(r + 1, i)
+      if (!mill || MILL_NOISE.test(mill)) return
+      z.processLabels.push([label, mill])
+    })
+    const cColor = texts.findIndex((t) => /^color name$/i.test(t))
+    if (cColor >= 0) {
+      for (let rr = r + 1; rr < Math.min(r + 5, rows.length); rr++) {
+        const value = g.at(rr, cColor)
+        if (!value || MILL_NOISE.test(value) || GENERIC_COLOR.test(value)) continue
+        blockColor = value
+        break
+      }
+    }
+    break
+  }
+
+  for (const [label, mill] of z.processLabels) {
+    if (/knitting/i.test(label)) mills.knit = mill
+    else if (/yarn\s*dyeing/i.test(label)) { mills.yarn = mill; dyeing = "YD" }
+    else if (/fabric\s*dyeing/i.test(label)) { mills.dye = mill; dyeing = dyeing || "CSD" }
+    else if (/finish|setting|washing|brush|coating|printing/i.test(label)) mills.finish = mill
+    else if (!mills.dye) mills.dye = mill
+  }
+
+  if (!mills.knit) {
+    const v = g.millOf("Knitting Company")
+    if (v) { mills.knit = v; z.processLabels.push(["Knitting Company", v]) }
+  }
+  if (!mills.yarn) {
+    const v = g.millOf("Yarn Dyeing Company")
+    if (v) { mills.yarn = v; dyeing = dyeing || "YD"; z.processLabels.push(["Yarn Dyeing Company", v]) }
+  }
+
+  // 공정 블록이 없는 생지 발주 건은 Yarn Detail 표의 Mill 칸에서 줍는다.
+  if (!mills.knit || !mills.yarn) {
+    for (let r = 0; r < rows.length; r++) {
+      const texts = g.rowTexts(r)
+      if (!texts.some((t) => t.toLowerCase() === "yarn detail")) continue
+      let hit = false
+      texts.forEach((t, i) => {
+        if (!/^(Mill\/Knitter|Y\/D Mill)$/i.test(t)) return
+        const mill = g.at(r + 1, i)
+        if (!mill) return
+        if (/Y\/D/i.test(t)) { if (!mills.yarn) { mills.yarn = mill; dyeing = dyeing || "YD" } }
+        else if (!mills.knit) mills.knit = mill
+        if (!z.processLabels.some(([label, value]) => label === t && value === mill)) z.processLabels.push([t, mill])
+        hit = true
+      })
+      if (hit) break
+    }
+  }
+
+  // 국내 양식에는 옵션별 Remark 열이 없다. Remark 블록을 공통으로 적용한다.
+  const notePos = g.find("Remark")
+  if (notePos) {
+    for (let r = notePos[0] + 1; r < Math.min(notePos[0] + 6, rows.length); r++) {
+      const texts = g.rowTexts(r).filter(Boolean)
+      if (!texts.length) continue
+      const text = String(cellSafe(texts.join(" ")))
+      if (text) z.notes.push(text)
+    }
+  }
+  const commonRemark = z.notes.join(" / ")
+
+  for (const option of z.options) {
+    option.mills = { ...mills }
+    option.dyeing = dyeing
+    if (!option.color) option.color = blockColor
+    if (!option.remark) option.remark = commonRemark
+  }
+
+  const m = (filename || "").match(/(HMP|FL|AN)\d{6,}/i)
+  if (m) { z.style = m[0].toUpperCase(); z.styleFromFilename = true }
+  return z
+}
+
 // ─────────────────────────────────────────────── 공개 API
-export function parseZajiBuffer(data: ArrayBuffer | Uint8Array): Zaji {
+export function parseZajiBuffer(data: ArrayBuffer | Uint8Array, filename = ""): Zaji {
   const wb = XLSX.read(data, { type: "array", cellDates: true })
-  const ws = wb.Sheets[wb.SheetNames[0]]
+  const sheetName = wb.SheetNames[0]
+  const ws = wb.Sheets[sheetName]
   const rows = XLSX.utils.sheet_to_json<Cell[]>(ws, { header: 1, raw: true, blankrows: true, defval: null })
   const fmt = detectFormat(rows)
-  if (fmt === null) throw new Error("작지 양식을 인식하지 못했습니다. GD 양식(Fabric sample request report)만 현재 지원합니다.")
-  if (fmt === "국내") throw new Error("국내 결재 양식은 아직 지원하지 않습니다. GD 양식(Fabric sample request report)만 지원합니다.")
-  return parseGd(rows)
+  if (fmt === null) throw new Error("작지 양식을 인식하지 못했습니다. GD 양식(Fabric sample request report)과 국내 결재 양식(Outsourcing Production Order / Yarn Dyeing Work Sheet)만 지원합니다.")
+  return fmt === "국내" ? parseDomestic(rows, sheetName, filename) : parseGd(rows)
 }
 
 export async function parseZaji(file: File): Promise<Zaji> {
-  return parseZajiBuffer(await file.arrayBuffer())
+  return parseZajiBuffer(await file.arrayBuffer(), file.name)
 }
 
 /** 테스트 전용 내부 노출. 화면 코드에서 쓰지 말 것. */
-export const __test = { convertSeason, splitYarn, matchDyeing, fmtDate, detectFormat, parseGd }
+export const __test = { convertSeason, splitYarn, matchDyeing, fmtDate, detectFormat, parseGd, parseDomestic }
 
 // ─────────────────────────────────────────────── DevRecord 매핑 (폼 자동 채움)
 function toWeight(raw: string): number | "" {
@@ -324,6 +474,7 @@ export function applyZajiHeader(record: DevRecord, z: Zaji): DevRecord {
   return {
     ...record,
     owner: z.developer || record.owner,
+    saNo: z.fmt === "국내" ? (z.number || record.saNo) : record.saNo,
     styleNo: z.style || record.styleNo,
     season: z.season || record.season,
     requestDate: z.created || record.requestDate,
