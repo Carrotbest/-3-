@@ -657,6 +657,10 @@ export function Warehouse() {
   const [undoStack, setUndoStack] = useState<FabricUndoEntry[]>([])
   const [undoing, setUndoing] = useState(false)
   const cellDragRef = useRef(false)
+  const dragPointerRef = useRef<{ x: number; y: number } | null>(null)
+  const dragFrameRef = useRef<number | null>(null)
+  const lastExtendRef = useRef("")
+  const extendDragAtPointerRef = useRef<(x: number, y: number) => void>(() => undefined)
   const [cellMenu, setCellMenu] = useState<{ x: number; y: number; key: string } | null>(null)
   const [viewports, setViewports] = useState<Record<string, { top: number; height: number }>>({})
   const gridRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -1397,8 +1401,110 @@ export function Warehouse() {
     }
   }
 
+  extendDragAtPointerRef.current = (x, y) => {
+    const target = document.elementFromPoint(x, y)
+    const cell = target instanceof Element ? target.closest<HTMLElement>("[data-row-index][data-col-index]") : null
+    if (!cell) return
+    const rowIndex = Number(cell.dataset.rowIndex)
+    const colIndex = Number(cell.dataset.colIndex)
+    const key = `${rowIndex}:${colIndex}`
+    if (!Number.isInteger(rowIndex) || !Number.isInteger(colIndex) || lastExtendRef.current === key) return
+    lastExtendRef.current = key
+    setCellRange((current) => current ? { ...current, fr: rowIndex, fc: colIndex } : current)
+  }
+
+  const stopDragAutoScroll = () => {
+    if (dragFrameRef.current !== null) window.cancelAnimationFrame(dragFrameRef.current)
+    dragFrameRef.current = null
+    dragPointerRef.current = null
+    lastExtendRef.current = ""
+  }
+
+  const startDragAutoScroll = (clientX: number, clientY: number) => {
+    dragPointerRef.current = { x: clientX, y: clientY }
+    if (dragFrameRef.current !== null) return
+    const tick = () => {
+      dragFrameRef.current = null
+      const pointer = dragPointerRef.current
+      if (!pointer || !cellDragRef.current) return
+      const scroller = gridRefs.current[tab]
+      if (scroller) {
+        const box = scroller.getBoundingClientRect()
+        const headBottom = Math.max(box.top, scroller.querySelector("thead")?.getBoundingClientRect().bottom ?? box.top)
+        if (pointer.y < headBottom + 24) scroller.scrollTop -= 16
+        else if (pointer.y > box.bottom - 48) scroller.scrollTop += 16
+        if (pointer.x < box.left + 80) scroller.scrollLeft -= 16
+        else if (pointer.x > box.right - 48) scroller.scrollLeft += 16
+        const x = Math.min(Math.max(pointer.x, box.left + 2), box.right - 14)
+        const y = Math.min(Math.max(pointer.y, headBottom + 2), box.bottom - 14)
+        extendDragAtPointerRef.current(x, y)
+      }
+      dragFrameRef.current = window.requestAnimationFrame(tick)
+    }
+    dragFrameRef.current = window.requestAnimationFrame(tick)
+  }
+
+  const scrollCellIntoView = (rowIndex: number, colIndex: number) => {
+    window.requestAnimationFrame(() => {
+      const cell = document.querySelector<HTMLElement>(`td[data-row-index="${rowIndex}"][data-col-index="${colIndex}"]`)
+      cell?.scrollIntoView({ block: "nearest", inline: "nearest" })
+    })
+  }
+
   useEffect(() => {
-    const stop = () => { cellDragRef.current = false }
+    const move = (event: globalThis.MouseEvent) => {
+      if (!cellDragRef.current) return
+      dragPointerRef.current = { x: event.clientX, y: event.clientY }
+      if (dragFrameRef.current === null) startDragAutoScroll(event.clientX, event.clientY)
+    }
+    const up = () => {
+      cellDragRef.current = false
+      stopDragAutoScroll()
+    }
+    window.addEventListener("mousemove", move)
+    window.addEventListener("mouseup", up)
+    return () => {
+      window.removeEventListener("mousemove", move)
+      window.removeEventListener("mouseup", up)
+      stopDragAutoScroll()
+    }
+  }, [])
+
+  useEffect(() => {
+    const onCellNavigation = (event: globalThis.KeyboardEvent) => {
+      if (!cellRange || editCell || document.querySelector("[role=dialog]")) return
+      const active = document.activeElement
+      if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) return
+      if (active instanceof HTMLElement && active.isContentEditable) return
+      if (!visibleRows.length || !visibleColumns.length) return
+      let rowIndex = cellRange.fr
+      let colIndex = cellRange.fc
+      // Ctrl+PageUp/PageDown은 크롬이 탭 전환으로 먼저 가져가 preventDefault가 듣지 않는다. Ctrl+방향키로 대신한다.
+      if (event.ctrlKey && event.key === "ArrowUp") rowIndex = 0
+      else if (event.ctrlKey && event.key === "ArrowDown") rowIndex = visibleRows.length - 1
+      else if (event.key === "ArrowUp") rowIndex -= 1
+      else if (event.key === "ArrowDown") rowIndex += 1
+      else if (event.key === "ArrowLeft") colIndex -= 1
+      else if (event.key === "ArrowRight") colIndex += 1
+      else if (event.key === "Home") colIndex = 0
+      else if (event.key === "End") colIndex = visibleColumns.length - 1
+      else return
+      event.preventDefault()
+      rowIndex = Math.min(Math.max(rowIndex, 0), visibleRows.length - 1)
+      colIndex = Math.min(Math.max(colIndex, 0), visibleColumns.length - 1)
+      if (event.shiftKey) setCellRange((current) => current ? { ...current, fr: rowIndex, fc: colIndex } : current)
+      else {
+        setCellRange({ ar: rowIndex, ac: colIndex, fr: rowIndex, fc: colIndex })
+        setExtraCellRanges([])
+      }
+      setSelectedCell({ row: visibleRows[rowIndex].key, col: visibleColumns[colIndex].id })
+      scrollCellIntoView(rowIndex, colIndex)
+    }
+    window.addEventListener("keydown", onCellNavigation)
+    return () => window.removeEventListener("keydown", onCellNavigation)
+  }, [cellRange, editCell, visibleRows, visibleColumns])
+
+  useEffect(() => {
     const onCopy = (event: globalThis.KeyboardEvent) => {
       const active = document.activeElement
       if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) return
@@ -1470,10 +1576,8 @@ export function Warehouse() {
       event.preventDefault()
       void copyRange()
     }
-    window.addEventListener("mouseup", stop)
     window.addEventListener("keydown", onCopy)
     return () => {
-      window.removeEventListener("mouseup", stop)
       window.removeEventListener("keydown", onCopy)
     }
   })
@@ -1684,7 +1788,7 @@ export function Warehouse() {
                 const selected = checked.has(item.key)
                 return <TableRow
                   key={item.key}
-                  className={`h-8 cursor-pointer border-l-2 ${GRADE_ROW_CLASS[perfOf(item)?.grade ?? "normal"] ?? ""} ${selected ? `${accent.rowBar} bg-[color-mix(in_srgb,var(--primary)_6%,transparent)]` : "border-l-transparent"}`}
+                  className={`h-8 cursor-pointer border-l-2 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--grid-selection)] ${GRADE_ROW_CLASS[perfOf(item)?.grade ?? "normal"] ?? ""} ${selected ? `${accent.rowBar} bg-[color-mix(in_srgb,var(--primary)_6%,transparent)]` : "border-l-transparent"}`}
                   tabIndex={0}
                   aria-selected={selected}
                   aria-label={`${item.styleNo || item.flNo || "원단"} 상세 보기`}
@@ -1705,10 +1809,10 @@ export function Warehouse() {
                     const inRange = Boolean(hitRect)
                     // DD MASTER 와 같은 방식이다. 범위 가장자리에만 선을 그어 사각형으로 보이게 한다.
                     const edges = hitRect ? [
-                      index === hitRect.top ? "inset 0 1.5px 0 0 var(--grid-selection)" : "",
-                      index === hitRect.bottom ? "inset 0 -1.5px 0 0 var(--grid-selection)" : "",
-                      colIndex === hitRect.left ? "inset 1.5px 0 0 0 var(--grid-selection)" : "",
-                      colIndex === hitRect.right ? "inset -1.5px 0 0 0 var(--grid-selection)" : "",
+                      index === hitRect.top ? "inset 0 2px 0 0 var(--grid-selection)" : "",
+                      index === hitRect.bottom ? "inset 0 -2px 0 0 var(--grid-selection)" : "",
+                      colIndex === hitRect.left ? "inset 2px 0 0 0 var(--grid-selection)" : "",
+                      colIndex === hitRect.right ? "inset -2px 0 0 0 var(--grid-selection)" : "",
                     ].filter(Boolean).join(", ") : ""
                     const cellActive = selectedCell?.row === item.key && selectedCell.col === column.id
                     const confirmed = Boolean(item.confirmedAt)
@@ -1722,7 +1826,7 @@ export function Warehouse() {
                     const storageEditable = canEditScope && column.id === "storageNo" && item.status === "WAREHOUSE"
                     const editable = rackEditable || storageEditable || fabric1Editable || (Boolean(manualId) && MANUAL_EDITABLE.has(column.id))
                     const editing = editable && editCell?.row === item.key && editCell.col === column.id
-                    return <TableCell key={column.id} className={`${teamScope === "team1" ? "text-center [&_.flex]:justify-center" : ""} h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id), background: selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; if (event.ctrlKey || event.metaKey) { if (cellRange) setExtraCellRanges((current) => [...current, cellRange]) } else setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) { setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }) } setCellMenu({ x: event.clientX, y: event.clientY, key: item.key }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (canEditScope && column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else if (teamScope !== "team1") openDetail(item.key) }}>{editing
+                    return <TableCell key={column.id} className={`${teamScope === "team1" ? "text-center [&_.flex]:justify-center" : ""} h-8 min-w-0 cursor-cell border-b border-r border-[var(--border)] px-1.5 py-0 ${confirmed ? "bg-[var(--muted)]" : ""} ${fixed ? "sticky z-10" : ""} ${inRange && cellActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_16%,transparent)]" : inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""} ${cellActive && !inRange ? "outline outline-2 -outline-offset-2 outline-[var(--grid-selection)]" : ""}`} style={{ ...(fixed ? { left: fixedLeft(column.id) } : null), ...(fixed ? { background: inRange ? (cellActive ? "color-mix(in srgb, var(--grid-selection) 16%, var(--card))" : "color-mix(in srgb, var(--grid-selection) 8%, var(--card))") : selected ? "color-mix(in srgb, var(--primary) 6%, var(--card))" : "var(--card)" } : null), ...(edges ? { boxShadow: edges } : null) }} data-row-index={index} data-col-index={colIndex} data-no-range={column.id === "stock" ? "" : undefined} onMouseDown={(event) => { if (event.button !== 0 || editing) return; blockNativeDrag(event); cellDragRef.current = true; lastExtendRef.current = `${index}:${colIndex}`; startDragAutoScroll(event.clientX, event.clientY); if (event.ctrlKey || event.metaKey) { if (cellRange) setExtraCellRanges((current) => [...current, cellRange]) } else setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setSelectedCell({ row: item.key, col: column.id }); setCellMenu(null) }} onMouseEnter={() => { if (cellDragRef.current) { lastExtendRef.current = `${index}:${colIndex}`; setCellRange((current) => current ? { ...current, fr: index, fc: colIndex } : current) } }} onContextMenu={(event) => { event.preventDefault(); if (!inRange) { setExtraCellRanges([]); setCellRange({ ar: index, ac: colIndex, fr: index, fc: colIndex }); setSelectedCell({ row: item.key, col: column.id }) } setCellMenu({ x: event.clientX, y: event.clientY, key: item.key }) }} onClick={(event) => { if (column.id === "stock") event.stopPropagation(); setSelectedCell({ row: item.key, col: column.id }) }} onDoubleClick={() => { if (canEditScope && column.id === "stock" && tab !== "HISTORY") { setOutboundHistoryKey(null); openAction("STOCK", [item]) } else if (editable) setEditCell({ row: item.key, col: column.id }); else if (teamScope !== "team1") openDetail(item.key) }}>{editing
                       ? <input
                           autoFocus
                           type={fabric1Editable && column.id === "requestDate" ? "date" : "text"}
