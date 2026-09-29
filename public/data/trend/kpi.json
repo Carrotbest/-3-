@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-09-29T00:40:58+00:00",
+"generated_at": "2026-09-29T01:08:55+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3656,14 +3656,14 @@
 },
 {
 "period": "2026-09",
-"value": 1357.345
+"value": 1359.572
 }
 ],
-"value": 1357.345,
+"value": 1359.572,
 "period": "2026-09",
 "period_end": null,
-"prev": -3.3,
-"yoy": -2.6,
+"prev": -3.1,
+"yoy": -2.4,
 "stale": false
 },
 {
