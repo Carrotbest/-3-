@@ -22,6 +22,7 @@ interface RequestLinkHelperDialogProps {
 const TABS: { key: HelperStatus; label: string }[] = [
   { key: "auto", label: "자동" },
   { key: "review", label: "확인 필요" },
+  { key: "suggest", label: "추천" },
   { key: "none", label: "후보 없음" },
 ]
 
@@ -83,7 +84,7 @@ export function RequestLinkHelperDialog({ open, onOpenChange, records, requests,
       <DialogHeader>
         <DialogTitle>요청 연결 도우미</DialogTitle>
         <DialogDescription>
-          자동 {autoGroups.length} · 확인 필요 {byStatus("review").length} · 후보 없음 {byStatus("none").length} · 미연결 DD 행 {totalRows}
+          자동 {autoGroups.length} · 확인 필요 {byStatus("review").length} · 추천 {byStatus("suggest").length} · 후보 없음 {byStatus("none").length} · 미연결 DD 행 {totalRows}
         </DialogDescription>
         <p className="text-xs text-[var(--warning)]">여러 행을 한 번에 연결합니다. 실행 전에 SETTING에서 JSON 백업을 내려받아 두세요.</p>
       </DialogHeader>
@@ -111,23 +112,28 @@ export function RequestLinkHelperDialog({ open, onOpenChange, records, requests,
                 {tab === "none" ? <th className={headCell}>담당</th> : <th className={headCell}>요청</th>}
                 {tab === "auto" ? <th className={headCell}>짝 미리보기 (DD Opt→요청 Opt)</th> : null}
                 {tab === "review" ? <th className={headCell}>사유</th> : null}
+                {tab === "suggest" ? <th className={headCell}>추천 근거</th> : null}
                 {tab !== "auto" ? <th className={`${headCell} w-24`} /> : null}
               </tr>
             </thead>
             <tbody>
               {shown.map((group) => {
                 const style = group.candidates[0]
+                const top = group.suggestions[0]
                 return <tr key={group.styleKey} className="hover:bg-[var(--accent)]">
                   {tab === "auto" ? <td className={bodyCell}><Checkbox aria-label={`${group.styleNo} 선택`} checked={!unchecked.has(group.styleKey)} onCheckedChange={(checked) => toggle(group.styleKey, checked === true)} /></td> : null}
                   <td className={`${bodyCell} font-mono`}>{group.styleNo}</td>
                   <td className={`${bodyCell} tabular-nums`}>{group.rows.length}</td>
                   {tab === "none"
                     ? <td className={bodyCell}>{ownerDisplayName(group.rows[0]?.owner ?? "") || "미지정"}</td>
-                    : <td className={bodyCell}>{group.candidates.length === 1 && style ? `${style.chart || "차트 미기재"} · #${style.seq} · ${style.brand || "Brand 미기재"}` : `${group.candidates.length}개 후보`}</td>}
+                    : tab === "suggest"
+                      ? <td className={bodyCell}>{top ? `${top.style.garmentNo || "Garment No. 미기재"} · ${top.style.chart || "차트 미기재"} #${top.style.seq}` : "-"}</td>
+                      : <td className={bodyCell}>{group.candidates.length === 1 && style ? `${style.chart || "차트 미기재"} · #${style.seq} · ${style.brand || "Brand 미기재"}` : `${group.candidates.length}개 후보`}</td>}
                   {tab === "auto" ? <td className={`${bodyCell} font-mono text-[11px] text-[var(--muted-foreground)]`}>{pairPreview(group)}</td> : null}
                   {tab === "review" ? <td className={bodyCell}>{group.reason}</td> : null}
+                  {tab === "suggest" ? <td className={bodyCell}>{top ? `${top.score}점 · ${top.reasons.slice(0, 3).join(" · ")}` : "-"}</td> : null}
                   {tab !== "auto" ? <td className={`${bodyCell} text-right`}>
-                    <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[11px]" disabled={!editEnabled} title={editEnabled ? undefined : disabledMessage} onClick={() => onReview(group)}>{tab === "review" ? "짝 확인…" : "직접 연결…"}</Button>
+                    <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[11px]" disabled={!editEnabled} title={editEnabled ? undefined : disabledMessage} onClick={() => onReview(group)}>{tab === "review" ? "짝 확인…" : tab === "suggest" ? "추천 확인…" : "직접 연결…"}</Button>
                   </td> : null}
                 </tr>
               })}

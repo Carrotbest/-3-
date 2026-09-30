@@ -16,12 +16,13 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { CONSTRUCTIONS, matchConstruction } from "@/data/constructions"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { buildFabricLedger } from "@/data/fabric-ledger"
-import { ddRecordsByLineId, requestDdStatus, type RequestDdStatus } from "@/data/request-link"
+import { applyRequestLinks, ddRecordsByLineId, ensureRequestLineIds, requestDdStatus, type RequestDdStatus } from "@/data/request-link"
 import { requestProcessStage, type ProcessStage } from "@/data/request-process-stage"
 import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindColor, buildBoardArchive, canDeleteBoard, canManageBoard, closeBoard, migrateChartsToBoards, nextBoardSeq, removeBoardWithStyles, reopenBoard, resultOf } from "@/data/request-board"
 import type { AuditKind } from "@/data/audit"
 
 import { ProcessStageChip } from "@/components/request/ProcessStageChip"
+import { DdCandidateDialog } from "@/components/request/DdCandidateDialog"
 import { ProcessStageDialog } from "@/components/request/ProcessStageDialog"
 import { RequestBoardHeader } from "@/components/request/RequestBoardHeader"
 import { RequestBoardCloseDialog } from "@/components/request/RequestBoardCloseDialog"
@@ -41,9 +42,9 @@ import { FillHandle, selectionShadow, type CellMove, type CellRect, type CellRef
 import { downloadBlob } from "@/data/dd-export"
 import { deleteRequestImage, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
 import { buildRequestWorkbook, mergeRequestStyles, parseRequestWorkbook, requestTemplateFileName } from "@/data/request-template"
-import { MEMBERS, REQUEST_RESULTS, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
+import { MEMBERS, REQUEST_RESULTS, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
 import { loadViewNumbers, saveViewPref } from "@/data/view-prefs"
-import { saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore } from "@/store/useAppStore"
+import { saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore, writeDevelopmentRecords } from "@/store/useAppStore"
 
 // ─────────────────────────────────────────────── 열 정의
 
@@ -694,10 +695,16 @@ export function FabricRequest() {
     hold: "bg-[color-mix(in_srgb,var(--warning)_16%,transparent)] text-[var(--warning)]",
     drop: "bg-[var(--muted)] text-[var(--muted-foreground)] line-through",
   }
-  const renderDdLink = (option: RequestOption): ReactNode => {
+  const renderDdLink = (style: RequestStyle, option: RequestOption): ReactNode => {
     const status = requestDdStatus(ddByLine, option)
     const chip = "whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-    if (status.tone === "none") return <span className={`${chip} ${DD_TONE_CLASS.none}`}>미연결</span>
+    if (status.tone === "none") return <button
+      type="button"
+      title="더블클릭하면 연결할 DD 행 후보를 보여줍니다"
+      onMouseDown={(event) => event.stopPropagation()}
+      onDoubleClick={(event) => { event.stopPropagation(); setDdPick({ style, option }) }}
+      className={`${chip} ${DD_TONE_CLASS.none} hover:opacity-80`}
+    >미연결</button>
     // 버튼 누름이 셀 선택·편집으로 번지지 않게 막는다.
     const stop = (event: React.MouseEvent) => event.stopPropagation()
     const openDd = () => navigate(`/development/workspace?focus=${encodeURIComponent(status.rowId ?? "")}`)
@@ -749,6 +756,8 @@ export function FabricRequest() {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(loadOpenGroups)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
+  // Link 열 미연결 칩을 더블클릭하면 그 옵션에 맞는 DD 행 후보를 고른다(R262).
+  const [ddPick, setDdPick] = useState<{ style: RequestStyle; option: RequestOption } | null>(null)
   const [focusedReqId, setFocusedReqId] = useState<string | null>(null)
   const uploadRef = useRef<HTMLInputElement | null>(null)
 
@@ -797,6 +806,32 @@ export function FabricRequest() {
     const history = appendRequestHistory(requests, next, requestBoards, actor)
     if (history.changed) saveRequestsAndBoards(next, history.boards, kind); else saveRequests(next, kind)
     return true
+  }
+
+  /**
+   * 요청 옵션 하나를 DD 행 하나에 묶는다. 연결 정보는 DD 행 tech.requestLink 에만 저장한다.
+   * 되돌리기는 이 화면 스택에 넣지 않는다. SETTING 작업 이력에 남고, 해제는 DD MASTER 팝업에서 한다.
+   */
+  const linkDdRecord = async (record: DevRecord, fillEmpty: boolean) => {
+    const target = ddPick
+    if (!target) return
+    if (!currentUserCanEditKey("records")) { setNotice({ kind: "error", text: "DD MASTER 편집 권한이 필요합니다." }); return }
+    let styles = requests
+    // lineId가 없는 옛 옵션이면 먼저 만들어 저장한다. 요청 저장은 commitRequests 하나를 지난다.
+    if (!target.style.options.find((option) => option.optId === target.option.optId)?.lineId) {
+      const prepared = ensureRequestLineIds(requests)
+      if (prepared.changed && !commitRequests(prepared.next)) return
+      styles = prepared.next
+    }
+    const style = styles.find((item) => item.reqId === target.style.reqId)
+    const option = style?.options.find((item) => item.optId === target.option.optId)
+    if (!style || !option?.lineId) { setNotice({ kind: "error", text: "옵션을 찾지 못했습니다. 새로 고친 뒤 다시 시도하세요." }); return }
+    const before = useAppStore.getState().records
+    const { next, linked } = applyRequestLinks(before, style, [{ rowId: `${record._src.sheet}::${record._src.row}`, optId: option.optId }], fillEmpty)
+    if (!linked) { setNotice({ kind: "error", text: "연결하지 못했습니다." }); return }
+    await writeDevelopmentRecords(next, false, "edit")
+    setDdPick(null)
+    setNotice({ kind: "ok", text: `${record.styleNo || "DD 행"} Opt ${record.opt || "-"}에 연결했습니다.` })
   }
   function saveMutation(next: RequestStyle[]) { if (next === requests || readOnly) { if (readOnly) commitRequests(next); return } pushSnapshot(); commitRequests(next) }
 
@@ -1408,7 +1443,7 @@ export function FabricRequest() {
     if (column.scope === "style") return null
     const option = line.option
     if (column.id === "ddStage") return renderDdStage(line.style, option)
-    if (column.id === "ddLink") return renderDdLink(option)
+    if (column.id === "ddLink") return renderDdLink(line.style, option)
     switch (column.id) {
       case "optNo": return <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--muted)] px-1.5 text-[10px] font-medium tabular-nums text-[var(--foreground)]">{option.no}</span>
       case "yarnDetail": return option.yarnDetail
@@ -1883,6 +1918,16 @@ export function FabricRequest() {
           navigate(`/development/workspace?focus=${encodeURIComponent(stageTarget.rowId)}`)
           setStageTarget(null)
         }}
+      />
+
+      <DdCandidateDialog
+        open={Boolean(ddPick)}
+        onOpenChange={(open) => { if (!open) setDdPick(null) }}
+        style={ddPick?.style ?? null}
+        option={ddPick?.option ?? null}
+        records={ddRecords}
+        canLink={currentUserCanEditKey("records")}
+        onConfirm={(record, fillEmpty) => void linkDdRecord(record, fillEmpty)}
       />
 
       <RequestEditor

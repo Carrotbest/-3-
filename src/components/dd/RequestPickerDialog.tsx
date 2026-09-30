@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { defaultLinkPairs, linkedLineIds, requestCandidates, type LinkPair } from "@/data/request-link"
+import { MATCH_MIN_SCORE, MATCH_STRONG_SCORE } from "@/data/request-link-match"
 import type { DevRecord, RequestOption, RequestStyle } from "@/data/schema"
 
 interface RequestPickerDialogProps {
@@ -33,8 +34,17 @@ export function RequestPickerDialog({ open, onOpenChange, requests, records, sty
   const [pairs, setPairs] = useState<LinkPair[]>([])
   const [fillEmpty, setFillEmpty] = useState(false)
   const linked = useMemo(() => linkedLineIds(records), [records])
-  const candidates = useMemo(() => requestCandidates(requests, records, styleNo, query, includeLinked), [includeLinked, query, records, requests, styleNo])
+  const candidates = useMemo(
+    () => requestCandidates(requests, records, styleNo, query, includeLinked, mode === "link" ? { rows: linkRows, blockedLineIds } : {}),
+    [blockedLineIds, includeLinked, linkRows, mode, query, records, requests, styleNo],
+  )
   const selected = candidates.find(({ style }) => style.reqId === selectedReqId)?.style ?? requests.find((style) => style.reqId === selectedReqId)
+
+  useEffect(() => {
+    if (!open || selectedReqId || query.trim()) return
+    const top = candidates[0]
+    if (top && top.score >= MATCH_STRONG_SCORE) setSelectedReqId(top.style.reqId)
+  }, [candidates, open, query, selectedReqId])
 
   useEffect(() => {
     if (!open) return
@@ -72,8 +82,8 @@ export function RequestPickerDialog({ open, onOpenChange, requests, records, sty
           <Input className="h-8" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Garment No. · Brand · 차트 · 개발 담당 검색" />
           <Button type="button" size="sm" variant={includeLinked ? "default" : "outline"} onClick={() => setIncludeLinked((value) => !value)}>연결된 스타일도 보기</Button>
           <div className="max-h-[60vh] space-y-1 overflow-y-auto">
-            {candidates.map(({ style, total, unlinked, exact }) => <button key={style.reqId} type="button" className={`flex w-full items-center gap-2 rounded-md border px-2.5 py-2 text-left ${selected?.reqId === style.reqId ? "bg-[var(--accent)]" : "hover:bg-[var(--muted)]"}`} onClick={() => setSelectedReqId(style.reqId)}>
-              <span className="min-w-0 flex-1"><span className="flex items-center gap-1.5"><strong className="truncate text-sm">{style.garmentNo || "Garment No. 미기재"}</strong>{exact ? <Badge className="shrink-0">같은 Style No.</Badge> : null}</span><span className="block truncate text-xs text-[var(--muted-foreground)]">{style.chart} · #{style.seq} · {style.brand} · 개발 {style.developer}</span></span>
+            {candidates.map(({ style, total, unlinked, exact, score, reasons }) => <button key={style.reqId} type="button" className={`flex w-full items-center gap-2 rounded-md border px-2.5 py-2 text-left ${selected?.reqId === style.reqId ? "bg-[var(--accent)]" : "hover:bg-[var(--muted)]"}`} onClick={() => setSelectedReqId(style.reqId)}>
+              <span className="min-w-0 flex-1"><span className="flex items-center gap-1.5"><strong className="truncate text-sm">{style.garmentNo || "Garment No. 미기재"}</strong>{exact ? <Badge className="shrink-0">같은 Style No.</Badge> : score >= MATCH_STRONG_SCORE ? <Badge className="shrink-0">추천 {score}</Badge> : score >= MATCH_MIN_SCORE ? <Badge variant="outline" className="shrink-0 tabular-nums">{score}점</Badge> : null}</span><span className="block truncate text-xs text-[var(--muted-foreground)]">{style.chart} · #{style.seq} · {style.brand} · 개발 {style.developer}</span>{reasons.length ? <span className="block truncate text-[11px] text-[var(--muted-foreground)]">{reasons.slice(0, 3).join(" · ")}</span> : null}</span>
               <span className="shrink-0 text-xs text-[var(--muted-foreground)]">미연결 {unlinked}/{total}</span>
             </button>)}
             {!candidates.length ? <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">조건에 맞는 요청이 없습니다.</p> : null}

@@ -1,9 +1,10 @@
 import { createBlankDevRecord, isCompletedFlNo } from "@/data/dd-workflow"
 import { daysLeft, toDate } from "@/data/format"
 import type { DevRecord, RequestOption, RequestStyle } from "@/data/schema"
+import { normalizeStyleKey, scoreStyleForRows, suggestStylesForRows, type StyleMatch } from "@/data/request-link-match"
 
-export const normalizeStyleKey = (value: string): string =>
-  value.trim().toLocaleUpperCase("en-US").replace(/\s+/g, "")
+export { normalizeStyleKey }
+export type { StyleMatch }
 
 export function linkedLineIds(records: readonly DevRecord[]): Set<string> {
   return new Set(records.flatMap((record) => record.tech?.requestLink?.lineId ? [record.tech.requestLink.lineId] : []))
@@ -105,7 +106,7 @@ export function removeRequestLinks(records: readonly DevRecord[], rowIds: Readon
   return { next, removed }
 }
 
-export type HelperStatus = "auto" | "review" | "none"
+export type HelperStatus = "auto" | "review" | "suggest" | "none"
 
 export interface HelperGroup {
   /** normalizeStyleKey(styleNo) */
@@ -116,6 +117,8 @@ export interface HelperGroup {
   rows: DevRecord[]
   /** normalizeStyleKey(garmentNo)가 같은 요청 스타일 */
   candidates: RequestStyle[]
+  /** 같은 Garment No. 후보가 없을 때 점수로 고른 추천. status가 "suggest"인 그룹만 채운다. */
+  suggestions: StyleMatch[]
   status: HelperStatus
   reason: string
 }
@@ -147,12 +150,17 @@ export function buildLinkHelperGroups(records: readonly DevRecord[], requests: r
     if (group) group.push(style)
     else requestsByKey.set(key, [style])
   })
-  const rank: Record<HelperStatus, number> = { auto: 0, review: 1, none: 2 }
+  const rank: Record<HelperStatus, number> = { auto: 0, review: 1, suggest: 2, none: 3 }
   return [...rowsByKey].map(([styleKey, rows]): HelperGroup => {
     const sortedRows = [...rows].sort((a, b) => numericOrder(a.opt) - numericOrder(b.opt))
     const candidates = requestsByKey.get(styleKey) ?? []
-    const base = { styleKey, styleNo: sortedRows[0].styleNo.trim(), rows: sortedRows, candidates }
-    if (!candidates.length) return { ...base, status: "none", reason: "같은 Garment No. 요청 없음" }
+    const base = { styleKey, styleNo: sortedRows[0].styleNo.trim(), rows: sortedRows, candidates, suggestions: [] as StyleMatch[] }
+    if (!candidates.length) {
+      const suggestions = suggestStylesForRows(requests, sortedRows[0].styleNo, sortedRows, linked, 3)
+      return suggestions.length
+        ? { ...base, suggestions, status: "suggest", reason: `추천 ${suggestions.length}건 · 최고 ${suggestions[0].score}점` }
+        : { ...base, status: "none", reason: "같은 Garment No. 요청 없음" }
+    }
     if (candidates.length > 1) return { ...base, status: "review", reason: `요청 후보 ${candidates.length}개` }
     const free = candidates[0].options.filter((option) => !option.lineId || !linked.has(option.lineId)).length
     return free === sortedRows.length
@@ -174,12 +182,8 @@ export function ensureRequestLineIds(requests: readonly RequestStyle[]): { next:
   return { next, changed }
 }
 
-export interface RequestCandidate {
-  style: RequestStyle
-  total: number
-  unlinked: number
-  exact: boolean
-}
+/** 연결 작업 후보. 점수와 근거까지 들어 있다. */
+export type RequestCandidate = StyleMatch
 
 export function requestCandidates(
   requests: readonly RequestStyle[],
@@ -187,21 +191,18 @@ export function requestCandidates(
   styleNo: string,
   query: string,
   includeLinked: boolean,
+  opts: { rows?: readonly DevRecord[]; blockedLineIds?: ReadonlySet<string> } = {},
 ): RequestCandidate[] {
-  const linked = linkedLineIds(records)
+  const blocked = opts.blockedLineIds ?? linkedLineIds(records)
+  const rows = opts.rows ?? []
   const needle = query.trim().toLocaleLowerCase("ko-KR")
-  const styleKey = normalizeStyleKey(styleNo)
   return requests
     .filter((style) => !needle || [style.garmentNo, style.brand, style.chart, style.developer]
       .some((value) => value.toLocaleLowerCase("ko-KR").includes(needle)))
-    .map((style) => ({
-      style,
-      total: style.options.length,
-      unlinked: style.options.filter((option) => !option.lineId || !linked.has(option.lineId)).length,
-      exact: Boolean(styleKey) && normalizeStyleKey(style.garmentNo) === styleKey,
-    }))
+    .map((style) => scoreStyleForRows(style, styleNo, rows, blocked))
     .filter((candidate) => includeLinked || candidate.unlinked > 0)
-    .sort((a, b) => Number(b.exact) - Number(a.exact)
+    .sort((a, b) => b.score - a.score
+      || Number(b.exact) - Number(a.exact)
       || Date.parse(b.style.updatedAt) - Date.parse(a.style.updatedAt))
 }
 
