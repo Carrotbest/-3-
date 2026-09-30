@@ -112,6 +112,8 @@ export interface ZajiOption {
   remark: string
   dyeing: string
   mills: { yarn: string; knit: string; dye: string; finish: string }
+  /** 이 BODY에 걸린 공정 블록의 (공정명, 업체) 쌍. 화면 표시는 아직 없다. */
+  processLabels: [string, string][]
 }
 
 export interface Zaji {
@@ -131,6 +133,8 @@ export interface Zaji {
   notes: string[]
   /** 국내 양식 공정 블록에서 읽은 (공정명, 업체) 쌍. 화면 표시는 아직 없다. */
   processLabels: [string, string][]
+  /** 공정 블록이 하나 이상인데 원단 수와 달라 BODY별로 붙이지 못했다는 뜻. 첫 블록을 공통 적용한다. */
+  processBlockMismatch: boolean
   /** 파일명에서 Style No.를 주웠는지. 사람이 확인해야 한다는 뜻이다. */
   styleFromFilename: boolean
   dupRemoved: number
@@ -225,7 +229,7 @@ function parseGd(rows: Grid): Zaji {
     dept: g.rightOf("Department"), created: fmtDate(g.rawRightOf("Created date")), due: fmtDate(g.rawRightOf("Due date")),
     author: g.rightOf("Created by"), developer: "", style: g.rightOf("Main style number"),
     season: convertSeason(g.rightOf("Year / Season")), brand: g.rightOf("Brand name"), co: "",
-    options: [], notes: [], dupRemoved: 0, processLabels: [], styleFromFilename: false,
+    options: [], notes: [], dupRemoved: 0, processLabels: [], processBlockMismatch: false, styleFromFilename: false,
   }
   z.developer = mapName(z.author)
   const requestTo = g.rightOf("Request to")
@@ -302,6 +306,7 @@ function parseGd(rows: Grid): Zaji {
       part: o.part, color: o.color, weight: pt.weight, yarn, cons, rawName: pt.name, remark,
       dyeing: matchDyeing(o.color, pt.dyeing),
       mills: { yarn: z.co, knit: z.co, dye: z.co, finish: z.co },
+      processLabels: [],
     })
   }
   return z
@@ -320,7 +325,7 @@ function parseDomestic(rows: Grid, sheetName: string, filename: string): Zaji {
     fmt: "국내", subFmt: isYarnDye ? "Yarn Dyeing Work Sheet" : "Outsourcing Production Order",
     number: sheetName.trim(), dept: "", created: "", due: "", author: "", developer: "",
     style: "", season: "", brand: "", co: "국내",
-    options: [], notes: [], dupRemoved: 0, processLabels: [], styleFromFilename: false,
+    options: [], notes: [], dupRemoved: 0, processLabels: [], processBlockMismatch: false, styleFromFilename: false,
   }
   z.author = g.rightOf("Production Order Creater")
   z.developer = mapName(z.author)
@@ -345,56 +350,77 @@ function parseDomestic(rows: Grid, sheetName: string, filename: string): Zaji {
       z.options.push({
         part: `B0${z.options.length + 1}`, color: g.at(r, cols["Color name"]),
         weight: g.at(r, cGsm), yarn, cons, rawName: fabric, remark: "", dyeing: "",
-        mills: { yarn: "", knit: "", dye: "", finish: "" },
+        mills: { yarn: "", knit: "", dye: "", finish: "" }, processLabels: [],
       })
     }
   }
 
-  // 공정 블록 = Part 와 COLOR 가 같이 있는 행. 블록이 여럿이어도 첫 블록만 쓴다.
-  // 블록 순서와 원단 순서가 대응하지 않는다(MODAL SUN 3번 블록 정우 vs Yarn Detail 송림).
-  const mills = { yarn: "", knit: "", dye: "", finish: "" }
-  let dyeing = isYarnDye ? "YD" : ""
-  let blockColor = ""
+  // 공정 블록 = Part 와 COLOR 가 같이 있는 행. 블록 하나가 BODY 하나이고 그 순서가 원단 표 순서다.
+  // 근거 1: 사용자 확인. MODAL SUN 3번 블록 (주)정우섬유가 B03 편직처다(2026-09-30).
+  // 근거 2: HV100은 블록 1·3에만 Spray Washing이 있고 원단 1·3만 2*2 Rib다.
+  // Yarn Detail 표는 원사 박스 배분표라 BODY 순서와 무관하다. 거기 순서를 옵션에 붙이지 말 것.
+  type ProcessBlock = {
+    mills: { yarn: string; knit: string; dye: string; finish: string }
+    dyeing: string
+    color: string
+    labels: [string, string][]
+  }
+  const blocks: ProcessBlock[] = []
   for (let r = 0; r < rows.length; r++) {
     const texts = g.rowTexts(r)
     if (!texts.includes("Part") || !texts.some((t) => t.toUpperCase() === "COLOR")) continue
+    const labels: [string, string][] = []
     texts.forEach((label, i) => {
       if (!label || /^(Part|COLOR|Ground Color|Color Name|OUTPUT|GARMENT)$/i.test(label)) return
       const mill = g.at(r + 1, i)
       if (!mill || MILL_NOISE.test(mill)) return
-      z.processLabels.push([label, mill])
+      labels.push([label, mill])
     })
+    const mills = { yarn: "", knit: "", dye: "", finish: "" }
+    let blockDyeing = isYarnDye ? "YD" : ""
+    for (const [label, mill] of labels) {
+      if (/knitting/i.test(label)) mills.knit = mill
+      else if (/yarn\s*dyeing/i.test(label)) { mills.yarn = mill; blockDyeing = "YD" }
+      else if (/fabric\s*dyeing/i.test(label)) { mills.dye = mill; blockDyeing = blockDyeing || "CSD" }
+      else if (/finish|setting|washing|brush|coating|printing/i.test(label)) mills.finish = mill
+      else if (!mills.dye) mills.dye = mill
+    }
+    let color = ""
     const cColor = texts.findIndex((t) => /^color name$/i.test(t))
     if (cColor >= 0) {
       for (let rr = r + 1; rr < Math.min(r + 5, rows.length); rr++) {
         const value = g.at(rr, cColor)
         if (!value || MILL_NOISE.test(value) || GENERIC_COLOR.test(value)) continue
-        blockColor = value
+        color = value
         break
       }
     }
-    break
+    blocks.push({ mills, dyeing: blockDyeing, color, labels })
   }
 
-  for (const [label, mill] of z.processLabels) {
-    if (/knitting/i.test(label)) mills.knit = mill
-    else if (/yarn\s*dyeing/i.test(label)) { mills.yarn = mill; dyeing = "YD" }
-    else if (/fabric\s*dyeing/i.test(label)) { mills.dye = mill; dyeing = dyeing || "CSD" }
-    else if (/finish|setting|washing|brush|coating|printing/i.test(label)) mills.finish = mill
-    else if (!mills.dye) mills.dye = mill
-  }
+  // 블록 수가 원단 수와 같으면 순서대로 붙인다. 블록이 하나면 전 옵션 공통이다.
+  // 개수가 다르고 블록이 여럿이면 순서를 믿을 수 없으므로 첫 블록을 공통 적용하고 표시만 남긴다.
+  const perBody = blocks.length > 0 && blocks.length === z.options.length
+  z.processBlockMismatch = blocks.length > 1 && !perBody
+  const blockFor = (index: number): ProcessBlock | undefined => (perBody ? blocks[index] : blocks[0])
 
-  if (!mills.knit) {
+  // 블록에서 못 찾은 공정만 문서 전체에서 줍는다. 블록 값을 덮어쓰지 않는다.
+  const fallback = { yarn: "", knit: "", dye: "", finish: "" }
+  let fallbackDyeing = isYarnDye ? "YD" : ""
+  const fallbackLabels: [string, string][] = []
+  const haveKnit = blocks.some((b) => b.mills.knit)
+  const haveYarn = blocks.some((b) => b.mills.yarn)
+  if (!haveKnit) {
     const v = g.millOf("Knitting Company")
-    if (v) { mills.knit = v; z.processLabels.push(["Knitting Company", v]) }
+    if (v) { fallback.knit = v; fallbackLabels.push(["Knitting Company", v]) }
   }
-  if (!mills.yarn) {
+  if (!haveYarn) {
     const v = g.millOf("Yarn Dyeing Company")
-    if (v) { mills.yarn = v; dyeing = dyeing || "YD"; z.processLabels.push(["Yarn Dyeing Company", v]) }
+    if (v) { fallback.yarn = v; fallbackDyeing = fallbackDyeing || "YD"; fallbackLabels.push(["Yarn Dyeing Company", v]) }
   }
 
-  // 공정 블록이 없는 생지 발주 건은 Yarn Detail 표의 Mill 칸에서 줍는다.
-  if (!mills.knit || !mills.yarn) {
+  // 공정 블록에 없는 생지 발주 건은 Yarn Detail 표의 Mill 칸에서 줍는다. 첫 표만 본다.
+  if ((!haveKnit && !fallback.knit) || (!haveYarn && !fallback.yarn)) {
     for (let r = 0; r < rows.length; r++) {
       const texts = g.rowTexts(r)
       if (!texts.some((t) => t.toLowerCase() === "yarn detail")) continue
@@ -403,9 +429,9 @@ function parseDomestic(rows: Grid, sheetName: string, filename: string): Zaji {
         if (!/^(Mill\/Knitter|Y\/D Mill)$/i.test(t)) return
         const mill = g.at(r + 1, i)
         if (!mill) return
-        if (/Y\/D/i.test(t)) { if (!mills.yarn) { mills.yarn = mill; dyeing = dyeing || "YD" } }
-        else if (!mills.knit) mills.knit = mill
-        if (!z.processLabels.some(([label, value]) => label === t && value === mill)) z.processLabels.push([t, mill])
+        if (/Y\/D/i.test(t)) { if (!haveYarn && !fallback.yarn) { fallback.yarn = mill; fallbackDyeing = fallbackDyeing || "YD" } }
+        else if (!haveKnit && !fallback.knit) fallback.knit = mill
+        if (!fallbackLabels.some(([label, value]) => label === t && value === mill)) fallbackLabels.push([t, mill])
         hit = true
       })
       if (hit) break
@@ -424,11 +450,30 @@ function parseDomestic(rows: Grid, sheetName: string, filename: string): Zaji {
   }
   const commonRemark = z.notes.join(" / ")
 
-  for (const option of z.options) {
-    option.mills = { ...mills }
-    option.dyeing = dyeing
-    if (!option.color) option.color = blockColor
+  for (let i = 0; i < z.options.length; i++) {
+    const option = z.options[i]
+    const block = blockFor(i)
+    option.mills = {
+      yarn: block?.mills.yarn || fallback.yarn,
+      knit: block?.mills.knit || fallback.knit,
+      dye: block?.mills.dye || fallback.dye,
+      finish: block?.mills.finish || fallback.finish,
+    }
+    option.dyeing = block?.dyeing || fallbackDyeing
+    option.processLabels = [...(block?.labels ?? [])]
+    for (const [label, mill] of fallbackLabels) {
+      if (!option.processLabels.some(([l, v]) => l === label && v === mill)) option.processLabels.push([label, mill])
+    }
+    if (!option.color) option.color = block?.color ?? ""
     if (!option.remark) option.remark = commonRemark
+  }
+
+  // 문서 단위 목록은 블록 전량을 중복 없이 모은 것이다.
+  z.processLabels = []
+  for (const pairs of [...blocks.map((b) => b.labels), fallbackLabels]) {
+    for (const [label, mill] of pairs) {
+      if (!z.processLabels.some(([l, v]) => l === label && v === mill)) z.processLabels.push([label, mill])
+    }
   }
 
   const m = (filename || "").match(/(HMP|FL|AN)\d{6,}/i)
