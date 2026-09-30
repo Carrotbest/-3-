@@ -42,6 +42,8 @@
 - `?focus=rowId`(FABRIC REQUEST DD 상태 칩에서 진입)는 검색·Status·열 필터·완료 제외를 풀고, 닫힌 행이면 그 담당 탭으로 연 뒤 그 행 전체를 선택(`selectWholeRow`)하고 Style No. 칸 기준으로 스크롤한 다음 파라미터를 지운다. 행이 아직 동기화 전이면 기다린다.
 - 사이드바 하위 메뉴(DD MASTER의 EU·SEASON·CORE·PROJECT)는 화살표를 눌렀을 때만 연다. 현재 경로로 자동 펼치지 않는다(`AppSidebar` `openMap ?? false`).
 - 요청 연결 도우미(`RequestLinkHelperDialog`, `buildLinkHelperGroups`): 미연결 DD 행을 Style No.로 묶어 Garment No. 일치 후보로 auto·review·none을 가른다. auto는 후보 1개이고 미연결 옵션 수=행 수일 때만이며 값을 채우지 않는다. 짝 규칙은 `defaultLinkPairs` 하나다. 일괄 연결은 그룹 결과를 누적해 앞 그룹이 연결한 옵션을 막고, 스냅샷·쓰기는 한 번이다.
+- 열 머리에 마우스를 올리면 왼쪽에 숨김 버튼이 뜬다. 숨긴 열은 도구줄 `숨긴 열 N`에서 되돌린다. 고정 3열(담당·Status·Style No.)은 숨기지 않는다. 숨겨도 검색과 64열 수정 모달에서는 그대로 보인다(`allColumns`는 `GROUPS`를 쓴다).
+- `Project`(`tech.project`)는 개발 건 별칭이다. Style No. 오른쪽 열에서 사람이 정하고 같은 이름을 여러 행에 쓴다. 엑셀 원본에는 없는 웹 전용 값이며 `dd-export.ts` 내보내기에는 넣지 않는다.
 
 ## FABRIC REQUEST (`src/routes/FabricRequest.tsx`, `src/data/request-template.ts`, `src/data/request-image.ts`)
 - 화면 이름은 2026-09-22부터 DEVELOPMENT REQUEST다(경로 `/request`, 코드 이름 FabricRequest는 그대로). `/development`는 PROGRESS OVERVIEW. 네비 순서: HOME, FABRIC ANALYSIS, DEVELOPMENT REQUEST, DD MASTER, PROGRESS OVERVIEW, WAREHOUSE.
@@ -171,7 +173,7 @@
 ## 보기 설정 (`src/data/view-prefs.ts`)
 - 열 너비와 그룹 펼침/접힘은 **개인 브라우저(localStorage)에만** 남는다. `CACHE_KEYS`에 없어 Firestore로 안 올라간다. 한 사람이 바꿔도 팀원 화면은 그대로다.
 - 계정이 아니라 브라우저에 붙는다. 공용 PC에서는 앞사람 설정이 보이고, 다른 PC로 가면 기본값에서 시작한다.
-- 키: `dd-col-widths-v2`, `dd-open-groups-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `fabric.request.rowHeights`, `fabric.request.activeBoard`, `home-today-briefing-hidden-v1`.
+- 키: `dd-col-widths-v2`, `dd-intake-col-widths-v1`, `dd-open-groups-v1`, `dd-hidden-cols-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `fabric.request.rowHeights`, `fabric.request.activeBoard`, `home-today-briefing-hidden-v1`.
 - 검색·필터·정렬·탭·선택은 일부러 저장하지 않는다. 남아 있으면 다음에 열었을 때 행이 왜 안 보이는지 헷갈린다.
 - **예외: DD MASTER 행 드래그 순서(`sortOrder`)는 레코드에 저장돼 팀 전체가 공유한다.** 보기 설정이 아니다.
 

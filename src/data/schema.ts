@@ -18,6 +18,8 @@ export interface DevTechnical {
   mills?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
   // 공정별 완료일 (기존 processReached 판정에 쓰는 Status 원본값)
   processDates?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
+  /** 개발 건 별칭(Project). DD의 Style No. 오른쪽 열에서 사람이 적는 웹 전용 값. */
+  project?: string
   // 개발 사양
   yarnDetail?: string
   arrangeNo?: string
