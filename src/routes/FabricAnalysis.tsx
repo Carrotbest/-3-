@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
-import { FileDown, ImageOff, Mail, Plus, Trash2 } from "lucide-react"
+import { FileDown, ImageOff, Mail, Plus, Printer, Trash2 } from "lucide-react"
 
 import { AnalysisDetailDialog } from "@/components/analysis/AnalysisDetailDialog"
+import { AnalysisPrintDeck } from "@/components/analysis/AnalysisPrintDeck"
 import { AnalysisKpiChart } from "@/components/analysis/AnalysisKpiChart"
 import { AnalysisRequestDialog } from "@/components/analysis/AnalysisRequestDialog"
 import { PageHeader } from "@/components/layout/PageHeader"
@@ -15,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuthStore, useScreenAccess } from "@/data/auth"
 import { downloadAnalysisFinishedEml, downloadAnalysisRequestEml, openAnalysisFinishedMail, openAnalysisRequestMail } from "@/data/analysis-mail"
+import { isAnalysisPrintable } from "@/data/analysis-print"
 import { analysisLeadDays, analysisTodayValue, analysisWeeklySeries } from "@/data/fabric-analysis"
 import { loadAnalysisRecipients } from "@/data/mail-recipients"
 import type { MailAddress } from "@/data/mail-draft"
@@ -58,6 +60,7 @@ export function FabricAnalysis() {
   const [requestOpen, setRequestOpen] = useState(false)
   const [recipients, setRecipients] = useState<MailAddress[]>([])
   const [notice, setNotice] = useState("")
+  const [printJob, setPrintJob] = useState<AnalysisRequest[] | null>(null)
 
   useEffect(() => { void loadAnalysisRecipients().then(setRecipients).catch(() => setRecipients([])) }, [])
   const showNotice = (message: string) => { setNotice(message); window.setTimeout(() => setNotice(""), 6000) }
@@ -72,6 +75,8 @@ export function FabricAnalysis() {
   const draftSelected = selectedRows.filter((item) => item.state === "작성")
   const requestedSelected = selectedRows.filter((item) => item.state === "의뢰")
   const finishedSelected = selectedRows.filter((item) => item.state === "완료")
+  // 취소 건은 종이로 내보내지 않는다. 완료 건은 리포트, 나머지는 의뢰서로 나간다.
+  const printableSelected = selectedRows.filter(isAnalysisPrintable)
   const monthPrefix = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
   const recentStart = Date.now() - 90 * 86_400_000
   const leadDays = rows.map((item) => ({ item, days: analysisLeadDays(item) })).filter(({ item, days }) => days != null && new Date(`${item.finishedAt}T00:00:00`).getTime() >= recentStart).map(({ days }) => days as number)
@@ -84,6 +89,14 @@ export function FabricAnalysis() {
     { label: "이번 달 완료", value: rows.filter((item) => item.state === "완료" && item.finishedAt.startsWith(monthPrefix)).length, color: "bg-teal-600 dark:bg-teal-400", onClick: () => { setActiveState("완료"); setUrgentOnly(false) } },
     { label: "평균 소요일", value: averageLead, suffix: leadDays.length ? "일" : "-", decimals: leadDays.length ? 1 : 0, color: "bg-slate-400", onClick: () => { setActiveState("완료"); setUrgentOnly(false) } },
   ]
+
+  // 팝업이 열려 있으면 먼저 닫는다. 팝업 오버레이가 인쇄 화면에 겹치는 것을 막는다.
+  const startPrint = (targets: AnalysisRequest[]) => {
+    const printable = targets.filter(isAnalysisPrintable)
+    if (!printable.length) return
+    setDetail(null)
+    setPrintJob(printable)
+  }
 
   const saveOne = (record: AnalysisRequest) => {
     const current = useAppStore.getState().analysisRequests
@@ -155,7 +168,7 @@ export function FabricAnalysis() {
     <Card className="border-[var(--border)]/60 shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:translate-y-0 hover:shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <CardHeader className="gap-3"><CardTitle className="text-base font-medium">분석 의뢰 목록</CardTitle><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><Tabs value={activeState} onValueChange={(value) => { setActiveState(value as AnalysisState | typeof ALL); setUrgentOnly(false) }}><TabsList className="bg-transparent">{[ALL, ...ANALYSIS_STATES].map((state) => <TabsTrigger key={state} value={state} className="rounded-none border-b-2 border-transparent px-3 data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:text-teal-700 data-[state=active]:shadow-none dark:data-[state=active]:border-teal-400 dark:data-[state=active]:text-teal-300">{state}</TabsTrigger>)}</TabsList></Tabs><div className="flex items-center gap-2 lg:w-full lg:max-w-xl">{canEdit ? <ShinyActionButton tone="teal" icon={<Plus />} onClick={() => { setEditRecord(null); setRequestOpen(true) }}>새 분석 의뢰</ShinyActionButton> : null}<Input className="min-w-0 flex-1" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="AN No. · Source code · Brand · Requester 검색" /></div></div>
         {urgentOnly ? <p className="text-xs text-rose-600">Urgent 대기만 표시 중</p> : null}
-        {selected.size ? <div className="flex flex-wrap items-center gap-2 rounded-md bg-teal-500/5 p-2 text-sm"><span className="px-1">{selected.size}건 선택</span>{canEdit ? <Button size="sm" disabled={!draftSelected.length} className="bg-teal-600 text-white hover:bg-teal-700" onClick={() => confirmRequests(draftSelected)}><Mail />의뢰 확정</Button> : null}{canEdit ? <Button size="sm" variant="outline" disabled={!requestedSelected.length} onClick={() => completeRequests(requestedSelected)}>완료 처리</Button> : null}<Button size="sm" variant="outline" disabled={!finishedSelected.length} onClick={finishedMail}>완료 메일</Button>{canEdit ? <Button size="sm" variant="outline" disabled={!draftSelected.length} onClick={deleteDrafts}><Trash2 />삭제</Button> : null}<Button size="sm" variant="ghost" disabled={!draftSelected.length && !finishedSelected.length} onClick={downloadSelectedEml}><FileDown />.eml로 받기</Button></div> : null}
+        {selected.size ? <div className="flex flex-wrap items-center gap-2 rounded-md bg-teal-500/5 p-2 text-sm"><span className="px-1">{selected.size}건 선택</span>{canEdit ? <Button size="sm" disabled={!draftSelected.length} className="bg-teal-600 text-white hover:bg-teal-700" onClick={() => confirmRequests(draftSelected)}><Mail />의뢰 확정</Button> : null}{canEdit ? <Button size="sm" variant="outline" disabled={!requestedSelected.length} onClick={() => completeRequests(requestedSelected)}>완료 처리</Button> : null}<Button size="sm" variant="outline" disabled={!finishedSelected.length} onClick={finishedMail}>완료 메일</Button>{canEdit ? <Button size="sm" variant="outline" disabled={!draftSelected.length} onClick={deleteDrafts}><Trash2 />삭제</Button> : null}<Button size="sm" variant="outline" disabled={!printableSelected.length} title="완료 건은 분석 리포트, 그 밖에는 분석 의뢰서로 나갑니다" onClick={() => startPrint(printableSelected)}><Printer />출력</Button><Button size="sm" variant="ghost" disabled={!draftSelected.length && !finishedSelected.length} onClick={downloadSelectedEml}><FileDown />.eml로 받기</Button></div> : null}
         {notice ? <p className="text-sm text-[var(--muted-foreground)]">{notice}</p> : null}
       </CardHeader>
       <CardContent className="p-0"><div className="overflow-x-auto"><Table className="min-w-[1700px] text-[13px]"><TableHeader className="bg-[var(--muted)]/40"><TableRow className="border-[var(--border)]/50">
@@ -168,6 +181,7 @@ export function FabricAnalysis() {
     </Card>
 
     <AnalysisRequestDialog open={requestOpen} onOpenChange={setRequestOpen} record={editRecord} requester={defaultName} requesterEmail={user?.email ?? ""} onSaved={(saved) => { if (editRecord) setDetail(saved) }} />
-    <AnalysisDetailDialog record={detail} canEdit={canEdit} defaultInCharge={defaultName} recipients={recipients} onOpenChange={(open) => { if (!open) setDetail(null) }} onSave={saveOne} onEditRequest={(selectedRecord) => { setDetail(null); setEditRecord(selectedRecord); setRequestOpen(true) }} />
+    <AnalysisDetailDialog record={detail} canEdit={canEdit} defaultInCharge={defaultName} recipients={recipients} onOpenChange={(open) => { if (!open) setDetail(null) }} onSave={saveOne} onPrint={(record) => startPrint([record])} onEditRequest={(selectedRecord) => { setDetail(null); setEditRecord(selectedRecord); setRequestOpen(true) }} />
+    {printJob ? <AnalysisPrintDeck records={printJob} onDone={() => setPrintJob(null)} /> : null}
   </section>
 }

@@ -836,6 +836,78 @@ input.dd-date::-webkit-calendar-picker-indicator {
   .rdda-print-kpis strong { font-size: 24pt; }
 }
 
+/* ------------------------------------------------------------------
+ * FABRIC ANALYSIS A4 출력(R258 → R265 개편). 의뢰서와 리포트가 같은 뼈대를 쓴다.
+ * 격자를 걷고 제목줄 + 값만 남겼다. 라벨은 작게 위, 값은 크게 아래다.
+ * 세로 @page 는 CSS 가 아니라 AnalysisPrintDeck 이 인쇄 직전에 붙이는 <style> 이 정한다.
+ * 위 RDDA 블록이 body * 를 숨기므로 여기서는 우리 뿌리만 다시 보이게 한다.
+ * 인쇄 길이 기준: A4 세로 여백 12mm → 가로 186mm, 세로 273mm.
+ * ------------------------------------------------------------------ */
+.an-print-deck { display: none; }
+
+@media print {
+  .an-print-root, .an-print-root * { visibility: visible !important; }
+  .an-print-root { position: fixed !important; inset: 0 !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; translate: none !important; transform: none !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
+  .an-print-deck { display: block !important; background: white; color: #111827; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .an-print-page { box-sizing: border-box; width: 186mm; font-size: 9pt; line-height: 1.4; page-break-after: always; break-after: page; }
+  .an-print-page:last-child { page-break-after: auto; break-after: auto; }
+
+  /* 머리말 */
+  .an-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8mm; padding-bottom: 2.5mm; border-bottom: 0.5mm solid #111827; }
+  .an-doc { margin: 0; font-size: 7.5pt; letter-spacing: 0.22em; color: #6b7280; }
+  .an-head h1 { margin: 1mm 0 0; font-size: 16pt; font-weight: 600; letter-spacing: -0.01em; }
+  .an-head-no { text-align: right; white-space: nowrap; }
+  .an-head-no strong { font-size: 13pt; font-weight: 600; letter-spacing: 0.06em; }
+  .an-head-no p { margin: 1mm 0 0; font-size: 8pt; color: #4b5563; }
+  .an-head-no em { margin-left: 2mm; padding: 0 1.5mm; border: 0.25mm solid #b91c1c; color: #b91c1c; font-style: normal; font-weight: 600; }
+
+  /* 구역: 제목줄과 내용을 확실히 가른다 */
+  .an-block { margin-top: 6mm; break-inside: avoid; }
+  .an-block > h2 { margin: 0 0 2mm; font-size: 7.5pt; font-weight: 600; letter-spacing: 0.18em; color: #6b7280; text-transform: uppercase; }
+
+  /* 짧은 칸 네 줄. 격자 대신 값 아래 실선 하나만 둔다 */
+  .an-fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 6mm; }
+  .an-field { padding: 1.4mm 0; border-bottom: 0.2mm solid #e5e7eb; break-inside: avoid; }
+  .an-field span { display: block; font-size: 6.5pt; letter-spacing: 0.08em; color: #9ca3af; text-transform: uppercase; }
+  .an-field b { display: block; margin-top: 0.4mm; font-size: 9pt; font-weight: 500; }
+
+  /* 긴 글은 전폭 한 줄 */
+  .an-notes { margin-top: 2mm; }
+  .an-note { display: flex; gap: 4mm; padding: 1.4mm 0; border-bottom: 0.2mm solid #e5e7eb; }
+  .an-note span { flex: 0 0 34mm; font-size: 6.5pt; letter-spacing: 0.08em; color: #9ca3af; text-transform: uppercase; padding-top: 0.6mm; }
+  .an-note b { flex: 1; font-size: 9pt; font-weight: 500; white-space: pre-wrap; }
+
+  /* 의뢰서: swatch 자리. 테두리도 안내선도 없이 비운다 */
+  .an-blank { height: 96mm; }
+
+  /* 의뢰서: 손으로 적는 결과 칸 */
+  .an-write-row { display: flex; align-items: flex-end; gap: 4mm; margin-bottom: 4mm; }
+  .an-write-row span { flex: 0 0 34mm; font-size: 7pt; color: #6b7280; }
+  .an-write-row i { flex: 1; border-bottom: 0.2mm solid #9ca3af; height: 4mm; }
+  .an-hand { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 1mm; }
+  .an-hand div { display: flex; align-items: flex-end; gap: 2mm; }
+  .an-hand span { font-size: 7pt; color: #6b7280; white-space: nowrap; }
+  .an-hand i { flex: 1; border-bottom: 0.2mm solid #9ca3af; height: 4mm; }
+
+  /* 의뢰서: 참고 사진 두 칸. 비어 있으면 붙일 자리다 */
+  .an-shots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6mm; }
+  .an-shot { box-sizing: border-box; height: 34mm; border: 0.2mm solid #d1d5db; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .an-shot img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+  /* 리포트: 서술 칸과 사진 */
+  .an-texts { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-top: 3mm; }
+  .an-texts div { break-inside: avoid; }
+  .an-texts span { display: block; font-size: 6.5pt; letter-spacing: 0.08em; color: #9ca3af; text-transform: uppercase; }
+  .an-texts p { margin: 1mm 0 0; min-height: 22mm; padding-bottom: 1mm; border-bottom: 0.2mm solid #e5e7eb; white-space: pre-wrap; }
+  .an-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+  .an-photos div { break-inside: avoid; }
+  .an-photos img { display: block; width: 100%; height: 38mm; object-fit: contain; border: 0.2mm solid #e5e7eb; }
+  .an-photos span { display: block; margin-top: 1mm; font-size: 7pt; color: #9ca3af; }
+  .an-empty { margin: 0; font-size: 8pt; color: #9ca3af; }
+
+  .an-foot { display: flex; justify-content: space-between; margin-top: 6mm; padding-top: 2mm; border-top: 0.2mm solid #e5e7eb; font-size: 7.5pt; color: #9ca3af; }
+}
+
 /* RDDA 원단 성과 행 강조(R211). 등급은 src/data/fabric-performance.ts 에서 정한다. */
 tr.perf-row-order > td { background-image: linear-gradient(color-mix(in srgb, #f59e0b 9%, transparent), color-mix(in srgb, #f59e0b 9%, transparent)); }
 tr.perf-row-order > td:first-child { box-shadow: inset 3px 0 0 #f59e0b; }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Check, ImagePlus, Loader2, Mail, Trash2, Upload } from "lucide-react"
+import { Check, ImagePlus, Loader2, Mail, Printer, Trash2, Upload } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -13,7 +13,7 @@ import type { MailAddress } from "@/data/mail-draft"
 import { deleteRequestImage, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
 import type { AnalysisRequest, AnalysisState } from "@/data/schema"
 
-type Props = { record: AnalysisRequest | null; canEdit: boolean; defaultInCharge: string; recipients: readonly MailAddress[]; onOpenChange: (open: boolean) => void; onSave: (record: AnalysisRequest) => void; onEditRequest: (record: AnalysisRequest) => void }
+type Props = { record: AnalysisRequest | null; canEdit: boolean; defaultInCharge: string; recipients: readonly MailAddress[]; onOpenChange: (open: boolean) => void; onSave: (record: AnalysisRequest) => void; onEditRequest: (record: AnalysisRequest) => void; onPrint: (record: AnalysisRequest) => void }
 type SaveStatus = "idle" | "saving" | "saved"
 const MAX_ANALYSIS_IMAGE_SIZE = 20 * 1024 * 1024
 const EMPTY_SELECT = "__empty__"
@@ -36,7 +36,7 @@ function RemoteImage({ path, alt, className }: { path: string; alt: string; clas
   return url ? <a href={url} target="_blank" rel="noreferrer" className="block h-full"><img src={url} alt={alt} className={className} /></a> : <div className="flex h-full items-center justify-center text-xs text-[var(--muted-foreground)]">불러오는 중…</div>
 }
 
-export function AnalysisDetailDialog({ record, canEdit, defaultInCharge, recipients, onOpenChange, onSave, onEditRequest }: Props) {
+export function AnalysisDetailDialog({ record, canEdit, defaultInCharge, recipients, onOpenChange, onSave, onEditRequest, onPrint }: Props) {
   const [draft, setDraft] = useState<AnalysisRequest | null>(record)
   const [notice, setNotice] = useState("")
   const [working, setWorking] = useState(false)
@@ -175,6 +175,6 @@ export function AnalysisDetailDialog({ record, canEdit, defaultInCharge, recipie
       </div>
       {notice ? <p className="text-sm text-[var(--muted-foreground)]">{notice}</p> : null}
     </DialogBody>
-    <DialogFooter className="justify-between"><div>{record.state === "완료" ? <Button type="button" variant="outline" disabled={completionPending} className="border-teal-600/40 text-teal-700 hover:bg-teal-500/10 dark:text-teal-300" onClick={finishedMail}><Mail />완료 메일</Button> : null}</div><div className="flex flex-wrap gap-2">{canEdit ? <><Button type="button" variant="ghost" disabled={completionPending} onClick={() => onEditRequest(record)}>의뢰 정보 수정</Button><Button type="button" variant="outline" disabled={working || completionPending || saveStatus === "saving"} className={resultSaveClass} onClick={saveResult}>{resultLabel}</Button>{record.state === "의뢰" ? <Button type="button" disabled={working || completionPending || (!draft.yarnDescription.trim() && !draft.commentRnd.trim())} className="bg-teal-600 text-white hover:bg-teal-700" onClick={completeAnalysis}>완료 처리</Button> : null}{record.state === "완료" ? <Button type="button" variant="outline" disabled={working || completionPending} className="border-amber-500/40 text-amber-700 hover:bg-amber-500/10 dark:text-amber-300" onClick={() => save({ state: "의뢰", finishedAt: "" })}>완료 되돌리기</Button> : null}{record.state === "작성" || record.state === "의뢰" ? <Button type="button" variant="outline" disabled={working || completionPending} className="border-rose-500/40 text-rose-600 hover:bg-rose-500/10" onClick={() => { if (confirm("이 의뢰를 취소할까요?")) save({ state: "취소" }) }}>의뢰 취소</Button> : null}</> : null}<Button type="button" variant="ghost" disabled={completionPending} onClick={() => onOpenChange(false)}>닫기</Button></div></DialogFooter>
+    <DialogFooter className="justify-between"><div className="flex flex-wrap gap-2"><Button type="button" variant="outline" disabled={completionPending} title="완료 건은 분석 리포트, 그 밖에는 분석 의뢰서로 나갑니다" onClick={() => onPrint(record)}><Printer />출력</Button>{record.state === "완료" ? <Button type="button" variant="outline" disabled={completionPending} className="border-teal-600/40 text-teal-700 hover:bg-teal-500/10 dark:text-teal-300" onClick={finishedMail}><Mail />완료 메일</Button> : null}</div><div className="flex flex-wrap gap-2">{canEdit ? <><Button type="button" variant="ghost" disabled={completionPending} onClick={() => onEditRequest(record)}>의뢰 정보 수정</Button><Button type="button" variant="outline" disabled={working || completionPending || saveStatus === "saving"} className={resultSaveClass} onClick={saveResult}>{resultLabel}</Button>{record.state === "의뢰" ? <Button type="button" disabled={working || completionPending || (!draft.yarnDescription.trim() && !draft.commentRnd.trim())} className="bg-teal-600 text-white hover:bg-teal-700" onClick={completeAnalysis}>완료 처리</Button> : null}{record.state === "완료" ? <Button type="button" variant="outline" disabled={working || completionPending} className="border-amber-500/40 text-amber-700 hover:bg-amber-500/10 dark:text-amber-300" onClick={() => save({ state: "의뢰", finishedAt: "" })}>완료 되돌리기</Button> : null}{record.state === "작성" || record.state === "의뢰" ? <Button type="button" variant="outline" disabled={working || completionPending} className="border-rose-500/40 text-rose-600 hover:bg-rose-500/10" onClick={() => { if (confirm("이 의뢰를 취소할까요?")) save({ state: "취소" }) }}>의뢰 취소</Button> : null}</> : null}<Button type="button" variant="ghost" disabled={completionPending} onClick={() => onOpenChange(false)}>닫기</Button></div></DialogFooter>
   </DialogContent></Dialog>
 }
