@@ -12,6 +12,7 @@ export const SCREEN_PERMISSION_OPTIONS = [
   { key: "study", label: "TECHNICAL REFERENCES", paths: ["/study"] },
   { key: "rdda", label: "RDDA REPORT", paths: ["/rdda"] },
   { key: "fabricAnalysis", label: "FABRIC ANALYSIS", paths: ["/fabric-analysis"] },
+  { key: "costSheet", label: "COST SHEET", paths: ["/cost"] },
   { key: "fabricTrend", label: "FABRIC TREND", paths: ["/trend/fabric", "/trend/macro"] },
   { key: "portfolio", label: "PORTFOLIO", paths: ["/trend/portfolio"] },
   { key: "processInnovation", label: "PROCESS INNOVATION", paths: ["/process-innovation"] },
@@ -68,7 +69,7 @@ export const ACCESS_LABELS: Record<ScreenAccess, string> = { none: "없음", rea
 /** 권한 표에 보이는 묶음. SETTING은 소유자 전용이라 표에 넣지 않는다. excelBackup은 기능이라 허용/차단 두 단계다. */
 export const ACCESS_GROUPS: { label: string; keys: ScreenPermissionKey[] }[] = [
   { label: "업무", keys: ["home", "fabricRequest", "development", "ddMaster", "warehouse", "warehouseFabric1", "calendar"] },
-  { label: "분석·자료", keys: ["rdda", "fabricAnalysis", "fabricTrend", "portfolio", "processInnovation", "ts", "study"] },
+  { label: "분석·자료", keys: ["rdda", "fabricAnalysis", "costSheet", "fabricTrend", "portfolio", "processInnovation", "ts", "study"] },
   { label: "기능", keys: ["excelBackup", "warehouseOutbound"] },
 ]
 

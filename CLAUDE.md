@@ -109,6 +109,24 @@
   입고·소진/폐기 목록은 **R&D No.마다 최종 이력 1건만** 올리고, 그 위에 **현재 원장 상태와 대조**해 되돌리거나 취소한 건을 뺀다. 이력만 보면 입고했다 되돌린 건이 남는다. R&D No.가 없는 기록은 집계에서 빠진다.
 - 1팀 신규 입고(R237): 1팀은 입고 대기가 없다. 창고보관 탭 `신규 입고` 팝업에서 저장하는 순간 `FABRIC1_INTAKE_SHEET` 샘플, WAREHOUSE override, RECEIVE 이력(occurredAt=저장 시각)이 한 번에 생기고 R&D No.가 자동 채번된다(`addFabric1Intake`). 1팀 엑셀의 `Ref. No` 열은 실제로 FL No.다. 업체 번호는 `millRef` 필드다. 롤 표시는 입고할 때만 정하고 사후 토글 버튼은 없앴다. **1팀 표와 신규 입고 팝업 열 순서(R242)**: 고정 4열(R&D No., Stock, 입고확인, Rack No.) 다음 FL No., Color, Construction, Content, Weight, Mill(`supplier`), Requester(`owner`), Season, Brand(`buyer`), Remark. Mill Ref., Width, Price 두 개, 입고 요청일은 표에서 뺐고 값은 남긴다. 입고 요청일은 입고한 날로 자동 저장한다. 재고 열 이름은 두 팀 모두 Stock이다.
 
+## COST SHEET (`src/data/fabric-cost.ts`, `yarn-blend.ts`, `cost-sheets.ts`, `cost-export.ts`, `src/components/dd/CostSheetDialog.tsx`, `src/routes/CostSheets.tsx`)
+- 국내 원단 사전 원가계산이다(R267~R271). 진입은 두 곳뿐이다. DD MASTER 행 우클릭 `사전 원가계산…`(`Co`가 국내 또는 생산인 행만, GD는 GD가 견적을 준다)과 DD MASTER FL# 칸 한 번 클릭(유효 FL#이고 국내 건일 때만, 더블클릭 편집과 220ms 타이머로 갈린다). 자료실은 `/cost`다.
+- **loss율과 단가는 사람이 직접 입력한다.** 공정과 사종, 공장, 컬러마다 달라 조직 이름으로 단가를 찾아 꽂는 로직을 만들지 말 것. 임가공 단가표는 참조 조회로만 띄운다.
+- 계산식은 `6085.xlsx` 구조 그대로다. 누적 마크업이며 **`÷(1-loss)`가 아니라 `×(1+loss)`**다. 추정한 식으로 바꾸지 말 것. 구성은 원사대와 임가공료뿐이다. 부대비, 관리비, 마진 칸을 만들지 않는다. 이익률은 입력값이고 기본 0이며 **팀 산출물은 Net price까지다.**
+- **공정료는 그룹과 무관하게 원단 전체 중량에 곱한다**(R272, 2026-10-01 확정). 원본 `6085.xlsx` `K17`이 그렇다. R271에서 원사 그룹만 선염 원사 투입 비중을 곱하게 고쳤다가 되돌렸다. **비중 배분을 다시 넣지 말 것.**
+- **원사 공정 단가는 사람이 비중을 곱해 넣는다**(2026-10-01 박향근 확인). 팀이 엑셀에서 쭉 그렇게 써 왔다. 공장 단가가 1200원이고 선염 원사가 55%면 660을 적는다. 화면 단가 칸 아래 `비중 곱한 값` 표시가 그 약속이다. **LOSS는 공장값 그대로 적는다.** loss만 코드가 원사별로 가려 준다. 단가를 자동으로 곱해 주지 말 것. 그러면 손으로 깎아 넣은 값이 두 번 깎인다.
+- **loss는 원사별로 갈린다.** 원사 그룹(선염·연사·인팅) loss는 `yarnDyed` 체크된 원사만 먹고 편직·염색·기타 loss는 전부 먹는다(`computeFabricCost`의 `yarnValues` 게이트). 엑셀 `K10`의 `IF($O10="Y", …)`가 이 자리다. **공정료를 되돌릴 때 이 게이트까지 같이 손대지 말 것.**
+- 회귀 판별값: 환율 1200, 270gsm, 72인치, 원사 A $590/bale 55% 선염체크 + B $6/kg 45%, 선염 1200원/kg loss5, 편직 600원/kg loss3이면 `netPerKg 6.25`. `5.78`이면 R271 비중 배분이 남아 있는 것이다.
+- 6085 회귀 기준값: 환율 1200, 270gsm, 72인치, 원사 $590/bale 95% + $6/kg 5%, 편직 600원/kg loss3, 염색 2800원/kg loss8, 기타 1360원/kg loss1 → `grPerYd 451`, `netPerKg 7.84`, `netPerYd 3.5358`, `netKrwPerYd 4243`. 이익 2.6%면 `4353`. 이 건에는 원사 공정료가 없어 R272 변경에 영향받지 않는다.
+- 혼용율은 `yarn-blend.ts`가 **유효 데니어**(`유효D = 데니어 × k`)로 합성한다. 스판 코어 `k=1/드래프트`, 인팅 `k=1+오버피드`, 연사와 단순 합사 `k=1`. **연사와 인팅의 총 번수는 꼬임 수축과 벌크가 들어가 부풀어 있으므로 비율 계산에 쓰지 말 것.** 정수화는 최대잉여법이다(반올림하면 합이 101이 된다). 표기는 FTC 16 CFR 303.
+- 사내 표기 파서는 혼방(`T/R 70/30 30's/1`), 커버링(`cvr sp/pe 20/40`), 단독(`CM26'S/1`) 세 형식만 받는다. 꼬리(`SLUB (ISL504) 3:1`)는 버리고 **맨숫자 굵기(`Span 20`)는 `null`이다. 방적사인지 필라멘트인지 추측하지 말 것.** `FIBER_ALIASES`는 더하기만 한다. **`PE`는 입력만 받고 출력에 쓰지 않는다**(폴리에틸렌 혼동). 성분이 하나뿐인 원사는 굵기가 비율에 영향이 없다(굵기 0이면 원사가 통째로 사라지던 버그).
+- 저장은 **별도 컬렉션 `costSheets`**다. 버전이 쌓이는 이력이라 `state`에 두지 않는다. 문서 하나가 한 버전이고 `groupId`로 묶여 `version`이 올라간다(`saveCostSheet`가 기존 최대 버전+1). DD 레코드에는 포인터와 열 표시용 요약 `tech.costRef`만 넣는다(`sheetId`, `groupId`, `version`, `at`, `netKrwPerYd`, `netPerYd`). **`records`에 계산서 본문을 넣지 말 것.** 배열 통째로 재업로드되는 구조라 편집 비용이 계속 커진다.
+- **`firestore.rules`의 `costSheets`는 수동 배포다.** `.github/workflows`에 firebase 배포가 없고 `deploy.yml`은 Pages 빌드만 한다. 규칙을 안 올리면 맨 아래 `allow read, write: if false`에 걸려 저장이 permission denied로 막힌다. `firebase deploy --only firestore:rules`.
+- 권한 키는 `costSheet`(`/cost`)다. `normalizeScreenPermissions`가 없는 키를 `true`로 채우므로 기존 승인 사용자에게 바로 보인다.
+- DD MASTER COST 열 그룹 3열(₩/yd, $/yd, 계산일)은 `tech.costRef`를 읽는 보기 전용이다(`COMPUTED_COLUMN_IDS`). 기본 접힘이고 `dd-export.ts` 내보내기에는 넣지 않는다.
+- **마스터 단가가 바뀌어도 저장된 계산서를 자동으로 고치지 않는다.** `COST_STALE_DAYS`(180일)를 넘기면 계산일 칸과 자료실에 경과 배지만 띄우고 사람이 다시 계산한다.
+- 테스트 러너가 없다(vitest 없음). 기준값 검증은 `src/data/__check.ts` 하네스를 임시로 만들고 `node_modules/@esbuild/win32-x64/esbuild.exe --bundle --platform=node --format=esm`로 묶어 `node`로 돌린 뒤 지운다.
+
 ## RDDA (`src/routes/Rdda.tsx`, `src/data/rdda-dataset.ts`, `src/data/rdda-sync.ts`, `src/data/fabric-performance.ts`)
 - 수집: `/rdda` **RDDA 갱신**이 RDDA 창을 열고, 그 창에서 북마크 **RDDA 수집**(바탕화면 `RDDA_수집_v5.js`, 설치 `RDDA_수집_북마크설치.html`)을 누르면 postMessage로 데이터셋이 들어와 `state/rdda`에 저장된다. 수신은 origin `https://rdda.hansoll.com`과 연 창(source)만 받는다. **수집기에는 팀원 사번이 있어 저장소에 넣지 않는다.** JSON 업로드는 예비 경로다.
 - 저장 형식은 12개월 집계가 아니라 전 기간 압축 데이터셋(`RddaDataset` v3, 약 1.7MB)이다. 화면은 사용자가 고른 기간으로 `buildRddaReport`를 즉석 계산하고 탭은 `RddaReportV2`만 받는다. 원장 기반 지표(`cumulative`)는 기간과 무관한 누적값이다. 개인 계정 조회라 미팅은 전사의 절반 정도만 잡힌다.
@@ -201,6 +219,7 @@
 | TREND | RSS 24곳, SEC 공시, World Bank, US Census | 사전 점수 채택, 공개 자료만 |
 | RDDA ANALYSIS | RDDA 전 기간 데이터셋(북마크 수집) | 기간 선택 즉석 재집계, 원장 지표는 누적 |
 | 원단 성과 배지 | RDDA FL 원장 누적 | 폐기 리스트 미팅 차감, 3팀 담당 FL만 |
+| COST SHEET | 사람 입력(단가·loss) + DD 행(중량·폭·조직·컬러) | 원본 `6085.xlsx` 누적 마크업, `×(1+loss)`. 단가표 자동 매칭 없음. 저장은 `costSheets` 컬렉션, DD에는 `tech.costRef` 요약만 |
 
 ## 코덱스 협업
 기획·검토=Claude, 코딩=Codex, 최종확인=Claude. 절차·명령·함정은 `codex-handoff` 스킬에 있다. 지시서 `docs/codex/RNN-*.md`, 실행 파일 `.codex-runs/`(gitignore). **커밋은 사용자 요청 시에만.** `git reset --hard`/`checkout --`로 사용자 변경 되돌리기 금지.
@@ -209,3 +228,6 @@
 - 자료 라이브러리 OneDrive 링크 목록화.
 - RDDA 월 재계산·KPI 대조, RDDA REPORT 파싱.
 - DEVELOPMENT 담당자 process status 재배치(미결).
+- COST SHEET R272 원사 시세표(붙여넣기 입력). 원가계산의 마지막 조각이다.
+- COST SHEET 화면 실물 확인 미완. 계산은 기준값으로 맞췄지만 팝업·자료실·FL# 클릭을 아직 아무도 안 봤다. `firebase deploy --only firestore:rules` 를 먼저 돌려야 저장이 된다.
+- 미결: 원본 `6085.xlsx` 수정 여부(수정본만 따로 있다. 진행 중 견적에 원본을 쓰면 옛 오류가 살아 있다), 6085 안의 `E7 Span 30de` 대 `D11 SPAN 20D` 불일치, 엑셀 K22/K25 단일행 제한(편직·염색이 한 줄씩. 행 삽입이 필요해 손대지 않았다).

@@ -54,6 +54,16 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // 원가계산서는 버전이 쌓이는 이력이라 state가 아닌 별도 컬렉션이다.
+    // 수정은 허용하되 새 문서는 로그인 이메일을 작성자로 기록한다.
+    match /costSheets/{docId} {
+      allow read: if isApproved();
+      allow create: if isApproved()
+                    && request.resource.data.by == request.auth.token.email;
+      allow update: if isApproved();
+      allow delete: if isOwner();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

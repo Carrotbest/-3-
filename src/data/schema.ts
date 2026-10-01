@@ -71,6 +71,20 @@ export interface DevTechnical {
   passFail?: string
   failReason?: string
   styleHistory?: string
+  /**
+   * 원가계산서 포인터와 열 표시용 요약(R268).
+   * 계산서 본문은 `costSheets` 컬렉션에 있다. 여기에 본문을 넣지 않는다.
+   * `records`는 배열 통째로 재업로드되는 구조라 이력을 담으면 편집 비용이 계속 커진다.
+   */
+  costRef?: {
+    sheetId: string
+    groupId: string
+    version: number
+    /** 계산 시각 epoch ms. */
+    at: number
+    netKrwPerYd: number
+    netPerYd: number
+  }
 }
 
 export interface DevRecord {

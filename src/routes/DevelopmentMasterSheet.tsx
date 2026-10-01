@@ -1,6 +1,6 @@
 import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
 import { FlPerfMark } from "@/components/fabric/PerfBadge"
-import { CalendarDays, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, FolderTree, Link2, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, Unlink, X } from "lucide-react"
+import { CalendarDays, Calculator, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, FolderTree, Link2, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, Unlink, X } from "lucide-react"
 import { Popover } from "radix-ui"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
@@ -10,6 +10,7 @@ import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { ColumnFilterMenu } from "@/components/data-table/ColumnFilterMenu"
 import { RequestPickerDialog } from "@/components/dd/RequestPickerDialog"
 import { RequestBrowseDialog } from "@/components/dd/RequestBrowseDialog"
+import { CostSheetDialog } from "@/components/dd/CostSheetDialog"
 import { StyleHoverLayer, type StyleHoverLayerHandle } from "@/components/data-table/StyleHoverLayer"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -17,7 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { useAuthStore } from "@/data/auth"
-import { FABRIC_STATUS_META, buildFabricLedger, type FabricLedgerItem } from "@/data/fabric-ledger"
+import { FABRIC_STATUS_META, buildFabricLedger, storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
 import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText, styleTimeline } from "@/data/derive"
@@ -28,6 +29,7 @@ import { applyRequestLinks, buildLinkHelperGroups, defaultLinkPairs, ensureReque
 import { RequestLinkHelperDialog } from "@/components/dd/RequestLinkHelperDialog"
 import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED } from "@/data/range-tsv"
 import { dayToneText, holidayName } from "@/data/holidays"
+import { COST_STALE_DAYS } from "@/data/cost-sheets"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
 import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical, type RequestOption, type RequestStyle } from "@/data/schema"
 import { buildWeeklyReport, reportOwnerNames as reportOwnersOf, weeklyReportText, type ReportDetailLevel } from "@/data/weekly-report"
@@ -48,6 +50,10 @@ const DEAD_STATUSES = new Set(["DROP", "REJECT", "HOLD"])
 /** 종료된 행의 회색. DD MASTER 에서 쓰는 회색 중 가장 진하다. */
 const DIMMED_ROW_BG = "color-mix(in srgb, var(--foreground) 24%, var(--card))"
 const isClosedRecord = (record: DevRecord): boolean => CLOSED_STATUSES.has(String(record.devStatus || record.stage || "").trim())
+const isDomesticCostRecord = (record: DevRecord): boolean => {
+  const co = String(record.tech?.development?.co || record.devType || "").trim()
+  return co === "국내" || co === "생산"
+}
 /** 엑셀의 행 머리글에 해당하는 좌측 번호 칸. 데이터 열이 아니므로 복사·붙여넣기 대상에서 빠진다. */
 const ROW_HEADER_WIDTH = 40
 
@@ -89,7 +95,7 @@ interface MoveDrag {
   grabCol: number
 }
 
-type GroupKey = "request" | "original" | "detail" | "schedule" | "result" | "data" | "history" | "ledger"
+type GroupKey = "request" | "original" | "detail" | "schedule" | "result" | "data" | "history" | "ledger" | "cost"
 type CellValue = string | number | null | undefined
 
 interface MasterColumn {
@@ -290,9 +296,20 @@ const GROUPS: MasterGroup[] = [
       { id: "ledgerUpdated", label: "웹 최종 변경", width: 136, value: (_row, ledger) => ledger?.updatedAt, render: (_row, ledger) => ledger?.updatedAt ? new Date(ledger.updatedAt).toLocaleString("ko-KR") : "" },
     ],
   },
+  {
+    key: "cost", label: "COST", color: "var(--chart-3)", columns: [
+      { id: "costKrwPerYd", label: "₩/yd", width: 92, align: "right", number: true, value: (row) => row.tech?.costRef?.netKrwPerYd ?? null },
+      { id: "costUsdPerYd", label: "$/yd", width: 84, align: "right", number: true, value: (row) => row.tech?.costRef?.netPerYd ?? null },
+      { id: "costAt", label: "계산일", width: 84, value: (row) => row.tech?.costRef?.at ? new Date(row.tech.costRef.at).toISOString().slice(0, 10) : "", render: (row) => {
+        const at = row.tech?.costRef?.at
+        const stale = at ? Date.now() - at > COST_STALE_DAYS * 86400000 : false
+        return <span className={stale ? "text-[var(--warning)]" : ""}>{at ? new Date(at).toISOString().slice(0, 10) : ""}</span>
+      } },
+    ],
+  },
 ]
 
-const DEFAULT_OPEN: Record<GroupKey, boolean> = { request: true, original: false, detail: true, schedule: false, result: true, data: false, history: false, ledger: false }
+const DEFAULT_OPEN: Record<GroupKey, boolean> = { request: true, original: false, detail: true, schedule: false, result: true, data: false, history: false, ledger: false, cost: false }
 const FINISHING_COLUMN_IDS = new Set(["finishingA", "finishingB", "finishingC", "finishingD", "remark"])
 const COMPANY_COLOR_COLUMN_IDS = new Set(["co", "yarnMill", "knittingMill", "dyeingMill", "finishingMill"])
 /** 공정 SCHEDULE 완료일 열. 오늘보다 이전이면 지나간 공정으로 보고 셀을 회색으로 덮는다. */
@@ -625,7 +642,7 @@ function createEmptyGridRecord(owner = ""): DevRecord {
   return { ...createBlankDevRecord(owner), opt: "", stage: "", devStatus: "", requestDate: "" }
 }
 
-const COMPUTED_COLUMN_IDS = new Set(["opt", "optionProgress", "actualBalance"])
+const COMPUTED_COLUMN_IDS = new Set(["opt", "optionProgress", "actualBalance", "costKrwPerYd", "costUsdPerYd", "costAt"])
 
 const TECH_PATHS: Record<string, string[]> = {
   project: ["project"],
@@ -940,6 +957,7 @@ interface GridActions {
   commit: (record: DevRecord, column: MasterColumn, raw: string, move?: CellMove, fillRange?: boolean) => void
   cancel: () => void
   contextMenu: (event: ReactMouseEvent<HTMLTableCellElement>, rowId: string, colId: string) => void
+  openCostSheet: (rowId: string) => void
   fillStart: (event: ReactMouseEvent<HTMLSpanElement>) => void
 }
 
@@ -972,6 +990,8 @@ interface GridCellProps {
  * 그래서 props 는 전부 원시값이거나 참조가 고정된 값이어야 한다(CellSel 객체를 그대로 넘기면 memo 가 깨진다).
  */
 const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, dimmed, moveStyle, options, editSeed, editEnabled, actions }: GridCellProps) {
+  const costClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (costClickTimer.current) clearTimeout(costClickTimer.current) }, [])
   const sel: CellSel = { inRange: selIn, isActive: selActive, top: selTop, bottom: selBottom, left: selLeft, right: selRight, handle: selHandle, moveEdge: selMoveEdge }
   const onSelect = () => actions.select(rowId, column.id)
   const onEdit = () => actions.edit(rowId, column.id)
@@ -979,6 +999,7 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const onCancel = () => actions.cancel()
   const onContextMenu = (event: ReactMouseEvent<HTMLTableCellElement>) => actions.contextMenu(event, rowId, column.id)
   const onFillStart = actions.fillStart
+  const costClickable = column.id === "flNo" && isCompletedFlNo(record.flNo) && isDomesticCostRecord(record)
   const fixed = isLockedCell(record, column)
   const align = `${alignOf(column) === "center" ? "text-center" : "text-left"} ${column.number ? "tabular-nums" : ""}`
   const highlight = sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""
@@ -1001,7 +1022,18 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const content = column.id === "storageNo" && ledger?.storageNo
     ? <div className="relative min-w-0 pr-4"><span className="block truncate">{ledger.storageNo}</span><Link to={`/fabric/${encodeURIComponent(ledger.key)}`} title="원단 상세 보기" aria-label={`${ledger.storageNo} 원단 상세 보기`} onMouseDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} className="pointer-events-none absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:pointer-events-auto group-hover:opacity-100"><ExternalLink className="size-3.5" /></Link></div>
     : column.render ? column.render(record, ledger) : column.date ? dateText(column.value(record, ledger)) : text(column.value(record, ledger))
-  return <td data-col-id={column.id} title={typeof content === "string" ? content : undefined} onClick={(event) => { if (!event.shiftKey) onSelect() }} onContextMenu={onContextMenu} onDoubleClick={fixed || !editEnabled ? undefined : onEdit} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{content}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
+  const displayedContent = costClickable ? <span title={record.tech?.costRef ? `원가계산서 열기 · v${record.tech.costRef.version}` : "원가계산서 열기"} className="cursor-pointer underline decoration-dashed underline-offset-2">{content}</span> : content
+  const handleClick = (event: ReactMouseEvent<HTMLTableCellElement>) => {
+    if (!event.shiftKey) onSelect()
+    if (!costClickable || event.shiftKey) return
+    if (costClickTimer.current) clearTimeout(costClickTimer.current)
+    costClickTimer.current = setTimeout(() => { costClickTimer.current = null; actions.openCostSheet(rowId) }, 220)
+  }
+  const handleDoubleClick = () => {
+    if (costClickTimer.current) { clearTimeout(costClickTimer.current); costClickTimer.current = null }
+    if (!fixed && editEnabled) onEdit()
+  }
+  return <td data-col-id={column.id} title={typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
 })
 
 function EditorGroup({ label, color, columns, draft, onChange, optionsById, layout, requiredIds, readOnly }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; layout?: "schedule" | "data"; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {
@@ -1170,6 +1202,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [requestPickerOpen, setRequestPickerOpen] = useState(false)
   const [requestPickerInitialReqId, setRequestPickerInitialReqId] = useState<string | undefined>()
   const [linkRows, setLinkRows] = useState<DevRecord[] | null>(null)
+  const [costRows, setCostRows] = useState<DevRecord[]>([])
   const [intakeRequest, setIntakeRequest] = useState<{ reqId: string; chart: string; garmentNo: string } | null>(null)
   const [attached, setAttached] = useState<Zaji | null>(null)
   const [attachError, setAttachError] = useState<string | null>(null)
@@ -2177,6 +2210,25 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     return styleNo ? filtered.filter((record) => record.styleNo.trim() === styleNo) : rows
   }
 
+  const costTargetRows = (): DevRecord[] => linkTargetRows().filter(isDomesticCostRecord)
+
+  const openCostSheet = () => {
+    const rows = costTargetRows()
+    if (rows.length) setCostRows(rows)
+  }
+
+  const openCostSheetByRowId = (rowId: string) => {
+    const row = useAppStore.getState().records.find((record) => recordIdentity(record) === rowId)
+    if (row && isDomesticCostRecord(row) && isCompletedFlNo(row.flNo)) setCostRows([row])
+  }
+
+  const applyCostRef = async (rowKey: string, ref: NonNullable<DevTechnical["costRef"]>) => {
+    const before = useAppStore.getState().records
+    const next = before.map((record) => recordIdentity(record) === rowKey ? { ...record, tech: { ...record.tech, costRef: ref } } : record)
+    pushUndoSnapshot(before)
+    await writeDevelopmentRecords(next, false, "edit")
+  }
+
   const openRequestLink = () => {
     if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     const rows = linkTargetRows()
@@ -2532,8 +2584,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }, [])
 
   const applyPreset = (preset: "core" | "process" | "all") => {
-    if (preset === "all") setOpenGroups({ request: true, original: true, detail: true, schedule: true, result: true, data: true, history: true, ledger: true })
-    else if (preset === "process") setOpenGroups({ request: true, original: false, detail: true, schedule: true, result: true, data: false, history: false, ledger: true })
+    if (preset === "all") setOpenGroups({ request: true, original: true, detail: true, schedule: true, result: true, data: true, history: true, ledger: true, cost: true })
+    else if (preset === "process") setOpenGroups({ request: true, original: false, detail: true, schedule: true, result: true, data: false, history: false, ledger: true, cost: false })
     else setOpenGroups(DEFAULT_OPEN)
   }
 
@@ -2744,14 +2796,15 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   // GridCell 은 memo 라 콜백 참조가 고정돼야 한다. 최신 상태는 ref 로 읽고 객체 자체는 한 번만 만든다.
-  const gridActionsRef = useRef({ setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, startFill })
-  gridActionsRef.current = { setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, startFill }
+  const gridActionsRef = useRef({ setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, openCostSheetByRowId, startFill })
+  gridActionsRef.current = { setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, openCostSheetByRowId, startFill }
   const gridActions = useMemo<GridActions>(() => ({
     select: (rowId, colId) => gridActionsRef.current.setCellAnchor(rowId, colId),
     edit: (rowId, colId) => gridActionsRef.current.beginCellEdit({ row: rowId, col: colId }),
     commit: (record, column, raw, move, fillRange) => void gridActionsRef.current.commitCell(record, column, raw, move, fillRange),
     cancel: () => gridActionsRef.current.cancelCellEdit(),
     contextMenu: (event, rowId, colId) => gridActionsRef.current.openCellMenu(event, rowId, colId),
+    openCostSheet: (rowId) => gridActionsRef.current.openCostSheetByRowId(rowId),
     fillStart: (event) => gridActionsRef.current.startFill(event),
   }), [])
 
@@ -2842,21 +2895,21 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <Select value={status} onValueChange={setStatus}><SelectTrigger className="h-7 w-28 shrink-0 text-[11px]"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
         <Button type="button" size="sm" variant="outline" className="h-7 shrink-0 px-2 text-[11px]" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL); setColumnFilters({}) }}><RotateCcw className="size-3.5" />초기화</Button>
         <Button type="button" size="sm" variant={hideClosed ? "default" : "outline"} className="h-7 shrink-0 px-2 text-[11px]" aria-pressed={hideClosed} title="완료, DROP, REJECT 건을 감춥니다" onClick={() => setHideClosed((current) => !current)}>{hideClosed ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}완료 제외</Button>
+        {hiddenColumnList.length ? <span className="relative shrink-0">
+          <button type="button" aria-expanded={hiddenMenuOpen} onClick={() => setHiddenMenuOpen((current) => !current)} className="flex items-center gap-1 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--background)] px-1.5 py-0.5 text-[11px] font-normal text-[var(--muted-foreground)] hover:text-[var(--foreground)]">숨긴 열 <span className="tabular-nums">{hiddenColumnList.length}</span></button>
+          {hiddenMenuOpen ? <>
+            <span className="fixed inset-0 z-[80]" onMouseDown={() => setHiddenMenuOpen(false)} />
+            <span className="absolute left-0 top-full z-[81] mt-1 block max-h-64 w-56 overflow-y-auto rounded-[8px] border border-[var(--border)] bg-[var(--card)] p-1 shadow-lg">
+              <button type="button" onClick={() => { showAllColumns(); setHiddenMenuOpen(false) }} className="mb-1 block w-full rounded px-2 py-1 text-left text-[11px] font-medium hover:bg-[var(--muted)]">모두 다시 보이기</button>
+              {hiddenColumnList.map((column) => <button key={column.id} type="button" onClick={() => showColumn(column.id)} className="block w-full truncate rounded px-2 py-1 text-left text-[11px] hover:bg-[var(--muted)]">{column.label}</button>)}
+            </span>
+          </> : null}
+        </span> : null}
         {!editEnabled ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--background)] px-2.5 py-1 text-[11px] text-[var(--muted-foreground)]">읽기 전용 · 담당을 선택하면 수정할 수 있습니다</span> : null}
         {intakeNotice ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full bg-[var(--muted)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)]">{intakeNotice}</span> : null}
         <div className="ml-auto flex flex-wrap items-center justify-end gap-2 text-xs text-[var(--muted-foreground)]">
           <div className="flex flex-wrap items-center justify-end gap-1" aria-label="DD 열 그룹 표시">
             {GROUPS.map((group) => <button type="button" key={group.key} aria-pressed={openGroups[group.key]} onClick={() => setOpenGroups((current) => ({ ...current, [group.key]: !current[group.key] }))} className={`flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full border px-1.5 py-0.5 text-[11px] font-normal transition-colors ${openGroups[group.key] ? "border-transparent text-white" : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)]"}`} style={openGroups[group.key] ? { backgroundColor: group.color } : undefined}>{openGroups[group.key] ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}{group.label}<span className="opacity-75">{group.columns.length}</span></button>)}
-            {hiddenColumnList.length ? <span className="relative shrink-0">
-              <button type="button" aria-expanded={hiddenMenuOpen} onClick={() => setHiddenMenuOpen((current) => !current)} className="flex items-center gap-1 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--background)] px-1.5 py-0.5 text-[11px] font-normal text-[var(--muted-foreground)] hover:text-[var(--foreground)]">숨긴 열 <span className="tabular-nums">{hiddenColumnList.length}</span></button>
-              {hiddenMenuOpen ? <>
-                <span className="fixed inset-0 z-[80]" onMouseDown={() => setHiddenMenuOpen(false)} />
-                <span className="absolute left-0 top-full z-[81] mt-1 block max-h-64 w-56 overflow-y-auto rounded-[8px] border border-[var(--border)] bg-[var(--card)] p-1 shadow-lg">
-                  <button type="button" onClick={() => { showAllColumns(); setHiddenMenuOpen(false) }} className="mb-1 block w-full rounded px-2 py-1 text-left text-[11px] font-medium hover:bg-[var(--muted)]">모두 다시 보이기</button>
-                  {hiddenColumnList.map((column) => <button key={column.id} type="button" onClick={() => showColumn(column.id)} className="block w-full truncate rounded px-2 py-1 text-left text-[11px] hover:bg-[var(--muted)]">{column.label}</button>)}
-                </span>
-              </> : null}
-            </span> : null}
           </div>
           <p className="shrink-0 whitespace-nowrap">{filtered.length.toLocaleString("ko-KR")} / {scoped.length.toLocaleString("ko-KR")}행</p>
         </div>
@@ -3036,6 +3089,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); openRequestLink() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Link2 className="size-3.5" /></span><span className="flex-1">DEVELOPMENT REQUEST 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
           <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); openRequestBrowse() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><FolderTree className="size-3.5" /></span><span className="flex-1">요청 폴더에서 찾아 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">행 1개</span></button>
           <button type="button" role="menuitem" disabled={!editEnabled || !linkTargetRows().some((row) => row.tech?.requestLink)} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); void unlinkSelectedRequests() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Unlink className="size-3.5" /></span><span className="flex-1">요청 연결 해제</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
+          <div className="my-1 h-px bg-[var(--border)]" />
+          <button type="button" role="menuitem" disabled={!costTargetRows().length} title={!costTargetRows().length ? "국내 또는 생산 건을 선택하십시오" : undefined} onClick={() => { setMenu(null); openCostSheet() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Calculator className="size-3.5" /></span><span className="flex-1">사전 원가계산…</span><span className="text-[11px] text-[var(--muted-foreground)]">국내 건</span></button>
           <div className="my-1 h-px bg-[var(--border)]" />
           <button type="button" role="menuitem" disabled={!undoStack.length} onClick={() => { setMenu(null); void undoLast() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40">
             <span className="text-[var(--muted-foreground)]"><Undo2 className="size-3.5" /></span>
@@ -3241,6 +3296,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     <RequestLinkHelperDialog open={linkHelperOpen} onOpenChange={setLinkHelperOpen} records={records} requests={requests} editEnabled={editEnabled} disabledMessage={EDIT_DISABLED_MESSAGE} onLinkAuto={linkHelperAuto} onReview={reviewLinkHelperGroup} />
     <RequestPickerDialog open={Boolean(linkRows)} onOpenChange={(open) => { if (!open) setLinkRows(null) }} requests={requests} records={records} styleNo={linkRows?.[0]?.styleNo ?? ""} initialReqId={requestPickerInitialReqId} mode="link" linkRows={linkRows ?? []} blockedLineIds={blockedRequestLineIds} onConfirmLink={(style, pairs, fillEmpty) => void confirmRequestLink(style, pairs, fillEmpty)} />
     <RequestBrowseDialog open={Boolean(browseRow)} onOpenChange={(open) => { if (!open) setBrowseRow(null) }} row={browseRow} requests={requests} boards={requestBoards} records={records} onConfirm={(style, option, fillEmpty) => void confirmRequestBrowse(style, option, fillEmpty)} />
+    <CostSheetDialog open={costRows.length > 0} onOpenChange={(open) => { if (!open) setCostRows([]) }} rows={costRows} canEdit={editEnabled} onSaved={(rowKey, ref) => void applyCostRef(rowKey, ref)} storageNoFor={(target) => { const item = ledgerByRecord.get(recordIdentity(target)); return item?.storageNo ? storageNoLabel(item) : "" }} />
 
     {/* 전체 항목 수정(64열) — 담당 칸의 확대 아이콘으로 진입. 데이터 입력 화면. */}
     <Dialog open={Boolean(editing)} onOpenChange={(open) => { if (!open) closeEditor() }}>

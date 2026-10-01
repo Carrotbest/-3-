@@ -1006,3 +1006,32 @@ tr.perf-row-dim > td { color: color-mix(in srgb, var(--foreground) 62%, transpar
   .nav-glass, .nav-glass::before, .nav-glass .nav-glass-label, .nav-glass .nav-glass-icon, .nav-glass .nav-glass-arrow { transition: none; }
   .nav-glass:hover .nav-glass-label, .nav-glass:hover .nav-glass-icon, .nav-glass:active { transform: none; }
 }
+
+.cs-print-deck { display: none; }
+
+@media print {
+  .cs-print-root, .cs-print-root * { visibility: visible !important; }
+  .cs-print-root { position: fixed !important; inset: 0 !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; translate: none !important; transform: none !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
+  .cs-print-deck { display: block !important; box-sizing: border-box; width: 186mm; background: white; color: #111827; font-size: 9pt; line-height: 1.4; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .cs-print-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8mm; padding-bottom: 2.5mm; border-bottom: 0.5mm solid #111827; }
+  .cs-print-head p { margin: 0; color: #6b7280; font-size: 7.5pt; letter-spacing: 0.22em; }
+  .cs-print-head h1 { margin: 1mm 0 0; font-size: 16pt; font-weight: 600; }
+  .cs-print-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 1mm; white-space: nowrap; }
+  .cs-print-meta strong { font-size: 11pt; font-weight: 600; }
+  .cs-print-meta span { color: #4b5563; font-size: 8pt; }
+  .cs-print-block { margin-top: 5mm; break-inside: avoid; }
+  .cs-print-block > h2 { margin: 0 0 2mm; color: #6b7280; font-size: 7.5pt; font-weight: 600; letter-spacing: 0.18em; }
+  .cs-print-fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 5mm; }
+  .cs-print-fields div { padding: 1.2mm 0; border-bottom: 0.2mm solid #e5e7eb; break-inside: avoid; }
+  .cs-print-fields span, .cs-print-results span { display: block; color: #9ca3af; font-size: 6.5pt; letter-spacing: 0.06em; }
+  .cs-print-fields b { display: block; margin-top: 0.3mm; font-size: 9pt; font-weight: 500; }
+  .cs-print-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+  .cs-print-table th { padding: 1.2mm 1mm; border-bottom: 0.3mm solid #9ca3af; color: #6b7280; font-size: 7.5pt; font-weight: 600; text-align: left; white-space: nowrap; }
+  .cs-print-table td { padding: 1.2mm 1mm; border-bottom: 0.2mm solid #e5e7eb; vertical-align: top; }
+  .cs-print-table tr { break-inside: avoid; }
+  .cs-print-table th:nth-last-child(-n+3), .cs-print-table td:nth-last-child(-n+3) { text-align: right; }
+  .cs-print-blend, .cs-print-note { margin: 0; padding: 1.5mm 0; border-bottom: 0.2mm solid #e5e7eb; white-space: pre-wrap; }
+  .cs-print-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
+  .cs-print-results div { padding: 2.5mm 3mm; background: #f3f4f6; break-inside: avoid; }
+  .cs-print-results b { display: block; margin-top: 1mm; font-size: 14pt; font-weight: 600; }
+}
