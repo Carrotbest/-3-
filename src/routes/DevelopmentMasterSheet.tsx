@@ -36,7 +36,7 @@ import { buildWeeklyReport, reportOwnerNames as reportOwnersOf, weeklyReportText
 import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, saveRequests, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
 
 const ALL = "__all__"
-const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니다."
+const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니다. 담당 칸이 비었거나 명단 밖인 행은 담당 드롭다운에서 그 값을 고르십시오."
 const COL_WIDTHS_STORAGE_KEY = "dd-col-widths-v2"
 const OPEN_GROUPS_STORAGE_KEY = "dd-open-groups-v1"
 /** 열 하나씩 숨기기(R264). 개인 브라우저에만 남는 값이며 key는 열 id, 값은 숨김 여부다. */
@@ -1420,6 +1420,14 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   // 전체 보기에서는 행 이동을 막고, 담당을 고른 상태에서만 그 담당의 행을 재배치한다.
   const dragEnabled = owner !== ALL && sortBy === null
   const editEnabled = owner !== ALL
+  /**
+   * 전체 보기에서 삭제를 열었다가 되돌렸다(2026-10-01).
+   * 담당 칸이 명단 밖인 행도 담당 드롭다운(`ownerOptions`는 실데이터로 만든다)에서 그 값을 고르면 닿는다.
+   * 길이 이미 있는데 전체 보기에서까지 삭제를 열면, 실물이 창고에 있는 행을 지워
+   * 창고 장부에서 통째로 사라지게 만드는 길만 넓어진다.
+   * 원장 항목은 records 와 samples 로만 만들어져서, DD 행을 지우면 오버라이드와 이력이 남아도
+   * 창고 화면에 아무것도 안 뜬다(`resolveEntryKey` 가 짝 없는 기록을 버린다).
+   */
 
   /**
    * 화면 표시 순서. 신규 접수 행은 기본 순서대로 맨 아래에 둔다(엑셀처럼 아래로 쌓인다).
