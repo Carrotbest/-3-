@@ -15,6 +15,8 @@
 ## DD MASTER (`src/routes/DevelopmentMasterSheet.tsx`)
 - `/development/workspace` = 살아있는 현황판(64열·7그룹, 담당·Status·Style 좌측 고정). 이 라우트만 `App.tsx`에서 폭 제약 해제.
 - 인라인 편집(셀 더블클릭, 타입별). 수식·대장연결 열은 수정 불가. 담당 칸 ⤢ → 64열 수정 모달.
+- **선택형 열은 드롭다운에 띄운 목록과 저장 검증 목록이 반드시 같아야 한다**(R280). `allowedFor(column, optionsById)`가 그 하나의 목록이고 `isAcceptableCellValue`·`updateRecordCell`에 모두 넘긴다. 예전에는 표시가 `optionsById`(상수+데이터 값), 검증이 `column.options`(상수)라 데이터에만 있던 `CSD`를 고르면 **아무 메시지 없이** 값이 안 들어갔다. 검증 가드 자체는 없애지 말 것. 날짜 열에 글자, 숫자 열에 문자가 붙여넣기로 들어가는 것을 이 가드가 막는다. 거부되면 이제 `notify`로 알린다.
+- **Dyeing Side 목록은 CSD·PSD·DD·SOAP·YD·PFD 여섯으로 닫혔다**(2026-10-01 박향근 확정, R281). `SD`와 `기타`와 `CPB`는 폐기했다. 이 열만 `optionsById`에서 데이터 값을 합치지 않는다. 합치면 폐기한 값이 목록에 되살아난다. 작지 파서 `matchDyeing`도 `SD`→`CSD`로 넣고 CPB는 빈칸으로 둔다. **모르는 값을 넣느니 빈칸이다. TBD 같은 자리표시자를 만들지 말 것.**
 - 신규 작지 접수 팝업: REQUEST·ORIGINAL·담당·Style=옵션 공통(`changeShared`), DETAIL·SCHEDULE=옵션별(`changeOption`). 저장=옵션 수만큼 행(`saveIntake`, `_src.sheet="웹 접수"`).
 - 신규 접수 창의 "FABRIC REQUEST에서 불러오기"는 요청 스타일의 옵션을 DD 접수 행으로 채운다. 연결은 DD 행 `tech.requestLink { reqId, lineId }`에만 저장한다. `optId`는 삭제 시 번호가 바뀌므로 연결 키로 쓰지 않고 `RequestOption.lineId`를 쓰며, 엑셀 재업로드 병합은 같은 위치의 `lineId`를 이어받는다. 차트명으로 Category·Season을 채우지 않으며, Garment No.=Style No. 일치를 추천하되 예외가 있어 사람이 선택한다.
 - 접수 필수 항목=`INTAKE_REQUIRED_IDS`(담당·Style No.·Season·Category·Buyer·Planner·**Due Date**). 라벨 `*`·빈 칸 붉은 테두리·저장 차단이 모두 이 목록을 본다. Due Date가 비면 HOME 스케줄에서 그 건이 통째로 빠지므로 접수에서 막는다. 엑셀 업로드는 과거 시트를 그대로 들여오는 길목이라 걸지 않는다.

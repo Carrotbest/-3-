@@ -488,7 +488,7 @@ const INTAKE_OPTION_COLUMNS: MasterColumn[] = [
 function IntakeCell({ column, record, optionsById, onChange }: { column: MasterColumn; record: DevRecord; optionsById: Record<string, readonly string[]>; onChange: (next: DevRecord) => void }) {
   const value = String(column.value(record, null) ?? "")
   const disabled = COMPUTED_COLUMN_IDS.has(column.id)
-  const set = (raw: string) => onChange(updateRecordCell(record, column, raw))
+  const set = (raw: string) => onChange(updateRecordCell(record, column, raw, allowedFor(column, optionsById)))
   const baseOptions = optionsById[column.id] ?? column.options
   // 작지 자동 채움 값이 정규 목록에 없어도 드롭다운에 보이도록 앞에 끼워 넣는다. EditorField 와 같은 규칙이다.
   const options = baseOptions && value && !baseOptions.includes(value) ? [value, ...baseOptions] : baseOptions
@@ -666,24 +666,31 @@ function setNested(target: Record<string, unknown>, path: string[], value: unkno
   cursor[path.at(-1)!] = value
 }
 
+/** 한 열의 드롭다운에 실제로 채우는 목록. 표시와 검증이 반드시 같은 것을 봐야 한다(R280). */
+const allowedFor = (column: MasterColumn, optionsById: Record<string, readonly string[]>): readonly string[] | undefined =>
+  optionsById[column.id] ?? column.options
+
 /**
  * 이 값을 이 열에 넣어도 되는가. 붙여넣기·아래로 채우기·Ctrl+Enter가 모두 거친다.
  * 거짓이면 그 칸은 건드리지 않는다. 지우지 않고 원래 값을 그대로 둔다.
  * 빈 값은 항상 허용한다. 지우기 동작이다.
  * `suggest` 열(담당·Buyer)은 목록이 제안일 뿐이라 자유 입력이다. 막지 않는다.
+ * 목록은 `allowed`(드롭다운에 실제로 채운 값)가 우선이다. 없으면 열 상수를 쓴다.
  */
-function isAcceptableCellValue(column: MasterColumn, raw: string): boolean {
+function isAcceptableCellValue(column: MasterColumn, raw: string, allowed?: readonly string[]): boolean {
   const value = raw.trim()
   if (!value) return true
   if (column.date) return isDateValue(value)
   if (column.number) return Number.isFinite(Number(value))
-  if (column.options && !column.suggest) return column.options.some((option) => option === value)
+  // 드롭다운에 채운 목록을 그대로 받는다. 상수만 보면 데이터에만 있는 값(CSD 등)이 소리 없이 버려진다(R280).
+  const list = allowed ?? column.options
+  if (list && !column.suggest) return list.some((option) => option === value)
   return true
 }
 
-function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string): DevRecord {
+function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string, allowed?: readonly string[]): DevRecord {
   if (COMPUTED_COLUMN_IDS.has(column.id)) return record
-  if (!isAcceptableCellValue(column, raw)) return record
+  if (!isAcceptableCellValue(column, raw, allowed)) return record
   const input = column.date ? normalizeDateInput(raw) : raw
   const value: string | number | null = column.number ? (input.trim() === "" ? null : Number(input)) : input
   switch (column.id) {
@@ -851,7 +858,7 @@ function EditorField({ column, draft, onChange, optionsById, requiredIds, readOn
   const disabled = readOnly || computed
   const required = requiredIds?.has(column.id) ?? false
   const invalid = required && !value.trim()
-  const set = (raw: string) => onChange(updateRecordCell(draft, column, raw))
+  const set = (raw: string) => onChange(updateRecordCell(draft, column, raw, allowedFor(column, optionsById)))
   const baseOptions = optionsById[column.id] ?? column.options
   // 작지 자동 채움 값이 정규 목록에 없어도 드롭다운에 표시되도록 앞에 끼워 넣는다.
   const options = baseOptions && value && !baseOptions.includes(value) ? [value, ...baseOptions] : baseOptions
@@ -872,14 +879,16 @@ function SubCard({ label, color, columns, draft, onChange, optionsById, required
 function StatusChip({ record, disabled }: { record: DevRecord; disabled?: boolean }) {
   const current = record.devStatus || record.stage || ""
   const style = ddStatusStyle(current)
-  const selected = DD_STATUS_OPTIONS.includes(current as (typeof DD_STATUS_OPTIONS)[number]) ? current : undefined
+  const known = DD_STATUS_OPTIONS.includes(current as (typeof DD_STATUS_OPTIONS)[number])
+  // 정규 목록에 없는 옛 상태값도 칩에 그대로 보여 준다. 안 그러면 값이 있는데 빈칩으로 보인다(R280).
+  const selected = current ? current : undefined
   const change = (next: string) => { if (!disabled) void saveDevelopmentRecord({ ...record, devStatus: next }, recordIdentity(record)) }
   return <Select value={selected} onValueChange={change} disabled={disabled}>
     <SelectTrigger className={`h-6 w-full gap-1 rounded-md border-0 px-2 text-[11px] font-normal shadow-none focus:ring-1 focus:ring-[var(--ring)] ${style.block}`}>
       <span className={`size-1.5 shrink-0 rounded-full ${style.dot}`} />
       <SelectValue placeholder={style.label} />
     </SelectTrigger>
-    <SelectContent>{DD_STATUS_OPTIONS.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
+    <SelectContent>{(known || !current ? DD_STATUS_OPTIONS : [current, ...DD_STATUS_OPTIONS]).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
   </Select>
 }
 
@@ -1321,7 +1330,10 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       season: union(DD_SEASON_OPTIONS, sortKo(distinct((record) => record.season))),
       category: union(DD_CATEGORY_OPTIONS, distinct((record) => record.category)),
       co: union(DD_COMPANY_OPTIONS, distinct((record) => record.tech?.development?.co || record.devType)),
-      dyeing: union(DD_DYEING_OPTIONS, distinct((record) => record.dyeing)),
+      // Dyeing Side 는 CSD, PSD, DD, SOAP, YD, PFD 여섯이 전부다(2026-10-01 박향근 확정, R281).
+      // 데이터 값을 합치지 않는다. 합치면 폐기한 SD 와 기타가 목록에 되살아나 다시 선택된다.
+      // 행이 이미 가진 값은 에디터가 목록 앞에 끼워 보여 주므로 화면에서 사라지지 않는다.
+      dyeing: DD_DYEING_OPTIONS,
       passFail: union(DD_PASS_FAIL_OPTIONS, distinct((record) => record.tech?.passFail)),
       owner: union(memberNames, distinct((record) => record.owner)),
       developer: union(memberNames, distinct((record) => record.tech?.development?.developer || record.owner)),
@@ -2062,7 +2074,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const write = (record: DevRecord, column: MasterColumn, value: string) => {
       const identity = recordIdentity(record)
       const draft = edits.get(identity) ?? record
-      const next = updateRecordCell(draft, column, value)
+      const next = updateRecordCell(draft, column, value, allowedFor(column, optionsById))
       if (next !== draft) edits.set(identity, next)
     }
     // 겹치는 범위도 잘라내기처럼 동작하도록 원본을 모두 비운 뒤 스냅샷 값을 대상에 쓴다.
@@ -2089,7 +2101,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       if (!record || !fromRecord || !column || !fromColumn || isLockedCell(record, column)) return
       const identity = recordIdentity(record)
       const draft = edits.get(identity) ?? record
-      const next = updateRecordCell(draft, column, rawCellText(fromRecord, fromColumn))
+      const next = updateRecordCell(draft, column, rawCellText(fromRecord, fromColumn), allowedFor(column, optionsById))
       if (next !== draft) { edits.set(identity, next); changed += 1 }
     }
 
@@ -2141,7 +2153,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           const column = displayedColumns[col]
           if (!column || isLockedCell(record, column)) continue
           const source = edits.get(recordIdentity(fromRecord)) ?? fromRecord
-          const next = updateRecordCell(draft, column, rawCellText(source, column))
+          const next = updateRecordCell(draft, column, rawCellText(source, column), allowedFor(column, optionsById))
           if (next !== draft) { draft = next; changed += 1 }
         }
         if (draft !== base) edits.set(identity, draft)
@@ -2167,7 +2179,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       const before = raw === null || raw === undefined ? "" : String(raw)
       const after = replaceText(before, findValue, replaceValue, replaceMatchCase)
       if (after === before) return
-      const next = updateRecordCell(draft, column, after)
+      const next = updateRecordCell(draft, column, after, allowedFor(column, optionsById))
       if (next !== draft) { edits.set(identity, next); changed += 1 }
     }
 
@@ -2204,7 +2216,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       let draft = createBlankDevRecord()
       line.forEach((value, index) => {
         const column = displayedColumns[rect.left + index]
-        if (column && !isFixedColumn(column)) draft = updateRecordCell(draft, column, value)
+        if (column && !isFixedColumn(column)) draft = updateRecordCell(draft, column, value, allowedFor(column, optionsById))
       })
       return draft
     })
@@ -2450,7 +2462,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           for (let c = area.left; c <= area.right; c += 1) {
             const column = displayedColumns[c]
             if (!column || isLockedCell(record, column)) continue
-            if (!isAcceptableCellValue(column, value)) continue
+            if (!isAcceptableCellValue(column, value, allowedFor(column, optionsById))) continue
             targets += 1
           }
         }
@@ -2471,8 +2483,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           for (let c = area.left; c <= area.right; c += 1) {
             const column = displayedColumns[c]
             if (!column || isLockedCell(record, column)) continue
-            if (!isAcceptableCellValue(column, value)) { invalid += 1; continue }
-            const next = updateRecordCell(draft, column, value)
+            if (!isAcceptableCellValue(column, value, allowedFor(column, optionsById))) { invalid += 1; continue }
+            const next = updateRecordCell(draft, column, value, allowedFor(column, optionsById))
             if (next !== draft) { draft = next; filled += 1 }
           }
           if (draft !== base) multiEdits.set(identity, draft)
@@ -2524,8 +2536,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         if (!column) break
         if (isLockedCell(record, column)) { skipped += 1; continue }
         const raw = grid[r % gridHeight][c % gridWidth] ?? ""
-        if (!isAcceptableCellValue(column, raw)) { invalid += 1; continue }
-        draft = updateRecordCell(draft, column, raw)
+        if (!isAcceptableCellValue(column, raw, allowedFor(column, optionsById))) { invalid += 1; continue }
+        draft = updateRecordCell(draft, column, raw, allowedFor(column, optionsById))
         filled += 1
       }
       put(record, draft)
@@ -2660,7 +2672,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       const after = String(column.value(next, null) ?? "")
       if (before !== after) return recs.map((record, i) => {
         if (i === 0) return next
-        return String(column.value(record, null) ?? "") === before ? updateRecordCell(record, column, after) : record
+        return String(column.value(record, null) ?? "") === before ? updateRecordCell(record, column, after, allowedFor(column, optionsById)) : record
       })
     }
     return recs.map((record, i) => (i === index ? next : record))
@@ -2763,7 +2775,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           for (let col = area.left; col <= area.right; col += 1) {
             const targetColumn = displayedColumns[col]
             if (!targetColumn || isLockedCell(target, targetColumn)) continue
-            const next = updateRecordCell(draft, targetColumn, raw)
+            const next = updateRecordCell(draft, targetColumn, raw, allowedFor(targetColumn, optionsById))
             if (next !== draft) { draft = next; changed += 1 }
           }
           if (draft !== base) edits.set(identity, draft)
@@ -2773,7 +2785,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       notify(`${changed}개 셀에 같은 값을 입력했습니다.`)
       return
     }
-    const next = updateRecordCell(record, column, raw)
+    if (!isAcceptableCellValue(column, raw, allowedFor(column, optionsById))) {
+      notify(`${column.label} 열에 넣을 수 없는 값입니다: ${raw.trim()}`)
+      if (move) moveSelection(move, false, move === "left" || move === "right", origin)
+      return
+    }
+    const next = updateRecordCell(record, column, raw, allowedFor(column, optionsById))
     if (next !== record) {
       const identity = recordIdentity(record)
       await commitRecords((records) => records.map((item) => recordIdentity(item) === identity ? next : item))

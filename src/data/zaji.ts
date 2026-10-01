@@ -96,7 +96,7 @@ function matchDyeing(color: string, method: string): string {
   const blob = `${color || ""} ${method || ""}`.toUpperCase()
   if (/DOUBLE\s*DYE|(^|\s)DD(\s|$)/.test(blob)) return "DD"
   if (/YARN\s*DYE|(^|\s)YD(\s|$)/.test(blob)) return "YD"
-  if (blob.includes("CPB")) return "CPB"
+  // CPB 는 Dyeing Side 정규 목록에서 빠졌다(2026-10-01 박향근 확정). 모르는 값을 넣느니 빈칸으로 둔다.
   if (/SINGLE\s*DYE|CSD|(^|\s)SD(\s|$)/.test(blob)) return "CSD"
   return ""
 }

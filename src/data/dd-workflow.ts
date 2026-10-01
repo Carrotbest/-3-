@@ -40,7 +40,7 @@ export function ddCategoryTextClass(category: string | undefined): string {
   return DD_CATEGORY_TEXT[String(category ?? "").trim().toUpperCase()] ?? ""
 }
 export const DD_COMPANY_OPTIONS = ["GD", "국내", "생산"] as const
-export const DD_DYEING_OPTIONS = ["SD", "DD", "PSD", "YD", "SOAP", "PFD", "기타"] as const
+export const DD_DYEING_OPTIONS = ["CSD", "PSD", "DD", "SOAP", "YD", "PFD"] as const
 export const DD_PASS_FAIL_OPTIONS = ["PASS", "FAIL"] as const
 
 /**
