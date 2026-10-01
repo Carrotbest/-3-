@@ -23,7 +23,7 @@ import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEIN
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
-import { fmtDate, fmtDateMd, normalizeDateInput, toDate } from "@/data/format"
+import { fmtDate, fmtDateMd, isDateValue, normalizeDateInput, toDate } from "@/data/format"
 import { loadViewFlag, loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
 import { applyRequestLinks, buildLinkHelperGroups, defaultLinkPairs, ensureRequestLineIds, removeRequestLinks, requestCandidates, requestLinkIndex, requestToIntakeRecords, resolveRequestLink, type HelperGroup, type LinkPair } from "@/data/request-link"
 import { RequestLinkHelperDialog } from "@/components/dd/RequestLinkHelperDialog"
@@ -666,8 +666,24 @@ function setNested(target: Record<string, unknown>, path: string[], value: unkno
   cursor[path.at(-1)!] = value
 }
 
+/**
+ * 이 값을 이 열에 넣어도 되는가. 붙여넣기·아래로 채우기·Ctrl+Enter가 모두 거친다.
+ * 거짓이면 그 칸은 건드리지 않는다. 지우지 않고 원래 값을 그대로 둔다.
+ * 빈 값은 항상 허용한다. 지우기 동작이다.
+ * `suggest` 열(담당·Buyer)은 목록이 제안일 뿐이라 자유 입력이다. 막지 않는다.
+ */
+function isAcceptableCellValue(column: MasterColumn, raw: string): boolean {
+  const value = raw.trim()
+  if (!value) return true
+  if (column.date) return isDateValue(value)
+  if (column.number) return Number.isFinite(Number(value))
+  if (column.options && !column.suggest) return column.options.some((option) => option === value)
+  return true
+}
+
 function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string): DevRecord {
   if (COMPUTED_COLUMN_IDS.has(column.id)) return record
+  if (!isAcceptableCellValue(column, raw)) return record
   const input = column.date ? normalizeDateInput(raw) : raw
   const value: string | number | null = column.number ? (input.trim() === "" ? null : Number(input)) : input
   switch (column.id) {
@@ -2418,8 +2434,25 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (extraRects.length) {
       if (grid.length !== 1 || grid[0].length !== 1) { notify("여러 영역에는 한 칸 값만 붙여넣을 수 있습니다."); return }
       const value = grid[0][0]
+      let targets = 0
+      for (const area of allRects) {
+        for (let r = area.top; r <= area.bottom; r += 1) {
+          const record = filtered[r]
+          if (!record) continue
+          for (let c = area.left; c <= area.right; c += 1) {
+            const column = displayedColumns[c]
+            if (!column || isLockedCell(record, column)) continue
+            if (!isAcceptableCellValue(column, value)) continue
+            targets += 1
+          }
+        }
+      }
+      if (!targets) { notify("붙여넣을 수 있는 셀이 없습니다."); return }
+      const label = value.length > 20 ? `${value.slice(0, 20)}…` : value
+      if (!window.confirm(`떨어진 영역 ${allRects.length}곳 ${targets}개 셀을 "${label}"로 채웁니다. 계속할까요?`)) return
       const multiEdits = new Map<string, DevRecord>()
       let filled = 0
+      let invalid = 0
       for (const area of allRects) {
         for (let r = area.top; r <= area.bottom; r += 1) {
           const record = filtered[r]
@@ -2430,6 +2463,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           for (let c = area.left; c <= area.right; c += 1) {
             const column = displayedColumns[c]
             if (!column || isLockedCell(record, column)) continue
+            if (!isAcceptableCellValue(column, value)) { invalid += 1; continue }
             const next = updateRecordCell(draft, column, value)
             if (next !== draft) { draft = next; filled += 1 }
           }
@@ -2438,7 +2472,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       }
       if (!multiEdits.size) { notify("붙여넣을 수 있는 셀이 없습니다."); return }
       await commitRecords((records) => records.map((record) => multiEdits.get(recordIdentity(record)) ?? record))
-      notify(`${filled}개 셀에 붙여넣었습니다.`)
+      notify(invalid
+        ? `${filled}개 셀에 붙여넣었습니다. 형식이 맞지 않는 ${invalid}칸은 건너뛰었습니다.`
+        : `${filled}개 셀에 붙여넣었습니다.`)
       return
     }
     const cut = clipRef.current?.cut ? cutRangeRef.current : null
@@ -2469,6 +2505,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const targetHeight = repeat ? selectionHeight : gridHeight
     const targetWidth = repeat ? selectionWidth : gridWidth
     let skipped = 0
+    let invalid = 0
     let filled = 0
     for (let r = 0; r < targetHeight; r += 1) {
       const record = filtered[rect.top + r]
@@ -2478,7 +2515,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         const column = displayedColumns[rect.left + c]
         if (!column) break
         if (isLockedCell(record, column)) { skipped += 1; continue }
-        draft = updateRecordCell(draft, column, grid[r % gridHeight][c % gridWidth] ?? "")
+        const raw = grid[r % gridHeight][c % gridWidth] ?? ""
+        if (!isAcceptableCellValue(column, raw)) { invalid += 1; continue }
+        draft = updateRecordCell(draft, column, raw)
         filled += 1
       }
       put(record, draft)
@@ -2489,9 +2528,10 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     clipRef.current = clipRef.current ? { ...clipRef.current, cut: false } : null
     cutRangeRef.current = null
     if (cut) setCopyMark(null)
-    notify(repeat
+    const invalidMessage = invalid ? ` 형식이 맞지 않는 ${invalid}칸은 건너뛰었습니다.` : ""
+    notify((repeat
       ? skipped ? `${filled}개 셀에 붙여넣었습니다. (수정 불가 ${skipped}개 제외)` : `${filled}개 셀에 붙여넣었습니다.`
-      : skipped ? `붙여넣기 완료 · 수정 불가 ${skipped}칸 제외` : "붙여넣기 완료")
+      : skipped ? `붙여넣기 완료 · 수정 불가 ${skipped}칸 제외` : "붙여넣기 완료") + invalidMessage)
   }
 
   /** 우클릭: 선택 밖 셀이면 그 셀을 먼저 선택하고 메뉴를 연다(엑셀과 동일). */

@@ -58,6 +58,17 @@ export function normalizeDateInput(raw: string): string {
   return format(new Date().getFullYear(), Number(short[1]), Number(short[2])) ?? raw
 }
 
+/**
+ * 저장된 값이 날짜인가. 저장 형식은 `YYYY-MM-DD` 하나다.
+ * `toDate`를 쓰지 않는다. `new Date("28482")`를 서기 28481년으로, `"1/1"`을
+ * 2000년으로 읽는 등 Style No.가 날짜 칸에 붙여넣어져도 통과할 수 있기 때문이다.
+ */
+export function isDateValue(value: unknown): boolean {
+  const raw = String(value ?? "").trim()
+  if (!raw) return false
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalizeDateInput(raw))
+}
+
 export const fmtTime = (v: unknown): string => {
   const d = toDate(v) || (v instanceof Date ? v : null)
   return d ? `${PAD(d.getHours())}:${PAD(d.getMinutes())}` : "—"

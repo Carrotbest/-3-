@@ -6,6 +6,7 @@ import type {
   FabricLedgerStatus,
 } from "./schema"
 import { isCompletedFlNo, isGdRecord } from "./dd-workflow"
+import { isDateValue } from "./format"
 import { FABRIC1_INTAKE_SHEET, WEB_INTAKE_SHEET } from "./schema"
 
 export interface FabricLedgerOutbound {
@@ -329,7 +330,9 @@ function statusFromRecord(record: DevRecord): FabricLedgerStatus {
   const arrived = isGdRecord(record)
     ? record.tech?.sampleDates?.yds
     : record.receivedDate
-  return String(arrived ?? "").trim() ? "READY" : "DEVELOPING"
+  // 비어 있지 않은지가 아니라 날짜인지로 본다. 붙여넣기 사고로 들어간 글자가
+  // 수취일로 읽혀 입고 대기까지 올라오는 일이 있다(2026-10-01).
+  return isDateValue(arrived) ? "READY" : "DEVELOPING"
 }
 
 export function statusFromSample(sample: CompletedSample): FabricLedgerStatus {

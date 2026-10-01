@@ -1,4 +1,4 @@
-import { toDate } from "./format"
+import { isDateValue, toDate } from "./format"
 import type { DevRecord } from "./schema"
 
 export const DD_STATUS_OPTIONS = ["진행중", "완료", "HOLD", "DROP", "REJECT"] as const
@@ -135,7 +135,7 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
 }
 
 export interface DdWarning {
-  key: "status" | "due" | "fl" | "arrange" | "fail" | "process"
+  key: "status" | "due" | "fl" | "arrange" | "fail" | "process" | "dateFormat"
   label: string
 }
 
@@ -155,6 +155,17 @@ export function ddWarnings(record: DevRecord, today = new Date()): DdWarning[] {
   }
   if (record.tech?.arrangeNo && record.tech?.development?.co && record.tech.development.co !== "GD") warnings.push({ key: "arrange", label: "Arrange#는 GD만 입력" })
   if (record.tech?.passFail === "FAIL" && !record.tech.failReason) warnings.push({ key: "fail", label: "Fail 사유 미입력" })
+
+  const dateCells: [string, unknown][] = [
+    ["Due Date", record.dueDate],
+    ["Received date", record.receivedDate],
+    ["FDS", record.tech?.sampleDates?.fds],
+    ["YDS", record.tech?.sampleDates?.yds],
+  ]
+  const badDates = dateCells.filter(([, value]) => String(value ?? "").trim() && !isDateValue(value))
+  if (badDates.length) {
+    warnings.push({ key: "dateFormat", label: `${badDates.map(([name]) => name).join(", ")} 날짜 형식 아님` })
+  }
 
   const pairs = [
     [record.tech?.mills?.yarn, record.tech?.processDates?.yarn],
