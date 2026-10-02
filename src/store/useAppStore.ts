@@ -1561,10 +1561,19 @@ export async function backfillFabricRecordIds(): Promise<number> {
   let filled = 0
   let overridesChanged = false
   let eventsChanged = false
+  // DD 행 하나에 상태 기록 하나다. 다른 key 의 상태 기록이 이미 쓰는 행 번호는 채우지 않는다(R287).
+  // 원장이 잘못 합쳐진 순간에 채우면 그 연결이 영구 저장되어, 고친 뒤에도 기록이 엉뚱한 행으로 간다.
+  const carriedBy = new Map<string, string>()
+  state.fabricOverrides.forEach((entry) => { if (entry.recordId) carriedBy.set(entry.recordId, entry.key) })
+  const ownOverrideKeys = new Set(state.fabricOverrides.map((entry) => entry.key))
+  const claimedElsewhere = (recordId: string, key: string): boolean => {
+    const holder = carriedBy.get(recordId)
+    return holder !== undefined && holder !== key
+  }
   const fabricOverrides = state.fabricOverrides.map((entry) => {
     if (entry.recordId) return entry
     const recordId = recordIds.get(entry.key)
-    if (!recordId) return entry
+    if (!recordId || claimedElsewhere(recordId, entry.key)) return entry
     filled += 1
     overridesChanged = true
     return { ...entry, recordId }
@@ -1573,6 +1582,8 @@ export async function backfillFabricRecordIds(): Promise<number> {
     if (event.recordId) return event
     const recordId = recordIds.get(event.fabricKey)
     if (!recordId) return event
+    // 이 이력의 원단이 자기 상태 기록을 따로 갖고 있는데 행 번호는 남이 쓰고 있으면 다른 원단이다.
+    if (ownOverrideKeys.has(event.fabricKey) && claimedElsewhere(recordId, event.fabricKey)) return event
     filled += 1
     eventsChanged = true
     return { ...event, recordId }

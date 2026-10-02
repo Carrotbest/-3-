@@ -635,21 +635,15 @@ export function buildFabricLedger(
 
   records.forEach((record) => {
     const ddBaseKey = ddRowBaseKey(record)
-    // FL# 칸에는 번호 대신 메모가 들어 있는 행이 많다(미등록, 컬러 잘못염색됨 …).
+    // FL# 칸에는 번호 대신 메모가 들어 있는 행이 많다(미등록, DROP, 컬러 잘못염색됨 …).
     // 그런 글자를 원단 식별자로 쓰면 뜻이 없는 글자로 행이 묶이거나 갈라진다.
-    // 형식이 맞는 번호일 때만 FL 로 본다.
+    // 형식이 맞는 번호일 때만 FL 로 보고, 글자만 있는 행은 FL 이 빈 행과 똑같이 자기 key 를 갖는다.
+    // R287: 예전에는 글자로 색인을 찾아 합쳤다. 'DROP'으로 바꾼 DD 행 4개가 FL 'Drop'인 옛 대장 샘플에
+    // 통째로 흡수되어 창고보관 3건이 사라지고 1건이 다른 원단으로 보였다. 글자로 합치지 말 것.
     const fl = isCompletedFlNo(record.flNo) ? normalized(record.flNo) : ""
-    // FL 형식이 아닌 글자가 적힌 행은 R229 이전 규칙 그대로 둔다.
-    // 근거 없는 병합이지만 오래 그렇게 굴러왔고, 지금 푸는 것은 이 작업의 범위가 아니다.
-    const legacyText = !fl && normalized(record.flNo) ? normalized(record.flNo) : ""
-    let matchedKey: string
-    if (legacyText) {
-      matchedKey = resolveKey("", record.flNo, "", recordIdentity(record))
-    } else {
-      // Allocate every DD row's own key first so match success cannot shift later keys.
-      const ownKey = ownKeyFor(record, fl, ddBaseKey)
-      matchedKey = (fl ? takeSampleMatch(record, fl) : undefined) ?? ownKey
-    }
+    // Allocate every DD row's own key first so match success cannot shift later keys.
+    const ownKey = ownKeyFor(record, fl, ddBaseKey)
+    const matchedKey = (fl ? takeSampleMatch(record, fl) : undefined) ?? ownKey
 
     const existing = items.get(matchedKey)
     // Candidate matching excludes items that already own a DD record, so no DD row is swallowed here.
