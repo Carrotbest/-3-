@@ -150,6 +150,32 @@
   ]
  },
  {
+  "key": "eedd4a4c4b61fb71",
+  "title": "Polo Ralph Lauren Classic Fit Cotton Polo Sale on Amazon",
+  "title_ko": "Polo Ralph Lauren 클래식핏 코튼 폴로 세일 Amazon",
+  "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPVW1ULXEtMm1kckpPMVB5T0h3WnVCeVVHRjFNUE9HdnBqWVlPZnFMYVJMenhQSEhtLTF0UjNkVU1nU2tMLUhMbUpaOHhhd1VvdkhoMHlVdVRhWk5ubHJSMHViMkZ5MWZZTmllYjdDeWpiaC1ZenBTWmRLQTlITUpyanFtcXA1RGxCTXBnbDQtVQ?oc=5",
+  "published": "2026-09-30",
+  "collected": "2026-10-02",
+  "summary": "Polo Ralph Lauren Classic Fit Cotton Polo Sale on Amazon The Inventory",
+  "content": "Polo Ralph Lauren Classic Fit Cotton Polo Sale on Amazon The Inventory",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Amazon",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "amazon"
+  ],
+  "score": 3,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Amazon"
+  ]
+ },
+ {
   "key": "e91488c5ee150959",
   "title": "Knitted fabric boosts strawberry yields",
   "title_ko": "니트 소재로 딸기 수확량 증대",
@@ -964,6 +990,34 @@
   ]
  },
  {
+  "key": "aac314f3ce30409f",
+  "title": "3-Pack Moisture-Wicking Polo Shirts Under $10 Each on Amazon",
+  "title_ko": "Amazon에서 각 $10 미만의 수분 흡수 폴로 셔츠 3팩",
+  "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPczBBZUJPV2FTeU1RalFnWkotSDR0c1JfeTJZNmNBTEYyNVdnckdKaTJNVVE2WEc4bXRjUG0xUlg4Rno1aV9jN0lrczZ3bEh1aWs2REJoTVJ2X2lYX1dGdGVkNVA4bDhrM1NjZEpLdDJkYXpLTTNLMFpJUVBwMUFLM0EzYlFac0ZHcHpwNHdxbTFSR2RVbkk5UkNUX0hKX1JUZDgySzFDYTN2VVZvNVNGZGxFS1E?oc=5",
+  "published": "2026-09-30",
+  "collected": "2026-10-02",
+  "summary": "3-Pack Moisture-Wicking Polo Shirts Under $10 Each on Amazon The Inventory",
+  "content": "3-Pack Moisture-Wicking Polo Shirts Under $10 Each on Amazon The Inventory",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Amazon",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "흡한속건"
+  ],
+  "entities": [
+   "amazon"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Amazon"
+  ]
+ },
+ {
   "key": "a9ee6d4571445ead",
   "title": "VDMA Textile Machinery with new Executive Board",
   "title_ko": null,
@@ -982,9 +1036,10 @@
   "score": 4,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Indian Textile Magazine"
+   "Indian Textile Magazine",
+   "Textile Focus"
   ]
  },
  {
@@ -1827,6 +1882,34 @@
   ]
  },
  {
+  "key": "7591b1e4f0b5581e",
+  "title": "Costco Got $184 Million in Tariff Refunds. Here’s What Got Cheaper",
+  "title_ko": "Costco는 관세 환급으로 1억 8400만 달러를 받았습니다. 더 저렴해진 것은 다음과 같습니다",
+  "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxNdUd4TlRnaU1jVlczUzdKNnhNY3hublNDbjhMWFBOM3pMMTVMU053akhNRWN5cEk4MS1waWtFMVdrR292ZFA2bUVERzdvekRuWXNPQTNVblZmbjAyZlJ5XzFmUDY5bDVpTVQtWU50cEt6Q1lvRlFJTjU1dzRrRmt1Nlh6akxNdFZIWEIyZVBBTl95X1JCY1E?oc=5",
+  "published": "2026-09-30",
+  "collected": "2026-10-02",
+  "summary": "Costco Got $184 Million in Tariff Refunds. Here’s What Got Cheaper Money Talks News",
+  "content": "Costco Got $184 Million in Tariff Refunds. Here’s What Got Cheaper Money Talks News",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "관세"
+  ],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
+  ]
+ },
+ {
   "key": "7553856f5bd765f2",
   "title": "Denim Mills Detail Modal’s Product Development Potential, Part 2",
   "title_ko": "Denim Mills 세부사항 Modal의 제품 개발 잠재력, 2부",
@@ -2028,6 +2111,32 @@
   "hits": 1,
   "sources": [
    "주제검색 · 국내소재"
+  ]
+ },
+ {
+  "key": "6461d928652a2290",
+  "title": "| Nylon 6 chips, caprolactam ease: Why is NFY yarn holding steady?",
+  "title_ko": "| 나일론 6 칩, 카프로락탐 용이성: NFY 원사가 안정적으로 유지되는 이유는 무엇입니까?",
+  "link": "https://news.google.com/rss/articles/CBMi7wFBVV95cUxOQjBKYkhaNXdobWlhc2x5dDNfM2k1ZHBqRE5FeTkya3p4TlhteDA1SWVZb0llM2FYRlNIR1F2ajZkU2RWV1UyZnJkckVlS0Rrb1VLOTdrWjJGV212aU9JTGNicFEtdmxsRElaQjlhQi02N3J4bWM1cVgyQzZ0OXVacGdjMGxTUW5aMjlhN2RobmswVi1oQ0ZkTmhFZ01Hb0lQODdGRjVhbThSRHExeGM0SWJ6aEFqTi1pSjAzcjN4WlpsaE1qUE9HX1NWSUQ1NVNwYjJLcVZfZktmZmxnVzNyOHBBU2ZSZG4xMktTN1ZTUQ?oc=5",
+  "published": "2026-09-30",
+  "collected": "2026-10-02",
+  "summary": "| Nylon 6 chips, caprolactam ease: Why is NFY yarn holding steady? Fibre2Fashion",
+  "content": "| Nylon 6 chips, caprolactam ease: Why is NFY yarn holding steady? Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "나일론"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -3493,6 +3602,30 @@
   ]
  },
  {
+  "key": "ee245a04bc26af9b",
+  "title": "Gallery of Textile Clay: A New Material at Milan Design Week - 1",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiqwJBVV95cUxNUHNWM0ZvUWdsdW9lR0Z4MGRISmJpdnR6SWZPVE1ZdzREeklDV1BlYXFJcVNHekF3UFVMS1FUakU3dzllUE1LRS1ua0g4YUo5LWJOczJUdnBYUzdPUW1YbmRhcnZZbUJhRk5nZHp1V3Y4a2F1eTk3LVJ4dGNsTm5CWHJ1TWl0SEViTE8tMDVXZU5mT1poV2FxSnJMX2JWRlk0OE1tdFR5aWJSZ0pTZG5qTHo0SmQxZERLMGNlT3BNT0ZjaG5kUjFFcElHQUhHcjJpLUZmT01vNXp0SmNvYi1uV1pRRnBKNWVGcFFEb3pXMF9jbDZVR3FLdUdKWURTbXhHZVd0T2ZwUDFhWDE0OUh3cW9fWi1WeURYTjFoYzB6am9Jd192RW5TOWIyTQ?oc=5",
+  "published": "2026-09-29",
+  "collected": "2026-10-02",
+  "summary": "Gallery of Textile Clay: A New Material at Milan Design Week - 1 ArchDaily",
+  "content": "Gallery of Textile Clay: A New Material at Milan Design Week - 1 ArchDaily",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
+  ]
+ },
+ {
   "key": "ed9de3ecc55eeaf4",
   "title": "Source Fashion, Fashion-Enter Manchester show to spotlight UK makers",
   "title_ko": null,
@@ -4344,6 +4477,30 @@
   "collected": "2026-09-29",
   "summary": "Iran Chabahar rail link nears launch for India-Central Asia trade Fibre2Fashion",
   "content": "Iran Chabahar rail link nears launch for India-Central Asia trade Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "ad38b6b73c754362",
+  "title": "Kurti Suppliers in India",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPUDVSUkpEa0ZuVDlTZDU0eXE4cUNzZ084Y2tKODg3ODRtNmlzSC1CMG9LZDBuUC1vaEZLcXE1ckloTHk3TDdiVnlyRFNHS3h6QVduaDhGODIwWUVYV1RuYi1tcFlQSHRTSC14T21seXVaSXQwLVdSVU9xal94WXFCZG9pTXV6TFdYQWgxd1NwUG9PUlNnZUE?oc=5",
+  "published": "2026-09-29",
+  "collected": "2026-10-02",
+  "summary": "Kurti Suppliers in India Fibre2Fashion",
+  "content": "Kurti Suppliers in India Fibre2Fashion",
   "image": "",
   "image_tried": null,
   "source": "Fibre2Fashion",
@@ -7734,6 +7891,30 @@
   ]
  },
  {
+  "key": "956ca8847a224100",
+  "title": "Levi Strauss, Marks and Spencer launch Fashion Renewable Collective",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxNek42Z1o1Mmg4dXR5R1Y4bU9rOTI4RThmVms1Ny1yTnZyOGs5MnU0a0V1Zk5FY2VCMmdaZTk5Zl9lSmlROVNxdV9aQlZGNS1oZFllUDJTMC1TblBSVDVIaWdOb3pIaW8yTmxjUTQzNDVSV0p4OTVOSU15ZXZlUGx1MmR4UVFlOEVYWEVxdWpLM1F0azg5OUZN?oc=5",
+  "published": "2026-09-28",
+  "collected": "2026-10-02",
+  "summary": "Levi Strauss, Marks and Spencer launch Fashion Renewable Collective Just Style",
+  "content": "Levi Strauss, Marks and Spencer launch Fashion Renewable Collective Just Style",
+  "image": "",
+  "image_tried": null,
+  "source": "Just Style",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Just Style"
+  ]
+ },
+ {
   "key": "951cc77f807f6040",
   "title": "Benzene, Cyclohexane Prices Move Higher Amid Cost Support",
   "title_ko": null,
@@ -8502,9 +8683,10 @@
   "score": 8,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Textile Today"
+   "Textile Today",
+   "Textile Focus"
   ]
  },
  {
@@ -36269,6 +36451,32 @@
   ]
  },
  {
+  "key": "fa6711821e57a756",
+  "title": "American Eagle Outfitters, Inc. (NYSE:AEO) Plans $0.12 Quarterly Dividend",
+  "title_ko": "American Eagle Outfitters, Inc.(NYSE:AEO)는 분기별 배당금 0.12달러를 계획합니다.",
+  "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNbjFSM25qX3Jjamwwb3VrWEhkaFdxZHhQQjEycEs4MXB6S0w2UVdRY3hGVjF0MGNjLS1nVXF3cF9XTE1FakoxTUtocS1yV3RkOTIxcmpzTldiQUtDZnluY3NWUlMxSndBVzRzLWd5dzl5NXhOQXI3QTd2REFmUGZONjZuYmRZWXZ1VDhVZ3FhQzd2dkhManFOcUNMWUZ4VWpSZzFhM0YtWUlsT1RLS19sWlVHRjBMWDVVQWpxM2JWekxlQUV3YzQtYVB3?oc=5",
+  "published": "2026-09-16",
+  "collected": "2026-10-02",
+  "summary": "American Eagle Outfitters, Inc. (NYSE:AEO) Plans $0.12 Quarterly Dividend MarketBeat",
+  "content": "American Eagle Outfitters, Inc. (NYSE:AEO) Plans $0.12 Quarterly Dividend MarketBeat",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · American Eagle",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "aeo"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · American Eagle"
+  ]
+ },
+ {
   "key": "fa4e369b51095dc8",
   "title": "Worldly plans connected supplier data",
   "title_ko": null,
@@ -44675,6 +44883,32 @@
   "hits": 1,
   "sources": [
    "Innovation in Textiles"
+  ]
+ },
+ {
+  "key": "66fe5f31e8701a87",
+  "title": "Polyamide Market Size, Industry Share, Forecast, 2034",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBtNGxjdG5aVEZhWHNRM0k0UkVLOXR6dk5oYnMtN1ZmT3AxblZzejYxVmRKQmhTTTdXLXlkcHNVaFZ3SEYtZVRhX05yc1VRdjhiNW85eGVKb2I0cVotUmpZbXU0ODN0THplTS1SUE1waVo?oc=5",
+  "published": "2026-09-14",
+  "collected": "2026-10-02",
+  "summary": "Polyamide Market Size, Industry Share, Forecast, 2034 Fortune Business Insights",
+  "content": "Polyamide Market Size, Industry Share, Forecast, 2034 Fortune Business Insights",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "나일론"
+  ],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -58286,6 +58520,32 @@
   "hits": 1,
   "sources": [
    "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "35ad5ce9e25cdc95",
+  "title": "| India polyester yarn prices rise on supply constraints, crude rally",
+  "title_ko": "| 인도 폴리에스터 원사 가격은 공급 제약으로 상승, 원유 랠리",
+  "link": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxQVHJHNGhQZWNGZ2I5Y2dmTUtsZkhwanVHNDJIMTRUUU4yOTFob1NCSzhMU2l6MlJhMHQwV0RmSG52QUs1MzFmLWNkRVdwNWcyX18yQ051UzNUMy1NN2FKR29BT2ZTNGtuaGZ5TldWRkNFMWpTMDd2UTB1b01PcWlXa3AwTXBlOWlFRWZvWFF3cmUtTVZQSjRqTFFGeXF4SHQ5Xy0xeko3aWJHTjF6TFhEY0lSRFp3YVBISTBYUzQwVGtSUFNMNm5uazZnalJxa3E4ZGdLbk1GY2xpbmZrT3RPYXE5SS1WZw?oc=5",
+  "published": "2026-09-09",
+  "collected": "2026-10-02",
+  "summary": "| India polyester yarn prices rise on supply constraints, crude rally Fibre2Fashion",
+  "content": "| India polyester yarn prices rise on supply constraints, crude rally Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "원사가격"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -76048,9 +76308,10 @@
   "score": 4,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Indian Textile Magazine"
+   "Indian Textile Magazine",
+   "Fibre2Fashion"
   ]
  },
  {
