@@ -68,10 +68,12 @@ export interface FabricLedgerItem {
   outboundTotal: number
   balance: number | null
   intakeAt: string
+  intakeByEmail: string
   /** 창고팀이 실물을 확인한 시각. 대장에서 셀을 회색으로 칠하던 표시를 기록으로 남긴 것이다. */
   confirmedAt: string
   /** 창고 rack 칸 번호(K-1-1 형식). 원단별 상태(override)에만 저장한다. */
   rackNo?: string
+  locks: { rackNo?: string; yds?: string }
   /** 롤 원단 표시. 원단별 상태(override)에만 저장한다. */
   roll?: boolean
   lastMovedAt: string
@@ -390,7 +392,9 @@ function emptyFromRecord(record: DevRecord, key: string): FabricLedgerItem {
     outboundTotal: 0,
     balance: null,
     intakeAt: "",
+    intakeByEmail: "",
     confirmedAt: "",
+    locks: {},
     lastMovedAt: "",
     lastOutbound: null,
     sourceOrder: null,
@@ -428,7 +432,9 @@ function emptyFromSample(sample: CompletedSample, index: number): FabricLedgerIt
     outboundTotal: 0,
     balance: null,
     intakeAt: "",
+    intakeByEmail: "",
     confirmedAt: "",
+    locks: {},
     lastMovedAt: "",
     lastOutbound: null,
     sourceOrder: index,
@@ -672,6 +678,7 @@ export function buildFabricLedger(
   })
   const outboundMap = new Map<string, FabricLedgerOutbound[]>()
   const intakeMap = new Map<string, string>()
+  const intakeByMap = new Map<string, string>()
   const confirmMap = new Map<string, string>()
   // 재고는 시간 순으로 쌓아야 하므로 오래된 기록부터 훑는다.
   // 배열 순서를 쓰면 안 된다. 팀 공유 병합이 새 기록을 배열 끝으로 보내 최신 기록이 가장 오래된 것으로 뒤집힌다.
@@ -687,10 +694,14 @@ export function buildFabricLedger(
     if (event.toStatus === "READY") {
       outboundMap.delete(itemKey)
       intakeMap.delete(itemKey)
+      intakeByMap.delete(itemKey)
     }
     if (event.action === "RECEIVE") {
       const previous = intakeMap.get(itemKey) ?? ""
-      if (event.occurredAt > previous) intakeMap.set(itemKey, event.occurredAt)
+      if (event.occurredAt > previous) {
+        intakeMap.set(itemKey, event.occurredAt)
+        intakeByMap.set(itemKey, event.actorEmail ?? "")
+      }
     }
     if (event.action === "CONFIRM") {
       const previous = confirmMap.get(itemKey) ?? ""
@@ -721,6 +732,7 @@ export function buildFabricLedger(
       status: override.status,
       storageNo: override.storageNo ?? item.storageNo,
       rackNo: override.rackNo,
+      locks: override.locks ?? {},
       roll: override.roll,
       note: override.note ?? item.note,
       updatedAt: override.updatedAt,
@@ -728,7 +740,7 @@ export function buildFabricLedger(
     } : item
     // 대장 전용 행은 상세에서 고친 값이 override.fields에 쌓인다. 본문 필드에 얹고 실무 값도 덮어쓴다.
     const patched = override?.fields ? applyCoreFieldOverrides(merged, override.fields) : merged
-    const stocked = { ...patched, yds, outbound, outboundTotal, balance, intakeAt, confirmedAt, lastMovedAt, lastOutbound }
+    const stocked = { ...patched, yds, outbound, outboundTotal, balance, intakeAt, intakeByEmail: intakeByMap.get(item.key) ?? "", confirmedAt, lastMovedAt, lastOutbound }
     return { ...stocked, fields: { ...deriveFields(stocked), ...(override?.fields ?? {}) } }
   }).filter((item) => options.includeRemoved || item.status !== "REMOVED").sort((left, right) => {
     const statusComparison = statusRank[left.status] - statusRank[right.status]
@@ -749,3 +761,51 @@ export function buildFabricLedger(
     return left.styleNo.localeCompare(right.styleNo, "ko-KR", { numeric: true })
   })
 }
+
+/**
+ * 창고보관 장부 지문(R289). R&D No.마다 [보유 재고, 잔량, Rack No., 실물 확인 여부, 롤]을 모은다.
+ * DD MASTER, 원단 상세, 직접 추가 원단 편집으로는 이 값이 바뀌면 안 된다.
+ * 같은 번호가 둘이면 둘 다 담는다. 개수가 바뀌어도 변화로 잡힌다.
+ */
+export function warehouseFingerprint(items: readonly FabricLedgerItem[]): Map<string, string> {
+  const faces = new Map<string, string[]>()
+  items.forEach((item) => {
+    if (item.status !== "WAREHOUSE") return
+    const no = item.storageNo.trim() || "(번호 없음)"
+    const list = faces.get(no) ?? []
+    list.push(JSON.stringify([item.yds, item.balance, item.rackNo ?? "", Boolean(item.confirmedAt), Boolean(item.roll)]))
+    faces.set(no, list)
+  })
+  return new Map([...faces].map(([no, list]) => [no, list.sort().join("|")]))
+}
+
+export interface WarehouseDrift {
+  removed: string[]
+  added: string[]
+  changed: string[]
+}
+
+/** 두 지문을 비교한다. allowed 에 든 번호의 변화는 세지 않는다(그 처리가 바꾸기로 한 원단). */
+export function warehouseDrift(
+  before: ReadonlyMap<string, string>,
+  after: ReadonlyMap<string, string>,
+  allowed: ReadonlySet<string> = new Set(),
+): WarehouseDrift {
+  const removed: string[] = []
+  const added: string[] = []
+  const changed: string[] = []
+  before.forEach((face, no) => {
+    if (allowed.has(no)) return
+    const next = after.get(no)
+    if (next === undefined) removed.push(no)
+    else if (next !== face) changed.push(no)
+  })
+  after.forEach((_face, no) => {
+    if (!allowed.has(no) && !before.has(no)) added.push(no)
+  })
+  const order = (left: string, right: string) => left.localeCompare(right, undefined, { numeric: true })
+  return { removed: removed.sort(order), added: added.sort(order), changed: changed.sort(order) }
+}
+
+export const hasWarehouseDrift = (drift: WarehouseDrift): boolean =>
+  drift.removed.length + drift.added.length + drift.changed.length > 0

@@ -444,6 +444,11 @@ export interface FabricLedgerOverride {
   yds?: number
   /** 창고 rack 칸 번호(K-1-1 형식, `src/data/warehouse-rack.ts`). 창고보관 상태에서만 의미가 있다. */
   rackNo?: string
+  /**
+   * 창고팀이 넣은 값의 잠금(R290). 값은 넣은 창고팀 계정 메일이다.
+   * 잠긴 값은 창고팀과 소유자만 고친다. 입고 대기로 내려가면 지운다.
+   */
+  locks?: { rackNo?: string; yds?: string }
   /** 롤 원단 표시. 채번에는 영향이 없고 화면·자료 표기에만 R을 붙인다. */
   roll?: boolean
   note?: string
@@ -454,6 +459,8 @@ export interface FabricLedgerOverride {
   fields?: Record<string, string>
   updatedAt: string
   updatedBy: string
+  /** 저장한 계정 메일. 권한 판단과 감사에 쓴다. 화면에는 이름(updatedBy)을 보인다. */
+  updatedByEmail?: string
 }
 
 /** 모든 업무 처리는 이전/변경 상태를 남기는 추가형 이력으로 저장한다. */
@@ -473,6 +480,8 @@ export interface FabricLedgerEvent {
    */
   recordedAt?: string
   actor: string
+  /** 처리한 계정 메일. 권한 판단과 감사에 쓴다. 화면에는 이름(actor)을 보인다. */
+  actorEmail?: string
   note: string
   storageNo?: string
   qty?: number

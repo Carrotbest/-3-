@@ -680,6 +680,7 @@ const allowedFor = (column: MasterColumn, optionsById: Record<string, readonly s
 function isAcceptableCellValue(column: MasterColumn, raw: string, allowed?: readonly string[]): boolean {
   const value = raw.trim()
   if (!value) return true
+  if (column.id === "flNo") return isCompletedFlNo(value)
   if (column.date) return isDateValue(value)
   if (column.number) return Number.isFinite(Number(value))
   // 드롭다운에 채운 목록을 그대로 받는다. 상수만 보면 데이터에만 있는 값(CSD 등)이 소리 없이 버려진다(R280).
@@ -2786,7 +2787,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       return
     }
     if (!isAcceptableCellValue(column, raw, allowedFor(column, optionsById))) {
-      notify(`${column.label} 열에 넣을 수 없는 값입니다: ${raw.trim()}`)
+      notify(column.id === "flNo"
+        ? "FL#는 FL과 숫자 8자리만 넣을 수 있습니다. DROP은 Status 칸, 메모는 비고 칸에 적어 주세요."
+        : `${column.label} 열에 넣을 수 없는 값입니다: ${raw.trim()}`)
       if (move) moveSelection(move, false, move === "left" || move === "right", origin)
       return
     }

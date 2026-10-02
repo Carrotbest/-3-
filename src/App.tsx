@@ -8,6 +8,7 @@ import { Topbar } from "@/components/layout/Topbar"
 import { ReadOnlyGuard, SyncStatusNotice } from "@/components/layout/ReadOnlyGuard"
 import { HomeGate } from "@/components/layout/HomeGate"
 import { UpdateBanner } from "@/components/layout/UpdateBanner"
+import { IntegrityNoticeDialog } from "@/components/layout/IntegrityNoticeDialog"
 import { ParsingOverlay } from "@/components/upload/ParsingOverlay"
 import { LoginGate } from "@/components/auth/AuthExperience"
 import { useAuthStore } from "@/data/auth"
@@ -193,6 +194,7 @@ function AppLayout() {
         </main>
       </div>
       <ParsingOverlay />
+      <IntegrityNoticeDialog />
       <UpdateBanner />
     </div>
   )

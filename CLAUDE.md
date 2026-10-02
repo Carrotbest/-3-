@@ -80,6 +80,12 @@
 - 양식에 사진 열은 없다. 엑셀 이미지 셀은 원본 차트에서도 깨져 있었다. 사진은 웹에서만 올린다.
 
 ## 창고 (`src/routes/Warehouse.tsx`, `src/data/fabric-ledger.ts`)
+- **창고 장부 보호(2026-10-02 사고 후, R287~R290).** DD FL 칸을 `DROP`으로 붙여넣자 창고보관 3건이 사라지고 1건이 다른 원단으로 보였다. 원장이 FL 칸 글자로 옛 대장 샘플과 합쳤고, 창고 화면의 `backfillFabricRecordIds`가 그 상태를 영구 저장했다.
+  - FL 형식이 아닌 글자 행은 글자로 합치지 않는다(R287). 백필은 다른 key가 쓰는 DD 행 번호를 채우지 않는다. 자동 치유 규칙은 9/21 백업의 정상 연결까지 지워 버렸다. 넣지 말 것.
+  - **저장 직전 창고 장부 검사(R289, `blockedByWarehouseDrift`).** DD, 원단 상세, 직접 추가 편집은 창고보관 지문(번호별 재고, 잔량, Rack, 확인, 롤)을 바꿀 수 없다. 창고 처리는 대상 원단 번호만 바꿀 수 있다. 걸리면 저장하지 않고 `IntegrityNoticeDialog`를 띄운다. 새 저장 함수를 만들면 반드시 이 검사를 건다. 우회 옵션을 만들지 말 것.
+  - **권한(R290, `src/data/warehouse-policy.ts`).** 소유자 예외. 입고 확인과 출고는 창고팀, 폐기, 소진, 입고 취소, 복구는 3팀(1팀 원단은 1팀), R&D No.는 입고 등록자, Rack과 재고는 창고팀이 넣은 값이면 창고팀만(`locks`), 아니면 등록자와 창고팀. 등록자는 RECEIVE 이력의 `actorEmail`이다. override를 새로 만드는 곳에 `locks: previous?.locks`를 빠뜨리면 잠금이 풀린다.
+  - DD FL#는 새 입력에 `FL`+8자리만 받는다. DROP은 Status, 메모는 비고.
+  - 새 버전이 배포되면 전체 화면을 막고 새로고침만 허용한다(R288, `UpdateBanner`). 창고 기록자는 실명과 메일(`actorEmail`, `updatedByEmail`)로 남는다.
 - DD+대장 FL 우선·Style 보조 병합. 개발진행→입고대기(READY)→창고보관→소진/폐기. 입고 시 R&D No. 자동 채번. 웹상태=IDB `fabricOverrides`, 이력=`fabricEvents`.
 - FL은 DD 원단이면 DD MASTER에서만 입력하고, 창고 직접 추가 원단만 창고에서 `checkWarehouseFlEntry` 검사 후 `updateManualIntake`로 저장한다. 현황에 없는 추가 옵션은 DD 행을 추가하는 것이 팀 규칙이다.
 - **DD 행 하나는 원단 하나다. DD 행끼리는 어떤 경우에도 서로 흡수하지 않는다**(R229, `buildFabricLedger`). 예전에는 FL# 하나로 원장 항목을 찾아 같은 FL을 가진 DD 행이 첫 행으로 접혔고, 짝이 될 대장 행이 없는 행은 경고도 없이 사라졌다. 대장 행과는 1대1로만 붙는다(우선순위: 이미 입고 기록으로 연결된 R&D No. → Yarn Detail 일치 → 대장도 DD도 하나뿐일 때). 짝을 못 찾으면 제 항목으로 선다. **`resolveKey`를 DD 레코드에 다시 쓰지 말 것.**
