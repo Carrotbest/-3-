@@ -8408,9 +8408,10 @@
   "score": 8,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Ecotextile News"
+   "Ecotextile News",
+   "주제검색 · 염색가공"
   ]
  },
  {
@@ -16519,6 +16520,30 @@
   ]
  },
  {
+  "key": "29eabd321f4503fe",
+  "title": "The New Luxury Marketplace: E-Commerce Is Unlocking Billions in Premium Apparel Sales",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxNV3pDVG1WZjFDOWJERVdMQ0pFN3E3NE9ERVJCcTYxUGxwOU1lNTRqb2NuWFcwU29TeWd1Q0s2amJtOWFSVmI2M1lvUjNsdEJuRThoa3lOaFFiS2hrYTkyOE5IcTlEWkhHSWgzUkdvVGM5Q0djQVZudFNkZkRrc0k4MHhFQks5ZTV3NjA5c2hMMEtTRkpNUUdwcnFUVk9tNUQ2NlBfLWVhR2thWVdQYzYza0RuWnJ3bUZEazhselNaMElMYW80OW5vekR1dEZsdkpaNVdGOVRIeWZnejNQOWc?oc=5",
+  "published": "2026-09-24",
+  "collected": "2026-10-03",
+  "summary": "The New Luxury Marketplace: E-Commerce Is Unlocking Billions in Premium Apparel Sales TradingView",
+  "content": "The New Luxury Marketplace: E-Commerce Is Unlocking Billions in Premium Apparel Sales TradingView",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
+  ]
+ },
+ {
   "key": "28be57de1b457e98",
   "title": "H&M Q3 profit rises 23% as tariff-related effects lift margins",
   "title_ko": null,
@@ -21391,9 +21416,10 @@
   "score": 4,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Fibre2Fashion"
+   "Fibre2Fashion",
+   "Textile Focus"
   ]
  },
  {
@@ -23709,6 +23735,30 @@
   "hits": 1,
   "sources": [
    "한국섬유신문"
+  ]
+ },
+ {
+  "key": "1b2b0bc5ad01f737",
+  "title": "| M&S's fashion week debut aims to win over younger shoppers",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxPSU90d2FwV0ZuYWFDUDlhdExxRkp5YTlpcDVfb0ZhNXktYjY4M0JtWGVFT1E3aUtNcV9Nb01ZQi05bEp4NEV5RHpLOF9TRm1EOGVuN2phekliOE9oaWhLc2FrcnR1T251RWRDZjZneU5NUG5KSkoyQzdIMEVyVGp2amtTaXY2a2FwbUpPb2pXcWtQVjQ2cWxrdWtiSGNHOFFxZEFhT1paZFBqM1k3aVNzNVlxekF3VHRiXzdlbjBaUEpjZGhodVlhbmlQdEwtZGxKejNESExOejlnb0JkVE42RlZfVU42cGNQT2ZmekxwLU5CRjJpeFE?oc=5",
+  "published": "2026-09-22",
+  "collected": "2026-10-03",
+  "summary": "| M&S's fashion week debut aims to win over younger shoppers Fibre2Fashion",
+  "content": "| M&S's fashion week debut aims to win over younger shoppers Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -31490,6 +31540,30 @@
   "hits": 1,
   "sources": [
    "The Interline"
+  ]
+ },
+ {
+  "key": "66c620e8dd4839c8",
+  "title": "Jason Aldean Has Entered the Apparel Game with 10Stone - See Photos",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxOeVZGLUdRaEZuS0xJWm1mdk5fZGpNOGt5QVFMNjVIVlFMQUZMaHBZV0ZRWEFuUHdvZU91eXN2MTR4YUJ4UWpQempqci10UTM0N0RuSGpFNnFQNXdwSUNCa3lzSC15OVZrZC1FWWh3Wm9TQkRhRkNLQV94X1NuMUlVUUYxNDd3YXRrWnhZ?oc=5",
+  "published": "2026-09-18",
+  "collected": "2026-10-03",
+  "summary": "Jason Aldean Has Entered the Apparel Game with 10Stone - See Photos Taste of Country",
+  "content": "Jason Aldean Has Entered the Apparel Game with 10Stone - See Photos Taste of Country",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
@@ -55849,6 +55923,30 @@
   ]
  },
  {
+  "key": "ba1cca525b778aa4",
+  "title": "Shifting Global Demand: Tracking Textile Trends in the US, EU & UK",
+  "title_ko": "변화하는 글로벌 수요: 미국, EU 및 영국의 섬유 동향 추적",
+  "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxQY1VaOVAwSHhaZmlubVBmS1hDUlB0QlhWUkNMSDI4NnI3RUd3ZTZkNWQ3RnFlQWFudVozSUVOZWFIcV9HMTB0REVTNzlINEhrREZ2LTlBZ1poWTBvejM4TjhrTkRXZVYzTUJ3RlFiWnRSb1dwSjczMDk3SGo2V3FqSERSbFBDZ21FU3ZRNkNKaEdld1U1M2wtaUhQYWtEclhFM2RPdTBYR2lQaVBnbUlsaVVQLVNPUmRoeXNQOHNTUllVeGkzOFJvU1FB?oc=5",
+  "published": "2026-09-09",
+  "collected": "2026-10-03",
+  "summary": "Shifting Global Demand: Tracking Textile Trends in the US, EU & UK Fibre2Fashion",
+  "content": "Shifting Global Demand: Tracking Textile Trends in the US, EU & UK Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "ba00c63aaff1b1ca",
   "title": "무신사, 8월 경량 패딩 거래액 8배 이상 증가",
   "title_ko": null,
@@ -74055,6 +74153,34 @@
   ]
  },
  {
+  "key": "c3992496ccfbc1fc",
+  "title": "Duluth Holdings Inc (DLTH) (Q2 2026) Earnings Call Highlights: Profitability Surges on Tariff ...",
+  "title_ko": "Duluth Holdings Inc(DLTH)(2026년 2분기) 실적 발표 하이라이트: 관세에 대한 수익성 급증",
+  "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxNdmR2Z0hXVURaaHpwbktHeFB4RExwZFJyaGdkT243dDI1b2FQYW9rMUpVYWQwMEgyRXVhbm5JMWpBMzlYankyR0QzZnRpWmNfTVZSUGsyNmFWcmJ4T21LRnk3WTNrUWVrQmdOUWxyRGoxQWhhOVVacTlqUnZ5R2F1VlpmOWpDa0Q1amJ0Vy1US0RYcFhFbUY4?oc=5",
+  "published": "2026-09-03",
+  "collected": "2026-10-03",
+  "summary": "Duluth Holdings Inc (DLTH) (Q2 2026) Earnings Call Highlights: Profitability Surges on Tariff ... Yahoo Finance",
+  "content": "Duluth Holdings Inc (DLTH) (Q2 2026) Earnings Call Highlights: Profitability Surges on Tariff ... Yahoo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Duluth Trading",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "관세"
+  ],
+  "entities": [
+   "duluth"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Duluth Trading"
+  ]
+ },
+ {
   "key": "c2c06cf83217823f",
   "title": "Why Victoria's Secret Earnings Fail to Put SXY Back in the Stock -- Barrons.com",
   "title_ko": "빅토리아 시크릿 수익이 SXY를 주식에 다시 넣지 못한 이유 - Barrons.com",
@@ -75021,6 +75147,32 @@
   "hits": 1,
   "sources": [
    "한국섬유신문"
+  ]
+ },
+ {
+  "key": "92639fc1607fce73",
+  "title": "Duluth Holdings Inc. Announces Second Quarter 2026 Financial Results",
+  "title_ko": "Duluth Holdings Inc., 2026년 2분기 재무 결과 발표",
+  "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxOeTJtSm5WZzBjVTFxMW9ScXV1eWI4RWFIZG5hdWRHZ244WGlfR25FVTRpT21JRlZKTDlOQm1XYVVfMUJSM19WSENuSHhIcHktT2ctU1hOUzhCT09UTEMtZEJhOEI3ZXo0NDB2ZG5PZGpPN2pVOGNIVHRDQ0tjOE1GTmF4SXhsQ29ZeFpKd1FQbXYyZEJmSE4tNkhyU0tWeGttRXo2UlBxNnpTWDdMNmJQQ2dkbWFMUjlvTF82OWNLOUQ1bTY2?oc=5",
+  "published": "2026-09-03",
+  "collected": "2026-10-03",
+  "summary": "Duluth Holdings Inc. Announces Second Quarter 2026 Financial Results markets.businessinsider.com",
+  "content": "Duluth Holdings Inc. Announces Second Quarter 2026 Financial Results markets.businessinsider.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Duluth Trading",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "duluth"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Duluth Trading"
   ]
  },
  {

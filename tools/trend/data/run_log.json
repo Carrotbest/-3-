@@ -434,5 +434,15 @@
   "kept": 34,
   "hits": 0,
   "translated": 51
+ },
+ {
+  "at": "2026-10-03T23:23:28+00:00",
+  "kind": "collect",
+  "ok": 37,
+  "fail": 1,
+  "new": 66,
+  "kept": 13,
+  "hits": 6,
+  "translated": 25
  }
 ]
