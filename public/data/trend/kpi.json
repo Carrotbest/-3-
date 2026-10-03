@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-10-02T00:19:47+00:00",
+"generated_at": "2026-10-03T00:04:31+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -4220,6 +4220,13 @@
 "m": "바이어 · Abercrombie & Fitch"
 },
 {
+"d": "2026-09-25",
+"t": "Abercrombie(ANF)가 지난 수익 보고서 이후 7.9% 하락한 이유는 무엇입니까?",
+"o": "Why Is Abercrombie (ANF) Down 7.9% Since Last Earnings Report?",
+"u": "https://news.google.com/rss/articles/CBMilgFBVV95cUxNMnBMdkl3RzZDMTVSZ3FtMlJRR2JOX3ZqSzhiUmE2WXVCdXo4SlVHb0xWdUFscnNOZVZ5REVRX2R0VVQxOUdXLTdzVF9qR2JuX1RnT3FFUVVZY1Fnak0wR3JiRkRDUk42NEpDbktxajMtNXllcjNWMUVET1lnVGR3cGFXaE5JWUdUNWwxRlI2aEw1RTMtRkE?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
+{
 "d": "2026-09-19",
 "t": "Abercrombie & Fitch(ANF)의 수익이 어떻게 투자 스토리를 바꾸었나요?",
 "o": "How Earnings Beat At Abercrombie & Fitch (ANF) Has Changed Its Investment Story",
@@ -4245,13 +4252,6 @@
 "t": "한세엠케이, ‘아베크롬비 키즈’ 국내 오프라인 첫선",
 "o": "한세엠케이, ‘아베크롬비 키즈’ 국내 오프라인 첫선",
 "u": "http://www.ktnews.com/news/articleView.html?idxno=148483",
-"m": "한국섬유신문"
-},
-{
-"d": "2026-09-07",
-"t": "한세MK, ‘플레이키즈 클럽’ 론칭…아베크롬비 키즈 국내 첫선",
-"o": "한세MK, ‘플레이키즈 클럽’ 론칭…아베크롬비 키즈 국내 첫선",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148292",
 "m": "한국섬유신문"
 }
 ],
@@ -4315,10 +4315,38 @@
 ],
 "amazon": [
 {
+"d": "2026-10-02",
+"t": "FitVille 엑스트라 와이드 슬립온 스니커즈 $55 미만 Amazon",
+"o": "FitVille Extra-Wide Slip-On Sneakers Under $55 on Amazon",
+"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxNNjVNdVpkUFRxX3FZMmJOMVRhYmJNeE9ZZFJIemVuSXlPdGl2R1VTcWxFN21QUFV6cDlfNU5MS0NEeDBCOV9HMnlYcXZxWE1WT04za0NldXhFYmpIdHVkYklHY1l5amYzUnZNcHd0cnBHLUFvZzhGMThwYnNHdVdWZ2ZYYjRteUw3NlE1cG5sTGxLOHB1blU2S1VMN1Juc2tBMnNEUmR3OHpENUd5V2VVWm5DVm8?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-10-02",
+"t": "$10 Amazon Essentials Cotton Polo: 옷장 기본 33% 할인",
+"o": "$10 Amazon Essentials Cotton Polo: 33% Off Wardrobe Basic",
+"u": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPOXRyei1kNHFGZGdkWXdMcmZfMThUZW9EWTB0azVIQjU5Mzl0XzJ6M0xFQ0dYZ2RnV0dKRDlGaVFWRndOaHFkREFRc1czejNjNkFZN2lldjcxbjBkUzJWNHQ2LUNQb3FBRF9uck1HOXZwTndCNzRxbW9hU2VHRDVjcUtiRXB0d3JiMmxkeHpjNDVKTzZSOXVrdA?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-10-01",
+"t": "Amazon에서 $32 미만의 편안한 드레스-캐주얼 옥스포드 스니커즈",
+"o": "Comfortable Dress-Casual Oxford Sneakers Under $32 on Amazon",
+"u": "https://news.google.com/rss/articles/CBMijwFBVV95cUxQUGdXdnVJT3AtN0xQempzZTd0dmlpM1U4aUJSS3JiQ1cyZFE0TjFib2x3R0l4ZXRUWGxWMkRISEJsclBOZ1hOcTdsTkplbE91S1VZVVpkdnJELXNyOUppVXd4N29VTk1JVmF5d0NNTVNLX3ZOSjc1Zm41UzdmUGFXOUFPTzVBa2k3cXVUNno3QQ?oc=5",
+"m": "바이어 · Amazon"
+},
+{
 "d": "2026-10-01",
 "t": "$20 Damipow 골프 폴로: 1,400+ Amazon 평가 리뷰됨",
 "o": "$20 Damipow Golf Polo: 1,400+ Amazon Ratings Reviewed",
 "u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxOTTBNRnVydE5VRGU0c2NUeWMtUktLVTM5cWt2MHgzWk5tdldGc3NrWkNtcTNyWGRnWkdJdWtkUFliSkNGOXZOVy1vV3dWbjNwYm1yeWJmNmx0Y09NSXRlZWJmNFVuUlBmS0VLRkdCTHcyX0cyWWpXaUN1LTRJeHhCUS1DVjVRaUZfWTdUX2pFUTh4UHlHamc5Rl9CNzVudEpTLUE?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-10-01",
+"t": "PUMA Caven III Plus $52 미만 스니커즈(Amazon에서 29% 할인)",
+"o": "PUMA Caven III Plus Sneakers Under $52 (29% Off on Amazon)",
+"u": "https://news.google.com/rss/articles/CBMic0FVX3lxTE0ySFpwTjZhVjJ1WklTd25BQ1FPSW1OQzI1bWF4NDRrSkwyT0c0ZTRXM29rc01WX3pkQnBMRjYtcFpYajRiYlZkRmRKYV93dnllRTg2T1FxQm5QeWpIUzhGd2dwREt3aDBhOG5aamlDdmdhLVU?oc=5",
 "m": "바이어 · Amazon"
 },
 {
@@ -4341,91 +4369,63 @@
 "o": "3-Pack Moisture-Wicking Polo Shirts Under $10 Each on Amazon",
 "u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPczBBZUJPV2FTeU1RalFnWkotSDR0c1JfeTJZNmNBTEYyNVdnckdKaTJNVVE2WEc4bXRjUG0xUlg4Rno1aV9jN0lrczZ3bEh1aWs2REJoTVJ2X2lYX1dGdGVkNVA4bDhrM1NjZEpLdDJkYXpLTTNLMFpJUVBwMUFLM0EzYlFac0ZHcHpwNHdxbTFSR2RVbkk5UkNUX0hKX1JUZDgySzFDYTN2VVZvNVNGZGxFS1E?oc=5",
 "m": "바이어 · Amazon"
-},
-{
-"d": "2026-09-30",
-"t": "$8.53 Amazon Essentials 코튼 폴로 빅 & 톨 사이즈",
-"o": "$8.53 Amazon Essentials Cotton Polo in Big & Tall Sizes",
-"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPS2hqQ3BsZHVYYm9hT3Fmdm1ZbzlGeXU0emZXRzlXTmQ5bHRFWDRwbVFKc19YYlRValV0S3FudTlwY0JFUjF4RXljRl9FOWloSURmcVFvNFBKT1FkM0ZSLTBBYzRUQkNmeG5qeURZZVlPMXI2V01Mc2xvRlZZOFZxOFk3blgxTEhKdXdEVWUwLWhZRlNuTUg0aGFXZTZST0VYWW1BeGlvc25rUjRfQlZSYWtxRkk?oc=5",
-"m": "바이어 · Amazon"
-},
-{
-"d": "2026-09-30",
-"t": "$15 COOFANDY 니트 폴로: Amazon에서 예산 옷장 업그레이드",
-"o": "$15 COOFANDY Knit Polo: Budget Wardrobe Upgrade on Amazon",
-"u": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxQZWl5RWhJTHRwR1l0cWpDYTAxOWtRVDhBekhsV1VsS1JEZ0Nva056clp5dmp0d3BuRFJYREhvYUhqWW1nZDZyTWEzOGN6aVh4aDZzZ3RQSHNRWWh6czRnWjBpVm9xSVYwa2Z3RUVkN2pXVkZReVk2YWMzTDJZejRqNnV2Vko4eVBMcm1RMEdSdzdmdVljQXJ5ZXFSY1BoSkJIUFQwcG0yWFJKVlE?oc=5",
-"m": "바이어 · Amazon"
-},
-{
-"d": "2026-09-30",
-"t": "Lee Daybreaker 하이 레트로 스니커즈 Amazon에서 23% 할인",
-"o": "Lee Daybreaker Hi Retro Sneakers 23% Off on Amazon",
-"u": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPUElOcnlQSlhnSy1KRS1DU2lRbVpQMWtJNkl5NjFWM3RNWHBtdVk1YzE3al94RWVxLUVwcmlRaVBSVTg4TlVoZVBuTkQ2dC10MzJoY1VrUWVlNGoyYlQ0VHM1WGVyOGdqakF1cFoweF8wWDIzTkMzdVREM2xPelVZcHAxRQ?oc=5",
-"m": "바이어 · Amazon"
-},
-{
-"d": "2026-09-30",
-"t": "Skechers 핸즈프리 슬립온 $80 미만 Amazon",
-"o": "Skechers Hands-Free Slip-Ons Under $80 on Amazon",
-"u": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNTUUwTnFDZmJLVDN1SkkwY1Qyc09obTlvZUNxcXVsZ0lxUi0ySUI2OTFYZ2NwOXhUcXdlaHZJMDhjQjl6QlpQWUxPUFd0MDNNcXh4bjlTWWdNMnEtWk02cXZaR0h4QkRwRWswZFB5ZGVRWWNiSDZhVm9vUnZTa2MzTHBvT0lfclNzSzhMMWVXNThBa2YtVVB3Vw?oc=5",
-"m": "바이어 · Amazon"
 }
 ],
 "nike": [
 {
-"d": "2026-10-01",
-"t": "Nike(NKE), 1분기 수익 보고: 주요 지표가 말해 주는 것",
-"o": "Nike (NKE) Reports Q1 Earnings: What Key Metrics Have to Say",
-"u": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQeVB6cjZXeGU1eHVMY3hERV9VaGlERG9BdWpaTzI5Rk5qN1hraFNIdnA4eFFtcUN1SkFlUnNxR2VWR25IdmtMcEVYUThUQUp6bzdoaldRSXpTNEpvSWlSVV9BMFJnejFUNXd5TXo1ZHN5N19IYkVYcEJNdDNJMFhmX2RPcw?oc=5",
+"d": "2026-10-02",
+"t": "회사가 모델 재구성을 발표함에 따라 Nike 매출 감소",
+"o": "Nike revenues decline as company announces model restruction",
+"u": "https://www.ecotextile.com/2026100266112/radar/nike-revenues-decline-as-company-announces-model-restruction/",
+"m": "Ecotextile News"
+},
+{
+"d": "2026-10-02",
+"t": "Nike는 수익 손실로 9% 하락하고 약한 지침은 앞으로 더 많은 고통을 의미함",
+"o": "Nike falls 9% as revenue miss, weak guidance signal more pain ahead",
+"u": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQekZKMTdsUHMwMW1rdklXSTJYUWhZcFFzSzNwcEdHVC1kZ2t0dWktdG9DUV9tdnd5aGZyUF9YaUlTS09ZSmpUQXdORDBwcUUxRG1Rd3dhNXZwVTh0cFVQd2dlTDdDOFVrcXBmMldmS2ZYMlpfQ05rbjdiOGgtREp2d0FQMW8wOGxHNWRrMDAwY1pJTlJKMnYtSnB2ZFMyTzlaeHZUbERqNnJJcTg3MXc?oc=5",
 "m": "바이어 · Nike"
 },
 {
-"d": "2026-10-01",
-"t": "Nike의 '실망스러운' 수익 분석 보기",
-"o": "Watch Breaking Down Nike's 'Disappointing' Earnings",
-"u": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQMDFlb2IzOWRwbFQzS0l5RUpYQkc5aHdwQmluQ0VKaGpGSm1NNlFsRkh6dnEyRVRHNDU5Vk5BZEU1eEs5aU1DczlvMG90Z1VCcTB5blloNndNaVdNeG5xWktBdmdIQWNRcjgxMXc0OHNZSHBSa1hXekc5VVJXWDlCZ011aWJ4ZkNfa09uRjFUQVpxaWhMeUpSUUxMelNmZEE?oc=5",
+"d": "2026-10-02",
+"t": "Nike 수익 설명: 수익이 감소해도 매출 감소를 숨길 수 없는 이유",
+"o": "Nike Earnings Explained: Why a Profit Beat Cannot Hide Shrinking Sales",
+"u": "https://news.google.com/rss/articles/CBMic0FVX3lxTFAzX09HejNyMjBTSlZoUXpzV3hSSUdRM2ZLNDcwc0NrWFJVX1BYYnhZTEljTWFSbzg2cEI3Qzd4V3FmeEpKUEJ4U2FsN0Y0bFU5MzJJbWNScVNzbkFQVW1OWVdRdDIzT3RlNFhvLVFNU09GdFU?oc=5",
 "m": "바이어 · Nike"
 },
 {
-"d": "2026-10-01",
-"t": "Caitlin Clark의 첫 번째 시그니처 Nike 신발이 마침내 35달러부터 시작하는 의류와 함께 출시되었습니다. 사라지기 전에 구매하세요",
-"o": "Caitlin Clark’s first signature Nike shoe is finally here alongside apparel starting at $35, grab it before it’s gone",
-"u": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxQY3p1VmVsa0RLVVNwYUxnZlctVnJTb0RqZXJhQ1J0UDBvdV9QNFRxVlkyUDk4c0VELXhyVm5vSlRhMUFYWFBEVlpFTkhORVh5cGw4MzRLak5qTVhYc0xUcE5SelJRa2xnZFg2VERxbzRpaW1LZm1aZExHaFRSdzFHMUZvQ1hMOWNzaTJDdnExdEJWM3Y2cFVzdGlhQXpyY0NuYmZncXhadlduRG9wQjRvOEFrYldPMmJyS1JacElzMVloTGk5NGJvOUxaSGFUdGNCUjJrMEJqR0RKWHdKYld1cHhzeno1MXZGajhUVTRB?oc=5",
+"d": "2026-10-02",
+"t": "업데이트: Nike 회계연도 1분기 수익, 수익 감소; 주식 하락 프리마켓",
+"o": "Update: Nike Fiscal Q1 Earnings, Revenue Fall; Shares Drop Premarket",
+"u": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOZkVtdTU2bHVEX0dyMjIydGotNXg5S1JmNkF3ak1ZeklBLVNyYjVLdFN4Z194endzc18zY2l5c20zb3hVcFlFV0pGYkRCVnJIV1NpeEFlREJ2Vm1rZUFqYWdxd2MwWVpaRk5SZzFXVlVDV1hZeDJreGs3RTZMVER2SWR5cjdVNVAxeEpsdTlVMy1lckpwRDZUS2ZqWjk?oc=5",
 "m": "바이어 · Nike"
 },
 {
-"d": "2026-10-01",
-"t": "Nike 주가는 실망스러운 1분기 실적 결과로 하락: 분석가 시사점",
-"o": "Nike stock sinks on disappointing Q1 earnings results: Analyst takeaways",
-"u": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNblM4WmZqQl9vLVpJTDE3UEp2RnhmQmlqTTlIVjdqeVJ4S21IVk9CYVVxdVBENEdYUDFfejdlX3NVdWZ6dnZVNTk4Vkg1Z0JNbmZkaldwc2ktTV9MZkNLbFE1MXR4WXprVkMyc2hPRHFiWmN0b0plVTdSRWQyWjc0cE9qS0NzQVg0NVFn?oc=5",
+"d": "2026-10-02",
+"t": "Nike 방금 수익을 보고했습니다. 투자자가 알아야 할 사항은 다음과 같습니다.",
+"o": "Nike Just Reported Earnings. Here's What Investors Need to Know.",
+"u": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPWW1Fb014Z2F6NTBIS3N4Q2pXNEtBejdvb0ZHSnIxQW9DU2gxMXBuWV91dWZMRUJwUklfZVdadk1CNE9yWVA2ZW9ZMF9HQktrTGRfcXlvSS1kQzZRM0xKZ050UHJkaTlsS1dsNTg0cDNMMXhTRThGWFFFWlFMbHljTTN1VU0ybHNUZElOYjVlYldBMk84Qjl0cDY4SkowT0k?oc=5",
 "m": "바이어 · Nike"
 },
 {
-"d": "2026-10-01",
-"t": "올해는 Nike 주식 사상 최악의 해가 될 수 있으며, 매출은 더욱 감소할 것으로 예상됩니다.",
-"o": "This could be the worst year ever for Nike’s stock, with sales set to fall further",
-"u": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNMUIyTXU4U1RNNGxGOWc1SzRuMVB6VDJYZW5zTEFsMWp6X0FSUnFEQjZETG9fdkJscUN5RVlVazd0bFU5R0JzMDd4QUVETXhFMVBDWWRobEFPc1djbHZGRFdKTnVZb1ZpU0RnX2hyWFdBQ3gyeUdnenJoX0I2anlBRjlVRnVBZHRNTkt3WFo2bDE1dm0xMVktN05nRkZvUHdV?oc=5",
+"d": "2026-10-02",
+"t": "Nike, 암울한 1분기 전망 하향 조정, 비용 절감을 위한 효율성 프로그램 출시",
+"o": "Nike trims outlook on bleak Q1, launches efficiency program to slash costs",
+"u": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5MQmZQUjZIQjV2MlM0dmhKQmJnb0h3TmdibVNnZi1sbC1FLV9IUmNKS2VMTUhMUFlfSzlmTndtNGhMcFFCdmF0TklRYWxSZEVxUUJqX2VYdVBvQlhScnBEY3FTa2p1Wm8wR2FLVEFDWQ?oc=5",
+"m": "Just Style"
+},
+{
+"d": "2026-10-02",
+"t": "Nike 수익 분석: 질문에 대한 답변 및 다음 촉매",
+"o": "Nike earnings analysis: questions answered and next catalysts",
+"u": "https://news.google.com/rss/articles/CBMivwFBVV95cUxNckJvT0RuYzBsX1ZRWjQ4U1hCcU5rWGpuUjlCRmNDWEpXQ2JaN1Jla1B5c0I1eFFuSHFLT3VzeG1GWUl4NGJ5c1ZESF9IOGdRcUhmRW5KQXhOWVI5dzV2RDR1bUlPczVZUlppU2hLd2R6bFphSGJsdlRnXzU1MkI3Y3NaVWNnVUZsUGJ2TWZ4SUtuVnZtdy1RZmpTR24yMDNFdk5OMjdiS0lJY2ZRTU11RWZocTBUSFFGRThjWjVkOA?oc=5",
 "m": "바이어 · Nike"
 },
 {
-"d": "2026-10-01",
-"t": "Nike 중국에 집중하는 투자자, 실적보다 CEO 보기",
-"o": "Watch Nike Investors Focused on China, CEO Ahead of Earnings",
-"u": "https://news.google.com/rss/articles/CBMirAFBVV95cUxPSjZMRVdka29LRXFOQm04TU5aU0phZk1wZmJhSmhyenl0UnU5T3ZMZGZyV3drTmJibHlsVEtGYzdpM3Vhd2JQNXJ1cGJDZlVYR3VRczVzeTN4dFZTSzN6MUktYzlHWW16MW9XRjhURkFxRnpvYk9LWEZ5aElnVk9DM0xkNi1JTUo3Ymh6VEFvTkVSUFRLTkkyLWN6d0dmYXpkYTNqalZrVTUxVTNZ?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-10-01",
-"t": "Nike 수익은 0.04달러 상회, 수익은 예상치에 미치지 못함",
-"o": "Nike earnings beat by $0.04, revenue fell short of estimates",
-"u": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxNZjlpN3ZvQjhGZjI0SU5sNXhPZEk1dEN2WW1XZ09JTTJ1ejA1c1BJU29VLUY1NFJuWnNSaHRPaFZIczBlSXpJVG5xa0ZMeERQZTlWaEE3WTM0YnFNRnVyZFBRY2dkRkE2MkY0S2JvRUJrWHg5Mmk3ZEpTODJhTVNaTmR1VllwMFdRenJtVi05dk9DakRoVzgxNGE5YjV6QWdCdldEWHYtRFY?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-10-01",
-"t": "NKE 주식은 밤새 상승했습니다. 소매점은 1분기 실적을 앞두고 Nike에서 강세를 유지합니다 – '재투자할 시간'",
-"o": "NKE Stock Ticks Higher Overnight: Retail Stays Bullish On Nike Ahead of Q1 Earnings – 'Time To Reinvest'",
-"u": "https://news.google.com/rss/articles/CBMingFBVV95cUxPcTh1UG5tOWc4Y2pHSnlhRHNZQ2l4QXljTGlLS1o5WnlnZUZVOGpLbVRRNkZwT0ZwM2E4eWxCSFBVQzdCVV9DSkRTaEpGMXY4elI4WTZZa1N2TDQ5QW5aVnBGbWZRNE5zMXR1UVVpZ3VfNzlaeTZqVjNTaTVBQlVCY2lBVkY4ZXRfNlpiU2cyVjlWT1ZlQ3laaEMwTjhhdw?oc=5",
+"d": "2026-10-02",
+"t": "Nike 주가는 약한 수익 전망과 해고 계획 진행 후 하락",
+"o": "Nike shares tumble after weak revenue outlook and layoff plans underway",
+"u": "https://news.google.com/rss/articles/CBMie0FVX3lxTE1jTVVlUmdIV0JLNEdzenZkVGh6ajltMklpckdDNnN4TThKTHdLOHVuMV9iX2NkclBIMzZTTkpVVmRXVVZOcl9hSGhqd3c4UEI1VnBsSXdBUXUzMGZBdkRJckRoTTZreXRFTEVXSF9OLUJpdF9kNkFHT1pRTdIBgAFBVV95cUxPT3RTalhhOUR1YmVxZ0haWnlPcWVROHVoX1ItV2ZhdnJ6Q2RKbnVMOTcwRllpLWF0TTFxWXhWNzZBTDhsOHRtZXFUQ0NZRU9PbTh6cmNyaDdkWW1iVFZRLTFWRDdTNFl0OVpDZEk0Qndub3BFZWxHdUJwMG5NRTVvSQ?oc=5",
 "m": "바이어 · Nike"
 }
 ],
@@ -4489,10 +4489,24 @@
 ],
 "costco": [
 {
+"d": "2026-10-02",
+"t": "Costco는 3.9%의 마진으로 상승하는 비용을 흡수할 수 있습니까?",
+"o": "Can Costco Absorb Rising Costs On A 3.9% Margin?",
+"u": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxOVjhfbGQ4aGtvd21iVnB1SzYzazN1MlcyLWoxVXh3TjBPd3NqOXdoRkhaa3Vhc1JhcEdDM0N5aFNzZlU0Yk5XcE9mWXBYZUlsdXh6alFnVFlZeHdhZkxNeklnUWF2MEk1Ul9PVGNaU2czcU9mUDJNaWpXcmppc3VWblBaZ2VGcmJvVlVZdUE1REdrZ3o0aV9uUzZ6NWtGV2szc0h0TDNYRXhfTVE?oc=5",
+"m": "바이어 · Costco"
+},
+{
 "d": "2026-09-30",
 "t": "Q4 수익이 개선된 후 Costco 주식을 매수, 보유 또는 매도해야 합니까?",
 "o": "Should You Buy, Hold or Sell Costco Stock After Its Q4 Earnings Beat?",
 "u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNY1REeWpKaEM4QVhnNHRfSUhFMTQzd2gxZldzSzJNYU1vMjlBSWlzOTRDa0dQWkR0eU9Tc2RLdVg4ay1mR1QtVkFXc0tSUjl3aEw2aHFDZm5JUGVVVk5ieENSeU5lYkVLQW5SSi1yUzYyMnVXenhCbTNHdjBjdldOQnF1SFFRQ0UzOEhtdzd6TGZ5VEd3WUpCSUdSeGJPLXA0SFlqbWhnQklMRHF5QU5keUZkbGJLaDFKRWNraXNrek4?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-09-30",
+"t": "Costco는 강력한 멤버십으로 5년 연속 수익을 기록했으며 주가는 16% 상승한 $1,069를 기록했습니다.",
+"o": "Costco posts fifth straight earnings beat with strong membership, stock seen rising 16% to $1,069.",
+"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOWE5aT0xmNjRUYmZ6Z1BfV2t5dTdsRXlHOEpQcjZ4X0pwTVoySkVZZVdTX3U3ellDalJNSFNRcFYtLUtESG9hSE54MWNZTmpFM0x1RmZiRFA4b2NyejZRNUNaNlpUdGpTOXdNbXc4dVEyaDYzTUNXN1VJamozOFdYVFAwTWQ4N3FZVEZuOWdKenNKb2VOZ05MZ2QwYw?oc=5",
 "m": "바이어 · Costco"
 },
 {
@@ -4529,23 +4543,16 @@
 "o": "How Tariff Refunds Could Shape Costco's Earnings in Fiscal 2027",
 "u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxOVUhsZzhqenhJN3VJNFlhLWdnUE5zLWlzRW4wdkI4ck01MHFnOHFncWo3cDZUR2hKRkZLRzNHa1BVSU1GMXB5VVBabVZZTC1VTjV2WlZHR2JyWFVkNGU3TWF3Qy00MjFTZDJHN0YxYlJrbHczbmgyU0NOSEZ6MkllcVNudkUxUDlMMW5jczFCeHozWnNDYkVjYjVIZU0xMmhETFI2NFVpUVdYRmtSTFF6Q2VTbGd4MmQ5X1VJ?oc=5",
 "m": "바이어 · Target"
-},
-{
-"d": "2026-09-28",
-"t": "Costco 수익으로 필수 소비재 부문의 불씨가 켜졌습니다",
-"o": "Costco Earnings Ignite Case for Consumer Staples",
-"u": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPcjZMTGVEYnd4SWZPZkNKM1ZZSlpJa3BkQVcyMHNwVEpKSjlTcUdGaElEUFlhcFZ5WTBsQml2TE5lZ09SRnQzUHh4X0tIVkFrcEEtVUdsX3hXbWFfSFg4YmhBMDBDdjZRUEtOSUtBMmpOQ2xLaExIQkxHcjNfY3BGMDNUSlF3YUxlWXZ3X1ZKcmtHQ1JsZDVRM1laMFQzVi1MdnYxX25GY9IBrAFBVV95cUxOZ3RiV2JJNVhSbG9YWFNYMUljZGVFbWxtSy1rSHF3c2E5N1N1QWVlbl9XbTZmNXRqWDdXWTBwR04zbG9KQnNOU2pvQ2podmo0c1JET1FueWk5cXp6c29pMVNKS0ZHaS1xSUZlVkh2b19sc1pkbEFrZXhyMHJiYUJ6V0hEa3ZkaXZpWU5Hd2J2eXJaUGt0ekJDN2kxTU81dE5aY2FaOVNMY20xTGtG?oc=5",
-"m": "바이어 · Costco"
-},
-{
-"d": "2026-09-28",
-"t": "IBM i 통합으로 Costco 구매자에게 실시간 재고 제공",
-"o": "IBM i Integration Gives Costco Shoppers Real-Time Inventory",
-"u": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNM3dROVZRUlRPekNYY3pOdzN4QjUwUHI5cDRFQ0VXVHhTbVJGWUtLbkdBZkdRUFJZaXl4dm5ZQnJiTEs0ZmI3WGhBcmZuLUEzaUR3WjlzMENVTUN2MV9PUTg4MHZDUmE2UElCc2xFZ0VuMkJOUjduLTNWcTdQR0tWNnVuUElBQ1RMeFJYLWd4SlNRUjhZcWpjU2FVSjY?oc=5",
-"m": "바이어 · Costco"
 }
 ],
 "aeo": [
+{
+"d": "2026-09-25",
+"t": "더 나은 여성 데님 판매를 위해서는 American Eagle 주식 투자자의 조치가 필요합니까?",
+"o": "Should Better Women’s Denim Sales Require Action From American Eagle Stock Investors?",
+"u": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxQX25GM0lHZEV2MzMwTnhNdXpWN29RS2ZCR2lJdThIZVZiSENOVzEyTlFHTXJaeTNvRmpYeGVXdzFhRlZhMlJXWWRBaVlDMzMzSEJLdWNsZ21HOHdXMlNNUU1URmJibnlIV0RZY1ljTU1ZZ2RNYjlFU2VOd0RZWTJDMlhMUG5pWWVIMEt6dHZCUjVnU1VtaXFsQkpoZENlcDRPN1BVdWNuLWpjcVJlVzMtMjM0cmZJU3FWVV85RXlyVEZ3VkZUbWs3X0VyQVBER0tuUzF0UmV30gHbAUFVX3lxTE1iZE1uZHFVcDVxd2xEd0NiclVTbWhKUmQ3VGI3cTRiUFpMU0RkSkJaMndpTTQ4dVBCcDIxaUxrVUg4OW1WeG52VjVMcVBLT19aeGF0VzBaQnFVNVN6Q1pxVnR4LVZtTTB6bzdQWkdBeWtYVmpoSVFTYU0yR0xsZ3AxMzBSZ0l0a3JXS2d1Y1ZEMDZVbnU2Rnp5d243dlFpNmpROEdsWFBJb0pJb1BfMzZHR3U0UzBsWlN0SXJldDc1UDJING4zWmJyOTU0WU5EOFpSdWVXaUxDUk82MA?oc=5",
+"m": "바이어 · American Eagle"
+},
 {
 "d": "2026-09-22",
 "t": "American Eagle Outfitters, Inc. 2018년 3분기 - 결과 - 실적 발표 슬라이드(NYSE:AEO) 2018-12-11",
@@ -4593,13 +4600,6 @@
 "t": "American Eagle Outfitters 2분기 검토: 관세 환불로 인해 추악한 현실이 숨겨졌습니다(NYSE:AEO)",
 "o": "American Eagle Outfitters Q2 Review: Tariff Refunds Hid The Ugly Reality (NYSE:AEO)",
 "u": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQWW1YLW9IVkxsT0lySndZc2Q3MXNxUUc3ZjA3eWhkbHh2cS1abndOZUtVYVJQMm1WeEY1WWxqYmxMai11OGdYLWNYZWV4MUxOZElVMUJ3RUt5enpQbE9RVHprVW9ObnYwMVdSZHR4WXJMaFpRb2Z0NnVuSDVpRVI4TXcxcFN2V3V3SjhtalZHYmExMnd1UzlubE9ZODNwZjdRMmRUZ0lfek1jcm9I?oc=5",
-"m": "바이어 · American Eagle"
-},
-{
-"d": "2026-09-11",
-"t": "아메리칸 이글(American Eagle) 주가는 균일한 마진 전망, 이름을 딴 브랜드의 약세로 하락",
-"o": "American Eagle shares slump on flat margin outlook, weakness in namesake brand",
-"u": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxQNGx1QldNRUZINll4VlBuVGtLQUw0b0UwR3FVVnQ0Z0pmeEVkaW5JblBOTWJQaWZXMHRydXZST1FoSmR3SUhPVC1GLXZYUzFjbExsYjVnc2swZXJWUDZOZnpUU2ZBcTJ2Y2w2SjFnYnlCeHFxZXVRX1VWamstTlh2Mm1fTEhxX1gxMEQ5UU1MOTZLM0N3Rkk3Y0lJV0N3VEtRNGdyZ0tWM1hHOVUtcDRGWG10RVBzWEl4OFZNX09Ycnd0QnZEUnFHTkdGUHJDLWZBNXRMSVRtTTBIM3o3cGtaOUl5Y05zWEFkcm80S0QtWENTUdIB9wFBVV95cUxNVkxINlJwQ2VFSldFZW5OLThZdDZTclVWQkI3WGZhSWxWLU1lQVd0VHMwcjhFQ2taV284MGE0a1FaY0dJeWlaSzZBUmVoWkxQWEhEYU5BNjBzR1JvZk54X0tQZDBaMlVOamhFZTR1a2VOM0R5MlpINEFxN3Bick5UMHJFSWFMck9IR0VDRGF3UHhjNC1hdTZpMnhNWE9Ednl5UVVPWC1uemhYZjZfSWxYajVkOHVsNk5PRExEelg5NW01M212WldvQ3liMXd4T2tWX0gyR1BnSnNoTHhXVFhVRnpQU2pzbl9VR2tQempRbkhTc2NNYXFr?oc=5",
 "m": "바이어 · American Eagle"
 }
 ],
