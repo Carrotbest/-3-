@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-10-03T23:24:42+00:00",
+"generated_at": "2026-10-04T23:39:43+00:00",
 "window_days": 120,
-"total": 1437,
-"translated": 1437,
-"filtered_out": 2551,
+"total": 1451,
+"translated": 1451,
+"filtered_out": 2576,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 22,
-"scanned": 692,
-"kept": 238,
-"material": 169
+"scanned": 693,
+"kept": 236,
+"material": 168
 },
 "30": {
 "sources": 22,
-"scanned": 2864,
-"kept": 1082,
-"material": 789
+"scanned": 2761,
+"kept": 1046,
+"material": 772
 }
 }
 },
@@ -25,7 +25,7 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 467
+"n": 477
 },
 {
 "key": "RETAIL",
@@ -33,11 +33,11 @@
 },
 {
 "key": "FABRIC",
-"n": 267
+"n": 268
 },
 {
 "key": "ETC",
-"n": 194
+"n": 197
 },
 {
 "key": "CHEMICAL",
@@ -55,7 +55,7 @@
 },
 {
 "key": "Fibre2Fashion",
-"n": 237
+"n": 247
 },
 {
 "key": "국제섬유신문",
@@ -63,7 +63,7 @@
 },
 {
 "key": "Textile Focus",
-"n": 96
+"n": 97
 },
 {
 "key": "Ecotextile News",
@@ -71,7 +71,7 @@
 },
 {
 "key": "Textile Today",
-"n": 80
+"n": 82
 },
 {
 "key": "Innovation in Textiles",
@@ -83,7 +83,7 @@
 },
 {
 "key": "주제검색 · 신소재",
-"n": 66
+"n": 67
 },
 {
 "key": "Indian Textile Magazine",
@@ -141,7 +141,7 @@
 "tags": [
 {
 "key": "방글라데시",
-"n": 91
+"n": 93
 },
 {
 "key": "리사이클",
@@ -172,12 +172,12 @@
 "n": 20
 },
 {
-"key": "T2T",
+"key": "부직포",
 "n": 19
 },
 {
-"key": "부직포",
-"n": 18
+"key": "T2T",
+"n": 19
 },
 {
 "key": "스판덱스",
@@ -189,7 +189,7 @@
 },
 {
 "key": "베트남",
-"n": 13
+"n": 14
 },
 {
 "key": "관세",
@@ -248,15 +248,15 @@
 "n": 7
 },
 {
+"key": "비스코스",
+"n": 7
+},
+{
 "key": "렌징",
 "n": 6
 },
 {
 "key": "환편",
-"n": 6
-},
-{
-"key": "비스코스",
 "n": 6
 },
 {
@@ -292,11 +292,11 @@
 "n": 4
 },
 {
-"key": "폐수",
+"key": "원사가격",
 "n": 4
 },
 {
-"key": "DPP",
+"key": "폐수",
 "n": 4
 }
 ],
@@ -340,17 +340,6 @@
 },
 "daily": [
 {
-"date": "2026-09-04",
-"total": 38,
-"by": {
-"RETAIL": 16,
-"MATERIAL": 12,
-"CHEMICAL": 3,
-"YARN": 3,
-"FABRIC": 4
-}
-},
-{
 "date": "2026-09-05",
 "total": 7,
 "by": {
@@ -373,9 +362,9 @@
 },
 {
 "date": "2026-09-07",
-"total": 63,
+"total": 64,
 "by": {
-"MATERIAL": 28,
+"MATERIAL": 29,
 "RETAIL": 18,
 "ETC": 5,
 "FABRIC": 9,
@@ -397,11 +386,11 @@
 },
 {
 "date": "2026-09-09",
-"total": 71,
+"total": 72,
 "by": {
 "RETAIL": 10,
 "CHEMICAL": 7,
-"MATERIAL": 35,
+"MATERIAL": 36,
 "ETC": 5,
 "FABRIC": 13,
 "YARN": 1
@@ -679,30 +668,17 @@
 "FABRIC": 1,
 "YARN": 1
 }
+},
+{
+"date": "2026-10-04",
+"total": 4,
+"by": {
+"ETC": 3,
+"MATERIAL": 1
+}
 }
 ],
 "momentum": [
-{
-"tag": "방글라데시",
-"label_en": "bangladesh",
-"recent": 74,
-"prior": 16,
-"delta": 58,
-"weeks": [
-0,
-1,
-0,
-0,
-0,
-0,
-7,
-14,
-23,
-20,
-14,
-12
-]
-},
 {
 "tag": "리사이클",
 "label_en": "recycled",
@@ -722,6 +698,27 @@
 12,
 16,
 13
+]
+},
+{
+"tag": "방글라데시",
+"label_en": "bangladesh",
+"recent": 71,
+"prior": 21,
+"delta": 50,
+"weeks": [
+0,
+1,
+0,
+0,
+0,
+0,
+7,
+14,
+23,
+20,
+14,
+14
 ]
 },
 {
@@ -973,22 +970,10 @@
 "first": "2026-09-07"
 },
 {
-"tag": "ZDHC",
-"label_en": "zdhc",
-"n": 2,
-"first": "2026-09-06"
-},
-{
 "tag": "bluesign",
 "label_en": "bluesign",
 "n": 2,
 "first": "2026-09-15"
-},
-{
-"tag": "원사가격",
-"label_en": "yarn price",
-"n": 2,
-"first": "2026-09-09"
 },
 {
 "tag": "항균",
@@ -1010,6 +995,96 @@
 }
 ],
 "articles": [
+{
+"id": "d1967ebe5a71f054",
+"d": "2026-10-04",
+"t": "Wendler Interlining Bangladesh, 지역 RMG 공급망 강화를 위해 새로운 LEED 골드 인증 공장 오픈",
+"o": "Wendler Interlining Bangladesh Opens New LEED Gold-Certified Factory to Strengthen Local RMG Supply Chain",
+"u": "https://textilefocus.com/wendler-interlining-bangladesh-opens-new-leed-gold-certified-factory-to-strengthen-local-rmg-supply-chain/",
+"s": "Wendler Interlining Bangladesh Limited officially opened its new production facility in Bangladesh on Saturday, marking a significant milestone in the German textile specialist’s long-term commitment to the country’s ready-made garment (RMG) industry. The opening ceremony brought together senior exe",
+"c": "ETC",
+"x": "Wendler Interlining Bangladesh Limited officially opened its new production facility in Bangladesh on Saturday, marking a significant milestone in the German textile specialist’s long-term commitment to the country’s ready-made garment (RMG) industry. The opening ceremony brought together senior executives of Wendler Interlining Group, industry stakeholders and business partners to celebrate the company’s growing presence in Bangladesh and its vision for the future of the global interlining market. Wendler Interlining, a family-owned German company with roots dating back to 1843, has evolved from a textile finisher into a specialist in high-quality interlinings for the garment industry. The company established its own Bangladesh subsidiary in 2022, building on its production presence in the country since 2009. According to the company, Bangladesh is a strategically important market because of its position as one of the world’s largest garment-producing countries. From 180 years of heritage to a new chapter in Bangladesh: Addressing the ceremony, Dr Gerhart Wendler, Chairman of Wendler Interlining Group, highlighted the company’s long history, its transformation through successive generations and its continuing commitment to innovation and quality. He spoke about Wendler’s journey from its establishment in 1843 to becoming an international specialist in interlinings. The company shifted its strategic focus to high-quality interlining fabrics in 1974 and subsequently expanded its presence across major garment-producing markets in Asia. Dr Wendler also outlined the group’s future ambition of strengthening its position as the market leader in interlinings, with Bangladesh playing an increasingly important role in that strategy. Global strength and local presence: Kanat Altu",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/WBD-Factory.png",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "82fc39b933c0d7bd",
+"d": "2026-10-04",
+"t": "네덜란드 기계 수출은 경제가 개선됨에 따라 섬유 무역을 지원합니다.",
+"o": "Dutch machinery exports support textile trade as economy improves",
+"u": "https://textiletoday.com.bd/dutch-machinery-exports-support-textile-trade-as-economy-improves",
+"s": "Dutch goods export volumes grew 2.1% year-over-year in July 2026. CBS reports that overall machinery shipments accounted for most of this export expansion. The Netherlands hosts major textile machine...",
+"c": "ETC",
+"x": "Dutch goods export volumes grew 2.1% year-over-year in July 2026. CBS reports that overall machinery shipments accounted for most of this export expansion. The Netherlands hosts major textile machine manufacturers like SPGPrints and Vandewiele Netherlands. These Dutch companies supply advanced technology for digital textile printing, carpet weaving, and yarn processing globally. Courtesy: Collected The Netherlands’ economy expanded 0.6% in the second quarter of 2026. According to Statistics Netherlands (CBS), higher exports and manufacturing output drove this overall economic growth. In addition, Dutch manufacturing output jumped 9.0% year-over-year in July 2026. This marks the strongest annual manufacturing gain for the country in four years, following a 5.0% increase in June. This machinery growth highlights rising capital investments by global textile manufacturers. Garment factory owners are buying more Dutch machinery for spinning, weaving, dyeing, and finishing operations. Stronger Dutch machinery trade confirms that supply chain partners are upgrading technology for late 2026 production.",
+"i": "/storage/uploads/2026/10/dutchmachineryexpo_17910850986316.jpg",
+"g": [],
+"m": "Textile Today",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "72db3b00b14dc4d8",
+"d": "2026-10-04",
+"t": "Wendler Interlining, Bangladesh RMG 공급망 강화를 위해 새로운 생산 시설 개설",
+"o": "Wendler Interlining opens new production facility to strengthen Bangladesh RMG supply chain",
+"u": "https://textiletoday.com.bd/wendler-interlining-opens-new-production-facility-to-strengthen-bangladesh-rmg-supply-chain",
+"s": "German textile specialist Wendler Interlining Bangladesh Limited has officially opened its new production facility in Bangladesh, strengthening its long-term commitment to the country’s ready-made ga...",
+"c": "ETC",
+"x": "German textile specialist Wendler Interlining Bangladesh Limited has officially opened its new production facility in Bangladesh, strengthening its long-term commitment to the country’s ready-made garment (RMG) industry. The facility was inaugurated on 03 October at a ceremony attended by senior executives of Wendler Interlining Group, industry stakeholders and business partners. The opening marks a new phase in the company’s efforts to expand local production and provide faster supply and technical support to Bangladesh’s garment manufacturers. Wendler Interlining is a family-owned German company with a history dating back to 1843. The company evolved from a textile finishing business into a specialist in high-quality interlinings for the garment industry. It established its Bangladesh subsidiary in 2022, building on its production presence in the country since 2009. Speaking at the opening ceremony, Dr Gerhart Wendler, Chairman of Wendler Interlining Group said, “With more than 183 years of heritage, our transformation across successive generations reflects a continuing commitment to innovation and quality. Established in 1843, we have gradually become an international specialist in interlinings. Our future ambition is to strengthen our position as the market leader in interlinings, with Bangladesh playing an increasingly important role in that strategy.” Figure 1: Dr Gerhart Wendler, Chairman of Wendler Interlining Group. Kanat Altunbas, General Manager Asia, Wendler Interlining Group, said, “We operate across 38 countries, collaborate with roughly 5,000 partners, and manage 30 warehouses, blending global expertise with local customer support. Our production network extends across Germany and Asia, keeping us near key garment manufacturers.” We have launched new plan",
+"i": "/storage/uploads/2026/10/wendlerinterlining_17911224497559.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "4b928b06cb1e29fd",
+"d": "2026-10-04",
+"t": "Vietnam 직물은 그린 시프트로 target 475억 달러를 수출합니다.",
+"o": "Vietnam textile exports target $47.5 bn on green shift",
+"u": "https://news.google.com/rss/articles/CBMizgFBVV95cUxQYVNhU09lc0xONllHWnh3cHJEUThWSndyUjR2YlhPLXo5emdveGRuZzg5eVM2WnY5czQySzNsaUhkRVNfQ01KcG5OZ095NENnNXNOS3JLWEFkeXZYaTVPc3lSdWZkcTIwZEF4Ymd2SE9ZT0J6SFYzQ3l2ZTVUcDNCcVpMM0tKbmxuM3VNb3Y1UlBMTW9FRWJlU0JQdGJad0dBME01WlZsZ1dtSkNfcDZCRW4wQ3BuZVZFaGhrM1AzaWpNdVVWUEN2SnhaMEZ0dw?oc=5",
+"s": "Vietnam textile exports target $47.5 bn on green shift Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Vietnam textile exports target $47.5 bn on green shift Fibre2Fashion",
+"i": "",
+"g": [
+"베트남"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
 {
 "id": "ed37e70f5aa947f4",
 "d": "2026-10-03",
@@ -2812,11 +2887,12 @@
 "m": "국제섬유신문",
 "r": "국내",
 "v": 13,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"국제섬유신문"
+"국제섬유신문",
+"주제검색 · 국내소재"
 ]
 },
 {
@@ -4357,11 +4433,12 @@
 "m": "Knitting Industry",
 "r": "해외",
 "v": 12,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Knitting Industry"
+"Knitting Industry",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -19192,6 +19269,27 @@
 ]
 },
 {
+"id": "430f9a252621c156",
+"d": "2026-09-09",
+"t": "가치 사슬의 유기적 변화: 보다 친환경적인 미래를 위한 지속 가능한 섬유 탐색",
+"o": "Organic Shift in Value Chain: Exploring Sustainable Textiles for a Greener Future",
+"u": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxNdmJiYmE3Y0ZKY1hxX01JSVVPTkRSS2p1eW1vLUcxTTNsLTYtZDNFM3BGSGpiTkFYS2VlcG83MjZKYzY3NzhCRFcyZlNjckNtREN0OXMtNGNHa1l0TTZiQ2NWQnJZd2VZNEhvSEF6bm5FRFA0enBGTFV0c05IUnpOcDFQR092a1ZtWkxsaUNuQW9oSVFNcmRGaXZuMXM0MV92a0hrbmFKd2p2cmIwVXdveVhIVXptYXctOHFDbm9XZkRJajZFSkQxN3NpbmczaF9VbEd1cHBLQi1FS1JkdF9paA?oc=5",
+"s": "Organic Shift in Value Chain: Exploring Sustainable Textiles for a Greener Future Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Organic Shift in Value Chain: Exploring Sustainable Textiles for a Greener Future Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "423689802e6f35dc",
 "d": "2026-09-09",
 "t": "새로운 스리랑카 허브에 Tonello 기술 설치",
@@ -22414,6 +22512,27 @@
 "g": [
 "방글라데시"
 ],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "3e9fdb205dcf44ad",
+"d": "2026-09-07",
+"t": "미국 301조 조사로 인도 섬유 수출에 새로운 위험 제기",
+"o": "US Section 301 Probe Raises New Risks for Indian Textile Exports",
+"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxQQ3hrZWtvVHBBbU1fZkloRmh5dWJhVnlfR0JaZk54MlpMSFp3ckJMQzIxU2k5cVV1UjQxUldDVk9xaFlKT2xEd3VWZjg1akhvVTlJVTJ6d05sXzliSFdXNjltalZ1Y2xNTTlGT3FDTkJIbXkyWmlIcjVyWURTZUxsdFNvMFFFY3BpbmhOV2l6dUhGNFZsczJaMTZoTWlMZHVfOGZYa0Q3UXFlSzUwZ3VzSC01amVibzJGSHQxd3IwRk5xT0cySXFsVWQzaTI?oc=5",
+"s": "US Section 301 Probe Raises New Risks for Indian Textile Exports Fibre2Fashion",
+"c": "MATERIAL",
+"x": "US Section 301 Probe Raises New Risks for Indian Textile Exports Fibre2Fashion",
+"i": "",
+"g": [],
 "m": "Fibre2Fashion",
 "r": "해외",
 "v": 7,
@@ -29118,6 +29237,29 @@
 ]
 },
 {
+"id": "83bf0dd5ca7d0dc5",
+"d": "2026-08-26",
+"t": "| 인도 폴리에스터 원사업체, 평균수요 속에 비스코스 혼방",
+"o": "| India's polyester yarn firms, viscose mixed amid average demand",
+"u": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxQV0ROOGlrSWNrSXZBT25iVVBBb2NWaTBZMUJsQl8wTmhmdDdOWEYtQkZoOXZRcjhZWVVuaGp1cVBBMEJRRmJ2bFJyRW9HNDhCam0wQXdsLTlobjUyQzRLbjBCVkJXb1dmejkzVHBoTlFhbTlBZzdTRHNxVWhhZDB3cnllMThVZV9KdkxOMmNlODJ4OGlkYWprQ2Znb3F2VWExSEppeVFhYjJ5RWRnbm1VYUxfbkdvcEtyQXRzbGNlU1lnUUVKcF9lVW9NSC01TFpfSUExak1mYk9jY0h0MFFtVg?oc=5",
+"s": "| India's polyester yarn firms, viscose mixed amid average demand Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| India's polyester yarn firms, viscose mixed amid average demand Fibre2Fashion",
+"i": "",
+"g": [
+"비스코스"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "52b44f285831455c",
 "d": "2026-08-26",
 "t": "모기에 대한 정밀한 보호",
@@ -29648,6 +29790,29 @@
 ]
 },
 {
+"id": "f020c1d0584db061",
+"d": "2026-08-24",
+"t": "| 북인도 면사 가격은 가격 상승과 수요 증가로 상승",
+"o": "| North India cotton yarn prices up on higher cost, better demand",
+"u": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxPRHc0WTJncEx0QUtqNVFZYlRVZEU4Y2lWZ3FsRzFYLWNjT0pWTUtwVHY5X0lRdzNMMWQtdmZSN2dHRVExZVVQREF4c1ZPeTA5clhDWUNlNkxJVEN4eDUyUk92OWJIcFFJVFB3Z19taXN4MnhQa3piRWhVZWtQVEVubmtXUzlhRDJhY1BGWW1kdlg4dWdLX0pfM2lyWGpEVGNMVGxyQ3hHV1F6X1hVWHdneDZlTkpwUHhKX05yZnhuR045SmFhbUt6am9KSk9Pblk2Z3pMXzY0Rm9OU3FPeG5fRg?oc=5",
+"s": "| North India cotton yarn prices up on higher cost, better demand Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| North India cotton yarn prices up on higher cost, better demand Fibre2Fashion",
+"i": "",
+"g": [
+"원사가격"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "bf669487a2df0e8b",
 "d": "2026-08-24",
 "t": "재생 코튼이 차세대 데님을 주도하고 있습니다",
@@ -29776,6 +29941,27 @@
 ]
 },
 {
+"id": "509bf3f0ec6befeb",
+"d": "2026-08-23",
+"t": "| 2026년 상반기 브라질 면화 수출은 중국이 12.5% ​​증가",
+"o": "| China drives 12.5% rise in Brazil's cotton exports in H1 2026",
+"u": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxPTGxtaTJQRkl4bXBHdE1LazRIbUJabk02OXlRZm1yX3NYd21rejlTWjQzX1dEQVBDaVJUTG1oT2U3WkdvMHVOOEdmNk5vVHk1dkw2bnM5bU54R1o5ejUyNlhNc3dPQTUwY21BbEloN2Y0NjNiZjdiUnBsSFhxSk4tUWlOUE5QS3lUcXphaElLX0hKa3VxcUZud3FpSlo1ZWg3dk1FcU96SmU5U2l0eHljRy1GbnhnUTNvamFud3cxMWprWEhYNUFLSVNka0d0TlVtS2xfemZ0UFcxaEM4eUE?oc=5",
+"s": "| China drives 12.5% rise in Brazil's cotton exports in H1 2026 Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| China drives 12.5% rise in Brazil's cotton exports in H1 2026 Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "주제검색 · 신소재",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 신소재"
+]
+},
+{
 "id": "4104a50458934d7f",
 "d": "2026-08-23",
 "t": "불에 강한 종이부터 빛나는 섬유까지...中 신소재 산업의 '무한 변신'-Xinhua",
@@ -29859,6 +30045,71 @@
 "e": [],
 "ms": [
 "Indian Textile Magazine"
+]
+},
+{
+"id": "8c42c1e8f43d3850",
+"d": "2026-08-21",
+"t": "ICE 면화, 통합 단계에서 혼합 추세 확인",
+"o": "ICE cotton notices mix trend amid consolidation phases",
+"u": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxOS1ZmNVp3cVFHajBWQklVenZmNjdJQnkwM0NURFJxYXdHb29udzNjVDNVeFZrRGw4MWVTSVlYdXg4UmdWbnA4WGxZU3VHM1BNeVpKZmRrNm1WOWVBM0ZxNmhPNUN4V1dNVjRlRmtJRmhYcU05WlNOQ2s2UmZRQXczaGpCWjV0cjN4NHZjcEhDa3RYZzBJVWJtSklvWWE2b1M2Q0xPaXpsQkV0OGRvdzVXbDNCRDNYSU52c015Q3hXSkQ1YlE?oc=5",
+"s": "ICE cotton notices mix trend amid consolidation phases Fibre2Fashion",
+"c": "MATERIAL",
+"x": "ICE cotton notices mix trend amid consolidation phases Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "752da82a8bf22c04",
+"d": "2026-08-21",
+"t": "| 뭄바이 시장이 지지를 얻으면서 인도 남부 면사 가격이 상승합니다.",
+"o": "| South India cotton yarn prices gain as Mumbai market finds support",
+"u": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxNLTFWYjc5MnVrVkNJNVF3WE9STW1SQnNWbnlCcmtfdTVWTi1kUkdKT01BZXJVel9zMUZUUzZkZ19NYUFqdjdzTGdPczR6UzdhLUdoaG5JQ0R4SmNfMW1tVTVfRnZ4dHNPOEhFZ1F5a2RpMUJZX1Zna2FLR2pqbGhfVzk3MUc5MUdwRHZyVzVYUGtTSGtDVmd3Vlpoanc0RDRrMEtmeXRmZHh3MmZyR2MzTUg2R1o4Tkc3Z1B2YmkyVXpjTWNzQV90QzQ2YjZNaDNfU0I4Njc3YjZVLVh6bGRBVTNmQXRIOHNvNXFhcmcxN0E1UG9V?oc=5",
+"s": "| South India cotton yarn prices gain as Mumbai market finds support Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| South India cotton yarn prices gain as Mumbai market finds support Fibre2Fashion",
+"i": "",
+"g": [
+"원사가격"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "6cbc29314d765321",
+"d": "2026-08-21",
+"t": "네팔의 산업 부흥이 새로운 성장 시대를 열 수 있을까?",
+"o": "Could Nepal's industrial revival unlock a new era of growth?",
+"u": "https://news.google.com/rss/articles/CBMiywFBVV95cUxNUE1GRng2QTRCUW1GZnBZellZanp5SlE3MFdmZHVZN2VwUkphUmVycXdtU2ZZSEJjRV9OT0RfdjlHZHJpVnlfYWVOQXY5UmZUSDZDaExqYXFuM0p4VlhkWmI2ZDlZd1AwUVhBc3R1cnkwbGhiZ3lSdXM3cU5jcHRJREh6M1JSbHgxa052NG13WmtZUGk0Wm9FdXozRllDaFNsXzdtekgyUUdac2M4WFZXXzN6b0VtakdpOFp6VFA0SjFiN3F1TWRGS0ozaw?oc=5",
+"s": "Could Nepal's industrial revival unlock a new era of growth? Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Could Nepal's industrial revival unlock a new era of growth? Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -30539,6 +30790,27 @@
 "e": [],
 "ms": [
 "국제섬유신문"
+]
+},
+{
+"id": "5ec19fd4ce6d8212",
+"d": "2026-08-14",
+"t": "패션 및 섬유산업을 선도하는 매거진",
+"o": "Leading Fashion and Textile Industry Magazine",
+"u": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9yZU1DTUc3QnZWTVBhQW82VVJlVWZHSHdBOWdTSi0tOGJLRW9tbTdXREpURm1reU1vV3RvZ3JKcXUybUZwUExZcjF3cDd6SEFFVGM2RzRkY2tVWXBOYVVjNVQtQ3Bzek9xSXc?oc=5",
+"s": "Leading Fashion and Textile Industry Magazine Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Leading Fashion and Textile Industry Magazine Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -31662,6 +31934,29 @@
 "e": [],
 "ms": [
 "Indian Textile Magazine"
+]
+},
+{
+"id": "6861dcef4046da02",
+"d": "2026-07-28",
+"t": "아시아 부직포 전시회 및 컨퍼런스(ANEX) - 2027(2027년 6월), 서울 - 한국 - 무역 박람회 및 박람회",
+"o": "Asia Nonwovens Exhibition & Conference (ANEX) - 2027 (June 2027), Seoul - Korea - Trade Show & Fairs",
+"u": "https://news.google.com/rss/articles/CBMimgFBVV95cUxOVWdCWGFGRW14ekJMWnN3bk1nYlRYT3l6aEdDQXFnTFZSVEJmZzZtRER4Wk92RjFUVVZBZ0FnOXY5Vm5kYWVIb0JPOFhVNVEzWGw3SXRETkRPTVRXVXRYaVBLQjk4cGZQM0dPR2VlUEQyajcwR0FnT0xJMW9XOUVxSDJFRDgtS1FsdFhGTkF1eFhlcWQ3bC1fVk1n?oc=5",
+"s": "Asia Nonwovens Exhibition & Conference (ANEX) - 2027 (June 2027), Seoul - Korea - Trade Show & Fairs Fibre2Fashion",
+"c": "FABRIC",
+"x": "Asia Nonwovens Exhibition & Conference (ANEX) - 2027 (June 2027), Seoul - Korea - Trade Show & Fairs Fibre2Fashion",
+"i": "",
+"g": [
+"부직포"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {

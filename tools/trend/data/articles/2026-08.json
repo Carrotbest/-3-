@@ -7837,6 +7837,32 @@
   ]
  },
  {
+  "key": "a84c870fc38dee88",
+  "title": "Abercrombie & Fitch posts record sales and raises guidance",
+  "title_ko": "Abercrombie & Fitch, 기록적인 판매 기록 및 가이던스 상향",
+  "link": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNSlgydmZremtiRl8zUlNFTS11eGxpVkM1TVRtcGZva0d3QU9LWmFoZHRFc0VIUUhvTFZSMjhTSTVKaDhaX2w5S09fajRkNldVTms1UnktQjctYjc0c25MeTI2NENvc3FkUk9YN1I1MldCVk1FN0FZNTdzZ1JvS1l5anZEeEZfOFF3TzJvN0JUUnhrZkQxYUZrczlRUVFxeU1BVFMwRmtucnRBcmRBSXg3WHZpZHNiaTFkVmZDMDdSYzQ5eEV5Slk0?oc=5",
+  "published": "2026-08-27",
+  "collected": "2026-10-04",
+  "summary": "Abercrombie & Fitch posts record sales and raises guidance Drapers",
+  "content": "Abercrombie & Fitch posts record sales and raises guidance Drapers",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
+  ]
+ },
+ {
   "key": "a7b175d848a0fe42",
   "title": "Brands urged to share US tariff refunds",
   "title_ko": null,
@@ -8778,6 +8804,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Urban Outfitters"
+  ]
+ },
+ {
+  "key": "55beb446285d5d6a",
+  "title": "Full-Year Guidance Gets A Major Upgrade - Abercrombie & Fitch stock surges: Why ANF is on fire",
+  "title_ko": "연간 지침으로 주요 업그레이드 제공 - Abercrombie 및 Fitch 주가 급등: ANF가 불타고 있는 이유",
+  "link": "https://news.google.com/rss/articles/CBMi_AFBVV95cUxPSENqWHVPbElEUjUyWFhWSnVmVXFKS0RxbVJsajlkNVUtZGFTUEp4N3hwckZTNk1DRzVrUlMzeHM3N2RnWDd4WGFCYnYzcDlnZ2dhT1p0dDA4aVlISGxyT1JFU2oyR2FDMGdGWVEzQTV4ZXFCbmpWU2dMdGNsLWhacW1IY0NSMF84d3BmWVdjT0U0M09tUjFuNHdDdWhJTGY4bGMyQi0zWnlUbzUxMXhfT3F1Mko0M3VTaGFmYnc4TDB2ekhSVElIUHMxTzRTejE4c21LNGFDcjlBeVdoOUNoM2hfOGJTZUhVNkRRZGVPc2todXpnLVluZTBRZkE?oc=5",
+  "published": "2026-08-27",
+  "collected": "2026-10-04",
+  "summary": "Full-Year Guidance Gets A Major Upgrade - Abercrombie & Fitch stock surges: Why ANF is on fire The Economic Times",
+  "content": "Full-Year Guidance Gets A Major Upgrade - Abercrombie & Fitch stock surges: Why ANF is on fire The Economic Times",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
   ]
  },
  {
@@ -11812,6 +11864,32 @@
   ]
  },
  {
+  "key": "83bf0dd5ca7d0dc5",
+  "title": "| India's polyester yarn firms, viscose mixed amid average demand",
+  "title_ko": "| 인도 폴리에스터 원사업체, 평균수요 속에 비스코스 혼방",
+  "link": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxQV0ROOGlrSWNrSXZBT25iVVBBb2NWaTBZMUJsQl8wTmhmdDdOWEYtQkZoOXZRcjhZWVVuaGp1cVBBMEJRRmJ2bFJyRW9HNDhCam0wQXdsLTlobjUyQzRLbjBCVkJXb1dmejkzVHBoTlFhbTlBZzdTRHNxVWhhZDB3cnllMThVZV9KdkxOMmNlODJ4OGlkYWprQ2Znb3F2VWExSEppeVFhYjJ5RWRnbm1VYUxfbkdvcEtyQXRzbGNlU1lnUUVKcF9lVW9NSC01TFpfSUExak1mYk9jY0h0MFFtVg?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-10-04",
+  "summary": "| India's polyester yarn firms, viscose mixed amid average demand Fibre2Fashion",
+  "content": "| India's polyester yarn firms, viscose mixed amid average demand Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "비스코스"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "80d8dcd889f45259",
   "title": "Abercrombie & Fitch (NYSE:ANF) Posts Quarterly Earnings Results, Beats Estimates By $2.18 EPS",
   "title_ko": "Abercrombie & Fitch(NYSE:ANF), 분기별 수익 결과 게시, 추정치를 EPS 2.18달러 상회",
@@ -13210,6 +13288,32 @@
   ]
  },
  {
+  "key": "3da602dc56e86ce7",
+  "title": "Abercrombie Sees Record Shares Jump After Guidance Lift",
+  "title_ko": "Abercrombie, 가이던스 상승 후 기록적인 주가 상승 확인",
+  "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPM2VoMTAzbGpIVzk4ZEJjbEFNYzZMLVBILWNNd2haUzVzYnlHMkpzZE9TYWFmLUIxMlVscDJHWUxERmcwRGFSSW5UbU5VTXF5N2tlRmZPSTVZV2pUR0ZaV19RcHd3RjV4S0dsWTJVVllsem8tancxQkpqNzRHbU9NajBBNW5LM1ZoSVdpcUJFUmpGQ1pXSkx2TFNNZHZwbmpGeG5IRg?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-10-04",
+  "summary": "Abercrombie Sees Record Shares Jump After Guidance Lift The Business of Fashion",
+  "content": "Abercrombie Sees Record Shares Jump After Guidance Lift The Business of Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
+  ]
+ },
+ {
   "key": "3d71e74a0771c2e3",
   "title": "Canada hits US with ‘dollar-for-dollar’ tariffs as trade row deepens",
   "title_ko": null,
@@ -13565,6 +13669,32 @@
   "hits": 1,
   "sources": [
    "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "322e36a39fc68bc4",
+  "title": "Abercrombie & Fitch Co (ANF) (Q2 2026) Earnings Call Highlights: Record Sales and Margin ...",
+  "title_ko": "Abercrombie & Fitch Co(ANF)(2026년 2분기) 실적 발표 하이라이트: 기록적인 판매 및 마진 ...",
+  "link": "https://news.google.com/rss/articles/CBMiggFBVV95cUxNZ0Y4V1h2S2xQRFJkdm52NnU2YmFXUl9UMWN3ODZVR2thTkNQa2tPODlJejZoMlZiaU1BQlcxSmpBbUY2Qm85Qm1aM3FOd25ZNkpkcHRZWlI1eldSN1YwSFhLZ3gxZ0pJa0p6RVBWUEZJN09nRGl1RlRYV09nMUtsejZR?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-10-04",
+  "summary": "Abercrombie & Fitch Co (ANF) (Q2 2026) Earnings Call Highlights: Record Sales and Margin ... Yahoo! Finance Canada",
+  "content": "Abercrombie & Fitch Co (ANF) (Q2 2026) Earnings Call Highlights: Record Sales and Margin ... Yahoo! Finance Canada",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
   ]
  },
  {
@@ -16352,6 +16482,32 @@
   ]
  },
  {
+  "key": "f020c1d0584db061",
+  "title": "| North India cotton yarn prices up on higher cost, better demand",
+  "title_ko": "| 북인도 면사 가격은 가격 상승과 수요 증가로 상승",
+  "link": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxPRHc0WTJncEx0QUtqNVFZYlRVZEU4Y2lWZ3FsRzFYLWNjT0pWTUtwVHY5X0lRdzNMMWQtdmZSN2dHRVExZVVQREF4c1ZPeTA5clhDWUNlNkxJVEN4eDUyUk92OWJIcFFJVFB3Z19taXN4MnhQa3piRWhVZWtQVEVubmtXUzlhRDJhY1BGWW1kdlg4dWdLX0pfM2lyWGpEVGNMVGxyQ3hHV1F6X1hVWHdneDZlTkpwUHhKX05yZnhuR045SmFhbUt6am9KSk9Pblk2Z3pMXzY0Rm9OU3FPeG5fRg?oc=5",
+  "published": "2026-08-24",
+  "collected": "2026-10-04",
+  "summary": "| North India cotton yarn prices up on higher cost, better demand Fibre2Fashion",
+  "content": "| North India cotton yarn prices up on higher cost, better demand Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "원사가격"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "ea1e78ddcf646e25",
   "title": "Walmart Aims to Take On Amazon With Trendier Apparel",
   "title_ko": "Walmart는 더욱 트렌디한 의류로 Amazon을 장악하는 것을 목표로 합니다.",
@@ -18020,6 +18176,30 @@
   ]
  },
  {
+  "key": "509bf3f0ec6befeb",
+  "title": "| China drives 12.5% rise in Brazil's cotton exports in H1 2026",
+  "title_ko": "| 2026년 상반기 브라질 면화 수출은 중국이 12.5% ​​증가",
+  "link": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxPTGxtaTJQRkl4bXBHdE1LazRIbUJabk02OXlRZm1yX3NYd21rejlTWjQzX1dEQVBDaVJUTG1oT2U3WkdvMHVOOEdmNk5vVHk1dkw2bnM5bU54R1o5ejUyNlhNc3dPQTUwY21BbEloN2Y0NjNiZjdiUnBsSFhxSk4tUWlOUE5QS3lUcXphaElLX0hKa3VxcUZud3FpSlo1ZWg3dk1FcU96SmU5U2l0eHljRy1GbnhnUTNvamFud3cxMWprWEhYNUFLSVNka0d0TlVtS2xfemZ0UFcxaEM4eUE?oc=5",
+  "published": "2026-08-23",
+  "collected": "2026-10-04",
+  "summary": "| China drives 12.5% rise in Brazil's cotton exports in H1 2026 Fibre2Fashion",
+  "content": "| China drives 12.5% rise in Brazil's cotton exports in H1 2026 Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
+  ]
+ },
+ {
   "key": "4f1ff6ba117b4b8d",
   "title": "India-UK-China team develops water-repellent catalyst to cut biodiesel costs",
   "title_ko": null,
@@ -18833,6 +19013,32 @@
   ]
  },
  {
+  "key": "d53330f6f541e007",
+  "title": "Walmart (WMT) Stock Plunges Despite Strong Earnings Beat: Buy The Dip Or Stay Away?",
+  "title_ko": "Walmart(WMT) 강한 수익에도 불구하고 주가 급락 비트: 하락세를 매수할 것인가 아니면 멀리할 것인가?",
+  "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQYm1UTlVhN1daakFlYlVyMDhURVFEdUZyOGVWdTdfYlJlYnRoN3B4WnRXbkUxb0lvd2swbmhxcVJUQzVqQmpkY2ZnOFhvNFI5OE96RDJ4M1BNZlo1VnVLSTRkaXU1aHRzUDN2N1JLN1lqOERJVTFHMXphck1sS0xseEdDUDB5Skhoa0JZZ2xlZTl3UGI0cWZpZVBFeVlEZFhjbUNhOW5hUmxON3VwWVlVNzlVajU?oc=5",
+  "published": "2026-08-21",
+  "collected": "2026-10-04",
+  "summary": "Walmart (WMT) Stock Plunges Despite Strong Earnings Beat: Buy The Dip Or Stay Away? TOP1markets",
+  "content": "Walmart (WMT) Stock Plunges Despite Strong Earnings Beat: Buy The Dip Or Stay Away? TOP1markets",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "d4b4417d051c3a37",
   "title": "Walmart Stock Fell 9% Despite Earnings Beat. Was the Selloff Justified?",
   "title_ko": "Walmart 주가는 실적 개선에도 불구하고 9% 하락했습니다. 매도는 정당했나요?",
@@ -18904,6 +19110,30 @@
   "hits": 1,
   "sources": [
    "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "c600efd6367661c3",
+  "title": "Sri Lankan apparel coalition signs pledge for disability inclusive jobs",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE83SUZQTFMxNVB3anBwWHRZNGhvRUJrNXctMlNSUnRfR1lsN3dVcERwbExpeXplck1Va0JCQ0Q3SnVFY1dUczNlTDB2MnlLSTlQR19iWUZZY1dyWVl3aXZWRWVMV3VGQQ?oc=5",
+  "published": "2026-08-21",
+  "collected": "2026-10-04",
+  "summary": "Sri Lankan apparel coalition signs pledge for disability inclusive jobs Just Style",
+  "content": "Sri Lankan apparel coalition signs pledge for disability inclusive jobs Just Style",
+  "image": "",
+  "image_tried": null,
+  "source": "Just Style",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Just Style"
   ]
  },
  {
@@ -19268,6 +19498,30 @@
   ]
  },
  {
+  "key": "8c42c1e8f43d3850",
+  "title": "ICE cotton notices mix trend amid consolidation phases",
+  "title_ko": "ICE 면화, 통합 단계에서 혼합 추세 확인",
+  "link": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxOS1ZmNVp3cVFHajBWQklVenZmNjdJQnkwM0NURFJxYXdHb29udzNjVDNVeFZrRGw4MWVTSVlYdXg4UmdWbnA4WGxZU3VHM1BNeVpKZmRrNm1WOWVBM0ZxNmhPNUN4V1dNVjRlRmtJRmhYcU05WlNOQ2s2UmZRQXczaGpCWjV0cjN4NHZjcEhDa3RYZzBJVWJtSklvWWE2b1M2Q0xPaXpsQkV0OGRvdzVXbDNCRDNYSU52c015Q3hXSkQ1YlE?oc=5",
+  "published": "2026-08-21",
+  "collected": "2026-10-04",
+  "summary": "ICE cotton notices mix trend amid consolidation phases Fibre2Fashion",
+  "content": "ICE cotton notices mix trend amid consolidation phases Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "8a1390aff7b5056e",
   "title": "Exploring Analyst Estimates for Abercrombie (ANF) Q2 Earnings, Beyond Revenue and EPS",
   "title_ko": "수익 및 EPS를 넘어 Abercrombie(ANF) 2분기 수익에 대한 분석가 추정치 살펴보기",
@@ -19474,6 +19728,30 @@
   ]
  },
  {
+  "key": "786d18075e7f60bf",
+  "title": "Knit Show - 2026 (August 2026), Tirupur - India - Trade Show & Fairs",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE40VVkweTYwUWNVY1ZtRU1abnl6bkZXMVAyRzc3eHBqOTlUOXhTMWRiWEpsMDBlZzJWVTZuZEtLWFdtNVJGWjcyZWdMMllHSkFENHB2TGJ2cm53M0ZqbW5mMlgzSUdGSkJaaElmZE5lWQ?oc=5",
+  "published": "2026-08-21",
+  "collected": "2026-10-04",
+  "summary": "Knit Show - 2026 (August 2026), Tirupur - India - Trade Show & Fairs Fibre2Fashion",
+  "content": "Knit Show - 2026 (August 2026), Tirupur - India - Trade Show & Fairs Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "785e56909755c142",
   "title": "The US consumer is flashing red flags as Walmart earnings, retail sales, and jobs data show weakness",
   "title_ko": "미국 소비자는 Walmart 수입, 소매 판매 및 고용 데이터가 약세를 보이면서 위험 신호를 번쩍이고 있습니다.",
@@ -19497,6 +19775,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Walmart"
+  ]
+ },
+ {
+  "key": "752da82a8bf22c04",
+  "title": "| South India cotton yarn prices gain as Mumbai market finds support",
+  "title_ko": "| 뭄바이 시장이 지지를 얻으면서 인도 남부 면사 가격이 상승합니다.",
+  "link": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxNLTFWYjc5MnVrVkNJNVF3WE9STW1SQnNWbnlCcmtfdTVWTi1kUkdKT01BZXJVel9zMUZUUzZkZ19NYUFqdjdzTGdPczR6UzdhLUdoaG5JQ0R4SmNfMW1tVTVfRnZ4dHNPOEhFZ1F5a2RpMUJZX1Zna2FLR2pqbGhfVzk3MUc5MUdwRHZyVzVYUGtTSGtDVmd3Vlpoanc0RDRrMEtmeXRmZHh3MmZyR2MzTUg2R1o4Tkc3Z1B2YmkyVXpjTWNzQV90QzQ2YjZNaDNfU0I4Njc3YjZVLVh6bGRBVTNmQXRIOHNvNXFhcmcxN0E1UG9V?oc=5",
+  "published": "2026-08-21",
+  "collected": "2026-10-04",
+  "summary": "| South India cotton yarn prices gain as Mumbai market finds support Fibre2Fashion",
+  "content": "| South India cotton yarn prices gain as Mumbai market finds support Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "원사가격"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -19551,6 +19855,30 @@
   "hits": 1,
   "sources": [
    "바이어 · Walmart"
+  ]
+ },
+ {
+  "key": "6cbc29314d765321",
+  "title": "Could Nepal's industrial revival unlock a new era of growth?",
+  "title_ko": "네팔의 산업 부흥이 새로운 성장 시대를 열 수 있을까?",
+  "link": "https://news.google.com/rss/articles/CBMiywFBVV95cUxNUE1GRng2QTRCUW1GZnBZellZanp5SlE3MFdmZHVZN2VwUkphUmVycXdtU2ZZSEJjRV9OT0RfdjlHZHJpVnlfYWVOQXY5UmZUSDZDaExqYXFuM0p4VlhkWmI2ZDlZd1AwUVhBc3R1cnkwbGhiZ3lSdXM3cU5jcHRJREh6M1JSbHgxa052NG13WmtZUGk0Wm9FdXozRllDaFNsXzdtekgyUUdac2M4WFZXXzN6b0VtakdpOFp6VFA0SjFiN3F1TWRGS0ozaw?oc=5",
+  "published": "2026-08-21",
+  "collected": "2026-10-04",
+  "summary": "Could Nepal's industrial revival unlock a new era of growth? Fibre2Fashion",
+  "content": "Could Nepal's industrial revival unlock a new era of growth? Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -20038,6 +20366,32 @@
   ]
  },
  {
+  "key": "385375e8adfdcb05",
+  "title": "Walmart Q2 Earnings Reveal Consumer Divide",
+  "title_ko": "Walmart 2분기 실적은 소비자 격차를 드러냅니다.",
+  "link": "https://news.google.com/rss/articles/CBMieEFVX3lxTFBaQXBtbTF4ZjJncnZkc3NVUkpBSktZa19Vb1FtY095b0JYWjkta2ZFaS1YT3FuSG1DXzN2dkk2aXd3RFBPMXpiYXhaMXFhNFpacUZRTEJlXzVOdld0UWFDZ0s1bi1sRDVWeFpBRVJTSzRQU1ZXRjA1bA?oc=5",
+  "published": "2026-08-21",
+  "collected": "2026-10-04",
+  "summary": "Walmart Q2 Earnings Reveal Consumer Divide Biz New Orleans",
+  "content": "Walmart Q2 Earnings Reveal Consumer Divide Biz New Orleans",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 6,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "382994fdce8212a2",
   "title": "Flipkart Faces Two Senior Exits Amid Profitability Push",
   "title_ko": null,
@@ -20107,6 +20461,30 @@
   "hits": 1,
   "sources": [
    "바이어 · Victoria's Secret"
+  ]
+ },
+ {
+  "key": "2ae2c8c3c8441ac8",
+  "title": "Clothing sales drag UK retail sales down in July",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQcVowYlRZVW1KOXhENS1nRzBHbTFueHEyandhdEprSDRQbUFYcGNKQUkwWkJRemUwUkwxa2FGSlNFbUVHVlpOT1ZPTmw4WWEzY0RrZmlYVjluU0tpYU1FWWN3eVdia1pTWDhRenlSb0Q2WEpyNHExVHhscGZjVENrdjVVRE1Tc29I?oc=5",
+  "published": "2026-08-21",
+  "collected": "2026-10-04",
+  "summary": "Clothing sales drag UK retail sales down in July Just Style",
+  "content": "Clothing sales drag UK retail sales down in July Just Style",
+  "image": "",
+  "image_tried": null,
+  "source": "Just Style",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Just Style"
   ]
  },
  {
@@ -29232,6 +29610,30 @@
   "hits": 1,
   "sources": [
    "국제섬유신문"
+  ]
+ },
+ {
+  "key": "5ec19fd4ce6d8212",
+  "title": "Leading Fashion and Textile Industry Magazine",
+  "title_ko": "패션 및 섬유산업을 선도하는 매거진",
+  "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9yZU1DTUc3QnZWTVBhQW82VVJlVWZHSHdBOWdTSi0tOGJLRW9tbTdXREpURm1reU1vV3RvZ3JKcXUybUZwUExZcjF3cDd6SEFFVGM2RzRkY2tVWXBOYVVjNVQtQ3Bzek9xSXc?oc=5",
+  "published": "2026-08-14",
+  "collected": "2026-10-04",
+  "summary": "Leading Fashion and Textile Industry Magazine Fibre2Fashion",
+  "content": "Leading Fashion and Textile Industry Magazine Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
