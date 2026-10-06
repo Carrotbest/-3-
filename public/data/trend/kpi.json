@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-10-06T01:35:58+00:00",
+"generated_at": "2026-10-06T01:49:47+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3607,10 +3607,6 @@
 "source_url": "https://fred.stlouisfed.org/series/DEXKOUS",
 "points": [
 {
-"period": "2025-09",
-"value": 1392.905
-},
-{
 "period": "2025-10",
 "value": 1423.08
 },
@@ -3656,14 +3652,18 @@
 },
 {
 "period": "2026-09",
-"value": 1359.572
+"value": 1359.209
+},
+{
+"period": "2026-10",
+"value": 1355.29
 }
 ],
-"value": 1359.572,
-"period": "2026-09",
+"value": 1355.29,
+"period": "2026-10",
 "period_end": null,
-"prev": -3.1,
-"yoy": -2.4,
+"prev": -0.3,
+"yoy": -4.8,
 "stale": false
 },
 {
@@ -3681,62 +3681,62 @@
 "points": [
 {
 "period": "2023-Q2",
-"value": 22580.499
+"value": 22577.556
 },
 {
 "period": "2023-Q3",
-"value": 22840.989
+"value": 22828.796
 },
 {
 "period": "2023-Q4",
-"value": 23033.78
+"value": 23033.25
 },
 {
 "period": "2024-Q1",
-"value": 23082.119
+"value": 23115.975
 },
 {
 "period": "2024-Q2",
-"value": 23286.508
+"value": 23320.074
 },
 {
 "period": "2024-Q3",
-"value": 23478.57
+"value": 23501.76
 },
 {
 "period": "2024-Q4",
-"value": 23586.542
+"value": 23641.759
 },
 {
 "period": "2025-Q1",
-"value": 23548.21
+"value": 23650.213
 },
 {
 "period": "2025-Q2",
-"value": 23770.976
+"value": 23884.563
 },
 {
 "period": "2025-Q3",
-"value": 24026.834
+"value": 24112.966
 },
 {
 "period": "2025-Q4",
-"value": 24055.749
+"value": 24125.479
 },
 {
 "period": "2026-Q1",
-"value": 24180.419
+"value": 24274.383
 },
 {
 "period": "2026-Q2",
-"value": 24269.613
+"value": 24408.011
 }
 ],
-"value": 24269.613,
+"value": 24408.011,
 "period": "2026-Q2",
 "period_end": null,
-"prev": 0.4,
-"yoy": 2.1,
+"prev": 0.6,
+"yoy": 2.2,
 "stale": false
 },
 {
@@ -3899,10 +3899,6 @@
 "source_url": "https://www.worldbank.org/en/research/commodity-markets",
 "points": [
 {
-"period": "2025-08",
-"value": 68.2
-},
-{
 "period": "2025-09",
 "value": 68.0
 },
@@ -3949,13 +3945,17 @@
 {
 "period": "2026-08",
 "value": 90.9
+},
+{
+"period": "2026-09",
+"value": 116.8
 }
 ],
-"value": 90.9,
-"period": "2026-08",
+"value": 116.8,
+"period": "2026-09",
 "period_end": null,
-"prev": 9.0,
-"yoy": 33.3,
+"prev": 28.5,
+"yoy": 71.8,
 "stale": false
 },
 {
@@ -3971,10 +3971,6 @@
 "source_name": "World Bank Commodity Markets (Pink Sheet)",
 "source_url": "https://www.worldbank.org/en/research/commodity-markets",
 "points": [
-{
-"period": "2025-08",
-"value": 1.73
-},
 {
 "period": "2025-09",
 "value": 1.72
@@ -4022,13 +4018,17 @@
 {
 "period": "2026-08",
 "value": 2.11
+},
+{
+"period": "2026-09",
+"value": 2.1
 }
 ],
-"value": 2.11,
-"period": "2026-08",
+"value": 2.1,
+"period": "2026-09",
 "period_end": null,
-"prev": 7.7,
-"yoy": 22.0,
+"prev": -0.5,
+"yoy": 22.1,
 "stale": false
 }
 ],
