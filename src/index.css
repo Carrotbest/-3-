@@ -838,7 +838,8 @@ input.dd-date::-webkit-calendar-picker-indicator {
 
 /* ------------------------------------------------------------------
  * FABRIC ANALYSIS A4 출력(R258 → R265 개편). 의뢰서와 리포트가 같은 뼈대를 쓴다.
- * 격자를 걷고 제목줄 + 값만 남겼다. 라벨은 작게 위, 값은 크게 아래다.
+ * 대시보드 톤앤매너의 문서다(R284). 가로선만 쓰고 색은 인디고 하나다.
+ * R265 무테 옅은 회색(안 읽힘)과 R282 검은 격자(엑셀 복제)를 둘 다 지난 결과다. 어느 쪽으로도 되돌리지 말 것.
  * 세로 @page 는 CSS 가 아니라 AnalysisPrintDeck 이 인쇄 직전에 붙이는 <style> 이 정한다.
  * 위 RDDA 블록이 body * 를 숨기므로 여기서는 우리 뿌리만 다시 보이게 한다.
  * 인쇄 길이 기준: A4 세로 여백 12mm → 가로 186mm, 세로 273mm.
@@ -848,64 +849,67 @@ input.dd-date::-webkit-calendar-picker-indicator {
 @media print {
   .an-print-root, .an-print-root * { visibility: visible !important; }
   .an-print-root { position: fixed !important; inset: 0 !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; translate: none !important; transform: none !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
-  .an-print-deck { display: block !important; background: white; color: #111827; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-  .an-print-page { box-sizing: border-box; width: 186mm; font-size: 9pt; line-height: 1.4; page-break-after: always; break-after: page; }
+  .an-print-deck { display: block !important; background: #fff; color: #0f172a; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .an-print-page {
+    --an-ink: #0f172a; --an-soft: #475569; --an-faint: #94a3b8;
+    --an-rule: #e2e8f0; --an-accent: #4f46e5; --an-accent-soft: #eef2ff; --an-accent-line: #c7d2fe; --an-tint: #f8fafc;
+    box-sizing: border-box; width: 186mm; font-size: 9.5pt; line-height: 1.4; color: var(--an-ink);
+    page-break-after: always; break-after: page;
+  }
   .an-print-page:last-child { page-break-after: auto; break-after: auto; }
 
   /* 머리말 */
-  .an-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8mm; padding-bottom: 2.5mm; border-bottom: 0.5mm solid #111827; }
-  .an-doc { margin: 0; font-size: 7.5pt; letter-spacing: 0.22em; color: #6b7280; }
-  .an-head h1 { margin: 1mm 0 0; font-size: 16pt; font-weight: 600; letter-spacing: -0.01em; }
+  .an-head { margin-bottom: 5mm; }
+  .an-head-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8mm; padding-bottom: 3mm; border-bottom: 0.7mm solid var(--an-accent); }
+  .an-eyebrow { margin: 0; font-size: 7pt; font-weight: 700; letter-spacing: 0.26em; color: var(--an-accent); }
+  .an-head h1 { margin: 1.5mm 0 0; font-size: 19pt; font-weight: 700; letter-spacing: -0.015em; }
+  .an-sub { margin: 0.8mm 0 0; font-size: 8pt; font-weight: 600; letter-spacing: 0.14em; color: var(--an-soft); }
   .an-head-no { text-align: right; white-space: nowrap; }
-  .an-head-no strong { font-size: 13pt; font-weight: 600; letter-spacing: 0.06em; }
-  .an-head-no p { margin: 1mm 0 0; font-size: 8pt; color: #4b5563; }
-  .an-head-no em { margin-left: 2mm; padding: 0 1.5mm; border: 0.25mm solid #b91c1c; color: #b91c1c; font-style: normal; font-weight: 600; }
+  .an-head-no strong { display: block; font-size: 14pt; font-weight: 700; letter-spacing: 0.04em; }
+  .an-head-no em { display: inline-block; margin-top: 1.5mm; padding: 0.6mm 2.4mm; border-radius: 6mm; background: #b45309; color: #fff; font-style: normal; font-size: 7.5pt; font-weight: 700; letter-spacing: 0.1em; }
 
-  /* 구역: 제목줄과 내용을 확실히 가른다 */
-  .an-block { margin-top: 6mm; break-inside: avoid; }
-  .an-block > h2 { margin: 0 0 2mm; font-size: 7.5pt; font-weight: 600; letter-spacing: 0.18em; color: #6b7280; text-transform: uppercase; }
+  /* 머리말 아래 요약 띠 */
+  .an-meta { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 3mm; border: 0.2mm solid var(--an-rule); border-radius: 1.5mm; background: var(--an-tint); overflow: hidden; }
+  .an-meta > div { padding: 2mm 3mm; border-left: 0.2mm solid var(--an-rule); }
+  .an-meta > div:first-child { border-left: 0; }
+  .an-meta span { display: block; font-size: 6.8pt; font-weight: 700; letter-spacing: 0.1em; color: var(--an-soft); text-transform: uppercase; }
+  .an-meta b { display: block; margin-top: 0.8mm; font-size: 10pt; font-weight: 600; }
 
-  /* 짧은 칸 네 줄. 격자 대신 값 아래 실선 하나만 둔다 */
-  .an-fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 6mm; }
-  .an-field { padding: 1.4mm 0; border-bottom: 0.2mm solid #e5e7eb; break-inside: avoid; }
-  .an-field span { display: block; font-size: 6.5pt; letter-spacing: 0.08em; color: #9ca3af; text-transform: uppercase; }
-  .an-field b { display: block; margin-top: 0.4mm; font-size: 9pt; font-weight: 500; }
+  /* 구역 제목 */
+  .an-block { margin-top: 4mm; break-inside: avoid; }
+  .an-block > h2 { display: flex; align-items: center; gap: 2mm; margin: 0 0 2mm; padding: 1.6mm 3mm; border-radius: 1.5mm; background: var(--an-accent-soft); font-size: 9.5pt; font-weight: 700; color: var(--an-ink); }
+  .an-block > h2::before { content: ""; width: 1.2mm; height: 4mm; border-radius: 1mm; background: var(--an-accent); }
 
-  /* 긴 글은 전폭 한 줄 */
-  .an-notes { margin-top: 2mm; }
-  .an-note { display: flex; gap: 4mm; padding: 1.4mm 0; border-bottom: 0.2mm solid #e5e7eb; }
-  .an-note span { flex: 0 0 34mm; font-size: 6.5pt; letter-spacing: 0.08em; color: #9ca3af; text-transform: uppercase; padding-top: 0.6mm; }
-  .an-note b { flex: 1; font-size: 9pt; font-weight: 500; white-space: pre-wrap; }
+  /* 표: 가로선만 */
+  .an-grid { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .an-grid th, .an-grid td { border-bottom: 0.2mm solid var(--an-rule); padding: 1.2mm 3mm; vertical-align: top; word-break: break-word; }
+  .an-grid th { background: var(--an-tint); font-size: 8pt; font-weight: 700; color: var(--an-soft); text-align: left; }
+  .an-grid td { font-size: 10pt; font-weight: 500; }
+  .an-grid tbody tr:first-child th, .an-grid tbody tr:first-child td { border-top: 0.2mm solid var(--an-rule); }
+  .an-grid td + th { border-left: 0.2mm solid var(--an-rule); }
+  .an-grid td:empty::after { content: ""; display: block; min-height: 4.5mm; }
+  .an-grid-write td { height: 8.5mm; background: #fff; }
 
-  /* 의뢰서: swatch 자리. 테두리도 안내선도 없이 비운다 */
-  .an-blank { height: 96mm; }
+  /* 실물 swatch 붙이는 자리 */
+  .an-swatch { display: flex; align-items: center; justify-content: center; height: 82mm; border: 0.5mm dashed var(--an-accent-line); border-radius: 2mm; background: #fff; }
+  .an-swatch span { font-size: 8pt; letter-spacing: 0.08em; color: var(--an-faint); }
 
-  /* 의뢰서: 손으로 적는 결과 칸 */
-  .an-write-row { display: flex; align-items: flex-end; gap: 4mm; margin-bottom: 4mm; }
-  .an-write-row span { flex: 0 0 34mm; font-size: 7pt; color: #6b7280; }
-  .an-write-row i { flex: 1; border-bottom: 0.2mm solid #9ca3af; height: 4mm; }
-  .an-hand { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 1mm; }
-  .an-hand div { display: flex; align-items: flex-end; gap: 2mm; }
-  .an-hand span { font-size: 7pt; color: #6b7280; white-space: nowrap; }
-  .an-hand i { flex: 1; border-bottom: 0.2mm solid #9ca3af; height: 4mm; }
+  /* 수령·담당·반환 */
+  .an-sign { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; margin-top: 3mm; }
+  .an-sign span { display: block; font-size: 7.5pt; font-weight: 700; color: var(--an-soft); }
+  .an-sign i { display: block; margin-top: 6mm; border-bottom: 0.2mm solid var(--an-rule); }
 
-  /* 의뢰서: 참고 사진 두 칸. 비어 있으면 붙일 자리다 */
-  .an-shots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6mm; }
-  .an-shot { box-sizing: border-box; height: 34mm; border: 0.2mm solid #d1d5db; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  /* 사진 */
+  .an-shots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4mm; }
+  .an-shot { box-sizing: border-box; height: 50mm; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 0.2mm solid var(--an-rule); border-radius: 2mm; background: var(--an-tint); }
   .an-shot img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-  /* 리포트: 서술 칸과 사진 */
-  .an-texts { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-top: 3mm; }
-  .an-texts div { break-inside: avoid; }
-  .an-texts span { display: block; font-size: 6.5pt; letter-spacing: 0.08em; color: #9ca3af; text-transform: uppercase; }
-  .an-texts p { margin: 1mm 0 0; min-height: 22mm; padding-bottom: 1mm; border-bottom: 0.2mm solid #e5e7eb; white-space: pre-wrap; }
-  .an-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+  .an-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
   .an-photos div { break-inside: avoid; }
-  .an-photos img { display: block; width: 100%; height: 38mm; object-fit: contain; border: 0.2mm solid #e5e7eb; }
-  .an-photos span { display: block; margin-top: 1mm; font-size: 7pt; color: #9ca3af; }
-  .an-empty { margin: 0; font-size: 8pt; color: #9ca3af; }
+  .an-photos img { display: block; width: 100%; height: 40mm; object-fit: contain; border: 0.2mm solid var(--an-rule); border-radius: 2mm; background: var(--an-tint); }
+  .an-photos span { display: block; margin-top: 1mm; font-size: 7.5pt; color: var(--an-soft); }
+  .an-empty { margin: 0; padding: 6mm 3mm; border: 0.3mm dashed var(--an-rule); border-radius: 2mm; font-size: 8.5pt; text-align: center; color: var(--an-faint); }
 
-  .an-foot { display: flex; justify-content: space-between; margin-top: 6mm; padding-top: 2mm; border-top: 0.2mm solid #e5e7eb; font-size: 7.5pt; color: #9ca3af; }
+  .an-foot { display: flex; justify-content: space-between; margin-top: 5mm; padding-top: 2mm; border-top: 0.2mm solid var(--an-rule); font-size: 7.5pt; color: var(--an-faint); }
 }
 
 /* RDDA 원단 성과 행 강조(R211). 등급은 src/data/fabric-performance.ts 에서 정한다. */

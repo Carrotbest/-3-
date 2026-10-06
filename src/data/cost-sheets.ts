@@ -63,16 +63,18 @@ export async function listCostSheets(filter: {
   groupId?: string
   limit?: number
 } = {}): Promise<CostSheetDoc[]> {
-  const constraints = [
+  const filters = [
     ...(filter.flNo ? [where("flNo", "==", filter.flNo)] : []),
     ...(filter.styleNo ? [where("styleNo", "==", filter.styleNo)] : []),
     ...(filter.rowKey ? [where("rowKey", "==", filter.rowKey)] : []),
     ...(filter.groupId ? [where("groupId", "==", filter.groupId)] : []),
-    orderBy("at", "desc"),
-    fsLimit(filter.limit ?? 100),
   ]
+  // where 와 orderBy 를 같이 걸면 복합 색인이 필요하다. 색인은 수동 배포라 자동화하지 않는다.
+  // 필터가 있을 때는 서버 정렬을 빼고 클라이언트에서 정렬한다. 한 건의 버전 수는 limit 을 넘지 않는다.
+  const constraints = [...filters, ...(filters.length ? [] : [orderBy("at", "desc")]), fsLimit(filter.limit ?? 100)]
   const snapshot = await getDocs(query(collection(db, COLLECTION), ...constraints))
-  return snapshot.docs.map((item) => ({ id: item.id, ...(item.data() as Omit<CostSheetDoc, "id">) }))
+  const docs = snapshot.docs.map((item) => ({ id: item.id, ...(item.data() as Omit<CostSheetDoc, "id">) }))
+  return filters.length ? docs.sort((left, right) => right.at - left.at) : docs
 }
 
 export function latestByGroup(docs: readonly CostSheetDoc[]): CostSheetDoc[] {

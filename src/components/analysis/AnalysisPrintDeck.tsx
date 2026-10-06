@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 
 import {
   ANALYSIS_WRITE_LINES, analysisHeadFields, analysisLeadText, analysisNoteLines,
@@ -15,16 +15,27 @@ const PAGE_STYLE = "@page { size: A4 portrait; margin: 12mm; }"
 /** 사진이 안 뜨면 이만큼만 기다리고 그냥 인쇄한다. 종이가 안 나오는 것이 더 나쁘다. */
 const IMAGE_WAIT_MS = 4000
 
-function Head({ item, kind, meta }: { item: AnalysisRequest; kind: string; meta: string }) {
+/** 짝 배열을 2개씩 끊어 한 줄에 라벨·값 두 쌍을 앉힌다. */
+function chunkPairs(items: [string, string][]): [string, string][][] {
+  const rows: [string, string][][] = []
+  for (let i = 0; i < items.length; i += 2) rows.push(items.slice(i, i + 2))
+  return rows
+}
+
+function Head({ item, kind, sub, meta }: { item: AnalysisRequest; kind: string; sub: string; meta: [string, string][] }) {
   return <header className="an-head">
-    <div>
-      <p className="an-doc">FABRIC ANALYSIS</p>
-      <h1>{kind}</h1>
+    <div className="an-head-top">
+      <div>
+        <p className="an-eyebrow">FABRIC ANALYSIS</p>
+        <h1>{kind}</h1>
+        <p className="an-sub">{sub}</p>
+      </div>
+      <div className="an-head-no">
+        <strong>{item.anNo}</strong>
+        {item.requestType === "Urgent" ? <em>URGENT</em> : null}
+      </div>
     </div>
-    <div className="an-head-no">
-      <strong>{item.anNo}</strong>
-      <p>{meta}{item.requestType === "Urgent" ? <em>URGENT</em> : null}</p>
-    </div>
+    <div className="an-meta">{meta.map(([label, value]) => <div key={label}><span>{label}</span><b>{value}</b></div>)}</div>
   </header>
 }
 
@@ -32,12 +43,18 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   return <section className="an-block"><h2>{title}</h2>{children}</section>
 }
 
-function Fields({ items }: { items: [string, string][] }) {
-  return <div className="an-fields">{items.map(([label, value]) => <div key={label} className="an-field"><span>{label}</span><b>{value}</b></div>)}</div>
-}
-
-function NoteLines({ items }: { items: [string, string][] }) {
-  return <div className="an-notes">{items.map(([label, value]) => <div key={label} className="an-note"><span>{label}</span><b>{value}</b></div>)}</div>
+/** 라벨·값 표. 짧은 항목은 2쌍씩, 긴 글은 전폭 한 줄이다. */
+function Grid({ pairs, wide }: { pairs: [string, string][]; wide?: [string, string][] }) {
+  return <table className="an-grid">
+    <colgroup><col style={{ width: "22%" }} /><col style={{ width: "28%" }} /><col style={{ width: "22%" }} /><col style={{ width: "28%" }} /></colgroup>
+    <tbody>
+      {chunkPairs(pairs).map((row, index) => <tr key={index}>
+        {row.map(([label, value]) => <Fragment key={label}><th>{label}</th><td>{value}</td></Fragment>)}
+        {row.length === 1 ? <><th /><td /></> : null}
+      </tr>)}
+      {(wide ?? []).map(([label, value]) => <tr key={label}><th>{label}</th><td colSpan={3}>{value}</td></tr>)}
+    </tbody>
+  </table>
 }
 
 function Foot({ item, kind, stamp }: { item: AnalysisRequest; kind: string; stamp: string }) {
@@ -46,53 +63,55 @@ function Foot({ item, kind, stamp }: { item: AnalysisRequest; kind: string; stam
 
 function RequestPage({ item, urls, stamp, onImageSettled }: PageProps) {
   const photo = item.imagePath ? urls[item.imagePath] : undefined
-  const meta = `의뢰일 ${item.requestedAt || "-"} · ${item.requester || "의뢰자 미기재"}`
+  const meta: [string, string][] = [
+    ["Requested", item.requestedAt || "-"],
+    ["Type", item.requestType || "-"],
+    ["Requester", item.requester || "-"],
+    ["Department", item.department || "-"],
+  ]
   return <section className="an-print-page">
-    <Head item={item} kind="분석 의뢰서" meta={meta} />
-    <Block title="의뢰 정보">
-      <Fields items={analysisHeadFields(item)} />
-      <NoteLines items={analysisNoteLines(item)} />
+    <Head item={item} kind="분석 의뢰서" sub="FABRIC ANALYSIS REQUEST" meta={meta} />
+    <Block title="의뢰 정보 (Request)">
+      <Grid pairs={analysisHeadFields(item)} wide={analysisNoteLines(item)} />
     </Block>
-    <Block title="실물 SWATCH">
-      <div className="an-blank" />
+    <Block title="실물 SWATCH (Original Fabric Swatch)">
+      <div className="an-swatch"><span>원단을 이 칸에 붙여 주세요</span></div>
     </Block>
     <Block title="분석 결과 (R&D 기입)">
-      <div className="an-write">
-        {ANALYSIS_WRITE_LINES.map((label) => <div key={label} className="an-write-row"><span>{label}</span><i /></div>)}
-      </div>
-      <div className="an-hand">
+      <table className="an-grid an-grid-write">
+        <colgroup><col style={{ width: "22%" }} /><col style={{ width: "78%" }} /></colgroup>
+        <tbody>{ANALYSIS_WRITE_LINES.map((label) => <tr key={label}><th>{label}</th><td /></tr>)}</tbody>
+      </table>
+      <div className="an-sign">
         <div><span>3팀 수령일</span><i /></div>
         <div><span>담당 (In charge)</span><i /></div>
         <div><span>swatch 반환일</span><i /></div>
       </div>
     </Block>
-    <Block title="참고 사진">
-      <div className="an-shots">
-        <div className="an-shot">{photo ? <img src={photo} alt="" onLoad={onImageSettled} onError={onImageSettled} /> : null}</div>
-        <div className="an-shot" />
-      </div>
-    </Block>
+    {photo ? <Block title="참고 사진 (Reference)">
+      <div className="an-shots"><div className="an-shot"><img src={photo} alt="" onLoad={onImageSettled} onError={onImageSettled} /></div></div>
+    </Block> : null}
     <Foot item={item} kind="분석 의뢰서" stamp={stamp} />
   </section>
 }
 
 function ReportPage({ item, urls, stamp, onImageSettled }: PageProps) {
   const photos = analysisPrintImages(item, "report").map((path) => urls[path]).filter(Boolean)
-  const meta = `의뢰 ${item.requestedAt || "-"} · 완료 ${item.finishedAt || "-"} · 소요 ${analysisLeadText(item)}`
+  const meta: [string, string][] = [
+    ["Requested", item.requestedAt || "-"],
+    ["Finished", item.finishedAt || "-"],
+    ["Lead time", analysisLeadText(item)],
+    ["In charge", item.inCharge || "-"],
+  ]
   return <section className="an-print-page">
-    <Head item={item} kind="분석 리포트" meta={meta} />
-    <Block title="의뢰 정보">
-      <Fields items={analysisHeadFields(item)} />
-      <NoteLines items={analysisNoteLines(item)} />
+    <Head item={item} kind="분석 리포트" sub="FABRIC ANALYSIS REPORT" meta={meta} />
+    <Block title="의뢰 정보 (Request)">
+      <Grid pairs={analysisHeadFields(item)} wide={analysisNoteLines(item)} />
     </Block>
-    <Block title="분석 결과">
-      <Fields items={analysisResultFields(item)} />
-      <div className="an-texts">
-        <div><span>Yarn description</span><p>{item.yarnDescription || "-"}</p></div>
-        <div><span>Comment (RND)</span><p>{item.commentRnd || "-"}</p></div>
-      </div>
+    <Block title="분석 결과 (Result)">
+      <Grid pairs={analysisResultFields(item)} wide={[["Yarn description", item.yarnDescription || "-"], ["Comment (RND)", item.commentRnd || "-"]]} />
     </Block>
-    <Block title="사진">
+    <Block title="사진 (Photo)">
       {photos.length
         ? <div className="an-photos">{photos.map((url, index) => <div key={url}><img src={url} alt="" onLoad={onImageSettled} onError={onImageSettled} /><span>사진 {index + 1}</span></div>)}</div>
         : <p className="an-empty">등록된 사진이 없습니다.</p>}
