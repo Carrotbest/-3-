@@ -17,6 +17,8 @@
 - 인라인 편집(셀 더블클릭, 타입별). 수식·대장연결 열은 수정 불가. 담당 칸 ⤢ → 64열 수정 모달.
 - **선택형 열은 드롭다운에 띄운 목록과 저장 검증 목록이 반드시 같아야 한다**(R280). `allowedFor(column, optionsById)`가 그 하나의 목록이고 `isAcceptableCellValue`·`updateRecordCell`에 모두 넘긴다. 예전에는 표시가 `optionsById`(상수+데이터 값), 검증이 `column.options`(상수)라 데이터에만 있던 `CSD`를 고르면 **아무 메시지 없이** 값이 안 들어갔다. 검증 가드 자체는 없애지 말 것. 날짜 열에 글자, 숫자 열에 문자가 붙여넣기로 들어가는 것을 이 가드가 막는다. 거부되면 이제 `notify`로 알린다.
 - **Dyeing Side 목록은 CSD·PSD·DD·SOAP·YD·PFD 여섯으로 닫혔다**(2026-10-01 박향근 확정, R281). `SD`와 `기타`와 `CPB`는 폐기했다. 이 열만 `optionsById`에서 데이터 값을 합치지 않는다. 합치면 폐기한 값이 목록에 되살아난다. 작지 파서 `matchDyeing`도 `SD`→`CSD`로 넣고 CPB는 빈칸으로 둔다. **모르는 값을 넣느니 빈칸이다. TBD 같은 자리표시자를 만들지 말 것.**
+- **날짜 열과 FL# 열은 허용 글자만 타자로 받는다**(R297). 날짜는 숫자와 `-`, `/`만(`sanitizeDateTyping`), FL#은 F·L·숫자 10자까지(`sanitizeFlTyping`)다. 거부 문구는 `cellRejectMessage` 하나에서 나와 그리드 토스트와 모달 안내가 같다. Color는 자유 입력이지만 `TBD`·`TBA`·`미정`·`확인중`·`N/A`·`-`·`?`는 막는다(`COLOR_PLACEHOLDERS`). **빈칸으로 보여야 지적을 할 수 있다. 자리표시자를 허용으로 되돌리지 말 것.**
+- **형식이 정해진 칸의 편집기는 지역 상태를 들고 있어야 한다**(`InlineFlNoEditor`, `GuardedTextInput`, `DateInput`). 글자마다 `updateRecordCell`을 부르면 미완성 값(`FL2610`, `2026-1`)이 형식 검사에 거부되면서 **방금 친 글자가 그대로 사라진다.** R297 전까지 64열 수정 모달과 접수 옵션 그리드에서는 날짜를 달력 아이콘으로만 넣을 수 있었고 FL#은 한 글자도 안 찍혔다. 검사를 느슨하게 풀어 해결하지 말 것. 반쪽 값이 저장되면 RDDA 집계가 깨진다.
 - 신규 작지 접수 팝업: REQUEST·ORIGINAL·담당·Style=옵션 공통(`changeShared`), DETAIL·SCHEDULE=옵션별(`changeOption`). 저장=옵션 수만큼 행(`saveIntake`, `_src.sheet="웹 접수"`).
 - 신규 접수 창의 "FABRIC REQUEST에서 불러오기"는 요청 스타일의 옵션을 DD 접수 행으로 채운다. 연결은 DD 행 `tech.requestLink { reqId, lineId }`에만 저장한다. `optId`는 삭제 시 번호가 바뀌므로 연결 키로 쓰지 않고 `RequestOption.lineId`를 쓰며, 엑셀 재업로드 병합은 같은 위치의 `lineId`를 이어받는다. 차트명으로 Category·Season을 채우지 않으며, Garment No.=Style No. 일치를 추천하되 예외가 있어 사람이 선택한다.
 - 접수 필수 항목=`INTAKE_REQUIRED_IDS`(담당·Style No.·Season·Category·Buyer·Planner·**Due Date**). 라벨 `*`·빈 칸 붉은 테두리·저장 차단이 모두 이 목록을 본다. Due Date가 비면 HOME 스케줄에서 그 건이 통째로 빠지므로 접수에서 막는다. 엑셀 업로드는 과거 시트를 그대로 들여오는 길목이라 걸지 않는다.
@@ -26,7 +28,15 @@
   **FDS·YDS 날짜는 웹에서만 산다.** `xlsx-parsers.ts`가 그 두 열을 읽지 않고 `dd-export.ts`도 내보내지 않는다. 엑셀에 적은 날짜는 업로드해도 안 들어오고, 웹에 적은 날짜는 내보내도 안 나간다. 그래서 업로드로만 들어온 행은 날짜를 채워 두었어도 미수취로 보인다. 열 이름을 확인한 뒤 양쪽에 더해야 한다(미착수).
   **FL 등록·FDS 미수취도 별도 분기로 요청한다.** GD·Style No.·Received date가 있고 유효한 FL#이 있으면서 FDS가 비고 Status가 DROP/HOLD/REJECT가 아닌 건 중, FL 등록월이 이번 달 또는 지난달인 건만 표 아래에 모은다. FL# 등록 시 Status가 자동 완료되어 진행중 판정에서 빠지므로 별도 분기가 필요하다. FDS 날짜는 웹 전용이라 과거 업로드 건이 섞이지 않도록 등록월을 2개월로 제한하며, REMARK 앞에는 `{FL#} 등록, FDS 미수취`를 붙인다.
   REQUEST 열은 **일부러 비워 보낸다**. 메일 쓰는 날에 맞춰 손으로 적는 값이라 접수일(requestDate)과 다르다.
-- 경고 아이콘(`ddWarnings`)의 FL 경고는 **Style History에 뭐라도 적혀 있으면 끈다.** "Matching RIB으로 등록 불필요"처럼 FL을 안 딴 사유를 남긴 건이라, 계속 띄우면 진짜 누락 건과 구분이 안 된다. FL# 열의 붉은 "FL 미입력" 표기도 같은 판정을 쓰므로 함께 사라진다.
+- 경고 아이콘(`ddWarnings`, `src/data/dd-workflow.ts`)은 **남발되면 진짜 누락 건과 구분이 안 된다.** 2026-10-06에 조건을 좁혔다(R296).
+  - **HOLD·DROP·REJECT 행은 경고를 띄우지 않는다**(`isStoppedRecord`). 받을 것도 채울 것도 없는 행이다. 예외는 `Fail 사유 미입력` 하나다. REJECT는 대개 FAIL의 결과라 사유가 비면 왜 반려됐는지 추적할 길이 없다.
+  - **`Due Date 경과`는 Received date가 빈 건만 띄운다.** HOME 임박·지연(`derive.ts` `isScheduleOpen`)과 기준을 맞춘 것이다. Status만 보면 행거가 도착했는데 FL 채번 전인 건이 DD MASTER에서만 계속 빨갛다. **두 화면 기준을 다시 갈라 놓지 말 것.**
+  - **공정 짝 경고는 `날짜가 있는데 업체가 빈` 경우만이다.** 반대 방향(업체만 있음)은 공정이 진행 중인 정상 상태다. 예전 `Boolean(mill) !== Boolean(date)`로 되돌리면 진행 중인 행 대부분에 삼각형이 붙는다.
+  - **`완료일 입력 · Status 확인` 경고는 없앴다**(2026-10-06 박향근 지시, R299). `Received date 있음 + Status ≠ 완료`로 떴는데, 화면 완료 기준은 FL#이라 FL 채번 전인 행은 완료가 아닌 것이 정상이다. `recalculateDevelopmentRecords`도 유효한 FL# 없이는 완료로 올리지 않아 담당자가 경고를 끄려면 규칙을 어겨야 했다. R298로 FL 경고 기준이 FDS로 바뀐 뒤에는 FDS 대기 중인 GD 행에서 FL 경고 자리를 그대로 이어받아 글자만 바뀐 꼴이 됐다. **되살리지 말 것.** `DdWarning`의 `key`에서도 `status`를 뺐다.
+  - **FL 경고의 방아쇠는 개발처마다 다르다**(2026-10-06 박향근 확정, R298). GD 건은 `FDS 날짜가 있는데 FL#이 없음`, 국내·생산 건은 `Received date가 있는데 FL#이 없음`이다. FL 채번은 FDS를 받아야 가능하지만 FDS·YDS 열은 GD 전용(`GD_ONLY_COLUMN_IDS`)이라 국내·생산 건은 채울 수 없다. **FDS 하나로 합치지 말 것.** 합치면 국내·생산 건이 경고 대상에서 통째로 빠진다. FDS 날짜는 웹에서만 사는 값이라 업로드로만 들어온 과거 GD 행에는 FL 경고가 안 뜬다. 그건 의도한 결과다.
+  - FL 경고는 **Style History에 뭐라도 적혀 있으면 끈다.** "Matching RIB으로 등록 불필요"처럼 FL을 안 딴 사유를 남긴 건이다. FL# 열의 붉은 `FL 미등록` 표기도 같은 판정을 쓴다.
+  - 날짜 형식 검사는 날짜 열 아홉 개 전부를 본다(Request Date와 공정 완료일 넷을 포함).
+- **REJECT는 DROP과 같은 회색이다**(2026-10-06 박향근 확정, R296). 빨강은 "지금 조치가 필요하다"는 뜻인데 REJECT는 반려로 끝난 종료건이다. 구분은 칩 글자로 한다. `DD_STATUS_STYLE`에서 다시 빨강으로 돌리지 말 것.
 - 작지 첨부 자동 채움: `src/data/zaji.ts`(GD `Fabric sample request report.xlsx`만, 국내 2종 미지원). 회귀규칙(조직명 최장일치·Part+Color dedup·시즌변환) 유지.
   **옵션 단위는 Part+Color 다.** 색상 번호(No)로 접으면 BODY 6개 x 2색이 2건으로 줄어든다(R114). 원본 `zaji/parser.py` 와 다르게 만들지 말 것.
 - 열 머리 ▼ 메뉴(`ColumnFilterMenu`)는 엑셀식 값 필터와 정렬이다. 머리 클릭 정렬은 그대로며 필터는 저장하지 않는다. Portal 안 이벤트가 `th`로 버블링되므로 `stopPropagation`을 빼지 말 것.
@@ -176,6 +186,7 @@
 - **인라인 편집기의 키 처리는 `stopPropagation`이 필수다**(`editorKeyHandler`). 표 단축키는 window 의 keydown 이 받고 "포커스가 입력칸이면 무시"로 편집 중을 피하는데, Enter·Tab 은 편집기가 먼저 편집기를 닫아 버려 window 에 닿을 때는 그 방어가 이미 무너져 있다. 막지 않으면 선택이 두 칸씩 건너뛴다. `preventDefault`로는 안 막힌다.
 - 그리드 셀 드래그는 `mousedown`에서 `preventDefault`를 건다. 안 걸면 브라우저 기본 선택이 같이 시작돼 화면 전체가 반투명 사본으로 끌려다닌다. 버튼·입력칸 위에서는 걸지 않는다.
 - **ref 콜백 안에서 setState 하지 말 것.** 인라인 ref 는 렌더마다 새 함수라 React 가 커밋마다 떼었다 붙인다. 그 안의 setState 는 무한 렌더가 되고 `Maximum update depth exceeded` 로 **화면 전체가 백지**가 된다. 값 비교로 막아도 소용없다(R119 창고 탭 전환 사고). 크기 측정은 `ResizeObserver` 나 layout effect 로 한다.
+- **입력 상태를 매 렌더 부모 값으로 되맞추지 말 것.** `DateInput`이 `value !== normalizeDateInput(raw)`를 의존성 `[value, raw]`로 돌려서, 부모가 미완성 입력을 거부하는 순간 effect가 방금 친 글자를 지웠다. 되맞추기는 **부모 값이 실제로 바뀐 경우만**이다(`useRef`로 직전 값을 기억해 비교, R297).
 - **렌더 예외는 `RouteErrorBoundary` 가 잡는다**(`src/App.tsx`). 없애지 말 것. 없으면 백지만 남고 원인 단서가 사라진다.
 - **실데이터·캐시 내용을 로그·git·공개 파일에 넣지 말 것.**
 - **동기화 쓰기 경로에서 `mergeForKey`를 그대로 부르지 말 것.** 병합 대상이 아닌 키(`MERGE_IDS` 네 개 외 전부)는 `theirs`가 돌아오는데, 쓰기 방향에서 그건 원격 값이다. 방금 저장한 것이 빠진 옛 값을 다시 올리고 스냅샷이 화면을 덮어 저장이 사라진다(R121). `pushCacheNow`는 병합 키일 때만 원격과 합친다.

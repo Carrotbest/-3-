@@ -254,7 +254,7 @@ const GROUPS: MasterGroup[] = [
       { id: "receivedDate", label: "Received date", width: 96, date: true, value: (row) => row.receivedDate, render: receiptDateRender((row) => row.receivedDate) },
       { id: "fds", label: "FDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.fds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.fds) },
       { id: "yds", label: "YDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.yds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.yds) },
-      { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo.trim() ? <span className={`inline-flex items-center font-mono ${isCompletedFlNo(row.flNo) ? "" : "text-[var(--destructive)]"}`} title={isCompletedFlNo(row.flNo) ? undefined : "FL + 숫자 8자리 형식만 완료로 인정합니다"}>{row.flNo}{isCompletedFlNo(row.flNo) ? <FlPerfMark flNo={row.flNo} /> : null}</span> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미입력</span> : "" },
+      { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo.trim() ? <span className={`inline-flex items-center font-mono ${isCompletedFlNo(row.flNo) ? "" : "text-[var(--destructive)]"}`} title={isCompletedFlNo(row.flNo) ? undefined : "FL + 숫자 8자리 형식만 완료로 인정합니다"}>{row.flNo}{isCompletedFlNo(row.flNo) ? <FlPerfMark flNo={row.flNo} /> : null}</span> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미등록</span> : "" },
       { id: "optionProgress", label: "옵션 완료", width: 67, align: "center", value: (row) => row.tech?.optionProgress },
       { id: "review", label: "Review", width: 123, value: (row) => row.tech?.review },
     ],
@@ -503,6 +503,7 @@ function IntakeCell({ column, record, optionsById, onChange }: { column: MasterC
     <input list={`dl-intake-${column.id}`} value={value} disabled={disabled} onChange={(event) => set(event.target.value)} className={box} />
     <datalist id={`dl-intake-${column.id}`}>{(options ?? []).map((option) => <option key={option} value={option} />)}</datalist>
   </>
+  if (column.id === "flNo" || column.id === "color") return <GuardedTextInput column={column} value={value} disabled={disabled} className={box} floatingHint onCommit={set} />
   return <input type={column.number ? "number" : "text"} value={value} disabled={disabled} onChange={(event) => set(event.target.value)} className={box} />
 }
 
@@ -671,23 +672,47 @@ function setNested(target: Record<string, unknown>, path: string[], value: unkno
 const allowedFor = (column: MasterColumn, optionsById: Record<string, readonly string[]>): readonly string[] | undefined =>
   optionsById[column.id] ?? column.options
 
+/** Color 칸에 넣으면 안 되는 자리표시자. 칸이 채워져 있으면 빈칸과 구분이 안 돼 지적을 못 한다(2026-10-06 박향근 확정). */
+const COLOR_PLACEHOLDERS = new Set(["TBD", "TBA", "미정", "확인중", "N/A", "NA", "-", "?"])
+/** 마침표와 공백을 걷고 대문자로 맞춰 본다. `T.B.D`, `tba`, `n/a` 가 모두 걸린다. */
+const isColorPlaceholder = (raw: string): boolean => COLOR_PLACEHOLDERS.has(raw.replace(/[.\s]/g, "").toUpperCase())
+
+/** 날짜 칸 타자 제한. 숫자와 구분자만 남긴다. "확인중", "미정" 같은 메모가 애초에 안 찍힌다. */
+const sanitizeDateTyping = (raw: string): string => raw.replace(/[^0-9/-]/g, "")
+/** FL# 칸 타자 제한. F, L, 숫자만 받고 10자에서 멈춘다. 소문자는 대문자로 바꾼다. */
+const sanitizeFlTyping = (raw: string): string => raw.toUpperCase().replace(/[^FL0-9]/g, "").slice(0, 10)
+
+const DATE_TYPING_HINT = "날짜만 받습니다. 2026-10-06, 10/06, 1006 형식으로 적어 주세요. 메모는 Remark 칸에 적습니다."
+const FL_TYPING_HINT = "FL 과 숫자 8자리만 넣을 수 있습니다. 미등록 사유는 Style History 칸에 적어 주세요."
+const COLOR_TYPING_HINT = "Color 는 비워 두세요. TBD, TBA, 미정 같은 자리표시자는 빈칸과 구분이 안 됩니다."
+
 /**
  * 이 값을 이 열에 넣어도 되는가. 붙여넣기·아래로 채우기·Ctrl+Enter가 모두 거친다.
  * 거짓이면 그 칸은 건드리지 않는다. 지우지 않고 원래 값을 그대로 둔다.
  * 빈 값은 항상 허용한다. 지우기 동작이다.
  * `suggest` 열(담당·Buyer)은 목록이 제안일 뿐이라 자유 입력이다. 막지 않는다.
  * 목록은 `allowed`(드롭다운에 실제로 채운 값)가 우선이다. 없으면 열 상수를 쓴다.
+ * `color` 는 자유 입력이지만 `TBD`·`TBA` 같은 자리표시자만 막는다. 빈칸으로 보여야 지적을 할 수 있다.
  */
 function isAcceptableCellValue(column: MasterColumn, raw: string, allowed?: readonly string[]): boolean {
   const value = raw.trim()
   if (!value) return true
   if (column.id === "flNo") return isCompletedFlNo(value)
+  if (column.id === "color") return !isColorPlaceholder(value)
   if (column.date) return isDateValue(value)
   if (column.number) return Number.isFinite(Number(value))
   // 드롭다운에 채운 목록을 그대로 받는다. 상수만 보면 데이터에만 있는 값(CSD 등)이 소리 없이 버려진다(R280).
   const list = allowed ?? column.options
   if (list && !column.suggest) return list.some((option) => option === value)
   return true
+}
+
+/** 이 값이 왜 거부되는가. 그리드 토스트와 모달·접수 그리드의 안내가 같은 문구를 쓴다. */
+function cellRejectMessage(column: MasterColumn, raw: string): string {
+  if (column.id === "flNo") return FL_TYPING_HINT
+  if (column.id === "color") return COLOR_TYPING_HINT
+  if (column.date) return `${column.label} 열은 ${DATE_TYPING_HINT}`
+  return `${column.label} 열에 넣을 수 없는 값입니다: ${raw.trim()}`
 }
 
 function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string, allowed?: readonly string[]): DevRecord {
@@ -833,24 +858,81 @@ function DateValuePreview({ raw, className = "" }: { raw: string; className?: st
 function DateInput({ value, disabled, invalid, onChange, compact = false }: { value: string; disabled?: boolean; invalid?: boolean; onChange: (raw: string) => void; compact?: boolean }) {
   // 저장된 YYYY-MM-DD를 그대로 초기화해야 과거 연도가 Enter만으로 올해로 바뀌지 않는다.
   const [raw, setRaw] = useState(value)
+  const [blocked, setBlocked] = useState(false)
+  /**
+   * **치는 동안의 중간 입력을 되돌리지 말 것.** 예전에는 `value !== normalizeDateInput(raw)` 로
+   * 매 렌더 되맞췄다. 부모가 미완성 값(`2026-1`)을 형식 검사로 거부하면 `value` 는 그대로이고
+   * 이 effect 가 방금 친 글자를 즉시 지웠다. 그래서 수정 모달과 접수 그리드에서는 날짜를
+   * 손으로 칠 수 없고 달력 아이콘으로만 넣을 수 있었다. 저장값이 실제로 바뀐 경우에만 다시 맞춘다.
+   */
+  const seen = useRef(value)
   useEffect(() => {
-    if (value !== normalizeDateInput(raw)) setRaw(value)
-  }, [value, raw])
+    if (value === seen.current) return
+    seen.current = value
+    setRaw(value)
+  }, [value])
   const change = (next: string) => {
-    setRaw(next)
-    onChange(next)
+    const clean = sanitizeDateTyping(next)
+    // 숫자와 구분자가 아닌 글자를 쳤다는 뜻이다. 안내를 띄우고 그 글자는 버린다.
+    setBlocked(clean !== next)
+    setRaw(clean)
+    onChange(clean)
+  }
+  /** 미완성으로 두고 칸을 떠나면 저장값으로 되돌린다. 화면 글자와 저장값이 어긋나지 않게 한다. */
+  const settle = () => {
+    setBlocked(false)
+    if (normalizeDateInput(raw) !== value) setRaw(value)
   }
   // 접수 옵션 그리드용 압축형. 행 높이 32px 안에 들어가야 해서 미리보기 줄을 뺀다.
-  if (compact) return <div className={`flex h-7 min-w-0 items-stretch rounded border border-[var(--border)] bg-[var(--background)] focus-within:ring-2 focus-within:ring-[var(--ring)] ${invalid ? "ring-1 ring-[var(--destructive)]" : ""}`}>
-    <input type="text" value={raw} disabled={disabled} onChange={(event) => change(event.target.value)} className="min-w-0 flex-1 bg-transparent px-1.5 text-xs text-[var(--foreground)] outline-none disabled:cursor-not-allowed disabled:opacity-40" />
-    <DatePickerPopover value={raw} disabled={disabled} invalid={invalid} onChange={change} iconOnly triggerClassName="h-full w-6 shrink-0 justify-center border-l border-[var(--border)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]" />
+  if (compact) return <div className="relative min-w-0">
+    <div className={`flex h-7 min-w-0 items-stretch rounded border border-[var(--border)] bg-[var(--background)] focus-within:ring-2 focus-within:ring-[var(--ring)] ${invalid || blocked ? "ring-1 ring-[var(--destructive)]" : ""}`}>
+      <input type="text" value={raw} disabled={disabled} onChange={(event) => change(event.target.value)} onBlur={settle} className="min-w-0 flex-1 bg-transparent px-1.5 text-xs text-[var(--foreground)] outline-none disabled:cursor-not-allowed disabled:opacity-40" />
+      <DatePickerPopover value={raw} disabled={disabled} invalid={invalid} onChange={change} iconOnly triggerClassName="h-full w-6 shrink-0 justify-center border-l border-[var(--border)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]" />
+    </div>
+    {blocked ? <span className="absolute left-0 top-[calc(100%+2px)] z-[65] max-w-[280px] rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 text-[10px] leading-tight text-[var(--destructive)] shadow-sm">{DATE_TYPING_HINT}</span> : null}
   </div>
   return <div className="grid min-w-0 gap-1">
-    <div className={`flex h-9 min-w-0 rounded-md border border-[var(--border)] bg-[var(--background)] transition-colors focus-within:ring-2 focus-within:ring-[var(--ring)] ${invalid ? "ring-1 ring-[var(--destructive)]" : ""}`}>
-      <input type="text" value={raw} disabled={disabled} aria-invalid={invalid} onChange={(event) => change(event.target.value)} className="min-w-0 flex-1 bg-transparent px-3 text-sm text-[var(--foreground)] outline-none disabled:cursor-not-allowed disabled:opacity-40" />
+    <div className={`flex h-9 min-w-0 rounded-md border border-[var(--border)] bg-[var(--background)] transition-colors focus-within:ring-2 focus-within:ring-[var(--ring)] ${invalid || blocked ? "ring-1 ring-[var(--destructive)]" : ""}`}>
+      <input type="text" value={raw} disabled={disabled} aria-invalid={invalid || blocked} onChange={(event) => change(event.target.value)} onBlur={settle} className="min-w-0 flex-1 bg-transparent px-3 text-sm text-[var(--foreground)] outline-none disabled:cursor-not-allowed disabled:opacity-40" />
       <DatePickerPopover value={raw} disabled={disabled} invalid={invalid} onChange={change} iconOnly triggerClassName="h-full w-9 shrink-0 justify-center border-l border-[var(--border)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]" />
     </div>
-    <DateValuePreview raw={raw} />
+    {blocked ? <span className="text-[10px] leading-tight text-[var(--destructive)]">{DATE_TYPING_HINT}</span> : <DateValuePreview raw={raw} />}
+  </div>
+}
+
+/**
+ * 형식이 정해진 글자 칸(FL#·Color)의 입력기. 수정 모달과 접수 옵션 그리드가 함께 쓴다.
+ * **치는 동안에는 부모에 쓰지 않는다.** 예전에는 글자마다 `updateRecordCell` 을 불러
+ * 미완성 값이 형식 검사에 거부되면서 방금 친 글자가 그대로 사라졌다. 이유도 안 보였다.
+ * 칸을 떠날 때 한 번 저장하고, 거부되면 저장값으로 되돌리고 안내를 띄운다.
+ */
+function GuardedTextInput({ column, value, disabled, className, floatingHint = false, onCommit }: { column: MasterColumn; value: string; disabled?: boolean; className?: string; floatingHint?: boolean; onCommit: (raw: string) => void }) {
+  const [raw, setRaw] = useState(value)
+  const [hint, setHint] = useState<string | null>(null)
+  // 저장값이 외부에서 바뀐 경우에만 다시 맞춘다. DateInput 과 같은 규칙이다.
+  const seen = useRef(value)
+  useEffect(() => {
+    if (value === seen.current) return
+    seen.current = value
+    setRaw(value)
+    setHint(null)
+  }, [value])
+  const settle = () => {
+    const next = raw.trim()
+    if (next === value.trim()) { setHint(null); setRaw(value); return }
+    if (!isAcceptableCellValue(column, next)) { setHint(cellRejectMessage(column, next)); setRaw(value); return }
+    setHint(null)
+    onCommit(next)
+  }
+  return <div className={`grid min-w-0 gap-1 ${floatingHint ? "relative" : ""}`}>
+    <Input type="text" value={raw} disabled={disabled} aria-invalid={Boolean(hint)}
+      onChange={(event) => { setHint(null); setRaw(column.id === "flNo" ? sanitizeFlTyping(event.target.value) : event.target.value) }}
+      onBlur={settle}
+      onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); event.stopPropagation(); event.currentTarget.blur() } }}
+      className={className} />
+    {hint ? <span className={floatingHint
+      ? "absolute left-0 top-[calc(100%+2px)] z-[65] max-w-[280px] rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 text-[10px] leading-tight text-[var(--destructive)] shadow-sm"
+      : "text-[10px] leading-tight text-[var(--destructive)]"}>{hint}</span> : null}
   </div>
 }
 
@@ -869,6 +951,7 @@ function EditorField({ column, draft, onChange, optionsById, requiredIds, readOn
   if (column.date) return <div className="grid min-w-0 gap-1">{label}<DateInput value={value} disabled={disabled} invalid={invalid} onChange={set} /></div>
   if (options && options.length && !column.suggest) return <div className="grid min-w-0 gap-1">{label}<Select value={value || ALL} onValueChange={(next) => set(next === ALL ? "" : next)} disabled={disabled}><SelectTrigger aria-invalid={invalid} className={`text-sm ${invalidClass}`}><SelectValue placeholder="선택" /></SelectTrigger><SelectContent><SelectItem value={ALL}>미입력</SelectItem>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div>
   if (column.suggest) return <div className="grid min-w-0 gap-1">{label}<Input list={`dl-${column.id}`} value={value} disabled={disabled} aria-invalid={invalid} onChange={(event) => set(event.target.value)} className={`text-sm ${invalidClass}`} /><datalist id={`dl-${column.id}`}>{(options ?? []).map((option) => <option key={option} value={option} />)}</datalist></div>
+  if (column.id === "flNo" || column.id === "color") return <div className="grid min-w-0 gap-1">{label}<GuardedTextInput column={column} value={value} disabled={disabled} onCommit={set} className={`text-sm ${disabled ? "bg-[var(--muted)]" : ""} ${column.mono ? "font-mono" : ""} ${invalidClass}`} /></div>
   return <div className="grid min-w-0 gap-1">{label}<Input type={column.number ? "number" : "text"} value={value} disabled={disabled} aria-invalid={invalid} onChange={(event) => set(event.target.value)} className={`text-sm ${disabled ? "bg-[var(--muted)]" : ""} ${invalidClass}`} /></div>
 }
 
@@ -936,19 +1019,36 @@ function editorKeyHandler<T extends HTMLInputElement | HTMLSelectElement>(
 function InlineDateEditor({ initialValue, onCommit, onCancel }: { initialValue: string; onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void; onCancel: () => void }) {
   // 저장된 전체 날짜를 초기값으로 보존하므로, 손대지 않고 Enter를 눌러도 연도가 바뀌지 않는다.
   const [raw, setRaw] = useState(initialValue)
+  const [blocked, setBlocked] = useState(false)
   const editorRef = useRef<HTMLDivElement>(null)
   const chooseDate = (next: string) => {
     setRaw(next)
     onCommit(next)
   }
   return <div ref={editorRef} className="relative flex h-8 min-w-0 bg-[var(--card)] ring-2 ring-inset ring-[var(--ring)]">
-    <input autoFocus type="text" value={raw} onChange={(event) => setRaw(event.target.value)} onBlur={(event) => {
+    <input autoFocus type="text" value={raw} onChange={(event) => { const clean = sanitizeDateTyping(event.target.value); setBlocked(clean !== event.target.value); setRaw(clean) }} onBlur={(event) => {
       const next = event.relatedTarget
       if (next instanceof Node && editorRef.current?.contains(next)) return
       onCommit(event.currentTarget.value)
     }} className="h-8 min-w-0 flex-1 rounded-none border-0 bg-transparent px-1.5 text-xs text-[var(--foreground)] outline-none" onKeyDown={editorKeyHandler(onCommit, onCancel)} />
     <DatePickerPopover value={raw} onChange={chooseDate} iconOnly triggerClassName="h-8 w-8 shrink-0 justify-center border-l border-[var(--border)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]" />
-    <DateValuePreview raw={raw} className="absolute left-1 top-[calc(100%+2px)] z-[65] whitespace-nowrap rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 shadow-sm" />
+    {blocked
+      ? <span className="absolute left-1 top-[calc(100%+2px)] z-[65] max-w-[280px] rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 text-[10px] leading-tight text-[var(--destructive)] shadow-sm">{DATE_TYPING_HINT}</span>
+      : <DateValuePreview raw={raw} className="absolute left-1 top-[calc(100%+2px)] z-[65] whitespace-nowrap rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 shadow-sm" />}
+  </div>
+}
+
+/**
+ * FL# 인라인 편집기. 타자는 F, L, 숫자만 받고 10자에서 멈춘다.
+ * 치는 동안에는 지역 상태만 들고 있고, 저장은 `commitCell` 이 형식을 보고 결정한다.
+ * 글자마다 부모에 쓰면 `FL2610` 같은 미완성 값이 거부돼 한 글자도 안 찍힌다.
+ */
+function InlineFlNoEditor({ initialValue, onCommit, onCancel }: { initialValue: string; onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void; onCancel: () => void }) {
+  const [raw, setRaw] = useState(() => sanitizeFlTyping(initialValue))
+  const incomplete = Boolean(raw.trim()) && !isCompletedFlNo(raw)
+  return <div className="relative flex h-8 min-w-0 bg-[var(--card)] ring-2 ring-inset ring-[var(--ring)]">
+    <input autoFocus type="text" value={raw} onChange={(event) => setRaw(sanitizeFlTyping(event.target.value))} onBlur={(event) => onCommit(event.currentTarget.value)} onKeyDown={editorKeyHandler(onCommit, onCancel)} className="h-8 min-w-0 flex-1 rounded-none border-0 bg-transparent px-1.5 font-mono text-xs text-[var(--foreground)] outline-none" />
+    {incomplete ? <span className="absolute left-1 top-[calc(100%+2px)] z-[65] max-w-[280px] rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 text-[10px] leading-tight text-[var(--destructive)] shadow-sm">{FL_TYPING_HINT}</span> : null}
   </div>
 }
 
@@ -959,6 +1059,7 @@ function InlineEditor({ record, column, options, initial, onCommit, onCancel }: 
   const cls = "h-8 w-full rounded-none border-0 bg-[var(--card)] px-1.5 text-xs text-[var(--foreground)] outline-none ring-2 ring-inset ring-[var(--ring)]"
   const opts = options && options.length ? options : undefined
   if (column.date) return <InlineDateEditor initialValue={initialValue} onCommit={onCommit} onCancel={onCancel} />
+  if (column.id === "flNo") return <InlineFlNoEditor initialValue={initialValue} onCommit={onCommit} onCancel={onCancel} />
   if (initial !== undefined) {
     return <input autoFocus type={column.number ? "number" : "text"} defaultValue={initialValue} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={editorKeyHandler(onCommit, onCancel)} />
   }
@@ -2788,9 +2889,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       return
     }
     if (!isAcceptableCellValue(column, raw, allowedFor(column, optionsById))) {
-      notify(column.id === "flNo"
-        ? "FL#는 FL과 숫자 8자리만 넣을 수 있습니다. DROP은 Status 칸, 메모는 비고 칸에 적어 주세요."
-        : `${column.label} 열에 넣을 수 없는 값입니다: ${raw.trim()}`)
+      notify(cellRejectMessage(column, raw))
       if (move) moveSelection(move, false, move === "left" || move === "right", origin)
       return
     }

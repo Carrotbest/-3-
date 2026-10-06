@@ -11,7 +11,8 @@ export const DD_STATUS_STYLE: Record<string, { label: string; block: string; dot
   완료: { label: "완료", block: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 ring-1 ring-inset ring-emerald-500/30", dot: "bg-emerald-500", row: "border-l-emerald-500" },
   HOLD: { label: "HOLD", block: "bg-amber-500/18 text-amber-700 dark:text-amber-300 ring-1 ring-inset ring-amber-500/35", dot: "bg-amber-500", row: "border-l-amber-500" },
   DROP: { label: "DROP", block: "bg-slate-500/15 text-slate-600 dark:text-slate-300 ring-1 ring-inset ring-slate-500/30", dot: "bg-slate-500", row: "border-l-slate-400" },
-  REJECT: { label: "REJECT", block: "bg-rose-500/15 text-rose-700 dark:text-rose-300 ring-1 ring-inset ring-rose-500/30", dot: "bg-rose-500", row: "border-l-rose-500" },
+  // REJECT 는 반려로 끝난 종료건이다. 빨강은 "지금 조치가 필요하다"는 뜻이라 DROP 과 같은 회색으로 맞춘다(2026-10-06 박향근 확정).
+  REJECT: { label: "REJECT", block: "bg-slate-500/15 text-slate-600 dark:text-slate-300 ring-1 ring-inset ring-slate-500/30", dot: "bg-slate-500", row: "border-l-slate-400" },
   원사: { label: "원사", block: "bg-violet-500/15 text-violet-700 dark:text-violet-300 ring-1 ring-inset ring-violet-500/30", dot: "bg-violet-500", row: "border-l-violet-500" },
   편직: { label: "편직", block: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 ring-1 ring-inset ring-indigo-500/30", dot: "bg-indigo-500", row: "border-l-indigo-500" },
   염색: { label: "염색", block: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 ring-1 ring-inset ring-cyan-500/30", dot: "bg-cyan-500", row: "border-l-cyan-500" },
@@ -62,6 +63,17 @@ export function isCompletedFlNo(flNo: string | undefined): boolean {
 
 const normalizedStatus = (record: DevRecord): string => String(record.devStatus ?? "").trim().toUpperCase()
 const identity = (record: DevRecord): string => `${record._src.sheet}::${record._src.row}`
+
+/**
+ * 사람이 멈춘 행인가. HOLD·DROP·REJECT 다.
+ * 이 행들은 경고를 띄우지 않는다. 받을 것도 채울 것도 없는데 삼각형이 붙으면
+ * 진짜로 빠뜨린 건과 섞여 경고 전체가 무의미해진다(2026-10-06 박향근 확정).
+ * 판정 어휘는 `derive.ts` `isScheduleOpen` 과 같게 유지한다.
+ */
+const STOPPED_STATUSES = new Set(["HOLD", "보류", "DROP", "REJECT"])
+export function isStoppedRecord(record: DevRecord): boolean {
+  return STOPPED_STATUSES.has(normalizedStatus(record).replace(/\s+/g, ""))
+}
 
 function dayValue(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
@@ -135,7 +147,7 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
 }
 
 export interface DdWarning {
-  key: "status" | "due" | "fl" | "arrange" | "fail" | "process" | "dateFormat"
+  key: "due" | "fl" | "arrange" | "fail" | "process" | "dateFormat"
   label: string
 }
 
@@ -143,21 +155,48 @@ export interface DdWarning {
 export function ddWarnings(record: DevRecord, today = new Date()): DdWarning[] {
   const warnings: DdWarning[] = []
   const status = normalizedStatus(record)
-  const due = toDate(record.dueDate)
-  if (record.receivedDate && !["완료", "REJECT"].includes(status)) warnings.push({ key: "status", label: "완료일 입력 · Status 확인" })
-  if (due && dayValue(due) < dayValue(today) && status !== "완료") warnings.push({ key: "due", label: "Due Date 경과" })
-  // Style History에 사유를 적었으면 FL 경고를 끈다.
-  // "Matching RIB으로 등록 불필요"처럼 FL을 안 딴 이유가 기록된 건이다. 담당이 이미 판단을 남겼는데
-  // 경고를 계속 띄우면 진짜로 빠뜨린 건과 구분이 안 돼 표 전체가 경고투성이가 된다.
-  const explained = String(record.tech?.styleHistory ?? "").trim().length > 0
-  if (record.receivedDate && !isCompletedFlNo(record.flNo) && status !== "DROP" && !explained) {
-    warnings.push({ key: "fl", label: record.flNo.trim() ? "FL 형식 확인" : "FL 미입력" })
-  }
-  if (record.tech?.arrangeNo && record.tech?.development?.co && record.tech.development.co !== "GD") warnings.push({ key: "arrange", label: "Arrange#는 GD만 입력" })
+  const received = String(record.receivedDate ?? "").trim().length > 0
+
+  // Fail 사유는 종료 행에서도 띄운다. REJECT 는 대개 FAIL 의 결과라, 사유가 비면
+  // 왜 반려됐는지 나중에 추적할 길이 없다(2026-10-06 박향근 확정).
   if (record.tech?.passFail === "FAIL" && !record.tech.failReason) warnings.push({ key: "fail", label: "Fail 사유 미입력" })
 
+  // HOLD·DROP·REJECT 는 여기서 끝낸다. 아래 경고는 모두 "지금 조치하라"는 뜻이다.
+  if (isStoppedRecord(record)) return warnings
+
+  // Style History 에 사유를 적었으면 FL 경고를 끈다.
+  // "Matching RIB으로 등록 불필요"처럼 FL을 안 딴 이유가 기록된 건이다.
+  const explained = String(record.tech?.styleHistory ?? "").trim().length > 0
+  // FL 채번은 FDS 를 받아야 가능하다. GD 건은 FDS 날짜가 들어온 뒤부터 묻는다.
+  // FDS·YDS 열은 GD 전용(`GD_ONLY_COLUMN_IDS`)이라 국내·생산 건은 채울 수 없다.
+  // 그 쪽은 실물 도착(Received date)을 기준으로 둔다. **두 기준을 하나로 합치지 말 것.**
+  // FDS 하나로 합치면 국내·생산 건이 경고 대상에서 통째로 빠진다(2026-10-06 박향근 확정, R298).
+  const flGate = isGdRecord(record)
+    ? String(record.tech?.sampleDates?.fds ?? "").trim().length > 0
+    : received
+  const flMissing = flGate && !isCompletedFlNo(record.flNo) && !explained
+  if (flMissing) warnings.push({ key: "fl", label: record.flNo.trim() ? "FL 형식 확인" : "FL 미등록" })
+  // **`완료일 입력 · Status 확인` 경고는 없앴다**(2026-10-06 박향근 지시, R299).
+  // `Received date 있음 + Status ≠ 완료` 로 떴는데, 화면 완료 기준은 FL#이라 FL 채번 전인 행은
+  // 완료가 아닌 것이 정상이다. `recalculateDevelopmentRecords` 도 유효한 FL# 없이는 완료로 올리지 않아
+  // 담당자가 경고를 끄려면 규칙을 어겨야 했다. R298 로 FL 경고 기준이 FDS 로 바뀐 뒤에는
+  // FDS 대기 중인 GD 행에서 FL 경고 자리를 그대로 이어받아 글자만 바뀐 꼴이 됐다. **되살리지 말 것.**
+
+  // 행거가 도착한 건은 일정이 닫힌 것으로 본다. HOME 임박·지연(`derive.ts` `isScheduleOpen`)과 기준을 맞춘다.
+  // Status 만 보면 FL 채번 전인 도착 건이 DD MASTER 에서만 계속 빨갛다.
+  const due = toDate(record.dueDate)
+  if (due && !received && status !== "완료" && dayValue(due) < dayValue(today)) warnings.push({ key: "due", label: "Due Date 경과" })
+
+  if (record.tech?.arrangeNo && record.tech?.development?.co && record.tech.development.co !== "GD") warnings.push({ key: "arrange", label: "Arrange#는 GD만 입력" })
+
+  // 날짜 열 아홉 개 전부를 본다. 예전에는 넷만 봐서 Request Date 와 공정 완료일의 오기재가 지나갔다.
   const dateCells: [string, unknown][] = [
+    ["Request Date", record.requestDate],
     ["Due Date", record.dueDate],
+    ["원사 완료일", record.tech?.processDates?.yarn],
+    ["편직 완료일", record.tech?.processDates?.knitting],
+    ["염색 완료일", record.tech?.processDates?.dyeing],
+    ["가공 완료일", record.tech?.processDates?.finishing],
     ["Received date", record.receivedDate],
     ["FDS", record.tech?.sampleDates?.fds],
     ["YDS", record.tech?.sampleDates?.yds],
@@ -167,13 +206,15 @@ export function ddWarnings(record: DevRecord, today = new Date()): DdWarning[] {
     warnings.push({ key: "dateFormat", label: `${badDates.map(([name]) => name).join(", ")} 날짜 형식 아님` })
   }
 
+  // 날짜가 있는데 업체가 빈 경우만 누락이다. 반대 방향(업체만 있음)은 공정이 진행 중인 정상 상태라
+  // 경고로 잡으면 진행 중인 행 대부분에 삼각형이 붙는다(2026-10-06 박향근 확정).
   const pairs = [
     [record.tech?.mills?.yarn, record.tech?.processDates?.yarn],
     [record.tech?.mills?.knitting, record.tech?.processDates?.knitting],
     [record.tech?.mills?.dyeing, record.tech?.processDates?.dyeing],
     [record.tech?.mills?.finishing, record.tech?.processDates?.finishing],
   ]
-  if (pairs.some(([mill, date]) => Boolean(mill) !== Boolean(date))) warnings.push({ key: "process", label: "공정 업체·날짜 짝 미완성" })
+  if (pairs.some(([mill, date]) => Boolean(date) && !mill)) warnings.push({ key: "process", label: "공정 완료일에 업체 미입력" })
   return warnings
 }
 
