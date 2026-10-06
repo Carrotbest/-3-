@@ -14,6 +14,7 @@ import * as XLSX from "xlsx"
 
 import { CONSTRUCTIONS, matchConstruction } from "./constructions"
 import { legacyBoardId } from "./request-board"
+import { styleRemarkText } from "./schema"
 import type { RequestOption, RequestStyle } from "./schema"
 
 type Band = "기본" | "ORIGINAL" | "분석" | "의뢰" | "옵션"
@@ -56,7 +57,8 @@ export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
   { band: "옵션", head: "W'T", width: 8, scope: "option", key: "weight", optional: true },
   { band: "옵션", head: "COLOR", width: 18, scope: "option", key: "color" },
   { band: "옵션", head: "DYEING METHOD", width: 13, scope: "option", key: "dyeingMethod" },
-  { band: "옵션", head: "REMARK", width: 26, scope: "option", key: "remark" },
+  // R291에서 스타일 단위로 옮겼다. 열 위치와 이름은 옛 양식 파일을 계속 읽기 위해 그대로 둔다.
+  { band: "옵션", head: "REMARK", width: 26, scope: "style", key: "remark" },
 ]
 
 const BAND_COLOR: Record<Band, string> = {
@@ -103,13 +105,13 @@ const cellOf = (style: RequestStyle, option: RequestOption | null, key: string):
     case "requester": return style.requester || null
     case "developer": return style.developer || null
     case "devPlan": return style.devPlan || null
+    case "remark": return styleRemarkText(style) || null
     case "no": return option ? option.no : null
     case "yarnDetail": return option ? option.yarnDetail || null : null
     case "construction": return option ? option.construction || null : null
     case "weight": return option && option.weight !== undefined && option.weight !== "" ? option.weight : null
     case "color": return option ? option.color || null : null
     case "dyeingMethod": return option ? option.dyeingMethod || null : null
-    case "remark": return option ? option.remark || null : null
     default: return null
   }
 }
@@ -183,7 +185,8 @@ export async function buildRequestWorkbook(styles: readonly RequestStyle[] = [])
     "1. REQUEST 시트의 3행부터 입력합니다. 1행(밴드)과 2행(열 이름)은 지우거나 옮기지 마세요.",
     "2. 스타일 1건에 옵션이 여러 개면 옵션 수만큼 행을 씁니다.",
     "   첫 행에만 Garment Number를 포함한 스타일 정보를 적고, 두 번째 옵션부터는",
-    "   Opt / YARN DETAIL / CONS / W'T / COLOR / DYEING METHOD / REMARK 만 채웁니다.",
+    "   Opt / YARN DETAIL / CONS / W'T / COLOR / DYEING METHOD 만 채웁니다.",
+    "   REMARK는 스타일 1건에 한 칸입니다. 첫 행에만 적고, 여러 줄로 써도 됩니다.",
     "   Garment Number가 비어 있는 행은 바로 위 스타일의 옵션으로 읽습니다.",
     "3. 단계는 분석 또는 개발만 씁니다. 비우면 분석으로 들어갑니다.",
     "4. URGENT는 V 또는 O로 표시합니다. 비우면 해제입니다.",
@@ -287,7 +290,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
     return index === undefined ? null : row[index] ?? null
   }
 
-  const optionKeys = ["yarnDetail", "construction", "weight", "color", "dyeingMethod", "remark"]
+  const optionKeys = ["yarnDetail", "construction", "weight", "color", "dyeingMethod"]
   const styles: RequestStyle[] = []
   const warnings: string[] = []
   let current: RequestStyle | null = null
@@ -320,6 +323,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
         requester: asText(at(row, "requester")),
         developer: asText(at(row, "developer")),
         devPlan: asText(at(row, "devPlan")),
+        remark: asText(at(row, "remark")),
         options: [],
         createdAt: now,
         updatedAt: now,
@@ -330,8 +334,13 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
       continue
     }
 
+    // 옛 양식은 옵션 행마다 REMARK를 적었다. 그 값은 스타일 REMARK 뒤에 줄바꿈으로 이어 붙인다(R291).
+    const trailingRemark = asText(at(row, "remark"))
+    if (trailingRemark && current) {
+      current.remark = [current.remark ?? "", trailingRemark].filter(Boolean).join("\n")
+    }
     if (!hasOption) {
-      warnings.push(`${excelRow}행: Garment Number도 옵션 값도 없어 건너뛰었습니다.`)
+      if (!trailingRemark) warnings.push(`${excelRow}행: Garment Number도 옵션 값도 없어 건너뛰었습니다.`)
       continue
     }
     if (!current) {
@@ -365,7 +374,6 @@ function readOption(
     weight: asNumber(at(row, "weight")),
     color: asText(at(row, "color")),
     dyeingMethod: asText(at(row, "dyeingMethod")),
-    remark: asText(at(row, "remark")),
   }
 }
 

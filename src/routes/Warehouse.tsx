@@ -84,7 +84,7 @@ interface WarehouseColumn {
 }
 
 interface WarehouseGroup {
-  key: "fixed" | "rdda" | "ledger" | "process" | "result"
+  key: "fixed" | "rdda" | "ledger" | "process" | "result" | "resultDetail"
   label: string
   color: string
   collapsible?: boolean
@@ -143,6 +143,10 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
     { id: "completedAt", label: "Finish Date", width: 88 },
     { id: "dueDate", label: "Due Date", width: 88 },
     { id: "note", label: "Remark/Issue", width: 200 },
+  ] },
+  // 수축률·편직 사양·Loop·Greige는 거의 보지 않는 열이라 기본 접힘으로 돌린다(R292, 2026-10-06 박향근 지시).
+  // 값은 그대로 저장되며 필요할 때 `결과 상세 +` 칩으로 펼친다.
+  { key: "resultDetail", label: "결과 상세", color: "var(--chart-4)", collapsible: true, columns: [
     { id: "shrinkageLength", label: "Shrinkage L", width: 88 },
     { id: "shrinkageWidth", label: "Shrinkage W", width: 88 },
     { id: "knitInch", label: "Inch", width: 68 },
@@ -592,7 +596,7 @@ export function Warehouse() {
   const [tab, setTab] = useState<WarehouseTab>("READY")
   const tabOrder = teamScope === "team1" ? TAB_ORDER_TEAM1 : TAB_ORDER
   // 펼침/접힘은 개인 브라우저에 남는다. 팀원 화면에는 영향을 주지 않는다.
-  const [openGroups, setOpenGroups] = useState(() => loadViewGroups(WH_OPEN_GROUPS_KEY, { process: true, rdda: true }))
+  const [openGroups, setOpenGroups] = useState(() => loadViewGroups(WH_OPEN_GROUPS_KEY, { process: true, rdda: true, resultDetail: false }))
   useEffect(() => { saveViewPref(WH_OPEN_GROUPS_KEY, openGroups) }, [openGroups])
   // 열 너비는 사용자가 끌어 조절하고 브라우저에 남는다. 기본값을 바꾸면 키를 올려야 반영된다.
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {

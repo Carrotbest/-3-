@@ -162,6 +162,11 @@ export interface RequestStyle {
   developer: string
   /** 엑셀 Q열 "개발" */
   devPlan: string
+  /**
+   * REMARK. 스타일 1건의 코멘트를 여러 줄로 적는 칸(R291).
+   * 값이 `undefined`면 아직 옮기지 않은 옛 데이터다. 읽을 때는 `styleRemarkText`를 쓴다.
+   */
+  remark?: string
   options: RequestOption[]
   createdAt: string
   updatedAt: string
@@ -249,10 +254,23 @@ export interface RequestOption {
   color: string
   /** 엑셀 U열 */
   dyeingMethod: string
-  /** 엑셀 Z열. 수기 유지 */
-  remark: string
+  /**
+   * 옛 옵션별 REMARK. R291에서 스타일 단위(`RequestStyle.remark`)로 옮겼다.
+   * 새로 쓰지 않는다. 옛 데이터를 읽어 합쳐 보여 주는 용도로만 남긴다.
+   */
+  remark?: string
   /** 미사용. DD 쪽 requestLink로 대체. */
   ddLink?: { styleNo: string; opt: string }
+}
+
+/**
+ * 화면과 양식에 함께 쓰는 REMARK 읽기 함수(R291).
+ * `style.remark`가 있으면 그 값이고, 없으면 옛 옵션별 REMARK를 번호 없이 줄바꿈으로 이어 붙인다.
+ * 옛 값을 합쳐 보여 주다가 사용자가 그 칸을 처음 고치면 `style.remark`로 굳는다.
+ */
+export function styleRemarkText(style: Pick<RequestStyle, "remark" | "options">): string {
+  if (typeof style.remark === "string") return style.remark
+  return style.options.map((option) => (option.remark ?? "").trim()).filter(Boolean).join("\n")
 }
 
 export interface FabricAnalysisRow {

@@ -22,6 +22,7 @@ import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindCo
 import type { AuditKind } from "@/data/audit"
 
 import { ProcessStageChip } from "@/components/request/ProcessStageChip"
+import { ReadOnlyBanner } from "@/components/layout/ReadOnlyBanner"
 import { DdCandidateDialog } from "@/components/request/DdCandidateDialog"
 import { ProcessStageDialog } from "@/components/request/ProcessStageDialog"
 import { RequestBoardHeader } from "@/components/request/RequestBoardHeader"
@@ -42,7 +43,7 @@ import { FillHandle, selectionShadow, type CellMove, type CellRect, type CellRef
 import { downloadBlob } from "@/data/dd-export"
 import { deleteRequestImage, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
 import { buildRequestWorkbook, mergeRequestStyles, parseRequestWorkbook, requestTemplateFileName } from "@/data/request-template"
-import { MEMBERS, REQUEST_RESULTS, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
+import { MEMBERS, REQUEST_RESULTS, styleRemarkText, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
 import { loadViewNumbers, saveViewPref } from "@/data/view-prefs"
 import { saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore, writeDevelopmentRecords } from "@/store/useAppStore"
 
@@ -99,7 +100,8 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
     { id: "weight", label: "W'T", width: 64, scope: "option", align: "right" },
     { id: "color", label: "Color", width: 120, scope: "option" },
     { id: "dyeingMethod", label: "Dyeing", width: 90, scope: "option" },
-    { id: "remark", label: "Remark", width: 180, scope: "option" },
+    // R291에서 스타일 단위로 옮겼다. 옵션 사이에 세로로 병합된 한 칸이 되고, 여러 줄 기록을 받는다.
+    { id: "remark", label: "Remark", width: 220, scope: "style" },
     // 보기 전용 두 열. DD 행의 tech.requestLink를 읽어 계산하며 요청 데이터나 엑셀 양식에는 없다.
     { id: "ddStage", label: "공정", width: 96, scope: "option", align: "center" },
     { id: "ddLink", label: "Link", width: 150, scope: "option" },
@@ -107,6 +109,8 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
 ]
 
 const ACTION_WIDTH = 72
+/** 보기 전용 안내 문구. 저장 차단 알림도 같은 문장으로 쓴다(R295). */
+const READ_ONLY_HINT = "전체 탭은 보기 전용입니다. 고치려면 위에서 보드 탭을 고르십시오."
 /** 엑셀 행 머리처럼 왼쪽 끝에 붙는 행 번호 칸. 너비 조절 대상이 아니라 상수로 둔다. */
 const ROW_NO_WIDTH = 44
 const STYLE_ROW_HEIGHT = 84
@@ -176,6 +180,20 @@ type Line =
 type StageFilter = "전체" | "분석" | "개발"
 type SortKey = "seq" | "requester" | "developer" | "analyst"
 
+/**
+ * 클릭 지점에 띄우는 확인 상자(R294).
+ * 브라우저 기본 confirm 은 창 맨 위 가운데에 떠서 표 아래쪽을 누르면 시선이 멀리 간다.
+ * 좌표는 누른 지점이고 `danger`는 지우는 동작에만 준다.
+ */
+interface ConfirmPrompt {
+  x: number
+  y: number
+  message: string
+  confirmLabel: string
+  danger: boolean
+  run: () => void
+}
+
 const SORT_LABEL: Record<SortKey, string> = {
   seq: "순번",
   requester: "의뢰자",
@@ -222,7 +240,6 @@ const blankOption = (reqId: string, no: number): RequestOption => ({
   weight: "",
   color: "",
   dyeingMethod: "",
-  remark: "",
 })
 
 const text = (value: string | number | undefined): string =>
@@ -351,7 +368,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
   const set = <K extends keyof RequestStyle>(key: K, next: RequestStyle[K]) =>
     setValue((current) => (current ? { ...current, [key]: next } : current))
 
-  const setOption = (index: number, key: "yarnDetail" | "construction" | "color" | "dyeingMethod" | "remark", next: string) =>
+  const setOption = (index: number, key: "yarnDetail" | "construction" | "color" | "dyeingMethod", next: string) =>
     setValue((current) => {
       if (!current) return current
       return { ...current, options: current.options.map((option, i) => (i === index ? { ...option, [key]: next } : option)) }
@@ -438,6 +455,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
 
           <div className="mt-3">
             {field("개발", <textarea className="h-20 rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" value={value.devPlan} onChange={(event) => set("devPlan", event.target.value)} />)}
+            {field("Remark", <textarea className="mt-3 h-20 w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" placeholder="스타일 코멘트. 여러 줄로 적습니다" value={styleRemarkText(value)} onChange={(event) => set("remark", event.target.value)} />)}
           </div>
 
           <div className="mt-5 rounded border border-[var(--border)]">
@@ -461,7 +479,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
             ) : (
               <div className="divide-y divide-[var(--border)]">
                 {value.options.map((option, index) => (
-                  <div key={option.optId} className="grid grid-cols-[36px_minmax(0,1.4fr)_140px_64px_minmax(0,1fr)_90px_minmax(0,1fr)_44px] items-center gap-2 px-3 py-2">
+                  <div key={option.optId} className="grid grid-cols-[36px_minmax(0,1.4fr)_140px_64px_minmax(0,1fr)_90px_44px] items-center gap-2 px-3 py-2">
                     <span className="text-center text-xs font-semibold text-[var(--muted-foreground)]">{option.no}</span>
                     <Input className="h-8 text-xs" placeholder="Yarn Detail" value={option.yarnDetail} onChange={(event) => setOption(index, "yarnDetail", event.target.value)} />
                     <Select value={option.construction || "__none"} onValueChange={(next) => setOption(index, "construction", next === "__none" ? "" : next)}>
@@ -475,7 +493,6 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
                     <Input className="h-8 text-right text-xs" type="number" min="0" placeholder="W'T" aria-label={`옵션 ${option.no} W'T`} value={option.weight ?? ""} onChange={(event) => setOptionWeight(index, event.target.value)} />
                     <Input className="h-8 text-xs" placeholder="Color" value={option.color} onChange={(event) => setOption(index, "color", event.target.value)} />
                     <Input className="h-8 text-xs" placeholder="Dyeing" value={option.dyeingMethod} onChange={(event) => setOption(index, "dyeingMethod", event.target.value)} />
-                    <Input className="h-8 text-xs" placeholder="Remark" value={option.remark} onChange={(event) => setOption(index, "remark", event.target.value)} />
                     <Button
                       type="button"
                       size="sm"
@@ -730,6 +747,7 @@ export function FabricRequest() {
   const [sortKey, setSortKey] = useState<SortKey>("seq")
   const [urgentOnly, setUrgentOnly] = useState(false)
   const [activeBoard, setActiveBoard] = useState<string>(() => { try { return window.localStorage.getItem("fabric.request.activeBoard") || ALL_BOARDS } catch { return ALL_BOARDS } })
+  const readOnly = activeBoard === ALL_BOARDS || activeBoard === ARCHIVE_VIEW
   const [boardDialog, setBoardDialog] = useState<"create" | "edit" | null>(null)
   const [closeOpen, setCloseOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -740,6 +758,12 @@ export function FabricRequest() {
   const [editCell, setEditCell] = useState<(CellRef & { seed?: string }) | null>(null)
   const [range, setRange] = useState<{ anchor: CellRef; focus: CellRef } | null>(null)
   const [rowMenu, setRowMenu] = useState<{ x: number; y: number; cell: CellRef } | null>(null)
+  const [confirmPrompt, setConfirmPrompt] = useState<ConfirmPrompt | null>(null)
+  // 보기 전용이면 묻지 않고 바로 알린다. 확인까지 받아 놓고 저장에서 막으면 두 번 속게 된다(R295).
+  const askConfirm = (anchor: { x: number; y: number }, message: string, run: () => void, options?: { confirmLabel?: string; danger?: boolean }) => {
+    if (readOnly) { setNotice({ kind: "error", text: READ_ONLY_HINT }); return }
+    setConfirmPrompt({ x: anchor.x, y: anchor.y, message, run, confirmLabel: options?.confirmLabel ?? "확인", danger: options?.danger ?? false })
+  }
   const [bottomMenu, setBottomMenu] = useState<{ x: number; y: number } | null>(null)
   const [undoStack, setUndoStack] = useState<RequestStyle[][]>([])
   const [redoStack, setRedoStack] = useState<RequestStyle[][]>([])
@@ -763,7 +787,6 @@ export function FabricRequest() {
 
   const openBoards = useMemo(() => requestBoards.filter((board) => board.status === "진행").sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "ko-KR")), [requestBoards])
   const activeBoardInfo = activeBoard === ALL_BOARDS || activeBoard === ARCHIVE_VIEW ? null : openBoards.find((board) => board.boardId === activeBoard) ?? null
-  const readOnly = activeBoard === ALL_BOARDS || activeBoard === ARCHIVE_VIEW
   // 보드 목록이 캐시나 동기화로 들어오기 전(빈 배열)에는 되돌리지 않는다. 되돌리면 새로고침마다 마지막 탭 기억이 전체로 덮인다.
   useEffect(() => { if (requestBoards.length > 0 && activeBoard !== ALL_BOARDS && activeBoard !== ARCHIVE_VIEW && !activeBoardInfo) setActiveBoard(ALL_BOARDS) }, [activeBoard, activeBoardInfo, requestBoards.length])
   useEffect(() => { try { window.localStorage.setItem("fabric.request.activeBoard", activeBoard) } catch { /* 현재 세션만 유지한다. */ } }, [activeBoard])
@@ -801,7 +824,7 @@ export function FabricRequest() {
 
   const actor = { email: authUser?.email ?? authUser?.uid ?? "unknown", name: authUser?.displayName?.trim() || authUser?.email?.split("@")[0] || "알 수 없음" }
   function commitRequests(next: RequestStyle[], kind: AuditKind = "edit"): boolean {
-    if (readOnly) { setNotice({ kind: "error", text: "전체 탭은 보기 전용입니다. 보드 탭에서 수정하세요." }); return false }
+    if (readOnly) { setNotice({ kind: "error", text: READ_ONLY_HINT }); return false }
     if (next === requests) return false
     const history = appendRequestHistory(requests, next, requestBoards, actor)
     if (history.changed) saveRequestsAndBoards(next, history.boards, kind); else saveRequests(next, kind)
@@ -846,18 +869,24 @@ export function FabricRequest() {
     commitRequests(requests.map((item) => (item.reqId === reqId ? { ...item, ...patch, updatedAt: new Date().toISOString() } : item)))
   }
 
-  const remove = (style: RequestStyle) => {
-    if (!window.confirm(`${style.garmentNo || "이 의뢰"} 건을 삭제할까요? 옵션 ${style.options.length}건이 함께 지워집니다.`)) return
-    commitRequests(requests.filter((item) => item.reqId !== style.reqId))
-    // 사진은 없으면 조용히 넘어간다. 실패해도 원장 삭제는 그대로 둔다.
-    void deleteRequestImage(style.reqId).catch(() => undefined)
+  const remove = (style: RequestStyle, anchor: { x: number; y: number }) => {
     setRowMenu(null)
+    askConfirm(anchor, `${style.garmentNo || "이 의뢰"} 건을 삭제할까요?\n옵션 ${style.options.length}건이 함께 지워집니다.`, () => {
+      commitRequests(requests.filter((item) => item.reqId !== style.reqId))
+      // 사진은 없으면 조용히 넘어간다. 실패해도 원장 삭제는 그대로 둔다.
+      void deleteRequestImage(style.reqId).catch(() => undefined)
+    }, { confirmLabel: "삭제", danger: true })
   }
 
-  /** 스타일 맨 아래에 옵션 라인을 한 줄 붙인다. 편집 팝업을 열지 않고 표에서 바로 만든다. */
-  const addOption = (style: RequestStyle) => {
-    saveMutation(requests.map((item) => item.reqId === style.reqId ? { ...item, options: renumber(style.reqId, [...style.options, blankOption(style.reqId, style.options.length + 1)]), updatedAt: new Date().toISOString() } : item))
+  /**
+   * 스타일 맨 아래에 옵션 라인을 한 줄 붙인다. 편집 팝업을 열지 않고 표에서 바로 만든다.
+   * 버튼이 표 안에 있어 잘못 누르기 쉬워 확인을 한 번 받는다(R293).
+   */
+  const addOption = (style: RequestStyle, anchor: { x: number; y: number }) => {
     setRowMenu(null)
+    askConfirm(anchor, `${style.garmentNo || "이 의뢰"}에 옵션 ${style.options.length + 1}번을 추가할까요?`, () => {
+      saveMutation(requests.map((item) => item.reqId === style.reqId ? { ...item, options: renumber(style.reqId, [...style.options, blankOption(style.reqId, style.options.length + 1)]), updatedAt: new Date().toISOString() } : item))
+    }, { confirmLabel: "추가" })
   }
 
   /**
@@ -865,13 +894,15 @@ export function FabricRequest() {
    *
    * 지운 뒤 `renumber`로 번호를 1부터 다시 매긴다. `optId`가 번호를 따라가므로
    * 인덱스로 지우면 뒤 옵션의 식별자가 밀린다. 반드시 `optId`로 찾아 지운다.
-   * 내용이 하나라도 적힌 줄만 되묻는다. 빈 줄까지 확인창을 띄우면 성가시다.
+   * R293부터 빈 줄도 되묻는다. 휴지통 버튼이 Opt 칸 안에 있어 잘못 누르기 쉽다.
    */
-  const removeOption = (style: RequestStyle, option: RequestOption) => {
-    const filled = [option.yarnDetail, option.construction, option.weight, option.color, option.dyeingMethod, option.remark].some((value) => text(value).trim())
-    if (filled && !window.confirm(`옵션 ${option.no}번을 삭제할까요?`)) return
-    saveMutation(requests.map((item) => item.reqId === style.reqId ? { ...item, options: renumber(style.reqId, style.options.filter((item) => item.optId !== option.optId)), updatedAt: new Date().toISOString() } : item))
+  const removeOption = (style: RequestStyle, option: RequestOption, anchor: { x: number; y: number }) => {
+    const filled = [option.yarnDetail, option.construction, option.weight, option.color, option.dyeingMethod].some((value) => text(value).trim())
+    const warning = filled ? "\n적어 둔 값이 함께 지워집니다." : ""
     setRowMenu(null)
+    askConfirm(anchor, `옵션 ${option.no}번을 삭제할까요?${warning}`, () => {
+      saveMutation(requests.map((item) => item.reqId === style.reqId ? { ...item, options: renumber(style.reqId, style.options.filter((item) => item.optId !== option.optId)), updatedAt: new Date().toISOString() } : item))
+    }, { confirmLabel: "삭제", danger: true })
   }
 
   const widthOf = (column: RequestColumn): number => colWidths[column.id] ?? column.width
@@ -1203,6 +1234,8 @@ export function FabricRequest() {
       const status = requestDdStatus(ddByLine, line.option)
       return status.tone === "none" ? "" : ["연결", status.flNo].filter(Boolean).join(" ")
     }
+    // 옛 옵션별 REMARK를 합친 값까지 보이게 한다. 그 칸을 고치면 style.remark로 굳는다(R291).
+    if (columnId === "remark") return styleRemarkText(line.style)
     const source = (line.kind === "style" ? line.style : line.option) as unknown as Record<string, unknown>
     const value = source[columnId]
     return value === undefined || value === null || value === "" ? "" : String(value)
@@ -1337,13 +1370,23 @@ export function FabricRequest() {
     if (next !== requests) saveMutation(next); if (clipRef.current) clipRef.current.cut = false
     noticeSkips(skipCounts)
   }
-  const changeOptions = (mode: "above" | "below" | "delete") => {
+  const changeOptions = (mode: "above" | "below" | "delete", anchor: { x: number; y: number }) => {
     if (!rect) return
     const targets = new Map<string, Set<number>>()
     for (let r = rect.top; r <= rect.bottom; r += 1) { const slot = slots[r]; if (!slot) continue; const set = targets.get(slot.style.reqId) ?? new Set<number>(); set.add(slot.optionIndex); targets.set(slot.style.reqId, set) }
-    const now = new Date().toISOString()
-    const next = requests.map((style) => { const indices = targets.get(style.reqId); if (!indices) return style; let options = [...style.options]; if (mode === "delete") options = options.filter((_, i) => !indices.has(i)); else [...indices].sort((a,b) => b-a).forEach((i) => options.splice(i + (mode === "below" ? 1 : 0), 0, blankOption(style.reqId, 1))); return { ...style, options: renumber(style.reqId, options), updatedAt: now } })
-    saveMutation(next); setRowMenu(null)
+    // 선택 영역이 여러 스타일에 걸칠 수 있어 건수를 세어 되묻는다(R293).
+    const lineCount = [...targets.values()].reduce((sum, set) => sum + set.size, 0)
+    if (lineCount === 0) { setRowMenu(null); return }
+    const scope = targets.size > 1 ? `스타일 ${targets.size}건의 ` : ""
+    const question = mode === "delete"
+      ? `${scope}옵션 ${lineCount}줄을 삭제할까요?\n적어 둔 값이 함께 지워집니다.`
+      : `${scope}선택한 ${lineCount}줄 ${mode === "below" ? "아래" : "위"}에 빈 옵션을 넣을까요?`
+    setRowMenu(null)
+    askConfirm(anchor, question, () => {
+      const now = new Date().toISOString()
+      const next = requests.map((style) => { const indices = targets.get(style.reqId); if (!indices) return style; let options = [...style.options]; if (mode === "delete") options = options.filter((_, i) => !indices.has(i)); else [...indices].sort((a,b) => b-a).forEach((i) => options.splice(i + (mode === "below" ? 1 : 0), 0, blankOption(style.reqId, 1))); return { ...style, options: renumber(style.reqId, options), updatedAt: now } })
+      saveMutation(next)
+    }, { confirmLabel: mode === "delete" ? "삭제" : "삽입", danger: mode === "delete" })
   }
   const replaceAllMatches = () => {
     if (!findValue) return
@@ -1354,6 +1397,11 @@ export function FabricRequest() {
   }
   const onKey = (event: KeyboardEvent) => {
     if (event.isComposing) return
+    // 확인 상자가 열려 있는 동안에는 표 단축키를 막는다. Esc 는 취소다(R294).
+    if (confirmPrompt) {
+      if (event.key === "Escape") { event.preventDefault(); setConfirmPrompt(null) }
+      return
+    }
     const active = document.activeElement
     if (active instanceof HTMLElement && active.closest("input,textarea,select,[contenteditable=true],[role=dialog]")) return
     const mod = event.ctrlKey || event.metaKey, key = event.key.toLowerCase()
@@ -1437,6 +1485,7 @@ export function FabricRequest() {
         case "requester": return style.requester
         case "developer": return style.developer
         case "devPlan": return style.devPlan
+        case "remark": return styleRemarkText(style)
         default: return null
       }
     }
@@ -1451,7 +1500,6 @@ export function FabricRequest() {
       case "weight": return text(option.weight)
       case "color": return option.color
       case "dyeingMethod": return option.dyeingMethod
-      case "remark": return option.remark
       default: return null
     }
   }
@@ -1477,7 +1525,7 @@ export function FabricRequest() {
         rowSpan={rowSpan}
         data-col-id={column.id}
         data-slot-index={slotIndex}
-        className={`relative min-w-0 overflow-hidden border-b border-r border-[var(--border)] p-0 align-top text-xs ${sel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,var(--card))]" : "bg-[var(--card)]"} ${isOption ? "" : "border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]"} ${fixed ? "sticky z-10" : ""} cursor-cell`}
+        className={`relative min-w-0 overflow-hidden border-b border-r border-[var(--border)] p-0 align-top text-xs ${sel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,var(--card))]" : column.id === "remark" ? "bg-[color-mix(in_srgb,var(--warning)_7%,var(--card))]" : "bg-[var(--card)]"} ${isOption ? "" : "border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]"} ${fixed ? "sticky z-10" : ""} ${readOnly ? "cursor-default" : "cursor-cell"}`}
         style={{ height, width: widthOf(column), boxShadow: selectionShadow(sel), ...(fixed ? { left: fixedLeft(column.id) } : null) }}
         title={isOption ? String(rawValue(line, column.id) ?? "") : editable ? "더블클릭해서 수정" : undefined}
         onMouseDown={(event) => onCellMouseDown(event, cellRef)}
@@ -1515,7 +1563,7 @@ export function FabricRequest() {
             aria-label={`옵션 ${line.option.no} 삭제`}
             title="옵션 삭제"
             className="absolute right-0 top-1/2 size-5 -translate-y-1/2 p-0 opacity-0 group-hover/opt:opacity-100"
-            onClick={(event) => { event.stopPropagation(); removeOption(line.style, line.option) }}
+            onClick={(event) => { event.stopPropagation(); removeOption(line.style, line.option, { x: event.clientX, y: event.clientY }) }}
           >
             <Trash2 className="size-3" />
           </Button>
@@ -1670,6 +1718,8 @@ export function FabricRequest() {
           </p>
           </div>
       ) : (
+        <>
+        {readOnly ? <ReadOnlyBanner reason="보기 전용" hint={activeBoard === ARCHIVE_VIEW ? "종결된 보드의 기록입니다. 고칠 수 없습니다." : "고치려면 위에서 보드 탭을 고르십시오."} /> : null}
         <div ref={scrollRef} onContextMenu={(event) => { if (readOnly || (event.target as HTMLElement).closest("table")) return; event.preventDefault(); setRowMenu(null); setBottomMenu({ x: event.clientX, y: event.clientY }) }} className="min-h-0 flex-1 overflow-auto">
           <table
             className="table-fixed border-separate border-spacing-0 text-xs"
@@ -1760,7 +1810,6 @@ export function FabricRequest() {
             <TableBody>
               {visible.flatMap((style, styleIndex) => {
                 const styleLine: Line = { kind: "style", style }
-                const styleColumns = visibleColumns.filter((column) => column.scope === "style")
                 const optionColumns = visibleColumns.filter((column) => column.scope === "option")
                 const hasOptionColumns = optionColumns.length > 0
                 const optionSlots = Math.max(1, style.options.length)
@@ -1773,6 +1822,12 @@ export function FabricRequest() {
                 const firstOption = style.options[0]
                 const styleStart = slots.findIndex((slot) => slot.style.reqId === style.reqId)
                 const rows: ReactNode[] = []
+                // 옵션 사이에 세로 병합된 스타일 열(Remark)이 있으므로 옵션 추가 줄은 연속 구간마다 칸을 나눈다(R291).
+                const addRowSpans = visibleColumns.reduce<number[]>((runs, column) => {
+                  if (column.scope === "option") runs.push((runs.pop() ?? 0) + 1)
+                  else if (runs.at(-1) !== 0) runs.push(0)
+                  return runs
+                }, []).filter((run) => run > 0)
 
                 rows.push(
                   <TableRow key={`s:${style.reqId}`} data-req-id={style.reqId} className={firstOption ? "group/opt hover:bg-[var(--accent)]" : undefined} style={{ height: hasOptionColumns ? optionRowHeight : blockHeight }}>
@@ -1801,10 +1856,12 @@ export function FabricRequest() {
                         className="absolute inset-x-0 bottom-0 h-1.5 cursor-row-resize select-none hover:bg-[var(--primary)]"
                       />
                     </TableCell>
-                    {styleColumns.map((column) => renderDataCell(styleLine, column, styleStart, blockHeight, blockHeight, rowSpan))}
-                    {hasOptionColumns && firstOption
-                      ? optionColumns.map((column) => renderDataCell({ kind: "option", style, option: firstOption }, column, styleStart, optionRowHeight, optionRowHeight))
-                      : hasOptionColumns ? optionColumns.map((column) => renderDataCell(styleLine, column, styleStart, optionRowHeight, optionRowHeight)) : null}
+                    {/* 머리글과 같은 순서로 그린다. 스타일 열은 세로 병합, 옵션 열은 첫 옵션 값이다(R291). */}
+                    {visibleColumns.map((column) => column.scope === "style"
+                      ? renderDataCell(styleLine, column, styleStart, blockHeight, blockHeight, rowSpan)
+                      : firstOption
+                        ? renderDataCell({ kind: "option", style, option: firstOption }, column, styleStart, optionRowHeight, optionRowHeight)
+                        : renderDataCell(styleLine, column, styleStart, optionRowHeight, optionRowHeight))}
                     <TableCell
                       rowSpan={rowSpan}
                       className="border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] bg-[var(--card)] p-0 align-top"
@@ -1814,7 +1871,7 @@ export function FabricRequest() {
                         <Button type="button" size="sm" variant="ghost" className="size-6 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)]" aria-label={`${style.garmentNo || "의뢰"} 수정`} title="수정" onClick={() => setDraft(style)}>
                           <Pencil className="size-3.5" />
                         </Button>
-                        <Button type="button" size="sm" variant="ghost" className="size-6 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)]" aria-label={`${style.garmentNo || "의뢰"} 삭제`} title="스타일 삭제" onClick={() => remove(style)}>
+                        <Button type="button" size="sm" variant="ghost" className="size-6 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)]" aria-label={`${style.garmentNo || "의뢰"} 삭제`} title="스타일 삭제" onClick={(event) => remove(style, { x: event.clientX, y: event.clientY })}>
                           <Trash2 className="size-3.5" />
                         </Button>
                       </div>
@@ -1835,11 +1892,15 @@ export function FabricRequest() {
                     // 옵션 추가 줄은 항상 자리를 지키되 버튼은 그 줄에 마우스를 올리거나 키보드로 오면 보인다.
                     // 스타일마다 버튼이 떠 있으면 옵션 값보다 버튼이 먼저 눈에 든다. 우클릭 메뉴에도 같은 동작이 있다.
                     <TableRow key={`a:${style.reqId}`} className="group/add border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]" style={{ height: ADD_ROW_HEIGHT }}>
-                      <TableCell colSpan={optionColumns.length} className="border-b border-r border-[var(--border)] border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] bg-[var(--card)] p-0">
-                        <Button type="button" variant="ghost" aria-label={`${style.garmentNo || "스타일"} 옵션 추가`} className="h-5 w-full justify-start gap-1 px-2 text-[11px] font-normal text-[var(--muted-foreground)] opacity-0 transition-opacity duration-150 hover:text-[var(--foreground)] focus-visible:opacity-100 group-hover/add:opacity-100 motion-reduce:transition-none" onClick={() => addOption(style)}>
-                          <Plus className="size-3" />옵션 추가
-                        </Button>
-                      </TableCell>
+                      {addRowSpans.map((span, runIndex) => (
+                        <TableCell key={`add-run-${runIndex}`} colSpan={span} className="border-b border-r border-[var(--border)] border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] bg-[var(--card)] p-0">
+                          {runIndex === 0 ? (
+                            <Button type="button" variant="ghost" aria-label={`${style.garmentNo || "스타일"} 옵션 추가`} className="h-5 w-full justify-start gap-1 px-2 text-[11px] font-normal text-[var(--muted-foreground)] opacity-0 transition-opacity duration-150 hover:text-[var(--foreground)] focus-visible:opacity-100 group-hover/add:opacity-100 motion-reduce:transition-none" onClick={(event) => addOption(style, { x: event.clientX, y: event.clientY })}>
+                              <Plus className="size-3" />옵션 추가
+                            </Button>
+                          ) : null}
+                        </TableCell>
+                      ))}
                     </TableRow>,
                   )
                 }
@@ -1848,6 +1909,7 @@ export function FabricRequest() {
             </TableBody>
           </table>
         </div>
+        </>
       )}
       </div>
       </>}
@@ -1866,9 +1928,9 @@ export function FabricRequest() {
             { key: "cut", label: "잘라내기", hint: "Ctrl+X", icon: <Scissors className="size-3.5" />, run: () => void copyRange(true) },
             { key: "paste", label: "붙여넣기", hint: "Ctrl+V", icon: <ClipboardPaste className="size-3.5" />, run: () => void pasteRange() },
             { key: "clear", label: "내용 지우기", hint: "Delete", icon: <Eraser className="size-3.5" />, run: clearRange },
-            { key: "above", label: "옵션 위에 삽입", hint: "", icon: <Plus className="size-3.5" />, run: () => changeOptions("above") },
-            { key: "below", label: "옵션 아래에 삽입", hint: "", icon: <Plus className="size-3.5" />, run: () => changeOptions("below") },
-            { key: "delete-option", label: "옵션 삭제", hint: "", icon: <Trash2 className="size-3.5" />, run: () => changeOptions("delete") },
+            { key: "above", label: "옵션 위에 삽입", hint: "", icon: <Plus className="size-3.5" />, run: () => changeOptions("above", { x: rowMenu.x, y: rowMenu.y }) },
+            { key: "below", label: "옵션 아래에 삽입", hint: "", icon: <Plus className="size-3.5" />, run: () => changeOptions("below", { x: rowMenu.x, y: rowMenu.y }) },
+            { key: "delete-option", label: "옵션 삭제", hint: "", icon: <Trash2 className="size-3.5" />, run: () => changeOptions("delete", { x: rowMenu.x, y: rowMenu.y }) },
             { key: "row", label: "줄 전체 선택", hint: "Shift+Space", icon: <Rows3 className="size-3.5" />, run: () => selectWholeRow(rowMenu.cell.row) },
           ].filter((item) => !readOnly || item.key === "copy" || item.key === "row").map((item) => <button key={item.key} type="button" role="menuitem" onClick={() => { setRowMenu(null); item.run() }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]"><span className="text-[var(--muted-foreground)]">{item.icon}</span><span className="flex-1">{item.label}</span><span className="text-[10px] text-[var(--muted-foreground)]">{item.hint}</span></button>)}
           <div className="my-1 h-px bg-[var(--border)]" />
@@ -1880,7 +1942,33 @@ export function FabricRequest() {
           <button type="button" role="menuitem" disabled={!undoStack.length} onClick={() => { setRowMenu(null); undoLast() }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)] disabled:opacity-40"><Undo2 className="size-3.5" /><span className="flex-1">되돌리기</span><span className="text-[10px]">Ctrl+Z</span></button>
           <button type="button" role="menuitem" disabled={!redoStack.length} onClick={() => { setRowMenu(null); redoLast() }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)] disabled:opacity-40"><Redo2 className="size-3.5" /><span className="flex-1">다시 실행</span><span className="text-[10px]">Ctrl+Y</span></button>
           </>}
-          {menuLine && !readOnly ? <><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setMoveStyle(menuLine.style); setRowMenu(null) }}><Rows3 className="size-3.5" />다른 보드로 옮기기</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setDraft(menuLine.style); setRowMenu(null) }}><Pencil className="size-3.5" />스타일 수정</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--destructive)] hover:bg-[var(--muted)]" onClick={() => remove(menuLine.style)}><Trash2 className="size-3.5" />스타일 삭제</button></> : null}
+          {menuLine && !readOnly ? <><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setMoveStyle(menuLine.style); setRowMenu(null) }}><Rows3 className="size-3.5" />다른 보드로 옮기기</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setDraft(menuLine.style); setRowMenu(null) }}><Pencil className="size-3.5" />스타일 수정</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--destructive)] hover:bg-[var(--muted)]" onClick={() => remove(menuLine.style, { x: rowMenu.x, y: rowMenu.y })}><Trash2 className="size-3.5" />스타일 삭제</button></> : null}
+        </div>
+      </> : null}
+
+      {confirmPrompt ? <>
+        {/* 덮개가 먼저 클릭을 받아 취소로 닫는다. 바깥을 누르면 아무 일도 일어나지 않는다. */}
+        <div className="fixed inset-0 z-[95]" onMouseDown={() => setConfirmPrompt(null)} onContextMenu={(event) => { event.preventDefault(); setConfirmPrompt(null) }} />
+        <div
+          role="alertdialog"
+          aria-label="확인"
+          className="fixed z-[100] w-64 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-3 text-xs shadow-lg"
+          style={{ left: Math.min(Math.max(8, confirmPrompt.x - 24), window.innerWidth - 272), top: Math.min(Math.max(8, confirmPrompt.y - 12), window.innerHeight - 136) }}
+        >
+          <p className="whitespace-pre-wrap leading-snug">{confirmPrompt.message}</p>
+          <div className="mt-3 flex justify-end gap-1.5">
+            <Button type="button" size="sm" variant="outline" className="h-7 px-3" onClick={() => setConfirmPrompt(null)}>취소</Button>
+            <Button
+              type="button"
+              size="sm"
+              className="h-7 px-3"
+              autoFocus
+              style={confirmPrompt.danger ? { backgroundColor: "var(--destructive)", color: "var(--card)" } : undefined}
+              onClick={() => { const run = confirmPrompt.run; setConfirmPrompt(null); run() }}
+            >
+              {confirmPrompt.confirmLabel}
+            </Button>
+          </div>
         </div>
       </> : null}
 

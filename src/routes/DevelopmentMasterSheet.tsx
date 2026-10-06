@@ -6,6 +6,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ReadOnlyBanner } from "@/components/layout/ReadOnlyBanner"
 import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { ColumnFilterMenu } from "@/components/data-table/ColumnFilterMenu"
 import { RequestPickerDialog } from "@/components/dd/RequestPickerDialog"
@@ -2985,6 +2986,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
       
 
+      {editEnabled ? null : <ReadOnlyBanner reason="전체 미리보기 · 보기 전용" hint="고치려면 위에서 담당을 고르십시오. 담당 칸이 비었거나 명단 밖인 행은 담당 드롭다운에서 그 값을 고르면 됩니다." />}
       <div ref={gridScrollRef} data-route-scroll-root onContextMenu={(event) => {
         const target = event.target as HTMLElement
         if (target.closest("table[data-dd-master-grid], [role=\"menu\"]")) return

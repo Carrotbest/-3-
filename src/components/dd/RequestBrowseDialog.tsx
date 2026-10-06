@@ -8,7 +8,7 @@ import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, Dia
 import { Input } from "@/components/ui/input"
 import { linkedLineIds } from "@/data/request-link"
 import { MATCH_MIN_SCORE, scoreStyleForRows } from "@/data/request-link-match"
-import type { DevRecord, RequestBoard, RequestOption, RequestStyle } from "@/data/schema"
+import { styleRemarkText, type DevRecord, type RequestBoard, type RequestOption, type RequestStyle } from "@/data/schema"
 
 interface RequestBrowseDialogProps {
   open: boolean
@@ -70,8 +70,9 @@ export function RequestBrowseDialog({ open, onOpenChange, row, requests, boards,
     }))
     byBoard.set(NO_BOARD, { key: NO_BOARD, name: "보드 없음(이관 전)", note: "", status: "이관", order: 9999, styles: [] })
     requests.forEach((style) => {
-      const optionHit = Boolean(needle) && style.options.some((option) => hay(option.yarnDetail, option.color, option.dyeingMethod, option.remark).includes(needle))
-      if (needle && !optionHit && !hay(style.garmentNo, style.brand, style.chart, style.developer, style.requester).includes(needle)) return
+      const optionHit = Boolean(needle) && style.options.some((option) => hay(option.yarnDetail, option.color, option.dyeingMethod).includes(needle))
+      const remarkHit = Boolean(needle) && hay(styleRemarkText(style)).includes(needle)
+      if (needle && !optionHit && !remarkHit && !hay(style.garmentNo, style.brand, style.chart, style.developer, style.requester).includes(needle)) return
       const match = scoreStyleForRows(style, row?.styleNo ?? "", row ? [row] : [], blocked)
       const folder = byBoard.get(style.boardId ?? NO_BOARD) ?? byBoard.get(NO_BOARD)!
       folder.styles.push({ style, score: match.score, reasons: match.reasons, free: match.unlinked })

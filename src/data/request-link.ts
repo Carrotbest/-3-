@@ -78,7 +78,6 @@ export function applyRequestLinks(records: readonly DevRecord[], style: RequestS
       planner: record.planner || style.requester,
       color: record.color || option.color,
       dyeing: record.dyeing || option.dyeingMethod,
-      note: record.note || option.remark,
       construction: record.construction || option.construction || "",
       weight: record.weight === "" ? option.weight ?? "" : record.weight,
     } : {}
@@ -218,7 +217,6 @@ export function requestToIntakeRecords(style: RequestStyle, options: readonly Re
       planner: style.requester,
       color: option.color,
       dyeing: option.dyeingMethod,
-      note: option.remark,
       construction: option.construction ?? "",
       weight: option.weight ?? "",
       tech: {
