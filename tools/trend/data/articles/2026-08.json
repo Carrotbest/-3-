@@ -317,9 +317,10 @@
   "score": 12,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Indian Textile Magazine"
+   "Indian Textile Magazine",
+   "Fibre2Fashion"
   ]
  },
  {
@@ -6820,6 +6821,30 @@
   ]
  },
  {
+  "key": "f9011f1ba236f784",
+  "title": "Esteem Apparel Adds Local Warehouses in Mexico, Canada, UK, EU and Australia for Men's Compression Shapewear",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPcW9JTGRuOTVyU3hzRXROVWRTbHozMmhmNDJIQ0t6dndsMUtRSDl1QWpsLTZoWWE4VS04S3dtRTdaaU5FUUxBcndXX0hjSWJVSmFnLWpKcXZaWFlzeWJGcGdIOFJUSWpRU0xHVmNQblJudi1PS2V2cVNwUjhrUlBLZVZKV2xKN0ZfU3dqamZ5eTl5bEIwakVnZ01YT1lEQ0xDNWpPOWJFX05SM2R1N3NaWFdsQnlUZw?oc=5",
+  "published": "2026-08-27",
+  "collected": "2026-10-06",
+  "summary": "Esteem Apparel Adds Local Warehouses in Mexico, Canada, UK, EU and Australia for Men's Compression Shapewear The National Law Review",
+  "content": "Esteem Apparel Adds Local Warehouses in Mexico, Canada, UK, EU and Australia for Men's Compression Shapewear The National Law Review",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Amazon",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Amazon"
+  ]
+ },
+ {
   "key": "f8d2b72e36ade5cd",
   "title": "Breaking down Nike’s first-quarter earnings beat",
   "title_ko": "Nike의 1분기 실적 분석",
@@ -7332,6 +7357,30 @@
   ]
  },
  {
+  "key": "d44dbd81c89ba7b2",
+  "title": "| North India cotton yarn notices mixed trend, overseas demand better",
+  "title_ko": "| 북인도 면사는 혼합 추세를 보이고 해외 수요는 좋아진다",
+  "link": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxOSUNuZ3lfZFZpUWxMMmc5UENUckZhMG9MNTRjVjFxc2VIaV8zS3lQVHh2LTQxdDRwdDliakpibm85Y21sRTZKaERwWW1kUWNkYk5nQkItdkJaeGFyc3hZdHFfN24wa1IxSl8wdFkzTTdaS053ZzZTVWFEbHpmTzV4MFVHZlF4Z21PQ0tudXhaMFpQc2VCOURIX19lTTgySUQ1dEdYajcwc3FqdWZ4UjEyVzBiTld2ekNNVGV5cUVOSV9PR20tUENoNHpjcnctem02ZndwVXpiMFVwbVVqak0wU2NDMlBWZw?oc=5",
+  "published": "2026-08-27",
+  "collected": "2026-10-06",
+  "summary": "| North India cotton yarn notices mixed trend, overseas demand better Fibre2Fashion",
+  "content": "| North India cotton yarn notices mixed trend, overseas demand better Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "cec5672f4c5b9f5d",
   "title": "Pacific RSF to showcase latest technology innovations at Textile Innovation Expo 2026",
   "title_ko": "Pacific RSF, Textile Innovation Expo 2026에서 최신 기술 혁신 선보일 예정",
@@ -7686,6 +7735,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Abercrombie & Fitch"
+  ]
+ },
+ {
+  "key": "b2ba29a735a63ae0",
+  "title": "Walmart shares drop 12% despite strong earnings, signaling a potential buying opportunity.",
+  "title_ko": "Walmart 주가는 높은 실적에도 불구하고 12% 하락해 잠재적인 매수 기회를 예고하고 있습니다.",
+  "link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxPemFRSGtnWm50LS0xMUxJMDdrNktYSlJiM1oxSnZQREJjTFRqaTR0Y2hRODRYbC02UUV1bGM5ckM3XzJLQVNNd2VSTFNsakJSZ2dIUnBSaDZWam5XMEdPTUFodmhweG0wNmdOanloc3NJcExrNlpMb2pTYlRfVDV6TXh6S08yWW9sNHc?oc=5",
+  "published": "2026-08-27",
+  "collected": "2026-10-06",
+  "summary": "Walmart shares drop 12% despite strong earnings, signaling a potential buying opportunity. Pluang",
+  "content": "Walmart shares drop 12% despite strong earnings, signaling a potential buying opportunity. Pluang",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
@@ -10044,6 +10119,32 @@
   ]
  },
  {
+  "key": "f2ad8a144f53bf5d",
+  "title": "Walmart, Safeway and Major Grocers’ Fresh Produce Supplier Files for Chapter 7 Bankruptcy",
+  "title_ko": "Walmart, Safeway 및 주요 식료품점의 신선 농산물 공급업체가 7장 파산 신청",
+  "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPX2R6bUtVbTZMaTgtYTVrRGs2Q0RrN0lqcVJ5bW1Fb1hFakZIUTNzRlN3Y2thMFFkaGNiZ0tYTy0tQnpiMDczQWQ3NTVqZnc5VzdKVmF0WXYzNy14QXJMTGJvY21BQXFXbkNwRjZnNE1uZzBsdmdhbWxMdWl0RUNvejlNTy11Nm40TDhQLUlJOUJ4VmFvQzVDbHdfeGFXWVF5TGJiOHh1NGtDMjY3bm5LUVM2Z3VjUDdKZHVDS185cw?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-10-06",
+  "summary": "Walmart, Safeway and Major Grocers’ Fresh Produce Supplier Files for Chapter 7 Bankruptcy whatnow.com",
+  "content": "Walmart, Safeway and Major Grocers’ Fresh Produce Supplier Files for Chapter 7 Bankruptcy whatnow.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "eda13a598acfd017",
   "title": "China’s central bank to conduct overnight reverse repos from Aug 27",
   "title_ko": null,
@@ -10221,6 +10322,30 @@
   "hits": 1,
   "sources": [
    "바이어 · Abercrombie & Fitch"
+  ]
+ },
+ {
+  "key": "e725cc1c4cdee71e",
+  "title": "Kohl’s Turnaround Stalls as Sales Growth Stagnates",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOZEk2aDFIeUF5SUFXMDk4Zm40OXBPOFZEU1RqRjdxODk2Q0lZZHpJN2doQ09ucmhBOTRrUkFXanRoVUJWTXJWRHZURGF3Mjk4RGhmV1gzb1c5Q1dxSnEtSEZTZjBnM215RXF0eTNuQUZZRUp5NThHSUszYU9WZUZGYUxFallPcTE4N0l2S0RQSWh2enY2Q29OUkZEWGs?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-10-06",
+  "summary": "Kohl’s Turnaround Stalls as Sales Growth Stagnates The Business of Fashion",
+  "content": "Kohl’s Turnaround Stalls as Sales Growth Stagnates The Business of Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Kohl's",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Kohl's"
   ]
  },
  {
@@ -10921,6 +11046,32 @@
   ]
  },
  {
+  "key": "b5b7443a82030c7b",
+  "title": "Why Is Abercrombie & Fitch (NYSE:ANFI) Apparel Demand in Focus?",
+  "title_ko": "Abercrombie & Fitch(NYSE:ANFI) 의류 수요가 주목받는 이유는 무엇입니까?",
+  "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQYmdWVUh6anozWFk1THRMOVZ0c3U4UHhnVHFwNjVBV3VYeEk4cEFocW5YZ0h4VEJxU0tOZl9aWllsT2RYa05YaU1yYzNmOUNwVlo4VzdJNHZIZDktTF9yWmtDWS01b3U1bzVOVjBxZlV4WWdsS09ESWhuMTV1RkUwdEVtaWJRS1Y5dmpGRDNiQnRLcnpyazM4NnNmQ2FTZ0s0?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-10-06",
+  "summary": "Why Is Abercrombie & Fitch (NYSE:ANFI) Apparel Demand in Focus? Kalkine Media",
+  "content": "Why Is Abercrombie & Fitch (NYSE:ANFI) Apparel Demand in Focus? Kalkine Media",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Abercrombie & Fitch",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "anf"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Abercrombie & Fitch"
+  ]
+ },
+ {
   "key": "b54029c6ebf3ae8c",
   "title": "Abercrombie & Fitch Stock Soars 41% After Blowout Earnings Beat, Tariff Refunds Boost Profit and Guidance",
   "title_ko": "Abercrombie 및 Fitch 주식은 폭발적인 수익 감소 후 41% 급등, 관세 환급으로 이익 및 지침 향상",
@@ -11150,6 +11301,30 @@
   "hits": 1,
   "sources": [
    "주제검색 · 염색가공"
+  ]
+ },
+ {
+  "key": "a7217b785a4847e5",
+  "title": "Kohl’s sees signs of progress as sales decline slows in Q2 - BizTimes",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOOVUxMmdPMXlBdEo1clRlVTZya2FYSThtZlJkMy12TEE4NGl0NHVhVXpZWmpXR3VYaVREYjZPekFOM0xZUlFMLXNfQ2pma3oyR3BrWVBYVFhsdWRhOTJEdGZiSURRRDZreTRZb0tOVWVxa0pOcHQ2V3hEUl9NUmN5ZFlWME9KZw?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-10-06",
+  "summary": "Kohl’s sees signs of progress as sales decline slows in Q2 BizTimes - Milwaukee Business News",
+  "content": "Kohl’s sees signs of progress as sales decline slows in Q2 BizTimes - Milwaukee Business News",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Kohl's",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Kohl's"
   ]
  },
  {
@@ -13824,6 +13999,32 @@
   ]
  },
  {
+  "key": "2acb27129ccee16d",
+  "title": "Walmart’s 10% Selloff Tests the Bull Case—but a High-Margin Flywheel Keeps Growing",
+  "title_ko": "Walmart의 10% 매도는 상승세를 테스트하지만 높은 마진의 플라이휠은 계속 성장하고 있습니다.",
+  "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxQOHdISENwdEpZN0lxUVpxUHMwZ1lkNl8tdTctV2xvUDFKanMzN0VjMG1KTFpHTTVlQlFkNkd1bnI4SXV4T1Q3TWFyZG0xV09raXZXamZhZjdxV0dyUHYtZUJoS05QRTZ2R25aOUJ1cjhCMlhJYzJrOWpndVVfMmxlTENid2NONV8xSTJBY3p0RzVCVFZYTlVNNzF6T0pyNG1hUjFvMzIzTTg2NmVFYldMNFZ5LUplSDljdTFtR3d5UTQ?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-10-06",
+  "summary": "Walmart’s 10% Selloff Tests the Bull Case—but a High-Margin Flywheel Keeps Growing Investing.com",
+  "content": "Walmart’s 10% Selloff Tests the Bull Case—but a High-Margin Flywheel Keeps Growing Investing.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "27ae7c17ffa51786",
   "title": "Kohl's Corporation 2027 Q2 - Results - Earnings Call Presentation (NYSE:KSS) 2026-08-26",
   "title_ko": "Kohl's Corporation 2027 Q2 - 결과 - 실적 발표 프레젠테이션(NYSE:KSS) 2026-08-26",
@@ -14041,6 +14242,30 @@
   "summary": "China Hydrofluoric Acid Higher as Tight Supply Offsets Weak ... Fibre2Fashion",
   "content": null,
   "image": null,
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "1f53c146a435ebe3",
+  "title": "What drove Germany's GDP growth in Q2 2026?",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQWEZvbklXRkJtdFgxR1Y4YjBuTzVZZi1xekNiOXRGNTQ5QmNXWkpIdkJSeVVoVkI5TE1GdTVIRkpaVTJHZW91MXoyakVUQS1fMm1ZcGVSRmh6YU9zQkx6NlNrdG5mM3lNSldVdWJKLXVWT09tY0NUTk55VTRvdHFjRVRPVGgyNVhNSDRlVlFBTUxFYXd5T0QxeWYzMmE2cWE0WFRQT0tBRjk3enRIeU5Sdg?oc=5",
+  "published": "2026-08-26",
+  "collected": "2026-10-06",
+  "summary": "What drove Germany's GDP growth in Q2 2026? Fibre2Fashion",
+  "content": "What drove Germany's GDP growth in Q2 2026? Fibre2Fashion",
+  "image": "",
   "image_tried": null,
   "source": "Fibre2Fashion",
   "region": "해외",
@@ -18102,6 +18327,32 @@
   ]
  },
  {
+  "key": "9606592197e0371e",
+  "title": "Walmart: Even After The Post-Earnings Sell-Off, It's Still Too Expensive (Rating Downgrade) (DCA) (NASDAQ:WMT)",
+  "title_ko": "Walmart: 실적 후 매도세 이후에도 여전히 너무 비싸다 (등급 하향) (DCA) (NASDAQ:WMT)",
+  "link": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxQQ0Y1MnRvcENVNzdUNE1rZjlqdVdmMTBDbGkxd05hNE1INGRHVGt6MS1jdVZ5MV82UzMyc0c1Y0tjY2dJeF9mcUxWNmQ2bi1hWWJFcE5sVXpaT3FiY2Q0Wi1HSXhVcm5QZ0d1NEhJQUR0SGNNdUlZMnNPOHBRTWJqMU16SThzX3ZoUXcweHpuMzhQT2NVaTNZaVdxSDBfQjNNeTRNRUhlRHhnbUxkMjVoWFotX1FHdUdxWHozV0JJcllrR1haRVA3MHNTN3BBMzl5MmJtTkR5aGdzUW1QZFYzc2lYbzhuMU9YYjJseXE0WE9MZw?oc=5",
+  "published": "2026-08-23",
+  "collected": "2026-10-06",
+  "summary": "Walmart: Even After The Post-Earnings Sell-Off, It's Still Too Expensive (Rating Downgrade) (DCA) (NASDAQ:WMT) seekingalpha.com",
+  "content": "Walmart: Even After The Post-Earnings Sell-Off, It's Still Too Expensive (Rating Downgrade) (DCA) (NASDAQ:WMT) seekingalpha.com",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
+  ]
+ },
+ {
   "key": "89f494bdb05bd0fa",
   "title": "Canada suspends trade negotiations with US",
   "title_ko": null,
@@ -18321,6 +18572,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Kohl's"
+  ]
+ },
+ {
+  "key": "1908e2bbe96d87af",
+  "title": "Consumer Tech (Aug 17-21): Walmart & Alibaba Posts Earnings, Trump Targets U.S. Space Launch Growth & More",
+  "title_ko": "소비자 기술(8월 17~21일): Walmart 및 Alibaba Post 실적, Trump는 미국 우주 발사 성장 등을 목표로 함",
+  "link": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPeFNEU3d1RWlodXlFZi1oUXE5bnNlVkd1VTBiVnptanRPMm00dUphaEdMZnBPUzl5OUNscXpDbDVoVTliQUpRRlhIQnhrTDVYM1lqVllmUkl3OHhSR0d5OGh3Zjl0RWF1SGFuNEUtWkhmZGhrbmMxQzJ3T2pwS2xUVnhlRGZldHp4WDFzUF8xSzRNLWNzMG1UdWJtRDhnUm5Bb2xYNTBOeWhOcWtBZDB1RkFqOXQ1WEVGN0E5X19OR3ZvZmxDRDBOQUFnaFl3cEtqSFFvM2xDZWQ3NGpubDFDRGZzZk4?oc=5",
+  "published": "2026-08-23",
+  "collected": "2026-10-06",
+  "summary": "Consumer Tech (Aug 17-21): Walmart & Alibaba Posts Earnings, Trump Targets U.S. Space Launch Growth & More Benzinga",
+  "content": "Consumer Tech (Aug 17-21): Walmart & Alibaba Posts Earnings, Trump Targets U.S. Space Launch Growth & More Benzinga",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 6,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
