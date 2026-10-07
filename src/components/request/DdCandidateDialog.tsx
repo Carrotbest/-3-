@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { isClosedDdRecord } from "@/data/request-link"
-import { MATCH_MIN_SCORE, scoreRowForOption } from "@/data/request-link-match"
+import { MATCH_MIN_SCORE, scoreRowForOption, type RowMatch } from "@/data/request-link-match"
 import type { DevRecord, RequestOption, RequestStyle } from "@/data/schema"
 
 interface DdCandidateDialogProps {
@@ -24,6 +24,8 @@ const identity = (record: DevRecord): string => `${record._src.sheet}::${record.
 const text = (value: unknown): string => String(value ?? "").trim()
 /** 검색어 없이 열었을 때 보여 줄 최대 후보 수. 검색하면 전체에서 다시 찾는다. */
 const LIMIT = 60
+/** 문턱을 넘는 후보가 하나도 없을 때 가까운 순으로 보여 줄 수. 빈 상자가 막다른 길이 되는 것을 막는다. */
+const WEAK_LIMIT = 20
 
 export function DdCandidateDialog({ open, onOpenChange, style, option, records, canLink, onConfirm }: DdCandidateDialogProps) {
   const [query, setQuery] = useState("")
@@ -39,18 +41,20 @@ export function DdCandidateDialog({ open, onOpenChange, style, option, records, 
     setSelectedId(null)
   }, [open])
 
-  const matches = useMemo(() => {
-    if (!style || !option) return []
+  const { matches, weak } = useMemo(() => {
+    if (!style || !option) return { matches: [] as RowMatch[], weak: false }
     const needle = query.trim().toLocaleLowerCase("ko-KR")
-    return records
+    const scored = records
       .filter((record) => !needle || [record.styleNo, record.color, record.dyeing, record.owner, record.buyer, record.flNo, record.tech?.yarnDetail]
         .some((value) => text(value).toLocaleLowerCase("ko-KR").includes(needle)))
       .map((record) => scoreRowForOption(record, style, option))
       .filter((match) => !unlinkedOnly || !match.linkedElsewhere)
-      // 검색어가 없으면 점수가 붙은 후보만 보인다. DD 행 전체를 펼쳐 놓으면 고르기 어렵다.
-      .filter((match) => Boolean(needle) || match.score >= MATCH_MIN_SCORE)
       .sort((a, b) => b.score - a.score || text(a.record.styleNo).localeCompare(text(b.record.styleNo), "en", { numeric: true }))
-      .slice(0, LIMIT)
+    // 검색어가 없으면 점수가 붙은 후보만 보인다. DD 행 전체를 펼쳐 놓으면 고르기 어렵다.
+    const strong = needle ? scored : scored.filter((match) => match.score >= MATCH_MIN_SCORE)
+    if (strong.length) return { matches: strong.slice(0, LIMIT), weak: false }
+    // 하나도 못 찾으면 가까운 순으로 조금만 보인다. Garment No. 표기가 달라 점수가 덜 붙는 건이 흔하다.
+    return { matches: scored.slice(0, needle ? LIMIT : WEAK_LIMIT), weak: !needle && scored.length > 0 }
   }, [option, query, records, style, unlinkedOnly])
 
   const selected = matches.find((match) => identity(match.record) === selectedId)
@@ -70,7 +74,9 @@ export function DdCandidateDialog({ open, onOpenChange, style, option, records, 
           <Input className="h-8 min-w-0 flex-1" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Style No. · Color · Yarn Detail · 담당 · FL# 검색" />
           <Button type="button" size="sm" variant={unlinkedOnly ? "default" : "outline"} onClick={() => setUnlinkedOnly((value) => !value)}>미연결 행만</Button>
         </div>
-        <p className="text-[11px] text-[var(--muted-foreground)]">검색어가 없으면 {MATCH_MIN_SCORE}점 이상 후보만 보입니다. 찾는 행이 없으면 검색하세요.</p>
+        <p className="text-[11px] text-[var(--muted-foreground)]">{weak
+          ? `${MATCH_MIN_SCORE}점을 넘는 후보가 없어 가까운 순으로 ${WEAK_LIMIT}건까지 보입니다. 번호 표기가 다르면 점수가 덜 붙습니다.`
+          : `검색어가 없으면 ${MATCH_MIN_SCORE}점 이상 후보만 보입니다. 찾는 행이 없으면 검색하세요.`}</p>
         <div className="max-h-[52vh] space-y-1 overflow-y-auto rounded-[var(--radius)] border border-[var(--border)] p-1">
           {matches.map(({ record, score, reasons, linkedElsewhere }) => {
             const key = identity(record)
@@ -88,7 +94,7 @@ export function DdCandidateDialog({ open, onOpenChange, style, option, records, 
               </span>
             </button>
           })}
-          {!matches.length ? <p className="py-10 text-center text-sm text-[var(--muted-foreground)]">{query.trim() ? "검색에 맞는 DD 행이 없습니다." : "점수가 붙는 후보가 없습니다. 검색해서 찾으세요."}</p> : null}
+          {!matches.length ? <p className="py-10 text-center text-sm text-[var(--muted-foreground)]">{query.trim() ? "검색에 맞는 DD 행이 없습니다." : "고를 수 있는 DD 행이 없습니다. 미연결 행만을 해제하거나 검색해 보세요."}</p> : null}
         </div>
         <label className="flex items-start gap-2 text-xs"><Checkbox checked={fillEmpty} onCheckedChange={(checked) => setFillEmpty(checked === true)} /><span>DD 행의 비어 있는 칸만 요청 값으로 채우기(Buyer·Planner·Color·Dyeing·Remark·Yarn Detail)</span></label>
         {selected?.linkedElsewhere ? <p className="text-xs text-[var(--warning)]">이 행은 다른 요청 옵션에 연결되어 있습니다. 연결하면 그 연결은 이 옵션으로 옮겨갑니다.</p> : null}

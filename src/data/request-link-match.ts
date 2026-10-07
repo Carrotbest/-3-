@@ -143,7 +143,9 @@ export function scoreRowForOption(record: DevRecord, style: RequestStyle, option
   if (Number(record.opt) === option.no) { score += 4; reasons.push("옵션 번호 일치") }
 
   const status = String(record.devStatus ?? "").replace(/\s+/g, "").toUpperCase()
-  if (status === "DROP" || status === "REJECT") { score -= 15; reasons.push(status) }
+  // DROP·REJECT도 연결 대상이다(R312). 점수를 깎지 않고 근거에만 남긴다.
+  // 깎으면 문턱(MATCH_MIN_SCORE) 아래로 빠져 검색어 없이 목록에서 사라진다.
+  if (status === "DROP" || status === "REJECT") reasons.push(status)
   const linkedElsewhere = Boolean(record.tech?.requestLink && record.tech.requestLink.lineId !== option.lineId)
   if (linkedElsewhere) { score -= 25; reasons.push("다른 요청에 연결됨") }
 
