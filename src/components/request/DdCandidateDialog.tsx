@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { isClosedDdRecord } from "@/data/request-link"
 import { MATCH_MIN_SCORE, scoreRowForOption } from "@/data/request-link-match"
 import type { DevRecord, RequestOption, RequestStyle } from "@/data/schema"
 
@@ -80,6 +81,7 @@ export function DdCandidateDialog({ open, onOpenChange, style, option, records, 
                   <span className="text-[11px] text-[var(--muted-foreground)]">Opt {record.opt || "-"} · {record.color || "색 미기입"} · {record.dyeing || "염색 미기입"}</span>
                   <Badge variant="outline" className="tabular-nums text-[10px]">{score}점</Badge>
                   {linkedElsewhere ? <Badge variant="outline" className="text-[10px] text-[var(--warning)]">다른 요청에 연결됨</Badge> : null}
+                  {isClosedDdRecord(record) ? <Badge variant="outline" className="text-[10px] text-[var(--destructive)]">{record.devStatus}</Badge> : null}
                 </span>
                 <span className="block truncate text-[11px] text-[var(--muted-foreground)]">{record.tech?.yarnDetail || "Yarn Detail 미기입"}</span>
                 <span className="block truncate text-[11px] text-[var(--muted-foreground)]">담당 {record.owner || "미지정"} · {record.devStatus || "상태 미기입"}{record.flNo ? ` · ${record.flNo}` : ""}{reasons.length ? ` · ${reasons.slice(0, 3).join(" · ")}` : ""}</span>

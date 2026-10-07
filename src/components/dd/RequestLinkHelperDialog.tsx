@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { buildLinkHelperGroups, defaultLinkPairs, linkedLineIds, type HelperGroup, type HelperStatus } from "@/data/request-link"
+import { buildLinkHelperGroups, defaultLinkPairs, isClosedDdRecord, linkedLineIds, type HelperGroup, type HelperStatus } from "@/data/request-link"
 import { ownerDisplayName, type DevRecord, type RequestStyle } from "@/data/schema"
 
 interface RequestLinkHelperDialogProps {
@@ -123,7 +123,13 @@ export function RequestLinkHelperDialog({ open, onOpenChange, records, requests,
                 return <tr key={group.styleKey} className="hover:bg-[var(--accent)]">
                   {tab === "auto" ? <td className={bodyCell}><Checkbox aria-label={`${group.styleNo} 선택`} checked={!unchecked.has(group.styleKey)} onCheckedChange={(checked) => toggle(group.styleKey, checked === true)} /></td> : null}
                   <td className={`${bodyCell} font-mono`}>{group.styleNo}</td>
-                  <td className={`${bodyCell} tabular-nums`}>{group.rows.length}</td>
+                  <td className={`${bodyCell} tabular-nums`}>
+                    {group.rows.length}
+                    {(() => {
+                      const closed = group.rows.filter(isClosedDdRecord).length
+                      return closed ? <span className="ml-1 rounded bg-[var(--muted)] px-1 text-[10px] font-normal text-[var(--muted-foreground)]">종료 {closed}</span> : null
+                    })()}
+                  </td>
                   {tab === "none"
                     ? <td className={bodyCell}>{ownerDisplayName(group.rows[0]?.owner ?? "") || "미지정"}</td>
                     : tab === "suggest"

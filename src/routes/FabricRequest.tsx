@@ -117,8 +117,8 @@ const STYLE_ROW_HEIGHT = 84
 const OPTION_ROW_HEIGHT = 28
 const ADD_ROW_HEIGHT = 24
 const MIN_COLUMN_WIDTH = 56
-/** 완료(FL# 나온) 칸 배경. 선택 강조보다 약해야 해서 연하게 쓴다. */
-const DONE_CELL_BG = "bg-[color-mix(in_srgb,var(--muted-foreground)_14%,var(--card))] text-[var(--muted-foreground)]"
+/** 완료(FL#) 또는 종료(DROP·REJECT) 칸 배경. 선택 강조보다 약해야 해서 연하게 쓴다. */
+const CLOSED_CELL_BG = "bg-[color-mix(in_srgb,var(--muted-foreground)_14%,var(--card))] text-[var(--muted-foreground)]"
 const COL_WIDTHS_KEY = "fabric.request.colWidths"
 const OPEN_GROUPS_KEY = "fabric.request.openGroups"
 const ROW_HEIGHTS_KEY = "fabric.request.rowHeights"
@@ -988,18 +988,23 @@ export function FabricRequest() {
   const slots = visible.flatMap((style) => Array.from({ length: Math.max(1, style.options.length) }, (_, optionIndex) => ({ style, optionIndex, option: style.options[optionIndex] })))
 
   /**
-   * FL# 완료 색인. 렌더당 한 번만 만든다.
-   * `all`은 스타일의 모든 옵션에 FL#이 있다는 뜻이고, `options`는 FL#이 나온 옵션 id다.
-   * 옵션이 없는 스타일은 완료로 보지 않는다.
+   * 흐림 판정 색인. 렌더당 한 번만 만든다.
+   * `closed`는 FL# 완료이거나 DROP·REJECT로 끝난 옵션 id다. 더 할 일이 없는 줄이라 흐리게 한다.
+   * `allFl`은 모든 옵션이 FL# 완료라는 뜻이고 초록 `DD n/m` 라벨에만 쓴다. 종료는 완료가 아니다.
+   * HOLD는 되살아날 수 있어 어느 쪽에도 넣지 않는다. 옵션이 없는 스타일은 둘 다 거짓이다.
    */
-  const doneByStyle = useMemo(() => {
-    const map = new Map<string, { all: boolean; options: Set<string> }>()
+  const closedByStyle = useMemo(() => {
+    const map = new Map<string, { allClosed: boolean; allFl: boolean; closed: Set<string> }>()
     for (const style of visible) {
-      const options = new Set<string>()
+      const closed = new Set<string>()
+      let fl = 0
       for (const option of style.options) {
-        if (requestDdStatus(ddByLine, option).tone === "done") options.add(option.optId)
+        const tone = requestDdStatus(ddByLine, option).tone
+        if (tone === "done") fl += 1
+        if (tone === "done" || tone === "drop") closed.add(option.optId)
       }
-      map.set(style.reqId, { all: style.options.length > 0 && options.size === style.options.length, options })
+      const total = style.options.length
+      map.set(style.reqId, { allClosed: total > 0 && closed.size === total, allFl: total > 0 && fl === total, closed })
     }
     return map
   }, [ddByLine, visible])
@@ -1728,16 +1733,16 @@ export function FabricRequest() {
     const editing = editable && editCell?.row === slotIndex && editCell.col === column.id && kind !== "toggle"
     const isOption = line.kind === "option"
     const sel = selectionFor(slotIndex, column)
-    // 전부 완료면 병합된 스타일 칸까지, 일부만 완료면 그 옵션 줄의 옵션 칸만 흐리게 한다.
-    const done = doneByStyle.get(line.style.reqId)
-    const dimmed = Boolean(done && (done.all || (line.kind === "option" && done.options.has(line.option.optId))))
+    // 전부 끝났으면 병합된 스타일 칸까지, 일부만 끝났으면 그 옵션 줄의 옵션 칸만 흐리게 한다.
+    const closed = closedByStyle.get(line.style.reqId)
+    const dimmed = Boolean(closed && (closed.allClosed || (line.kind === "option" && closed.closed.has(line.option.optId))))
     return (
       <TableCell
         key={column.id}
         rowSpan={rowSpan}
         data-col-id={column.id}
         data-slot-index={slotIndex}
-        className={`relative min-w-0 overflow-hidden border-b border-r border-[var(--border)] p-0 align-top text-xs ${sel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,var(--card))]" : dimmed ? DONE_CELL_BG : column.id === "remark" ? "bg-[color-mix(in_srgb,var(--warning)_7%,var(--card))]" : "bg-[var(--card)]"} ${isOption ? "" : "border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]"} ${fixed ? "sticky z-10" : ""} ${readOnly ? "cursor-default" : "cursor-cell"} ${inFillPreview(slotIndex, column.id) ? "outline outline-1 outline-dashed outline-[var(--grid-selection)] -outline-offset-1" : ""}`}
+        className={`relative min-w-0 overflow-hidden border-b border-r border-[var(--border)] p-0 align-top text-xs ${sel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,var(--card))]" : dimmed ? CLOSED_CELL_BG : column.id === "remark" ? "bg-[color-mix(in_srgb,var(--warning)_7%,var(--card))]" : "bg-[var(--card)]"} ${isOption ? "" : "border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]"} ${fixed ? "sticky z-10" : ""} ${readOnly ? "cursor-default" : "cursor-cell"} ${inFillPreview(slotIndex, column.id) ? "outline outline-1 outline-dashed outline-[var(--grid-selection)] -outline-offset-1" : ""}`}
         style={{ height, width: widthOf(column), boxShadow: selectionShadow(sel), ...(fixed ? { left: fixedLeft(column.id) } : null) }}
         title={isOption ? String(rawValue(line, column.id) ?? "") : editable ? "더블클릭해서 수정" : undefined}
         onMouseDown={(event) => onCellMouseDown(event, cellRef)}
@@ -2062,14 +2067,14 @@ export function FabricRequest() {
                   else if (runs.at(-1) !== 0) runs.push(0)
                   return runs
                 }, []).filter((run) => run > 0)
-                // 스타일 전체가 완료면 블록의 모든 칸을 흐리게 한다. 액션 칸과 옵션 추가 줄도 포함이다.
-                const blockDone = doneByStyle.get(style.reqId)?.all ?? false
+                // 스타일의 모든 옵션이 끝났으면 블록의 모든 칸을 흐리게 한다. 액션 칸과 옵션 추가 줄도 포함이다.
+                const blockClosed = closedByStyle.get(style.reqId)?.allClosed ?? false
 
                 rows.push(
                   <TableRow key={`s:${style.reqId}`} data-req-id={style.reqId} className={firstOption ? "group/opt hover:bg-[var(--accent)]" : undefined} style={{ height: hasOptionColumns ? optionRowHeight : blockHeight }}>
                     <TableCell
                       rowSpan={rowSpan}
-                      className={`relative sticky left-0 z-20 select-none border-b border-r border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 text-center align-top text-[10px] font-medium tabular-nums text-[var(--muted-foreground)] ${blockDone ? "bg-[color-mix(in_srgb,var(--muted-foreground)_18%,var(--muted))]" : "bg-[var(--muted)]"}`}
+                      className={`relative sticky left-0 z-20 select-none border-b border-r border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 text-center align-top text-[10px] font-medium tabular-nums text-[var(--muted-foreground)] ${blockClosed ? "bg-[color-mix(in_srgb,var(--muted-foreground)_18%,var(--muted))]" : "bg-[var(--muted)]"}`}
                       style={{ width: ROW_NO_WIDTH, height: blockHeight, ...(focusedReqId === style.reqId ? { outline: "2px solid var(--primary)", outlineOffset: "-2px" } : null) }}
                       title="우클릭: 옵션 추가·삭제"
                       data-row-start={styleStart}
@@ -2081,7 +2086,7 @@ export function FabricRequest() {
                       {style.options.length ? (() => {
                         const statuses = style.options.map((option) => requestDdStatus(ddByLine, option))
                         const linkedCount = statuses.filter((status) => status.tone !== "none").length
-                        const allDone = doneByStyle.get(style.reqId)?.all ?? false
+                        const allDone = closedByStyle.get(style.reqId)?.allFl ?? false
                         return <div title="DD에 연결된 옵션 수 / 전체 옵션 수" className={`mt-0.5 text-[9px] tabular-nums ${allDone ? "text-[var(--chart-2)]" : "text-[var(--muted-foreground)]"}`}>DD {linkedCount}/{style.options.length}</div>
                       })() : null}
                       <span
@@ -2100,7 +2105,7 @@ export function FabricRequest() {
                         : renderDataCell(styleLine, column, styleStart, optionRowHeight, optionRowHeight))}
                     <TableCell
                       rowSpan={rowSpan}
-                      className={`border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 align-top ${blockDone ? DONE_CELL_BG : "bg-[var(--card)]"}`}
+                      className={`border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 align-top ${blockClosed ? CLOSED_CELL_BG : "bg-[var(--card)]"}`}
                       style={{ height: blockHeight, width: ACTION_WIDTH }}
                     >
                       <div className="flex items-start justify-center gap-0.5 pt-1">
@@ -2129,7 +2134,7 @@ export function FabricRequest() {
                     // 스타일마다 버튼이 떠 있으면 옵션 값보다 버튼이 먼저 눈에 든다. 우클릭 메뉴에도 같은 동작이 있다.
                     <TableRow key={`a:${style.reqId}`} className="group/add border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]" style={{ height: ADD_ROW_HEIGHT }}>
                       {addRowSpans.map((span, runIndex) => (
-                        <TableCell key={`add-run-${runIndex}`} colSpan={span} className={`border-b border-r border-[var(--border)] border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 ${blockDone ? DONE_CELL_BG : "bg-[var(--card)]"}`}>
+                        <TableCell key={`add-run-${runIndex}`} colSpan={span} className={`border-b border-r border-[var(--border)] border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 ${blockClosed ? CLOSED_CELL_BG : "bg-[var(--card)]"}`}>
                           {runIndex === 0 ? (
                             <Button type="button" variant="ghost" aria-label={`${style.garmentNo || "스타일"} 옵션 추가`} className="h-5 w-full justify-start gap-1 px-2 text-[11px] font-normal text-[var(--muted-foreground)] opacity-0 transition-opacity duration-150 hover:text-[var(--foreground)] focus-visible:opacity-100 group-hover/add:opacity-100 motion-reduce:transition-none" onClick={(event) => addOption(style, { x: event.clientX, y: event.clientY })}>
                               <Plus className="size-3" />옵션 추가

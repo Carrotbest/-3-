@@ -122,7 +122,12 @@ export interface HelperGroup {
   reason: string
 }
 
-const HELPER_EXCLUDED_STATUS = /^(DROP|REJECT)$/
+/**
+ * 더 할 일이 없는 DD 행인지. DROP과 REJECT만이다.
+ * HOLD는 되살아날 수 있어 넣지 않는다. 연결 후보에서 빼지도, 흐리게 하지도 않는다.
+ */
+export const isClosedDdRecord = (record: DevRecord): boolean =>
+  /^(DROP|REJECT)$/.test(String(record.devStatus ?? "").replace(/\s+/g, "").toUpperCase())
 
 /**
  * 연결 도우미 후보. 짝 규칙은 defaultLinkPairs 하나를 쓰고 여기서는 묶음과 판정만 한다.
@@ -135,7 +140,6 @@ export function buildLinkHelperGroups(records: readonly DevRecord[], requests: r
   records.forEach((record) => {
     const styleNo = record.styleNo.trim()
     if (!styleNo || record.tech?.requestLink) return
-    if (HELPER_EXCLUDED_STATUS.test(String(record.devStatus ?? "").replace(/\s+/g, "").toUpperCase())) return
     const key = normalizeStyleKey(styleNo)
     const group = rowsByKey.get(key)
     if (group) group.push(record)
