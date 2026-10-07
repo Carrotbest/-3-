@@ -38,6 +38,17 @@ import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, saveRequests, useA
 
 const ALL = "__all__"
 const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니다. 담당 칸이 비었거나 명단 밖인 행은 담당 드롭다운에서 그 값을 고르십시오."
+/**
+ * 담당 탭의 담당 값과 로그인한 계정 이름을 맞춘다(R319).
+ * "진영은/박근후"처럼 슬래시로 이어진 값은 토큰마다 본다. 공백은 무시한다.
+ * 계정 이름이 비어 있으면 어느 탭도 고치지 못한다. 관리자만 예외다.
+ * 집계와 필터는 실이름을 쓰므로 여기서도 표시명(ownerDisplayName)이 아니라 원문으로 맞춘다.
+ */
+const matchesOwnerName = (ownerValue: string, userName: string): boolean => {
+  const me = userName.replace(/\s+/g, "")
+  if (!me) return false
+  return ownerValue.split("/").some((part) => part.replace(/\s+/g, "") === me)
+}
 const COL_WIDTHS_STORAGE_KEY = "dd-col-widths-v2"
 const OPEN_GROUPS_STORAGE_KEY = "dd-open-groups-v1"
 /** 열 하나씩 숨기기(R264). 개인 브라우저에만 남는 값이며 key는 열 id, 값은 숨김 여부다. */
@@ -1183,7 +1194,9 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   }
   const handleDoubleClick = () => {
     if (costClickTimer.current) { clearTimeout(costClickTimer.current); costClickTimer.current = null }
-    if (!fixed && editEnabled) onEdit()
+    // editEnabled 를 여기서 보지 않는다(R319). 보면 막힌 칸이 두 번 눌러도 조용해서
+    // 왜 안 되는지 알 길이 없다. beginCellEdit 가 권한을 보고 안내를 띄운다.
+    if (!fixed) onEdit()
   }
   return <td data-col-id={column.id} title={typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
 })
@@ -1232,6 +1245,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const requestBoards = useAppStore((state) => state.requestBoards)
   const requestIndex = useMemo(() => requestLinkIndex(requests), [requests])
   const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
+  // 담당 탭 편집 권한 판정에 쓴다(R319). 관리자(앱 소유자)는 모든 담당 탭을 고친다.
+  const isAdmin = useAuthStore((state) => state.isOwner)
+  const myName = useAuthStore((state) => state.user?.displayName ?? "")
   const [fdsYdsOpen, setFdsYdsOpen] = useState(false)
   // 주간 보고 팝업. 전체와 담당별 탭을 두고, 탭마다 손질한 문장을 따로 들고 있는다.
   // 한 탭에서 고친 것이 다른 탭으로 넘어가면 안 되니 문장은 탭별로 보관한다.
@@ -1562,9 +1578,19 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     .sort((a, b) => compareManualOrder(a.record, b.record) || a.index - b.index)
     .map(({ record }) => record), [scoped])
 
-  // 전체 보기에서는 행 이동을 막고, 담당을 고른 상태에서만 그 담당의 행을 재배치한다.
-  const dragEnabled = owner !== ALL && sortBy === null
-  const editEnabled = owner !== ALL
+  /**
+   * 전체 미리보기는 모두 보기 전용이고(R307에서 열었다가 R310에서 되돌렸다),
+   * 담당 탭은 그 담당 본인과 관리자만 고친다(R319, 2026-10-07 박향근 확정).
+   * 남의 탭에서 고치면 그 사람이 모르는 사이에 제 행이 바뀐다. 전체 탭은 담당 구분 없이
+   * 모든 행이 한 번에 잡히는 자리라 더 위험하다. 다시 열지 말 것.
+   */
+  const editEnabled = owner !== ALL && (isAdmin || matchesOwnerName(owner, myName))
+  const editDeniedMessage = owner === ALL
+    ? EDIT_DISABLED_MESSAGE
+    : `${ownerDisplayName(owner)} 담당 행은 본인과 관리자만 수정할 수 있습니다. 본인인데 막히면 계정 설정에서 이름이 담당 이름과 같은지 확인하십시오.`
+  // 전체 보기에서는 행 이동을 막고, 담당 탭에서도 고칠 권한이 있을 때만 재배치한다(R319).
+  // 수동 정렬(sortOrder)은 레코드에 저장돼 팀 전체가 보는 값이라 남의 탭에서 바꾸면 그 사람 순서가 섞인다.
+  const dragEnabled = editEnabled && sortBy === null
   /**
    * 전체 보기에서 삭제를 열었다가 되돌렸다(2026-10-01).
    * 담당 칸이 명단 밖인 행도 담당 드롭다운(`ownerOptions`는 실데이터로 만든다)에서 그 값을 고르면 닿는다.
@@ -1951,7 +1977,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const startFill = (event: ReactMouseEvent<HTMLSpanElement>) => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!rect) return
     event.preventDefault()
     event.stopPropagation()
@@ -2107,7 +2133,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const beginCellEdit = (cellRef: CellRef, initial?: string) => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     const rowIndex = rowIndexOf.get(cellRef.row)
     const colIndex = colIndexOf.get(cellRef.col)
     const column = colIndex === undefined ? undefined : displayedColumns[colIndex]
@@ -2171,7 +2197,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 선택 테두리 이동은 셀 값 이동과 행 블록 재배치를 한 경로에서 처리해 한 번에 되돌릴 수 있게 한다. */
   const commitSelectionMove = async (drag: MoveDrag, target: CellRect) => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     const source = drag.source
     if (source.top === target.top && source.left === target.left) return
 
@@ -2238,7 +2264,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 채우기 핸들은 원본 사각형의 값을 행/열 패턴 그대로 반복한다. */
   const commitFill = async (source: CellRect, target: CellRect) => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     const edits = new Map<string, DevRecord>()
     let changed = 0
     const write = (rowIndex: number, colIndex: number, sourceRow: number, sourceCol: number) => {
@@ -2278,7 +2304,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** Ctrl+D: 첫 행을 아래로 복사하고, 단일 셀은 바로 위 값을 가져온다. */
   const fillDown = async () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!allRects.length) return
     const edits = new Map<string, DevRecord>()
     let changed = 0
@@ -2314,7 +2340,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const replaceAllMatches = async () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!findValue) { notify("찾을 내용을 입력하세요."); return }
     const edits = new Map<string, DevRecord>()
     let changed = 0
@@ -2352,7 +2378,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 엑셀의 "복사한 셀 삽입" — 클립보드 내용을 선택 행 아래에 새 행으로 끼워 넣는다. */
   const insertCopiedRows = async () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!rect) return
     let text = ""
     try { text = await navigator.clipboard.readText() } catch { text = "" }
@@ -2414,7 +2440,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const openRequestLink = () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     const rows = linkTargetRows()
     if (!rows.length) return
     const counts = new Map<string, number>()
@@ -2438,7 +2464,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 폴더 찾기는 DD 행 하나를 요청 옵션 하나에 잇는다. 여러 행을 한 번에 다루는 길은 기존 피커와 도우미다. */
   const openRequestBrowse = () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     const rows = selectedRows()
     if (rows.length !== 1) { notify("행 하나만 선택한 뒤 다시 누르세요."); return }
     setBrowseRow(rows[0])
@@ -2454,7 +2480,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [linkHelperOpen, setLinkHelperOpen] = useState(false)
   const linkHelperPending = useMemo(() => buildLinkHelperGroups(records, requests).reduce((sum, group) => sum + group.rows.length, 0), [records, requests])
   const linkHelperAuto = async (groups: HelperGroup[]) => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!groups.length) return
     const { next: nextRequests, changed } = ensureRequestLineIds(requests)
     if (changed) saveRequests(nextRequests)
@@ -2482,7 +2508,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     notify(`${linkedStyles}개 스타일 · ${linkedRows}행을 연결했습니다.`)
   }
   const reviewLinkHelperGroup = (group: HelperGroup) => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     setRequestPickerInitialReqId(group.candidates.length === 1
       ? group.candidates[0].reqId
       : group.candidates.length === 0 ? group.suggestions[0]?.style.reqId : undefined)
@@ -2490,7 +2516,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const unlinkSelectedRequests = async () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     const rows = linkTargetRows().filter((row) => row.tech?.requestLink)
     if (!rows.length || !window.confirm(`선택한 ${rows.length}행의 DEVELOPMENT REQUEST 연결을 해제할까요? 입력한 값은 그대로 둡니다.`)) return
     const before = useAppStore.getState().records
@@ -2503,7 +2529,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   /** 가리키는 요청 옵션이 사라진 연결. 그대로 두면 그 행이 요청 쪽 후보에서 사라진다(R314). */
   const brokenLinkRows = useMemo(() => records.filter((record) => resolveRequestLink(requestIndex, record) === "missing"), [records, requestIndex])
   const clearBrokenRequestLinks = async () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!brokenLinkRows.length) return
     if (!window.confirm(`가리키는 요청 옵션이 사라진 연결 ${brokenLinkRows.length}건을 끊을까요?\n담당과 무관하게 전체에서 정리합니다. 행과 입력한 값은 그대로 둡니다.`)) return
     const before = useAppStore.getState().records
@@ -2514,7 +2540,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const insertBlankRows = async (position: "above" | "below") => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!rect) return
     const count = Math.max(1, rect.bottom - rect.top + 1)
     const blankOwner = owner === ALL ? "" : owner
@@ -2539,7 +2565,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const appendBlankRows = async (count: number) => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     const blankOwner = owner === ALL ? "" : owner
     const created = Array.from({ length: count }, () => createEmptyGridRecord(blankOwner))
     setCopyMark(null)
@@ -2558,13 +2584,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const requestDeleteSelectedRows = () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     const rows = selectedRows()
     if (rows.length) setConfirmDelete(rows)
   }
 
   const copyRange = async (cut = false) => {
-    if (cut && !editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (cut && !editEnabled) { notify(editDeniedMessage); return }
     if (!rect) return
     // Ctrl+클릭으로 더한 영역이 있으면 엑셀 규칙(같은 열은 위아래, 같은 행은 좌우)으로 합친다. 잘라내기는 한 영역만.
     if (extraRects.length && cut) { notify("여러 영역은 잘라낼 수 없습니다. 복사를 쓰세요."); return }
@@ -2580,7 +2606,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   /** 선택 영역의 편집 가능한 셀을 비운다(수식·대장연결 열은 건너뛴다). Ctrl+클릭으로 더한 영역도 함께 비운다. */
   const clearRange = async () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!allRects.length) return
     const edits = new Map<string, DevRecord>()
     for (const area of allRects) {
@@ -2603,7 +2629,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const pasteRange = async () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!rect) return
     let text = ""
     try { text = await navigator.clipboard.readText() } catch { text = "" }
@@ -2754,7 +2780,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const mod = event.ctrlKey || event.metaKey
     const key = event.key.toLowerCase()
 
-    if (mod && key === "h") { event.preventDefault(); if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }; setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true); return }
+    if (mod && key === "h") { event.preventDefault(); if (!editEnabled) { notify(editDeniedMessage); return }; setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true); return }
     if (mod && key === "c") { event.preventDefault(); void copyRange(); return }
     if (mod && key === "x") { event.preventDefault(); void copyRange(true); return }
     if (mod && key === "v") { event.preventDefault(); void pasteRange(); return }
@@ -2913,13 +2939,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     }
   }
   const saveEditor = async () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!editing) return
     await saveDevelopmentRecord(editing, recordIdentity(editing))
     closeEditor()
   }
   const commitCell = async (record: DevRecord, column: MasterColumn, raw: string, move?: CellMove, fillRange = false) => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     const origin = { row: recordIdentity(record), col: column.id }
     cancelCellEdit()
     if (fillRange && allRects.length) {
@@ -3035,7 +3061,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }), [])
 
   const confirmDeleteRecord = async () => {
-    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!editEnabled) { notify(editDeniedMessage); return }
     if (!confirmDelete?.length) return
     const identities = new Set(confirmDelete.map(recordIdentity))
     setCopyMark(null)
@@ -3100,7 +3126,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <div className="inline-flex shrink-0 overflow-hidden rounded-[calc(var(--radius)-2px)] border border-[var(--border)]" role="group" aria-label="편집 도구">
         <Button type="button" size="sm" variant="ghost" className="rounded-none border-r border-[var(--border)]" disabled={!undoStack.length} title={undoStack.length ? "이전 편집 되돌리기 (Ctrl+Z)" : "되돌릴 편집이 없습니다"} onClick={() => void undoLast()}><Undo2 className="size-4" />되돌리기</Button>
         <Button type="button" size="sm" variant="ghost" className="rounded-none border-r border-[var(--border)]" disabled={!redoStack.length} title={redoStack.length ? "되돌린 편집 다시 실행 (Ctrl+Y)" : "다시 실행할 편집이 없습니다"} onClick={() => void redoLast()}><Redo2 className="size-4" />다시 실행</Button>
-        <Button type="button" size="sm" variant="ghost" className="rounded-none" disabled={!editEnabled} title={editEnabled ? "찾기·바꾸기 (Ctrl+H)" : EDIT_DISABLED_MESSAGE} onClick={() => { setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true) }}><Search className="size-4" />찾기·바꾸기</Button>
+        <Button type="button" size="sm" variant="ghost" className="rounded-none" disabled={!editEnabled} title={editEnabled ? "찾기·바꾸기 (Ctrl+H)" : editDeniedMessage} onClick={() => { setReplaceScope(rect ? "selection" : "all"); setReplaceOpen(true) }}><Search className="size-4" />찾기·바꾸기</Button>
         </div>
         {sortBy ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setSortBy(null)}><X className="size-4" />정렬 해제</Button> : null}
         {Object.keys(columnFilters).length ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setColumnFilters({})}><FilterX className="size-4" />필터 해제 ({Object.keys(columnFilters).length})</Button> : null}
@@ -3259,7 +3285,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                           <span className="block w-full truncate text-center">{text(ownerDisplayName(record.owner))}</span>
                           <div className="pointer-events-none absolute right-1 top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 group-hover:pointer-events-auto">
                           <button type="button" title={editEnabled ? "전체 항목 수정" : "전체 항목 보기"} onClick={(event) => { event.stopPropagation(); openEditor(record) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:opacity-100"><Maximize2 className="size-3.5" /></button>
-                          <button type="button" title={editEnabled ? "이 옵션 삭제" : EDIT_DISABLED_MESSAGE} aria-label="이 옵션 삭제" disabled={!editEnabled} onClick={(event) => { event.stopPropagation(); setConfirmDelete([record]) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--destructive)] hover:text-white group-hover:opacity-100 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[var(--muted-foreground)]"><Trash2 className="size-3.5" /></button>
+                          <button type="button" title={editEnabled ? "이 옵션 삭제" : editDeniedMessage} aria-label="이 옵션 삭제" disabled={!editEnabled} onClick={(event) => { event.stopPropagation(); setConfirmDelete([record]) }} onDoubleClick={(event) => event.stopPropagation()} className="shrink-0 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--destructive)] hover:text-white group-hover:opacity-100 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[var(--muted-foreground)]"><Trash2 className="size-3.5" /></button>
                           </div>
                         </>
                       : column.id === "styleNo"
@@ -3309,15 +3335,15 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             { key: "delete-row", label: "행 삭제", hint: "선택 행 전체", icon: <Trash2 className="size-3.5" />, run: requestDeleteSelectedRows, disabled: !editEnabled },
             { key: "clear", label: "내용 지우기", hint: "Delete", icon: <Eraser className="size-3.5" />, run: () => void clearRange(), disabled: !editEnabled },
             { key: "row", label: "행 전체 선택", hint: "Shift+Space", icon: <Rows3 className="size-3.5" />, run: () => { if (range) selectWholeRow(range.focus.row) }, disabled: false },
-          ]).map((item) => <button key={item.key} type="button" role="menuitem" disabled={item.disabled} title={item.disabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); item.run() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent">
+          ]).map((item) => <button key={item.key} type="button" role="menuitem" disabled={item.disabled} title={item.disabled ? editDeniedMessage : undefined} onClick={() => { setMenu(null); item.run() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent">
             <span className="text-[var(--muted-foreground)]">{item.icon}</span>
             <span className="flex-1">{item.label}</span>
             <span className="text-[11px] text-[var(--muted-foreground)]">{item.hint}</span>
           </button>)}
           {menu.kind === "cells" ? <><div className="my-1 h-px bg-[var(--border)]" />
-          <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); openRequestLink() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Link2 className="size-3.5" /></span><span className="flex-1">DEVELOPMENT REQUEST 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
-          <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); openRequestBrowse() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><FolderTree className="size-3.5" /></span><span className="flex-1">요청 폴더에서 찾아 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">행 1개</span></button>
-          <button type="button" role="menuitem" disabled={!editEnabled || !linkTargetRows().some((row) => row.tech?.requestLink)} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => { setMenu(null); void unlinkSelectedRequests() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Unlink className="size-3.5" /></span><span className="flex-1">요청 연결 해제</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
+          <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => { setMenu(null); openRequestLink() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Link2 className="size-3.5" /></span><span className="flex-1">DEVELOPMENT REQUEST 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
+          <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => { setMenu(null); openRequestBrowse() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><FolderTree className="size-3.5" /></span><span className="flex-1">요청 폴더에서 찾아 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">행 1개</span></button>
+          <button type="button" role="menuitem" disabled={!editEnabled || !linkTargetRows().some((row) => row.tech?.requestLink)} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => { setMenu(null); void unlinkSelectedRequests() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Unlink className="size-3.5" /></span><span className="flex-1">요청 연결 해제</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
           <div className="my-1 h-px bg-[var(--border)]" />
           <button type="button" role="menuitem" disabled={!costTargetRows().length} title={!costTargetRows().length ? "국내 또는 생산 건을 선택하십시오" : undefined} onClick={() => { setMenu(null); openCostSheet() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Calculator className="size-3.5" /></span><span className="flex-1">사전 원가계산…</span><span className="text-[11px] text-[var(--muted-foreground)]">국내 건</span></button>
           <div className="my-1 h-px bg-[var(--border)]" />
@@ -3468,7 +3494,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </DialogBody>
         <DialogFooter className="gap-1.5 py-2.5">
           <Button type="button" size="sm" variant="outline" onClick={() => setReplaceOpen(false)}>닫기</Button>
-          <Button type="button" size="sm" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => void replaceAllMatches()}>모두 바꾸기</Button>
+          <Button type="button" size="sm" disabled={!editEnabled} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => void replaceAllMatches()}>모두 바꾸기</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -3522,7 +3548,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     </Dialog>
 
     <RequestPickerDialog open={requestPickerOpen} onOpenChange={setRequestPickerOpen} requests={requests} records={records} styleNo={sharedDraft?.styleNo ?? ""} initialReqId={requestPickerInitialReqId} onConfirm={importRequest} />
-    <RequestLinkHelperDialog open={linkHelperOpen} onOpenChange={setLinkHelperOpen} records={records} requests={requests} editEnabled={editEnabled} disabledMessage={EDIT_DISABLED_MESSAGE} onLinkAuto={linkHelperAuto} onReview={reviewLinkHelperGroup} />
+    <RequestLinkHelperDialog open={linkHelperOpen} onOpenChange={setLinkHelperOpen} records={records} requests={requests} editEnabled={editEnabled} disabledMessage={editDeniedMessage} onLinkAuto={linkHelperAuto} onReview={reviewLinkHelperGroup} />
     <RequestPickerDialog open={Boolean(linkRows)} onOpenChange={(open) => { if (!open) setLinkRows(null) }} requests={requests} records={records} styleNo={linkRows?.[0]?.styleNo ?? ""} initialReqId={requestPickerInitialReqId} mode="link" linkRows={linkRows ?? []} blockedLineIds={blockedRequestLineIds} onConfirmLink={(style, pairs, fillEmpty) => void confirmRequestLink(style, pairs, fillEmpty)} />
     <RequestBrowseDialog open={Boolean(browseRow)} onOpenChange={(open) => { if (!open) setBrowseRow(null) }} row={browseRow} requests={requests} boards={requestBoards} records={records} onConfirm={(style, option, fillEmpty) => void confirmRequestBrowse(style, option, fillEmpty)} />
     <CostSheetDialog open={costRows.length > 0} onOpenChange={(open) => { if (!open) setCostRows([]) }} rows={costRows} canEdit={editEnabled} onSaved={(rowKey, ref) => void applyCostRef(rowKey, ref)} storageNoFor={(target) => { const item = ledgerByRecord.get(recordIdentity(target)); return item?.storageNo ? storageNoLabel(item) : "" }} />
@@ -3545,7 +3571,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           </DialogBody>
           <DialogFooter className="gap-1.5 py-2.5">
             <Button type="button" size="sm" variant="outline" onClick={closeEditor}>취소</Button>
-            <Button type="button" size="sm" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => void saveEditor()}><Save className="size-4" />변경 저장</Button>
+            <Button type="button" size="sm" disabled={!editEnabled} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => void saveEditor()}><Save className="size-4" />변경 저장</Button>
           </DialogFooter>
         </> : null}
       </DialogContent>
@@ -3563,7 +3589,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           </DialogHeader>
           <DialogFooter className="gap-1.5 py-2.5">
             <Button type="button" size="sm" variant="outline" onClick={() => setConfirmDelete(null)}>취소</Button>
-            <Button type="button" size="sm" variant="destructive" disabled={!editEnabled} title={!editEnabled ? EDIT_DISABLED_MESSAGE : undefined} onClick={() => void confirmDeleteRecord()}><Trash2 className="size-4" />삭제</Button>
+            <Button type="button" size="sm" variant="destructive" disabled={!editEnabled} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => void confirmDeleteRecord()}><Trash2 className="size-4" />삭제</Button>
           </DialogFooter>
         </> : null}
       </DialogContent>
