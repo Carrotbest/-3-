@@ -52,7 +52,7 @@
 - 다른 DD 행에 연결된 요청 옵션은 선택할 수 없다. 연결·해제는 스냅샷 뒤 `writeDevelopmentRecords` 한 번으로 저장해 Ctrl+Z로 되돌린다.
 - 다중 선택: Ctrl(⌘)+클릭·드래그로 영역을 더한다(`extraRanges`, 활성은 `range`). `setRange` 래퍼가 새 선택마다 추가 영역을 비우고, 넓히기(`extendTo`)와 Ctrl 추가만 `setRangeState`를 직접 쓴다. Ctrl+mousedown 뒤 셀 click이 선택을 다시 잡지 않게 `additiveClickRef`로 한 번 건너뛴다. 지우기·아래로 채우기·Ctrl+Enter·한 칸 붙여넣기는 모든 영역에 적용하고, 복사는 `range-tsv.ts` `combineRangeTsv`(같은 열은 위아래, 같은 행은 좌우, 아니면 막음) 규칙이다. 잘라내기·행 삽입/삭제·요청 연결은 활성 영역만. 두 칸 이상 선택하면 오른쪽 아래에 개수·합계·평균을 보인다. WAREHOUSE도 같은 규칙이다(`extraCellRanges`).
 - `?focus=rowId`(FABRIC REQUEST DD 상태 칩에서 진입)는 검색·Status·열 필터·완료 제외를 풀고, 닫힌 행이면 그 담당 탭으로 연 뒤 그 행 전체를 선택(`selectWholeRow`)하고 Style No. 칸 기준으로 스크롤한 다음 파라미터를 지운다. 행이 아직 동기화 전이면 기다린다.
-- **전체 미리보기(`owner === ALL`)는 읽기 전용이다**(`editEnabled = owner !== ALL`). 담당을 골라야 수정과 삭제가 열린다. **담당 칸이 비었거나 명단 밖인 행은 담당 네임카드(6명)에 안 뜨고 전체 미리보기에만 보여 손댈 길이 없어 보인다.** 그때는 도구줄 담당 드롭다운에서 그 값을 고른다. `ownerOptions`는 고정 명단이 아니라 실데이터(`scoped`)로 만들어 깨진 값도 목록에 있다. 검색은 행만 거를 뿐 잠금을 풀지 않는다. 전체 미리보기에서 삭제를 열었다가 되돌렸다(2026-10-01). 실물이 창고에 있는 행을 지우면 창고 장부에서 통째로 사라지기 때문이다. 원장 항목은 `records`와 `samples`로만 서고 짝 없는 오버라이드·이력은 `resolveEntryKey`가 버린다.
+- **전체 미리보기(`owner === ALL`)는 읽기 전용이다**(`editEnabled = owner !== ALL`). 담당을 골라야 수정과 삭제가 열린다. **소유자도 예외가 아니다.** 2026-10-07에 소유자만 전체 보기에서 편집하게 열었다가(R307) 같은 날 되돌렸다(R310). 요청 연결 도우미를 전체 보기에서 쓰려다 나온 요구였는데, 연결은 담당 탭에서 하면 되고 전체 보기는 담당 구분 없이 모든 행이 한 번에 잡히는 자리라 열어 둘 이유가 없다. **다시 열지 말 것.** 행 이동(`dragEnabled`)도 같이 막힌다. 담당별 수동 정렬이라 전체 보기에서 재배치하면 남의 순서가 섞인다. **담당 칸이 비었거나 명단 밖인 행은 담당 네임카드(6명)에 안 뜨고 전체 미리보기에만 보여 손댈 길이 없어 보인다.** 그때는 도구줄 담당 드롭다운에서 그 값을 고른다. `ownerOptions`는 고정 명단이 아니라 실데이터(`scoped`)로 만들어 깨진 값도 목록에 있다. 검색은 행만 거를 뿐 잠금을 풀지 않는다. 전체 미리보기에서 삭제를 열었다가 되돌렸다(2026-10-01). 실물이 창고에 있는 행을 지우면 창고 장부에서 통째로 사라지기 때문이다. 원장 항목은 `records`와 `samples`로만 서고 짝 없는 오버라이드·이력은 `resolveEntryKey`가 버린다.
 - 사이드바 하위 메뉴(DD MASTER의 EU·SEASON·CORE·PROJECT)는 화살표를 눌렀을 때만 연다. 현재 경로로 자동 펼치지 않는다(`AppSidebar` `openMap ?? false`).
 - 요청 연결 도우미(`RequestLinkHelperDialog`, `buildLinkHelperGroups`): 미연결 DD 행을 Style No.로 묶어 Garment No. 일치 후보로 auto·review·none을 가른다. auto는 후보 1개이고 미연결 옵션 수=행 수일 때만이며 값을 채우지 않는다. 짝 규칙은 `defaultLinkPairs` 하나다. 일괄 연결은 그룹 결과를 누적해 앞 그룹이 연결한 옵션을 막고, 스냅샷·쓰기는 한 번이다.
 - 열 머리에 마우스를 올리면 왼쪽에 숨김 버튼이 뜬다. 숨긴 열은 도구줄 `숨긴 열 N`에서 되돌린다. 고정 3열(담당·Status·Style No.)은 숨기지 않는다. 숨겨도 검색과 64열 수정 모달에서는 그대로 보인다(`allColumns`는 `GROUPS`를 쓴다).
@@ -61,6 +61,9 @@
 ## FABRIC REQUEST (`src/routes/FabricRequest.tsx`, `src/data/request-template.ts`, `src/data/request-image.ts`)
 - 화면 이름은 2026-09-22부터 DEVELOPMENT REQUEST다(경로 `/request`, 코드 이름 FabricRequest는 그대로). `/development`는 PROGRESS OVERVIEW. 네비 순서: HOME, FABRIC ANALYSIS, DEVELOPMENT REQUEST, DD MASTER, PROGRESS OVERVIEW, WAREHOUSE.
 - 표 편집은 DD MASTER와 같은 선택·키보드·클립보드·되돌리기 단축키를 쓴다.
+- 채우기 핸들을 끌면 점선 미리보기를 보이고 놓을 때 값을 채운다(R305, `startFill`, `commitFill`, `inFillPreview`). 아래로 더 끌면 아래로만, 오른쪽으로 더 끌면 오른쪽으로만 넓힌다. 원본이 여러 줄이면 그 높이로 되풀이한다. 스타일 열은 묶음 첫 줄에만 쓴다. **`commitFill`을 드래그 종료 핸들러에서 직접 부르지 말 것.** 그 핸들러는 `useEffect(..., [])` 안이라 첫 렌더 원장을 붙잡는다. `commitFillRef`를 거친다. 저장이 사라진다.
+- 화살표·Tab·Enter 이동은 `scrollCellIntoView`로 포커스 셀을 화면 안으로 굴린다(R305). 스타일 열은 rowSpan이라 위로 올라가며 묶음 첫 칸을 찾는다.
+- 열 숨기기는 열 머리글 호버 시 왼쪽 `−` 버튼, 되돌리기는 도구줄 `숨긴 열 N`이다(R309). `visibleGroups`에서 거르므로 `visibleColumns`와 `tableWidth`는 따라온다. 전부 숨긴 밴드는 밴드째 빠진다. 좌측 고정 2열과 전체 탭의 `보드` 열은 숨기지 않는다. **`loadViewGroups`는 기본값에 있는 키만 되읽으므로 `DEFAULT_HIDDEN`에 모든 열을 `false`로 적어 둬야 한다.** 비우면 저장값이 통째로 버려진다.
 - 드래그 선택(셀, 행 머리, 채우기 핸들) 중 표 가장자리 가까이 가면 `scrollRef` 상자를 굴린다. 위쪽 기준은 sticky 머리글 아래 선이고, 행 머리 드래그는 세로로만 굴린다. 매 프레임 `elementFromPoint`로 포인터 아래 칸(`data-slot-index`, `data-col-id`, 행 머리 `data-row-start`)을 다시 찾아 선택을 넓히며, 같은 칸이면 setRange를 건너뛴다(프레임마다 재렌더 방지).
 - 격자는 slot(블럭당 `max(1, 옵션 수)`) × `visibleColumns`다. style 열은 블럭 병합 셀이며 복사는 첫 slot에만 값을 쓰고, 붙여넣기는 옵션을 자동으로 늘리지 않는다.
 - 여러 셀 작업은 새 `requests` 배열을 한 번 만든 뒤 `saveRequests`를 한 번만 부른다.
@@ -85,6 +88,8 @@
 - 옵션 원단 사양은 YARN DETAIL(원사), CONS(조직), W'T(중량 g/m2) 세 칸이다(`RequestOption.construction`, `weight`, 분리 전 데이터에는 없음). CONS는 `src/data/constructions.ts` `CONSTRUCTIONS`(작지 파서와 공유) 목록에서만 고른다. 셀은 드롭다운 편집, 붙여넣기와 채우기는 `matchConstruction`(대소문자, 공백, 하이픈 무시)으로 목록 표기에 맞추고 없으면 건너뛴다. 엑셀 양식은 숨김 `LISTS` 시트를 참조하는 목록 검증을 걸고, 업로드에서 목록 밖 값은 버리지 않고 경고로 알린다. DD 불러오기와 연결의 빈 칸 채우기는 `construction`, `weight`를 DD 행 같은 필드로 넘긴다. 기존 YARN DETAIL에 섞인 조직과 중량은 자동으로 나누지 않는다.
 - 업로드 병합 키는 `차트 + Garment No.`다. 기존 건은 `reqId`와 사진 경로를 지킨다. 안 지키면 재업로드마다 사진이 날아간다.
 - 사진은 Firebase Storage(`requests/{reqId}/full.webp`, `thumb.webp`). 원본 1200px, 썸네일 400px webp로 줄여 올린다.
+- 사진 칸은 끌어 놓기로도 받는다(R306). 핸들러는 `ImageCell` 안에만 달고 `td`에는 달지 않는다. OS 파일 드래그는 `mousedown`이 안 와서 셀 범위 선택과 부딪히지 않는다. `onDragOver`의 `preventDefault`를 빼면 사진이 새 탭으로 열리고, `onDrop`의 `stopPropagation`을 빼면 상위 놓기 대상이 같은 파일을 또 받는다. `window`나 `document`에 `dragover`·`drop` 리스너를 달지 말 것. 엑셀 업로드와 분석 의뢰 창의 놓기 대상을 가로챈다.
+- 사진이 있는 칸에 호버하면 오른쪽 위에 삭제 버튼이 뜬다(R308, `removeImage`). `askConfirm`으로 한 번 되묻고, 기록에서 `imagePath`·`imageThumbPath`를 `undefined`로 떼고 Storage 파일도 지운다. **Storage 삭제를 `await`해서 기록 정리를 막지 말 것.** 같은 경로에 덮어쓰므로 파일이 쌓이지 않는다. 보기 전용(전체 탭·보관함)에서는 추가·교체·삭제 버튼과 끌어 놓기가 모두 막힌다.
 - `/request?focus=reqId`는 필터를 풀고 해당 스타일의 Garment No. 셀을 선택·스크롤·강조한 뒤 `focus` 파라미터를 지운다.
 - **`getStorage`는 지연 초기화다**(`firebase.ts`의 `appStorage()`). 최상단에서 만들면 Storage 실패가 앱 전체 부팅을 막는다.
 - 양식에 사진 열은 없다. 엑셀 이미지 셀은 원본 차트에서도 깨져 있었다. 사진은 웹에서만 올린다.
@@ -211,7 +216,7 @@
 ## 보기 설정 (`src/data/view-prefs.ts`)
 - 열 너비와 그룹 펼침/접힘은 **개인 브라우저(localStorage)에만** 남는다. `CACHE_KEYS`에 없어 Firestore로 안 올라간다. 한 사람이 바꿔도 팀원 화면은 그대로다.
 - 계정이 아니라 브라우저에 붙는다. 공용 PC에서는 앞사람 설정이 보이고, 다른 PC로 가면 기본값에서 시작한다.
-- 키: `dd-col-widths-v2`, `dd-intake-col-widths-v1`, `dd-open-groups-v1`, `dd-hidden-cols-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `fabric.request.rowHeights`, `fabric.request.activeBoard`, `home-today-briefing-hidden-v1`.
+- 키: `dd-col-widths-v2`, `dd-intake-col-widths-v1`, `dd-open-groups-v1`, `dd-hidden-cols-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `fabric.request.rowHeights`, `fabric.request.hiddenCols`, `fabric.request.activeBoard`, `home-today-briefing-hidden-v1`.
 - 검색·필터·정렬·탭·선택은 일부러 저장하지 않는다. 남아 있으면 다음에 열었을 때 행이 왜 안 보이는지 헷갈린다.
 - **예외: DD MASTER 행 드래그 순서(`sortOrder`)는 레코드에 저장돼 팀 전체가 공유한다.** 보기 설정이 아니다.
 

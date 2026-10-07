@@ -8,7 +8,7 @@
  * 행 높이는 사용자가 조절하되 글자 길이에 따라 자동으로 늘리지는 않는다.
  * 넘치는 셀 안에서만 세로 스크롤한다.
  */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react"
 import { FlPerfMark } from "@/components/fabric/PerfBadge"
 import { Archive, ChevronDown, ChevronRight, ClipboardPaste, Copy, Download, Eraser, Flame, ImagePlus, Loader2, Pencil, Plus, Redo2, RotateCcw, Rows3, Scissors, Trash2, Undo2, Upload } from "lucide-react"
 import * as XLSX from "xlsx"
@@ -44,7 +44,7 @@ import { downloadBlob } from "@/data/dd-export"
 import { deleteRequestImage, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
 import { buildRequestWorkbook, mergeRequestStyles, parseRequestWorkbook, requestTemplateFileName } from "@/data/request-template"
 import { MEMBERS, REQUEST_RESULTS, styleRemarkText, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
-import { loadViewNumbers, saveViewPref } from "@/data/view-prefs"
+import { loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
 import { saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore, writeDevelopmentRecords } from "@/store/useAppStore"
 
 // ─────────────────────────────────────────────── 열 정의
@@ -120,10 +120,14 @@ const MIN_COLUMN_WIDTH = 56
 const COL_WIDTHS_KEY = "fabric.request.colWidths"
 const OPEN_GROUPS_KEY = "fabric.request.openGroups"
 const ROW_HEIGHTS_KEY = "fabric.request.rowHeights"
+const HIDDEN_COLS_KEY = "fabric.request.hiddenCols"
 const MAX_ROW_HEIGHT = 800
 
 const ALL_COLUMNS = [...FIXED_COLUMNS, ...COLUMN_GROUPS.flatMap((group) => group.columns)]
 const COLUMN_IDS = new Set(ALL_COLUMNS.map((column) => column.id))
+const GROUP_COLUMNS = COLUMN_GROUPS.flatMap((group) => group.columns)
+/** 숨김 기본값. loadViewGroups가 여기에 있는 키만 되살리므로 모든 열을 적어 둬야 한다. */
+const DEFAULT_HIDDEN: Record<string, boolean> = Object.fromEntries(GROUP_COLUMNS.map((column) => [column.id, false]))
 
 type GroupKey = (typeof COLUMN_GROUPS)[number]["key"]
 const ALL_OPEN = Object.fromEntries(COLUMN_GROUPS.map((group) => [group.key, true])) as Record<string, boolean>
@@ -274,18 +278,26 @@ function useRequestImageUrl(path: string | undefined): string | null {
 
 interface ImageCellProps {
   style: RequestStyle
+  readOnly: boolean
   onUploaded: (paths: { imagePath: string; imageThumbPath: string }) => void
   onOpen: () => void
+  onDelete: (anchor: { x: number; y: number }) => void
 }
 
-function ImageCell({ style, onUploaded, onOpen }: ImageCellProps) {
+function ImageCell({ style, readOnly, onUploaded, onOpen, onDelete: deleteImage }: ImageCellProps) {
   const thumbUrl = useRequestImageUrl(style.imageThumbPath)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [dropping, setDropping] = useState(false)
 
   const pick = async (file: File | undefined) => {
     if (!file) return
+    if (readOnly) {
+      // 보기 전용에서는 올려도 기록에서 거부된다. Storage에는 파일만 남기지 않는다.
+      setError("보기 전용입니다. 보드 탭을 골라 주세요.")
+      return
+    }
     const invalid = validateRequestImage(file)
     if (invalid) {
       setError(invalid)
@@ -303,8 +315,39 @@ function ImageCell({ style, onUploaded, onOpen }: ImageCellProps) {
     }
   }
 
+  /**
+   * 끌어 놓기로 사진을 받는다. 파일 여러 개를 놓으면 첫 장만 쓴다.
+   * `onDragOver`에서 `preventDefault`를 해야 브라우저가 놓기를 허용한다. 안 하면 파일이 새 탭으로 열린다.
+   */
+  const dragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    if (readOnly || busy || !event.dataTransfer.types.includes("Files")) return
+    event.preventDefault()
+    event.stopPropagation()
+    event.dataTransfer.dropEffect = "copy"
+    if (!dropping) setDropping(true)
+  }
+  const dragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    // 자식 요소로 들어갈 때도 leave가 오므로 칸 밖으로 나간 경우만 끈다.
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) return
+    setDropping(false)
+  }
+  const drop = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!event.dataTransfer.types.includes("Files")) return
+    event.preventDefault()
+    event.stopPropagation()
+    setDropping(false)
+    if (busy) return
+    void pick(event.dataTransfer.files?.[0])
+  }
+
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-0.5">
+    <div
+      onDragOver={dragOver}
+      onDragEnter={dragOver}
+      onDragLeave={dragLeave}
+      onDrop={drop}
+      className={`group relative flex h-full w-full flex-col items-center justify-center gap-0.5 rounded ${dropping ? "outline outline-2 outline-[var(--primary)] -outline-offset-2 bg-[color-mix(in_srgb,var(--primary)_10%,transparent)]" : ""}`}
+    >
       <input
         ref={inputRef}
         type="file"
@@ -319,13 +362,28 @@ function ImageCell({ style, onUploaded, onOpen }: ImageCellProps) {
         <Loader2 className="size-4 animate-spin text-[var(--muted-foreground)]" aria-label="사진 올리는 중" />
       ) : thumbUrl ? (
         <>
+          {!readOnly ? (
+            <button
+              type="button"
+              aria-label="사진 삭제"
+              title="사진 삭제"
+              onMouseDown={(event) => event.stopPropagation()}
+              onDoubleClick={(event) => event.stopPropagation()}
+              onClick={(event) => { event.stopPropagation(); deleteImage({ x: event.clientX, y: event.clientY }) }}
+              className="absolute right-0.5 top-0.5 z-20 inline-flex size-4 items-center justify-center rounded border border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] opacity-0 shadow-sm transition-opacity hover:bg-[var(--destructive)] hover:text-white group-hover:opacity-100"
+            >
+              <Trash2 className="size-2.5" />
+            </button>
+          ) : null}
           <button type="button" className="min-h-0 flex-1" title="크게 보기" onClick={onOpen}>
             <img src={thumbUrl} alt={`${style.garmentNo || "의뢰"} garment 사진`} className="h-full w-full rounded object-cover" />
           </button>
           <button
             type="button"
+            disabled={readOnly}
+            title={readOnly ? "보기 전용입니다." : "눌러서 고르거나 사진을 끌어 놓으세요"}
             onClick={() => inputRef.current?.click()}
-            className="text-[9px] text-[var(--muted-foreground)] underline-offset-2 hover:underline"
+            className="text-[9px] text-[var(--muted-foreground)] underline-offset-2 hover:underline disabled:opacity-50"
           >
             교체
           </button>
@@ -333,11 +391,13 @@ function ImageCell({ style, onUploaded, onOpen }: ImageCellProps) {
       ) : (
         <button
           type="button"
+          disabled={readOnly}
+          title={readOnly ? "보기 전용입니다." : "눌러서 고르거나 사진을 끌어 놓으세요"}
           onClick={() => inputRef.current?.click()}
-          className="flex h-full w-full flex-col items-center justify-center gap-0.5 rounded border border-dashed border-[var(--border)] text-[10px] text-[var(--muted-foreground)] hover:bg-[var(--muted)]"
+          className="flex h-full w-full flex-col items-center justify-center gap-0.5 rounded border border-dashed border-[var(--border)] text-[10px] text-[var(--muted-foreground)] hover:bg-[var(--muted)] disabled:opacity-50 disabled:hover:bg-transparent"
         >
           <ImagePlus className="size-3.5" />
-          사진 추가
+          {dropping ? "놓으세요" : "사진 추가"}
         </button>
       )}
       {error ? <span className="px-0.5 text-center text-[9px] leading-tight text-[var(--destructive)]">{error}</span> : null}
@@ -774,10 +834,15 @@ export function FabricRequest() {
   const [replaceMatchCase, setReplaceMatchCase] = useState(false)
   const dragRef = useRef(false)
   const fillRef = useRef<CellRect | null>(null)
+  const fillPreviewRef = useRef<CellRect | null>(null)
+  const [fillPreview, setFillPreview] = useState<CellRect | null>(null)
+  const commitFillRef = useRef<(source: CellRect, target: CellRect) => void>(() => undefined)
   const clipRef = useRef<{ text: string; cut: boolean; rect: CellRect } | null>(null)
   const [colWidths, setColWidths] = useState<Record<string, number>>(loadColumnWidths)
   const [rowHeights, setRowHeights] = useState<Record<string, number>>(() => loadViewNumbers(ROW_HEIGHTS_KEY, 0, MAX_ROW_HEIGHT))
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(loadOpenGroups)
+  const [hiddenColumns, setHiddenColumns] = useState<Record<string, boolean>>(() => loadViewGroups(HIDDEN_COLS_KEY, DEFAULT_HIDDEN))
+  const [hiddenMenuOpen, setHiddenMenuOpen] = useState(false)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
   // Link 열 미연결 칩을 더블클릭하면 그 옵션에 맞는 DD 행 후보를 고른다(R262).
@@ -906,7 +971,15 @@ export function FabricRequest() {
   }
 
   const widthOf = (column: RequestColumn): number => colWidths[column.id] ?? column.width
-  const visibleGroups = COLUMN_GROUPS.filter((group) => openGroups[group.key])
+  const hiddenColumnList = GROUP_COLUMNS.filter((column) => hiddenColumns[column.id])
+  const setHidden = (next: Record<string, boolean>) => { setHiddenColumns(next); saveViewPref(HIDDEN_COLS_KEY, next) }
+  const hideColumn = (columnId: string) => setHidden({ ...hiddenColumns, [columnId]: true })
+  const showColumn = (columnId: string) => setHidden({ ...hiddenColumns, [columnId]: false })
+  const showAllColumns = () => setHidden({ ...DEFAULT_HIDDEN })
+  const visibleGroups: RequestGroup[] = COLUMN_GROUPS
+    .filter((group) => openGroups[group.key])
+    .map((group) => ({ ...group, columns: group.columns.filter((column) => !hiddenColumns[column.id]) }))
+    .filter((group) => group.columns.length > 0)
   const boardColumn: RequestColumn = { id: "boardName", label: "보드", width: 120, scope: "style" }
   const visibleColumns = readOnly ? [...FIXED_COLUMNS, boardColumn, ...visibleGroups.flatMap((group) => group.columns)] : [...FIXED_COLUMNS, ...visibleGroups.flatMap((group) => group.columns)]
   const tableWidth = visibleColumns.reduce((sum, column) => sum + widthOf(column), 0) + ACTION_WIDTH + ROW_NO_WIDTH
@@ -1012,6 +1085,30 @@ export function FabricRequest() {
   const autoScrollFrameRef = useRef<number | null>(null)
   const lastExtendRef = useRef("")
   const extendAtPointerRef = useRef<(x: number, y: number) => void>(() => undefined)
+  /** 채우기 핸들 드래그 시작. 선택 영역을 원본으로 잡고 한 방향으로 값을 복사한다. */
+  const startFill = (event: React.MouseEvent) => {
+    if (readOnly || !rect) return
+    event.preventDefault()
+    event.stopPropagation()
+    dragRef.current = true
+    rowDragRef.current = false
+    lastExtendRef.current = ""
+    fillRef.current = { ...rect }
+    fillPreviewRef.current = { ...rect }
+    setFillPreview({ ...rect })
+  }
+
+  /**
+   * 사진만 지운다. 스타일과 옵션은 그대로 둔다. 잘못 올린 사진을 되돌리는 길이다.
+   * 기록에서 경로를 비우고 Storage 파일도 지운다. 파일이 이미 없으면 조용히 넘어간다.
+   */
+  const removeImage = (style: RequestStyle, anchor: { x: number; y: number }) => {
+    if (readOnly) { setNotice({ kind: "error", text: READ_ONLY_HINT }); return }
+    askConfirm(anchor, `${style.garmentNo || "이 의뢰"}의 사진을 지울까요?`, () => {
+      patchStyle(style.reqId, { imagePath: undefined, imageThumbPath: undefined })
+      void deleteRequestImage(style.reqId).catch(() => undefined)
+    }, { confirmLabel: "삭제", danger: true })
+  }
   const onCellMouseDown = (event: React.MouseEvent, cell: CellRef) => {
     if ((event.target as HTMLElement).closest("button,input,textarea,select,[role=menu]")) return
     event.preventDefault(); dragRef.current = true; rowDragRef.current = false; lastExtendRef.current = ""; setCellAnchor(cell, event.shiftKey)
@@ -1022,6 +1119,23 @@ export function FabricRequest() {
     const target = document.elementFromPoint(x, y)
     if (!(target instanceof Element) || !scrollRef.current?.contains(target)) return
     const cellEl = target.closest<HTMLElement>("[data-slot-index][data-col-id]")
+    if (fillRef.current) {
+      if (!cellEl) return
+      const row = Number(cellEl.dataset.slotIndex)
+      const col = colIndexOf.get(cellEl.dataset.colId ?? "")
+      if (!Number.isInteger(row) || col === undefined) return
+      const source = fillRef.current
+      // 원본과 같다. 아래로 더 멀었으면 아래로만, 오른쪽으로 더 멀었으면 오른쪽으로만 넓힌다.
+      const down = Math.max(0, row - source.bottom)
+      const right = Math.max(0, col - source.right)
+      const next = !down && !right ? source : down >= right ? { ...source, bottom: row } : { ...source, right: col }
+      const key = `fill:${next.top}:${next.bottom}:${next.left}:${next.right}`
+      if (lastExtendRef.current === key) return
+      lastExtendRef.current = key
+      fillPreviewRef.current = next
+      setFillPreview(next)
+      return
+    }
     if (rowDragRef.current) {
       const rowHead = target.closest<HTMLElement>("[data-row-start]")
       const slotIndex = cellEl ? Number(cellEl.dataset.slotIndex) : -1
@@ -1072,10 +1186,17 @@ export function FabricRequest() {
       if (autoScrollFrameRef.current === null) autoScrollFrameRef.current = window.requestAnimationFrame(tick)
     }
     const up = () => {
+      const fillSource = fillRef.current
+      const fillTarget = fillPreviewRef.current
       dragRef.current = false
       rowDragRef.current = false
       fillRef.current = null
+      fillPreviewRef.current = null
       stopAutoScroll()
+      if (fillSource && fillTarget) {
+        setFillPreview(null)
+        commitFillRef.current(fillSource, fillTarget)
+      }
     }
     window.addEventListener("mousemove", move)
     window.addEventListener("mouseup", up)
@@ -1138,6 +1259,59 @@ export function FabricRequest() {
   const cellsInRect = (area = rect) => { const cells: CellRef[] = []; if (!area) return cells; for (let r = area.top; r <= area.bottom; r += 1) for (let c = area.left; c <= area.right; c += 1) cells.push({ row: r, col: visibleColumns[c].id }); return cells }
   const clearRange = () => { if (!rect) return; let next = requests; cellsInRect().forEach((cell) => { if (!editableCell(cell)) return; next = updateCell(next, cell, "").next }); if (next !== requests) saveMutation(next) }
   const fillDown = () => { if (!rect || rect.bottom <= rect.top) return; let next = requests; for (let r = rect.top + 1; r <= rect.bottom; r += 1) for (let c = rect.left; c <= rect.right; c += 1) { const source = cellLine({ row: rect.top, col: visibleColumns[c].id }); if (source) next = updateCell(next, { row: r, col: visibleColumns[c].id }, rawValue(source, visibleColumns[c].id)).next } if (next !== requests) saveMutation(next) }
+
+  /**
+   * 채우기 핸들로 늘어난 범위에 원본 값을 반복해서 넣는다.
+   * 아래로 늘면 원본 높이로 반복하고, 오른쪽으로 늘면 원본 너비로 반복한다.
+   * 스타일 값은 스타일의 첫 줄에만 쓴다. 아래 옵션 줄까지 같은 값을 가리킬 뿐 여러 번 쓸 필요가 없다.
+   */
+  const commitFill = (source: CellRect, target: CellRect) => {
+    if (readOnly) { commitRequests(requests); return }
+    if (target.bottom === source.bottom && target.right === source.right) return
+    let next = requests
+    const skipCounts: SkipCounts = { number: 0, construction: 0, result: 0 }
+    const write = (row: number, col: number, sourceRow: number, sourceCol: number) => {
+      const column = visibleColumns[col], fromColumn = visibleColumns[sourceCol]
+      if (!column || !fromColumn || !slots[row]) return
+      if (column.scope === "style" && row > 0 && slots[row - 1]?.style.reqId === slots[row]?.style.reqId) return
+      const cell = { row, col: column.id }
+      if (!editableCell(cell)) return
+      const from = cellLine({ row: sourceRow, col: fromColumn.id })
+      if (!from) return
+      const raw = fromColumn.id === "urgent" ? (from.style.urgent ? "Y" : "") : rawValue(from, fromColumn.id)
+      const result = updateCell(next, cell, raw)
+      next = result.next
+      countSkip(skipCounts, result.skipped)
+    }
+    if (target.bottom > source.bottom) {
+      const height = source.bottom - source.top + 1
+      for (let row = source.bottom + 1; row <= target.bottom; row += 1) {
+        const sourceRow = source.top + ((row - source.top) % height)
+        for (let col = source.left; col <= source.right; col += 1) write(row, col, sourceRow, col)
+      }
+    } else if (target.right > source.right) {
+      const width = source.right - source.left + 1
+      for (let row = source.top; row <= source.bottom; row += 1) {
+        for (let col = source.right + 1; col <= target.right; col += 1) {
+          write(row, col, row, source.left + ((col - source.left) % width))
+        }
+      }
+    }
+    if (next !== requests) saveMutation(next)
+    noticeSkips(skipCounts)
+    const firstCol = visibleColumns[target.left], lastCol = visibleColumns[target.right]
+    if (firstCol && lastCol) setRange({ anchor: { row: target.top, col: firstCol.id }, focus: { row: target.bottom, col: lastCol.id } })
+  }
+  commitFillRef.current = commitFill
+
+  /** 채우기 미리보기 중 원본 선택 밖으로 늘어난 칸에 점선 테두리를 둘러 어디까지 채울지 보여 준다. */
+  const inFillPreview = (row: number, colId: string): boolean => {
+    if (!fillPreview) return false
+    const col = colIndexOf.get(colId)
+    if (col === undefined) return false
+    const inside = row >= fillPreview.top && row <= fillPreview.bottom && col >= fillPreview.left && col <= fillPreview.right
+    return inside && (!rect || row < rect.top || row > rect.bottom || col < rect.left || col > rect.right)
+  }
 
   /** 좌측 고정 열의 누적 left 값. 조절된 너비를 따라간다. 행 번호 칸이 맨 왼쪽에 먼저 붙는다. */
   const fixedLeft = (id: string): number => {
@@ -1322,6 +1496,21 @@ export function FabricRequest() {
     saveViewPref(ROW_HEIGHTS_KEY, next)
   }
 
+  /**
+   * 포커스 셀을 화면 안으로 굴린다.
+   * 스타일 값은 rowSpan으로 묶여 있어 그 줄에 td가 없을 수 있다. 위로 올라가며 묶음의 첫 칸을 찾는다.
+   */
+  const scrollCellIntoView = (cell: CellRef) => {
+    window.requestAnimationFrame(() => {
+      const root = scrollRef.current
+      if (!root) return
+      for (let row = cell.row; row >= 0; row -= 1) {
+        const found = root.querySelector<HTMLElement>(`td[data-slot-index="${row}"][data-col-id="${CSS.escape(cell.col)}"]`)
+        if (found) { found.scrollIntoView({ block: "nearest", inline: "nearest" }); return }
+      }
+    })
+  }
+
   const moveSelection = (direction: CellMove, extend = false, wrap = false) => {
     if (!range || !visibleColumns.length || !slots.length) return
     let row = range.focus.row, col = colIndexOf.get(range.focus.col) ?? 0
@@ -1339,6 +1528,7 @@ export function FabricRequest() {
     }
     row = Math.max(0, Math.min(slots.length - 1, row)); col = Math.max(0, Math.min(visibleColumns.length - 1, col))
     setCellAnchor({ row, col: visibleColumns[col].id }, extend)
+    scrollCellIntoView({ row, col: visibleColumns[col].id })
   }
   const beginCellEdit = (cell: CellRef, seed?: string) => { if (readOnly) { commitRequests(requests); return } if (editableCell(cell)) setEditCell({ ...cell, seed }) }
   const copyRange = async (cut = false) => {
@@ -1460,7 +1650,7 @@ export function FabricRequest() {
       const style = line.style
       switch (column.id) {
         case "image":
-          return <ImageCell style={style} onUploaded={(paths) => patchStyle(style.reqId, paths)} onOpen={() => setPreview(style)} />
+          return <ImageCell style={style} readOnly={readOnly} onUploaded={(paths) => patchStyle(style.reqId, paths)} onOpen={() => setPreview(style)} onDelete={(anchor) => removeImage(style, anchor)} />
         case "garmentNo": return <span className="font-mono">{style.garmentNo}</span>
         case "boardName": {
           const board = requestBoards.find((item) => item.boardId === style.boardId)
@@ -1525,7 +1715,7 @@ export function FabricRequest() {
         rowSpan={rowSpan}
         data-col-id={column.id}
         data-slot-index={slotIndex}
-        className={`relative min-w-0 overflow-hidden border-b border-r border-[var(--border)] p-0 align-top text-xs ${sel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,var(--card))]" : column.id === "remark" ? "bg-[color-mix(in_srgb,var(--warning)_7%,var(--card))]" : "bg-[var(--card)]"} ${isOption ? "" : "border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]"} ${fixed ? "sticky z-10" : ""} ${readOnly ? "cursor-default" : "cursor-cell"}`}
+        className={`relative min-w-0 overflow-hidden border-b border-r border-[var(--border)] p-0 align-top text-xs ${sel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,var(--card))]" : column.id === "remark" ? "bg-[color-mix(in_srgb,var(--warning)_7%,var(--card))]" : "bg-[var(--card)]"} ${isOption ? "" : "border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]"} ${fixed ? "sticky z-10" : ""} ${readOnly ? "cursor-default" : "cursor-cell"} ${inFillPreview(slotIndex, column.id) ? "outline outline-1 outline-dashed outline-[var(--grid-selection)] -outline-offset-1" : ""}`}
         style={{ height, width: widthOf(column), boxShadow: selectionShadow(sel), ...(fixed ? { left: fixedLeft(column.id) } : null) }}
         title={isOption ? String(rawValue(line, column.id) ?? "") : editable ? "더블클릭해서 수정" : undefined}
         onMouseDown={(event) => onCellMouseDown(event, cellRef)}
@@ -1554,7 +1744,7 @@ export function FabricRequest() {
             {cellValue(line, column)}
           </div>
         )}
-        <FillHandle visible={sel.handle} onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); fillRef.current = rect; dragRef.current = true }} />
+        <FillHandle visible={sel.handle && !readOnly} onMouseDown={startFill} />
         {isOption && column.id === "optNo" ? (
           <Button
             type="button"
@@ -1615,7 +1805,9 @@ export function FabricRequest() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-4">
+    // --grid-selection 은 선택 테두리(selectionShadow)와 선택 배경, 채우기 핸들 색이 모두 쓴다.
+    // 없으면 box-shadow 와 color-mix 가 무효가 되어 선택이 하나도 안 보인다. DD MASTER, WAREHOUSE 와 같은 값이다.
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-4" style={{ "--grid-selection": "#217346" } as CSSProperties}>
       <div className="flex shrink-0 items-center gap-2 overflow-x-auto">
         {/* 보드 탭 레일. 전체와 보드 묶음을 구분선으로 가르고, 보드마다 종류 색 막대와 건수 배지로 구분한다. */}
         <div className="flex min-w-0 items-center gap-1 overflow-x-auto rounded-xl border border-[var(--border)] bg-[color-mix(in_srgb,var(--muted)_55%,transparent)] p-1">
@@ -1698,6 +1890,16 @@ export function FabricRequest() {
             <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-[var(--muted-foreground)]" onClick={resetColumnWidths} title="열 너비를 기본값으로 되돌립니다">
               <RotateCcw className="size-3.5" />너비 초기화
             </Button>
+            {hiddenColumnList.length ? <span className="relative shrink-0">
+              <button type="button" aria-expanded={hiddenMenuOpen} onClick={() => setHiddenMenuOpen((current) => !current)} className="flex items-center gap-1 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--background)] px-1.5 py-0.5 text-[11px] font-normal text-[var(--muted-foreground)] hover:text-[var(--foreground)]">숨긴 열 <span className="tabular-nums">{hiddenColumnList.length}</span></button>
+              {hiddenMenuOpen ? <>
+                <span className="fixed inset-0 z-[80]" onMouseDown={() => setHiddenMenuOpen(false)} />
+                <span className="absolute right-0 top-full z-[81] mt-1 block max-h-64 w-44 overflow-auto rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-1 shadow-lg">
+                  <button type="button" onClick={() => { showAllColumns(); setHiddenMenuOpen(false) }} className="mb-1 block w-full rounded px-2 py-1 text-left text-[11px] font-medium hover:bg-[var(--muted)]">모두 다시 보이기</button>
+                  {hiddenColumnList.map((column) => <button key={column.id} type="button" onClick={() => showColumn(column.id)} className="block w-full truncate rounded px-2 py-1 text-left text-[11px] hover:bg-[var(--muted)]">{column.label}</button>)}
+                </span>
+              </> : null}
+            </span> : null}
             <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-[var(--muted-foreground)]" onClick={resetRowHeights} title="행 높이를 기본값으로 되돌립니다">
               <RotateCcw className="size-3.5" />높이 초기화
             </Button>
@@ -1792,11 +1994,21 @@ export function FabricRequest() {
                 {visibleGroups.flatMap((group) => group.columns.map((column) => (
                   <TableHead
                     key={column.id}
-                    className={`relative sticky top-6 z-30 h-8 truncate border-b border-r border-[var(--border)] bg-[var(--muted)] px-2 text-center text-xs font-normal text-[var(--muted-foreground)]`}
+                    className={`group/col relative sticky top-6 z-30 h-8 truncate border-b border-r border-[var(--border)] bg-[var(--muted)] px-2 text-center text-xs font-normal text-[var(--muted-foreground)]`}
                     style={{ width: widthOf(column) }}
                     title={column.label}
                   >
                     {column.label}
+                    <button
+                      type="button"
+                      aria-label={`${column.label} 열 숨기기`}
+                      title={`${column.label} 열 숨기기`}
+                      onMouseDown={(event) => event.stopPropagation()}
+                      onClick={(event) => { event.stopPropagation(); hideColumn(column.id) }}
+                      className="absolute left-0.5 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none opacity-0 transition-opacity hover:bg-[var(--muted)] group-hover/col:opacity-100"
+                    >
+                      −
+                    </button>
                     <span
                       aria-hidden="true"
                       title={`${column.label} 너비 조절`}
