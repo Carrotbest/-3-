@@ -18,7 +18,7 @@ export interface ProcessStage {
   currentIndex: number
   label: string
   color: string
-  halted?: "보류" | "드롭" | "반려"
+  halted?: "HOLD" | "DROP" | "REJECT"
   record?: DevRecord
 }
 
@@ -104,11 +104,12 @@ export function requestProcessStage(byLine: Map<string, DevRecord[]>, option: Re
     return { key, label: STEP_LABELS[key], date, state, color: stepColor(index, keys.length) }
   })
   const normalizedStatus = String(record.devStatus ?? "").replace(/\s+/g, "").toUpperCase()
+  // DD 원문 그대로 HOLD·DROP·REJECT로 적는다(2026-10-07 박향근 확정). 옛 한글 표기 "보류"도 HOLD로 받는다.
   const halted = normalizedStatus === "HOLD" || normalizedStatus === "보류"
-    ? "보류"
-    : normalizedStatus === "DROP" ? "드롭"
-      : normalizedStatus === "REJECT" ? "반려" : undefined
-  const color = halted === "보류"
+    ? "HOLD"
+    : normalizedStatus === "DROP" ? "DROP"
+      : normalizedStatus === "REJECT" ? "REJECT" : undefined
+  const color = halted === "HOLD"
     ? "var(--warning)"
     : halted ? "var(--muted-foreground)" : steps[currentIndex].color
 

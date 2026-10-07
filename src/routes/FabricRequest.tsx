@@ -16,7 +16,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { CONSTRUCTIONS, matchConstruction } from "@/data/constructions"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { buildFabricLedger } from "@/data/fabric-ledger"
-import { applyRequestLinks, clearRequestLinksByLineId, ddRecordsByLineId, ensureRequestLineIds, liveRequestLineIds, requestDdStatus, type RequestDdStatus } from "@/data/request-link"
+import { applyRequestLinks, clearRequestLinksByLineId, ddRecordsByLineId, ensureRequestLineIds, liveRequestLineIds, requestDdStatus } from "@/data/request-link"
 import { requestProcessStage, type ProcessStage } from "@/data/request-process-stage"
 import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindColor, buildBoardArchive, canDeleteBoard, canManageBoard, closeBoard, migrateChartsToBoards, nextBoardSeq, removeBoardWithStyles, reopenBoard, resultOf } from "@/data/request-board"
 import type { AuditKind } from "@/data/audit"
@@ -104,7 +104,7 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
     { id: "remark", label: "Remark", width: 220, scope: "style" },
     // 보기 전용 두 열. DD 행의 tech.requestLink를 읽어 계산하며 요청 데이터나 엑셀 양식에는 없다.
     { id: "ddStage", label: "공정", width: 96, scope: "option", align: "center" },
-    { id: "ddLink", label: "Link", width: 150, scope: "option" },
+    { id: "ddLink", label: "FL no.", width: 150, scope: "option" },
   ] },
 ]
 
@@ -766,39 +766,32 @@ export function FabricRequest() {
       .flatMap((item) => item.record ? [[`${item.record._src.sheet}::${item.record._src.row}`, item.key] as const] : []),
   ), [ddCompletedSamples, ddFabricOverrides, ddRecords])
   const [stageTarget, setStageTarget] = useState<{ stage: ProcessStage; title: string; rowId?: string } | null>(null)
-  const DD_TONE_CLASS: Record<RequestDdStatus["tone"], string> = {
-    none: "bg-[var(--muted)] text-[var(--muted-foreground)]",
-    progress: "bg-[color-mix(in_srgb,var(--chart-1)_14%,transparent)] text-[var(--chart-1)]",
-    late: "bg-[color-mix(in_srgb,var(--destructive)_14%,transparent)] text-[var(--destructive)]",
-    received: "bg-[color-mix(in_srgb,var(--chart-2)_12%,transparent)] text-[var(--chart-2)]",
-    done: "bg-[color-mix(in_srgb,var(--chart-2)_26%,transparent)] font-semibold text-[var(--chart-2)]",
-    hold: "bg-[color-mix(in_srgb,var(--warning)_16%,transparent)] text-[var(--warning)]",
-    drop: "bg-[var(--muted)] text-[var(--muted-foreground)] line-through",
-  }
-  const renderDdLink = (style: RequestStyle, option: RequestOption): ReactNode => {
+  // FL no. 열은 FL#만 보인다(2026-10-07 박향근 확정). 연결 여부는 왼쪽 공정 열이 말한다.
+  // 공정 상태가 보이면 그 자체로 연결된 것이라 체크 표시를 따로 두지 않는다. 미연결 표시는 공정 열로 옮겼다.
+  const renderDdLink = (_style: RequestStyle, option: RequestOption): ReactNode => {
     const status = requestDdStatus(ddByLine, option)
-    const chip = "whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-    if (status.tone === "none") return <button
-      type="button"
-      title="더블클릭하면 연결할 DD 행 후보를 보여줍니다"
-      onMouseDown={(event) => event.stopPropagation()}
-      onDoubleClick={(event) => { event.stopPropagation(); setDdPick({ style, option }) }}
-      className={`${chip} ${DD_TONE_CLASS.none} hover:opacity-80`}
-    >미연결</button>
+    if (!status.flNo) return null
     // 버튼 누름이 셀 선택·편집으로 번지지 않게 막는다.
     const stop = (event: React.MouseEvent) => event.stopPropagation()
     const openDd = () => navigate(`/development/workspace?focus=${encodeURIComponent(status.rowId ?? "")}`)
     const ledgerKey = status.rowId ? ddLedgerKeyByRow.get(status.rowId) : undefined
-    const linkTone: RequestDdStatus["tone"] = status.tone === "hold" || status.tone === "drop" || status.tone === "done" ? status.tone : "progress"
     return <span className="inline-flex flex-wrap items-center gap-1">
-      <button type="button" title="DD MASTER에서 열기" onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); openDd() }} className={`${chip} ${DD_TONE_CLASS[linkTone]} hover:opacity-80`}>연결</button>
-      {status.flNo ? <button type="button" title="원단 상세 열기" onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); if (ledgerKey) navigate(`/fabric/${encodeURIComponent(ledgerKey)}`); else openDd() }} className="font-mono text-[11px] text-[var(--primary)] underline-offset-2 hover:underline">{status.flNo}</button> : null}
-      {status.flNo ? <FlPerfMark flNo={status.flNo} /> : null}
+      <button type="button" title={`${status.label} · 원단 상세 열기`} onMouseDown={stop} onDoubleClick={stop} onClick={(event) => { event.stopPropagation(); if (ledgerKey) navigate(`/fabric/${encodeURIComponent(ledgerKey)}`); else openDd() }} className="font-mono text-[11px] text-[var(--primary)] underline-offset-2 hover:underline">{status.flNo}</button>
+      <FlPerfMark flNo={status.flNo} />
       {status.extra > 0 ? <span title={`같은 옵션에 연결된 DD 행이 ${status.extra}개 더 있습니다`} className="text-[10px] text-[var(--muted-foreground)]">+{status.extra}</span> : null}
     </span>
   }
   const renderDdStage = (style: RequestStyle, option: RequestOption): ReactNode => {
     const stage = requestProcessStage(ddByLine, option)
+    // 미연결은 이 열에서 말한다. 더블클릭하면 연결할 DD 행 후보 창이 열린다.
+    // REQUEST 화면의 유일한 연결 진입점이라 없애지 말 것.
+    if (!stage.linked) return <button
+      type="button"
+      title="더블클릭하면 연결할 DD 행 후보를 보여줍니다"
+      onMouseDown={(event) => event.stopPropagation()}
+      onDoubleClick={(event) => { event.stopPropagation(); setDdPick({ style, option }) }}
+      className="whitespace-nowrap text-[10px] font-medium text-[var(--destructive)] underline-offset-2 hover:underline"
+    >미연결</button>
     const status = requestDdStatus(ddByLine, option)
     return <ProcessStageChip
       stage={stage}
@@ -1451,12 +1444,11 @@ export function FabricRequest() {
     if (columnId === "ddStage") {
       if (line.kind !== "option") return ""
       const stage = requestProcessStage(ddByLine, line.option)
-      return stage.linked ? stage.label : ""
+      return stage.linked ? stage.label : "미연결"
     }
     if (columnId === "ddLink") {
       if (line.kind !== "option") return ""
-      const status = requestDdStatus(ddByLine, line.option)
-      return status.tone === "none" ? "" : ["연결", status.flNo].filter(Boolean).join(" ")
+      return requestDdStatus(ddByLine, line.option).flNo ?? ""
     }
     // 옛 옵션별 REMARK를 합친 값까지 보이게 한다. 그 칸을 고치면 style.remark로 굳는다(R291).
     if (columnId === "remark") return styleRemarkText(line.style)

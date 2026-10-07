@@ -14,10 +14,10 @@ export function RequestBoardHeader({ board, styles, stageOf, canManage, canDelet
     const stage = stageOf(option)
     const key = !stage.linked ? "waiting" : stage.halted ? `halted:${stage.halted}` : stage.steps[stage.currentIndex]?.key ?? "waiting"
     const label = !stage.linked ? "대기" : stage.halted ?? stage.label
-    const color = !stage.linked ? "var(--muted)" : stage.halted === "보류" ? "var(--warning)" : stage.halted ? "var(--muted-foreground)" : processStepColor(key as (typeof PROCESS_STEP_ORDER)[number])
+    const color = !stage.linked ? "var(--muted)" : stage.halted === "HOLD" ? "var(--warning)" : stage.halted ? "var(--muted-foreground)" : processStepColor(key as (typeof PROCESS_STEP_ORDER)[number])
     const current = stages.get(key); stages.set(key, { label, color, count: (current?.count ?? 0) + 1 })
   })
-  const ordered = [...PROCESS_STEP_ORDER.map((key) => stages.get(key)).filter(Boolean), stages.get("waiting"), stages.get("halted:보류"), stages.get("halted:드롭"), stages.get("halted:반려")].filter(Boolean) as { label: string; count: number; color: string }[]
+  const ordered = [...PROCESS_STEP_ORDER.map((key) => stages.get(key)).filter(Boolean), stages.get("waiting"), stages.get("halted:HOLD"), stages.get("halted:DROP"), stages.get("halted:REJECT")].filter(Boolean) as { label: string; count: number; color: string }[]
   const total = ordered.reduce((sum, item) => sum + item.count, 0)
   const created = new Date(board.createdAt)
   return <div className="grid shrink-0 gap-4 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-3 lg:grid-cols-[minmax(220px,1fr)_auto_minmax(280px,1.3fr)]">

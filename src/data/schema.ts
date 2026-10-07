@@ -216,7 +216,8 @@ export interface RequestArchiveStage {
   linked: boolean
   label: string
   stepKey?: ProcessStepKey
-  halted?: "보류" | "드롭" | "반려"
+  /** 2026-10-07부터 HOLD·DROP·REJECT로 적는다. 그 전에 종결한 스냅샷에는 한글 표기가 남아 있다. */
+  halted?: "HOLD" | "DROP" | "REJECT" | "보류" | "드롭" | "반려"
   currentIndex: number
   total: number
   flNo?: string

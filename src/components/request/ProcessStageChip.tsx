@@ -16,7 +16,7 @@ export function ProcessStageChip({ stage, onOpen }: ProcessStageChipProps) {
 
   const stop = (event: MouseEvent) => event.stopPropagation()
   const progress = stage.currentIndex < 0 ? 0 : (stage.currentIndex + 1) / stage.steps.length * 100
-  const struck = stage.halted === "드롭" || stage.halted === "반려"
+  const struck = stage.halted === "DROP" || stage.halted === "REJECT"
   const title = stage.linked ? `${stage.currentIndex + 1}/${stage.steps.length}단계 ${stage.label}` : "대기"
 
   return (
