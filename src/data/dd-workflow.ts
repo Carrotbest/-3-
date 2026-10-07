@@ -70,9 +70,24 @@ const identity = (record: DevRecord): string => `${record._src.sheet}::${record.
  * 진짜로 빠뜨린 건과 섞여 경고 전체가 무의미해진다(2026-10-06 박향근 확정).
  * 판정 어휘는 `derive.ts` `isScheduleOpen` 과 같게 유지한다.
  */
-const STOPPED_STATUSES = new Set(["HOLD", "보류", "DROP", "REJECT"])
+/**
+ * 멈춘 행의 상태를 DD 원문 표기로 돌려준다. 멈춘 행이 아니면 null이다.
+ * 옛 한글 표기 "보류"는 HOLD로 받는다(R316과 같은 규칙).
+ *
+ * **표시 전용이다. 이 글자를 셀 값으로 저장하지 말 것.** FL# 칸에 글자가 들어가면 원장이
+ * 그 글자로 행을 묶는다. 2026-10-02에 DD FL 칸에 DROP을 붙여넣어 창고보관 3건이 사라지고
+ * 1건이 다른 원단으로 보였다(R287~R290). DD FL#는 새 입력에 FL+8자리만 받는다.
+ */
+export function stoppedStatusLabel(record: DevRecord): "HOLD" | "DROP" | "REJECT" | null {
+  const status = normalizedStatus(record).replace(/\s+/g, "")
+  if (status === "HOLD" || status === "보류") return "HOLD"
+  if (status === "DROP") return "DROP"
+  if (status === "REJECT") return "REJECT"
+  return null
+}
+/** 판정과 표기가 갈라지지 않게 `stoppedStatusLabel` 하나만 본다. */
 export function isStoppedRecord(record: DevRecord): boolean {
-  return STOPPED_STATUSES.has(normalizedStatus(record).replace(/\s+/g, ""))
+  return stoppedStatusLabel(record) !== null
 }
 
 function dayValue(date: Date): number {

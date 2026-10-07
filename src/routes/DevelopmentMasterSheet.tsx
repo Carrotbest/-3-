@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { useAuthStore } from "@/data/auth"
 import { FABRIC_STATUS_META, buildFabricLedger, storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord, isStoppedRecord } from "@/data/dd-workflow"
+import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord, isStoppedRecord, stoppedStatusLabel } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
@@ -132,6 +132,13 @@ const dateText = (value: CellValue): string => value ? fmtDateMd(String(value)) 
  * 표시 전용이다. 이 글자를 셀 값으로 저장하지 말 것.
  */
 const NotApplicable = () => <span>N/A</span>
+/**
+ * 멈춘 행의 FL# 칸. 번호가 왜 없는지 그 자리에 적는다(2026-10-07 박향근 확정).
+ * **붉은 글자도 같은 날 확정이다.** 위 `NotApplicable`의 "색을 주지 않는다"는 N/A 에만 해당한다.
+ * 고정폭이 아니라 FL# 번호와 모양이 다르다. 색을 빼는 쪽으로 되돌리지 말 것.
+ * 표시 전용이다. 이 글자를 셀 값으로 저장하지 말 것. 창고 FL 칸이 같은 글자를 비춘다.
+ */
+const StoppedStatusMark = ({ record }: { record: DevRecord }) => <span className="text-[var(--destructive)]">{stoppedStatusLabel(record)}</span>
 /**
  * FDS·YDS 전용. 국내 작업은 이 공정 자체가 없으므로 미수취로 몰아세우지 않고 N/A로 비운다.
  * 멈춘 행도 같다. 날짜가 이미 있으면 그 값을 그대로 보인다. 멈추기 전에 받은 기록이다.
@@ -260,7 +267,7 @@ const GROUPS: MasterGroup[] = [
       { id: "receivedDate", label: "Received date", width: 96, date: true, value: (row) => row.receivedDate, render: receiptDateRender((row) => row.receivedDate) },
       { id: "fds", label: "FDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.fds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.fds) },
       { id: "yds", label: "YDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.yds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.yds) },
-      { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo.trim() ? <span className={`inline-flex items-center font-mono ${isCompletedFlNo(row.flNo) ? "" : "text-[var(--destructive)]"}`} title={isCompletedFlNo(row.flNo) ? undefined : "FL + 숫자 8자리 형식만 완료로 인정합니다"}>{row.flNo}{isCompletedFlNo(row.flNo) ? <FlPerfMark flNo={row.flNo} /> : null}</span> : isStoppedRecord(row) ? <NotApplicable /> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미등록</span> : "" },
+      { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo.trim() ? <span className={`inline-flex items-center font-mono ${isCompletedFlNo(row.flNo) ? "" : "text-[var(--destructive)]"}`} title={isCompletedFlNo(row.flNo) ? undefined : "FL + 숫자 8자리 형식만 완료로 인정합니다"}>{row.flNo}{isCompletedFlNo(row.flNo) ? <FlPerfMark flNo={row.flNo} /> : null}</span> : isStoppedRecord(row) ? <StoppedStatusMark record={row} /> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미등록</span> : "" },
       { id: "optionProgress", label: "옵션 완료", width: 67, align: "center", value: (row) => row.tech?.optionProgress },
       { id: "review", label: "Review", width: 123, value: (row) => row.tech?.review },
     ],

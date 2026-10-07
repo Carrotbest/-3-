@@ -33,6 +33,7 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/compon
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { firstWarehouseDenial, type WarehouseActor, type WarehouseRule } from "@/data/warehouse-policy"
 import { buildFabricLedger, FABRIC1_STORAGE_NO_MAX, FABRIC1_STORAGE_NO_MIN, fabricRecordIdentity, isFabric1Item, latestActiveOutbound, STORAGE_NO_MAX, STORAGE_NO_WRAP, storageNoLabel, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
+import { stoppedStatusLabel } from "@/data/dd-workflow"
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { departmentMailLabel } from "@/data/departments"
@@ -1190,7 +1191,15 @@ export function Warehouse() {
       ? <TextCell value={item.rackNo} mono />
       : <span className="text-[10px] text-[var(--muted-foreground)]" title="더블클릭해서 Rack No. 입력">미지정</span>
     if (id === "styleNo") return <TextCell value={item.styleNo} mono />
-    if (id === "flNo") return <TextCell value={item.flNo} mono />
+    if (id === "flNo") {
+      // 멈춘 행은 번호 대신 상태를 비춘다(2026-10-07 박향근 확정). DD MASTER FL# 칸과 같은 글자다.
+      // 창고는 보기만 하는 화면이고 수정은 DD에서 한다. 표시 전용이라 원장 값은 빈칸 그대로다.
+      // cellRawValue 는 손대지 말 것. 편집 초기값, 복사, 검색, 정렬, 창고팀 엑셀이 거기서 나온다.
+      const stopped = item.flNo.trim() || !item.record ? null : stoppedStatusLabel(item.record)
+      // 붉은 글자는 2026-10-07 박향근 확정이다. DD MASTER 와 같은 모양으로 맞춘다.
+      if (stopped) return <span title={stopped} className="block truncate text-[var(--destructive)]">{stopped}</span>
+      return <TextCell value={item.flNo} mono />
+    }
     if (id === "owner") return <TextCell value={item.owner} />
     if (id === "stock") {
       const balance = item.balance === null ? null : Math.max(0, item.balance)
