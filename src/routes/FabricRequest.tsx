@@ -2062,12 +2062,14 @@ export function FabricRequest() {
                   else if (runs.at(-1) !== 0) runs.push(0)
                   return runs
                 }, []).filter((run) => run > 0)
+                // 스타일 전체가 완료면 블록의 모든 칸을 흐리게 한다. 액션 칸과 옵션 추가 줄도 포함이다.
+                const blockDone = doneByStyle.get(style.reqId)?.all ?? false
 
                 rows.push(
                   <TableRow key={`s:${style.reqId}`} data-req-id={style.reqId} className={firstOption ? "group/opt hover:bg-[var(--accent)]" : undefined} style={{ height: hasOptionColumns ? optionRowHeight : blockHeight }}>
                     <TableCell
                       rowSpan={rowSpan}
-                      className={`relative sticky left-0 z-20 select-none border-b border-r border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 text-center align-top text-[10px] font-medium tabular-nums text-[var(--muted-foreground)] ${doneByStyle.get(style.reqId)?.all ? "bg-[color-mix(in_srgb,var(--muted-foreground)_18%,var(--muted))]" : "bg-[var(--muted)]"}`}
+                      className={`relative sticky left-0 z-20 select-none border-b border-r border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 text-center align-top text-[10px] font-medium tabular-nums text-[var(--muted-foreground)] ${blockDone ? "bg-[color-mix(in_srgb,var(--muted-foreground)_18%,var(--muted))]" : "bg-[var(--muted)]"}`}
                       style={{ width: ROW_NO_WIDTH, height: blockHeight, ...(focusedReqId === style.reqId ? { outline: "2px solid var(--primary)", outlineOffset: "-2px" } : null) }}
                       title="우클릭: 옵션 추가·삭제"
                       data-row-start={styleStart}
@@ -2098,7 +2100,7 @@ export function FabricRequest() {
                         : renderDataCell(styleLine, column, styleStart, optionRowHeight, optionRowHeight))}
                     <TableCell
                       rowSpan={rowSpan}
-                      className="border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] bg-[var(--card)] p-0 align-top"
+                      className={`border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 align-top ${blockDone ? DONE_CELL_BG : "bg-[var(--card)]"}`}
                       style={{ height: blockHeight, width: ACTION_WIDTH }}
                     >
                       <div className="flex items-start justify-center gap-0.5 pt-1">
@@ -2127,7 +2129,7 @@ export function FabricRequest() {
                     // 스타일마다 버튼이 떠 있으면 옵션 값보다 버튼이 먼저 눈에 든다. 우클릭 메뉴에도 같은 동작이 있다.
                     <TableRow key={`a:${style.reqId}`} className="group/add border-b border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]" style={{ height: ADD_ROW_HEIGHT }}>
                       {addRowSpans.map((span, runIndex) => (
-                        <TableCell key={`add-run-${runIndex}`} colSpan={span} className="border-b border-r border-[var(--border)] border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] bg-[var(--card)] p-0">
+                        <TableCell key={`add-run-${runIndex}`} colSpan={span} className={`border-b border-r border-[var(--border)] border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))] p-0 ${blockDone ? DONE_CELL_BG : "bg-[var(--card)]"}`}>
                           {runIndex === 0 ? (
                             <Button type="button" variant="ghost" aria-label={`${style.garmentNo || "스타일"} 옵션 추가`} className="h-5 w-full justify-start gap-1 px-2 text-[11px] font-normal text-[var(--muted-foreground)] opacity-0 transition-opacity duration-150 hover:text-[var(--foreground)] focus-visible:opacity-100 group-hover/add:opacity-100 motion-reduce:transition-none" onClick={(event) => addOption(style, { x: event.clientX, y: event.clientY })}>
                               <Plus className="size-3" />옵션 추가
