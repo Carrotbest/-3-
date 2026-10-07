@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { useAuthStore } from "@/data/auth"
 import { FABRIC_STATUS_META, buildFabricLedger, storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord } from "@/data/dd-workflow"
+import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord, isStoppedRecord } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
@@ -47,7 +47,6 @@ const MIN_COLUMN_WIDTH = 56
 /** 더 이상 진행하지 않는 상태. 전체 탭에서는 감추고, 담당 탭에서는 위로 올려 흐리게 보여 준다. */
 const CLOSED_STATUSES = new Set(["완료", "DROP", "REJECT"])
 /** 더 진행되지 않는 행. 받을 것이 없으니 미수취로 몰아세우지 않는다. 완료는 여기 넣지 않는다. */
-const DEAD_STATUSES = new Set(["DROP", "REJECT", "HOLD"])
 /** 종료된 행의 회색. DD MASTER 에서 쓰는 회색 중 가장 진하다. */
 const DIMMED_ROW_BG = "color-mix(in srgb, var(--foreground) 24%, var(--card))"
 const isClosedRecord = (record: DevRecord): boolean => CLOSED_STATUSES.has(String(record.devStatus || record.stage || "").trim())
@@ -128,13 +127,22 @@ interface MasterGroup {
 const text = (value: CellValue): string => value === null || value === undefined || value === "" ? "" : String(value)
 const dateText = (value: CellValue): string => value ? fmtDateMd(String(value)) : ""
 /**
- * FDS·YDS 전용. 국내 작업은 이 공정 자체가 없으므로 미수취로 몰아세우지 않고 해당 없음으로 비운다.
+ * 받을 것도 채울 것도 없는 칸. 멈춘 행(HOLD·DROP·REJECT)과 공정 자체가 없는 국내 FDS·YDS 등에
+ * 색을 주지 않는다. 같은 글자가 칸마다 다른 색이면 결함으로 보인다.
+ * 표시 전용이다. 이 글자를 셀 값으로 저장하지 말 것.
+ */
+const NotApplicable = () => <span>N/A</span>
+/**
+ * FDS·YDS 전용. 국내 작업은 이 공정 자체가 없으므로 미수취로 몰아세우지 않고 N/A로 비운다.
+ * 멈춘 행도 같다. 날짜가 이미 있으면 그 값을 그대로 보인다. 멈추기 전에 받은 기록이다.
  * 셀 편집도 `isLockedCell`에서 함께 막는다.
  */
 const gdReceiptDateRender = (value: (record: DevRecord) => CellValue): NonNullable<MasterColumn["render"]> => (record) => {
-  if (!isGdRecord(record)) return <span className="text-[var(--muted-foreground)]">해당 없음</span>
+  if (!isGdRecord(record)) return <NotApplicable />
   const date = value(record)
-  return date ? dateText(date) : <span className="text-[var(--destructive)]">미수취</span>
+  if (date) return dateText(date)
+  if (isStoppedRecord(record)) return <NotApplicable />
+  return <span className="text-[var(--destructive)]">미수취</span>
 }
 
 /**
@@ -147,9 +155,7 @@ const gdReceiptDateRender = (value: (record: DevRecord) => CellValue): NonNullab
 const receiptDateRender = (value: (record: DevRecord) => CellValue): NonNullable<MasterColumn["render"]> => (record) => {
   const date = value(record)
   if (date) return dateText(date)
-  if (DEAD_STATUSES.has(String(record.devStatus || record.stage || "").trim().toUpperCase())) {
-    return <span className="text-[var(--muted-foreground)]">해당 없음</span>
-  }
+  if (isStoppedRecord(record)) return <NotApplicable />
   return <span className="text-[var(--destructive)]">미수취</span>
 }
 
@@ -254,7 +260,7 @@ const GROUPS: MasterGroup[] = [
       { id: "receivedDate", label: "Received date", width: 96, date: true, value: (row) => row.receivedDate, render: receiptDateRender((row) => row.receivedDate) },
       { id: "fds", label: "FDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.fds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.fds) },
       { id: "yds", label: "YDS", width: 76, date: true, value: (row) => row.tech?.sampleDates?.yds, render: gdReceiptDateRender((row) => row.tech?.sampleDates?.yds) },
-      { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo.trim() ? <span className={`inline-flex items-center font-mono ${isCompletedFlNo(row.flNo) ? "" : "text-[var(--destructive)]"}`} title={isCompletedFlNo(row.flNo) ? undefined : "FL + 숫자 8자리 형식만 완료로 인정합니다"}>{row.flNo}{isCompletedFlNo(row.flNo) ? <FlPerfMark flNo={row.flNo} /> : null}</span> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미등록</span> : "" },
+      { id: "flNo", label: "FL#", width: 81, mono: true, value: (row) => row.flNo, render: (row) => row.flNo.trim() ? <span className={`inline-flex items-center font-mono ${isCompletedFlNo(row.flNo) ? "" : "text-[var(--destructive)]"}`} title={isCompletedFlNo(row.flNo) ? undefined : "FL + 숫자 8자리 형식만 완료로 인정합니다"}>{row.flNo}{isCompletedFlNo(row.flNo) ? <FlPerfMark flNo={row.flNo} /> : null}</span> : isStoppedRecord(row) ? <NotApplicable /> : ddWarnings(row).some((item) => item.key === "fl") ? <span className="text-[var(--destructive)]">FL 미등록</span> : "" },
       { id: "optionProgress", label: "옵션 완료", width: 67, align: "center", value: (row) => row.tech?.optionProgress },
       { id: "review", label: "Review", width: 123, value: (row) => row.tech?.review },
     ],
