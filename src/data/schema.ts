@@ -281,7 +281,9 @@ export interface FabricAnalysisRow {
   owner: string
 }
 
-export const ANALYSIS_STATES = ["작성", "의뢰", "완료", "취소"] as const
+export const ANALYSIS_STATES = ["작성", "의뢰", "완료"] as const
+/** 제거된 이전 상태값(R301). 남아 있는 데이터를 걸러내는 데만 쓴다. 상태 목록에 되돌리지 않는다. */
+export const LEGACY_ANALYSIS_CANCELLED = "취소"
 export type AnalysisState = (typeof ANALYSIS_STATES)[number]
 export const ANALYSIS_REQUEST_TYPES = ["Normal", "Urgent"] as const
 export type AnalysisRequestType = (typeof ANALYSIS_REQUEST_TYPES)[number]

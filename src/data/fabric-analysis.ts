@@ -53,6 +53,18 @@ export function analysisLeadDays(item: AnalysisRequest): number | null {
   return Number.isFinite(start) && Number.isFinite(finish) ? Math.max(0, Math.round((finish - start) / 86_400_000)) : null
 }
 
+/**
+ * 분석 의뢰 삭제는 관리자(소유자)와 만든 사람만 한다.
+ * `createdBy`는 만들 때 넣은 의뢰자 메일이다(`blankAnalysisRequest`).
+ * 이전 데이터에는 비어 있을 수 있어 빈 값은 소유자만 지운다.
+ */
+export function canDeleteAnalysis(item: AnalysisRequest, viewer: { isOwner: boolean; email: string }): boolean {
+  if (viewer.isOwner) return true
+  const email = viewer.email.trim().toLowerCase()
+  const creator = (item.createdBy ?? "").trim().toLowerCase()
+  return Boolean(email) && email === creator
+}
+
 export const analysisTodayValue = localDateValue
 
 export interface AnalysisWeeklyPoint {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react"
 import { Check, FileSpreadsheet, ImagePlus, Plus, Trash2, Upload } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -36,6 +36,17 @@ const QUICK_ITEM_COLORS = [
   "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/50",
   "border-lime-200 bg-lime-50 text-lime-700 hover:bg-lime-100 dark:border-lime-800 dark:bg-lime-950/30 dark:text-lime-300 dark:hover:bg-lime-950/50",
 ] as const
+
+/**
+ * 일괄 의뢰 표의 열 기본 너비(px). `colgroup` 순서와 1대1로 맞춘다.
+ * Contents 열은 충분히 길어 펼치고 Request item은 빠른 입력 버튼으로 채우는 칸이라 줄였다.
+ * (2026-10-07 방향근 지시). 열 수가 바뀌면 이 배열도 같이 고쳐야 한다.
+ */
+const BATCH_COL_DEFAULTS = [32, 44, 100, 110, 130, 100, 100, 95, 140, 230, 64, 100, 200, 56, 150, 40]
+const BATCH_COL_MIN = 32
+const BATCH_COL_MAX = 600
+/** 열 너비는 개인 브라우저에만 둔다. `CACHE_KEYS`에 넣지 말 것 — 공유 값이 아니다. */
+const BATCH_COL_WIDTHS_KEY = "fabric.analysis.batchColWidths"
 
 let batchSequence = 0
 const nextBatchKey = () => `analysis-batch-${Date.now()}-${batchSequence++}`
@@ -135,6 +146,46 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
   const [importing, setImporting] = useState(false)
   const [savedNotice, setSavedNotice] = useState<"visible" | "fading" | null>(null)
   const [savedMessage, setSavedMessage] = useState("")
+  const [colWidths, setColWidths] = useState<number[]>(() => {
+    const base = [...BATCH_COL_DEFAULTS]
+    if (typeof window === "undefined") return base
+    try {
+      const raw = window.localStorage.getItem(BATCH_COL_WIDTHS_KEY)
+      if (!raw) return base
+      const stored = JSON.parse(raw) as unknown
+      if (!Array.isArray(stored) || stored.length !== base.length) return base
+      return base.map((value, index) => {
+        const next = stored[index]
+        return typeof next === "number" && next >= BATCH_COL_MIN && next <= BATCH_COL_MAX ? next : value
+      })
+    } catch {
+      return base
+    }
+  })
+
+  useEffect(() => {
+    try { window.localStorage.setItem(BATCH_COL_WIDTHS_KEY, JSON.stringify(colWidths)) } catch { /* 저장소를 못 써도 화면은 기본값으로 뜬다 */ }
+  }, [colWidths])
+
+  const resizeRef = useRef<{ index: number; startX: number; startWidth: number } | null>(null)
+  const startResize = (index: number) => (event: ReactPointerEvent<HTMLSpanElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    resizeRef.current = { index, startX: event.clientX, startWidth: colWidths[index] }
+  }
+  const moveResize = (event: ReactPointerEvent<HTMLSpanElement>) => {
+    const drag = resizeRef.current
+    if (!drag) return
+    const next = Math.min(BATCH_COL_MAX, Math.max(BATCH_COL_MIN, drag.startWidth + (event.clientX - drag.startX)))
+    setColWidths((current) => current.map((value, index) => index === drag.index ? next : value))
+  }
+  const endResize = (event: ReactPointerEvent<HTMLSpanElement>) => {
+    if (!resizeRef.current) return
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+    resizeRef.current = null
+  }
+  const resetColWidth = (index: number) => setColWidths((current) => current.map((value, at) => at === index ? BATCH_COL_DEFAULTS[index] : value))
   const imageInput = useRef<HTMLInputElement>(null)
   const excelInput = useRef<HTMLInputElement>(null)
   const savedFadeTimer = useRef<number | null>(null)
@@ -455,14 +506,9 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
     {batchError ? <p role="alert" className="shrink-0 text-sm text-[var(--destructive)]">{batchError}</p> : null}
     <div className="min-h-0 flex-1 overflow-auto rounded-[var(--radius)] border border-[var(--border)]">
       <table className="w-max min-w-full table-fixed border-collapse text-xs">
-        <colgroup>
-          <col className="w-8" /><col className="w-11" /><col className="w-[100px]" /><col className="w-[110px]" />
-          <col className="w-[130px]" /><col className="w-[100px]" /><col className="w-[100px]" /><col className="w-[95px]" />
-          <col className="w-[140px]" /><col className="w-[150px]" /><col className="w-16" /><col className="w-[100px]" />
-          <col className="w-[300px]" /><col className="w-14" /><col className="w-[150px]" /><col className="w-10" />
-        </colgroup>
+        <colgroup>{colWidths.map((width, index) => <col key={index} style={{ width }} />)}</colgroup>
         <thead className="sticky top-0 z-10 bg-[var(--muted)] text-[var(--muted-foreground)]">
-          <tr>{["#", "사진", "AN No.", "Source *", "Source code", "Brand", "Season/Year", "Gender/Age", "Construction", "Contents", "Weight", "Objective", "Request item *", "Urgent", "Comment", ""].map((label, index) => <th key={`${label}-${index}`} className="h-9 whitespace-nowrap border-b border-r border-[var(--border)] px-1 text-center font-medium last:sticky last:right-0 last:z-10 last:border-l last:border-r-0 last:bg-[var(--muted)]">{requiredLabel(label)}</th>)}</tr>
+          <tr>{["#", "사진", "AN No.", "Source *", "Source code", "Brand", "Season/Year", "Gender/Age", "Construction", "Contents", "Weight", "Objective", "Request item *", "Urgent", "Comment", ""].map((label, index) => <th key={`${label}-${index}`} className="relative h-9 whitespace-nowrap border-b border-r border-[var(--border)] px-1 text-center font-medium last:sticky last:right-0 last:z-10 last:border-l last:border-r-0 last:bg-[var(--muted)]">{requiredLabel(label)}{index < colWidths.length - 1 ? <span role="separator" aria-label={`${label || "마지막"} 열 너비 조절`} title="끌어서 열 너비 조절, 두 번 누르면 기본값" onPointerDown={startResize(index)} onPointerMove={moveResize} onPointerUp={endResize} onPointerCancel={endResize} onDoubleClick={() => resetColWidth(index)} className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize select-none hover:bg-teal-500/40" /> : null}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((row, index) => {
@@ -508,7 +554,7 @@ export function AnalysisRequestDialog({ open, onOpenChange, record, requester, r
     {importWarnings.length ? <p className="shrink-0 text-xs text-amber-700 dark:text-amber-300">{importWarnings.join(" · ")}</p> : null}
   </div>
 
-  return <Dialog open={open} onOpenChange={(next) => { if (!saving && savedNotice === null) onOpenChange(next) }}><DialogContent className={record ? "w-[96vw] max-w-5xl" : "flex max-h-[88vh] w-[98vw] max-w-none flex-col"}>
+  return <Dialog open={open} onOpenChange={(next) => { if (!saving && savedNotice === null) onOpenChange(next) }}><DialogContent className={record ? "w-[96vw] max-w-5xl" : "flex max-h-[88vh] w-[80vw] max-w-[1520px] flex-col"}>
     {savedNotice ? <div className={`pointer-events-none absolute inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${savedNotice === "fading" ? "opacity-0" : "opacity-100"}`}><div className="flex items-center gap-2 rounded-full bg-teal-600 px-5 py-3 text-sm font-medium text-white shadow-lg"><Check className="size-5" />{savedMessage}</div></div> : null}
     <DialogHeader><DialogTitle>{record ? "의뢰 정보 수정" : "새 분석 의뢰"}</DialogTitle><DialogDescription>의뢰는 작성 상태로 저장됩니다. 목록에서 선택한 뒤 의뢰를 확정하세요.</DialogDescription></DialogHeader>
     <DialogBody className={record ? "space-y-4" : "flex min-h-0 flex-col overflow-hidden"}>

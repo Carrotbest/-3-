@@ -13,9 +13,9 @@ export function analysisSheetMode(item: AnalysisRequest): AnalysisPrintMode {
   return item.state === "완료" ? "report" : "request"
 }
 
-/** 취소 건은 종이로 내보내지 않는다. */
-export function isAnalysisPrintable(item: AnalysisRequest): boolean {
-  return item.state !== "취소"
+/** 취소 상태를 제거해(R301) 제외할 건이 없어졌다. 호출부를 그대로 두려고 함수를 남긴다. */
+export function isAnalysisPrintable(_item: AnalysisRequest): boolean {
+  return true
 }
 
 /** 상단 짧은 칸. 네 칸씩 세 줄로 앉는다. 라벨은 AX 리캡 열 이름을 그대로 쓴다. */
