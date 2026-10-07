@@ -734,3 +734,31 @@ tr.perf-row-dim > td { color: color-mix(in srgb, var(--foreground) 62%, transpar
   .cs-print-results div { padding: 2.5mm 3mm; background: #f3f4f6; break-inside: avoid; }
   .cs-print-results b { display: block; margin-top: 1mm; font-size: 14pt; font-weight: 600; }
 }
+
+/* DD MASTER: FABRIC REQUEST 에서 ?focus= 로 넘어온 행 강조(R318).
+   한 번에 한 행뿐이라 모션을 둔다. 세 번 뛰고 멈추며 그 뒤에는 정지한 색만 남는다.
+   표 격자 안이라 backdrop-filter 는 쓰지 않는다(2026-10-07 사고로 화면이 깨졌다).
+   칸 배경이 클래스와 인라인 스타일로 따로 붙어 있어 ::after 로 덮는다. background 를
+   !important 로 덮으면 선택 표시와 흐린 행 색까지 지우고 애니메이션도 무시된다.
+   데이터 행의 모든 칸은 이미 relative 나 sticky 라 기준이 선다. position 을 건드리지 말 것.
+   고정 열이 풀린다. */
+tr[data-dd-focus] > td::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    color-mix(in oklab, var(--grid-selection) 24%, transparent),
+    color-mix(in oklab, var(--grid-selection) 12%, transparent));
+  animation: dd-focus-row 900ms var(--e-soft) 3;
+}
+tr[data-dd-focus] > td:first-child::after {
+  box-shadow: inset 3px 0 0 var(--grid-selection);
+}
+@keyframes dd-focus-row {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  tr[data-dd-focus] > td::after { animation: none !important; }
+}

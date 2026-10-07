@@ -166,6 +166,17 @@ const receiptDateRender = (value: (record: DevRecord) => CellValue): NonNullable
   return <span className="text-[var(--destructive)]">미수취</span>
 }
 
+/**
+ * 스크롤바 위에서 누른 mousedown 인지 본다(R318).
+ * 스크롤바는 요소의 클라이언트 영역(clientWidth·clientHeight) 밖에 있다. 거기서 온 누름은
+ * "다른 곳을 클릭했다"로 세지 않는다. 테두리 한두 픽셀이 걸려도 선택을 지키는 쪽이라 안전하다.
+ */
+function isScrollbarMouseDown(event: MouseEvent, target: Element): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  const box = target.getBoundingClientRect()
+  return event.clientX > box.left + target.clientWidth || event.clientY > box.top + target.clientHeight
+}
+
 function selectionShadow(sel: CellSel): string | undefined {
   if (!sel.inRange) return undefined
   const parts: string[] = []
@@ -1408,6 +1419,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const onDocumentMouseDown = (event: MouseEvent) => {
       const target = event.target
       if (!(target instanceof Element)) return
+      // 스크롤바를 끄는 것은 "다른 곳을 눌렀다"가 아니다(R318). 스크롤바 누름은 요소의
+      // 클라이언트 영역 밖 좌표로 들어온다. 이 판정이 없으면 표를 가로로 끌 때마다 선택이 풀려
+      // 요청 화면에서 찾아 온 행을 눈으로 좇다가 놓친다.
+      if (isScrollbarMouseDown(event, target)) return
+      // 강조는 사람이 어디든 한 번 누르면 끝낸다. 표 안을 눌러도 끝낸다.
+      setFocusedRowId(null)
       if (target.closest("table[data-dd-master-grid]")) return
       // 포털로 열린 메뉴·대화상자·달력·선택 목록을 누를 때는 작업 중인 선택을 보존한다.
       if (target.closest('[role="menu"], [role="dialog"], [role="listbox"], [data-radix-popper-content-wrapper], [data-slot="dialog-content"]')) return
@@ -2011,6 +2028,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   // FABRIC REQUEST의 DD 상태 칩에서 넘어온 행(?focus=rowId)을 보이게 하고 선택한다.
+  // 강조는 선택(range)과 따로 둔다(R318). 선택은 스크롤·편집·다른 조작으로 쉽게 풀리는데
+  // 찾아온 행 표시는 사람이 다른 곳을 누를 때까지 남아야 한다.
+  const [focusedRowId, setFocusedRowId] = useState<string | null>(null)
   const [focusParams, setFocusParams] = useSearchParams()
   const focusRowId = focusParams.get("focus")
   useEffect(() => {
@@ -2037,7 +2057,19 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     // 요청 옵션과 짝인 행이 한눈에 보이게 행 전체를 선택한다. 스크롤 기준은 Style No. 칸이다.
     additiveClickRef.current = false
     selectWholeRow(focusRowId)
-    window.requestAnimationFrame(() => scrollCellIntoView({ row: focusRowId, col: "styleNo" }))
+    setFocusedRowId(focusRowId)
+    // 탭과 필터를 방금 바꾼 참이라 행이 아직 DOM 에 없을 수 있다. 한 프레임만 기다리면
+    // 조용히 지나가 버려서, 행을 잡아 놓고도 화면 밖에 둔 채로 끝난다(R318).
+    // 나타날 때까지 몇 프레임 더 보고, 끝내 없으면 그냥 멈춘다.
+    let tries = 60
+    const scrollWhenReady = () => {
+      if (document.querySelector(`tr[data-row-id="${CSS.escape(focusRowId)}"]`)) {
+        scrollCellIntoView({ row: focusRowId, col: "styleNo" })
+        return
+      }
+      if (tries > 0) { tries -= 1; window.requestAnimationFrame(scrollWhenReady) }
+    }
+    window.requestAnimationFrame(scrollWhenReady)
     clearFocus()
   }, [focusRowId, records.length, scoped])
 
@@ -2730,7 +2762,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (mod && key === "z" && event.shiftKey) { event.preventDefault(); void redoLast(); return }
     if (mod && key === "z") { event.preventDefault(); void undoLast(); return }
     if (mod && key === "y") { event.preventDefault(); void redoLast(); return }
-    if (event.key === "Escape") { setCopyMark(null); setRange(null); setMenu(null); return }
+    if (event.key === "Escape") { setCopyMark(null); setRange(null); setMenu(null); setFocusedRowId(null); return }
     if (event.key === "Delete" || event.key === "Backspace") { if (rect) { event.preventDefault(); void clearRange() }; return }
     if (event.shiftKey && event.code === "Space") { if (range) { event.preventDefault(); selectWholeRow(range.focus.row) }; return }
     if (event.key.startsWith("Arrow")) {
@@ -3181,6 +3213,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               }
               return <tr key={rowId}
                 data-row-id={rowId}
+                data-dd-focus={rowId === focusedRowId ? "on" : undefined}
                 data-style-key={record.styleNo.trim() || undefined}
                 onMouseDown={(event) => {
                   if (hoverTimerRef.current !== null) {
