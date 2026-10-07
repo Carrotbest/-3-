@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent, type KeyboardEvent, type MouseEvent } from "react"
+import { useSearchParams } from "react-router-dom"
 import { CalendarDays, ChevronLeft, ChevronRight, Plus, Repeat, Trash2, X } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -143,14 +144,20 @@ export function Calendar() {
   const events = useAppStore((state) => state.events)
   const today = useMemo(() => new Date(), [])
   const todayKey = dateKey(today)
+  // HOME 브리핑에서 일정을 누르면 ?d=YYYY-MM-DD로 들어온다. 형식이 틀리면 오늘로 떨어진다.
+  const [searchParams] = useSearchParams()
+  const initialKey = useMemo(() => {
+    const raw = searchParams.get("d")
+    return raw && dateFromKey(raw) ? raw : todayKey
+  }, [])
   const [mode, setMode] = useState<"month" | "week">("month")
-  const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), today.getDate()))
+  const [cursor, setCursor] = useState(() => dateFromKey(initialKey) ?? new Date(today.getFullYear(), today.getMonth(), today.getDate()))
   const [owner, setOwner] = useState(ALL)
-  const [selectionStart, setSelectionStart] = useState(todayKey)
-  const [selectionEnd, setSelectionEnd] = useState(todayKey)
-  const [focusKey, setFocusKey] = useState(todayKey)
+  const [selectionStart, setSelectionStart] = useState(initialKey)
+  const [selectionEnd, setSelectionEnd] = useState(initialKey)
+  const [focusKey, setFocusKey] = useState(initialKey)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [form, setForm] = useState<EventFormState>(() => formStateFor(todayKey, todayKey))
+  const [form, setForm] = useState<EventFormState>(() => formStateFor(initialKey, initialKey))
   const [formError, setFormError] = useState<"title" | "date" | null>(null)
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const dayRefs = useRef(new Map<string, HTMLDivElement>())
