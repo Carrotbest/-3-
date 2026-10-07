@@ -105,6 +105,29 @@ export function removeRequestLinks(records: readonly DevRecord[], rowIds: Readon
   return { next, removed }
 }
 
+/** 지금 원장에 살아 있는 옵션 lineId. DD 행의 requestLink 가 이 안에 없으면 끊어진 연결이다. */
+export function liveRequestLineIds(requests: readonly RequestStyle[]): Set<string> {
+  const ids = new Set<string>()
+  for (const style of requests) for (const option of style.options) if (option.lineId) ids.add(option.lineId)
+  return ids
+}
+
+/**
+ * lineId 로 DD 행의 요청 연결을 끊는다. rowId 로 끊는 removeRequestLinks 의 짝이다.
+ * 요청 옵션을 지울 때 쓴다. 행과 입력한 값은 건드리지 않는다.
+ */
+export function clearRequestLinksByLineId(records: readonly DevRecord[], lineIds: ReadonlySet<string>): { next: DevRecord[]; removed: number } {
+  let removed = 0
+  const next = records.map((record) => {
+    const lineId = record.tech?.requestLink?.lineId
+    if (!lineId || !lineIds.has(lineId) || !record.tech?.requestLink) return record
+    removed += 1
+    const { requestLink: _removed, ...tech } = record.tech
+    return { ...record, tech }
+  })
+  return { next, removed }
+}
+
 export type HelperStatus = "auto" | "review" | "suggest" | "none"
 
 export interface HelperGroup {

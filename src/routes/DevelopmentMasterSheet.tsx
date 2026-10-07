@@ -2461,6 +2461,19 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     notify(`${removed}행 연결을 해제했습니다.`)
   }
 
+  /** 가리키는 요청 옵션이 사라진 연결. 그대로 두면 그 행이 요청 쪽 후보에서 사라진다(R314). */
+  const brokenLinkRows = useMemo(() => records.filter((record) => resolveRequestLink(requestIndex, record) === "missing"), [records, requestIndex])
+  const clearBrokenRequestLinks = async () => {
+    if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
+    if (!brokenLinkRows.length) return
+    if (!window.confirm(`가리키는 요청 옵션이 사라진 연결 ${brokenLinkRows.length}건을 끊을까요?\n담당과 무관하게 전체에서 정리합니다. 행과 입력한 값은 그대로 둡니다.`)) return
+    const before = useAppStore.getState().records
+    pushUndoSnapshot(before)
+    const { next, removed } = removeRequestLinks(before, new Set(brokenLinkRows.map(recordIdentity)))
+    await writeDevelopmentRecords(next, false, "edit")
+    notify(`끊어진 연결 ${removed}건을 정리했습니다.`)
+  }
+
   const insertBlankRows = async (position: "above" | "below") => {
     if (!editEnabled) { notify(EDIT_DISABLED_MESSAGE); return }
     if (!rect) return
@@ -3079,6 +3092,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             </span>
           </> : null}
         </span> : null}
+        {brokenLinkRows.length ? <button type="button" onClick={() => void clearBrokenRequestLinks()} title="가리키는 요청 옵션이 사라진 연결입니다. 눌러서 정리하면 그 행이 요청 쪽 후보에 다시 보입니다." className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-[var(--destructive)] bg-[color-mix(in_srgb,var(--destructive)_10%,var(--background))] px-1.5 py-0.5 text-[11px] font-normal text-[var(--destructive)] hover:bg-[color-mix(in_srgb,var(--destructive)_18%,var(--background))]">끊어진 연결 <span className="tabular-nums">{brokenLinkRows.length}</span></button> : null}
         {!editEnabled ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--background)] px-2.5 py-1 text-[11px] text-[var(--muted-foreground)]">읽기 전용 · 담당을 선택하면 수정할 수 있습니다</span> : null}
         {intakeNotice ? <span role="status" className="shrink-0 whitespace-nowrap rounded-full bg-[var(--muted)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)]">{intakeNotice}</span> : null}
         <div className="ml-auto flex flex-wrap items-center justify-end gap-2 text-xs text-[var(--muted-foreground)]">

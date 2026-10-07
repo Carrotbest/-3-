@@ -15,6 +15,8 @@ interface DdCandidateDialogProps {
   style: RequestStyle | null
   option: RequestOption | null
   records: readonly DevRecord[]
+  /** 지금 원장에 살아 있는 옵션 lineId. 끊어진 연결을 미연결로 보기 위해 필요하다. */
+  liveLineIds: ReadonlySet<string>
   /** DD MASTER 편집 권한. 없으면 후보만 보고 연결은 못 한다. */
   canLink: boolean
   onConfirm: (record: DevRecord, fillEmpty: boolean) => void
@@ -27,7 +29,7 @@ const LIMIT = 60
 /** 문턱을 넘는 후보가 하나도 없을 때 가까운 순으로 보여 줄 수. 빈 상자가 막다른 길이 되는 것을 막는다. */
 const WEAK_LIMIT = 20
 
-export function DdCandidateDialog({ open, onOpenChange, style, option, records, canLink, onConfirm }: DdCandidateDialogProps) {
+export function DdCandidateDialog({ open, onOpenChange, style, option, records, liveLineIds, canLink, onConfirm }: DdCandidateDialogProps) {
   const [query, setQuery] = useState("")
   const [unlinkedOnly, setUnlinkedOnly] = useState(true)
   const [fillEmpty, setFillEmpty] = useState(false)
@@ -47,7 +49,7 @@ export function DdCandidateDialog({ open, onOpenChange, style, option, records, 
     const scored = records
       .filter((record) => !needle || [record.styleNo, record.color, record.dyeing, record.owner, record.buyer, record.flNo, record.tech?.yarnDetail]
         .some((value) => text(value).toLocaleLowerCase("ko-KR").includes(needle)))
-      .map((record) => scoreRowForOption(record, style, option))
+      .map((record) => scoreRowForOption(record, style, option, liveLineIds))
       .filter((match) => !unlinkedOnly || !match.linkedElsewhere)
       .sort((a, b) => b.score - a.score || text(a.record.styleNo).localeCompare(text(b.record.styleNo), "en", { numeric: true }))
     // 검색어가 없으면 점수가 붙은 후보만 보인다. DD 행 전체를 펼쳐 놓으면 고르기 어렵다.
@@ -55,7 +57,7 @@ export function DdCandidateDialog({ open, onOpenChange, style, option, records, 
     if (strong.length) return { matches: strong.slice(0, LIMIT), weak: false }
     // 하나도 못 찾으면 가까운 순으로 조금만 보인다. Garment No. 표기가 달라 점수가 덜 붙는 건이 흔하다.
     return { matches: scored.slice(0, needle ? LIMIT : WEAK_LIMIT), weak: !needle && scored.length > 0 }
-  }, [option, query, records, style, unlinkedOnly])
+  }, [liveLineIds, option, query, records, style, unlinkedOnly])
 
   const selected = matches.find((match) => identity(match.record) === selectedId)
 

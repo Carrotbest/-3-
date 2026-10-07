@@ -119,7 +119,7 @@ export interface RowMatch {
  * DD 행 하나가 요청 옵션 하나와 얼마나 잘 맞는지. scoreStyleForRows와 반대 방향이고 배점 규칙은 같다.
  * 요청 화면 Link 칸에서 DD 후보를 고를 때 쓴다.
  */
-export function scoreRowForOption(record: DevRecord, style: RequestStyle, option: RequestOption): RowMatch {
+export function scoreRowForOption(record: DevRecord, style: RequestStyle, option: RequestOption, liveLineIds?: ReadonlySet<string>): RowMatch {
   const reasons: string[] = []
   let score = 0
   const styleKey = normalizeStyleKey(record.styleNo)
@@ -146,7 +146,9 @@ export function scoreRowForOption(record: DevRecord, style: RequestStyle, option
   // DROP·REJECT도 연결 대상이다(R312). 점수를 깎지 않고 근거에만 남긴다.
   // 깎으면 문턱(MATCH_MIN_SCORE) 아래로 빠져 검색어 없이 목록에서 사라진다.
   if (status === "DROP" || status === "REJECT") reasons.push(status)
-  const linkedElsewhere = Boolean(record.tech?.requestLink && record.tech.requestLink.lineId !== option.lineId)
+  // 끊어진 연결(가리키는 옵션이 사라진 것)은 미연결로 본다. 그러지 않으면 그 행이 후보에서 영영 사라진다.
+  const link = record.tech?.requestLink
+  const linkedElsewhere = Boolean(link && link.lineId !== option.lineId && (!liveLineIds || liveLineIds.has(link.lineId)))
   if (linkedElsewhere) { score -= 25; reasons.push("다른 요청에 연결됨") }
 
   // 번호가 하나도 안 맞는 건은 자동 선택 문턱 아래로 묶는다. 같은 사양은 여러 스타일에 되풀이된다.

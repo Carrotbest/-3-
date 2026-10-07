@@ -16,7 +16,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { CONSTRUCTIONS, matchConstruction } from "@/data/constructions"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { buildFabricLedger } from "@/data/fabric-ledger"
-import { applyRequestLinks, ddRecordsByLineId, ensureRequestLineIds, requestDdStatus, type RequestDdStatus } from "@/data/request-link"
+import { applyRequestLinks, clearRequestLinksByLineId, ddRecordsByLineId, ensureRequestLineIds, liveRequestLineIds, requestDdStatus, type RequestDdStatus } from "@/data/request-link"
 import { requestProcessStage, type ProcessStage } from "@/data/request-process-stage"
 import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindColor, buildBoardArchive, canDeleteBoard, canManageBoard, closeBoard, migrateChartsToBoards, nextBoardSeq, removeBoardWithStyles, reopenBoard, resultOf } from "@/data/request-board"
 import type { AuditKind } from "@/data/audit"
@@ -759,6 +759,7 @@ export function FabricRequest() {
   const ddCompletedSamples = useAppStore((state) => state.completed)
   const ddFabricOverrides = useAppStore((state) => state.fabricOverrides)
   const ddByLine = useMemo(() => ddRecordsByLineId(ddRecords), [ddRecords])
+  const liveLineIds = useMemo(() => liveRequestLineIds(requests), [requests])
   // 원단 상세 링크 키는 DD MASTER(ledgerByRecord)와 같은 원장 구성으로 만든다.
   const ddLedgerKeyByRow = useMemo(() => new Map<string, string>(
     buildFabricLedger(ddRecords, ddCompletedSamples, ddFabricOverrides)
@@ -936,10 +937,34 @@ export function FabricRequest() {
     commitRequests(requests.map((item) => (item.reqId === reqId ? { ...item, ...patch, updatedAt: new Date().toISOString() } : item)))
   }
 
+  /**
+   * 요청 옵션을 지울 때 DD 행에 남는 연결을 같이 끊는다.
+   * 안 끊으면 그 DD 행은 `REQ?`가 되고, 가리키는 곳이 없는데도 "다른 요청에 연결됨"으로 읽혀
+   * 요청 쪽 후보 목록에서 사라진다(R314).
+   * DD 쓰기 권한이 없으면 요청 삭제는 그대로 하고 남은 연결만 알린다.
+   * 1팀 사용자가 DD 권한 때문에 자기 보드를 못 고치면 안 된다. 남은 것은 DD MASTER에서 정리한다.
+   */
+  const dropDdLinks = async (lineIds: readonly (string | undefined)[]) => {
+    const targets = new Set(lineIds.filter((id): id is string => Boolean(id)))
+    if (!targets.size) return
+    const before = useAppStore.getState().records
+    const hit = before.filter((record) => { const id = record.tech?.requestLink?.lineId; return id ? targets.has(id) : false }).length
+    if (!hit) return
+    if (!currentUserCanEditKey("records")) {
+      setNotice({ kind: "error", text: `DD 연결 ${hit}건이 남았습니다. DD MASTER 편집 권한이 없어 정리하지 못했습니다.` })
+      return
+    }
+    const { next, removed } = clearRequestLinksByLineId(before, targets)
+    if (!removed) return
+    await writeDevelopmentRecords(next, false, "edit")
+    setNotice({ kind: "ok", text: `DD 연결 ${removed}건을 함께 끊었습니다.` })
+  }
+
   const remove = (style: RequestStyle, anchor: { x: number; y: number }) => {
     setRowMenu(null)
     askConfirm(anchor, `${style.garmentNo || "이 의뢰"} 건을 삭제할까요?\n옵션 ${style.options.length}건이 함께 지워집니다.`, () => {
       commitRequests(requests.filter((item) => item.reqId !== style.reqId))
+      void dropDdLinks(style.options.map((option) => option.lineId))
       // 사진은 없으면 조용히 넘어간다. 실패해도 원장 삭제는 그대로 둔다.
       void deleteRequestImage(style.reqId).catch(() => undefined)
     }, { confirmLabel: "삭제", danger: true })
@@ -969,6 +994,7 @@ export function FabricRequest() {
     setRowMenu(null)
     askConfirm(anchor, `옵션 ${option.no}번을 삭제할까요?${warning}`, () => {
       saveMutation(requests.map((item) => item.reqId === style.reqId ? { ...item, options: renumber(style.reqId, style.options.filter((item) => item.optId !== option.optId)), updatedAt: new Date().toISOString() } : item))
+      void dropDdLinks([option.lineId])
     }, { confirmLabel: "삭제", danger: true })
   }
 
@@ -1600,6 +1626,11 @@ export function FabricRequest() {
       const now = new Date().toISOString()
       const next = requests.map((style) => { const indices = targets.get(style.reqId); if (!indices) return style; let options = [...style.options]; if (mode === "delete") options = options.filter((_, i) => !indices.has(i)); else [...indices].sort((a,b) => b-a).forEach((i) => options.splice(i + (mode === "below" ? 1 : 0), 0, blankOption(style.reqId, 1))); return { ...style, options: renumber(style.reqId, options), updatedAt: now } })
       saveMutation(next)
+      if (mode === "delete") {
+        const gone: (string | undefined)[] = []
+        requests.forEach((style) => { const indices = targets.get(style.reqId); if (indices) indices.forEach((index) => gone.push(style.options[index]?.lineId)) })
+        void dropDdLinks(gone)
+      }
     }, { confirmLabel: mode === "delete" ? "삭제" : "삽입", danger: mode === "delete" })
   }
   const replaceAllMatches = () => {
@@ -2255,6 +2286,7 @@ export function FabricRequest() {
         style={ddPick?.style ?? null}
         option={ddPick?.option ?? null}
         records={ddRecords}
+        liveLineIds={liveLineIds}
         canLink={currentUserCanEditKey("records")}
         onConfirm={(record, fillEmpty) => void linkDdRecord(record, fillEmpty)}
       />
