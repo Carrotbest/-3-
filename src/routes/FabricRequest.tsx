@@ -765,7 +765,7 @@ export function FabricRequest() {
     buildFabricLedger(ddRecords, ddCompletedSamples, ddFabricOverrides)
       .flatMap((item) => item.record ? [[`${item.record._src.sheet}::${item.record._src.row}`, item.key] as const] : []),
   ), [ddCompletedSamples, ddFabricOverrides, ddRecords])
-  const [stageTarget, setStageTarget] = useState<{ stage: ProcessStage; title: string; rowId?: string } | null>(null)
+  const [stageTarget, setStageTarget] = useState<{ stage: ProcessStage; title: string; rowId?: string; style: RequestStyle; option: RequestOption } | null>(null)
   // FL no. 열은 FL#만 보인다(2026-10-07 박향근 확정). 연결 여부는 왼쪽 공정 열이 말한다.
   // 공정 상태가 보이면 그 자체로 연결된 것이라 체크 표시를 따로 두지 않는다. 미연결 표시는 공정 열로 옮겼다.
   const renderDdLink = (_style: RequestStyle, option: RequestOption): ReactNode => {
@@ -795,7 +795,7 @@ export function FabricRequest() {
     const status = requestDdStatus(ddByLine, option)
     return <ProcessStageChip
       stage={stage}
-      onOpen={() => setStageTarget({ stage, title: `${style.garmentNo || "스타일"} Opt ${option.no}`, rowId: status.rowId })}
+      onOpen={() => setStageTarget({ stage, title: `${style.garmentNo || "스타일"} Opt ${option.no}`, rowId: status.rowId, style, option })}
     />
   }
 
@@ -911,11 +911,27 @@ export function FabricRequest() {
     const option = style?.options.find((item) => item.optId === target.option.optId)
     if (!style || !option?.lineId) { setNotice({ kind: "error", text: "옵션을 찾지 못했습니다. 새로 고친 뒤 다시 시도하세요." }); return }
     const before = useAppStore.getState().records
-    const { next, linked } = applyRequestLinks(before, style, [{ rowId: `${record._src.sheet}::${record._src.row}`, optId: option.optId }], fillEmpty)
+    const targetRowId = `${record._src.sheet}::${record._src.row}`
+    // 이 옵션에 이미 붙어 있는 다른 DD 행의 연결을 먼저 푼다. 안 풀면 옵션 하나에 행이 여럿 붙는다.
+    const cleared = clearRequestLinksByLineId(before, new Set([option.lineId]))
+    const replaced = cleared.next.filter((row, index) => row !== before[index] && `${row._src.sheet}::${row._src.row}` !== targetRowId).length
+    const { next, linked } = applyRequestLinks(cleared.next, style, [{ rowId: targetRowId, optId: option.optId }], fillEmpty)
     if (!linked) { setNotice({ kind: "error", text: "연결하지 못했습니다." }); return }
     await writeDevelopmentRecords(next, false, "edit")
     setDdPick(null)
-    setNotice({ kind: "ok", text: `${record.styleNo || "DD 행"} Opt ${record.opt || "-"}에 연결했습니다.` })
+    setNotice({ kind: "ok", text: replaced > 0
+      ? `${record.styleNo || "DD 행"} Opt ${record.opt || "-"}에 연결했습니다. 기존 연결 ${replaced}건은 해제했습니다.`
+      : `${record.styleNo || "DD 행"} Opt ${record.opt || "-"}에 연결했습니다.` })
+  }
+  const unlinkOption = async (option: RequestOption): Promise<boolean> => {
+    if (!currentUserCanEditKey("records")) { setNotice({ kind: "error", text: "DD MASTER 편집 권한이 필요합니다." }); return false }
+    if (!option.lineId) { setNotice({ kind: "error", text: "연결 정보를 찾지 못했습니다." }); return false }
+    const before = useAppStore.getState().records
+    const { next, removed } = clearRequestLinksByLineId(before, new Set([option.lineId]))
+    if (!removed) { setNotice({ kind: "error", text: "해제할 연결이 없습니다." }); return false }
+    await writeDevelopmentRecords(next, false, "edit")
+    setNotice({ kind: "ok", text: `DD 행 ${removed}개의 연결을 해제했습니다.` })
+    return true
   }
   function saveMutation(next: RequestStyle[]) { if (next === requests || readOnly) { if (readOnly) commitRequests(next); return } pushSnapshot(); commitRequests(next) }
 
@@ -2265,10 +2281,29 @@ export function FabricRequest() {
         onOpenChange={(open) => { if (!open) setStageTarget(null) }}
         stage={stageTarget?.stage ?? null}
         title={stageTarget?.title ?? ""}
+        linkedCount={stageTarget ? 1 + requestDdStatus(ddByLine, stageTarget.option).extra : 0}
+        canEdit={currentUserCanEditKey("records")}
         onOpenDd={() => {
           if (!stageTarget?.rowId) return
           navigate(`/development/workspace?focus=${encodeURIComponent(stageTarget.rowId)}`)
           setStageTarget(null)
+        }}
+        onUnlink={() => {
+          const target = stageTarget
+          if (!target) return
+          const linkedCount = 1 + requestDdStatus(ddByLine, target.option).extra
+          askConfirm(
+            { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+            `${target.title}의 DD 연결을 해제할까요?\n연결된 DD 행 ${linkedCount}개가 모두 풀립니다.`,
+            () => { void (async () => { if (await unlinkOption(target.option)) setStageTarget(null) })() },
+            { confirmLabel: "연결 해제", danger: true },
+          )
+        }}
+        onRelink={() => {
+          const target = stageTarget
+          if (!target) return
+          setStageTarget(null)
+          setDdPick({ style: target.style, option: target.option })
         }}
       />
 

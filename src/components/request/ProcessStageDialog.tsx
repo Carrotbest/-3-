@@ -9,10 +9,16 @@ interface ProcessStageDialogProps {
   onOpenChange: (open: boolean) => void
   stage: ProcessStage | null
   title: string
+  /** 이 옵션에 연결된 DD 행 수. 1보다 크면 겹쳐 연결된 상태다. */
+  linkedCount: number
+  /** DD MASTER 편집 권한. 없으면 두 버튼을 비활성한다. */
+  canEdit: boolean
+  onUnlink: () => void
+  onRelink: () => void
   onOpenDd: () => void
 }
 
-export function ProcessStageDialog({ open, onOpenChange, stage, title, onOpenDd }: ProcessStageDialogProps) {
+export function ProcessStageDialog({ open, onOpenChange, stage, title, linkedCount, canEdit, onUnlink, onRelink, onOpenDd }: ProcessStageDialogProps) {
   if (!stage?.linked) return null
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -23,6 +29,7 @@ export function ProcessStageDialog({ open, onOpenChange, stage, title, onOpenDd 
             {stage.halted ? <Badge variant="secondary" style={{ color: stage.color }}>{stage.halted}</Badge> : null}
           </div>
           <DialogDescription>현재 {stage.label}, {stage.currentIndex + 1}/{stage.steps.length}단계</DialogDescription>
+          {linkedCount >= 2 ? <p className="text-xs" style={{ color: "var(--destructive)" }}>DD 행 {linkedCount}개가 이 옵션에 함께 연결돼 있습니다. 연결 해제는 전부 풉니다.</p> : null}
         </DialogHeader>
         <DialogBody>
           {/* 인라인 animation은 motion-reduce 클래스로 못 끈다(R137). 미디어 쿼리를 !important로 둔다. */}
@@ -63,9 +70,15 @@ export function ProcessStageDialog({ open, onOpenChange, stage, title, onOpenDd 
             })}
           </div>
         </DialogBody>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>닫기</Button>
-          <Button type="button" onClick={onOpenDd}>DD MASTER에서 열기</Button>
+        <DialogFooter className="flex-wrap justify-between">
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" disabled={!canEdit} title={!canEdit ? "DD MASTER 편집 권한이 필요합니다" : undefined} style={{ color: "var(--destructive)" }} onClick={onUnlink}>연결 해제</Button>
+            <Button type="button" variant="outline" disabled={!canEdit} title={!canEdit ? "DD MASTER 편집 권한이 필요합니다" : undefined} onClick={onRelink}>연결 변경</Button>
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>닫기</Button>
+            <Button type="button" onClick={onOpenDd}>DD MASTER에서 열기</Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
