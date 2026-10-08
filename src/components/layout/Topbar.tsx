@@ -3,6 +3,7 @@ import { LogOut, Menu, UserCog } from "lucide-react"
 import { useLocation } from "react-router-dom"
 
 import { AccountSettingsDialog, COMPANY_EMAIL_DOMAIN } from "@/components/auth/AccountSettingsDialog"
+import { PresenceStack } from "@/components/layout/PresenceStack"
 import { Button } from "@/components/ui/button"
 import { routeDefinitions } from "@/routes/route-config"
 import { signOutUser, useAuthStore, useScreenAccess } from "@/data/auth"
@@ -55,6 +56,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
 
       {user ? (
         <div className="flex shrink-0 items-center gap-2">
+          <PresenceStack />
           <span
             className={
               "hidden rounded-full px-2 py-0.5 text-[11px] font-medium sm:inline-block " +
