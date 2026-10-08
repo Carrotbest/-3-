@@ -7,7 +7,7 @@ import { RackMap } from "@/components/warehouse/RackMap"
 import { DisposalRoundPanel } from "@/components/warehouse/DisposalRoundPanel"
 import { OutboundRequestMailDialog } from "@/components/warehouse/OutboundRequestMailDialog"
 import { FlEntryCheckDialog } from "@/components/warehouse/FlEntryCheckDialog"
-import { normalizeRackNo, RACK_FORMAT_HINT } from "@/data/warehouse-rack"
+import { dashedRackNo, normalizeRackNo, RACK_FORMAT_HINT } from "@/data/warehouse-rack"
 import { CONSTRUCTIONS } from "@/data/constructions"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
@@ -537,6 +537,20 @@ export function Warehouse() {
   const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents), [fabricEvents, overrides, records, samples])
   const suggestFabric1Numbers = useCallback((count: number) => nextStorageNumbers(ledger, count, "team1"), [ledger])
   const scopedLedger = useMemo(() => ledger.filter((item) => isFabric1Item(item) === (teamScope === "team1")), [ledger, teamScope])
+  const rackDashTargets = useMemo(() => {
+    if (teamScope !== "team1") return { convert: [] as { item: FabricLedgerItem; rackNo: string }[], skipped: [] as string[] }
+    const convert: { item: FabricLedgerItem; rackNo: string }[] = []
+    const skipped: string[] = []
+    for (const item of ledger) {
+      if (!isFabric1Item(item) || item.status !== "WAREHOUSE") continue
+      const current = (item.rackNo ?? "").trim()
+      if (!current) continue
+      const dashed = dashedRackNo(current)
+      if (dashed) convert.push({ item, rackNo: dashed })
+      else if (!current.includes("-")) skipped.push(current)
+    }
+    return { convert, skipped }
+  }, [ledger, teamScope])
   /**
    * 목록에서 숨긴(REMOVED) 항목. 되살리기 화면에서만 쓴다.
    * 채번과 통계는 위 `ledger` 를 그대로 보게 두어야 한다. 숨긴 번호까지 점유로 세면 채번이 달라진다.
@@ -871,6 +885,20 @@ export function Warehouse() {
       visibleRows.forEach((item) => allRowsSelected ? next.delete(item.key) : next.add(item.key))
       return next
     })
+  }
+
+  const organizeFabric1RackNos = async () => {
+    if (!rackDashTargets.convert.length) return
+    const examples = rackDashTargets.convert
+      .slice(0, 3)
+      .map(({ item, rackNo }) => `${(item.rackNo ?? "").trim()} → ${rackNo}`)
+      .join(", ")
+    const skippedNotice = rackDashTargets.skipped.length
+      ? `\n숫자가 두 자리가 아닌 ${rackDashTargets.skipped.length}건은 그대로 둡니다. 직접 고쳐야 합니다.`
+      : ""
+    if (!window.confirm(`Rack No. ${rackDashTargets.convert.length}건을 V-7-4 형태로 바꿀까요?\n예: ${examples}${skippedNotice}`)) return
+    const count = await saveFabricRackNos(rackDashTargets.convert)
+    setSelectionNotice(count ? `Rack No. ${count}건을 정리했습니다.` : "바뀐 값이 없습니다.")
   }
 
   /**
@@ -1988,6 +2016,7 @@ export function Warehouse() {
     {rackView ? <RackMap items={storedItems} onOpenSlot={openRackSlot} /> : <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-t-4 border-[var(--border)] bg-[var(--card)] transition-colors duration-200 motion-reduce:transition-none ${accent.borderTop}`}>
       <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] p-2">
         {teamScope === "team1" && tab === "WAREHOUSE" && canEditScope ? <ShinyActionButton tone="amber" size="sm" icon={<Plus />} onClick={() => setFabric1IntakeOpen(true)}>신규 입고</ShinyActionButton> : null}
+        {teamScope === "team1" && tab === "WAREHOUSE" && canEditScope && rackDashTargets.convert.length > 0 ? <Button type="button" size="sm" variant="outline" title="V74 형태의 Rack No.에 대시를 넣어 V-7-4로 바꿉니다" onClick={() => void organizeFabric1RackNos()}>Rack No. 정리 {rackDashTargets.convert.length}</Button> : null}
         <label className="relative block min-w-52 flex-1"><span className="sr-only">창고 검색</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="R&D No., Style, FL, Buyer 검색" className="pl-9" /></label>
         <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{TAB_META[tab].label} <strong className="text-[var(--foreground)]">{rows.length.toLocaleString("ko-KR")}</strong>건 · 선택 {selectedRows.length}건</span>
         {tab === "READY" && !hiddenOnly && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => openAction("RECEIVE", selectedRows)}><PackageCheck />선택 입고</Button> : null}

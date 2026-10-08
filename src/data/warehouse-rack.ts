@@ -57,3 +57,15 @@ export function normalizeRackNo(raw: string): string | null {
   if (!racks || rack < 1 || rack > racks || level < 1 || level > RACK_LEVELS) return text
   return `${row}-${rack}-${level}`
 }
+
+/**
+ * `V74`처럼 영문 한 글자에 숫자 두 자리가 붙은 rack 번호에 대시를 넣는다(`V-7-4`).
+ * 1팀 선반이 이 형태라 3팀 형식(K-1-1)과 맞추려고 만든 일회성 정리용이다.
+ * 숫자가 두 자리가 아니면 어디서 끊을지 알 수 없으므로 건드리지 않고 null을 돌려준다.
+ * 이미 대시가 있는 값도 정규식에 안 걸려 null이다. 여러 번 돌려도 결과가 같다.
+ */
+export function dashedRackNo(raw: string): string | null {
+  const match = /^([A-Za-z])(\d)(\d)$/.exec(raw.trim())
+  if (!match) return null
+  return `${match[1].toUpperCase()}-${match[2]}-${match[3]}`
+}
