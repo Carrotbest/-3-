@@ -25,7 +25,7 @@ import { Calendar } from "@/routes/Calendar"
 import { PlaceholderPage } from "@/routes/PlaceholderPage"
 import { Rdda } from "@/routes/Rdda"
 import { Setting } from "@/routes/Setting"
-import { Study } from "@/routes/Study"
+import { TechnicalReferences } from "@/routes/TechnicalReferences"
 import { TS } from "@/routes/TS"
 import { FabricAnalysis } from "@/routes/FabricAnalysis"
 import { CostSheets } from "@/routes/CostSheets"
@@ -169,7 +169,7 @@ function AppLayout() {
             <Route path="/development/:sub" element={<Development />} />
             <Route path="/rdda" element={<Rdda />} />
             <Route path="/ts" element={<TS />} />
-            <Route path="/study" element={<Study />} />
+            <Route path="/study" element={<TechnicalReferences />} />
             <Route path="/fabric-analysis" element={<FabricAnalysis />} />
             <Route path="/cost" element={<CostSheets />} />
             <Route path="/fabric/:key" element={<FabricDetail />} />

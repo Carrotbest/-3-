@@ -50,7 +50,7 @@ export const routeDefinitions: RouteDefinition[] = [
   { path: "/development/project", title: "DD MASTER · PROJECT", subtitle: "프로젝트별 개발 건을 확인합니다." },
   { path: "/rdda", title: "RDDA REPORT", subtitle: "RDDA 보고 현황을 확인합니다." },
   { path: "/ts", title: "TROUBLE SHOOTING", subtitle: "Technical Service 업무를 관리합니다." },
-  { path: "/study", title: "TECHNICAL REFERENCES", subtitle: "팀 학습 과제와 점검 현황을 확인합니다." },
+  { path: "/study", title: "TECHNICAL REFERENCES", subtitle: "팀이 공유하는 원단 자료를 분류하고 검색합니다." },
   { path: "/fabric-analysis", title: "FABRIC ANALYSIS", subtitle: "원단 분석 의뢰와 결과를 관리합니다." },
   { path: "/cost", title: "COST SHEET", subtitle: "국내 원단 원가계산서 보관과 검색" },
   { path: "/warehouse", title: "WAREHOUSE", subtitle: "완료 샘플의 입고·보관·소진·폐기 이력을 관리합니다." },
