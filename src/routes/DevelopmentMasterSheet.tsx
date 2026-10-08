@@ -1,6 +1,6 @@
 import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
 import { FlPerfMark } from "@/components/fabric/PerfBadge"
-import { CalendarDays, Calculator, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, FolderTree, Link2, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, Unlink, X } from "lucide-react"
+import { CalendarDays, Calculator, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, Unlink, X } from "lucide-react"
 import { Popover } from "radix-ui"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
@@ -10,7 +10,6 @@ import { ReadOnlyBanner } from "@/components/layout/ReadOnlyBanner"
 import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { ColumnFilterMenu } from "@/components/data-table/ColumnFilterMenu"
 import { RequestPickerDialog } from "@/components/dd/RequestPickerDialog"
-import { RequestBrowseDialog } from "@/components/dd/RequestBrowseDialog"
 import { CostSheetDialog } from "@/components/dd/CostSheetDialog"
 import { StyleHoverLayer, type StyleHoverLayerHandle } from "@/components/data-table/StyleHoverLayer"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -26,8 +25,7 @@ import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
 import { fmtDate, fmtDateMd, isDateValue, normalizeDateInput, toDate } from "@/data/format"
 import { loadViewFlag, loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
-import { applyRequestLinks, buildLinkHelperGroups, defaultLinkPairs, ensureRequestLineIds, removeRequestLinks, requestCandidates, requestLinkIndex, requestToIntakeRecords, resolveRequestLink, type HelperGroup, type LinkPair } from "@/data/request-link"
-import { RequestLinkHelperDialog } from "@/components/dd/RequestLinkHelperDialog"
+import { ensureRequestLineIds, removeRequestLinks, requestCandidates, requestLinkIndex, requestToIntakeRecords, resolveRequestLink } from "@/data/request-link"
 import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED } from "@/data/range-tsv"
 import { dayToneText, holidayName } from "@/data/holidays"
 import { COST_STALE_DAYS } from "@/data/cost-sheets"
@@ -1242,7 +1240,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const navigate = useNavigate()
   const records = useAppStore((state) => state.records)
   const requests = useAppStore((state) => state.requests)
-  const requestBoards = useAppStore((state) => state.requestBoards)
   const requestIndex = useMemo(() => requestLinkIndex(requests), [requests])
   const canBackup = useAuthStore((state) => state.isOwner || state.screenPermissions.excelBackup)
   // 담당 탭 편집 권한 판정에 쓴다(R319). 관리자(앱 소유자)는 모든 담당 탭을 고친다.
@@ -1369,7 +1366,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [intakeError, setIntakeError] = useState<string | null>(null)
   const [requestPickerOpen, setRequestPickerOpen] = useState(false)
   const [requestPickerInitialReqId, setRequestPickerInitialReqId] = useState<string | undefined>()
-  const [linkRows, setLinkRows] = useState<DevRecord[] | null>(null)
   const [costRows, setCostRows] = useState<DevRecord[]>([])
   const [intakeRequest, setIntakeRequest] = useState<{ reqId: string; chart: string; garmentNo: string } | null>(null)
   const [attached, setAttached] = useState<Zaji | null>(null)
@@ -1411,11 +1407,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const dragAutoScrollFrameRef = useRef<number | null>(null)
   const [colWidths, setColWidths] = useState<Record<string, number>>(loadColumnWidths)
   const [confirmDelete, setConfirmDelete] = useState<DevRecord[] | null>(null)  // 행 삭제 확인
-  const [browseRow, setBrowseRow] = useState<DevRecord | null>(null)  // 요청 폴더 찾기 대상 행
-  const blockedRequestLineIds = useMemo(() => {
-    const targets = new Set((linkRows ?? []).map(recordIdentity))
-    return new Set(records.flatMap((record) => !targets.has(recordIdentity(record)) && record.tech?.requestLink?.lineId ? [record.tech.requestLink.lineId] : []))
-  }, [linkRows, records])
   const zajiInputRef = useRef<HTMLInputElement>(null)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
   const gridScrollRef = useRef<HTMLDivElement>(null)
@@ -2439,82 +2430,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     await writeDevelopmentRecords(next, false, "edit")
   }
 
-  const openRequestLink = () => {
-    if (!editEnabled) { notify(editDeniedMessage); return }
-    const rows = linkTargetRows()
-    if (!rows.length) return
-    const counts = new Map<string, number>()
-    rows.forEach((row) => { const reqId = row.tech?.requestLink?.reqId; if (reqId) counts.set(reqId, (counts.get(reqId) ?? 0) + 1) })
-    setRequestPickerInitialReqId([...counts].sort((a, b) => b[1] - a[1])[0]?.[0])
-    setLinkRows(rows)
-  }
-
-  const confirmRequestLink = async (style: RequestStyle, pairs: LinkPair[], fillEmpty: boolean) => {
-    const { next: nextRequests, changed } = ensureRequestLineIds(requests)
-    if (changed) saveRequests(nextRequests)
-    const freshStyle = nextRequests.find((item) => item.reqId === style.reqId)
-    if (!freshStyle) return
-    const before = useAppStore.getState().records
-    pushUndoSnapshot(before)
-    const { next, linked } = applyRequestLinks(before, freshStyle, pairs, fillEmpty)
-    await writeDevelopmentRecords(next, false, "edit")
-    setLinkRows(null)
-    notify(`${linked}행을 DEVELOPMENT REQUEST에 연결했습니다.`)
-  }
-
-  /** 폴더 찾기는 DD 행 하나를 요청 옵션 하나에 잇는다. 여러 행을 한 번에 다루는 길은 기존 피커와 도우미다. */
-  const openRequestBrowse = () => {
-    if (!editEnabled) { notify(editDeniedMessage); return }
-    const rows = selectedRows()
-    if (rows.length !== 1) { notify("행 하나만 선택한 뒤 다시 누르세요."); return }
-    setBrowseRow(rows[0])
-  }
-  const confirmRequestBrowse = async (style: RequestStyle, option: RequestOption, fillEmpty: boolean) => {
-    const target = browseRow
-    if (!target) return
-    setBrowseRow(null)
-    await confirmRequestLink(style, [{ rowId: recordIdentity(target), optId: option.optId }], fillEmpty)
-  }
-
-  // 요청 연결 도우미. 짝 규칙은 defaultLinkPairs 하나를 쓰고, 여러 스타일을 모아 스냅샷·쓰기를 한 번만 한다.
-  const [linkHelperOpen, setLinkHelperOpen] = useState(false)
-  const linkHelperPending = useMemo(() => buildLinkHelperGroups(records, requests).reduce((sum, group) => sum + group.rows.length, 0), [records, requests])
-  const linkHelperAuto = async (groups: HelperGroup[]) => {
-    if (!editEnabled) { notify(editDeniedMessage); return }
-    if (!groups.length) return
-    const { next: nextRequests, changed } = ensureRequestLineIds(requests)
-    if (changed) saveRequests(nextRequests)
-    const before = useAppStore.getState().records
-    let acc: DevRecord[] = before
-    let linkedRows = 0
-    let linkedStyles = 0
-    for (const group of groups) {
-      const style = nextRequests.find((item) => item.reqId === group.candidates[0]?.reqId)
-      if (!style) continue
-      const targets = new Set(group.rows.map(recordIdentity))
-      // 앞 그룹이 방금 연결한 옵션도 막아야 하므로 누적 배열에서 매번 다시 계산한다.
-      const blocked = new Set(acc.flatMap((record) => !targets.has(recordIdentity(record)) && record.tech?.requestLink?.lineId ? [record.tech.requestLink.lineId] : []))
-      const current = new Map(acc.map((record) => [recordIdentity(record), record]))
-      const rows = group.rows.map((row) => current.get(recordIdentity(row)) ?? row)
-      const result = applyRequestLinks(acc, style, defaultLinkPairs(rows, style, blocked), false)
-      if (!result.linked) continue
-      acc = result.next
-      linkedRows += result.linked
-      linkedStyles += 1
-    }
-    if (!linkedRows) { notify("연결할 행이 없습니다."); return }
-    pushUndoSnapshot(before)
-    await writeDevelopmentRecords(acc, false, "edit")
-    notify(`${linkedStyles}개 스타일 · ${linkedRows}행을 연결했습니다.`)
-  }
-  const reviewLinkHelperGroup = (group: HelperGroup) => {
-    if (!editEnabled) { notify(editDeniedMessage); return }
-    setRequestPickerInitialReqId(group.candidates.length === 1
-      ? group.candidates[0].reqId
-      : group.candidates.length === 0 ? group.suggestions[0]?.style.reqId : undefined)
-    setLinkRows(group.rows)
-  }
-
   const unlinkSelectedRequests = async () => {
     if (!editEnabled) { notify(editDeniedMessage); return }
     const rows = linkTargetRows().filter((row) => row.tech?.requestLink)
@@ -3134,7 +3049,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         <Button type="button" size="sm" variant="outline" title="주간 업무 보고에 붙일 현황 문장을 만듭니다. 완료는 Received date 기준입니다" onClick={openWeeklyReport}><ClipboardList className="size-4" />주간 보고</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
         <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
-        <Button type="button" size="sm" variant="outline" title="미연결 DD 행을 같은 Garment No. 요청과 묶어 한 번에 연결합니다" onClick={() => setLinkHelperOpen(true)}><Link2 className="size-4" />요청 연결 도우미{linkHelperPending ? <span className="ml-0.5 rounded-full bg-[var(--muted)] px-1.5 text-[10px] tabular-nums text-[var(--muted-foreground)]">{linkHelperPending}</span> : null}</Button>
         {canBackup ? <Button type="button" size="sm" variant="outline" disabled={backupExporting} title="DD 전체와 창고 상태·이력, 샘플대장을 필드 그대로 엑셀로 내려받습니다" onClick={() => void exportBackup()}>{backupExporting ? <Loader2 className="size-4 animate-spin" /> : <DatabaseBackup className="size-4" />}엑셀 백업</Button> : null}
         <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={resetColumnWidths}><RotateCcw className="size-4" />열 너비 초기화</Button>
       </div>
@@ -3341,8 +3255,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             <span className="text-[11px] text-[var(--muted-foreground)]">{item.hint}</span>
           </button>)}
           {menu.kind === "cells" ? <><div className="my-1 h-px bg-[var(--border)]" />
-          <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => { setMenu(null); openRequestLink() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Link2 className="size-3.5" /></span><span className="flex-1">DEVELOPMENT REQUEST 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
-          <button type="button" role="menuitem" disabled={!editEnabled} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => { setMenu(null); openRequestBrowse() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><FolderTree className="size-3.5" /></span><span className="flex-1">요청 폴더에서 찾아 연결…</span><span className="text-[11px] text-[var(--muted-foreground)]">행 1개</span></button>
           <button type="button" role="menuitem" disabled={!editEnabled || !linkTargetRows().some((row) => row.tech?.requestLink)} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => { setMenu(null); void unlinkSelectedRequests() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Unlink className="size-3.5" /></span><span className="flex-1">요청 연결 해제</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
           <div className="my-1 h-px bg-[var(--border)]" />
           <button type="button" role="menuitem" disabled={!costTargetRows().length} title={!costTargetRows().length ? "국내 또는 생산 건을 선택하십시오" : undefined} onClick={() => { setMenu(null); openCostSheet() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Calculator className="size-3.5" /></span><span className="flex-1">사전 원가계산…</span><span className="text-[11px] text-[var(--muted-foreground)]">국내 건</span></button>
@@ -3548,9 +3460,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     </Dialog>
 
     <RequestPickerDialog open={requestPickerOpen} onOpenChange={setRequestPickerOpen} requests={requests} records={records} styleNo={sharedDraft?.styleNo ?? ""} initialReqId={requestPickerInitialReqId} onConfirm={importRequest} />
-    <RequestLinkHelperDialog open={linkHelperOpen} onOpenChange={setLinkHelperOpen} records={records} requests={requests} editEnabled={editEnabled} disabledMessage={editDeniedMessage} onLinkAuto={linkHelperAuto} onReview={reviewLinkHelperGroup} />
-    <RequestPickerDialog open={Boolean(linkRows)} onOpenChange={(open) => { if (!open) setLinkRows(null) }} requests={requests} records={records} styleNo={linkRows?.[0]?.styleNo ?? ""} initialReqId={requestPickerInitialReqId} mode="link" linkRows={linkRows ?? []} blockedLineIds={blockedRequestLineIds} onConfirmLink={(style, pairs, fillEmpty) => void confirmRequestLink(style, pairs, fillEmpty)} />
-    <RequestBrowseDialog open={Boolean(browseRow)} onOpenChange={(open) => { if (!open) setBrowseRow(null) }} row={browseRow} requests={requests} boards={requestBoards} records={records} onConfirm={(style, option, fillEmpty) => void confirmRequestBrowse(style, option, fillEmpty)} />
     <CostSheetDialog open={costRows.length > 0} onOpenChange={(open) => { if (!open) setCostRows([]) }} rows={costRows} canEdit={editEnabled} onSaved={(rowKey, ref) => void applyCostRef(rowKey, ref)} storageNoFor={(target) => { const item = ledgerByRecord.get(recordIdentity(target)); return item?.storageNo ? storageNoLabel(item) : "" }} />
 
     {/* 전체 항목 수정(64열) — 담당 칸의 확대 아이콘으로 진입. 데이터 입력 화면. */}
