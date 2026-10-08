@@ -17,11 +17,10 @@ from urllib.parse import quote
 
 CATEGORY_IDS = (
     "fundamentals",
-    "process",
-    "quality",
-    "materials",
-    "market",
-    "testing",
+    "study",
+    "functional",
+    "sustainable",
+    "external",
 )
 DATE_RES = (
     (re.compile(r"^(\d{4})[.\-_](\d{1,2})[.\-_](\d{1,2})\s*"), False),

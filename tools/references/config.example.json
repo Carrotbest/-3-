@@ -5,12 +5,15 @@
   "output_dir": "C:\\Users\\<사용자>\\fabric-references",
   "category_map": {
     "<최상위 폴더 이름 1>": "fundamentals",
-    "<최상위 폴더 이름 2>": "process",
-    "<최상위 폴더 이름 3>": "quality",
-    "<최상위 폴더 이름 4>": "materials",
-    "<최상위 폴더 이름 5>": "market"
+    "<최상위 폴더 이름 2>": "study",
+    "<최상위 폴더 이름 3>": "functional",
+    "<최상위 폴더 이름 4>": "sustainable",
+    "<최상위 폴더 이름 5>": "external"
   },
   "default_category": "fundamentals",
   "owner_names": ["<담당자 이름 1>", "<담당자 이름 2>"],
+  "exclude_folders": ["<라이브러리에서 뺄 최상위 폴더 이름>"],
+  "owner_email": "<소유자 계정 이메일>",
+  "review_folders": ["<사람이 분류를 다시 볼 최상위 폴더 이름>"],
   "skip_dirs": ["<썸네일을 만들지 않을 대용량 폴더 이름>"]
 }

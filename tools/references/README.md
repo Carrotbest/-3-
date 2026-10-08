@@ -44,3 +44,21 @@ python tools/references/index_references.py --config <설정 파일 경로>
 - 색인 결과에는 동기화 루트 기준 상대 경로만 저장하고 로컬 절대 경로는 저장하지 않습니다.
 - 온디맨드 파일이 많으면 다음 단계인 요약 추출 전에 OneDrive에서 해당 폴더를 **항상 이 장치에 유지**로 바꿔야 합니다.
 - `skip_dirs`는 다음 단계의 썸네일·요약 제외 설정을 위한 예약 항목이며, 이번 메타데이터 색인에서는 폴더를 제외하지 않습니다.
+
+## 6. Firestore 업로드
+
+색인 결과를 먼저 점검합니다. 이 명령은 네트워크를 사용하지 않습니다.
+
+```powershell
+python -I tools/references/upload_references.py
+```
+
+점검을 통과한 색인을 실제로 올리려면 다음 명령을 실행합니다.
+
+```powershell
+python -I tools/references/upload_references.py --upload
+```
+
+다른 설정 파일은 두 명령 모두 `--config <설정 파일 경로>`로 지정합니다. 업로드는 `owner_email`을 사용하며 비밀번호는 실행할 때마다 화면에서 입력합니다. 비밀번호와 로그인 토큰은 파일에 저장하지 않습니다.
+
+재색인 때는 제목, 형식, 크기, 문서일, 수정일, 담당자, 링크만 갱신합니다. 사람이 고친 카테고리, 태그, 요약과 검토 상태는 덮지 않습니다. 색인에서 사라진 기존 Firestore 문서는 삭제하지 않고 ID와 건수만 보고합니다.
