@@ -264,16 +264,18 @@
 ## 코덱스 협업
 기획·검토=Claude, 코딩=Codex, 최종확인=Claude. 절차·명령·함정은 `codex-handoff` 스킬에 있다. 지시서 `docs/codex/RNN-*.md`, 실행 파일 `.codex-runs/`(gitignore). **커밋은 사용자 요청 시에만.** `git reset --hard`/`checkout --`로 사용자 변경 되돌리기 금지.
 
-## TECHNICAL REFERENCES 재빌드 (진행 중, 미커밋)
-`/study` 화면을 팀 자료 라이브러리로 처음부터 다시 만드는 중이다. 2026-10-08 박향근 지시. 매주 study 제출 프로세스가 폐지돼 주차별 현황판이 쓸모없어졌다. 배경과 실측은 사용자 메모리 `fabric-rnd-references-library` 에 있다.
-- **워킹트리에 R321과 R325가 미커밋 상태다. 다른 작업에서 건드리지 말 것.** `src/routes/TechnicalReferences.tsx`, `src/data/reference-schema.ts`, `src/data/reference-demo.ts`, `tools/references/`, `src/App.tsx`, 삭제된 `src/routes/Study.tsx` 다.
-- R321 화면 골격. 카테고리 카드 6개 고정(자료 수와 무관하게 늘 6개, 같은 높이), 검색과 태그 칩, 표형 리스트, 우측 상세 패널. **데모 데이터 12건**이라 아직 배포하지 않는다. `MaterialItem`·`MaterialKind`·`MaterialDeck`을 재사용하지 않고 새 타입을 새 파일에 만들었다. 코버플로 덱은 폐기했다.
-- R325 로컬 색인 스크립트 `tools/references/index_references.py`. 메타데이터만 뽑고 파일을 열지 않는다. 설정과 결과물은 저장소 밖(`%USERPROFILE%abric-references`)이다. **공개 저장소라 사내 경로·폴더명·팀원 실명을 코드와 예시에 넣지 않는다.**
-- 2026-10-08 실측: 459건, 온디맨드 0, 읽기 실패 0, 260자 초과 0, ID 충돌 0. 날짜 41건, 담당자 37건. 카테고리는 materials 286 / fundamentals 119 / process 46 / market 8 / quality 0 / testing 0.
-- 남은 것: R326 Firestore `referenceItems` 연결과 규칙 게시와 HOME의 `state.study` 참조 절단, R327 실데이터 투입. **HOME(`Home.tsx` 839·867·1008·1041)이 아직 `state.study`를 읽어 화면만 바꾸면 폐기한 과거 과제가 계속 뜬다.**
+## TECHNICAL REFERENCES 자료 라이브러리 (`src/routes/TechnicalReferences.tsx`, `src/data/reference-schema.ts`, `src/data/references.ts`, `tools/references/`)
+`/study`를 팀 자료 라이브러리로 다시 만들었다(R321, R325~R328, 2026-10-08). 매주 study 제출이 폐지돼 주차별 현황판을 버렸다. 배경과 실측은 사용자 메모리 `fabric-rnd-references-library`에 있다. **공개 저장소라 사내 경로, 폴더명, 실제 자료 제목을 코드와 예시에 넣지 않는다.** 색인 결과는 저장소 밖(`%USERPROFILE%\fabric-references`)에만 둔다.
+- **화면은 RDDA REPORT와 같은 디자인 언어다**(R328). 유리 머리말과 KPI 4칸, 번호 붙은 같은 폭 탭 카드 6개(OVERVIEW + 카테고리 5개), `MotionSection`과 `AnimatedNumber`는 `components/rdda/motion.tsx`에서 가져다 쓴다. 탭은 `?tab=`이다. 유리 효과는 머리말과 탭 바에만 있고 표, 막대, 카드에는 없다.
+- **카테고리는 자료 성격 기준 5개다**(2026-10-08 박향근 확정). fundamentals 기초 교육, study 스터디, functional 기능성 원단, sustainable 친환경 소재, external 외부 자료. 옛 6개(process, quality, materials, market, testing)는 폐기했다. 순서가 곧 색 순서다(`slot`, `--ref-cat-1~5`). 검증한 팔레트라 바꾸지 말 것. 밝은 모드에서 3, 4, 5번이 배경 대비 3:1 미만이라 색 칩 옆에 이름과 건수를 꼭 붙인다. 앱의 `--chart-1~5`는 쓰지 않는다. 모르는 카테고리 id는 화면에서 "미분류"로 센다.
+- 자료 필드: `displayTitle`(화면용 제목, `titleOf`가 고른다), `topic`(세부 주제, 카테고리 탭의 분포 막대), `kind: "folder"`(폴더 링크). 원본 파일명 `title`은 상세 팝업에 따로 보인다. 상세는 가운데 팝업(`Dialog`)이다. `Sheet`는 `bg-background` 미매핑으로 배경이 투명해 바꿨다.
+- 저장은 **별도 컬렉션 `referenceItems`**(자료 1건이 문서 1개, 문서 ID는 `ReferenceItem.id`). `state` 캐시 키가 아니다. 읽기는 승인 사용자, 쓰기는 소유자만이다. 규칙은 2026-10-08 게시했다. HOME은 `orderBy(modifiedAt) limit 6`만 구독하고 전체 구독은 `/study`를 열었을 때만 한다. Firestore 영구 캐시는 켜지 않는다. HOME의 `state.study` 참조는 끊었다. `study` 스토어 키, `studyMaterials`, `homeWorkSummary`, `ingestStudyWorkbook`은 호출처 없는 죽은 코드로 남아 있다.
+- 색인 `tools/references/index_references.py`는 메타데이터만 뽑는다. 업로드 `upload_references.py`는 기본이 네트워크 없는 점검이고 `--upload`가 소유자 비밀번호(getpass)로 Firebase Auth REST 로그인 후 `documents:commit`한다. 신규 문서는 전체 필드와 `tags: []`, 기존 문서는 색인 소유 7필드(`title`, `format`, `sizeBytes`, `documentDate`, `modifiedAt`, `owner`, `webUrl`)만 마스크로 갱신하고 본문에서도 나머지를 뺀다. **사람이 정한 `category`, `topic`, `displayTitle`, 요약을 재색인이 덮지 않는다.** 삭제는 하지 않는다. 쓰기 문서의 `name`은 URL이 아니라 `projects/.../documents/...` 리소스 이름이다. 로컬 경로 필드(`fileName`, `relativePath`, `sourceFolder`, `subFolder`, `syncState`)는 올리지 않는다.
+- **라이브러리에서 뺀 자료는 다시 올리지 않는다.** 폴더는 설정 `exclude_folders`, 파일은 색인 폴더의 `exclusions.json`(`exclude_ids`)이다. 업로드 스크립트가 둘 다 읽는다. 빠뜨리면 재업로드가 신규로 되살린다.
+- 2026-10-08 현재 Firestore 304건이다. 색인 459건에서 섬유 용어 43건(용어집은 별도 web book 화면으로 만든다), 단가와 가격, 카톡 사진, url, zip, 중복, 사내 진행 현황 엑셀, 방적 사진과 영상 낱장 등 113건을 뺐고 방적 사진 폴더 링크 1건을 더했다. 분류, 주제, 화면용 제목은 클로드가 본문 발췌를 읽고 붙였다. 박향근 최종 검토 전이다. 첫 투입과 분류 반영은 비밀번호 대신 Firebase CLI 로그인(IAM, 규칙 우회)으로 했다.
 
 ## 잔여 작업
-- 자료 라이브러리 OneDrive 링크 목록화 → **Teams(SharePoint)로 확정. 위 절 참조.**
+- 자료 라이브러리: 박향근 분류 검토(검토용 엑셀), 본문 전문 검색, 섬유 용어집 web book 화면.
 - RDDA 월 재계산·KPI 대조, RDDA REPORT 파싱.
 - DEVELOPMENT 담당자 process status 재배치(미결).
 - COST SHEET R272 원사 시세표(붙여넣기 입력). 원가계산의 마지막 조각이다.
