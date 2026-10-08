@@ -1,0 +1,16 @@
+{
+  "source_dir": "C:\\Users\\<사용자>\\<동기화 루트>\\<라이브러리 폴더>",
+  "sharepoint_site": "https://<테넌트>.sharepoint.com/sites/<사이트>",
+  "library_path": "Shared Documents/<라이브러리 경로>",
+  "output_dir": "C:\\Users\\<사용자>\\fabric-references",
+  "category_map": {
+    "<최상위 폴더 이름 1>": "fundamentals",
+    "<최상위 폴더 이름 2>": "process",
+    "<최상위 폴더 이름 3>": "quality",
+    "<최상위 폴더 이름 4>": "materials",
+    "<최상위 폴더 이름 5>": "market"
+  },
+  "default_category": "fundamentals",
+  "owner_names": ["<담당자 이름 1>", "<담당자 이름 2>"],
+  "skip_dirs": ["<썸네일을 만들지 않을 대용량 폴더 이름>"]
+}

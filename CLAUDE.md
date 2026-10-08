@@ -75,6 +75,9 @@
 - 저장은 `requests` CACHE_KEY. 스타일 1건에 옵션 라인 N개. 옵션 라인 1개가 DD 행 1개와 짝이 될 예정(연결은 미구현).
 - 옵션 연결 키는 번호 변경에도 유지되는 `RequestOption.lineId`다. DD 연결은 FABRIC REQUEST가 아니라 DD 행에만 저장한다.
 - 옵션 그룹 끝 "공정" 열(`ddStage`, R147)은 `requestProcessStage`(`src/data/request-process-stage.ts`)로 연결 DD 행의 현재 단계를 한 단어로 보인다. 단계는 접수, 원사, 편직, 염색, 가공(공정일 오늘 이하), 수취(Received date), YDS(GD만), FDS, FL완료(유효 FL#)이고 뒤 단계가 도달하면 앞 단계는 날짜가 비어도 완료다. 색은 그 행 단계 수로 나눈 빨강에서 초록 그라데이션이다. **이 색을 한 계열로 줄이자는 안이 있었으나 2026-10-07에 박향근이 그대로 두기로 확정했다. 다시 꺼내지 말 것.** HOLD, DROP, REJECT는 DD 원문 그대로 적는다(R316). 보류, 드롭, 반려 한글 표기는 폐기했다. 취소선은 DROP과 REJECT에만 긋는다. HOLD는 멈춘 것이지 끝난 것이 아니라 앰버 색만 준다. 연결된 DD 행이 없으면 이 칸이 붉은 "미연결"이 되고, 더블클릭하면 연결 후보 창이 열린다. **REQUEST 화면의 유일한 연결 진입점이라 없애지 말 것**(R316). 칩을 누르면 `ProcessStageDialog`가 단계를 위에서 아래로 보이고 현재 위치를 강조한다. 대표 행은 `requestDdStatus`와 같다. 이어지는 "FL no." 열(`ddLink`)이 아래 규칙을 따른다.
+- **요청과 DD의 연결은 REQUEST 화면에서만 만든다. 일방향이다**(2026-10-08 박향근 확정, R323). DD MASTER의 연결 생성 경로 셋(도구줄 `요청 연결 도우미`, 우클릭 `DEVELOPMENT REQUEST 연결…`, 우클릭 `요청 폴더에서 찾아 연결…`)을 지웠고 `RequestLinkHelperDialog.tsx`와 `RequestBrowseDialog.tsx`도 삭제했다. DD 쪽에 남은 것은 우클릭 `요청 연결 해제`와 도구줄 `끊어진 연결 N` 정리뿐이다. **`RequestPickerDialog.tsx`는 지우지 않았다.** 신규 접수 창의 `FABRIC REQUEST에서 불러오기`가 같은 컴포넌트를 쓴다. 안 쓰이는 `mode="link"` 분기가 남아 있는데 되살려 쓰려면 일방향 결정을 먼저 뒤집어야 한다.
+- **연결은 1대1 바꿔치기다**(R322). `linkDdRecord`가 `applyRequestLinks` 전에 `clearRequestLinksByLineId`로 그 옵션의 기존 연결을 전부 풀고 **푼 결과(`cleared.next`)를 넘긴다.** 원본 `before`를 넘기면 방금 푼 연결이 되살아난다. 한 번의 쓰기라 작업 이력과 되돌리기가 한 걸음이다. 예전에는 `applyRequestLinks`가 새로 연결하는 행만 고쳐서 옵션 하나에 DD 행이 겹쳐 붙었고 `+N`으로만 조용히 드러났다. DD 쪽은 이미 연결된 옵션을 막는데 REQUEST 쪽에 그 가드가 없던 비대칭이 원인이었다.
+- 공정 팝업에 `연결 해제`와 `연결 변경`이 있다(R322). 해제는 `clearRequestLinksByLineId`로 그 옵션에 붙은 DD 행을 **전부** 푼다. `removeRequestLinks`는 DD 행 id 기준이라 겹쳐 붙은 행을 놓치므로 쓰지 말 것. 변경은 팝업을 닫고 후보 창을 열기만 한다. **미리 풀지 않는다.** 미리 풀면 후보 창을 취소했을 때 연결만 사라진다. DD 행이 둘 이상 붙은 옵션에는 붉은 경고 줄이 뜬다. 저장은 `writeDevelopmentRecords` 하나만 지난다.
 - "FL no." 열(`ddLink`, 이름은 R316에서 Link에서 바뀌었고 열 id는 그대로다)은 `records`의 `tech.requestLink`를 읽어 `requestDdStatus`로 계산하는 보기 전용 열이다. 요청 데이터에도 엑셀 양식(`TEMPLATE_COLUMNS`)에도 없다. **FL#이 있을 때만 보인다.** FL#은 `/fabric/:key`(DD MASTER와 같은 원장 키)로 가고 성과 배지와 `+N`이 따라붙는다. **연결 여부를 이 열에서 말하지 않는다**(R316). 공정 칸에 단계가 보이면 그 자체로 연결된 것이라 체크나 "연결" 칩을 다시 만들지 말 것. 상태 색 알약(`DD_TONE_CLASS`)은 공정 칩과 같은 말을 두 번 하고 진행이 `--chart-1`(연어빛)이라 정상 진행이 경고로 읽혀 폐기했다. `requestDdStatus`의 판정 순서(DROP·REJECT, HOLD, 유효 FL#, Received date, 지연, 진행)와 **FL# 완료와 원단 수취를 합치지 않는** 규칙은 그대로이고 지금은 FL# 툴팁에 쓰인다. 행 머리에 `DD 연결/옵션` 수를 보인다.
 - 엑셀에서 한 셀에 "1./2./3."으로 눌러 담던 옵션을 라인으로 푼 것이 이 화면의 핵심이다.
 - 스타일은 병합 블럭이다. style 열과 행 머리, 액션은 rowSpan으로 세로 병합하고, 옵션 칸만 옵션 수만큼 줄로 나눈다. 블럭은 최소 84px, 옵션 줄은 최소 28px이고 마지막에 24px "옵션 추가" 줄이 붙는다. 모든 셀은 줄바꿈하고 넘치면 세로 스크롤만 둔다(가로 스크롤 없음). 행 번호는 스타일 단위다. 옵션을 스타일과 분리된 행처럼 그리지 말 것.
@@ -118,6 +121,7 @@
   6. **동시 채번은 `src/data/storage-claims.ts`의 트랜잭션 예약으로 막는다**(R234). 번호 대장이 아니라 10분짜리 락이다. 진실은 원장이고 예약 문서는 "지금 누가 집는 중"만 담는다. 입고 저장이 끝나면 바로 푼다. **`state/storageClaims`를 `CACHE_KEYS`에 넣지 말 것.** 화면에 보이던 번호와 실제로 나간 번호가 다르면 사용자에게 알린다.
 - 롤 원단은 원단별 상태 `roll` 플래그이고 **표기할 때만** 번호 뒤에 `R`을 붙인다(`storageNoLabel`, R228). 채번·정렬·중복 검사에 이 함수를 쓰지 말 것. 저장 값은 숫자 그대로다. 메일 제목에는 붙이지 않는다(번호를 범위로 접는 `storageNoSummary`가 깨진다). `rackNo`와 같이 **override를 새로 만드는 곳마다 물려줘야 한다.**
 - Rack No.(`src/data/warehouse-rack.ts`): 창고팀 선반배치도 기준 통합원단부 전용 rack은 K열 9개, L열 10개, rack당 3칸(위에서부터 1~3)이고 형식은 `K-1-1`이다. 원단을 입고 순서가 아니라 빈 칸에 넣기 위한 번호라 같은 칸을 여러 원단이 쓸 수 있다. 원단별 상태(`FabricLedgerOverride.rackNo`)에만 저장한다. `applyFabricAction`은 도착 상태가 창고보관이면 이전 값을 물려주고 창고를 떠나면(폐기, 소진, 입고 취소) 비운다. `saveFabricFields`도 값을 물려준다. **override를 새로 만드는 곳에 rackNo를 빠뜨리면 창고 동작마다 번호가 지워진다.** 창고보관 탭에서만 열이 보이고 더블클릭으로 입력한다. 지우기는 Rack No. 칸을 선택하고 Delete·Backspace(여러 영역 포함, `saveFabricRackNos`로 한 번에 저장)이거나 칸을 비우고 확정한다. **형식을 강제하지 않는다(2026-09-22).** 선반 배치가 바뀔 수 있어 친 값을 그대로 저장하고(`normalizeRackNo`는 K/L 규칙에 맞는 값만 `K-1-1`로 맞추고 나머지는 대문자 그대로), 추천 목록은 고정 선반 목록이 아니라 이미 입력된 값(`usedRackNos`)이다. 규칙 밖 값은 배치도(`RACK_SLOTS`)에 나오지 않는다. 여러 원단을 원단마다 따로 저장하면 앞 저장을 뒤 저장이 덮어쓰므로 묶어서 저장한다. 실물 입고 확인 창에도 원단마다 Rack No. 칸이 있어 창고팀이 확인하면서 적는다. 확인 처리(`applyFabricAction`)가 모두 끝난 뒤 체크한 원단의 번호를 `saveFabricRackNos`로 한 번에 저장한다. 순서를 바꾸면 확인 처리가 새 번호를 덮는다. 입고대기 탭은 R&D No., 재고, 입고확인 고정 열을 숨긴다.
+- **1팀 Rack No. 형식 정리**(R324, `dashedRackNo`): 1팀 선반은 `V74`처럼 붙여 쓴 값이라 3팀 형식(`K-1-1`)과 달랐다. 1팀 창고보관 탭에 `Rack No. 정리 N` 버튼이 있고 바꿀 값이 있을 때만 보인다. **영문 한 글자 + 숫자 정확히 두 자리만 바꾼다.** `V7`은 어디서 끊을지 모르고 `V123`은 `V-1-23`인지 `V-12-3`인지 모른다. 추측해서 끊으면 실물 위치와 장부가 어긋나므로 건너뛰고 건수만 알린다. **미지정(빈 값)은 대상에 넣지 않는다.** `saveFabricRackNos`에 빈 문자열을 넘기는 것은 지정 해제 동작이라 멀쩡한 번호가 지워진다. 대상은 `ledger` 전체이고 `visibleRows`를 쓰지 않는다(검색과 필터에 가린 행이 빠진다). 저장은 `saveFabricRackNos` 하나만 지나고 그 함수가 다른 필드를 `previous`에서 물려받고 `blockedByWarehouseDrift`가 장부 지문을 대조한다. **입력 동작(`normalizeRackNo`)은 고치지 않았다.** 2026-09-22 형식 비강제 결정 그대로다.
 - Rack 배치도(`src/components/warehouse/RackMap.tsx`): 탭 줄 오른쪽 "배치도" 버튼이 표 자리를 배치도로 바꾼다(1단계, 창고 화면 안). 칸마다 창고보관 원단 수와 잔량 yds를 색 농도로 보이고, 칸을 누르면 창고보관 탭에 Rack No. 열 필터(`columnFilters.rackNo`)를 걸어 넘어간다. 미지정은 빈 문자열 필터다. 위치는 `RACK_SLOTS`(열 순서 `RACK_ROW_ORDER`, rack, 위부터 층)만 읽고 화면 상태를 갖지 않는다. 3D 맵이나 다른 부서 rack으로 넓힐 때는 별도 경로 `/warehouse/rack`으로 옮기고 3D 라이브러리는 지연 로딩한다(2단계).
 - 메일 초안은 `src/data/mail-draft.ts`의 `.eml`(`X-Unsent: 1`, HTML 본문)로 만든다. `mailto:`는 본문에 표를 못 넣어서 바꿨다. 파일을 열면 Outlook이 보내기 전 새 메일로 연다. **자동 발송이 아니다.** 표 복사 버튼은 대체 경로로 남긴다.
 - 입고 요청 메일(`InboundRequestMailDialog`, `src/data/inbound-request-mail.ts`): 선택 입고 창의 "입고 등록 후 요청 메일"이 입고 등록을 마친 뒤 원장 값(R&D No.)으로 표를 채운다. Rack No. 열은 창고팀 회신용으로 비워 나간다. 받는 사람은 고정 목록이며 **주소와 이름을 코드에 넣지 않고 Firestore `state/mailRecipients`(`inbound`)에 둔다.** 동기화 구독은 `CACHE_KEYS`에 없는 문서를 건너뛰므로 이 문서 이름을 CACHE_KEYS에 넣지 말 것. 편집 화면은 소유자에게만 보인다.
@@ -167,6 +171,15 @@
 - 로그인 이메일 변경은 `verifyBeforeUpdateEmail`로 새 주소에 확인 링크를 보내고, 링크를 누른 뒤에 바뀐다. uid가 그대로라 승인 상태와 화면 권한이 유지된다.
 - 사내 보안 공지(2026-09-14, 외부 서비스는 개인 메일로 가입)에 따라 새 이메일로 회사 도메인은 막고, 회사 메일 계정 팀원에게 권고 문구와 알림 점을 띄운다. **소유자 계정은 이메일 변경을 잠근다.** 소유자 판정이 이메일 문자열(`OWNER_EMAIL`, firestore/storage rules)이라 바꾸면 소유자 권한이 사라진다.
 - `firestore.rules`는 `users/{uid}` 수정을 소유자만 허용한다. 팀원이 이메일을 바꿔도 사용자 목록의 이메일 필드는 옛 값이 남으므로 소유자가 갱신한다. 규칙은 바꾸지 않았다.
+
+## 상단바 접속자 표시 (`src/data/presence.ts`, `src/components/layout/PresenceStack.tsx`)
+- R320, 2026-10-08. 접속한 승인 사용자를 상단바 우측에 아바타로 보이고 호버하면 `이름 · 화면 이름`이 뜬다. **1단계만 만들었다. 행 범위와 셀 단위 커서는 범위 밖이다.**
+- 저장은 **별도 컬렉션 `presence/{uid}`**다. `state/{key}` 청크 동기화와 완전히 분리했다. **`CACHE_KEYS`에 넣지 말 것.** `saveCache`와 `logAction`도 거치지 않는다. 하트비트가 90일 보관 작업 이력을 초 단위로 더럽힌다.
+- **하트비트는 60초다. 줄이지 말 것.** Firestore는 리스너에 문서가 전달될 때마다 읽기로 과금해 비용이 사람 수의 제곱으로 는다. 6명 60초 기준 하루 쓰기 2,880회, 읽기 17,280회로 무료 한도(쓰기 20,000, 읽기 50,000) 안쪽이다. 30초면 읽기가 34,560회가 되고 인원이 늘면 바로 넘는다.
+- 탭이 숨겨져 있으면(`document.hidden`) 쓰지 않는다. 다시 보이면 `visibilitychange`가 즉시 한 번 쓴다.
+- **Firestore에는 접속 종료를 서버가 아는 수단이 없다.** `pagehide`에서 지우고, 남는 유령은 150초 지난 항목을 거르는 필터가 치운다. 필터는 스냅샷이 올 때만 돌아 최악 210초까지 남는다. 로그아웃 직후 삭제는 규칙이 `request.auth.uid`를 요구해 거부되는데 그것도 이 필터가 받는다.
+- 전송하는 것은 `pathname`까지다. 셀과 행과 선택 범위를 보내지 않는다. 화면 이름보다 잘게 드러내면 협업 정보가 아니라 감시로 읽힌다.
+- 자기 자신은 아바타에서 뺐다(바로 옆에 본인 이메일이 있다). 목록이 비면 `null`을 반환해 빈 자리를 남기지 않는다. 최대 4명 + `+N`이다. 구독 실패는 빈 배열로 받아 규칙 게시 전에는 오류 없이 아무것도 안 보인다.
 
 ## 권한 (`src/data/screen-permissions.ts`, `src/data/departments.ts`, `src/components/settings/UserApprovalPanel.tsx`)
 - R217: 사용자 문서 `users/{uid}`에 화면별 `access`(none/read/edit)와 `department`를 둔다. 예전 `screenPermissions`(불리언)는 라우팅·사이드바 호환용으로 access에서 파생해 같이 저장한다. access가 없는 기존 사용자는 불리언 true를 편집으로 읽어 동작이 바뀌지 않는다.
@@ -251,8 +264,16 @@
 ## 코덱스 협업
 기획·검토=Claude, 코딩=Codex, 최종확인=Claude. 절차·명령·함정은 `codex-handoff` 스킬에 있다. 지시서 `docs/codex/RNN-*.md`, 실행 파일 `.codex-runs/`(gitignore). **커밋은 사용자 요청 시에만.** `git reset --hard`/`checkout --`로 사용자 변경 되돌리기 금지.
 
+## TECHNICAL REFERENCES 재빌드 (진행 중, 미커밋)
+`/study` 화면을 팀 자료 라이브러리로 처음부터 다시 만드는 중이다. 2026-10-08 박향근 지시. 매주 study 제출 프로세스가 폐지돼 주차별 현황판이 쓸모없어졌다. 배경과 실측은 사용자 메모리 `fabric-rnd-references-library` 에 있다.
+- **워킹트리에 R321과 R325가 미커밋 상태다. 다른 작업에서 건드리지 말 것.** `src/routes/TechnicalReferences.tsx`, `src/data/reference-schema.ts`, `src/data/reference-demo.ts`, `tools/references/`, `src/App.tsx`, 삭제된 `src/routes/Study.tsx` 다.
+- R321 화면 골격. 카테고리 카드 6개 고정(자료 수와 무관하게 늘 6개, 같은 높이), 검색과 태그 칩, 표형 리스트, 우측 상세 패널. **데모 데이터 12건**이라 아직 배포하지 않는다. `MaterialItem`·`MaterialKind`·`MaterialDeck`을 재사용하지 않고 새 타입을 새 파일에 만들었다. 코버플로 덱은 폐기했다.
+- R325 로컬 색인 스크립트 `tools/references/index_references.py`. 메타데이터만 뽑고 파일을 열지 않는다. 설정과 결과물은 저장소 밖(`%USERPROFILE%abric-references`)이다. **공개 저장소라 사내 경로·폴더명·팀원 실명을 코드와 예시에 넣지 않는다.**
+- 2026-10-08 실측: 459건, 온디맨드 0, 읽기 실패 0, 260자 초과 0, ID 충돌 0. 날짜 41건, 담당자 37건. 카테고리는 materials 286 / fundamentals 119 / process 46 / market 8 / quality 0 / testing 0.
+- 남은 것: R326 Firestore `referenceItems` 연결과 규칙 게시와 HOME의 `state.study` 참조 절단, R327 실데이터 투입. **HOME(`Home.tsx` 839·867·1008·1041)이 아직 `state.study`를 읽어 화면만 바꾸면 폐기한 과거 과제가 계속 뜬다.**
+
 ## 잔여 작업
-- 자료 라이브러리 OneDrive 링크 목록화.
+- 자료 라이브러리 OneDrive 링크 목록화 → **Teams(SharePoint)로 확정. 위 절 참조.**
 - RDDA 월 재계산·KPI 대조, RDDA REPORT 파싱.
 - DEVELOPMENT 담당자 process status 재배치(미결).
 - COST SHEET R272 원사 시세표(붙여넣기 입력). 원가계산의 마지막 조각이다.
