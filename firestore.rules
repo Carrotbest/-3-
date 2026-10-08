@@ -70,6 +70,13 @@ service cloud.firestore {
       allow delete: if isOwner();
     }
 
+    // 사내 자료 색인이며 색인 스크립트가 소유자 계정으로 올린다.
+    // 팀원 분류 수정 화면이 생기면 update 권한을 넓힌다.
+    match /referenceItems/{docId} {
+      allow read: if isApproved();
+      allow create, update, delete: if isOwner();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

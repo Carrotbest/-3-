@@ -32,7 +32,6 @@ import {
   optionSequenceText,
   monthlyDevelopmentTrend,
   processWeeklyFlow,
-  studyMaterials as deriveStudyMaterials,
   tsMaterials as deriveTsMaterials,
   weeklyIntakeBalance,
   type HomeKpiDetailGroups,
@@ -44,6 +43,7 @@ import {
 } from "@/data/derive"
 import { fmtDateFull } from "@/data/format"
 import { stageOf, type ChemicalCategory, type ChemicalPortfolio } from "@/data/chemical"
+import { referenceToMaterial, useRecentReferences } from "@/data/references"
 import { loadTrendFeed, loadTrendKpi, type TrendFeed, type TrendKpi } from "@/data/trend"
 import { SAMPLE_OWNERS, type DevRecord, type MaterialItem, type MaterialKind } from "@/data/schema"
 import { hoverLift } from "@/lib/motion"
@@ -836,7 +836,6 @@ export function Home() {
   const records = useAppStore((state) => state.records)
   const completed = useAppStore((state) => state.completed)
   const ts = useAppStore((state) => state.ts)
-  const study = useAppStore((state) => state.study)
   const materialsManual = useAppStore((state) => state.materialsManual)
   const chemical = useAppStore((state) => state.chemical)
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialItem | null>(null)
@@ -864,7 +863,8 @@ export function Home() {
     purchase: summary.purchase + item.purchase,
   }), { total: 0, gd: 0, domestic: 0, production: 0, purchase: 0 }), [monthly])
   const tsDeckMaterials = useMemo(() => materialsOf("TS", deriveTsMaterials(ts), materialsManual), [materialsManual, ts])
-  const studyDeckMaterials = useMemo(() => materialsOf("STUDY", deriveStudyMaterials(study), materialsManual), [materialsManual, study])
+  const recentReferences = useRecentReferences(6)
+  const studyDeckMaterials = useMemo(() => materialsOf("STUDY", recentReferences.items.map(referenceToMaterial), materialsManual), [materialsManual, recentReferences.items])
   const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
   useEffect(() => {
@@ -1005,7 +1005,7 @@ export function Home() {
         <div className="grid gap-4 lg:grid-cols-2">
           {[
             { kind: "TS" as const, title: "TS 관리", description: "사고사례·불량 trouble shoot", path: "/ts", icon: Wrench, items: tsDeckMaterials, empty: "SETTING에서 TS 엑셀을 업로드하면 사고사례가 카드로 표시됩니다." },
-            { kind: "STUDY" as const, title: "TECHNICAL REFERENCES", description: "섬유 교육자료", path: "/study", icon: BookOpenCheck, items: studyDeckMaterials, empty: "SETTING에서 STUDY 엑셀을 업로드하면 교육 과제가 카드로 표시됩니다." },
+            { kind: "STUDY" as const, title: "TECHNICAL REFERENCES", description: "팀 자료 라이브러리 최근 자료", path: "/study", icon: BookOpenCheck, items: studyDeckMaterials, empty: "Teams 자료 폴더 색인이 올라오면 최근 자료가 표시됩니다." },
           ].map((deck, index) => {
             const Icon = deck.icon
             return (

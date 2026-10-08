@@ -85,6 +85,11 @@ input.dd-date::-webkit-calendar-picker-indicator {
   --chart-3: hsl(197 37% 24%);
   --chart-4: hsl(43 74% 66%);
   --chart-5: hsl(27 87% 67%);
+  --ref-cat-1: #2a78d6;
+  --ref-cat-2: #eb6834;
+  --ref-cat-3: #1baf7a;
+  --ref-cat-4: #eda100;
+  --ref-cat-5: #e87ba4;
   --stage-plan: #8a8a8a;
   --stage-progress: #274754;
   --stage-done: #2a9d90;
@@ -171,6 +176,11 @@ input.dd-date::-webkit-calendar-picker-indicator {
   --chart-3: hsl(30 80% 55%);
   --chart-4: hsl(280 65% 60%);
   --chart-5: hsl(340 75% 55%);
+  --ref-cat-1: #3987e5;
+  --ref-cat-2: #d95926;
+  --ref-cat-3: #199e70;
+  --ref-cat-4: #c98500;
+  --ref-cat-5: #d55181;
   --stage-plan: #9c9c9f;
   --stage-progress: #5b93a3;
   --stage-done: #3fb6a7;
