@@ -489,5 +489,15 @@
   "kept": 59,
   "hits": 4,
   "translated": 47
+ },
+ {
+  "at": "2026-10-09T00:42:38+00:00",
+  "kind": "collect",
+  "ok": 38,
+  "fail": 0,
+  "new": 160,
+  "kept": 62,
+  "hits": 2,
+  "translated": 48
  }
 ]

@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-10-08T00:31:18+00:00",
+"generated_at": "2026-10-09T00:44:52+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -1891,7 +1891,7 @@
 "period_end": "2026-05-31",
 "prev": -2.7,
 "yoy": -1.1,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_operating_nike",
@@ -1977,7 +1977,7 @@
 "period_end": "2026-05-31",
 "prev": 104.5,
 "yoy": 317.9,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_inventory_nike",
@@ -2063,7 +2063,7 @@
 "period_end": "2026-05-31",
 "prev": 0.2,
 "yoy": 0.2,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_revenue_pvh",
@@ -4199,6 +4199,13 @@
 ],
 "anf": [
 {
+"d": "2026-10-06",
+"t": "Abercrombie & Fitch (ANF) 수익 내역 및 추세",
+"o": "Abercrombie & Fitch (ANF) Earnings History & Trends",
+"u": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9MazVSSnN2WUxvRkhsVzhPUzZraEVqak0wY0FSb0lWS0tjUThVWUpxTnpPRGxZWkdib1VtWUt6VldSZG9MX3h6aktubDdfZ0Q3SXRMZWJUbEc3N0RoSklWR2tR?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
+{
 "d": "2026-10-05",
 "t": "Zacks, Abercrombie 및 Fitch 주식에 대한 수익 예측 상향 조정",
 "o": "Zacks raises earnings forecast for Abercrombie & Fitch stock",
@@ -4245,13 +4252,6 @@
 "t": "Abercrombie 및 Fitch Co. 클래스 A – HAN:AFT의 순익 대비 가격",
 "o": "Price to earnings forward of Abercrombie & Fitch Co. Class A – HAN:AFT",
 "u": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOYnpjVWhiT25hbTdaekVMdlBoV1RmeWlrd0NUT0J1TWRKZ2h4UVVvVUV4YXhFbWktODRPa1RYQzF2NEJsSEhiM21VMkF6ZmlhS2dJa01IOUZvME56MW9zMXBHVjBtVndFQ0JJWXpHdnFILUN1UmtRZ0EwRzVIeHlaRW1VNklWWExGNkxWRTNJaUhTcDNXRzlvN0RJck8?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-09-26",
-"t": "실적이 저조한 후 투자자들이 Abercrombie 및 Fitch 주식에 반응하는 방법",
-"o": "How Investors Are Reacting To Abercrombie & Fitch Stock After An Earnings Beat",
-"u": "https://news.google.com/rss/articles/CBMiygFBVV95cUxORmp1SDFLY085ZFo3UkxxLWF1ZzdwS2U4dGZPWFdaOFlfZHRGbVFDZEl4V0JRSWZTYkpMbHdpQUVSYkluQ2t5dWxsc0lNSFJwa0FMdjNmRnV6NmJuV1F6MTZNaHdrbDFhRHJQN1pOWm9GZW1qMlBmbnNiMnhGcFRwUjJuSnR2OGdPbGp1ODRVck96MEpGS1FXdm9vSl9BZ1VCVmxmczB2VFBEb2ZoYXlHMFJkWnZiR0dlNTNYODNITC1oWVR2MW1MN2Nn0gHPAUFVX3lxTE9RV3ZmZ0ExVHFOdmRDdElrelRIa3haRDdrZmVqUnBtY0FUWGVIYnFIUTFwTDdubklfMjBOT2V0MEFGbzFlUHpqbDA3NWJTTDY3OGtUc0E0cElJeUVLUHo1WmRaeTBraVhyOFhnMDBTcWthRDd1djN3WnM3V3VReThiaUhfcWlZMUFSY3ZMek9udFFlcF9EWXZEZDNsVlRWNktHTHIwN3QxNHVfaTBacFVyd2lYRXlKYTlQTVdsTTVSMWgwc19yMmdpZnFRbHdCdw?oc=5",
 "m": "바이어 · Abercrombie & Fitch"
 }
 ],
@@ -4374,10 +4374,31 @@
 "nike": [
 {
 "d": "2026-10-08",
+"t": "Lululemon, Nike 베테랑 Gauger를 제품 책임자로 임명",
+"o": "Lululemon taps Nike veteran Gauger as product chief",
+"u": "https://www.ecotextile.com/2026100866294/radar/lululemon-taps-nike-veteran-gauger-as-product-chief/",
+"m": "Ecotextile News"
+},
+{
+"d": "2026-10-08",
+"t": "Nike는 배당금보다 낮은 수익을 유도합니다. CFO의 지급 약속을 뒷받침하는 내용은 다음과 같습니다.",
+"o": "Nike Guided Earnings Below Its Dividend. Here’s What Backs the CFO’s Payout Pledge",
+"u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNbGd3SHEtZVNpUlVUTk9CTVZCbVlLY002TEJtVE9VWUJDVUVyb00wS0FaWlRyNFVhQld6cVZPbWMwcC1VTXo1eF9sNHh3a3hIc0R4Zll5Ukc5VEQtZ2hpclluNzlWVlcxUmhLeWlZaVNSOUpIT3FSOThBaV9tYmNEcGxRb2xZZE8xVzlsYkNBYW5yeUxBMjVjanZlWlhZbkRCZ0E?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-10-08",
 "t": "Nike 주식의 약한 지도로 인해 투자 스토리가 어떻게 바뀌었나요?",
 "o": "How Weak Guidance At Nike Stock Has Changed Its Investment Story",
 "u": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxPbHNnOWJTRUotR09uZlV5TWQwaEtLSHI0RW50WkRXdjQzaVVnVmx6Z19Hbi1yOHdVS3l3RUE5cEJEZzZ3V2o5WGVjN1N0YVJ4R0JPVHhRRnZpSGFFUXRTZXRYMjZNUHc4ZWlxRDM4c0xPb0MyWnp3MkZna3lOT0Q5YnhEUThocWNlMnAxbkw5LUtFZDlkRkhoN2ZyT2I1LTRETFR1NjJqMlUzUm9BbUlFalZjMDRDZzktZEdiWEV5X1JYaGx6Nzh5MdIBzgFBVV95cUxPUVM2dS1XM3RvakNMa1Y1bXo5Y2I1eXBJdGpiNHloNVRTMFFnNDAzUms1RnpHZ2pqSFJqUmlLU0kwXzlMOGFpX3huWi1VOVpLS1hKS095MU95UUxXQzU5QlFEVWRucXZ1ZUdCR2JidGRHa2puM2wzeUpNd3h5TkUyMUo3UEVEdjh3R0hINS1LOHRHVkxtUTdFNmJ3ZnhoVWZ2NDlnNlNieklkcHNBNmdqdkVLNlNZOXUzWnVpWnZ6NnAxV2pGQkVLN1QzUmZGUQ?oc=5",
 "m": "바이어 · Nike"
+},
+{
+"d": "2026-10-08",
+"t": "미국 TNC, Nike, Patagonia, Lululemon을 통합하여 극세사 오염 억제",
+"o": "US' TNC unites Nike, Patagonia, Lululemon to curb microfibre pollution",
+"u": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxOblpMVG9TbW5tbjRLY3lLcVVBU0pXMlRPMVFlSFhPc25kV0tPRnZUaDd2VG16VjJkZ3RkNVhON2ZWYzd2RWF0ZldXeG5DU0Jqc0h1b1FXWUlBZUhEMk11RUxYNVRLcTJqZ1BJTjlTSjdQUXpCd3hnVFhPME00c0VTaDZDMlZVTkFZYWVPSmlQb0w2bzZ4eDFTR2JSd3Z3UXlMVlo5enBTc2x4NDZnQjA1NFM4YUxvbDBjSU55NXVrbjU0b1JzTGE2YjFmZDNka3pTWFU4a0FCemwzU09DQ0R3WGlnaWdBV3Jqemc?oc=5",
+"m": "Fibre2Fashion"
 },
 {
 "d": "2026-10-07",
@@ -4406,27 +4427,6 @@
 "o": "3PL Study: Nearshoring and AI Are Changing What Shippers Expect From 3PLs",
 "u": "https://wwd.com/sourcing-journal/logistics/3pl-study-nike-nearshoring-ai-third-party-logistics-cscmp-penske-1239316246/",
 "m": "WWD"
-},
-{
-"d": "2026-10-06",
-"t": "The Nature Conservancy, 섬유 부문의 극세사 오염을 줄이기 위해 극세사 행동 연합 출범",
-"o": "The Nature Conservancy Launches Microfiber Action Alliance To Reduce Microfiber Pollution In Textile Sector",
-"u": "https://www.textileworld.com/textile-world/2026/10/the-nature-conservancy-launches-microfiber-action-alliance-to-reduce-microfiber-pollution-in-textile-sector/",
-"m": "Textile World"
-},
-{
-"d": "2026-10-06",
-"t": "Amazon Prime Big Deal Days 세일에서 최대 45% 할인으로 최고의 Nike 의류 거래 50개를 쇼핑하세요.",
-"o": "Shop the 50 best Nike apparel deals in the Amazon Prime Big Deal Days sale with up to 45% off",
-"u": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxQUUVwREttWkgwNmVOSFZnM3V6bzdpOUs3czBFSjUyMnQ2c3NUTmk4eE9fbC1qV05PYW51M2g1VVFSVzk3N1ZIUGlCNWdLZXNRaGs0ajctYklZV0wxLVlRdVhuN01ady15VFU4R3prTHIzR1R3RkVqNjE1TXFPbnVuTmRMV0U3TUUzNVJ0VGhPdnNMQzJMQUJXb0Jic3J6RE1zVk14dFVxeHpSQzN5VHEzajdIVVdpd1pTcUZnNkFxcm1ScVRyZDZfUmJUT1ZhMnVXQ0xkOU5Xck5nZHR0S0VPME5HQkZ1UXhNWm8tdTB6M1ZDNHY5TDFyY1U4ZENENmM?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-10-05",
-"t": "Nike, 2026 시즌을 앞두고 대담하고 새로운 NBA 코트용 의류 출시",
-"o": "Nike drops bold, new NBA on-court apparel ahead of 2026 season",
-"u": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxOZHVHdzRGM01qYUlMalRkdFdYU0NGS2lVWjI5Q3EzTkpRbllhMVpRSEp0d0F2R2t4ZEpYX1loM3JmNGxadVRNQ0hvVmVQSWFaWllLbFZxYlNBQXAzWlQzT3g4a2xORnVQMUVWQ0VZVDI0Wjk1RDM4X3prRWdENmdoYXh6aHRsN2hnVDBEX0gxY0pETFI1TkJaS2lvZnhERFdMMXYtQUw0em9XYXB6NjBlaUNUT0ZwclB4b05KbTM1UVMxUnF5MDdZMExXQXlUQ2ljdFJ6NmxLdHJ4bElHSU03WDBTOGdlblJuNHc?oc=5",
-"m": "바이어 · Nike"
 }
 ],
 "pvh": [
@@ -4489,6 +4489,13 @@
 ],
 "costco": [
 {
+"d": "2026-10-08",
+"t": "Costco의 9월 매출은 강력한 Comps, 디지털 성장으로 13% 증가",
+"o": "Costco's September Sales Rise 13% on Strong Comps, Digital Growth",
+"u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPRjE4bG11dnhoTlVqTnU3NW5MNzRSWmdNMWlOZkxLSzZJRl9sOHdFTHU0ZVV5TEtsQkozQ3dYcy0wNk1ORHRnMGFBTy0yNHNPRTA2X0gwRWtIQ2szUzJUOW1UWlhNbXU1LWI5UVR4Z3B5T21LY2x0bjlpT21uYjJxbHJrS0VuTV9oQjY4UVlIT0lFeGd6QUJWOHVZQWI5cXR6N2FSRkliYTBtY19rWFctMUV0R09FazZZYXJj?oc=5",
+"m": "바이어 · Costco"
+},
+{
 "d": "2026-10-07",
 "t": "2022년 4분기 Costco Wholesale Corp 수입 통화 기록",
 "o": "Q4 2022 Costco Wholesale Corp Earnings Call Transcript",
@@ -4510,6 +4517,13 @@
 "m": "한국섬유신문"
 },
 {
+"d": "2026-10-07",
+"t": "Costco 도매(COST) 수익: 9월 비교 가능한 매출이 기대치를 상회함",
+"o": "Costco Wholesale (COST) Earnings: September Comparable Sales Surpass Expectations",
+"u": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOWDZRVGJpdWE4bjRyTXBJYVRpUE1RMVNuZXdKOXA0Y1ZKcHZXM2J3QnZHUlFQb2l3SGRSZnluek5DNjdidmVWNF84MEZ2ZmExU01uQUpHVFNjTV9OTVdMbWJkYXU3dDBSQmk3Qy1HbThNamluV29ReVdKNGRjUURPVjUtWkFZT2ZLVFpIMkF4V181bmxub0lzS05EVUZBNGo2dWMxWTJWTnRXbHQwdWRrM01fNkNUMGdwSEdHLU5mbjJPelh3Z2ZWZzZ3ZDNnSGlSb0E?oc=5",
+"m": "바이어 · Costco"
+},
+{
 "d": "2026-10-06",
 "t": "Costco의 디지털 매출 330억 달러 돌파: 전자상거래가 계속해서 확장될 수 있을까요?",
 "o": "Costco's Digital Sales Top $33 Billion: Can E-commerce Keep Scaling?",
@@ -4528,20 +4542,6 @@
 "t": "Costco의 기본 매출 성장이 3개월 연속 둔화되었습니다. 9월 보고서는 10월 7일에 발표됩니다.",
 "o": "Costco's Underlying Sales Growth Has Slowed 3 Months in a Row. Its September Report Comes Oct. 7.",
 "u": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxNcjVzZ0pGWW5Eak9xSXhiR0ZLeGpCd0V1YU9tVU00NEFqZzExR0pLc3JleTNMblhFak43bW9ZWUpjd0FsejJad1c4QWdBUDUxZFI1UE9SV25EZlhmR0R5U1FUMkc1WklwZk1QNjFaWnpyMEwwVWRvcHBwMnBOcGdOaGhjOEFyVFlXUVVMOHF4cWFKb212T3lUSU9wYk1ZdXFwV2pPYVR6UzkyeVNwU1NhYWNnNXNUSFRGNTRFSFJjdDh3NGhBZlJLRV9jTEo2NDZtbElZ?oc=5",
-"m": "바이어 · Costco"
-},
-{
-"d": "2026-10-02",
-"t": "Costco는 3.9%의 마진으로 상승하는 비용을 흡수할 수 있습니까?",
-"o": "Can Costco Absorb Rising Costs On A 3.9% Margin?",
-"u": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxOVjhfbGQ4aGtvd21iVnB1SzYzazN1MlcyLWoxVXh3TjBPd3NqOXdoRkhaa3Vhc1JhcEdDM0N5aFNzZlU0Yk5XcE9mWXBYZUlsdXh6alFnVFlZeHdhZkxNeklnUWF2MEk1Ul9PVGNaU2czcU9mUDJNaWpXcmppc3VWblBaZ2VGcmJvVlVZdUE1REdrZ3o0aV9uUzZ6NWtGV2szc0h0TDNYRXhfTVE?oc=5",
-"m": "바이어 · Costco"
-},
-{
-"d": "2026-09-30",
-"t": "Q4 수익이 개선된 후 Costco 주식을 매수, 보유 또는 매도해야 합니까?",
-"o": "Should You Buy, Hold or Sell Costco Stock After Its Q4 Earnings Beat?",
-"u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNY1REeWpKaEM4QVhnNHRfSUhFMTQzd2gxZldzSzJNYU1vMjlBSWlzOTRDa0dQWkR0eU9Tc2RLdVg4ay1mR1QtVkFXc0tSUjl3aEw2aHFDZm5JUGVVVk5ieENSeU5lYkVLQW5SSi1yUzYyMnVXenhCbTNHdjBjdldOQnF1SFFRQ0UzOEhtdzd6TGZ5VEd3WUpCSUdSeGJPLXA0SFlqbWhnQklMRHF5QU5keUZkbGJLaDFKRWNraXNrek4?oc=5",
 "m": "바이어 · Costco"
 }
 ],
@@ -4721,6 +4721,20 @@
 ],
 "walmart": [
 {
+"d": "2026-10-08",
+"t": "Walmart 주식은 최신 결과와 소매 규모로 상승",
+"o": "Walmart stock rises on its latest results and retail scale",
+"u": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPRC13SU9HZk5Fc2JValpNeExicFU0LUpVSmlQem1wbllTbEs2NzdWTmE1WGl0ZlZZVVo5RW5zcGRjZDU4WDZYS2lMeUFITG5ZYUo0UkIyZFFhdG0wS0FBcFpRNU5qMGNmRTByeE9ZSDJBbU1hSXRSWkdUMFhfSDJSR2E4X2g3dDc5VWs1T1I4blE0NnozYU9SZ2JjejJDa3gtY0RJNWo2Vmhac2U0aUFXclQ0bXpFel92M3ZGYkZR?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-10-07",
+"t": "Walmart 주식은 분기 실적을 앞두고 EUR 96.62에 거래됩니다.",
+"o": "Walmart stock trades at EUR 96.62 ahead of quarterly results",
+"u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPaFprcUU5a0VIVjgtN252T3FMcldUNDlnZ3I5TGI0eFNVc2J0S1ZHNlZJeHNGY21GZmdIWXJ6aGk1TVFtWm5Mc01SaU42b0dEOENMeHZpa1JVZTFjNFpZNTJZTVpsR3dTajMzR0lqUG5nWnNQWTdDT21yYjlYd2tTRXFxTzVaRFdrM3pnWjJhcHU2V1BDMTQtc2V1dlZmYjVvQWRkdnVMYmZTMS1ldGhuUS1vaDdGencxQ05kMUlwOWw?oc=5",
+"m": "바이어 · Walmart"
+},
+{
 "d": "2026-10-06",
 "t": "Spotify Ad Exchange 인벤토리가 Walmart DSP에 합류했습니다.",
 "o": "Spotify Ad Exchange inventory joins Walmart DSP",
@@ -4760,20 +4774,6 @@
 "t": "판매자는 이제 Seller Central에서 Amazon, eBay, Shopify, TikTok 및 Walmart 전반의 판매를 관리할 수 있습니다.",
 "o": "Sellers can now manage sales across Amazon, eBay, Shopify, TikTok, and Walmart from Seller Central",
 "u": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOQ3lUWUszZ0lhaXRhM0FRb2hvTjA2QlBINWhKbEcydkpSRW5uak1jeUZfVGYxUzcyRE55SDNfZHQ0UHF3OW1ab0h4TExxTG5zMmF3YTQyZlA4NWZOVXJmNnhUZC1hb1cySzdyY0NMcURIc0JoQnRKU1puYnhULXRpbkdQLUd3R1h4WDdiSlp6THBWX2doTmFQRUgxX3U?oc=5",
-"m": "바이어 · Walmart"
-},
-{
-"d": "2026-09-24",
-"t": "Costco vs Walmart 주식: COST 수익 이전에 어느 쪽이 승리할까요?",
-"o": "Costco vs Walmart Stock: Which Wins Before COST Earnings?",
-"u": "https://news.google.com/rss/articles/CBMidkFVX3lxTFA0dEVWam05M05IOTdBazNzRTZQaU9MZ3ZEZTljc1R0Q0Q3bnQ4aFRFaUl6UGNTeEhuS1k3NU5SY0J3aVlSVHhaTmZSMW5xNXJ3Q2w5SGhYVXl3XzRkZnloMFdtUHJOZWcyM3Nib3NRMERJOF9tUVE?oc=5",
-"m": "바이어 · Costco"
-},
-{
-"d": "2026-09-24",
-"t": "Scintilla가 공급업체 데이터를 AI로 전환함에 따라 Walmart가 하락함",
-"o": "Walmart Falls as Scintilla Turns Supplier Data Into AI",
-"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOZkRZLWttdlR6WDVQY1dYRE83RzBlM1hqZXVvRTlvdWdHOTN1VE5HUmNIV3NNb3plb2pKYklhXzVMNVVWRmpqMmw3MlRtZ1I2aDlFUnNGOTdMc2NWbnhMMkFLWmtyYjRPcGFNLTR0OGVkY296NzNERDEtNUo1UW1TRTJYUktCT0NiZTh4TTNtTUpCUUZXMGZGQmNOUW5HWlVJbFBvel9aU09OdkFjYmc1czBBU0o?oc=5",
 "m": "바이어 · Walmart"
 }
 ],
