@@ -7636,6 +7636,33 @@
   ]
  },
  {
+  "key": "b7a2df7bf42c9ef7",
+  "title": "The LYCRA Company Showcases Fiber Innovation And Co-creation At Intertextile Shanghai",
+  "title_ko": "LYCRA Company는 Intertextile 상하이에서 섬유 혁신과 공동 창작을 선보입니다.",
+  "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE5kYmNJcEpBbWRVcGRPNEFLSGhYY213enpVN1dOSjNRUkFBNTA2ckM0dlAzVmdnUWRVZEllRjJoVnk5ODY0RDhCa2ZPVDJhWVAtb1FrVnY2UU1TSWJwdlpteGVvUWY?oc=5",
+  "published": "2026-08-27",
+  "collected": "2026-10-10",
+  "summary": "The LYCRA Company Showcases Fiber Innovation And Co-creation At Intertextile Shanghai IFAB MEDIA",
+  "content": "The LYCRA Company Showcases Fiber Innovation And Co-creation At Intertextile Shanghai IFAB MEDIA",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "스판덱스",
+   "전시회"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
+  ]
+ },
+ {
   "key": "b6f7a4100d60200e",
   "title": "M&S launches ZEOS fulfilment partnership across 22 European markets",
   "title_ko": null,
@@ -7811,6 +7838,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Abercrombie & Fitch"
+  ]
+ },
+ {
+  "key": "b140a7457b84187e",
+  "title": "Retail Investors Buying Back Into Walmart Stock (WMT) After Q2 Earnings",
+  "title_ko": "2분기 실적 이후 Walmart 주식(WMT)을 다시 구매하는 소매 투자자들",
+  "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNdTYtNmJ3a1YtWGJPUC1SWC04RXlXR2JLZVJLajB1aG9ucU9DLVlzV0VsaVVlSHV2UjM0Xy1vYWRQaGJVenp6SHJEbk14X3Jfd2d0V2dnNUJRaEk3aVRPYUpMNW83UDlmWXJDZUN3RWhyVmdIYWNaSGJpNFZZM3k5WkVkQzlVM3pxajVZUE5aZlU0WXZzVm01V3A0ZUVMbEli?oc=5",
+  "published": "2026-08-27",
+  "collected": "2026-10-10",
+  "summary": "Retail Investors Buying Back Into Walmart Stock (WMT) After Q2 Earnings TipRanks",
+  "content": "Retail Investors Buying Back Into Walmart Stock (WMT) After Q2 Earnings TipRanks",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
