@@ -12,7 +12,7 @@ export interface InboundRequestMeta {
   note: string
 }
 
-export const INBOUND_REQUEST_COLUMNS = ["R&D No.", "Style No.", "FL#", "Buyer", "원단", "컬러", "수량(yds)", "Rack No."] as const
+export const INBOUND_REQUEST_COLUMNS = ["R&D No.", "Style No.", "FL#", "Buyer", "Yarn Detail", "Cons", "컬러", "Dyeing Side", "수량(yds)", "Rack No."] as const
 
 export function inboundRequestRows(items: readonly FabricLedgerItem[]): string[][] {
   return items.map((item) => [
@@ -20,8 +20,10 @@ export function inboundRequestRows(items: readonly FabricLedgerItem[]): string[]
     item.styleNo,
     item.flNo,
     item.buyer,
+    item.fields.yarnDetail ?? "",
     item.construction,
     item.color,
+    item.dyeing,
     item.yds === null ? "" : String(item.yds),
     item.rackNo ?? "",
   ])
