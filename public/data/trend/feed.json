@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-10-10T23:57:39+00:00",
+"generated_at": "2026-10-12T00:04:13+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
-"filtered_out": 3165,
+"filtered_out": 3194,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 21,
-"scanned": 673,
-"kept": 273,
-"material": 211
+"scanned": 649,
+"kept": 269,
+"material": 209
 },
 "30": {
 "sources": 22,
-"scanned": 2751,
-"kept": 1050,
-"material": 773
+"scanned": 2552,
+"kept": 968,
+"material": 713
 }
 }
 },
@@ -25,7 +25,7 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 482
+"n": 483
 },
 {
 "key": "RETAIL",
@@ -33,15 +33,15 @@
 },
 {
 "key": "FABRIC",
-"n": 245
+"n": 244
 },
 {
 "key": "ETC",
-"n": 213
+"n": 212
 },
 {
 "key": "CHEMICAL",
-"n": 113
+"n": 114
 },
 {
 "key": "YARN",
@@ -51,7 +51,7 @@
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 432
+"n": 431
 },
 {
 "key": "Fibre2Fashion",
@@ -59,18 +59,18 @@
 },
 {
 "key": "Textile Focus",
-"n": 120
+"n": 116
 },
 {
 "key": "Ecotextile News",
 "n": 113
 },
 {
-"key": "Textile Today",
-"n": 94
+"key": "국제섬유신문",
+"n": 93
 },
 {
-"key": "국제섬유신문",
+"key": "Textile Today",
 "n": 93
 },
 {
@@ -79,7 +79,7 @@
 },
 {
 "key": "Textile World",
-"n": 56
+"n": 57
 },
 {
 "key": "Knitting Industry",
@@ -87,11 +87,11 @@
 },
 {
 "key": "주제검색 · 국내소재",
-"n": 41
+"n": 45
 },
 {
 "key": "주제검색 · 신소재",
-"n": 40
+"n": 41
 },
 {
 "key": "Indian Textile Magazine",
@@ -133,7 +133,7 @@
 "tags": [
 {
 "key": "방글라데시",
-"n": 114
+"n": 112
 },
 {
 "key": "리사이클",
@@ -141,7 +141,7 @@
 },
 {
 "key": "전시회",
-"n": 60
+"n": 58
 },
 {
 "key": "데님",
@@ -149,7 +149,7 @@
 },
 {
 "key": "T2T",
-"n": 24
+"n": 25
 },
 {
 "key": "울",
@@ -157,6 +157,10 @@
 },
 {
 "key": "탄소",
+"n": 23
+},
+{
+"key": "바이오소재",
 "n": 22
 },
 {
@@ -164,12 +168,8 @@
 "n": 22
 },
 {
-"key": "바이오소재",
-"n": 21
-},
-{
-"key": "r-PET",
-"n": 17
+"key": "스판덱스",
+"n": 18
 },
 {
 "key": "베트남",
@@ -180,15 +180,15 @@
 "n": 16
 },
 {
-"key": "스판덱스",
+"key": "r-PET",
 "n": 16
 },
 {
-"key": "부직포",
-"n": 14
+"key": "관세",
+"n": 13
 },
 {
-"key": "관세",
+"key": "부직포",
 "n": 13
 },
 {
@@ -232,6 +232,10 @@
 "n": 7
 },
 {
+"key": "PFAS",
+"n": 7
+},
+{
 "key": "스트레치",
 "n": 7
 },
@@ -241,10 +245,6 @@
 },
 {
 "key": "GOTS",
-"n": 6
-},
-{
-"key": "PFAS",
 "n": 6
 },
 {
@@ -268,6 +268,10 @@
 "n": 5
 },
 {
+"key": "DWR",
+"n": 4
+},
+{
 "key": "면가",
 "n": 4
 },
@@ -285,10 +289,6 @@
 },
 {
 "key": "렌징",
-"n": 3
-},
-{
-"key": "DWR",
 "n": 3
 }
 ],
@@ -336,27 +336,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-09-11",
-"total": 44,
-"by": {
-"RETAIL": 10,
-"ETC": 6,
-"CHEMICAL": 5,
-"YARN": 2,
-"MATERIAL": 14,
-"FABRIC": 7
-}
-},
-{
-"date": "2026-09-12",
-"total": 8,
-"by": {
-"ETC": 5,
-"FABRIC": 2,
-"YARN": 1
-}
-},
 {
 "date": "2026-09-13",
 "total": 8,
@@ -643,11 +622,11 @@
 },
 {
 "date": "2026-10-08",
-"total": 65,
+"total": 66,
 "by": {
 "RETAIL": 16,
 "MATERIAL": 19,
-"ETC": 12,
+"ETC": 13,
 "FABRIC": 10,
 "CHEMICAL": 5,
 "YARN": 3
@@ -666,70 +645,84 @@
 },
 {
 "date": "2026-10-10",
-"total": 10,
+"total": 12,
 "by": {
-"MATERIAL": 4,
+"MATERIAL": 5,
 "ETC": 1,
 "RETAIL": 2,
-"YARN": 1,
-"FABRIC": 2
+"FABRIC": 3,
+"YARN": 1
+}
+},
+{
+"date": "2026-10-11",
+"total": 6,
+"by": {
+"MATERIAL": 4,
+"ETC": 2
+}
+},
+{
+"date": "2026-10-12",
+"total": 1,
+"by": {
+"CHEMICAL": 1
 }
 }
 ],
 "momentum": [
 {
-"tag": "방글라데시",
-"label_en": "bangladesh",
-"recent": 77,
-"prior": 37,
-"delta": 40,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-6,
-14,
-23,
-20,
-14,
-14,
-23
-]
-},
-{
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 67,
-"prior": 33,
-"delta": 34,
+"recent": 65,
+"prior": 35,
+"delta": 30,
 "weeks": [
 0,
 0,
 0,
 0,
 0,
-1,
 5,
 28,
 12,
 16,
 13,
-25
+26,
+0
 ]
 },
 {
-"tag": "T2T",
-"label_en": "textile-to-textile",
-"recent": 18,
-"prior": 6,
+"tag": "방글라데시",
+"label_en": "bangladesh",
+"recent": 62,
+"prior": 50,
 "delta": 12,
 "weeks": [
 0,
 0,
 0,
 0,
+3,
+14,
+23,
+20,
+14,
+14,
+24,
+0
+]
+},
+{
+"tag": "T2T",
+"label_en": "textile-to-textile",
+"recent": 18,
+"prior": 7,
+"delta": 11,
+"weeks": [
+0,
+0,
+0,
 0,
 0,
 0,
@@ -737,36 +730,16 @@
 2,
 4,
 6,
-6
-]
-},
-{
-"tag": "데님",
-"label_en": "denim",
-"recent": 32,
-"prior": 22,
-"delta": 10,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-1,
-9,
-12,
-6,
-5,
-13,
-8
+7,
+0
 ]
 },
 {
 "tag": "부직포",
 "label_en": "nonwoven",
 "recent": 12,
-"prior": 2,
-"delta": 10,
+"prior": 1,
+"delta": 11,
 "weeks": [
 0,
 0,
@@ -774,19 +747,61 @@
 0,
 0,
 1,
-1,
 0,
 4,
 4,
 2,
-2
+2,
+0
 ]
 },
 {
 "tag": "바이오소재",
 "label_en": "bio-based",
-"recent": 14,
+"recent": 15,
 "prior": 7,
+"delta": 8,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+6,
+1,
+0,
+6,
+4,
+5,
+0
+]
+},
+{
+"tag": "스판덱스",
+"label_en": "spandex",
+"recent": 13,
+"prior": 5,
+"delta": 8,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+1,
+4,
+2,
+5,
+2,
+4,
+0
+]
+},
+{
+"tag": "탄소",
+"label_en": "carbon footprint",
+"recent": 15,
+"prior": 8,
 "delta": 7,
 "weeks": [
 0,
@@ -794,13 +809,13 @@
 0,
 0,
 0,
-0,
-6,
-1,
-0,
-6,
 4,
-4
+4,
+0,
+10,
+2,
+3,
+0
 ]
 },
 {
@@ -815,34 +830,13 @@
 0,
 0,
 0,
-0,
 1,
 1,
 1,
 2,
 3,
-3
-]
-},
-{
-"tag": "제직",
-"label_en": "woven fabric",
-"recent": 14,
-"prior": 8,
-"delta": 6,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-1,
-7,
-5,
-4,
 3,
-2
+0
 ]
 },
 {
@@ -857,12 +851,54 @@
 0,
 0,
 0,
-0,
 1,
 4,
 1,
 1,
 0,
+0,
+0
+]
+},
+{
+"tag": "PFAS",
+"label_en": "pfas",
+"recent": 2,
+"prior": 5,
+"delta": -3,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+3,
+1,
+2,
+1,
+0,
+0,
+0
+]
+},
+{
+"tag": "오가닉코튼",
+"label_en": "organic cotton",
+"recent": 1,
+"prior": 4,
+"delta": -3,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+2,
+2,
+0,
+0,
+0,
+1,
 0
 ]
 },
@@ -878,65 +914,17 @@
 0,
 0,
 0,
-0,
 1,
 3,
 0,
 0,
 0,
-1
-]
-},
-{
-"tag": "DPP",
-"label_en": "digital product passport",
-"recent": 1,
-"prior": 4,
-"delta": -3,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
 1,
-3,
-0,
-0,
-0,
-1
-]
-},
-{
-"tag": "오가닉코튼",
-"label_en": "organic cotton",
-"recent": 1,
-"prior": 4,
-"delta": -3,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-2,
-2,
-0,
-0,
-0,
-1
+0
 ]
 }
 ],
 "fresh": [
-{
-"tag": "GOTS",
-"label_en": "gots",
-"n": 6,
-"first": "2026-09-14"
-},
 {
 "tag": "흡한속건",
 "label_en": "moisture management",
@@ -962,6 +950,12 @@
 "first": "2026-09-15"
 },
 {
+"tag": "방오",
+"label_en": "soil release",
+"n": 1,
+"first": "2026-10-12"
+},
+{
 "tag": "메쉬",
 "label_en": "mesh fabric",
 "n": 1,
@@ -974,14 +968,14 @@
 "first": "2026-10-08"
 },
 {
-"tag": "해양유래",
-"label_en": "ocean plastic",
-"n": 1,
-"first": "2026-10-06"
-},
-{
 "tag": "항균",
 "label_en": "antimicrobial",
+"n": 1,
+"first": "2026-09-22"
+},
+{
+"tag": "BCI코튼",
+"label_en": "better cotton",
 "n": 1,
 "first": "2026-09-22"
 },
@@ -993,6 +987,165 @@
 }
 ],
 "articles": [
+{
+"id": "bece7fa079ce1552",
+"d": "2026-10-12",
+"t": "불소 없이 발수·발유 섬유가공 기술 개발",
+"o": "불소 없이 발수·발유 섬유가공 기술 개발",
+"u": "https://www.itnk.co.kr/news/articleView.html?idxno=82020",
+"s": "불소계 화학물질을 사용하지 않고도 섬유에 발수·발유 기능을 부여하는 가공기술이 개발됐다.독일 작센섬유연구소(STFI)와 라이프니츠 고분자연구소 공동연구진은 새로운 가공제를 개발하고, 처리한 면직물에서 세탁 후에도 성능이 유지되는 것을 확인했다고 지난달 28일 밝혔다기존 불소계 가공제는 보호복과 아웃도어 의류에 발수·발유·방오 기능을 부여하는 데 쓰여왔다. 그러나 일부 물질이 자연에서 잘 분해되지 않고 환경에 축적되는 문제가 제기되면서 대체 기술이 요구돼왔다. 특히 무불소 가공은 발수 기능에 비해 발유 기능을 구현하기 어려웠다는 게",
+"c": "CHEMICAL",
+"x": "불소계 화학물질을 사용하지 않고도 섬유에 발수·발유 기능을 부여하는 가공기술이 개발됐다.독일 작센섬유연구소(STFI)와 라이프니츠 고분자연구소 공동연구진은 새로운 가공제를 개발하고, 처리한 면직물에서 세탁 후에도 성능이 유지되는 것을 확인했다고 지난달 28일 밝혔다기존 불소계 가공제는 보호복과 아웃도어 의류에 발수·발유·방오 기능을 부여하는 데 쓰여왔다. 그러나 일부 물질이 자연에서 잘 분해되지 않고 환경에 축적되는 문제가 제기되면서 대체 기술이 요구돼왔다. 특히 무불소 가공은 발수 기능에 비해 발유 기능을 구현하기 어려웠다는 게",
+"i": "https://cdn.itnk.co.kr/news/photo/202610/82020_53771_2417.png",
+"g": [
+"DWR",
+"방오"
+],
+"m": "국제섬유신문",
+"r": "국내",
+"v": 14,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"국제섬유신문"
+]
+},
+{
+"id": "e19df1716c591b04",
+"d": "2026-10-11",
+"t": "전북대 연구팀, 두께 1/3 초박막 ‘전자파 차폐’ 신소재 개발",
+"o": "전북대 연구팀, 두께 1/3 초박막 ‘전자파 차폐’ 신소재 개발",
+"u": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQeFBxOVhlTU8zWWNmYmxMbXdXNWU0YTFtVEZqS2FqUkhhUUFhTkw0dFFIUzNRSXZYS1NGYVJTdG5id0FMcnVZUDliQzZOcWVheXdCNmFNem5TUjNISnVjU09EV25lNkxnenVJUktXR3pNaEVwc01qRXRYZEhFWldGWDhoSDRseUFk?oc=5",
+"s": "전북대 연구팀, 두께 1/3 초박막 ‘전자파 차폐’ 신소재 개발 전북도민일보",
+"c": "MATERIAL",
+"x": "전북대 연구팀, 두께 1/3 초박막 ‘전자파 차폐’ 신소재 개발 전북도민일보",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
+{
+"id": "cae3001979c30564",
+"d": "2026-10-11",
+"t": "코오롱그룹, AI 가속기·우주발사체·수소용기 소재 개발",
+"o": "코오롱그룹, AI 가속기·우주발사체·수소용기 소재 개발",
+"u": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE54cWp3bVRqQVIxN0U5cDhyVUpBWDlQblg2MkliRGZ3WEVUUUFFVEtCamY4RS04enQyaGNObzVKbG1pbnlFUXV1N2FMRURtX3ZiMk82STZhSVowUQ?oc=5",
+"s": "코오롱그룹, AI 가속기·우주발사체·수소용기 소재 개발 한국경제",
+"c": "ETC",
+"x": "코오롱그룹, AI 가속기·우주발사체·수소용기 소재 개발 한국경제",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
+{
+"id": "c0e8e0fe5728287c",
+"d": "2026-10-11",
+"t": "전북대학교 오진 박사과정생·강경인 박사팀, 에폭시 나노섬유 기반 차세대 전자파 차폐 복합소재 개발",
+"o": "전북대학교 오진 박사과정생·강경인 박사팀, 에폭시 나노섬유 기반 차세대 전자파 차폐 복합소재 개발",
+"u": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9STElBUV84VDU2SXItTUxoWDdad0s0V3VWVlNET0ROVXl3LTYxWV9LR1hUNnZTME1BdjFrUE1GNEtDM19JT3lyTE5WSzZSd3M5eFpNaWROeU9DeEFvWkw3M2ZfeFBqSWdIaFRWaFdGTkY?oc=5",
+"s": "전북대학교 오진 박사과정생·강경인 박사팀, 에폭시 나노섬유 기반 차세대 전자파 차폐 복합소재 개발 한국강사신문",
+"c": "MATERIAL",
+"x": "전북대학교 오진 박사과정생·강경인 박사팀, 에폭시 나노섬유 기반 차세대 전자파 차폐 복합소재 개발 한국강사신문",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 13,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
+{
+"id": "58b99b705a756b83",
+"d": "2026-10-11",
+"t": "Circ®, 중국에서 Textile-To-Textile 재활용 구축 및 확장을 위해 Huafon과 협력하여 글로벌 입지 확장",
+"o": "Circ® Expands Global Footprint By Partnering With Huafon To Build And Scale Textile-To-Textile Recycling In China",
+"u": "https://www.textileworld.com/textile-world/fiber-world/2026/10/circ-expands-global-footprint-by-partnering-with-huafon-to-build-and-scale-textile-to-textile-recycling-in-china/",
+"s": "DANVILLE, V.A. — October 8, 2026 — Circ® and Huafon, a leading spandex producer in China, are partnering to build and scale a new multi-phase textile-to-textile recycling site in China, expanding Circ’s global pathway to industrial scale. The project will be located within Huafon’s industrial footpr",
+"c": "MATERIAL",
+"x": "DANVILLE, V.A. — October 8, 2026 — Circ® and Huafon, a leading spandex producer in China, are partnering to build and scale a new multi-phase textile-to-textile recycling site in China, expanding Circ’s global pathway to industrial scale. The project will be located within Huafon’s industrial footprint and will use Circ’s technology to process polycotton textile waste and recycle both inputs, recovering recycled PTA, recycled MEG and recycled cellulosic pulp for use in new textiles. The site will be developed in phases, with Phase 1 designed for approximately 200 metric tons of textile waste per day and additional capacity planned. The partnership brings together Circ’s polycotton recycling technology with Huafon’s manufacturing capabilities, infrastructure, and China market position. Huafon is also investing directly in the project alongside Circ and other selected investors. Huafon’s engineering, procurement, logistics, and commercial experience provide an efficient path to industrial deployment. Circ brings an established network of global brands, textile manufacturing partners, and downstream customers ready to adopt the materials the platform produces. “China is at the center of global textile production, making it a critical location for scaling textile-to-textile recycling. Huafon brings the industrial capabilities, experience, and investment to move quickly and build a platform that can scale well beyond this first site,” said Peter Majeranowski, CEO of Circ. Huafon is one of China’s leading chemical and advanced materials companies and one of the world’s largest spandex companies, with more than 30 years of experience in materials technology, innovation, and chemical manufacturing. Huafon has also demonstrated its ability to expand globally in advanced and sust",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/10/CIRC-Huafon-image-1.jpg",
+"g": [
+"T2T",
+"리사이클",
+"스판덱스"
+],
+"m": "Textile World",
+"r": "해외",
+"v": 18,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "30fad9a6cd253d27",
+"d": "2026-10-11",
+"t": "NITER 텍스타일 클럽, 최초의 텍스타일 페스티벌 Bangladesh 1.0 개최",
+"o": "NITER Textile Club hosts first-ever Textile Fest Bangladesh 1.0",
+"u": "https://textiletoday.com.bd/niter-textile-club-hosts-first-ever-textile-fest-bangladesh-10",
+"s": "The two-day \"Textile Fest Bangladesh 1.0\" was held for the first time at the National Institute of Textile Engineering and Research (NITER) in Savar. Organized by the NITER Textile Club on October 8 a...",
+"c": "ETC",
+"x": "The two-day \"Textile Fest Bangladesh 1.0\" was held for the first time at the National Institute of Textile Engineering and Research (NITER) in Savar. Organized by the NITER Textile Club on October 8 and 9, the festival brought students from across the country, industry representatives and corporate leaders together on one platform. Competitions, discussions with industry figures, career seminars, a job fair, a fashion show and cultural performances kept the campus lively for two days. The program began on Thursday (October 8) with registration at 8:30 am. From 9 am, competitions got under way, including Tex Olympiad, mock interview, case competition and innovative speech, while stalls from various organizations were set up. More than 3,000 students and over 150 industry and corporate representatives took part on the first day. Dhaka-19 MP Dr Dewan Mohammad Salahuddin Babu was the chief guest, and Bangladesh Textile Mills Corporation (BTMC) Chairman Brig Gen S M Zahid Hasan was the special guest. Speakers included Md Safayat Hossain, General Manager of Epyllion Group, who presented the \"7E\" formula; Kazi Feroz Hossain; Prof Dr Md Shah-e-Alam, Vice-Chancellor of Shanto-Mariam University of Creative Technology; BTMC Director (Finance and Audit) Noore Khaja Alamin; and NITER Director Prof Dr Ashequl Alam Rana. Banna, convener of the NITER Textile Club, pledged to continue the club's activities to increase student engagement. Guests visited the stalls around noon while judging continued. After the lunch break came dance and music performances and a competitive fashion show. The first day ended at around 9:30 pm. The second day began on Friday (October 9) at 11 am with recitations from the Quran and the Gita and the national anthem. State Minister for Primary and Mass Educati",
+"i": "/storage/uploads/2026/10/nitertextileclubh_17916997503040.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "130977f4ccfd6745",
+"d": "2026-10-11",
+"t": "Lycra, 70% 재생 가능 콘텐츠로 식물성 spandex 발전",
+"o": "Lycra advances plant-based spandex with 70% renewable content",
+"u": "https://textiletoday.com.bd/lycra-advances-plant-based-spandex-with-70-renewable-content",
+"s": "The Lycra Company is advancing plant-based spandex with 70% renewable content from US-grown field corn. The fiber can reduce its carbon footprint by up to 45% while maintaining the stretch and recover...",
+"c": "MATERIAL",
+"x": "The Lycra Company is advancing plant-based spandex with 70% renewable content from US-grown field corn. The fiber can reduce its carbon footprint by up to 45% while maintaining the stretch and recovery performance of conventional Lycra fiber, according to a third-party-reviewed life cycle assessment. Figure: Global fiber production reached an estimated 139 million tons in 2025, while textile-to-textile recycling accounted for only 0.76% of total fiber production. The fiber has entered commercial applications, including swimwear by Italian brand Arena and denim by Danish brand Only & Sons. Lycra also showcased a plant-based denim collection during Climate Week in New York in September 2026, combining its renewable fiber with lower-footprint cotton. The development comes as textile manufacturers face growing pressure to reduce material-related emissions. Global fiber production reached an estimated 139 million tons in 2025, while textile-to-textile recycling accounted for only 0.76% of total fiber production, according to Textile Exchange’s Materials Market Report 2026 . Alongside renewable feedstocks, Lycra is developing pilot-stage technology to recover spandex from textile waste blended with nylon and polyester. Commercial-scale recycling remains a challenge because these fibers are difficult to separate efficiently. For apparel manufacturers, renewable spandex offers a potential route to lower the carbon footprint of stretch fabrics without compromising performance. However, wider adoption will depend on cost, supply availability and credible environmental data. Scaling fiber recovery from blended textiles will also be critical to advancing circular production beyond the use of renewable raw materials.",
+"i": "/storage/uploads/2026/10/lycraadvancesplant_17916915018156.png",
+"g": [
+"스판덱스",
+"탄소"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
 {
 "id": "f706096132c4e397",
 "d": "2026-10-10",
@@ -1061,6 +1214,27 @@
 ]
 },
 {
+"id": "bb0eedae8079d26d",
+"d": "2026-10-10",
+"t": "중국의 대러시아 의류 수출 증가; 1~3월에 원단 다운",
+"o": "China's apparel exports to Russia up; fabric down in Jan-March",
+"u": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxNNWRHSDJKNk5kcVRNd1hzdGdwNldCV0ViVzE1eXl5eGFYb0xxOVAzd1NQc1JUQjY2SEp1akpUWkJrbHl6TUZVU1VycERYQjBacncxVUxVV0MzbnhCSkdhZy11a1ZLb0NmWkZReGFLUnBuOEo0WEFPa3dYaW1KMWdkWFRQQk5kVERUdWt2anRWbjhmQV95cHNERTloZjRKTEJaTjhISGtaZTVaWHgyX0dwYjZyUWcyLVZ3SnhZTC1GSXF4SF84dlVBMXNaN25YUkVTNHVJOXQxTV8yckg5VlVQVmFYY3owd3gxSnVWMkN5NElYUkZCU1h4YW9iS3NFQU0?oc=5",
+"s": "China's apparel exports to Russia up; fabric down in Jan-March Fibre2Fashion",
+"c": "FABRIC",
+"x": "China's apparel exports to Russia up; fabric down in Jan-March Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "65cd829bc17df0be",
 "d": "2026-10-10",
 "t": "기술 업그레이드가 Bangladesh의 섬유 부문이 경쟁력을 회복하는 데 어떻게 도움이 될 수 있습니까?",
@@ -1126,6 +1300,29 @@
 "ms": [
 "Textile Today",
 "주제검색 · 염색가공"
+]
+},
+{
+"id": "3773f1b25dc8ccd8",
+"d": "2026-10-10",
+"t": "기능성 원단과 Bio-Based 소재: 차세대...",
+"o": "Functional Fabrics and Bio-Based Materials: The Next...",
+"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxObE9nOW4tbjBPc2pzbzBTRTBiaEJqRTV6ZGJJejVSUG14NV9rX2VJTnlwZ2pDdjNhN1RVWjhlQ3J1OE10cEFDWlhKZnNKUjRIaW9qMlY2M0pYeTdveE9hQjRwV3BSMVdPVGp2aEZwSGRGNldJLXdqVko0N1dpVlZnSE9lWHM3eFY1YWdRVW9ON3lXNDhXclBCODZzcVBuUnNiMG82UmlXTkFYOGdiV2lJYWpWWXk4bk5UbFFXWWJxYVBrUWgzWVBLSjMtQk9NYVV1?oc=5",
+"s": "Functional Fabrics and Bio-Based Materials: The Next... Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Functional Fabrics and Bio-Based Materials: The Next... Fibre2Fashion",
+"i": "",
+"g": [
+"바이오소재"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -3019,6 +3216,27 @@
 "e": [],
 "ms": [
 "Innovation in Textiles"
+]
+},
+{
+"id": "35dc77271296200c",
+"d": "2026-10-08",
+"t": "전북대 연구진, 기존보다 3분의 1 얇은 전자파 차폐 소재 개발",
+"o": "전북대 연구진, 기존보다 3분의 1 얇은 전자파 차폐 소재 개발",
+"u": "https://news.google.com/rss/articles/CBMiakFVX3lxTE00dUt6OEVJN2RTeUl5amI3QTA1U3U5MkNKazBOQ1JtMUVQV3RLSVNUSlczc0Y4Q011NkhMWHhGMTdrQjJaTnM3Q193R0RiemhVVFY1TnhGWnJEZkx1d0FQWjBsNDEtekdyQXc?oc=5",
+"s": "전북대 연구진, 기존보다 3분의 1 얇은 전자파 차폐 소재 개발 투데이안",
+"c": "ETC",
+"x": "전북대 연구진, 기존보다 3분의 1 얇은 전자파 차폐 소재 개발 투데이안",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
 ]
 },
 {
@@ -13166,11 +13384,12 @@
 "m": "Knitting Industry",
 "r": "해외",
 "v": 18,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Knitting Industry"
+"Knitting Industry",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -23197,11 +23416,12 @@
 "m": "국제섬유신문",
 "r": "국내",
 "v": 15,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"국제섬유신문"
+"국제섬유신문",
+"주제검색 · 국내소재"
 ]
 },
 {
@@ -30797,6 +31017,30 @@
 ]
 },
 {
+"id": "dc82833c88f17812",
+"d": "2026-09-02",
+"t": "Algae Scope는 해초 기반의 섬유용 PFAS 대안을 개발합니다.",
+"o": "Algae Scope develops seaweed-based PFAS alternative for textiles",
+"u": "https://news.google.com/rss/articles/CBMirgFBVV95cUxOaW5JV2lIdGpQMDY5MXU4a1AzazdyV3RvLVNfNkJBWFZZVUMzVGRnSExWb1N1bW4teGJvdkMxV3JzUXktZlVWVXFDcHgza3ZyVy1YM2ZYVW1KVENXUkg5RU9sR1dQVnJKOHhLZDYxb3NyYktkT1JuZ1hhTUVrWXN4TmtLd0pQbWxodnlnWGFPaTJDaHRRMndwT1RVMnI1eTJnYTljbkpXMHN4TXhXTnc?oc=5",
+"s": "Algae Scope develops seaweed-based PFAS alternative for textiles Innovation News Network",
+"c": "CHEMICAL",
+"x": "Algae Scope develops seaweed-based PFAS alternative for textiles Innovation News Network",
+"i": "",
+"g": [
+"해양유래",
+"PFAS"
+],
+"m": "주제검색 · 신소재",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 신소재"
+]
+},
+{
 "id": "d7389e25a4398896",
 "d": "2026-09-02",
 "t": "미국산 코튼은 관세 전쟁의 깜짝 승자가 될 수 있습니다",
@@ -33667,255 +33911,6 @@
 "e": [],
 "ms": [
 "Textile World"
-]
-},
-{
-"id": "0daf2cda313ca497",
-"d": "2026-08-30",
-"t": "Bangladesh-말레이시아는 상호 신뢰를 바탕으로 오랜 관계를 유지하고 있습니다: Sakhawat",
-"o": "Bangladesh-Malaysia ties long-standing, based on mutual trust: Sakhawat",
-"u": "https://textilefocus.com/bangladesh-malaysia-ties-long-standing-based-on-mutual-trust-sakhawat/",
-"s": "Health and Family Welfare Minister Sardar Md Sakhawat Hossain today said the longstanding friendship between Bangladesh and Malaysia is based on mutual trust and confidence. “Prime Minister Tarique Rahman’s recent visit to Malaysia has further strengthened the existing friendly relations between the",
-"c": "ETC",
-"x": "Health and Family Welfare Minister Sardar Md Sakhawat Hossain today said the longstanding friendship between Bangladesh and Malaysia is based on mutual trust and confidence. “Prime Minister Tarique Rahman’s recent visit to Malaysia has further strengthened the existing friendly relations between the two countries,” he said. The minister made the remarks as chief guest at […] The post Bangladesh-Malaysia ties long-standing, based on mutual trust: Sakhawat appeared first on Textile Focus .",
-"i": "https://textilefocus.com/wp-content/uploads/2026/08/BMCCI-01.jpeg",
-"g": [
-"방글라데시"
-],
-"m": "Textile Focus",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Focus"
-]
-},
-{
-"id": "ec44a8ebdaf8d948",
-"d": "2026-08-29",
-"t": "Better Cotton은 AI 기반 면화 육종을 발전시키기 위해 Avalo와 파트너십을 맺었습니다.",
-"o": "Better Cotton partners with Avalo to advance AI-driven cotton breeding",
-"u": "https://textiletoday.com.bd/better-cotton-partners-with-avalo-to-advance-ai-driven-cotton-breeding",
-"s": "Better Cotton Initiative (BCI) has partnered with agribiotech startup Avalo to accelerate the development of cotton varieties.It requires fewer inputs and can better withstand climate-related challeng...",
-"c": "MATERIAL",
-"x": "Better Cotton Initiative (BCI) has partnered with agribiotech startup Avalo to accelerate the development of cotton varieties.It requires fewer inputs and can better withstand climate-related challeng...",
-"i": "https://textiletoday.com.bd/storage/uploads/2026/8/bettercottonpartne_17879772748376.jpg",
-"g": [
-"BCI코튼"
-],
-"m": "Textile Today",
-"r": "해외",
-"v": 11,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Today"
-]
-},
-{
-"id": "eae60ba3c06d5e14",
-"d": "2026-08-29",
-"t": "2026 전국섬유과학경진대회 BTEC 개최",
-"o": "National Textile Science Competition 2026 held in BTEC",
-"u": "https://textiletoday.com.bd/national-textile-science-competition-2026-held-in-btec",
-"s": "The National Textile Science Competition 2026, hosted by the Science &amp; Research Club of Barishal Textile Engineering College (BTEC), brought together bright minds from textile institutions across...",
-"c": "ETC",
-"x": "The National Textile Science Competition 2026, hosted by the Science &amp; Research Club of Barishal Textile Engineering College (BTEC), brought together bright minds from textile institutions across...",
-"i": "https://textiletoday.com.bd/storage/uploads/2026/8/nationalsciencecom_17880045957670.jpg",
-"g": [],
-"m": "Textile Today",
-"r": "해외",
-"v": 8,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Today"
-]
-},
-{
-"id": "c35b96ea9bda691c",
-"d": "2026-08-29",
-"t": "Cinte Techtextil China 2026이 다음 주에 개막하여 상하이에 글로벌 혁신과 자원을 가져올 예정입니다.",
-"o": "Cinte Techtextil China 2026 set to open next week, bringing global innovations and resources to Shanghai",
-"u": "https://textilefocus.com/cinte-techtextil-china-2026-set-to-open-next-week-bringing-global-innovations-and-resources-to-shanghai/",
-"s": "As Asia’s premier platform catering to the evolving needs in technical textiles and nonwovens, Cinte Techtextil China will open next week at the Shanghai New International Expo Centre, gathering over 300 exhibitors from 15 countries and regions. Across Halls W3 to W5, this edition will create chance",
-"c": "FABRIC",
-"x": "As Asia’s premier platform catering to the evolving needs in technical textiles and nonwovens, Cinte Techtextil China will open next week at the Shanghai New International Expo Centre, gathering over 300 exhibitors from 15 countries and regions. Across Halls W3 to W5, this edition will create chances for fast-growing sectors and emerging trends – such […] The post Cinte Techtextil China 2026 set to open next week, bringing global innovations and resources to Shanghai appeared first on Textile Focus .",
-"i": "https://textilefocus.com/wp-content/uploads/2026/08/unnamed.png",
-"g": [
-"부직포",
-"전시회"
-],
-"m": "Textile Focus",
-"r": "해외",
-"v": 16,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Focus"
-]
-},
-{
-"id": "ba7b1a74ec6e3b17",
-"d": "2026-08-29",
-"t": "Nazneen Ahmed 박사가 CPD의 전무이사로 임명되었습니다.",
-"o": "Dr Nazneen Ahmed Appointed Executive Director of CPD",
-"u": "https://textilefocus.com/dr-nazneen-ahmed-appointed-executive-director-of-cpd/",
-"s": "Dr Nazneen Ahmed has been appointed as the Executive Director of the Centre for Policy Dialogue (CPD), effective from 1 September 2026. A distinguished development economist, Dr Ahmed brings nearly three decades of experience in economic research, policy analysis and development practice in Banglade",
-"c": "ETC",
-"x": "Dr Nazneen Ahmed has been appointed as the Executive Director of the Centre for Policy Dialogue (CPD), effective from 1 September 2026. A distinguished development economist, Dr Ahmed brings nearly three decades of experience in economic research, policy analysis and development practice in Bangladesh and internationally. Prior to joining CPD as the Executive Director, Dr […] The post Dr Nazneen Ahmed Appointed Executive Director of CPD appeared first on Textile Focus .",
-"i": "https://textilefocus.com/wp-content/uploads/2026/08/Dr-Nazneen-Ahmed-scaled.jpg",
-"g": [
-"방글라데시"
-],
-"m": "Textile Focus",
-"r": "해외",
-"v": 11,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Focus"
-]
-},
-{
-"id": "9ffd1fb14c380ef0",
-"d": "2026-08-29",
-"t": "1~7월 중국 공업기업 이익 17.6% 증가",
-"o": "China industrial firms' profits rise 17.6% in January-July",
-"u": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxPejVVLTZHaHJPU1FQanUyTmZTek1ZVEN4bDlSblJOUHlyMVRiaUhxdXdqdDJXejBsV21sTXF3dXRSVUJlOGpDa3FxM0ZrU1B0YTZDRWNFOXplOWNlUXNkNW1hRlVrOUJWS1dqYVRFQkNTN0paV3JyZzM2Q2lickdqNTJyRlFNQk4yLWMyV3pjVlVyREsxQTJYSGRhLTZGMDRFdXp5RDdtM3ZOWTBQRlBzSDg5ZVQyWjdiaXhzOXIxc2RPRUNFSndabUtPRG9HMEhIOFE?oc=5",
-"s": "China industrial firms' profits rise 17.6% in January-July Fibre2Fashion",
-"c": "MATERIAL",
-"x": "China industrial firms' profits rise 17.6% in January-July Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "9932bc083dde30dd",
-"d": "2026-08-29",
-"t": "프랑스 7월 산업 생산자 물가는 4.3% 상승",
-"o": "France's industrial producer prices accelerate 4.3% in July",
-"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOVnZhQ3ZFaW5xa1drOUJHQk8yNWFIXzhHOEV4WUJTckNTMlM4ODFFVV9xQnc5dXlQNmpObGN5cG9ub0FnWU5YWUI1THVpMDUtS1MxNzNuZ1NINjlRbm9YVDlXVHdINk96aUdMUjZPNF9PT1g5LXVxWDIyZVFiaDcyN2VzN3d6bTRRVHZtS2tibjJUb1paazA2YnIzSkZBTEE2cDRsemczdWk0MzdOelNaSHF6Uk5rODR6bkxYbDNIcHNqRUJxNVh5SzdabDdjWXpL?oc=5",
-"s": "France's industrial producer prices accelerate 4.3% in July Fibre2Fashion",
-"c": "MATERIAL",
-"x": "France's industrial producer prices accelerate 4.3% in July Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "734cf00127b74c61",
-"d": "2026-08-29",
-"t": "Circ와 Shenghong이 협력하여 재활용 폴리에스터 원사 규모 확대",
-"o": "Circ and Shenghong partner to scale recycled polyester yarn",
-"u": "https://textiletoday.com.bd/circ-and-shenghong-partner-to-scale-recycled-polyester-yarn",
-"s": "Circ, a US textile recycler, has partnered with Chinese fiber producer Shenghong Chemical Fiber New Material. They will make polyester filament yarn from recycled textile waste. Under the deal, Sheng...",
-"c": "MATERIAL",
-"x": "Circ, a US textile recycler, has partnered with Chinese fiber producer Shenghong Chemical Fiber New Material. They will make polyester filament yarn from recycled textile waste. Under the deal, Sheng...",
-"i": "https://textiletoday.com.bd/storage/uploads/2026/8/circandshenghongp_1787977449949.jpg",
-"g": [
-"r-PET",
-"리사이클"
-],
-"m": "Textile Today",
-"r": "해외",
-"v": 11,
-"h": 2,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Today",
-"주제검색 · 신소재"
-]
-},
-{
-"id": "3eb3f3f9894519fc",
-"d": "2026-08-29",
-"t": "BLUCHEEZ × WARFAZE: 패션과 40년의 음악적 유산이 만나는 새로운 장",
-"o": "BLUCHEEZ × WARFAZE: A New Chapter Where Fashion Meets a Four-Decade Musical Legacy",
-"u": "https://textilefocus.com/blucheez-x-warfaze-a-new-chapter-where-fashion-meets-a-four-decade-musical-legacy/",
-"s": "Bangladesh’s contemporary fashion brand Blucheez has officially signed a Memorandum of Understanding (MoU) with Warfaze, one of the country’s most iconic and influential music brands, marking the beginning of a distinctive collaboration between fashion and music. The MoU was signed on 25 August 2026",
-"c": "ETC",
-"x": "Bangladesh’s contemporary fashion brand Blucheez has officially signed a Memorandum of Understanding (MoU) with Warfaze, one of the country’s most iconic and influential music brands, marking the beginning of a distinctive collaboration between fashion and music. The MoU was signed on 25 August 2026 by Dr. Mohammad Kamruzzaman, Founder of Blucheez, and Sheikh Monirul Alam […] The post BLUCHEEZ × WARFAZE: A New Chapter Where Fashion Meets a Four-Decade Musical Legacy appeared first on Textile Focus .",
-"i": "https://textilefocus.com/wp-content/uploads/2026/08/02.png",
-"g": [
-"방글라데시"
-],
-"m": "Textile Focus",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Focus"
-]
-},
-{
-"id": "323af37da2a53f52",
-"d": "2026-08-29",
-"t": "[ITSA2026]추계 인터텍스타일 상하이ㆍ얀엑스포 르포 ①",
-"o": "[ITSA2026]추계 인터텍스타일 상하이ㆍ얀엑스포 르포 ①",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81762",
-"s": "2026 추계 인터텍스타일 상하이(Intertextile Shanghai Apparel Fabrics – Autumn Edition 2026 )ㆍ 얀 엑스포(Yarn Expo 2026) 상하이=조정희 국장아시아 최대 섬유전시회인 ‘인터텍스타일 상하이가 올해 30개 참가국 확대와 함께 한국의 K-섬유가 경쟁력을 과시하며 역대급 전시회로서 위상을 과시했다.세계 권위의 국제 섬유 어패럴 전시회인 ‘2026 추계 인터텍스타일 상하이(intertextile SHANGHAI apparel fabrics)’가 25일 상하이국제컨벤션센터에서 개막",
-"c": "FABRIC",
-"x": "2026 추계 인터텍스타일 상하이(Intertextile Shanghai Apparel Fabrics – Autumn Edition 2026 )ㆍ 얀 엑스포(Yarn Expo 2026) 상하이=조정희 국장아시아 최대 섬유전시회인 ‘인터텍스타일 상하이가 올해 30개 참가국 확대와 함께 한국의 K-섬유가 경쟁력을 과시하며 역대급 전시회로서 위상을 과시했다.세계 권위의 국제 섬유 어패럴 전시회인 ‘2026 추계 인터텍스타일 상하이(intertextile SHANGHAI apparel fabrics)’가 25일 상하이국제컨벤션센터에서 개막",
-"i": "https://cdn.itnk.co.kr/news/photo/202608/81762_53077_941.jpg",
-"g": [
-"전시회"
-],
-"m": "국제섬유신문",
-"r": "국내",
-"v": 8,
-"h": 2,
-"w": "material",
-"e": [],
-"ms": [
-"국제섬유신문",
-"주제검색 · 국내소재"
-]
-},
-{
-"id": "ffd625bb8beed2ec",
-"d": "2026-08-28",
-"t": "국내 컬러얀 생산기반 붕괴…목련, 고가·고품질 시장 다크호스로 부상",
-"o": "국내 컬러얀 생산기반 붕괴…목련, 고가·고품질 시장 다크호스로 부상",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148035",
-"s": "국내 색사(선염사) 생산 기반이 빠르게 축소되는 가운데 목련(MOKELUN)이 고가·고품질 색사 시장의 새로운 다크호스로 떠오르고 있다.과거 국내 섬유산업의 주요 축을 형성했던 색사는 염색·방적업체들의 생산기반 축소와 인건비 및 생산비 상승 등으로 국내 생산 물량이 크게 줄어든 상황이다.특히 다품종 소량 생산과 빠른 납기를 요구하는 패션시장의 수요에 비해 국내 공급 기반이 취약해지면서 고품질 색사를 안정적으로 공급할 수 있는 전문업체의 중요성이 높아지고 있다.이 같은 시장 변화 속에서 목련이 차별화된 경쟁력을 앞세워 고가 색사 시장",
-"c": "CHEMICAL",
-"x": "국내 색사(선염사) 생산 기반이 빠르게 축소되는 가운데 목련(MOKELUN)이 고가·고품질 색사 시장의 새로운 다크호스로 떠오르고 있다.과거 국내 섬유산업의 주요 축을 형성했던 색사는 염색·방적업체들의 생산기반 축소와 인건비 및 생산비 상승 등으로 국내 생산 물량이 크게 줄어든 상황이다.특히 다품종 소량 생산과 빠른 납기를 요구하는 패션시장의 수요에 비해 국내 공급 기반이 취약해지면서 고품질 색사를 안정적으로 공급할 수 있는 전문업체의 중요성이 높아지고 있다.이 같은 시장 변화 속에서 목련이 차별화된 경쟁력을 앞세워 고가 색사 시장",
-"i": "http://www.ktnews.com/news/thumbnail/202608/148035_129295_449_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 11,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"한국섬유신문"
 ]
 }
 ]
