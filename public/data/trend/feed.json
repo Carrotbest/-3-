@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-10-13T02:18:46+00:00",
+"generated_at": "2026-10-13T02:40:06+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
@@ -866,6 +866,27 @@
 ]
 },
 {
+"tag": "모달",
+"label_en": "modal fiber",
+"recent": 1,
+"prior": 4,
+"delta": -3,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+3,
+2,
+0,
+0,
+0,
+0
+]
+},
+{
 "tag": "비스코스",
 "label_en": "viscose",
 "recent": 1,
@@ -904,27 +925,6 @@
 0,
 0,
 1,
-0
-]
-},
-{
-"tag": "모달",
-"label_en": "modal fiber",
-"recent": 1,
-"prior": 4,
-"delta": -3,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-3,
-2,
-0,
-0,
-0,
 0
 ]
 }
