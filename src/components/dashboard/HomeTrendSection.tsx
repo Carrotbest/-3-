@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState, type FocusEvent } from "react"
+import { useEffect, useMemo, useState, type FocusEvent } from "react"
 import { Link } from "react-router-dom"
-import { ArrowUpRight, ChevronLeft, ChevronRight, TrendingDown, TrendingUp } from "lucide-react"
+import { ArrowUpRight, ChevronLeft, ChevronRight, Maximize2, TrendingDown, TrendingUp } from "lucide-react"
 
 import { NumberTicker } from "@/components/motion/NumberTicker"
+import { ArticleExcerptModal } from "@/components/trend/ArticleExcerptDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -72,18 +73,19 @@ function FabricTrendStack({ articles }: { articles: TrendArticle[] }) {
   const pageVisible = usePageVisible()
   const [activeIndex, setActiveIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [openArticle, setOpenArticle] = useState<TrendArticle | null>(null)
 
   useEffect(() => {
     setActiveIndex((current) => current % articles.length)
   }, [articles.length])
 
   useEffect(() => {
-    if (reducedMotion || paused || !pageVisible || articles.length < 2) return
+    if (reducedMotion || paused || openArticle || !pageVisible || articles.length < 2) return
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % articles.length)
     }, 6000)
     return () => window.clearInterval(interval)
-  }, [articles.length, pageVisible, paused, reducedMotion])
+  }, [articles.length, openArticle, pageVisible, paused, reducedMotion])
 
   const move = (direction: -1 | 1) => {
     setActiveIndex((current) => (current + direction + articles.length) % articles.length)
@@ -109,7 +111,6 @@ function FabricTrendStack({ articles }: { articles: TrendArticle[] }) {
             <h3 className="mt-1 truncate text-base font-semibold text-[var(--foreground)]">최근 소재 기술 기사</h3>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <span className="text-xs tabular-nums text-[var(--muted-foreground)]">{activeIndex + 1} / {articles.length}</span>
             <Button asChild variant="outline" size="sm" className="h-7 gap-1 px-2 text-[11px] [&_svg]:size-3.5">
               <Link to="/trend/fabric" aria-label="FABRIC TREND 전체 보기">전체 보기<ArrowUpRight aria-hidden="true" /></Link>
             </Button>
@@ -125,9 +126,9 @@ function FabricTrendStack({ articles }: { articles: TrendArticle[] }) {
                 type="button"
                 tabIndex={active ? 0 : -1}
                 aria-hidden={!active}
-                aria-label={`다음 기사 보기: ${article.t}`}
-                onClick={() => active && move(1)}
-                className="absolute inset-x-0 top-0 h-[18rem] w-full cursor-pointer overflow-hidden rounded-[var(--radius)] border border-white/75 bg-[var(--card)] text-left shadow-[var(--shadow-2)] outline-none transition-[transform,opacity,box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none sm:h-72"
+                aria-label={`요약 보기: ${article.t}`}
+                onClick={() => active && setOpenArticle(article)}
+                className="group absolute inset-x-0 top-0 h-[18rem] w-full cursor-pointer overflow-hidden rounded-[var(--radius)] border border-white/75 bg-[var(--card)] text-left shadow-[var(--shadow-2)] outline-none transition-[transform,opacity,box-shadow] duration-[var(--t-lift)] ease-[var(--e-soft)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] motion-reduce:transition-none sm:h-72"
                 style={{
                   zIndex: articles.length - depth,
                   opacity: Math.max(0.38, 1 - depth * 0.14),
@@ -160,7 +161,13 @@ function FabricTrendStack({ articles }: { articles: TrendArticle[] }) {
                       {CATEGORY_LABEL[article.c]}
                     </Badge>
                     <strong className="mt-4 line-clamp-2 text-base leading-7 text-[var(--foreground)] sm:text-lg">{article.t}</strong>
-                    <span className="mt-auto text-xs text-[var(--muted-foreground)]">{fmtDate(article.d)} · {article.m}</span>
+                    <span className="mt-auto flex items-center justify-between gap-3 text-xs text-[var(--muted-foreground)]">
+                      <span>{fmtDate(article.d)} · {article.m}</span>
+                      <span className="inline-flex items-center gap-1 font-medium text-[var(--foreground)]/70 group-hover:text-[var(--foreground)]">
+                        <Maximize2 aria-hidden="true" className="size-3.5" />
+                        요약 보기
+                      </span>
+                    </span>
                   </span>
                 </span>
               </button>
@@ -168,7 +175,7 @@ function FabricTrendStack({ articles }: { articles: TrendArticle[] }) {
           })}
         </div>
 
-        <div className="mt-1 flex items-center justify-between gap-3">
+        <div className="mt-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1" aria-label="기사 선택">
             {articles.map((article, index) => (
               <button
@@ -178,22 +185,26 @@ function FabricTrendStack({ articles }: { articles: TrendArticle[] }) {
                 aria-current={index === activeIndex ? "true" : undefined}
                 onClick={() => setActiveIndex(index)}
                 className={cn(
-                  "size-2.5 cursor-pointer rounded-full outline-none transition-[width,background-color] duration-[var(--t-lift)] ease-[var(--e-soft)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] motion-reduce:transition-none",
+                  "h-2 w-2 cursor-pointer rounded-full outline-none transition-[width,background-color] duration-[var(--t-lift)] ease-[var(--e-soft)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] motion-reduce:transition-none",
                   index === activeIndex ? "w-6 bg-[var(--foreground)]" : "bg-[var(--border)] hover:bg-[var(--muted-foreground)]",
                 )}
               />
             ))}
           </div>
-          <div className="flex gap-1">
-            <Button type="button" variant="ghost" size="icon" className="size-8" aria-label="이전 기사" onClick={() => move(-1)}>
+          <div className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--card)] p-1 shadow-sm">
+            <Button type="button" variant="ghost" className="h-9 rounded-full px-3 text-sm font-medium hover:bg-[var(--muted)] focus-visible:ring-2 focus-visible:ring-[var(--ring)]" aria-label="이전 기사" onClick={() => move(-1)}>
               <ChevronLeft aria-hidden="true" className="size-4" />
+              이전
             </Button>
-            <Button type="button" variant="ghost" size="icon" className="size-8" aria-label="다음 기사" onClick={() => move(1)}>
+            <span className="min-w-[3.5rem] text-center text-sm tabular-nums text-[var(--muted-foreground)]">{activeIndex + 1} / {articles.length}</span>
+            <Button type="button" variant="ghost" className="h-9 rounded-full bg-[var(--foreground)] px-3 text-sm font-medium text-[var(--background)] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--ring)]" aria-label="다음 기사" onClick={() => move(1)}>
+              다음
               <ChevronRight aria-hidden="true" className="size-4" />
             </Button>
           </div>
         </div>
       </CardContent>
+      <ArticleExcerptModal article={openArticle} onOpenChange={(open) => { if (!open) setOpenArticle(null) }} />
     </Card>
   )
 }
