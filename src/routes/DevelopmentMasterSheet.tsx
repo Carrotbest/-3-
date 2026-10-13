@@ -1258,6 +1258,10 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [fdsYdsNotice, setFdsYdsNotice] = useState<string | null>(null)
   const [fdsYdsExporting, setFdsYdsExporting] = useState(false)
   const fdsYdsRows = useMemo(() => fdsYdsOpen ? collectFdsYdsRows(records) : [], [fdsYdsOpen, records])
+  // BODY 입력칸은 본인 담당 행(관리자는 전부)에만 띄운다. 나머지는 값만 보인다.
+  const fdsYdsEditable = useMemo(() => new Set(records
+    .filter((record) => isAdmin || matchesOwnerName(record.owner ?? "", myName))
+    .map(recordIdentity)), [isAdmin, myName, records])
   const fdsYdsMissing = useMemo(() => fdsYdsRows.filter((row) => row.missing).length, [fdsYdsRows])
   const fdsYdsFlRegistered = useMemo(() => fdsYdsRows.filter((row) => row.flRegistered).length, [fdsYdsRows])
   useEffect(() => {
@@ -1265,9 +1269,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const timer = window.setTimeout(() => setFdsYdsNotice(null), 3000)
     return () => window.clearTimeout(timer)
   }, [fdsYdsNotice])
+  /** 행 단위 수정 권한(R319). 담당 본인과 관리자만. 탭이 아니라 그 행의 담당으로 본다. */
+  const canEditRow = (record: DevRecord) => isAdmin || matchesOwnerName(record.owner ?? "", myName)
   const saveFdsYdsBody = (key: string, bodyNo: string) => {
     const record = useAppStore.getState().records.find((item) => recordIdentity(item) === key)
     if (!record) return
+    // FDS/YDS 팝업은 어느 탭에서나 열리고 모든 담당 행이 나온다. BODY도 그 행 담당과 관리자만 고친다(2026-10-13).
+    if (!canEditRow(record)) { setFdsYdsNotice(`${ownerDisplayName(record.owner ?? "")} 담당 행은 본인과 관리자만 수정할 수 있습니다.`); return }
     void saveDevelopmentRecord({ ...record, tech: { ...record.tech, bodyNo } }, key)
       .catch(() => setFdsYdsNotice("BODY 저장에 실패했습니다. 다시 시도해 주세요."))
   }
@@ -2753,7 +2761,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   const resetAttach = () => { setAttached(null); setAttachError(null); setAttaching(false) }
   const openEditor = (record: DevRecord) => { setEditing(structuredClone(record)); cancelCellEdit() }
-  const openNew = () => { setIntake([createBlankDevRecord()]); setIntakeOpt(0); setIntakeError(null); setIntakeNotice(null); setIntakeRequest(null); resetAttach() }
+  // 관리자가 아니면 담당 칸을 본인 이름으로 채워 연다(가안). 저장할 때 한 번 더 확인한다.
+  const openNew = () => { setIntake([createBlankDevRecord(isAdmin ? "" : myName)]); setIntakeOpt(0); setIntakeError(null); setIntakeNotice(null); setIntakeRequest(null); resetAttach() }
   const closeEditor = () => { setEditing(null) }
   const closeIntake = () => { setIntake(null); setIntakeOpt(0); setIntakeError(null); setIntakeRequest(null); setRequestPickerOpen(false); resetAttach() }
 
@@ -2830,6 +2839,14 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const missing = [...INTAKE_REQUIRED_IDS].filter((id) => !String(fieldValueOf(sharedDraft, id) ?? "").trim())
     if (missing.length > 0) {
       setIntakeError(`필수 항목을 입력하세요: ${missing.map((id) => intakeColumns.find((column) => column.id === id)?.label ?? id).join(" · ")}`)
+      return
+    }
+    // 신규 접수의 담당은 본인 이름만 넣는다. 관리자는 예외다(2026-10-13 박향근 확정, 가안).
+    // 남의 이름으로 접수하면 그 사람이 모르는 행이 그 사람 탭에 생긴다(R319와 같은 이유).
+    if (!isAdmin && intake.some((record) => !matchesOwnerName(record.owner ?? "", myName))) {
+      setIntakeError(myName.trim()
+        ? `담당은 본인 이름(${myName})만 넣을 수 있습니다. 다른 담당의 건은 그 담당이나 관리자가 접수합니다.`
+        : "계정 이름이 비어 있어 담당을 확인할 수 없습니다. 계정 설정에서 이름을 담당 이름과 같게 맞추십시오.")
       return
     }
     setIntakeError(null)
@@ -3366,7 +3383,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               </tr> : null}
               <tr className={row.missing ? "bg-[color-mix(in_srgb,var(--destructive)_7%,transparent)]" : row.flRegistered ? "bg-amber-500/10" : ""}>
               {FDS_YDS_COLUMNS.map((column) => <td key={column.key} className="whitespace-pre-wrap break-words border border-[#bfbfbf] px-2 py-1 align-top">
-                {column.key === "body" ? <input
+                {column.key === "body" && fdsYdsEditable.has(row.key) ? <input
                   aria-label={`${row.hmp} BODY`}
                   defaultValue={row.body}
                   className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-[var(--card-foreground)]"
