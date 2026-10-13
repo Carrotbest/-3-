@@ -2,8 +2,20 @@ import { useMemo, useState, type CSSProperties } from "react"
 import { useSearchParams } from "react-router-dom"
 
 import { GROUP_FIGURES } from "@/components/protocol/TechFigures"
+import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { displaySummaryOf, titleOf, type ReferenceItem } from "@/data/reference-schema"
 import { useBuyerProtocols } from "@/data/references"
+import {
+  applyApprovedReviews,
+  dismissReviewBatch,
+  isStale,
+  liveValue,
+  setReviewDecision,
+  useProtocolReviews,
+  type ReviewBatch,
+  type ReviewDecision,
+  type ReviewItem,
+} from "@/data/protocol-review"
 import {
   isNotApplicable,
   methodKey,
@@ -17,7 +29,7 @@ import {
 } from "@/data/protocol-matrix"
 import { FolderCard, FolderDialog, ReferenceDialog, type FolderAccent, type FolderGroup } from "@/routes/TechnicalReferences"
 
-type TabId = "matrix" | "buyer" | "revisions" | "manuals"
+type TabId = "matrix" | "buyer" | "revisions" | "manuals" | "review"
 type PendingDiff = ProtocolDiff & { revDate: string }
 
 const TAB_ITEMS: Array<{ id: TabId; no: string; label: string; hint: string }> = [
@@ -25,6 +37,7 @@ const TAB_ITEMS: Array<{ id: TabId; no: string; label: string; hint: string }> =
   { id: "buyer", no: "02", label: "BY BUYER", hint: "바이어별" },
   { id: "revisions", no: "03", label: "REVISIONS", hint: "개정 이력" },
   { id: "manuals", no: "04", label: "SOURCE MANUALS", hint: "원문 매뉴얼" },
+  { id: "review", no: "05", label: "REVIEW", hint: "검토 대기" },
 ]
 
 const BUYER_ALL = "전 바이어"
@@ -133,15 +146,17 @@ function SectionLabel({ label, value, warning = false }: { label: string; value:
   </div>
 }
 
-function TabNav({ active, onSelect }: { active: TabId; onSelect: (tab: TabId) => void }) {
-  return <nav role="tablist" aria-label="바이어 시험 기준 탭" className="grid grid-cols-2 overflow-hidden rounded-[6px] border border-[var(--border)] sm:grid-cols-4">
+function TabNav({ active, onSelect, badges }: { active: TabId; onSelect: (tab: TabId) => void; badges?: Partial<Record<TabId, number>> }) {
+  return <nav role="tablist" aria-label="바이어 시험 기준 탭" className="grid grid-cols-2 overflow-hidden rounded-[6px] border border-[var(--border)] sm:grid-cols-5">
     {TAB_ITEMS.map((tab, index) => {
       const selected = active === tab.id
-      return <button key={tab.id} type="button" role="tab" aria-selected={selected} onClick={() => onSelect(tab.id)} className={`relative flex h-12 items-center justify-center gap-2 px-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)] ${index > 0 ? "border-l border-[var(--border)]" : ""} ${index >= 2 ? "border-t border-[var(--border)] sm:border-t-0" : ""} ${index === 2 ? "border-l-0 sm:border-l" : ""} ${selected ? "bg-[var(--card)] text-[var(--foreground)]" : "bg-[color-mix(in_oklab,var(--muted)_55%,var(--card))] text-[var(--muted-foreground)] hover:bg-[var(--card)] hover:text-[var(--foreground)]"}`}>
+      const badge = badges?.[tab.id] ?? 0
+      return <button key={tab.id} type="button" role="tab" aria-selected={selected} onClick={() => onSelect(tab.id)} className={`relative flex h-12 items-center justify-center gap-2 px-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)] ${index % 2 === 1 ? "border-l border-[var(--border)]" : ""} ${index > 0 ? "sm:border-l sm:border-[var(--border)]" : ""} ${index >= 2 ? "border-t border-[var(--border)] sm:border-t-0" : ""} ${selected ? "bg-[var(--card)] text-[var(--foreground)]" : "bg-[color-mix(in_oklab,var(--muted)_55%,var(--card))] text-[var(--muted-foreground)] hover:bg-[var(--card)] hover:text-[var(--foreground)]"}`}>
         <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-[3px] ${selected ? "bg-[var(--ref-cat-1)]" : "bg-transparent"}`} />
         <span className={`font-mono text-[10px] tracking-[0.14em] ${selected ? "text-[var(--ref-cat-1)]" : ""}`}>{tab.no}</span>
         <span className="text-xs font-semibold uppercase tracking-[0.14em]">{tab.label}</span>
         <span className="text-xs text-[var(--muted-foreground)]">{tab.hint}</span>
+        {badge > 0 ? <span className="font-mono text-[10px] text-[var(--warning)]">{badge}</span> : null}
       </button>
     })}
   </nav>
@@ -345,6 +360,224 @@ function RevisionsTab({ master, revisions }: { master: ProtocolRevision; revisio
   })}</div>
 }
 
+function nextReviewVersion(version?: string) {
+  const [major = 1, minor = 0] = (version || "1.0").split(".").map(Number)
+  return `${major}.${minor + 1}`
+}
+
+function reviewItemOrder(a: ReviewItem, b: ReviewItem, batch: ReviewBatch, latest: ProtocolRevision, testsById: Map<string, ProtocolTest>) {
+  const rank = (item: ReviewItem) => {
+    if (isStale(latest, batch, item)) return 3
+    if (item.decision === "pending") return 0
+    return item.decision === "approved" ? 1 : 2
+  }
+  return rank(a) - rank(b)
+    || (testsById.get(a.testId)?.no ?? a.testId).localeCompare(testsById.get(b.testId)?.no ?? b.testId, undefined, { numeric: true })
+    || a.variant - b.variant
+    || (a.field === b.field ? 0 : a.field === "method" ? -1 : 1)
+}
+
+function ReviewBatchCard({ batch, latest, buyersById, testsById, onAction }: { batch: ReviewBatch; latest: ProtocolRevision; buyersById: Map<string, ProtocolBuyer>; testsById: Map<string, ProtocolTest>; onAction: () => void }) {
+  const [busy, setBusy] = useState(false)
+  const [saveError, setSaveError] = useState("")
+  const [editingId, setEditingId] = useState("")
+  const [editValue, setEditValue] = useState("")
+  const buyer = buyersById.get(batch.buyerId)
+  const open = batch.status === "open"
+  const sortedItems = [...batch.items].sort((a, b) => reviewItemOrder(a, b, batch, latest, testsById))
+
+  const decide = async (item: ReviewItem, decision: ReviewDecision, editedValue?: string) => {
+    onAction()
+    setBusy(true)
+    setSaveError("")
+    try {
+      await setReviewDecision(batch, item.id, decision, editedValue)
+      setEditingId("")
+    } catch {
+      setSaveError("판정을 저장하지 못했습니다.")
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const decideMany = async (items: ReviewItem[], decision: ReviewDecision) => {
+    if (!items.length) return
+    onAction()
+    setBusy(true)
+    setSaveError("")
+    let working = batch
+    try {
+      for (const item of items) {
+        await setReviewDecision(working, item.id, decision)
+        working = { ...working, items: working.items.map((current) => current.id === item.id ? { ...current, decision, decidedAt: new Date().toISOString() } : current) }
+      }
+    } catch {
+      setSaveError("판정을 저장하지 못했습니다.")
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const dismiss = async () => {
+    if (!window.confirm("이 배치를 버립니다. 판정 기록은 남지만 반영 대상에서 빠집니다.")) return
+    onAction()
+    setBusy(true)
+    setSaveError("")
+    try {
+      await dismissReviewBatch(batch)
+    } catch {
+      setSaveError("판정을 저장하지 못했습니다.")
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const highPending = batch.items.filter((item) => item.confidence === "high" && item.decision === "pending" && !isStale(latest, batch, item))
+  const allPending = batch.items.filter((item) => item.decision === "pending")
+
+  return <article className="border border-[var(--border)] bg-[var(--card)]" style={buyerBar(buyer)}>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--border)] px-4 py-3">
+      <span className="inline-flex items-center gap-2 text-sm font-semibold"><Swatch buyer={buyer} />{buyer?.name ?? batch.buyerId}</span>
+      <span className="text-xs">{batch.sourceFile}</span>
+      <span className="font-mono text-[11px] text-[var(--muted-foreground)]">원문 {batch.sourceDate ?? "-"}</span>
+      <span className="font-mono text-[11px] text-[var(--muted-foreground)]">추출 {batch.extractedAt.slice(0, 10)} {batch.extractedBy}</span>
+      <span className="font-mono text-[11px] text-[var(--muted-foreground)]">기준 Ver. {batch.baseVersion}</span>
+      <span className="ml-auto">
+        {open ? <button type="button" disabled={busy} onClick={() => void dismiss()} className={`${FILTER_BUTTON} w-auto disabled:opacity-40`}>배치 버리기</button> : null}
+        {batch.status === "applied" ? <span className="text-xs text-[var(--ref-cat-1)]">Ver. {batch.appliedVersion}에 반영됨</span> : null}
+        {batch.status === "dismissed" ? <span className="text-xs text-[var(--muted-foreground)]">버림</span> : null}
+      </span>
+    </div>
+    {saveError ? <p className="border-b border-[var(--border)] px-4 py-2 text-xs text-[var(--destructive)]">{saveError}</p> : null}
+    {open ? <div className="flex flex-wrap gap-2 border-b border-[var(--border)] px-4 py-2">
+      <button type="button" disabled={busy || !highPending.length} onClick={() => void decideMany(highPending, "approved")} className={`${FILTER_BUTTON} w-auto disabled:opacity-40`}>신뢰도 높음 모두 승인</button>
+      <button type="button" disabled={busy || !allPending.length} onClick={() => void decideMany(allPending, "rejected")} className={`${FILTER_BUTTON} w-auto disabled:opacity-40`}>남은 칸 모두 거절</button>
+    </div> : null}
+    <div className="overflow-x-auto">
+      <table className="table-fixed w-full min-w-[960px] border-collapse text-left text-[13px]">
+        <colgroup><col style={{ width: 220 }} /><col style={{ width: 110 }} /><col /><col /><col style={{ width: 220 }} /><col style={{ width: 150 }} /></colgroup>
+        <thead className="bg-[var(--muted)]/35"><tr className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+          <th className="border-b border-r border-[var(--border)] px-3 py-2 font-normal">TEST</th>
+          <th className="border-b border-r border-[var(--border)] px-3 py-2 font-normal">FIELD</th>
+          <th className="border-b border-r border-[var(--border)] px-3 py-2 font-normal">현재 값</th>
+          <th className="border-b border-r border-[var(--border)] px-3 py-2 font-normal">원문 값</th>
+          <th className="border-b border-r border-[var(--border)] px-3 py-2 font-normal">근거</th>
+          <th className="border-b border-[var(--border)] px-3 py-2 font-normal">판정</th>
+        </tr></thead>
+        <tbody>{sortedItems.map((item) => {
+          const test = testsById.get(item.testId)
+          const stale = isStale(latest, batch, item)
+          const current = liveValue(latest, batch.buyerId, item)
+          const proposed = item.editedValue ?? item.proposed
+          return <tr key={item.id}>
+            <td className="border-r border-t border-[var(--border)] px-3 py-2 align-top">
+              <p className="font-mono text-xs">{test ? `${test.no} ${test.name}` : item.testId}</p>
+              {test ? <p className="text-xs text-[var(--muted-foreground)]">{test.korean}</p> : null}
+              {item.variant > 0 ? <p className="font-mono text-[11px] text-[var(--muted-foreground)]">조건 {item.variant + 1}</p> : null}
+            </td>
+            <td className="border-r border-t border-[var(--border)] px-3 py-2 align-top font-mono text-xs">{fieldLabel(item.field)}</td>
+            <td className={`whitespace-pre-line border-r border-t border-[var(--border)] px-3 py-2 align-top ${stale ? "bg-[color-mix(in_oklab,var(--warning)_9%,transparent)]" : ""}`}>
+              <span className={current ? "" : "text-[var(--muted-foreground)]"}>{current || "-"}</span>
+              {stale ? <p className="mt-1 text-xs text-[var(--warning)]">추출 이후 기준표가 바뀌었습니다. 다시 추출하거나 거절하십시오.</p> : null}
+            </td>
+            <td className="whitespace-pre-line border-r border-t border-[var(--border)] bg-[color-mix(in_oklab,var(--ref-cat-1)_8%,transparent)] px-3 py-2 align-top">
+              {proposed}
+              {item.editedValue !== undefined ? <p className="mt-1 text-xs text-[var(--muted-foreground)]">수정함 (원문: {firstLine(item.proposed)})</p> : null}
+            </td>
+            <td className="border-r border-t border-[var(--border)] px-3 py-2 align-top">
+              <p className="font-mono text-[11px] text-[var(--muted-foreground)]">{item.page ? `p.${item.page}` : "-"}</p>
+              {item.quote ? <p className="mt-1 line-clamp-4 text-xs" title={item.quote}>“{item.quote}”</p> : null}
+              <p className={`mt-1 font-mono text-[10px] uppercase tracking-[0.14em] ${item.confidence === "low" ? "text-[var(--warning)]" : "text-[var(--muted-foreground)]"}`}>CONFIDENCE {item.confidence.toUpperCase()}</p>
+              {item.note ? <p className="mt-1 text-xs text-[var(--muted-foreground)]">{item.note}</p> : null}
+            </td>
+            <td className="border-t border-[var(--border)] px-3 py-2 align-top">
+              {open ? editingId === item.id ? <div className="space-y-2">
+                <textarea rows={3} value={editValue} onChange={(event) => setEditValue(event.target.value)} disabled={busy} className="w-full rounded-[4px] border border-[var(--border)] bg-[var(--card)] p-2 text-[13px]" />
+                <div className="flex gap-2"><button type="button" disabled={busy} onClick={() => void decide(item, "approved", editValue)} className={`${FILTER_BUTTON} justify-center disabled:opacity-40`}>저장</button><button type="button" disabled={busy} onClick={() => setEditingId("")} className={`${FILTER_BUTTON} justify-center disabled:opacity-40`}>취소</button></div>
+              </div> : <div className="space-y-2">
+                <button type="button" disabled={busy || stale} onClick={() => void decide(item, item.decision === "approved" ? "pending" : "approved")} className={`${FILTER_BUTTON} justify-center disabled:opacity-40 ${item.decision === "approved" ? GROUP_ON : ""}`}>승인</button>
+                <button type="button" disabled={busy} onClick={() => void decide(item, item.decision === "rejected" ? "pending" : "rejected")} className={`${FILTER_BUTTON} justify-center disabled:opacity-40 ${item.decision === "rejected" ? "border-[var(--muted-foreground)] bg-[var(--muted)]/40" : ""}`}>거절</button>
+                <button type="button" disabled={busy || stale} onClick={() => { onAction(); setEditingId(item.id); setEditValue(item.editedValue ?? item.proposed) }} className={`${FILTER_BUTTON} justify-center disabled:opacity-40`}>값 고쳐 승인</button>
+              </div> : <span className="text-sm">{item.decision === "approved" ? "승인" : item.decision === "rejected" ? "거절" : "대기"}</span>}
+            </td>
+          </tr>
+        })}</tbody>
+      </table>
+    </div>
+  </article>
+}
+
+function ReviewTab({ latest, batches, loading, error }: { latest: ProtocolRevision; batches: ReviewBatch[]; loading: boolean; error: string }) {
+  const [pastOpen, setPastOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [label, setLabel] = useState("원문 매뉴얼 검토 반영")
+  const [applying, setApplying] = useState(false)
+  const [applyError, setApplyError] = useState("")
+  const [notice, setNotice] = useState("")
+  const buyersById = new Map((latest.buyers ?? []).map((buyer) => [buyer.id, buyer]))
+  const testsById = new Map((latest.tests ?? []).map((test) => [test.id, test]))
+  const openBatches = batches.filter((batch) => batch.status === "open")
+  const pastBatches = batches.filter((batch) => batch.status !== "open")
+  const openItems = openBatches.flatMap((batch) => batch.items.map((item) => ({ batch, item })))
+  const pending = openItems.filter(({ batch, item }) => item.decision === "pending" && !isStale(latest, batch, item)).length
+  const approved = openItems.filter(({ item }) => item.decision === "approved").length
+  const rejected = openItems.filter(({ item }) => item.decision === "rejected").length
+  const stale = openItems.filter(({ batch, item }) => isStale(latest, batch, item)).length
+  const approvedReady = openItems.some(({ batch, item }) => item.decision === "approved" && !isStale(latest, batch, item))
+
+  const openConfirm = () => {
+    setNotice("")
+    setApplyError("")
+    setLabel("원문 매뉴얼 검토 반영")
+    setConfirmOpen(true)
+  }
+
+  const apply = async () => {
+    setApplying(true)
+    setApplyError("")
+    try {
+      const result = await applyApprovedReviews(latest.id, openBatches.map((batch) => batch.id), label.trim() || "원문 매뉴얼 검토 반영")
+      if (!result) {
+        setApplyError("반영할 칸이 없습니다.")
+        return
+      }
+      setNotice(`Ver. ${result.version} 반영 완료: ${result.applied}칸${result.skipped > 0 ? ` (기준표가 바뀐 ${result.skipped}칸 제외)` : ""}`)
+      setConfirmOpen(false)
+    } catch (caught) {
+      setApplyError(caught instanceof Error && caught.message ? caught.message : "반영하지 못했습니다.")
+    } finally {
+      setApplying(false)
+    }
+  }
+
+  const card = (batch: ReviewBatch) => <ReviewBatchCard key={batch.id} batch={batch} latest={latest} buyersById={buyersById} testsById={testsById} onAction={() => setNotice("")} />
+
+  return <div className="space-y-4">
+    <div className="flex flex-wrap items-end justify-between gap-3">
+      <div><h2 className="text-sm font-semibold">원문 매뉴얼 검토</h2><p className="text-sm text-[var(--muted-foreground)]">원문에서 뽑은 값 중 현재 기준표와 다른 칸만 올라옵니다. 승인한 칸만 새 버전에 반영됩니다.</p></div>
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="font-mono text-xs">대기 {pending}  승인 {approved}  거절 {rejected}{stale > 0 ? `  낡음 ${stale}` : ""}</span>
+        <button type="button" disabled={!approvedReady} onClick={openConfirm} className="inline-flex h-9 items-center rounded-[4px] border border-transparent bg-[var(--ref-cat-1)] px-4 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40">승인 칸 새 버전으로 반영</button>
+      </div>
+    </div>
+    {notice ? <p className="text-sm text-[var(--ref-cat-1)]">{notice}</p> : null}
+    {loading ? <p className="text-sm text-[var(--muted-foreground)]">검토 목록을 불러오는 중입니다.</p> : null}
+    {!loading && error ? <p className="text-sm text-[var(--destructive)]">{error}</p> : null}
+    {!loading && !error && !batches.length ? <div className="border border-dashed border-[var(--border)] px-5 py-12 text-center text-[var(--muted-foreground)]"><p className="text-sm">검토할 원문 매뉴얼이 없습니다.</p><p className="mt-1 text-sm">새 매뉴얼을 Teams 바이어 폴더에 넣고 Claude Code에서 추출을 요청하면 여기에 올라옵니다.</p></div> : null}
+    {!loading && !error && batches.length ? <>
+      {openBatches.length ? <div className="space-y-4">{openBatches.map(card)}</div> : <p className="text-sm text-[var(--muted-foreground)]">열린 검토가 없습니다.</p>}
+      {pastBatches.length ? <div className="space-y-4"><button type="button" onClick={() => setPastOpen((current) => !current)} className={`${FILTER_BUTTON} w-auto`}>지난 검토 {pastBatches.length}</button>{pastOpen ? <div className="space-y-4">{pastBatches.map(card)}</div> : null}</div> : null}
+    </> : null}
+    <Dialog open={confirmOpen} onOpenChange={(open) => { if (!applying) setConfirmOpen(open) }}>
+      <DialogContent className="sm:max-w-[480px]">
+        <DialogHeader><DialogTitle>Ver. {nextReviewVersion(latest.version)}으로 반영합니다</DialogTitle><DialogDescription>승인 {approved}칸을 반영해 새 버전을 만듭니다. 이전 버전은 과거 버전으로 남습니다.</DialogDescription></DialogHeader>
+        <DialogBody><label className="block text-sm font-medium" htmlFor="review-version-label">버전 설명</label><input id="review-version-label" value={label} onChange={(event) => setLabel(event.target.value)} disabled={applying} className="mt-2 h-9 w-full rounded-[4px] border border-[var(--border)] bg-[var(--card)] px-3 text-sm" />{applyError ? <p className="mt-3 text-sm text-[var(--destructive)]">{applyError}</p> : null}</DialogBody>
+        <DialogFooter><button type="button" disabled={applying} onClick={() => setConfirmOpen(false)} className={`${FILTER_BUTTON} w-auto disabled:opacity-40`}>취소</button><button type="button" disabled={applying} onClick={() => void apply()} className="inline-flex h-9 items-center rounded-[4px] border border-transparent bg-[var(--ref-cat-1)] px-4 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40">{applying ? "반영 중…" : "반영"}</button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
+}
+
 function ManualsTab({ items, buyerName, onOpen }: { items: ReferenceItem[]; buyerName: string; onOpen: (item: ReferenceItem) => void }) {
   const [openFolder, setOpenFolder] = useState<FolderGroup | null>(null)
   const visible = buyerName ? items.filter((item) => protocolBuyer(item) === buyerName) : items
@@ -360,16 +593,22 @@ function ManualsTab({ items, buyerName, onOpen }: { items: ReferenceItem[]; buye
 export function BuyerProtocols() {
   const [searchParams, setSearchParams] = useSearchParams()
   const rawTab = searchParams.get("tab")
-  const active: TabId = rawTab === "buyer" || rawTab === "revisions" || rawTab === "manuals" ? rawTab : "matrix"
+  const active: TabId = rawTab === "buyer" || rawTab === "revisions" || rawTab === "manuals" || rawTab === "review" ? rawTab : "matrix"
   const [query, setQuery] = useState("")
   const [selectedItem, setSelectedItem] = useState<ReferenceItem | null>(null)
-  const { revisions, master, loading, error } = useProtocolMatrix()
+  const { revisions, latest, master, loading, error } = useProtocolMatrix()
+  const reviews = useProtocolReviews()
   const manuals = useBuyerProtocols()
   const manualItems = manuals.items.filter((item) => protocolBuyer(item) !== BUYER_ALL)
   const pendingRevisions = revisions.filter((revision) => revision.status === "pending")
   const pendingDiffs = pendingRevisions.flatMap((revision) => (revision.diffs ?? []).map((diff) => ({ ...diff, revDate: revision.revDate })))
   const buyerParam = searchParams.get("buyer") ?? ""
   const buyerName = master?.buyers?.find((buyer) => buyer.id === buyerParam)?.manualTopic ?? ""
+  const reviewBase = latest ?? master
+  const reviewPending = reviews.batches
+    .filter((batch) => batch.status === "open")
+    .flatMap((batch) => batch.items.map((item) => ({ batch, item })))
+    .filter(({ batch, item }) => item.decision === "pending" && !isStale(reviewBase, batch, item)).length
 
   const selectTab = (tab: TabId) => {
     const next = new URLSearchParams(searchParams)
@@ -395,12 +634,13 @@ export function BuyerProtocols() {
 
   return <section className="-mt-1 min-w-0 space-y-5 pb-4">
     <HeaderBlock master={master} pendingCount={pendingRevisions.length} />
-    <TabNav active={active} onSelect={selectTab} />
+    <TabNav active={active} onSelect={selectTab} badges={{ review: reviewPending }} />
     <div aria-live="polite" className="min-h-[70vh]">
       {active === "matrix" ? <MatrixTab master={master} pendingDiffs={pendingDiffs} query={query} onQuery={setQuery} /> : null}
       {active === "buyer" ? <BuyerTab master={master} manuals={manualItems} pendingDiffs={pendingDiffs} selectedBuyerId={buyerParam} onSelectBuyer={selectBuyer} onManuals={openManuals} /> : null}
       {active === "revisions" ? <RevisionsTab master={master} revisions={revisions} /> : null}
       {active === "manuals" ? <ManualsTab items={manualItems} buyerName={buyerName} onOpen={setSelectedItem} /> : null}
+      {active === "review" ? <ReviewTab latest={latest ?? master} batches={reviews.batches} loading={reviews.loading} error={reviews.error} /> : null}
     </div>
     <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] px-1 pt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted-foreground)]"><span>SOURCE  Buyer별 Test protocols 취합본, Teams Test Protocols 폴더</span><span>REV. {master.revDate}</span></footer>
     <ReferenceDialog item={selectedItem} onOpenChange={(open) => { if (!open) setSelectedItem(null) }} />
