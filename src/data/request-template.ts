@@ -381,6 +381,8 @@ export interface RequestMergeResult {
   merged: RequestStyle[]
   added: number
   updated: number
+  /** 갱신으로 옵션 수가 줄어 사라진 옵션의 lineId. DD 연결은 건드리지 않고 화면에서 알리기만 한다. */
+  droppedLineIds: string[]
 }
 
 /**
@@ -394,6 +396,7 @@ export function mergeRequestStyles(existing: readonly RequestStyle[], incoming: 
   const merged = [...existing]
   let added = 0
   let updated = 0
+  const droppedLineIds: string[] = []
 
   for (const style of incoming) {
     const previous = byKey.get(keyOf(style))
@@ -405,6 +408,10 @@ export function mergeRequestStyles(existing: readonly RequestStyle[], incoming: 
     const next: RequestStyle = {
       ...style,
       reqId: previous.reqId,
+      // 결과(완료, 드롭, 보류)와 결과일은 양식에 없는 웹 전용 값이다. 물려받지 않으면 재업로드마다
+      // 진행중으로 돌아가고 보드 이력에 결과 변경이 찍힌다(2026-10-13 검토).
+      result: previous.result,
+      resultAt: previous.resultAt,
       imagePath: previous.imagePath,
       imageThumbPath: previous.imageThumbPath,
       createdAt: previous.createdAt,
@@ -418,9 +425,10 @@ export function mergeRequestStyles(existing: readonly RequestStyle[], incoming: 
         lineId: previous.options[index]?.lineId ?? option.lineId,
       })),
     }
+    previous.options.slice(style.options.length).forEach((option) => { if (option.lineId) droppedLineIds.push(option.lineId) })
     merged[merged.indexOf(previous)] = next
     updated += 1
   }
 
-  return { merged, added, updated }
+  return { merged, added, updated, droppedLineIds }
 }

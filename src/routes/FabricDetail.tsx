@@ -259,7 +259,8 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
   }
 
   const confirmEdit = async () => {
-    const changed = Object.entries(draft).filter(([id, value]) => value !== valueOf(item, id))
+    // DD 행이 붙은 원단은 창고 칸만 저장한다. 화면에서 막았어도 저장 길목에서 한 번 더 거른다.
+    const changed = Object.entries(draft).filter(([id, value]) => value !== valueOf(item, id) && (!item.record || STOCK_IDS.has(id)))
     if (!changed.length) { cancelEdit(); return }
     const nextStorageNo = draft.storageNo ?? item.storageNo
     const duplicate = nextStorageNo.trim()
@@ -274,8 +275,16 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
     await saveEdit(changed, manualFl?.fl)
   }
 
+  /**
+   * DD 행이 붙은 원단은 DD 칸을 여기서 고치지 않는다(2026-10-13 박향근 확정, A안).
+   * 이 화면에는 DD MASTER의 담당자 확인(R319), 닫힌 목록(R281), 입력 검사(R297)가 없어서
+   * 담당, Dyeing, Color, 날짜가 검사 없이 바뀌었다. 규칙은 DD MASTER 한 곳에만 둔다.
+   * 창고 칸(R&D No., 재고)은 창고 처리(applyFabricAction)의 권한 검사를 거치므로 그대로 고친다.
+   */
+  const ddLocked = Boolean(item.record)
+  const ddRowId = item.record ? `${item.record._src.sheet}::${item.record._src.row}` : ""
   const cell = (id: string, label: string, type: "text" | "date" | "number" = "text", suffix = "") =>
-    <FieldCell key={id} id={id} label={label} type={type} suffix={suffix} item={item} editing={editing} draft={draft} onChange={change} />
+    <FieldCell key={id} id={id} label={label} type={type} suffix={suffix} item={item} editing={editing && (!ddLocked || STOCK_IDS.has(id))} draft={draft} onChange={change} />
   const flCell = item.record && editing
     ? <CellShell label="FL#"><span className="block truncate font-mono text-sm font-medium">{item.flNo || "—"}</span><span className="block text-[10px] text-[var(--muted-foreground)]">DD MASTER에서 입력</span></CellShell>
     : cell("flNo", "FL#")
@@ -293,7 +302,10 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
               <Button type="button" size="sm" disabled={saving} onClick={() => { void confirmEdit() }}><Check />{saving ? "저장 중…" : "확인"}</Button>
             </>
           ) : (
-            <Button type="button" size="sm" variant="outline" onClick={startEdit}><Pencil />수정</Button>
+            <>
+              {ddLocked ? <Button asChild type="button" size="sm" variant="outline"><Link to={`/development/workspace?focus=${encodeURIComponent(ddRowId)}`} title="DD 칸(담당, 조직, Color, 날짜 등)은 DD MASTER에서 고칩니다">DD MASTER에서 수정</Link></Button> : null}
+              <Button type="button" size="sm" variant="outline" onClick={startEdit} title={ddLocked ? "R&D No.와 재고만 여기서 고칩니다" : undefined}><Pencil />{ddLocked ? "창고 칸 수정" : "수정"}</Button>
+            </>
           )}
         </div>
       </div>
@@ -326,7 +338,8 @@ export function FabricDetailBody({ fabricKey }: { fabricKey: string }) {
         onCancel={() => setFlEntryCheck(null)}
         onConfirm={() => {
           if (!flEntryCheck) return
-          const changed = Object.entries(draft).filter(([id, value]) => value !== valueOf(item, id))
+          // DD 행이 붙은 원단은 창고 칸만 저장한다. 화면에서 막았어도 저장 길목에서 한 번 더 거른다.
+    const changed = Object.entries(draft).filter(([id, value]) => value !== valueOf(item, id) && (!item.record || STOCK_IDS.has(id)))
           setFlEntryCheck(null)
           void saveEdit(changed, flEntryCheck.fl)
         }}

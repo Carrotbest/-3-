@@ -55,10 +55,27 @@ export function collectWarehouseExport(
   const ordered = [...events].sort((a, b) => eventTime(a).localeCompare(eventTime(b)))
   const lastInbound = new Map<string, FabricLedgerEvent>()
   const lastDone = new Map<string, FabricLedgerEvent>()
+  // 목록에서 감췄다(REMOVED) 되살린(RESTORE) 건은 감추기 전 기록으로 돌아가야 한다.
+  // 되살린 날을 입고일이나 폐기일로 세면 안 되고, 기록을 통째로 잃어도 안 된다(2026-10-13 검토).
+  const hidden = new Map<string, { inbound?: FabricLedgerEvent; done?: FabricLedgerEvent }>()
   for (const event of ordered) {
     const storageNo = (event.storageNo ?? "").trim()
     if (!storageNo) continue
-    if (event.toStatus === "READY" || event.toStatus === "REMOVED") {
+    if (event.toStatus === "REMOVED") {
+      hidden.set(storageNo, { inbound: lastInbound.get(storageNo), done: lastDone.get(storageNo) })
+      lastInbound.delete(storageNo)
+      lastDone.delete(storageNo)
+      continue
+    }
+    if (event.action === "RESTORE" && event.fromStatus === "REMOVED" && event.toStatus !== "READY") {
+      const before = hidden.get(storageNo)
+      hidden.delete(storageNo)
+      if (before?.inbound) lastInbound.set(storageNo, before.inbound)
+      if (before?.done && DONE_STATUS.has(event.toStatus)) lastDone.set(storageNo, before.done)
+      continue
+    }
+    if (event.toStatus === "READY") {
+      hidden.delete(storageNo)
       lastInbound.delete(storageNo)
       lastDone.delete(storageNo)
       continue

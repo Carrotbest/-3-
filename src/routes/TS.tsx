@@ -551,8 +551,10 @@ export function TS() {
     setFormErrors(errors)
     if (Object.keys(errors).length) return
 
+    // 화면이 들고 있던 rows가 아니라 지금 저장 값으로 번호와 목록을 만든다. 다른 저장 경로와 같다.
+    const latest = useAppStore.getState().ts
     const newRow: TsRecord = {
-      id: nextTsId(rows),
+      id: nextTsId(latest),
       receivedAt: form.receivedAt,
       subject: form.subject.trim(),
       fromDept: form.fromDept.trim(),
@@ -571,7 +573,7 @@ export function TS() {
       state: form.state,
       source: "web",
     }
-    saveTsRecords([newRow, ...rows])
+    saveTsRecords([newRow, ...latest])
     setForm(initialForm())
     setFormOpen(false)
   }

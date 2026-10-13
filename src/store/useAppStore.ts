@@ -1765,6 +1765,8 @@ export async function removeFabricRows(
       status: "REMOVED",
       storageNo: previous?.storageNo,
       yds: previous?.yds,
+      // override를 새로 만드는 곳마다 rackNo를 물려준다. 빠지면 숨겼다 되살릴 때 Rack No.가 사라진다.
+      rackNo: previous?.rackNo,
       locks: previous?.locks,
       roll: previous?.roll,
       note: previous?.note,

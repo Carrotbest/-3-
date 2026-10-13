@@ -47,6 +47,9 @@ const MERGE_IDS: Record<string, (item: never) => string> = {
 const LIST_MERGE_IDS: Record<string, (list: readonly unknown[]) => string[]> = {
   completed: (list) => occurrenceIds(list as readonly ({ sourceSheet?: string; id?: string } | null)[],
     (item) => `${item?.sourceSheet ?? ""}|${item?.id ?? ""}`),
+  // TS는 마지막 저장이 이기던 키라 두 사람이 몇 초 안에 등록하거나 고치면 한쪽이 사라졌다(2026-10-13 검토).
+  // 엑셀에서 들여온 옛 행은 번호가 겹칠 수 있어 completed처럼 `번호|몇 번째`로 id를 세운다.
+  ts: (list) => occurrenceIds(list as readonly ({ id?: string } | null)[], (item) => item?.id ?? ""),
 }
 
 /** 이 키들은 화면에서 통째로 비울 일이 없다. 병합 결과가 비면 사고로 보고 쓰지 않는다. */
@@ -120,6 +123,16 @@ async function pushCache<K extends CacheKey>(key: K, value: AppState[K]): Promis
     .then(() => markPushSucceeded(key), (error) => handlePushFailure(key, error))
   pushChains.set(key, chained)
   return chained
+}
+
+/**
+ * 지금 전송 중이거나 줄 서 있는 저장을 모두 기다린다. 새 버전 새로고침 직전에 부른다(2026-10-13).
+ * 예전에는 DD 저장만 비우고 새로고침해서, 창고나 요청처럼 바로 전송되는 키의 저장이 끝나기 전에 끊길 수 있었다.
+ * 전송 실패는 여기서 던지지 않는다. 실패 처리는 handlePushFailure가 이미 한다.
+ */
+export async function awaitPendingPushes(timeoutMs = 8000): Promise<void> {
+  const pending = Promise.allSettled([...pushChains.values()]).then(() => undefined)
+  await Promise.race([pending, new Promise<void>((resolve) => setTimeout(resolve, timeoutMs))])
 }
 
 async function pushCacheNow<K extends CacheKey>(key: K, value: AppState[K]): Promise<void> {

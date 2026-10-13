@@ -324,6 +324,7 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
     setSaving(true)
     setError("")
     let claimed: string[] = []
+    let saved = false
     try {
       try {
         claimed = await claimStorageNumbers([...assigned, ...spare], targets.length)
@@ -360,6 +361,7 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
           ...(row.supplier.trim() ? { supplier: row.supplier.trim() } : {}),
         },
       })))
+      saved = true
 
       const labels = actual.map((storageNo, index) => storageNoLabel({ storageNo, roll: targets[index].roll }))
       const numbers = actual.map(Number)
@@ -374,7 +376,9 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "신규 입고를 저장하지 못했습니다.")
     } finally {
-      await releaseStorageNumbers(claimed).catch(() => undefined)
+      // 저장에 성공했으면 예약을 풀지 않고 TTL(10분)에 맡긴다. 서버 전송이 팀원 화면에 닿기 전에
+      // 같은 번호가 다른 사람에게 나가는 것을 막는다(2026-10-13 검토). 실패나 중단일 때만 바로 푼다.
+      if (!saved) await releaseStorageNumbers(claimed).catch(() => undefined)
       setSaving(false)
     }
   }

@@ -1698,10 +1698,14 @@ export function FabricRequest() {
       const parsed = parseRequestWorkbook(workbook)
       const ignored = parsed.styles.filter((style) => style.chart.trim() && style.chart.trim() !== activeBoardInfo.name).length
       const incoming = parsed.styles.map((style) => ({ ...style, boardId: activeBoard, chart: activeBoardInfo.name }))
-      const { merged, added, updated } = mergeRequestStyles(requests, incoming)
+      const { merged, added, updated, droppedLineIds } = mergeRequestStyles(requests, incoming)
       commitRequests(merged, "upload")
+      // 파일에서 빠진 옵션에 DD 행이 연결돼 있으면 알리기만 한다. 업로드로 DD 연결을 자동으로 풀지 않는다.
+      // 일부만 담긴 파일을 잘못 올려도 DD MASTER 쪽이 흐트러지지 않게 하려는 것이다(2026-10-13).
+      const dropped = new Set(droppedLineIds)
+      const orphaned = dropped.size ? useAppStore.getState().records.filter((record) => { const id = record.tech?.requestLink?.lineId; return id ? dropped.has(id) : false }).length : 0
       const skipped = parsed.warnings.length ? ` 확인할 내용 ${parsed.warnings.length}건: ${parsed.warnings.slice(0, 3).join(" / ")}${parsed.warnings.length > 3 ? " 외" : ""}` : ""
-      setNotice({ kind: "ok", text: `추가 ${added}건, 갱신 ${updated}건을 반영했습니다.${skipped}${ignored ? ` 차트 열 값 ${ignored}건은 무시하고 현재 보드로 올렸습니다.` : ""}` })
+      setNotice({ kind: "ok", text: `추가 ${added}건, 갱신 ${updated}건을 반영했습니다.${skipped}${ignored ? ` 차트 열 값 ${ignored}건은 무시하고 현재 보드로 올렸습니다.` : ""}${orphaned ? ` 파일에서 빠진 옵션에 연결된 DD 행 ${orphaned}건이 있습니다. 연결은 그대로 두었으니 공정 칸에서 확인하십시오.` : ""}` })
     } catch (error) {
       setNotice({ kind: "error", text: error instanceof Error ? error.message : "파일을 읽지 못했습니다." })
     }

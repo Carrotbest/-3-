@@ -1041,10 +1041,13 @@ export function Warehouse() {
         const changedNos = claimed.filter((value, index) => value !== assigned[index])
         try {
           rememberUndo(await applyFabricActions(actionItems.map((item, index) => ({ fabricKey: item.key, action: "RECEIVE" as const, fromStatus: "READY" as const, toStatus: "WAREHOUSE" as const, storageNo: claimed[index], roll: receiveRolls[item.key] === true, yds: parsedYds[index], note: "웹 입고 등록", recordIdentity: fabricRecordIdentity(item.record) }))))
-        } finally {
-          // 원장에 들어갔으면 예약은 더 필요 없다. 실패했으면 번호를 다른 사람에게 돌려준다.
+        } catch (error) {
+          // 실패했을 때만 번호를 바로 돌려준다.
           void releaseStorageNumbers(claimed)
+          throw error
         }
+        // 성공했으면 풀지 않고 TTL(10분)에 맡긴다. 저장은 화면에 먼저 반영되고 서버 전송은 뒤따르므로,
+        // 바로 풀면 내 입고가 팀원 화면에 닿기 전에 같은 번호를 다른 사람이 예약할 수 있다(2026-10-13 검토).
         if (changedNos.length) {
           setSelectionNotice(`다른 사람이 먼저 쓴 번호가 있어 ${changedNos.join(", ")} 로 바뀌었습니다.`)
         }
@@ -1400,11 +1403,14 @@ export function Warehouse() {
             && (recordId && event.recordId ? event.recordId === recordId : event.fabricKey === item.key))
           .sort((left, right) => (left.recordedAt ?? left.occurredAt).localeCompare(right.recordedAt ?? right.occurredAt))
           .at(-1)
-        const target = removal?.fromStatus === "WAREHOUSE" ? "WAREHOUSE" as const : "READY" as const
+        // 감추기 직전 상태로 그대로 돌린다. 예전에는 창고보관이 아니면 모두 입고대기로 보내서
+        // 이력 탭(소진, 폐기)에서 감춘 건이 입고대기로 되살아나 다시 입고될 수 있었다(2026-10-13 검토).
+        const origin = removal?.fromStatus
+        const target = origin === "WAREHOUSE" || origin === "EXHAUSTED" || origin === "DISPOSED" ? origin : "READY" as const
         return {
           fabricKey: item.key, action: "RESTORE" as const,
           fromStatus: "REMOVED" as const, toStatus: target,
-          storageNo: target === "WAREHOUSE" ? item.storageNo : undefined,
+          storageNo: target === "READY" ? undefined : item.storageNo,
           note: "목록 숨김 해제",
         }
       })
@@ -2045,7 +2051,7 @@ export function Warehouse() {
         {tab === "HISTORY" && canEditScope && teamScope !== "team1" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => guardedAction("lifecycle", selectedRows, () => openAction("RESTORE", selectedRows, "READY"))}><PackageOpen />입고 대기로</Button> : null}
         {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!hasSelectedActiveOutbound} title={hasSelectedActiveOutbound ? "선택한 원단의 최근 출고를 취소합니다" : "취소할 출고가 있는 원단을 선택하세요."} onClick={() => guardedAction("outbound", selectedRows, () => openAction("UNOUTBOUND", selectedRows))}><PackageX />출고 취소</Button> : null}
         {tab === "WAREHOUSE" && teamScope !== "team1" ? <Button type="button" size="sm" variant={unconfirmedOnly ? "default" : "outline"} aria-pressed={unconfirmedOnly} onClick={() => setUnconfirmedOnly((current) => !current)}>미확인 {unconfirmedCount}건</Button> : null}
-        {tab === "READY" && hiddenCount > 0 ? <Button type="button" size="sm" variant={hiddenOnly ? "default" : "outline"} aria-pressed={hiddenOnly} title="선택 삭제로 목록에서 감춘 행입니다" onClick={() => setHiddenOnly((current) => !current)}>숨긴 행 {hiddenCount}건</Button> : null}
+        {hiddenCount > 0 ? <Button type="button" size="sm" variant={hiddenOnly ? "default" : "outline"} aria-pressed={hiddenOnly} title="선택 삭제로 목록에서 감춘 행입니다" onClick={() => setHiddenOnly((current) => !current)}>숨긴 행 {hiddenCount}건</Button> : null}
         {hiddenOnly && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => void restoreHiddenRows()}><PackageCheck />되살리기</Button> : null}
       </div>
 
