@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { BookOpenCheck, ExternalLink, Folder, Search } from "lucide-react"
+import { ArrowLeft, BookOpenCheck, ExternalLink, Folder, Search } from "lucide-react"
 import { useSearchParams } from "react-router-dom"
 
 import { AnimatedNumber, MotionSection, RddaMotionContext } from "@/components/rdda/motion"
@@ -9,24 +9,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
+  DOC_TYPE_ORDER,
   REFERENCE_CATEGORIES,
+  REFERENCE_FOLDERS,
+  UNASSIGNED_FOLDER,
   categoryOf,
   displaySummaryOf,
+  folderOf,
   formatSize,
   titleOf,
   type ReferenceCategory,
   type ReferenceCategoryId,
+  type ReferenceFolder,
   type ReferenceItem,
 } from "@/data/reference-schema"
 import { useReferenceItems } from "@/data/references"
 import { ownerDisplayName } from "@/data/schema"
 
 type TabId = "overview" | ReferenceCategoryId
-type TopicCount = { topic: string; count: number }
+export type FolderGroup = ReferenceFolder & { items: ReferenceItem[] }
+export type FolderAccent = { color: string; label: string; sortByDate: boolean }
 
-const UNASSIGNED_TOPIC = "주제 미지정"
 const normalize = (value: string) => value.toLocaleLowerCase("ko-KR").replace(/\s+/g, "")
 const categoryColor = (category: ReferenceCategory) => `var(--ref-cat-${category.slot})`
 const dateText = (value?: string) => {
@@ -34,22 +38,37 @@ const dateText = (value?: string) => {
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? value.slice(0, 10) : date.toLocaleDateString("ko-KR")
 }
-const topicOf = (item: ReferenceItem) => item.topic?.trim() || UNASSIGNED_TOPIC
 
-function countTopics(items: ReferenceItem[], category?: ReferenceCategory): TopicCount[] {
-  const counts = new Map<string, number>()
-  items.forEach((item) => counts.set(topicOf(item), (counts.get(topicOf(item)) ?? 0) + 1))
-  const configured = category?.topicOrder ?? []
-  return [...counts].map(([topic, count]) => ({ topic, count })).sort((a, b) => {
-    if (a.topic === UNASSIGNED_TOPIC) return 1
-    if (b.topic === UNASSIGNED_TOPIC) return -1
-    if (configured.length) {
-      const ai = configured.indexOf(a.topic)
-      const bi = configured.indexOf(b.topic)
-      if (ai >= 0 || bi >= 0) return (ai < 0 ? configured.length : ai) - (bi < 0 ? configured.length : bi)
-    }
-    return b.count - a.count || a.topic.localeCompare(b.topic, "ko-KR")
+function docTypeIndex(value?: string) {
+  const index = DOC_TYPE_ORDER.indexOf(value ?? "")
+  return index >= 0 ? index : DOC_TYPE_ORDER.length
+}
+
+function sortItemsForFolder(sortByDate: boolean, items: ReferenceItem[]) {
+  return [...items].sort((a, b) => {
+    if (sortByDate) return (b.documentDate || b.modifiedAt).localeCompare(a.documentDate || a.modifiedAt)
+    return docTypeIndex(a.docType) - docTypeIndex(b.docType) || titleOf(a).localeCompare(titleOf(b), "ko-KR")
   })
+}
+
+function groupFolders(items: ReferenceItem[], categoryId: ReferenceCategoryId): FolderGroup[] {
+  const groups = new Map<string, FolderGroup>()
+  REFERENCE_FOLDERS[categoryId].forEach((folder) => groups.set(folder.name, { ...folder, items: [] }))
+  items.forEach((item) => {
+    const name = folderOf(item)
+    const group = groups.get(name)
+    if (group) group.items.push(item)
+    else groups.set(name, { name, description: "", items: [item] })
+  })
+  return [...groups.values()].filter((group) => group.items.length > 0)
+}
+
+function docTypeCounts(items: ReferenceItem[]) {
+  const counts = new Map<string, number>()
+  items.forEach((item) => {
+    if (item.docType?.trim()) counts.set(item.docType.trim(), (counts.get(item.docType.trim()) ?? 0) + 1)
+  })
+  return [...counts].sort((a, b) => docTypeIndex(a[0]) - docTypeIndex(b[0]) || a[0].localeCompare(b[0], "ko-KR"))
 }
 
 function ItemRow({ item, onOpen, compact = false }: { item: ReferenceItem; onOpen: (item: ReferenceItem) => void; compact?: boolean }) {
@@ -63,7 +82,26 @@ function ItemRow({ item, onOpen, compact = false }: { item: ReferenceItem; onOpe
   </button>
 }
 
-function ReferenceDialog({ item, onOpenChange }: { item: ReferenceItem | null; onOpenChange: (open: boolean) => void }) {
+function ReferenceDetail({ item }: { item: ReferenceItem }) {
+  const category = categoryOf(item.category)
+  return <>
+    {item.tags.length ? <div className="flex flex-wrap gap-2">{item.tags.map((tag) => <Badge key={tag} variant="outline">{tag}</Badge>)}</div> : null}
+    <section><h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">요약{!item.curatedSummary?.trim() && item.generatedSummary?.trim() ? <span className="text-[11px] font-normal text-[var(--muted-foreground)]">자동 작성, 검토 전</span> : null}</h3><p className="text-sm leading-6 text-[var(--muted-foreground)]">{displaySummaryOf(item) || "요약이 아직 없습니다"}</p></section>
+    <Separator />
+    <dl className="grid grid-cols-[7rem_1fr] gap-x-4 gap-y-3 text-sm">
+      {item.displayTitle ? <><dt className="text-[var(--muted-foreground)]">원본 파일명</dt><dd className="break-all">{item.title}</dd></> : null}
+      <dt className="text-[var(--muted-foreground)]">분류</dt><dd>{category?.korean ?? "-"}</dd>
+      {item.docType ? <><dt className="text-[var(--muted-foreground)]">자료 형태</dt><dd><Badge variant="outline">{item.docType}</Badge></dd></> : null}
+      <dt className="text-[var(--muted-foreground)]">작성자</dt><dd>{ownerDisplayName(item.owner ?? "") || "-"}</dd>
+      <dt className="text-[var(--muted-foreground)]">자료일</dt><dd>{dateText(item.documentDate)}</dd>
+      <dt className="text-[var(--muted-foreground)]">원본 수정일</dt><dd>{dateText(item.modifiedAt)}</dd>
+      <dt className="text-[var(--muted-foreground)]">형식</dt><dd className="uppercase">{item.kind === "folder" ? "folder" : item.format}</dd>
+      <dt className="text-[var(--muted-foreground)]">크기</dt><dd>{item.kind === "folder" ? "-" : formatSize(item.sizeBytes)}</dd>
+    </dl>
+  </>
+}
+
+export function ReferenceDialog({ item, onOpenChange }: { item: ReferenceItem | null; onOpenChange: (open: boolean) => void }) {
   const category = item ? categoryOf(item.category) : undefined
   return <Dialog open={Boolean(item)} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-xl">
@@ -72,24 +110,13 @@ function ReferenceDialog({ item, onOpenChange }: { item: ReferenceItem | null; o
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="gap-1.5"><span className="size-2 rounded-sm" style={{ backgroundColor: category ? categoryColor(category) : "color-mix(in oklab,var(--muted-foreground) 40%,transparent)" }} />{category?.korean ?? "미분류"}</Badge>
             {item.topic ? <Badge variant="outline">{item.topic}</Badge> : null}
+            {item.docType ? <Badge variant="outline">{item.docType}</Badge> : null}
             {item.needsReview ? <Badge variant="outline" className="border-[var(--warning)] text-[var(--warning)]">확인 필요</Badge> : null}
           </div>
           <DialogTitle className="text-xl leading-snug">{titleOf(item)}</DialogTitle>
           <DialogDescription className="sr-only">자료 상세 정보</DialogDescription>
         </DialogHeader>
-        <DialogBody className="space-y-6">
-          {item.tags.length ? <div className="flex flex-wrap gap-2">{item.tags.map((tag) => <Badge key={tag} variant="outline">{tag}</Badge>)}</div> : null}
-          <section><h3 className="mb-2 text-sm font-semibold">요약</h3><p className="text-sm leading-6 text-[var(--muted-foreground)]">{displaySummaryOf(item) || "요약이 아직 없습니다"}</p></section>
-          <Separator />
-          <dl className="grid grid-cols-[7rem_1fr] gap-x-4 gap-y-3 text-sm">
-            {item.displayTitle ? <><dt className="text-[var(--muted-foreground)]">원본 파일명</dt><dd className="break-all">{item.title}</dd></> : null}
-            <dt className="text-[var(--muted-foreground)]">작성자</dt><dd>{ownerDisplayName(item.owner ?? "") || "-"}</dd>
-            <dt className="text-[var(--muted-foreground)]">자료일</dt><dd>{dateText(item.documentDate)}</dd>
-            <dt className="text-[var(--muted-foreground)]">원본 수정일</dt><dd>{dateText(item.modifiedAt)}</dd>
-            <dt className="text-[var(--muted-foreground)]">형식</dt><dd className="uppercase">{item.kind === "folder" ? "folder" : item.format}</dd>
-            <dt className="text-[var(--muted-foreground)]">크기</dt><dd>{item.kind === "folder" ? "-" : formatSize(item.sizeBytes)}</dd>
-          </dl>
-        </DialogBody>
+        <DialogBody className="space-y-6"><ReferenceDetail item={item} /></DialogBody>
         <DialogFooter>
           {item.webUrl
             ? <Button asChild><a href={item.webUrl} target="_blank" rel="noreferrer"><ExternalLink />{item.kind === "folder" ? "폴더 열기" : "원본 열기"}</a></Button>
@@ -119,13 +146,13 @@ function Overview({ items, onSelect, onOpen }: { items: ReferenceItem[]; onSelec
     <Card><CardHeader className="pb-3"><CardTitle className="text-sm font-medium">자료 구성</CardTitle></CardHeader><CardContent><CompositionBar items={items} onSelect={onSelect} /></CardContent></Card>
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">{REFERENCE_CATEGORIES.map((category) => {
       const categoryItems = items.filter((item) => item.category === category.id)
-      const topics = countTopics(categoryItems, category).slice().sort((a, b) => b.count - a.count).slice(0, 3)
+      const folders = groupFolders(categoryItems, category.id).slice().sort((a, b) => b.items.length - a.items.length || a.name.localeCompare(b.name, "ko-KR")).slice(0, 3)
       return <button key={category.id} type="button" onClick={() => onSelect(category.id)} className="h-full text-left outline-none">
         <Card className="h-full transition-colors hover:border-[var(--border)]"><CardContent className="p-4">
           <div className="flex items-center gap-2 text-sm font-medium"><span className="size-2.5 rounded-sm" style={{ backgroundColor: categoryColor(category) }} />{category.korean}</div>
           <p className="mt-1 text-[10px] tracking-[0.08em] text-[var(--muted-foreground)]">{category.label}</p>
           <div className="mt-4 flex items-baseline justify-between gap-2"><span className="text-2xl font-semibold tabular-nums">{categoryItems.length}</span><span className="text-xs tabular-nums text-[var(--muted-foreground)]">{total ? Math.round(categoryItems.length / total * 100) : 0}%</span></div>
-          <p className="mt-3 line-clamp-2 min-h-8 text-xs leading-4 text-[var(--muted-foreground)]">{topics.map(({ topic }) => topic).join(", ") || "주제 미지정"}</p>
+          <p className="mt-3 line-clamp-2 min-h-8 text-xs leading-4 text-[var(--muted-foreground)]">{folders.map(({ name }) => name).join(", ") || UNASSIGNED_FOLDER}</p>
         </CardContent></Card>
       </button>
     })}</div>
@@ -136,16 +163,77 @@ function Overview({ items, onSelect, onOpen }: { items: ReferenceItem[]; onSelec
   </div>
 }
 
-function CategoryTab({ category, items, onOpen }: { category: ReferenceCategory; items: ReferenceItem[]; onOpen: (item: ReferenceItem) => void }) {
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
-  const topics = useMemo(() => countTopics(items, category), [items, category])
-  const topicIndex = useMemo(() => new Map(topics.map(({ topic }, index) => [topic, index])), [topics])
-  const rows = useMemo(() => items.filter((item) => !selectedTopic || topicOf(item) === selectedTopic).sort((a, b) => {
-    if (category.id === "study") return (b.documentDate || b.modifiedAt).localeCompare(a.documentDate || a.modifiedAt)
-    const topicOrder = (topicIndex.get(topicOf(a)) ?? topics.length) - (topicIndex.get(topicOf(b)) ?? topics.length)
-    return topicOrder || titleOf(a).localeCompare(titleOf(b), "ko-KR")
-  }), [category.id, items, selectedTopic, topicIndex, topics.length])
-  const maxTopic = Math.max(1, ...topics.map(({ count }) => count))
+export function FolderCard({ accent, folder, onOpen }: { accent: FolderAccent; folder: FolderGroup; onOpen: (folder: FolderGroup) => void }) {
+  const examples = sortItemsForFolder(accent.sortByDate, folder.items).slice(0, 2)
+  const types = docTypeCounts(folder.items)
+  return <button type="button" onClick={() => onOpen(folder)} className="h-full text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]">
+    <Card className="h-full overflow-hidden transition-colors hover:border-[var(--border)]">
+      <CardContent className="flex h-full flex-col gap-3 p-4">
+        <div className="h-1 rounded-[4px]" style={{ backgroundColor: accent.color }} />
+        <div className="flex items-start justify-between gap-3"><h2 className="min-w-0 truncate text-base font-semibold text-[var(--foreground)]">{folder.name}</h2><span className="shrink-0 text-2xl font-semibold tabular-nums text-[var(--foreground)]">{folder.items.length}<span className="ml-1 text-xs font-medium text-[var(--muted-foreground)]">건</span></span></div>
+        <p className="line-clamp-2 min-h-8 text-xs leading-4 text-[var(--muted-foreground)]">{folder.description}</p>
+        <div className="space-y-1.5">{examples.map((item) => <div key={item.id} className="flex min-w-0 items-center gap-2 text-xs text-[var(--muted-foreground)]"><span className="size-1 shrink-0 rounded-full bg-[var(--muted-foreground)]/60" /><span className="truncate">{titleOf(item)}</span></div>)}</div>
+        <div className="mt-auto flex flex-wrap gap-1.5">{types.map(([type, count]) => <Badge key={type} variant="secondary" className="font-normal">{type} <span className="ml-1 tabular-nums text-[var(--muted-foreground)]">{count}</span></Badge>)}</div>
+      </CardContent>
+    </Card>
+  </button>
+}
+
+function FolderItemRow({ item, onOpen }: { item: ReferenceItem; onOpen: (item: ReferenceItem) => void }) {
+  const helper = item.topic?.trim() || displaySummaryOf(item).split(/\r?\n/)[0] || "요약이 아직 없습니다"
+  return <button type="button" onClick={() => onOpen(item)} className="flex w-full items-center gap-3 border-b border-[var(--border)]/60 px-4 py-3 text-left outline-none last:border-b-0 hover:bg-[var(--muted)]/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]">
+    {item.kind === "folder" ? <Folder className="size-4 shrink-0 text-[var(--muted-foreground)]" aria-hidden="true" /> : null}
+    <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{titleOf(item)}</span><span className="mt-0.5 block truncate text-xs text-[var(--muted-foreground)]">{helper}</span></span>
+    {item.docType ? <Badge variant="outline" className="shrink-0 font-normal">{item.docType}</Badge> : null}
+    <span className="shrink-0 text-xs uppercase tabular-nums text-[var(--muted-foreground)]">{dateText(item.documentDate || item.modifiedAt)}</span>
+  </button>
+}
+
+export function FolderDialog({ accent, folder, onOpenChange }: { accent: FolderAccent; folder: FolderGroup | null; onOpenChange: (open: boolean) => void }) {
+  const [docType, setDocType] = useState("all")
+  const [detail, setDetail] = useState<ReferenceItem | null>(null)
+  const types = folder ? docTypeCounts(folder.items) : []
+  const rows = useMemo(() => {
+    if (!folder) return []
+    const filtered = docType === "all" ? folder.items : folder.items.filter((item) => item.docType === docType)
+    return sortItemsForFolder(accent.sortByDate, filtered)
+  }, [accent.sortByDate, docType, folder])
+  const close = (open: boolean) => {
+    if (!open) {
+      setDetail(null)
+      setDocType("all")
+    }
+    onOpenChange(open)
+  }
+  return <Dialog open={Boolean(folder)} onOpenChange={close}>
+    <DialogContent className="max-w-3xl">
+      {folder ? <>
+        <DialogHeader className="pr-12">
+          <div className="mb-2 flex flex-wrap items-center gap-2"><span className="size-2.5 rounded-[4px]" style={{ backgroundColor: accent.color }} /><Badge variant="secondary">{accent.label}</Badge>{detail?.docType ? <Badge variant="outline">{detail.docType}</Badge> : null}</div>
+          <DialogTitle className="text-xl leading-snug">{detail ? titleOf(detail) : folder.name}</DialogTitle>
+          <DialogDescription>{detail ? (detail.topic || folder.description || "자료 상세 정보") : folder.description}</DialogDescription>
+        </DialogHeader>
+        <DialogBody className="space-y-4">
+          {detail ? <><Button type="button" variant="ghost" size="sm" onClick={() => setDetail(null)} className="gap-2"><ArrowLeft className="size-4" />목록으로</Button><ReferenceDetail item={detail} /></> : <>
+            {types.length >= 2 ? <div className="flex flex-wrap gap-2">{["all", ...types.map(([type]) => type)].map((type) => {
+              const count = type === "all" ? folder.items.length : types.find(([name]) => name === type)?.[1] ?? 0
+              const active = docType === type
+              return <Button key={type} type="button" variant={active ? "secondary" : "outline"} size="sm" aria-pressed={active} onClick={() => setDocType(type)}>{type === "all" ? "전체" : type} <span className="ml-1 tabular-nums text-[var(--muted-foreground)]">{count}</span></Button>
+            })}</div> : null}
+            <div className="overflow-hidden rounded-lg border border-[var(--border)]/70">{rows.length ? rows.map((item) => <FolderItemRow key={item.id} item={item} onOpen={setDetail} />) : <p className="px-5 py-12 text-center text-sm text-[var(--muted-foreground)]">선택한 조건에 맞는 자료가 없습니다.</p>}</div>
+          </>}
+        </DialogBody>
+        {detail ? <DialogFooter>{detail.webUrl ? <Button asChild><a href={detail.webUrl} target="_blank" rel="noreferrer"><ExternalLink />{detail.kind === "folder" ? "폴더 열기" : "원본 열기"}</a></Button> : <Button disabled><ExternalLink />{detail.kind === "folder" ? "폴더 열기" : "원본 열기"}</Button>}</DialogFooter> : null}
+      </> : null}
+    </DialogContent>
+  </Dialog>
+}
+
+function CategoryTab({ category, items, onOpen, searching }: { category: ReferenceCategory; items: ReferenceItem[]; onOpen: (item: ReferenceItem) => void; searching: boolean }) {
+  const [openFolder, setOpenFolder] = useState<FolderGroup | null>(null)
+  const accent = useMemo(() => ({ color: categoryColor(category), label: category.korean, sortByDate: category.id === "study" }), [category])
+  const folders = useMemo(() => groupFolders(items, category.id), [category.id, items])
+  const rows = useMemo(() => sortItemsForFolder(accent.sortByDate, items), [accent.sortByDate, items])
   const owners = category.id === "study" ? [...items.reduce((map, item) => {
     const owner = ownerDisplayName(item.owner ?? "") || "작성자 미지정"
     map.set(owner, (map.get(owner) ?? 0) + 1)
@@ -153,25 +241,10 @@ function CategoryTab({ category, items, onOpen }: { category: ReferenceCategory;
   }, new Map<string, number>())].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko-KR")) : []
 
   return <div className="space-y-5">
-    <Card><CardHeader className="pb-3"><CardTitle className="text-sm font-medium">주제 분포</CardTitle></CardHeader><CardContent className="space-y-2.5">
-      {topics.length ? topics.map(({ topic, count }) => {
-        const active = selectedTopic === topic
-        return <button key={topic} type="button" aria-pressed={active} onClick={() => setSelectedTopic(active ? null : topic)} className={`grid w-full grid-cols-[8rem_1fr_3rem] items-center gap-3 rounded-md px-2 py-1 text-left outline-none hover:bg-[var(--muted)]/40 focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${active ? "bg-[var(--muted)]/60" : ""}`}>
-          <span className="truncate text-xs text-[var(--foreground)]">{topic}</span><span className="h-3 overflow-hidden rounded-[4px] bg-[var(--muted)]"><span className="block h-full rounded-[4px]" style={{ width: `${count / maxTopic * 100}%`, backgroundColor: categoryColor(category) }} /></span><span className="text-right text-xs tabular-nums text-[var(--muted-foreground)]">{count}건</span>
-        </button>
-      }) : <p className="py-5 text-center text-sm text-[var(--muted-foreground)]">표시할 주제가 없습니다.</p>}
-    </CardContent></Card>
     {category.id === "study" && owners.length ? <div className="flex flex-wrap items-center gap-2"><span className="text-xs text-[var(--muted-foreground)]">작성자별</span>{owners.map(([owner, count]) => <Badge key={owner} variant="secondary" className="font-normal">{owner} <span className="ml-1 tabular-nums text-[var(--muted-foreground)]">{count}</span></Badge>)}</div> : null}
-    <div className="overflow-hidden rounded-lg border border-[var(--border)]/70">
-      <div className="flex items-center justify-between border-b border-[var(--border)]/70 px-4 py-3"><h2 className="text-sm font-medium">자료 목록</h2><span className="text-xs tabular-nums text-[var(--muted-foreground)]">{rows.length}건</span></div>
-      {rows.length ? <div className="overflow-x-auto"><Table className="min-w-[880px] text-[13px]">
-        <TableHeader className="bg-[var(--muted)]/40"><TableRow><TableHead>제목</TableHead><TableHead>주제</TableHead><TableHead>작성자</TableHead><TableHead>자료일</TableHead><TableHead>형식</TableHead><TableHead className="text-right">크기</TableHead></TableRow></TableHeader>
-        <TableBody>{rows.map((item) => <TableRow key={item.id} tabIndex={0} className="cursor-pointer outline-none hover:bg-[var(--muted)]/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)]" onClick={() => onOpen(item)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onOpen(item) } }}>
-          <TableCell className="max-w-md"><div className="flex items-center gap-2">{item.kind === "folder" ? <Folder className="size-4 shrink-0 text-[var(--muted-foreground)]" aria-hidden="true" /> : null}<span className="font-medium">{titleOf(item)}</span>{item.needsReview ? <Badge variant="outline" className="shrink-0 border-[var(--warning)] text-[var(--warning)]">확인 필요</Badge> : null}</div><p className="mt-1 line-clamp-1 text-xs text-[var(--muted-foreground)]">{displaySummaryOf(item) || "요약이 아직 없습니다"}</p></TableCell>
-          <TableCell>{item.topic || UNASSIGNED_TOPIC}</TableCell><TableCell>{ownerDisplayName(item.owner ?? "") || "-"}</TableCell><TableCell className="whitespace-nowrap">{dateText(item.documentDate)}</TableCell><TableCell className="uppercase">{item.kind === "folder" ? "folder" : item.format}</TableCell><TableCell className="text-right tabular-nums">{item.kind === "folder" ? "-" : formatSize(item.sizeBytes)}</TableCell>
-        </TableRow>)}</TableBody>
-      </Table></div> : <p className="px-5 py-12 text-center text-sm text-[var(--muted-foreground)]">선택한 조건에 맞는 자료가 없습니다.</p>}
-    </div>
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">{folders.length ? folders.map((folder) => <FolderCard key={folder.name} accent={accent} folder={folder} onOpen={setOpenFolder} />) : <p className="px-5 py-12 text-center text-sm text-[var(--muted-foreground)]">선택한 조건에 맞는 자료가 없습니다.</p>}</div>
+    {searching ? <div className="overflow-hidden rounded-lg border border-[var(--border)]/70"><div className="flex items-center justify-between border-b border-[var(--border)]/70 px-4 py-3"><h2 className="text-sm font-medium">검색 결과 {rows.length}건</h2></div>{rows.length ? rows.map((item) => <ItemRow key={item.id} item={item} onOpen={onOpen} />) : <p className="px-5 py-12 text-center text-sm text-[var(--muted-foreground)]">선택한 조건에 맞는 자료가 없습니다.</p>}</div> : null}
+    <FolderDialog accent={accent} folder={openFolder} onOpenChange={(open) => { if (!open) setOpenFolder(null) }} />
   </div>
 }
 
@@ -184,7 +257,7 @@ export function TechnicalReferences() {
   const { items, loading, error } = useReferenceItems()
   const searched = useMemo(() => {
     const needle = normalize(query)
-    return items.filter((item) => !needle || normalize([titleOf(item), item.title, item.topic ?? "", displaySummaryOf(item), ...item.tags, item.owner ?? ""].join(" ")).includes(needle))
+    return items.filter((item) => !needle || normalize([titleOf(item), item.title, item.topic ?? "", item.folder ?? "", item.docType ?? "", displaySummaryOf(item), ...item.tags, item.owner ?? ""].join(" ")).includes(needle))
   }, [items, query])
   const now = new Date()
   const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
@@ -204,7 +277,7 @@ export function TechnicalReferences() {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[14px]"><span className="absolute inset-x-7 top-0 h-px bg-white/95" /><span className="absolute -right-16 -top-20 size-56 rounded-full bg-[var(--gradient-1)] opacity-[0.08] blur-3xl" /><span className="absolute -bottom-24 left-1/3 size-48 rounded-full bg-[var(--gradient-3)] opacity-[0.07] blur-3xl" /></div>
       <div className="relative flex flex-wrap items-start justify-between gap-5">
         <div className="flex min-w-0 items-start gap-3.5"><span className="flex size-9 shrink-0 items-center justify-center rounded-[11px] bg-gradient-to-br from-[var(--gradient-1)] to-[var(--gradient-3)] text-white shadow-[0_10px_22px_-10px_rgba(76,91,212,0.7)]"><BookOpenCheck className="size-5" aria-hidden="true" /></span><div><h1 className="text-lg font-semibold tracking-tight">Fabric references</h1><p className="text-xs text-[var(--muted-foreground)]">팀 자료 라이브러리</p></div></div>
-        <div className="relative w-full sm:w-80"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="제목, 요약, 주제로 검색" className="bg-white/48 pl-9 backdrop-blur" /></div>
+        <div className="relative w-full sm:w-80"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="제목, 요약, 폴더로 검색" className="bg-white/48 pl-9 backdrop-blur" /></div>
       </div>
       <MotionSection className="relative mt-3 grid items-stretch gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {[{ label: "전체 자료", value: items.length }, { label: "이번 달 신규", value: items.filter((item) => item.modifiedAt.startsWith(thisMonth)).length }, { label: "분류 확인 필요", value: items.filter((item) => item.needsReview).length }].map(({ label, value }) => <div key={label} className="rounded-[11px] border border-white/75 bg-white/48 px-3.5 py-2 shadow-[0_9px_22px_-20px_rgba(15,23,42,0.28)] backdrop-blur"><p className="text-[11px] font-medium text-[var(--muted-foreground)]">{label}</p><p className="mt-0.5 font-semibold"><AnimatedNumber value={value} suffix="건" locale /></p></div>)}
@@ -226,7 +299,7 @@ export function TechnicalReferences() {
         : error ? <p className="px-5 py-16 text-center text-sm text-[var(--destructive)]">{error}</p>
         : items.length === 0 ? <p className="px-5 py-16 text-center text-sm text-[var(--muted-foreground)]">아직 색인된 자료가 없습니다. Teams 자료 폴더 색인이 올라오면 여기 표시됩니다.</p>
         : active === "overview" ? <Overview items={activeItems} onSelect={selectTab} onOpen={setSelectedItem} />
-        : activeCategory ? <CategoryTab key={activeCategory.id} category={activeCategory} items={activeItems} onOpen={setSelectedItem} /> : null}
+        : activeCategory ? <CategoryTab key={activeCategory.id} category={activeCategory} items={activeItems} onOpen={setSelectedItem} searching={query.trim() !== ""} /> : null}
     </div>
     <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)]/70 px-1 pt-3 text-[11px] text-[var(--muted-foreground)]"><span>Teams 자료 폴더 색인 기준</span><span>전체 {items.length.toLocaleString("ko-KR")}건</span></footer>
     <ReferenceDialog item={selectedItem} onOpenChange={(open) => { if (!open) setSelectedItem(null) }} />

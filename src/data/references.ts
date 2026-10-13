@@ -6,19 +6,17 @@ import { db } from "./firebase"
 import { categoryOf, displaySummaryOf, formatSize, titleOf, type ReferenceItem } from "./reference-schema"
 import type { MaterialDetailRow, MaterialItem } from "./schema"
 
-const COLLECTION = "referenceItems"
-
 type ReferenceItemsState = {
   items: ReferenceItem[]
   loading: boolean
   error: string
 }
 
-function useReferenceSubscription(count?: number): ReferenceItemsState {
+function useReferenceSubscription(collectionName: string, count?: number, ownerOnly = false): ReferenceItemsState {
   const approval = useAuthStore((state) => state.approval)
   const isOwner = useAuthStore((state) => state.isOwner)
   const [state, setState] = useState<ReferenceItemsState>({ items: [], loading: false, error: "" })
-  const approved = isOwner || approval === "approved"
+  const approved = ownerOnly ? isOwner : isOwner || approval === "approved"
 
   useEffect(() => {
     if (!approved) {
@@ -28,8 +26,8 @@ function useReferenceSubscription(count?: number): ReferenceItemsState {
 
     setState((current) => ({ ...current, loading: true, error: "" }))
     const source = count === undefined
-      ? collection(db, COLLECTION)
-      : query(collection(db, COLLECTION), orderBy("modifiedAt", "desc"), limit(count))
+      ? collection(db, collectionName)
+      : query(collection(db, collectionName), orderBy("modifiedAt", "desc"), limit(count))
 
     return onSnapshot(source, (snapshot) => {
       const items = snapshot.docs.map((document) => {
@@ -39,17 +37,21 @@ function useReferenceSubscription(count?: number): ReferenceItemsState {
       })
       setState({ items, loading: false, error: "" })
     }, () => setState({ items: [], loading: false, error: "자료를 불러오지 못했습니다." }))
-  }, [approved, count])
+  }, [approved, collectionName, count])
 
   return state
 }
 
 export function useReferenceItems(): ReferenceItemsState {
-  return useReferenceSubscription()
+  return useReferenceSubscription("referenceItems")
 }
 
 export function useRecentReferences(count: number): ReferenceItemsState {
-  return useReferenceSubscription(count)
+  return useReferenceSubscription("referenceItems", count)
+}
+
+export function useBuyerProtocols(): ReferenceItemsState {
+  return useReferenceSubscription("buyerProtocols", undefined, true)
 }
 
 export function referenceToMaterial(item: ReferenceItem): MaterialItem {

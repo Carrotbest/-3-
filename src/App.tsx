@@ -25,6 +25,7 @@ import { Calendar } from "@/routes/Calendar"
 import { PlaceholderPage } from "@/routes/PlaceholderPage"
 import { Rdda } from "@/routes/Rdda"
 import { Setting } from "@/routes/Setting"
+import { BuyerProtocols } from "@/routes/BuyerProtocols"
 import { TechnicalReferences } from "@/routes/TechnicalReferences"
 import { TS } from "@/routes/TS"
 import { FabricAnalysis } from "@/routes/FabricAnalysis"
@@ -38,7 +39,7 @@ import { TrendMacro } from "@/routes/TrendMacro"
 import { ensureTsSeed, migrateLocalTsIntoSync, normalizeLoadedRecords, repairTsData, setAppState, useAppStore } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
-const IMPLEMENTED_ROUTES = new Set(["/", "/request", "/development", "/rdda", "/ts", "/study", "/fabric-analysis", "/cost", "/fabric/:key", "/warehouse", "/calendar", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
+const IMPLEMENTED_ROUTES = new Set(["/", "/request", "/development", "/rdda", "/ts", "/study", "/protocol", "/fabric-analysis", "/cost", "/fabric/:key", "/warehouse", "/calendar", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
 
 function ScreenAccessDenied() {
   return (
@@ -170,6 +171,7 @@ function AppLayout() {
             <Route path="/rdda" element={<Rdda />} />
             <Route path="/ts" element={<TS />} />
             <Route path="/study" element={<TechnicalReferences />} />
+            <Route path="/protocol" element={isOwnerRaw ? <BuyerProtocols /> : <ScreenAccessDenied />} />
             <Route path="/fabric-analysis" element={<FabricAnalysis />} />
             <Route path="/cost" element={<CostSheets />} />
             <Route path="/fabric/:key" element={<FabricDetail />} />

@@ -77,6 +77,21 @@ service cloud.firestore {
       allow create, update, delete: if isOwner();
     }
 
+    // 바이어 시험 프로토콜은 바이어 기밀 문서라 소유자만 읽는다. 직급 권한이 생기면 여기서 연다.
+    match /buyerProtocols/{docId} {
+      allow read, write: if isOwner();
+    }
+
+    // 바이어 시험 기준 매트릭스(취합본 엑셀 개정본). buyerProtocols와 같은 권한으로 묶는다.
+    match /protocolMatrix/{docId} {
+      allow read, write: if isOwner();
+    }
+
+    // 원문 매뉴얼에서 뽑은 변경 후보(검토 대기). 승인되면 protocolMatrix 새 버전이 된다.
+    match /protocolReview/{docId} {
+      allow read, write: if isOwner();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
