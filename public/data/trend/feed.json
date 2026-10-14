@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-10-13T02:40:06+00:00",
+"generated_at": "2026-10-14T00:01:32+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
-"filtered_out": 3332,
+"filtered_out": 3451,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 21,
-"scanned": 702,
-"kept": 297,
-"material": 217
+"scanned": 655,
+"kept": 274,
+"material": 206
 },
 "30": {
 "sources": 22,
-"scanned": 2665,
-"kept": 1020,
-"material": 744
+"scanned": 2755,
+"kept": 1054,
+"material": 773
 }
 }
 },
@@ -25,11 +25,11 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 482
+"n": 486
 },
 {
 "key": "RETAIL",
-"n": 395
+"n": 388
 },
 {
 "key": "FABRIC",
@@ -37,41 +37,41 @@
 },
 {
 "key": "ETC",
-"n": 213
+"n": 211
 },
 {
 "key": "CHEMICAL",
-"n": 116
+"n": 114
 },
 {
 "key": "YARN",
-"n": 51
+"n": 58
 }
 ],
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 432
+"n": 425
 },
 {
 "key": "Fibre2Fashion",
-"n": 247
+"n": 251
 },
 {
 "key": "Ecotextile News",
-"n": 117
+"n": 119
 },
 {
 "key": "Textile Focus",
-"n": 114
+"n": 116
 },
 {
 "key": "국제섬유신문",
-"n": 92
+"n": 90
 },
 {
 "key": "Textile Today",
-"n": 89
+"n": 87
 },
 {
 "key": "Innovation in Textiles",
@@ -79,43 +79,43 @@
 },
 {
 "key": "Textile World",
-"n": 55
+"n": 56
 },
 {
 "key": "Knitting Industry",
-"n": 49
+"n": 54
 },
 {
 "key": "주제검색 · 국내소재",
-"n": 46
+"n": 45
 },
 {
 "key": "주제검색 · 신소재",
-"n": 40
+"n": 37
 },
 {
 "key": "Indian Textile Magazine",
-"n": 35
-},
-{
-"key": "Apparel Insider",
-"n": 32
+"n": 36
 },
 {
 "key": "Apparel Resources",
 "n": 31
 },
 {
+"key": "Apparel Insider",
+"n": 31
+},
+{
 "key": "주제검색 · 염색가공",
-"n": 20
+"n": 19
+},
+{
+"key": "WWD",
+"n": 7
 },
 {
 "key": "Retail Dive",
 "n": 7
-},
-{
-"key": "WWD",
-"n": 6
 },
 {
 "key": "Textile Exchange",
@@ -128,12 +128,16 @@
 {
 "key": "Just Style",
 "n": 2
+},
+{
+"key": "EURATEX",
+"n": 1
 }
 ],
 "tags": [
 {
 "key": "방글라데시",
-"n": 111
+"n": 113
 },
 {
 "key": "리사이클",
@@ -141,38 +145,38 @@
 },
 {
 "key": "전시회",
-"n": 58
+"n": 60
 },
 {
 "key": "데님",
-"n": 52
+"n": 51
 },
 {
 "key": "울",
 "n": 27
 },
 {
-"key": "T2T",
+"key": "제직",
 "n": 25
 },
 {
 "key": "바이오소재",
-"n": 23
+"n": 25
 },
 {
-"key": "제직",
-"n": 23
+"key": "T2T",
+"n": 25
 },
 {
 "key": "탄소",
 "n": 22
 },
 {
-"key": "추적성",
-"n": 18
+"key": "스판덱스",
+"n": 20
 },
 {
-"key": "스판덱스",
+"key": "추적성",
 "n": 18
 },
 {
@@ -188,11 +192,11 @@
 "n": 14
 },
 {
-"key": "관세",
+"key": "부직포",
 "n": 13
 },
 {
-"key": "부직포",
+"key": "관세",
 "n": 13
 },
 {
@@ -204,15 +208,15 @@
 "n": 11
 },
 {
+"key": "플리스",
+"n": 10
+},
+{
 "key": "리오셀",
 "n": 10
 },
 {
 "key": "효성",
-"n": 9
-},
-{
-"key": "플리스",
 "n": 9
 },
 {
@@ -228,6 +232,10 @@
 "n": 8
 },
 {
+"key": "DPP",
+"n": 7
+},
+{
 "key": "인도네시아",
 "n": 7
 },
@@ -236,7 +244,7 @@
 "n": 7
 },
 {
-"key": "DPP",
+"key": "DWR",
 "n": 6
 },
 {
@@ -248,15 +256,11 @@
 "n": 6
 },
 {
-"key": "DWR",
+"key": "면가",
 "n": 5
 },
 {
 "key": "자카드",
-"n": 5
-},
-{
-"key": "오가닉코튼",
 "n": 5
 },
 {
@@ -276,11 +280,7 @@
 "n": 4
 },
 {
-"key": "OEKO-TEX",
-"n": 4
-},
-{
-"key": "면가",
+"key": "오가닉코튼",
 "n": 4
 },
 {
@@ -289,6 +289,10 @@
 },
 {
 "key": "DTY",
+"n": 4
+},
+{
+"key": "환편",
 "n": 4
 }
 ],
@@ -300,7 +304,7 @@
 },
 {
 "key": "target",
-"n": 7,
+"n": 5,
 "label": "Target"
 },
 {
@@ -336,18 +340,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-09-14",
-"total": 54,
-"by": {
-"RETAIL": 11,
-"CHEMICAL": 5,
-"YARN": 4,
-"MATERIAL": 13,
-"ETC": 10,
-"FABRIC": 11
-}
-},
 {
 "date": "2026-09-15",
 "total": 44,
@@ -511,12 +503,12 @@
 },
 {
 "date": "2026-09-29",
-"total": 43,
+"total": 44,
 "by": {
 "ETC": 9,
 "FABRIC": 7,
+"MATERIAL": 13,
 "RETAIL": 9,
-"MATERIAL": 12,
 "YARN": 2,
 "CHEMICAL": 4
 }
@@ -666,42 +658,49 @@
 },
 {
 "date": "2026-10-13",
-"total": 11,
+"total": 52,
 "by": {
-"MATERIAL": 1,
-"RETAIL": 8,
-"ETC": 1,
-"FABRIC": 1
+"ETC": 4,
+"MATERIAL": 12,
+"RETAIL": 14,
+"FABRIC": 13,
+"YARN": 7,
+"CHEMICAL": 2
 }
+},
+{
+"date": "2026-10-14",
+"total": 0,
+"by": {}
 }
 ],
 "momentum": [
 {
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 65,
-"prior": 37,
-"delta": 28,
+"recent": 66,
+"prior": 36,
+"delta": 30,
 "weeks": [
 0,
 0,
 0,
 0,
 0,
-4,
+3,
 28,
 12,
 16,
 13,
 26,
-3
+4
 ]
 },
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 64,
-"prior": 47,
+"recent": 65,
+"prior": 48,
 "delta": 17,
 "weeks": [
 0,
@@ -709,33 +708,75 @@
 0,
 0,
 0,
-13,
+12,
 23,
 20,
 15,
 14,
 24,
-2
+5
 ]
 },
 {
 "tag": "전시회",
 "label_en": "performance days",
-"recent": 34,
-"prior": 24,
-"delta": 10,
+"recent": 37,
+"prior": 23,
+"delta": 14,
 "weeks": [
 0,
 0,
 0,
 0,
 0,
-4,
+2,
 20,
 3,
 8,
 12,
 9,
+6
+]
+},
+{
+"tag": "바이오소재",
+"label_en": "bio-based",
+"recent": 19,
+"prior": 6,
+"delta": 13,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+5,
+1,
+0,
+6,
+4,
+5,
+4
+]
+},
+{
+"tag": "데님",
+"label_en": "denim",
+"recent": 30,
+"prior": 21,
+"delta": 9,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+5,
+12,
+6,
+5,
+13,
+8,
 2
 ]
 },
@@ -758,48 +799,6 @@
 6,
 7,
 0
-]
-},
-{
-"tag": "바이오소재",
-"label_en": "bio-based",
-"recent": 16,
-"prior": 7,
-"delta": 9,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-6,
-1,
-0,
-6,
-4,
-5,
-1
-]
-},
-{
-"tag": "데님",
-"label_en": "denim",
-"recent": 30,
-"prior": 22,
-"delta": 8,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-6,
-12,
-6,
-5,
-13,
-8,
-2
 ]
 },
 {
@@ -826,8 +825,8 @@
 {
 "tag": "스판덱스",
 "label_en": "spandex",
-"recent": 13,
-"prior": 5,
+"recent": 14,
+"prior": 6,
 "delta": 8,
 "weeks": [
 0,
@@ -841,6 +840,27 @@
 5,
 2,
 4,
+2
+]
+},
+{
+"tag": "모달",
+"label_en": "modal fiber",
+"recent": 0,
+"prior": 5,
+"delta": -5,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+3,
+2,
+0,
+0,
+0,
 0
 ]
 },
@@ -866,11 +886,11 @@
 ]
 },
 {
-"tag": "모달",
-"label_en": "modal fiber",
+"tag": "스트레치",
+"label_en": "stretch recovery",
 "recent": 1,
-"prior": 4,
-"delta": -3,
+"prior": 5,
+"delta": -4,
 "weeks": [
 0,
 0,
@@ -878,9 +898,9 @@
 0,
 0,
 0,
-3,
-2,
-0,
+4,
+1,
+1,
 0,
 0,
 0
@@ -900,27 +920,6 @@
 0,
 1,
 3,
-0,
-0,
-0,
-1,
-0
-]
-},
-{
-"tag": "오가닉코튼",
-"label_en": "organic cotton",
-"recent": 1,
-"prior": 4,
-"delta": -3,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-2,
-2,
 0,
 0,
 0,
@@ -949,16 +948,16 @@
 "first": "2026-09-22"
 },
 {
-"tag": "횡편",
-"label_en": "flat knit",
-"n": 3,
-"first": "2026-09-16"
-},
-{
 "tag": "BCI코튼",
 "label_en": "better cotton",
 "n": 2,
 "first": "2026-09-22"
+},
+{
+"tag": "냉감",
+"label_en": "cooling fabric",
+"n": 2,
+"first": "2026-10-01"
 },
 {
 "tag": "방오",
@@ -999,6 +998,71 @@
 ],
 "articles": [
 {
+"id": "fa9151444e1a3f20",
+"d": "2026-10-13",
+"t": "Wulcea, 겨울용 그래핀 가열 재킷 출시",
+"o": "Wulcea introduces graphene-heated jackets for winter wear",
+"u": "https://innovationintextiles.com/wulcea-introduces-graphene-heated-jackets-for-winter-wear/",
+"s": "Flexible graphene heating elements are at the centre of a new range of electrically heated jackets being introduced by New York-based apparel brand Wulcea, aimed at reducing the need for bulky winter clothing. The company’s proprietary GrapheneNano technology offers an alternative to conventional he",
+"c": "ETC",
+"x": "Flexible graphene heating elements are at the centre of a new range of electrically heated jackets being introduced by New York-based apparel brand Wulcea, aimed at reducing the need for bulky winter clothing. The company’s proprietary GrapheneNano technology offers an alternative to conventional heated garments, which typically use embedded electrical wires to generate warmth. These can restrict flexibility, create uneven heating and complicate garment care. Wulcea’s new range instead incorporates flexible graphene-based heating elements designed to distribute warmth across targeted areas of the body without compromising freedom of movement. The technology uses far-infrared heating, with three adjustable temperature settings allowing wearers to control the level of warmth according to conditions and activity. The jackets can begin generating heat within three seconds and provide up to ten hours of continuous heating on the lowest setting, using an 18,400mAh rechargeable battery pack. The heating system operates at 12V and incorporates intelligent thermal control, automatically interrupting heating if internal temperatures exceed 55°C. The new collection includes hardshell jackets for outdoor work and winter sports, softshell garments for everyday use and heated vests that can be worn beneath other outerwear. The men’s hardshell jacket incorporates six heating zones positioned around the neck, upper back, lower waist and front pockets. A women’s ski jacket also features six zones, with heating extended to the upper arms as well as the neck, back and pockets. Wulcea says the flexibility and durability of its graphene heating elements are intended to improve comfort and extend product life, although the company has not disclosed comparative performance data against conven",
+"i": "https://innovationintextiles.com/wp-content/uploads/2026/10/Wulcea.jpg",
+"g": [],
+"m": "Innovation in Textiles",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Innovation in Textiles"
+]
+},
+{
+"id": "f50204932d018566",
+"d": "2026-10-13",
+"t": "인도는 수출과 일자리를 늘리기 위해 FTA와 섬유를 활용해야 합니다: Goyal",
+"o": "India must leverage FTAs, textiles to boost exports & jobs: Goyal",
+"u": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxPWWpqVlFaT2VJVHZ4LWVEZ3ozQ1NieGl2Q0tSOUFzLXp3NkhGWFhQdWNoQ01sNTltc1BuQzE0SWZYdGs1eFpIUkZNT0hYOEplU3NOcUNXZWtRZGxmOUtTZ2xFRm56ZGJIcmJoM1FOcDdIanBGREdFd2VUbE55RVhQUWUwWF95VHJ3RUg0RnZHLU5NZm1aYWRGVXNETFhtSHl4dmdkMVpCOFFHRUp5cGlYNVBERGxHNmJxTVk4TThlU21JNFhQMHlqUEpld2V3eVZUOE5jZDIzdzYzdlgzdjc0MENndw?oc=5",
+"s": "India must leverage FTAs, textiles to boost exports & jobs: Goyal Fibre2Fashion",
+"c": "MATERIAL",
+"x": "India must leverage FTAs, textiles to boost exports & jobs: Goyal Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "f15c44049e90ece9",
+"d": "2026-10-13",
+"t": "재활용 면화의 상업적 규모 확보",
+"o": "Unlocking commercial scale for recycled cotton",
+"u": "https://knittingindustry.com/unlocking-commercial-scale-for-recycled-cotton/",
+"s": "Fashion for Good has launched the Cotton Reloop Matrix Project, a cross-industry initiative designed to accelerate the commercial adoption of recycled cotton by benchmarking yarn quality, recycled content and price against the requirements of fashion brands. The project brings together Fashion for G",
+"c": "MATERIAL",
+"x": "Fashion for Good has launched the Cotton Reloop Matrix Project, a cross-industry initiative designed to accelerate the commercial adoption of recycled cotton by benchmarking yarn quality, recycled content and price against the requirements of fashion brands. The project brings together Fashion for Good partners Arvind, Bestseller, C&A, Interloop, Reformation and Shahi, alongside textile testing specialist Uster. It aims to establish a shared, evidence-based understanding of where mechanically recycled cotton can be used commercially and how higher recycled content can be achieved without compromising product performance. Cotton accounts for approximately 19% of global fibre production but incorporating significant quantities of mechanically recycled cotton into new yarns remains challenging. During mechanical recycling, textile waste is shredded and reopened into fibres, shortening and weakening them. According to Fashion for Good, only 45–50% of the original material survives as usable fibre. The resulting shorter fibres limit the proportion of recycled cotton that can be incorporated into new yarns, with many commercial applications currently restricted to around 10% recycled content. Increasing this proportion can affect yarn strength, fabric durability and handle. Although recycling capacity is available, brands and manufacturers frequently work with fragmented testing data and differing quality specifications. Recycled cotton blends are also commonly assessed against standards developed for 100% virgin cotton, creating additional barriers to adoption. “Recycled cotton has been talked about as a scale-ready solution for years, but the industry has been working from fragmented data and siloed testing,” said Katrin Ley, Managing Director at Fashion for Good. “By plott",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/10/Fashion4Good-1024x681.png",
+"g": [
+"리사이클"
+],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 16,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry"
+]
+},
+{
 "id": "f0ae58892367b3dc",
 "d": "2026-10-13",
 "t": "Better Cotton Initiative는 재생 시스템을 채택합니다.",
@@ -1032,6 +1096,318 @@
 "c": "RETAIL",
 "x": "이탈리아 유아가구 브랜드 포빠페드레띠(Foppapedretti)가 디자인 하우스 피닌파리나(Pininfarina)와 협업한 하이체어 '스타일(Stile)'을 국내에 처음 출시했다.스타일은 이탈리아어로 '스타일'을 뜻하는 제품명으로, 포빠페드레띠의 가구 제작 기술과 피닌파리나의 디자인을 결합한 제품이다. 유아용 의자의 기능을 유지하면서 실내 인테리어와 조화를 이루는 가구 형태로 설계했다.디자인은 페라리 등 글로벌 브랜드와 협업해 온 이탈리아 디자인 하우스 피닌파리나가 맡았다. 간결한 실루엣과 유연한 곡선, 원목 고유의 질감을 조합해",
 "i": "http://www.ktnews.com/news/thumbnail/202610/149292_131833_4840_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "edf1d6923d8f6f5d",
+"d": "2026-10-13",
+"t": "투르키예의 8월 산업생산은 연간 1.9% 감소했다.",
+"o": "Turkiye's industrial production falls 1.9% annually in August",
+"u": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxPUFVsUzFaNzIzY0xLTFpNczhTa2R2MTNtWnhfNFJQeURXeGt0Wk1jVFpBTEVwUXI1Q244Q2lTNlRvRkJ5X202VU5MamxZTTRjZDdOTjRVT0QtM1NqWTVrZkQ4dFRSakRoSWp6N0pzVXJQRElabXR5bHBpRmFmOFZhelEtU05wWGg5cFdWbUw0d3dxSGN4bWY5X1REXzh1cVNzV2dBa19xWjNGMzV4WlkwcVBQVDRGaUpsUmpBUGFyalVQRE1OUUotLS1pRXROMy1adld4UHpoWUo2a2N0ZDNaeGFKQXRxVzA?oc=5",
+"s": "Turkiye's industrial production falls 1.9% annually in August Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Turkiye's industrial production falls 1.9% annually in August Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "e894757bd7699111",
+"d": "2026-10-13",
+"t": "혁신포럼에 Coolmax CloakFX 선정",
+"o": "Coolmax CloakFX selected for Innovation Forum",
+"u": "https://knittingindustry.com/coolmax-cloakfx-selected-for-innovation-forum/",
+"s": "The Lycra Company is highlighting its latest Coolmax CloakFX fibre technology at this week’s Performance Days in Munich (13-14 October), following its selection for the event’s Innovation Forum. The technology is one of just 16 innovations chosen for the curated showcase of new materials, technologi",
+"c": "FABRIC",
+"x": "The Lycra Company is highlighting its latest Coolmax CloakFX fibre technology at this week’s Performance Days in Munich (13-14 October), following its selection for the event’s Innovation Forum. The technology is one of just 16 innovations chosen for the curated showcase of new materials, technologies and developments. Coolmax CloakFX uses optical masking technology to diffuse light at fibre level, reducing the visibility of sweat marks while providing moisture-wicking and cooling performance. The fibre now contains 100% recycled polyester and is Global Recycled Standard (GRS) certified. “Visible sweat on apparel is a leading pain point for consumers across demographics, often forcing them to compromise between performance, comfort, and appearance,” said Tara Maurer-Mackay, Product Category Director, Branded Specialty Products, The Lycra Company. “Consumers want one fabric that does it all, and Coolmax CloakFX fibre is designed to help garments look drier while helping keep the wearer cool and dry.” The company is also presenting fabrics and garments incorporating renewable Lycra fibre, which contains 70% plant-based content and is designed to reduce the carbon footprint of apparel while maintaining the performance characteristics of conventional elastane. Among the featured developments is Set the Pace, a collaboration with Italian textile manufacturer Brugnoli and cycling apparel specialist PISSEI. The project combines Brugnoli’s patented Br4 technology and bio-based polyamide with renewable Lycra fibre to produce a technical stretch fabric containing up to 89% bio-based materials. PISSEI has used the fabric to develop a high-performance cycling kit. Another collaboration, From Waste to Motion, brings together The Lycra Company, Südwolle Group and UTO to demonstrate t",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/10/Cloak.jpg",
+"g": [
+"스판덱스",
+"전시회"
+],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 12,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry",
+"주제검색 · 신소재"
+]
+},
+{
+"id": "e86f6d55433d4ffd",
+"d": "2026-10-13",
+"t": "테이프 피치가 없어 수리 가능한 지퍼가 더 가벼움",
+"o": "No Tape pitches lighter repairable zippers",
+"u": "https://www.ecotextile.com/2026101366411/news/materials-production-news/no-tape-pitches-lighter-repairable-zippers/",
+"s": "The tapeless fastening system claims weight savings and individual-tooth repairs, although fabric compatibility and premium pricing remain constraints MUNICH — […] The post No Tape pitches lighter repairable zippers appeared first on Ecotextile News .",
+"c": "FABRIC",
+"x": "The tapeless fastening system claims weight savings and individual-tooth repairs, although fabric compatibility and premium pricing remain constraints MUNICH — […] The post No Tape pitches lighter repairable zippers appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/10/notape.png",
+"g": [],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "d87f386f32fedb17",
+"d": "2026-10-13",
+"t": "스토케, 뉴욕 현대미술관과 협업한 '트립트랩 MoMA 에디션' 출시",
+"o": "스토케, 뉴욕 현대미술관과 협업한 '트립트랩 MoMA 에디션' 출시",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149300",
+"s": "프리미엄 유아용품 브랜드 스토케(Stokke)가 뉴욕 현대미술관(The Museum of Modern Art, MoMA)과 협업한 한정판 '트립트랩 MoMA 에디션(Tripp Trapp MoMA Edition)'을 국내 출시했다.이번 협업은 50년 넘게 이어온 트립트랩의 디자인 철학에 MoMA의 현대적인 색채 감각을 결합한 프로젝트다. 기존 제품의 구조와 기능성을 유지하면서 컬러와 디테일에 변화를 줘 새로운 디자인을 구현했다.트립트랩은 1972년 노르웨이 디자이너 피터 옵스빅(Peter Opsvik)이 설계한 유아용 의자다. 아이의",
+"c": "RETAIL",
+"x": "프리미엄 유아용품 브랜드 스토케(Stokke)가 뉴욕 현대미술관(The Museum of Modern Art, MoMA)과 협업한 한정판 '트립트랩 MoMA 에디션(Tripp Trapp MoMA Edition)'을 국내 출시했다.이번 협업은 50년 넘게 이어온 트립트랩의 디자인 철학에 MoMA의 현대적인 색채 감각을 결합한 프로젝트다. 기존 제품의 구조와 기능성을 유지하면서 컬러와 디테일에 변화를 줘 새로운 디자인을 구현했다.트립트랩은 1972년 노르웨이 디자이너 피터 옵스빅(Peter Opsvik)이 설계한 유아용 의자다. 아이의",
+"i": "http://www.ktnews.com/news/thumbnail/202610/149300_131852_05_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "d7fd7ce6031b162c",
+"d": "2026-10-13",
+"t": "폴리에스터 생산자들은 Yarnproof 검증을 위해 단결합니다",
+"o": "Polyester producers unite behind Yarnproof verification",
+"u": "https://www.ecotextile.com/2026101366252/news/shows-events/polyester-producers-unite-behind-traceability-verification/",
+"s": "Eleven polyester yarn manufacturers unite behind a regional initiative using embedded tracers to strengthen supply chain transparency and origin verification […] The post Polyester producers unite behind Yarnproof verification appeared first on Ecotextile News .",
+"c": "YARN",
+"x": "Eleven polyester yarn manufacturers unite behind a regional initiative using embedded tracers to strengthen supply chain transparency and origin verification […] The post Polyester producers unite behind Yarnproof verification appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/10/Yarn.jpg",
+"g": [],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "d39d3ba8e99ceb75",
+"d": "2026-10-13",
+"t": "Cedro Têxtil의 원 인, 쓰리 아웃",
+"o": "One in, three out at Cedro Têxtil",
+"u": "https://innovationintextiles.com/one-in-three-out-at-cedro-textil/",
+"s": "Brazilian fabric manufacturer Cedro Têxtil has been able to decommission three older stenters following the installation of a new Brückner finishing line, while also reducing natural gas consumption by more than 20%. The investment forms part of an ongoing modernisation programme at the vertically i",
+"c": "CHEMICAL",
+"x": "Brazilian fabric manufacturer Cedro Têxtil has been able to decommission three older stenters following the installation of a new Brückner finishing line, while also reducing natural gas consumption by more than 20%. The investment forms part of an ongoing modernisation programme at the vertically integrated company, which produces more than 60 million linear metres of fabric annually and is one of South America’s largest suppliers of workwear textiles. The new Brückner line, commissioned just over a year ago, has enabled Cedro to substantially increase production speeds while improving energy efficiency and reducing maintenance requirements. It has also delivered improvements in the finishing of super-stretch fabrics, where uniform temperature distribution and precise process control are essential to achieving consistent dimensional stability. The resulting productivity gains have enabled Cedro to consolidate production previously handled by three older stenters onto the new line, reducing the number of machines required and associated operating costs. The investment followed several years of evaluating machinery suppliers from Europe and Asia, including visits to manufacturing facilities and reference customers worldwide. The Brückner stenter SFP-4 at Cedro Têxtil © Brueckner Cedro assessed the competing technologies on productivity, maintenance requirements, energy consumption, spare parts availability and the provision of technical support in Brazil. The company ultimately selected Brückner on the basis of its combination of production performance, energy efficiency and local service capabilities. Founded in 1872, Cedro is one of Brazil’s oldest industrial companies and employs more than 2,600 people. It generates annual revenues of approximately BRL 1.2 billion, wi",
+"i": "https://innovationintextiles.com/wp-content/uploads/2026/10/Bruck1.jpg",
+"g": [],
+"m": "Innovation in Textiles",
+"r": "해외",
+"v": 15,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Innovation in Textiles"
+]
+},
+{
+"id": "d018ce78d757101f",
+"d": "2026-10-13",
+"t": "Unifi, 방수 원사 기술 도입",
+"o": "Unifi introduces water-resistant yarn technology",
+"u": "https://knittingindustry.com/unifi-introduces-water-resistant-yarn-technology/",
+"s": "US yarn manufacturer Unifi is launching two new yarn technologies at Performance Days in Munich on 13-14 October, including a water-resistant yarn designed to eliminate conventional topical durable water-repellent (DWR) treatments. Resist2O Pro incorporates water resistance directly into the yarn, m",
+"c": "FABRIC",
+"x": "US yarn manufacturer Unifi is launching two new yarn technologies at Performance Days in Munich on 13-14 October, including a water-resistant yarn designed to eliminate conventional topical durable water-repellent (DWR) treatments. Resist2O Pro incorporates water resistance directly into the yarn, minimising water absorption without topical treatments or fluorinated chemistry. Compatible with different fabric formation methods, the technology could simplify textile production by eliminating a separate finishing stage. Unifi says Resist2O Pro is fluorine-free and PFOA-free, with PFOA levels below five parts per billion (ppb). Potential applications include apparel, footwear, furnishings and industrial textiles. The company’s second innovation, Cofira, combines the aesthetics and handle of spun yarns with the performance characteristics of filament yarns. It can be tailored using synthetic, blended and functional fibres to deliver different fabric properties and effects. Suitable for apparel, furnishings, equipment and accessories, Cofira can also incorporate Unifi’s existing technologies, including AMT moisture management, ChillSense cooling and ReFlexx stretch and recovery. Cofira is available globally in virgin and Repreve recycled polyester versions, including material produced using Unifi’s Repreve Takeback textile-to-textile recycling technology. Recycled versions can be traced using the company’s FiberPrint technology and are available with GRS and SCS recycled-content certification. “These new products bring multifunctional capabilities that help reduce complexities associated with high-performance products,” said Unifi CEO Eddie Ingle. Both innovations will be showcased at Performance Days in Munich at booth J18, followed by the Functional Fabric Fair in Portland",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/10/Uni.jpg",
+"g": [
+"DWR",
+"전시회"
+],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 15,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry"
+]
+},
+{
+"id": "c132516ab3f550e6",
+"d": "2026-10-13",
+"t": "2026-27년 전 세계 면화 생산량은 1억 1,795만 베일로 증가: WASDE",
+"o": "Global cotton output raised to 117.95 mn bales for 2026-27: WASDE",
+"u": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxOdC16d3FKeWkxQzJhd3l3NWJHVU4yRDFybXMtUWxwejFKZ1U4UlpaTm1acjloeHBIZVhhWlNicDRBYTZ0dnRBQWRYYTIyelpkLXdTMldKNW5jeXFmQjV6YkdfbkNaYXdaekctZ0p5ZlZ5S3M5RV9rZUh4NFk0cnRrNXAzZjJ0dU1yMEx5SGNmQ2FrdHpjRjRFbGtlQXRka2VYRlZ6d2FWR1pzdkdIdHpKYkF5a1FoN3VJNEVuRmlYTjc0N3BBZjJoRjlRZGFVTndhTUtQTmJSbjBoTDQ?oc=5",
+"s": "Global cotton output raised to 117.95 mn bales for 2026-27: WASDE Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Global cotton output raised to 117.95 mn bales for 2026-27: WASDE Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "bfa9d72f2ea1d491",
+"d": "2026-10-13",
+"t": "Cotlook A-Index 1.45% 상승: 아시아 면화 시장이 분기되는 이유는 무엇입니까?",
+"o": "Cotlook A-Index Gains 1.45 Per Cent: Why are Asian Cotton Markets Diverging?",
+"u": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxOV05hNDltbDBnYXk0MmxFSHBrZGVVLXdlel9vcnpqZTBTbkxpTWdyUXlyV1VjWUdQbF9XTFNibzZoSEk3enFuNUZYWmZ1SEdsMVZraEZfLWp1Tl8wMl9fd0dpQjEzdFFzcVhVampmd0tNOHE5S0k3am92dmtXZVlGUFJuZTJXM3phSHdTVGZUamZRc2RwVk4wSWtlV1F2MWVMUG1ZZTd5MEFkWEFwdGdhM0xYMC1JbC1aYVpvQVE1SGVZaHdtSXhjRlBwaGlUVnlheGJHa2FZVW10UQ?oc=5",
+"s": "Cotlook A-Index Gains 1.45 Per Cent: Why are Asian Cotton Markets Diverging? Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Cotlook A-Index Gains 1.45 Per Cent: Why are Asian Cotton Markets Diverging? Fibre2Fashion",
+"i": "",
+"g": [
+"면가"
+],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "b988e1a0179ac560",
+"d": "2026-10-13",
+"t": "FibreTrace® 물리적 검증은 이제 지역 생산업체가 YarnProof™를 출시함에 따라 북미 및 중미 전역에서 사용 가능",
+"o": "FibreTrace® Physical Verification Now Available Across North And Central America As Regional Producers Launch YarnProof™",
+"u": "https://www.textileworld.com/textile-world/fiber-world/2026/10/fibretrace-physical-verification-now-available-across-north-and-central-america-as-regional-producers-launch-yarnproof/",
+"s": "LONDON — October 13, 2026 — North and Central American polyester filament manufacturers today announced a collective initiative, launching YarnProof™ powered by FibreTrace® technology. YarnProof, powered by FibreTrace, enables physical verification of regional origin at any point across the value ch",
+"c": "MATERIAL",
+"x": "LONDON — October 13, 2026 — North and Central American polyester filament manufacturers today announced a collective initiative, launching YarnProof powered by FibreTrace® technology. YarnProof, powered by FibreTrace, enables physical verification of regional origin at any point across the value chain, giving brands, manufacturers, and regulators increased confidence in supply chain compliance. By embedding an invisible, persistent tracer directly into polyester filament yarn during extrusion, YarnProof-enabled materials carry a verifiable origin signature that stays in the material from production through the life of the product. The FibreTrace handheld scanner detects the tracer in real time, whether in yarn, fabric, or final product. Each scan by an authorized participant creates a verification event that connects the physical material with supporting production and sourcing records. Working alongside existing documentation, YarnProof facilitates a layer of physical proof of origin to strengthen trade integrity, protect compliant supply chains, and support regional manufacturing. For YarnProof, this capability creates an additional layer of assurance supporting the yarn-forward requirements of CAFTA-DR and USMCA. North and Central American polyester filament manufacturers have united to protect the integrity of manufacturing in region. These manufacturers are: Aquafil O’Mara, Inc. CS America, Inc. CS Central America, S.A. de C.V. Nan Ya Plastics Corporation America, Premiere Fibers, LLC Skytex México, S.A. de C.V. Tecnología Textil Avanzada S.A. Textufil S.A. de C.V. Unifi Manufacturing, Inc. United Textiles of America. “We commend the polyester filament yarn manufacturers across North and Central America for coming together to lead this,” said Danielle Statham, Foun",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2024/06/FibreTrace®-logo.png",
+"g": [],
+"m": "Textile World",
+"r": "해외",
+"v": 15,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "b46c73d4301f3561",
+"d": "2026-10-13",
+"t": "INDA, 부직포 및 가공 직물을 위한 최고의 글로벌 Event인 IDEA®27 등록 시작",
+"o": "INDA Opens Registration For IDEA®27, The Premier Global Event For Nonwovens And Engineered Fabrics",
+"u": "https://www.textileworld.com/textile-world/nonwovens-technical-textiles/2026/10/inda-opens-registration-for-idea27-the-premier-global-event-for-nonwovens-and-engineered-fabrics/",
+"s": "CARY, N.C. — October 13, 2026 — INDA, the Association of the Nonwoven Fabrics Industry, has opened registration for IDEA®27, the premier global event for the nonwovens and engineered fabrics industry, taking place March 23-25, 2027, at the Kansas City Convention Center in Kansas City, Missouri. Part",
+"c": "FABRIC",
+"x": "CARY, N.C. — October 13, 2026 — INDA, the Association of the Nonwoven Fabrics Industry, has opened registration for IDEA®27, the premier global event for the nonwovens and engineered fabrics industry, taking place March 23-25, 2027, at the Kansas City Convention Center in Kansas City, Missouri. Participants can register for IDEA27 at https://events.american-tradeshow.com/IDEA27. Expected to bring together more than 4,000 industry professionals and 400 exhibitors from across the nonwovens value chain, IDEA27 will provide three days of business development, sourcing, innovation and industry connection. Exhibitors will showcase the latest materials, technologies, equipment and solutions serving markets including hygiene, medical, filtration, automotive, geotextiles, building and construction, and home furnishings. “IDEA is where the global nonwovens industry comes together to discover what’s next, strengthen business relationships and turn new ideas into opportunities,” said Ben Muller, executive director of INDA. “IDEA27 will bring together the people, technologies and expertise that drive our industry forward, and we look forward to welcoming the global nonwovens community to Kansas City.” INDA Members Receive Show Floor Pass at No Charge INDA recognizes the economic pressures and market uncertainty our industry is facing and its impact on our members’ ability to convene and connect. To facilitate members building relationships, sourcing solutions, identifying new opportunities, and moving business forward, INDA Members can receive an IDEA®27 show floor pass at no charge in 2027. RISE® Technology Conference Joins IDEA27 For the first time since its inception, the RISE® Technology Conference will be held in conjunction with IDEA27, expanding the event’s technical content ",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/10/IDEA27-Registration-Open-PR-Graphic.png",
+"g": [
+"제직",
+"부직포"
+],
+"m": "Textile World",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "b1902f45639f5fd7",
+"d": "2026-10-13",
+"t": "Pontetorto, Performance Days Eco Award 수상",
+"o": "Pontetorto wins Performance Days Eco Award",
+"u": "https://knittingindustry.com/pontetorto-wins-performance-days-eco-award/",
+"s": "Italian warp knitted textiles manufacturer Pontetorto has won the Performance Days Eco Award for its innovative 6140/Biobased fleece fabric, developed using bio-based polyester fibres from Finnish company UPM. The award will be presented at Performance Days in Munich, Germany, on 13 and 14 October 2",
+"c": "FABRIC",
+"x": "Italian warp knitted textiles manufacturer Pontetorto has won the Performance Days Eco Award for its innovative 6140/Biobased fleece fabric, developed using bio-based polyester fibres from Finnish company UPM. The award will be presented at Performance Days in Munich, Germany, on 13 and 14 October 2026, recognising the company’s efforts to develop lower-impact textile solutions for the outdoor, sportswear and performance apparel sectors. Founded in 1952, Pontetorto has established a strong reputation for developing technical fleece fabrics and other innovative textiles. Its latest development replaces conventional fossil-based raw materials with wood-derived bio-PET, offering an alternative to traditional polyester while maintaining the performance, comfort and technical characteristics required for demanding applications. The 6140/Biobased microfleece incorporates innovative fibres produced using raw materials derived from residues generated by the wood industry, including small branches, leaves and sawmill by-products. These resources are converted into bio-based polyester feedstocks, helping to reduce dependence on fossil-based materials. According to Pontetorto, the resulting fabric offers a lower carbon footprint than conventional polyester while retaining the functional properties expected of high-performance fleece materials. The wood used in the production process is sourced from forests certified under FSC and PEFC schemes, supporting responsible forest management and traceability throughout the supply chain. Marco Toccafondi, general manager of Pontetorto, welcomed the recognition and emphasised the company’s long-term commitment to reducing the environmental impact of textile manufacturing. “We accept this award with pride and a sense of responsibility,” said",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/10/PONTETORTO-.jpg",
+"g": [
+"바이오소재",
+"경편",
+"플리스",
+"전시회"
+],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 18,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry",
+"주제검색 · 신소재"
+]
+},
+{
+"id": "af4e7a60033b6637",
+"d": "2026-10-13",
+"t": "Jiwarajka의 새로운 기술 섬유 개척: 원사에서 성능까지",
+"o": "Jiwarajka’s New Technical-Textile Frontier: From Yarn to Performance",
+"u": "https://www.indiantextilemagazine.in/jiwarajkas-new-technical-textile-frontier-from-yarn-to-performance/",
+"s": "By Jayshri Ramani With more than four decades of polyester expertise, Jiwarajka Textile Industries is moving beyond conventional yarn manufacturing into application-driven, high-performance yarn solutions for technical textiles The global… The post Jiwarajka’s New Technical-Textile Frontier: From Ya",
+"c": "FABRIC",
+"x": "By Jayshri Ramani With more than four decades of polyester expertise, Jiwarajka Textile Industries is moving beyond conventional yarn manufacturing into application-driven, high-performance yarn solutions for technical textiles The global textile industry is undergoing a fundamental shift from commodity products towards materials engineered for specific performance requirements. For Jiwarajka Textile Industries, this is opening a new avenue of growth—one that builds on its more than four decades of experience in polyester yarn manufacturing while taking the company deeper into technical textiles. Anish Jiwarajka, Director, Jiwarajka Textile Industries In an exclusive interaction with The Textile Magazine , Anish Jiwarajka, Director, Jiwarajka Textile Industries, explains the company’s evolving strategy, including its expansion into Industrial Drawn Yarn (IDY), Mother Yarn, Monofilament and other specialised yarns. At the heart of the strategy is a simple change in the customer’s question—from “What is the price of this yarn?” to “What can this yarn do?” From commodity yarn to performance materials Technical textiles are fundamentally different from conventional textiles because their primary purpose is functionality rather than aesthetics or fashion. Whether it is a seat belt designed for safety, a geotextile used to strengthen infrastructure or a medical textile requiring specific protective properties, performance is the defining criterion. This is creating opportunities across automotive, infrastructure, agriculture, healthcare, industrial manufacturing, safety and protection, sports and packaging. For Jiwarajka, the opportunity begins much earlier in the value chain—with the fibre and yarn from which the final technical product is made. The company’s objective is th",
+"i": "https://www.indiantextilemagazine.in/wp-content/uploads/2026/10/Jiwarajka-TM-1-scaled.jpg",
+"g": [],
+"m": "Indian Textile Magazine",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Indian Textile Magazine"
+]
+},
+{
+"id": "a3f6b422667da13a",
+"d": "2026-10-13",
+"t": "르베이지, 윤광조의 분청 미학을 옷에 담다",
+"o": "르베이지, 윤광조의 분청 미학을 옷에 담다",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149314",
+"s": "삼성물산 패션부문의 여성복 브랜드 ‘르베이지’가 도예가 윤광조와 협업해 분청사기의 조형미를 담은 컬렉션을 선보인다.",
+"c": "RETAIL",
+"x": "삼성물산 패션부문의 여성복 브랜드 ‘르베이지’가 도예가 윤광조와 협업해 분청사기의 조형미를 담은 컬렉션을 선보인다.",
+"i": "http://www.ktnews.com/news/thumbnail/202610/149314_131885_241_v150.jpg",
 "g": [],
 "m": "한국섬유신문",
 "r": "국내",
@@ -1086,6 +1462,27 @@
 ]
 },
 {
+"id": "8c6e511dd733b446",
+"d": "2026-10-13",
+"t": "섬유회로를 내장한 새로운 방사방식",
+"o": "New spinning method embeds fibre circuits",
+"u": "https://www.ecotextile.com/2026101366390/news/materials-production-news/new-spinning-method-embeds-fibre-circuits/",
+"s": "Researchers integrate electronic components into ‘robotic textiles’, offering a potential breakthrough in the development of smart clothing SHANGHAI — Researchers […] The post New spinning method embeds fibre circuits appeared first on Ecotextile News .",
+"c": "YARN",
+"x": "Researchers integrate electronic components into ‘robotic textiles’, offering a potential breakthrough in the development of smart clothing SHANGHAI — Researchers […] The post New spinning method embeds fibre circuits appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/10/Robotic-textiles.png",
+"g": [],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 17,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
 "id": "881299b3c29f8f6c",
 "d": "2026-10-13",
 "t": "브라운브레스, 현대백화점 판교점서 알파드라이브원 협업 팝업",
@@ -1101,6 +1498,30 @@
 "v": 7,
 "h": 1,
 "w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "841f3c6dbfffc0a0",
+"d": "2026-10-13",
+"t": "FITI시험연구원, 유럽 생분해 인증 시험기관 지정…글로벌 진출 지원",
+"o": "FITI시험연구원, 유럽 생분해 인증 시험기관 지정…글로벌 진출 지원",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149301",
+"s": "FITI시험연구원(원장 윤주경, 이하 FITI)이 유럽 글로벌 시험인증기관 TUV AUSTRIA로부터 생분해 인증 ‘OK biodegradable’ 공식 시험기관으로 지정받았다. 국내 친환경·생분해성 소재 및 제품 기업들이 해외 시험기관을 거치지 않고도 글로벌 친환경 인증에 필요한 시험평가를 받을 수 있는 길이 열린 것이다. 이번 지정은 산업통상부의 ‘친환경 바이오소재 핵심전략기술 확보 및 전주기 사업화 지원 기반 구축’ 과제의 주요 성과로, 국내 기업의 글로벌 인증 취득과 해외 시장 진출을 뒷받침할 시험평가 기반을 강화했다.187",
+"c": "MATERIAL",
+"x": "FITI시험연구원(원장 윤주경, 이하 FITI)이 유럽 글로벌 시험인증기관 TUV AUSTRIA로부터 생분해 인증 ‘OK biodegradable’ 공식 시험기관으로 지정받았다. 국내 친환경·생분해성 소재 및 제품 기업들이 해외 시험기관을 거치지 않고도 글로벌 친환경 인증에 필요한 시험평가를 받을 수 있는 길이 열린 것이다. 이번 지정은 산업통상부의 ‘친환경 바이오소재 핵심전략기술 확보 및 전주기 사업화 지원 기반 구축’ 과제의 주요 성과로, 국내 기업의 글로벌 인증 취득과 해외 시장 진출을 뒷받침할 시험평가 기반을 강화했다.187",
+"i": "http://www.ktnews.com/news/thumbnail/202610/149301_131855_254_v150.jpg",
+"g": [
+"바이오소재",
+"생분해"
+],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 9,
+"h": 1,
+"w": "material",
 "e": [],
 "ms": [
 "한국섬유신문"
@@ -1128,6 +1549,93 @@
 ]
 },
 {
+"id": "7cfc4014cc34da35",
+"d": "2026-10-13",
+"t": "골든웨일즈 신홍규 대표 “크리에이터 데이터로 소비자 니즈 찾는다”",
+"o": "골든웨일즈 신홍규 대표 “크리에이터 데이터로 소비자 니즈 찾는다”",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149309",
+"s": "콘텐츠와 크리에이터 비즈니스에서 출발한 골든웨일즈가 뷰티 브랜드 사업을 새로운 성장축으로 키운다. 2022년 창업한 골든웨일즈는 뷰티 크리에이터 사업을 기반으로 지난해 11월 스킨케어 브랜드 ‘디피노르(DIPINOR·deep+in+origin)’를 론칭했다.첫 번째로 선택한 시장은 화려한 기능성 화장품이 아닌 ‘속보습’이다. 수분이라는 큰 시장에 곧바로 뛰어들기보다 하나의 소비자 문제를 좁고 명확하게 정의하고 먼저 점유하겠다는 전략이다.연세대학교에서 산업공학을 전공하고 IT 스타트업에서 PO(Product Owner)로 일했다. 공",
+"c": "RETAIL",
+"x": "콘텐츠와 크리에이터 비즈니스에서 출발한 골든웨일즈가 뷰티 브랜드 사업을 새로운 성장축으로 키운다. 2022년 창업한 골든웨일즈는 뷰티 크리에이터 사업을 기반으로 지난해 11월 스킨케어 브랜드 ‘디피노르(DIPINOR·deep+in+origin)’를 론칭했다.첫 번째로 선택한 시장은 화려한 기능성 화장품이 아닌 ‘속보습’이다. 수분이라는 큰 시장에 곧바로 뛰어들기보다 하나의 소비자 문제를 좁고 명확하게 정의하고 먼저 점유하겠다는 전략이다.연세대학교에서 산업공학을 전공하고 IT 스타트업에서 PO(Product Owner)로 일했다. 공",
+"i": "http://www.ktnews.com/news/thumbnail/202610/149309_131872_281_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "770dbb1b062b06d1",
+"d": "2026-10-13",
+"t": "Lycra CloakFX를 사용하면 수분 흔적이 덜 눈에 띕니다",
+"o": "Moisture marks less visible with Lycra CloakFX",
+"u": "https://innovationintextiles.com/moisture-marks-less-visible-with-lycra-cloakfx/",
+"s": "A polyester fibre designed to make sweat marks less visible on clothing is among the technologies being highlighted by The Lycra Company at this week’s Performance Days in Munich (October 13-14). Coolmax CloakFX uses optical masking technology to diffuse light at the fibre level, reducing the visibl",
+"c": "MATERIAL",
+"x": "A polyester fibre designed to make sweat marks less visible on clothing is among the technologies being highlighted by The Lycra Company at this week’s Performance Days in Munich (October 13-14). Coolmax CloakFX uses optical masking technology to diffuse light at the fibre level, reducing the visible appearance of moisture on fabrics. Rather than simply managing perspiration, the technology aims to make garments look drier during exercise and everyday wear. The fibre, which is now made from 100% recycled polyester and is Global Recycled Standard (GRS) certified, is one of 16 products selected for the exhibition’s Innovation Forum. The technology addresses a familiar problem in sportswear, where sweat marks can remain highly visible even when fabrics are designed to transport moisture away from the skin. By incorporating the masking effect into the fibre itself, Lycra aims to reduce this visibility without compromising moisture management. Turkish textile manufacturer Ekoten will demonstrate how CloakFX can be incorporated into commercially developed fabrics and garments. Lycra will also present two collaborative projects exploring the use of bio-based and recycled materials in performance apparel. The first, Set the Pace, brings together Italian textile manufacturer Brugnoli and cycling apparel specialist Pissei in the development of a technical cycling kit containing up to 89% bio-based materials. The fabrics combine Brugnoli’s patented Br4 technology and bio-based polyamide with renewable Lycra elastane which contains 70% plant-based content. The project demonstrates how bio-based fibres can be combined in stretch fabrics designed to meet the demands of technical cycling apparel. A second collaboration, From Waste to Motion, involves Lycra, Südwolle Group and seamless",
+"i": "https://innovationintextiles.com/wp-content/uploads/2026/10/Cloak.jpg",
+"g": [
+"스판덱스",
+"전시회"
+],
+"m": "Innovation in Textiles",
+"r": "해외",
+"v": 18,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Innovation in Textiles"
+]
+},
+{
+"id": "71acf446235ef094",
+"d": "2026-10-13",
+"t": "디앤드퀘스천, 더현대 서울에 신규 매장 '더 서울' 오픈",
+"o": "디앤드퀘스천, 더현대 서울에 신규 매장 '더 서울' 오픈",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149302",
+"s": "더주하(대표 이정훈)가 전개하는 젠더리스 캐주얼 브랜드 디앤드퀘스천(THE END QUESTION)이 지난 12일 더현대 서울 지하 2층 WEST에 신규 매장 '디앤드퀘스천 더 서울(THE END QUESTION THE SEOUL)'을 오픈했다.신규 매장은 'Focus on Mass, Pause the Moment.'를 콘셉트로 채움과 비움의 균형을 강조했다. 남성과 여성으로 구분된 영역을 하나의 개방형 공간으로 통합해 젠더리스 정체성을 공간 설계에 반영했다.인테리어는 화이트와 세이지 그린을 중심으로 우드와 패브릭 소재를 활용해 볼",
+"c": "RETAIL",
+"x": "더주하(대표 이정훈)가 전개하는 젠더리스 캐주얼 브랜드 디앤드퀘스천(THE END QUESTION)이 지난 12일 더현대 서울 지하 2층 WEST에 신규 매장 '디앤드퀘스천 더 서울(THE END QUESTION THE SEOUL)'을 오픈했다.신규 매장은 'Focus on Mass, Pause the Moment.'를 콘셉트로 채움과 비움의 균형을 강조했다. 남성과 여성으로 구분된 영역을 하나의 개방형 공간으로 통합해 젠더리스 정체성을 공간 설계에 반영했다.인테리어는 화이트와 세이지 그린을 중심으로 우드와 패브릭 소재를 활용해 볼",
+"i": "http://www.ktnews.com/news/thumbnail/202610/149302_131856_434_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "64243dbff571a623",
+"d": "2026-10-13",
+"t": "마레몬떼, 정상판매·AI·유통 혁신 3박자…여성복 성장판 키운다",
+"o": "마레몬떼, 정상판매·AI·유통 혁신 3박자…여성복 성장판 키운다",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149311",
+"s": "엔에프엘(대표 지홍찬) 여성복 ‘마레몬떼’가 정상판매율 개선과 AI 기반 수요예측, 직영 컨셉스토어 확대를 축으로 사업 경쟁력 강화에 속도를 낸다. 2026년 전년 대비 15% 매출 성장과 전국 유통망 70개점 확보를 목표로 외형 성장과 판매 효율 개선을 동시에 추진해왔다. 특히 할인 중심의 판매 구조에서 벗어나 상품 가치와 고객 라이프스타일에 맞춘 스타일링 판매로 전환하면서 앞선 시즌 정상판매율이 이전 시즌 대비 약 5% 상승하는 성과를 거뒀다. 2027년에는 'THE MARE' 컨셉스토어를 중심으로 유통망의 질적 성장과 멀티브랜",
+"c": "RETAIL",
+"x": "엔에프엘(대표 지홍찬) 여성복 ‘마레몬떼’가 정상판매율 개선과 AI 기반 수요예측, 직영 컨셉스토어 확대를 축으로 사업 경쟁력 강화에 속도를 낸다. 2026년 전년 대비 15% 매출 성장과 전국 유통망 70개점 확보를 목표로 외형 성장과 판매 효율 개선을 동시에 추진해왔다. 특히 할인 중심의 판매 구조에서 벗어나 상품 가치와 고객 라이프스타일에 맞춘 스타일링 판매로 전환하면서 앞선 시즌 정상판매율이 이전 시즌 대비 약 5% 상승하는 성과를 거뒀다. 2027년에는 'THE MARE' 컨셉스토어를 중심으로 유통망의 질적 성장과 멀티브랜",
+"i": "http://www.ktnews.com/news/thumbnail/202610/149311_131875_5941_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
 "id": "624526e259710f46",
 "d": "2026-10-13",
 "t": "바이오던스, 캐비어 PDRN 제품군 크림으로 확대…올리브영 단독 공급",
@@ -1146,6 +1654,96 @@
 "e": [],
 "ms": [
 "한국섬유신문"
+]
+},
+{
+"id": "5fcdd41552dcef2f",
+"d": "2026-10-13",
+"t": "히어로 제품에서 히어로 포트폴리오로: 베스트셀러를 넘어선 변화",
+"o": "From Hero Product to Hero Portfolio: The Shift Beyond the Bestseller",
+"u": "https://apparelresources.com/business-news/retail/from-hero-product-to-hero-portfolio-the-shift-beyond-the-bestseller/",
+"s": "A hero product does exactly what it is supposed to do. It attracts customers and drives the bulk of sales. On average, just 15-20% of a brand’s SKUs account for nearly 70-80% of sales, making these products the backbone of merchandising, inventory planning and marketing. But while hero products cont",
+"c": "RETAIL",
+"x": "A hero product does exactly what it is supposed to do. It attracts customers and drives the bulk of sales. On average, just 15-20% of a brand’s SKUs account for nearly 70-80% of sales, making these products the backbone of merchandising, inventory planning and marketing. But while hero products continue to play a crucial role, […] The post From Hero Product to Hero Portfolio: The Shift Beyond the Bestseller appeared first on Apparel Resources .",
+"i": "https://apparelresources.com/wp-content/uploads/2026/10/From-Hero-Product-to-Hero-Portfolio-The-Shift-Beyond-the-Bestseller.jpg",
+"g": [],
+"m": "Apparel Resources",
+"r": "해외",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"Apparel Resources"
+]
+},
+{
+"id": "5f343250fdda4600",
+"d": "2026-10-13",
+"t": "그린수소의 새로운 미래를 뜨개질하고 엮는다",
+"o": "Knitting and weaving a new future for green hydrogen",
+"u": "https://innovationintextiles.com/knitting-and-weaving-a-new-future-for-green-hydrogen/",
+"s": "North Wales-based KnitMesh Technologies and German technical mesh specialist GKD are combining knitted and woven metallic structures in complete cell assemblies for hydrogen electrolysers, bringing two long-established textile technologies into the rapidly developing green hydrogen industry. The com",
+"c": "FABRIC",
+"x": "North Wales-based KnitMesh Technologies and German technical mesh specialist GKD are combining knitted and woven metallic structures in complete cell assemblies for hydrogen electrolysers, bringing two long-established textile technologies into the rapidly developing green hydrogen industry. The companies will jointly showcase their technologies at Hydrogen Technology World Expo in Hamburg from October 20-22, building on a strategic partnership first announced in March 2025. For KnitMesh, the development represents a significant new application for technology it has been developing since 1957. The Greenfield, Flintshire-based company is supplying knitted wire mesh as porous transport layers (PTLs), gas diffusion layers, electrodes and elastic elements for electrolysers used to produce hydrogen. The potential of the technology has been highlighted by research from the German Aerospace Center (DLR) Institute of Engineering Thermodynamics into the performance of porous transport layers in water electrolysis. In controlled single-cell testing, DLR compared a KnitMesh knitted-wire PTL with a standard configuration and recorded a 33% increase in current density. Cell voltage was also reduced indicating lower energy requirements under the test conditions. The knitted structure further provided more uniform compression across the active area and improved gas removal while retaining electrical and thermal conductivity and permeability. “The study from DLR supports what we have found in our own development work,” said KnitMesh Technologies engineering manager Craig Jones. “Knitted wire mesh provides a unique combination of flexibility, conductivity and permeability, which can deliver significant performance improvements in electrolysis.” The findings are significant because the p",
+"i": "https://innovationintextiles.com/wp-content/uploads/2026/10/GKD2.png",
+"g": [
+"제직"
+],
+"m": "Innovation in Textiles",
+"r": "해외",
+"v": 18,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Innovation in Textiles"
+]
+},
+{
+"id": "588cc42d908f118a",
+"d": "2026-10-13",
+"t": "Dutch AWARE™, 글로벌 시장에 소재 혁신을 가져오기 위해 중국 섬유 허브 Shengze와 계약 체결",
+"o": "Dutch AWARE™ signs agreement with Chinese textile hub Shengze to bring material innovation to global markets",
+"u": "https://textilefocus.com/dutch-aware-signs-agreement-with-chinese-textile-hub-shengze-to-bring-material-innovation-to-global-markets/",
+"s": "Government-backed traceability initiative launches as carbon-capture yarn from China is transformed into a jacket in Bangladesh with a Digital Product Passport for Europe. Dutch textile traceability company AWARE™ has signed a cooperation agreement with the Shengze Town People’s Government to develo",
+"c": "YARN",
+"x": "Government-backed traceability initiative launches as carbon-capture yarn from China is transformed into a jacket in Bangladesh with a Digital Product Passport for Europe. Dutch textile traceability company AWARE™ has signed a cooperation agreement with the Shengze Town People’s Government to develop international supply-chain traceability and help bring the region’s advanced synthetic textile innovations to global markets. The agreement was announced on 10 October during the opening of the 15th Jiangsu (Shengze) Textile Expo, which also celebrated the 40th anniversary of the China Eastern Silk Market. The collaboration will establish a large-scale pilot connecting textile producers through a neutral, cross-border data infrastructure. The initiative aims to make production origin, material composition and sustainability evidence accessible to international buyers, while allowing producers to retain control of their own data. As a first step, the partners will launch the first recycled polyester Digital Product Passport. Shengze is one of China’s most important textile manufacturing centres, home to major producers including Shenghong and Hengli. The China Eastern Silk Market generates approximately RMB 200 billion in annual trading activity. From carbon-capture yarn in China to a jacket for Europe The first practical example was presented during the event. Fuhua Weaving received Wujiang District’s first carbon-capture fabric material Digital Product Passport (mDPP) label, powered by STCP first-mile traceability and AWARE™, demonstrating how innovative materials can be connected to digital production evidence. The fabric was produced using carbon-capture yarn developed by Chinese textile group Shenghong. Fuhua subsequently sold the fabric to Turag in Bangladesh, where it",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/AWARE.jpeg",
+"g": [
+"DPP",
+"추적성",
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 16,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "57dfa0394c847996",
+"d": "2026-10-13",
+"t": "EURATEX는 Horizon Europe 2028-2034에서 더욱 강력한 섬유 파트너십을 요구합니다.",
+"o": "EURATEX calls for a stronger textile partnership in Horizon Europe 2028–2034",
+"u": "https://euratex.eu/news/horizon-europe-textile-partnership-2028-2034/",
+"s": "Brussels, 6 October 2026 – EURATEX has submitted its contribution to the European Commission’s public consultation on the future European Partnerships under Horizon Europe 2028–2034, calling for the continuation of a dedicated European research and innovation partnership for the textile and clothing",
+"c": "ETC",
+"x": "Brussels, 6 October 2026 – EURATEX has submitted its contribution to the European Commission’s public consultation on the future European Partnerships under Horizon Europe 2028–2034, calling for the continuation of a dedicated European research and innovation partnership for the textile and clothing industry. As the European Commission prepares the next EU research and innovation framework, the future of sector-specific partnerships is under discussion. EURATEX stresses that textiles must remain a strategic priority , ensuring that European companies, particularly SMEs, can access the research, technologies and funding needed to strengthen their competitiveness. The European textile and clothing industry generates €166 billion in annual turnover and employs 1.2 million people across approximately 194,000 companies. With 99.8% of businesses being SMEs, dedicated European cooperation is essential to translate research into practical industrial solutions. Keeping Textiles of the Future at the heart of European innovation EURATEX calls for the continuation and reinforcement of Textiles of the Future , the co-programmed European Partnership launched under Horizon Europe’s 2025–2027 Strategic Plan. The partnership connects companies, research organisations and technology providers to address common industrial challenges. It is expected to mobilise at least €60 million in its initial phase, with projects running until 2030. Discontinuing the partnership after 2027 would risk interrupting this momentum before its first projects have delivered their full results. EURATEX therefore advocates a reinforced partnership under Horizon Europe 2028–2034, working alongside broader European initiatives covering advanced materials, artificial intelligence, robotics, manufacturing and the b",
+"i": "https://euratex.eu/wp-content/uploads/European-Textile-Innovation-and-Circular-Futures-1024x576.png",
+"g": [],
+"m": "EURATEX",
+"r": "해외",
+"v": 9,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"EURATEX"
 ]
 },
 {
@@ -1191,6 +1789,50 @@
 ]
 },
 {
+"id": "4d21ea1f74b75b27",
+"d": "2026-10-13",
+"t": "Bangladesh 원사 마케팅 전문가 협회(BYMPA) 집행위원회 회의",
+"o": "Executive Committee Meeting of Bangladesh Yarn Marketing Professional Association (BYMPA)",
+"u": "https://textilefocus.com/executive-committee-meeting-of-bangladesh-yarn-marketing-professional-association-bympa/",
+"s": "Today, a meeting of the Executive Committee of the Bangladesh Yarn Marketing Professional Association (BYMPA) was held. The meeting was chaired by the Association’s President & Director of Jamuna Group, Engr. ABM Sirajul Islam, and conducted by the Association’s General Secretary & Executive Directo",
+"c": "YARN",
+"x": "Today, a meeting of the Executive Committee of the Bangladesh Yarn Marketing Professional Association (BYMPA) was held. The meeting was chaired by the Association’s President & Director of Jamuna Group, Engr. ABM Sirajul Islam, and conducted by the Association’s General Secretary & Executive Director of Getco Group, Md. Ruhul Amin Ashiq. Among others, the following distinguished members were present at the meeting: Engr. Md. Azhar Ali – Executive Member & COO of Salma Group, Md. Anwar Hossain – Executive Member & Director of Unitex Spinning, AKM Enayet Ullah Jewel – Vice President & GM of Youth Spinning, Md. Kazi Bazlur Rashid Kamal – Vice President & MD of Kazi Enterprise, Pankaj Kanti Sarkar – Vice President and CEO of PK Sourcing, Saiful Islam Sabuj – Organizing Secretary & GM of Jamuna Group, Md. Maksud Ritu – Vice President, Md. Zillur Rahman – Finance Secretary & GM of Ridisha Spinning, Md. Bashir Khan – Publicity Secretary & AGM of Salma Group, Engr. Sayeed Rimon – Executive Member & CEO, OSN Sourcing. During the meeting, important decisions were made regarding various key issues concerning the Association. The post Executive Committee Meeting of Bangladesh Yarn Marketing Professional Association (BYMPA) appeared first on Textile Focus .",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/BYMPA.jpeg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "4c1596faf51187d4",
+"d": "2026-10-13",
+"t": "Barmag는 반복성을 생산성의 핵심으로 삼습니다.",
+"o": "Barmag puts repeatability at the heart of productivity",
+"u": "https://innovationintextiles.com/barmag-puts-repeatability-at-the-heart-of-productivity/",
+"s": "Barmag’s new Wings POY 2.0 1920/16 winding concept increases the number of winding positions from 12 to 16, enabling polyester spinning plants to achieve up to 33% higher production density. For Georg Strausberg, however, the more important development is the automation needed to sustain this increa",
+"c": "YARN",
+"x": "Barmag’s new Wings POY 2.0 1920/16 winding concept increases the number of winding positions from 12 to 16, enabling polyester spinning plants to achieve up to 33% higher production density. For Georg Strausberg, however, the more important development is the automation needed to sustain this increased output without compromising process stability, yarn quality or operating efficiency. Speaking at the recent Dornbirn Global Fiber Congress, Strausberg emphasised that the objective of automation should not simply be to introduce additional functions, robots or more sophisticated machinery, but to eliminate the variability that can undermine production performance. “The real question is not how to achieve higher productivity once but how to achieve it every day,” he said. “This is where automation becomes decisive.” The distinction is particularly relevant to polyester filament production, where higher production density places additional demands on process control, yarn handling and operating personnel. “If higher productivity leads to more breaks, more waste, greater operator dependency, or less stable quality, it is not real progress,” Strausberg said. Redesigning the process First introduced to a selected audience at ITMA Asia + CITME 2025 in Singapore, POY 2.0 represents a redesign of Barmag’s production technology for partially oriented yarn, covering the entire process from spinning and filament cooling through to winding and digital monitoring. Rather than concentrating solely on increasing winding capacity, Barmag has modified several core components to improve their combined performance. The new generation of its DIO spin pack, for example, has a more compact design and improved polymer flow characteristics intended to produce more homogeneous filaments. It requi",
+"i": "https://innovationintextiles.com/wp-content/uploads/2026/10/Wings.jpg",
+"g": [],
+"m": "Innovation in Textiles",
+"r": "해외",
+"v": 18,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Innovation in Textiles"
+]
+},
+{
 "id": "442a5486c02e3859",
 "d": "2026-10-13",
 "t": "Argon Denims는 혁신과 지속 가능한 제조를 통해 데님 경쟁력을 주도합니다.",
@@ -1206,11 +1848,164 @@
 "m": "주제검색 · 염색가공",
 "r": "해외",
 "v": 10,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 염색가공",
+"Textile Today"
+]
+},
+{
+"id": "42244c476d137a64",
+"d": "2026-10-13",
+"t": "Polartec®, 차세대 Polartec Alpha™ 활성 단열재 출시",
+"o": "Polartec® Introduces The Next Generation Of Polartec Alpha™ Active Insulation",
+"u": "https://www.textileworld.com/textile-world/nonwovens-technical-textiles/2026/10/polartec-introduces-the-next-generation-of-polartec-alpha-active-insulation/",
+"s": "SPARTANBURG, S.C. — October 13, 2026 — Polartec®, a Milliken & Company brand and global supplier of innovative performance textiles, introduces the next generation of Polartec Alpha™ active insulation, featuring a new patent-pending construction engineered to deliver greater durability and design ve",
+"c": "ETC",
+"x": "SPARTANBURG, S.C. — October 13, 2026 — Polartec®, a Milliken & Company brand and global supplier of innovative performance textiles, introduces the next generation of Polartec Alpha active insulation, featuring a new patent-pending construction engineered to deliver greater durability and design versatility while preserving the breathability and dynamic thermoregulation that has made Alpha a benchmark for active insulation. Polartec Alpha was born from an unusually complex performance challenge: create insulation for highly active military users who move rapidly between periods of intense exertion and lower activity in cold environments. Traditional insulation could provide warmth, but often at the expense of breathability and moisture management as activity increased. Polartec Alpha approached the problem differently. Its open, highly breathable construction was engineered to balance insulation with airflow, helping manage excess heat and moisture as exertion and environmental conditions change. That combination helped establish Polartec Alpha within military and special operations communities around the world and ultimately helped create an entirely new category of active insulation. Over the following decade, the same performance principle moved into outdoor, endurance and lifestyle apparel. Polartec Alpha became known for its combination of lightweight warmth, exceptional breathability, fast drying, and packability – forever changing how designers approached insulation for people in motion. Now, Polartec is advancing the platform once again. At the center of the next generation is a patent-pending construction engineered to improve the structural integrity of the fabric while maintaining the open architecture fundamental to Polartec Alpha performance. The result is ",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/10/polartec-nex-gen-alpha-1.jpg",
+"g": [],
+"m": "Textile World",
+"r": "해외",
+"v": 14,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World",
+"주제검색 · 신소재"
+]
+},
+{
+"id": "3de53729b65cbadd",
+"d": "2026-10-13",
+"t": "기능성 직물 박람회 2026년 가을, 새로운 셀룰로오스 포럼을 통해 Bio-Based 혁신 조명",
+"o": "Functional Fabric Fair Fall 2026 Spotlights Bio-Based Innovation with New Cellulose Forum",
+"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxPeU1JMkhKNXBJQVVaV2RFSmpUUTdlRW13V3dIaE1NNWRHZFlWdlpJRmZMdXl6MGpvNC1sWEN2WFlWaVhZUUY1RGVZQkJyTFJueVFmWGFwanVkSjdZV0dUUzZDRGFaeF9MaGQ0Qi1SOHpiV3h0TWdEaWhvM2ZyX0RIZ1NhOGpaWnI0SU1vRWZ1LUNSMDZLWlFFU3pNQUtTTkRlbEQ0clc2YWhhS3BKdTlCZEdIbmFjYnZDMUQxRlFyU2tJSGI5ZlZHMzJlR1NSUGpM?oc=5",
+"s": "Functional Fabric Fair Fall 2026 Spotlights Bio-Based Innovation with New Cellulose Forum California Apparel News",
+"c": "FABRIC",
+"x": "Functional Fabric Fair Fall 2026 Spotlights Bio-Based Innovation with New Cellulose Forum California Apparel News",
+"i": "",
+"g": [
+"바이오소재"
+],
+"m": "주제검색 · 신소재",
+"r": "해외",
+"v": 13,
 "h": 1,
 "w": "material",
 "e": [],
 "ms": [
-"주제검색 · 염색가공"
+"주제검색 · 신소재"
+]
+},
+{
+"id": "3d45e5df3f52bf98",
+"d": "2026-10-13",
+"t": "그린피스, IKEA의 산림 조달에 도전하다",
+"o": "Greenpeace challenges IKEA forest sourcing",
+"u": "https://www.ecotextile.com/2026101366402/news/environment/greenpeace-challenges-ikea-forest-sourcing/",
+"s": "New reports question biodiversity protections across IKEA ’s supply chain, including sourcing of wood-based fibres for home textiles BUCHAREST — […] The post Greenpeace challenges IKEA forest sourcing appeared first on Ecotextile News .",
+"c": "MATERIAL",
+"x": "New reports question biodiversity protections across IKEA ’s supply chain, including sourcing of wood-based fibres for home textiles BUCHAREST — […] The post Greenpeace challenges IKEA forest sourcing appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/10/IKEA.jpg",
+"g": [],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "3589631f55a2cc58",
+"d": "2026-10-13",
+"t": "Eurojersey와 Petratex는 성능에 대한 새로운 접근 방식을 취합니다.",
+"o": "Eurojersey and Petratex take new approach to performance",
+"u": "https://knittingindustry.com/eurojersey-and-petratex-take-new-approach-to-performance/",
+"s": "Italian warp-knitted fabric specialist Eurojersey and Portuguese technical apparel manufacturer Petratex have joined forces to develop Optical Motion, a new performance wear project that integrates textile innovation, garment engineering and advanced manufacturing from the earliest stages of product",
+"c": "FABRIC",
+"x": "Italian warp-knitted fabric specialist Eurojersey and Portuguese technical apparel manufacturer Petratex have joined forces to develop Optical Motion, a new performance wear project that integrates textile innovation, garment engineering and advanced manufacturing from the earliest stages of product development. Using cycling as its starting point, the collaboration explores how fabrics, garment construction and technologies can be developed together to optimise aerodynamics, comfort, breathability and freedom of movement. The project, developed under the concept ‘Engineered Together’, combines Eurojersey’s expertise in technical warp-knitted fabrics with Petratex’s capabilities in garment design, engineering and production. Rather than treating fabric and garment development as separate processes, the partners have created an integrated approach in which material selection, construction and fit are developed simultaneously. Optical Motion incorporates different textile structures positioned according to the demands of the body and movement. Mesh fabrics enhance ventilation, structured surfaces are designed to improve aerodynamics, while high-density materials provide support and stability. The resulting garments are engineered to maintain comfort and performance over long distances. © Eurojersey The capsule also features a distinctive visual identity inspired by Op Art, using three-dimensional textures, contrasting surfaces and reflective elements to create a sense of movement and speed. These aesthetic features are developed alongside the technical characteristics of the garments rather than added during the final design stages. Eurojersey contributes more than 65 years of textile research and manufacturing experience, including advanced warp-knitting technologies and",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/10/OM_5-1024x571.png",
+"g": [],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 18,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry"
+]
+},
+{
+"id": "350752bdc568015d",
+"d": "2026-10-13",
+"t": "북미 및 중미 폴리에스터 필라멘트 원사 생산업체, 지역 무역 규정 준수 및 공급망 무결성 강화를 위해 Yarnproof™ 출시",
+"o": "North And Central American Polyester Filament Yarn Producers Launch Yarnproof™ To Strengthen Regional Trade Compliance And Supply Chain Integrity",
+"u": "https://www.textileworld.com/textile-world/fiber-world/2026/10/north-and-central-american-polyester-filament-yarn-producers-launch-yarnproof-to-strengthen-regional-trade-compliance-and-supply-chain-integrity/",
+"s": "GREENSBORO, N.C. — October 13, 2026 — Unifi, Inc., together with polyester filament yarn manufacturers across North and Central America, today announced the launch of YarnProof™, an industry-wide initiative designed to provide immediate, physical verification of polyester filament yarn origin throug",
+"c": "YARN",
+"x": "GREENSBORO, N.C. — October 13, 2026 — Unifi, Inc., together with polyester filament yarn manufacturers across North and Central America, today announced the launch of YarnProof , an industry-wide initiative designed to provide immediate, physical verification of polyester filament yarn origin throughout the supply chain. YarnProof, powered by FibreTrace® technology, embeds an invisible and permanent tracer into polyester filament yarn during extrusion. The tracer remains with the material throughout its lifecycle and can be immediately detected using a proprietary FibreTrace handheld scanner at designated points across the supply chain, including yarn, fabric, and finished goods. By linking physical verification to origin claims, YarnProof supports compliance with the yarn-forward requirements of the CAFTA-DR and USMCA trade agreements. Working alongside existing documentation and certification systems, YarnProof adds a layer of verifiable evidence that strengthens trade integrity, protects compliant supply chains, and supports regional manufacturing. “Supply chain integrity is a top priority for our brand,” said Nick Pence, Senior Director of Material Supply at Under Armour. “As we continue to rely on yarn manufacturers in the region to fulfill our brand’s strategic goals, we are encouraged by the proactive steps the industry is taking to enhance transparency and reliability throughout the supply chain, and to provide physical evidence to support sourcing history.” As concerns over non-compliant trade continue to grow, trade regulators like U.S. Customs and Border Protection have emphasized the importance of private-sector solutions that help strengthen supply chain traceability and support enforcement efforts. “Traditional methods of fraud detection, such as document ",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/10/yarnproof-logo-dark-fibretrace.png",
+"g": [],
+"m": "Textile World",
+"r": "해외",
+"v": 15,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "344c8437df96b08f",
+"d": "2026-10-13",
+"t": "뮌헨 패브릭 스타트(Munich Fabric Start), 디지털 도달 범위 확장",
+"o": "Munich Fabric Start expands digital reach",
+"u": "https://knittingindustry.com/munich-fabric-start-expands-digital-reach/",
+"s": "Munich Fabric Start is expanding its role beyond the traditional trade fair calendar with a year-round digital platform, new industry partnerships and a government-backed initiative supporting emerging German textile and fashion businesses. The organiser says its latest developments reflect a strate",
+"c": "FABRIC",
+"x": "Munich Fabric Start is expanding its role beyond the traditional trade fair calendar with a year-round digital platform, new industry partnerships and a government-backed initiative supporting emerging German textile and fashion businesses. The organiser says its latest developments reflect a strategy to strengthen international connections, encourage innovation and provide greater value to the global fashion and textile industry between its twice-yearly exhibitions in Munich. Central to the strategy is the launch of 365 Days Munich Fabric Start, a digital platform building on the organiser’s 30th anniversary campaign, 30 Years. 30 Stories. The initiative will provide year-round industry insights, emerging trends and perspectives through podcasts, editorial content, video and an expanded social media presence. The platform is designed to extend industry dialogue beyond the physical exhibitions, creating additional opportunities for knowledge exchange, networking and collaboration across the international textile supply chain. A further development is a partnership with Future Fashion Assembly, beginning with an industry webinar entitled What Comes Next for European Fashion Supply? on 28 October 2026. Bringing together brands, retailers, textile manufacturers and specialists in sourcing, technology and innovation, the webinar will examine practical solutions for improving the competitiveness of European fashion supply chains. Discussions will focus on the commercial benefits of artificial intelligence and digitalisation, preparations for Digital Product Passports, compliance with sustainability claims legislation and the implications of evolving EU regulations. The webinar will be curated by Sofia Strazzanti, Founder and CEO of Future Fashion Assembly, and moderated by M",
+"i": "https://knittingindustry.com/wp-content/uploads/2026/10/MFS.jpg",
+"g": [],
+"m": "Knitting Industry",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Knitting Industry"
+]
+},
+{
+"id": "2f9d390c26e7e107",
+"d": "2026-10-13",
+"t": "상암, 확장에서 실행으로 전환, 고수익 성장 목표",
+"o": "Sangam shifts from expansion to execution, targets high-yield growth",
+"u": "https://www.indiantextilemagazine.in/sangam-shifts-from-expansion-to-execution-targets-high-yield-growth/",
+"s": "₹344-crore spinning expansion completed, weaving capacity to rise to 65 million metres; company sharpens focus on asset utilisation, circularity, seamless garments and capital efficiency Sangam (India) Limited is entering a… The post Sangam shifts from expansion to execution, targets high-yield grow",
+"c": "FABRIC",
+"x": "₹344-crore spinning expansion completed, weaving capacity to rise to 65 million metres; company sharpens focus on asset utilisation, circularity, seamless garments and capital efficiency Sangam (India) Limited is entering a new phase of its growth journey. After several years of investment and capacity creation, the integrated textile manufacturer is now shifting its focus from project execution to operational excellence , with the objective of extracting higher returns from the assets already deployed. R. P. Soni, Chairman The company’s consolidated revenue from operations rose 13.22% to ₹3,234.53 crore in FY2025-26 , from ₹2,856.95 crore in the previous year. This performance comes as Sangam completes or advances a series of strategic investments spanning spinning, weaving, recycled polyester and downstream textile and apparel businesses. Chairman R. P. Soni describes the transition as more than a change in operational priorities. Having moved from a phase of adding capacity to one focused on making every spindle and loom contribute to the bottom line, Sangam is now seeking to build a self-sustaining model of high-yield growth. The strategy is centred on three broad priorities: improving utilisation of existing assets, increasing value addition and strengthening financial efficiency. Building scale across the textile value chain Sangam has developed an integrated textile platform extending from fibre and yarn manufacturing to weaving, processing, denim and garments. The company’s portfolio includes grey yarn, cotton blends, PV dyed yarn, denim, knitted fabrics, woven and processed fabrics and garments. Its manufacturing infrastructure includes six facilities covering the various stages of the textile value chain. The integration begins with recycled PET bottles being ",
+"i": "https://www.indiantextilemagazine.in/wp-content/uploads/2026/10/Sangam-2.jpg",
+"g": [
+"제직"
+],
+"m": "Indian Textile Magazine",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Indian Textile Magazine"
 ]
 },
 {
@@ -1232,6 +2027,114 @@
 "e": [],
 "ms": [
 "한국섬유신문"
+]
+},
+{
+"id": "1a7154ce3ac2c8f9",
+"d": "2026-10-13",
+"t": "원사 테스트: 개수, 꼬임, 강도, 신장률, 균일성 및 잔털성",
+"o": "Yarn Testing: Count, Twist, Strength, Elongation, Uniformity and Hairiness",
+"u": "https://news.google.com/rss/articles/CBMivwFBVV95cUxOREprVkdPaG1RZzhBSGRnR3p4cUlxZXU5azBsYTNJUVp6TDBhQmtRSUp2VDZLeW1aS3BCOHZWQ1JlbUcxSWJUMkU4UDhuVnBZejluNVI0WFZMS2dyWUJNcFhXcmMtSGN0Y3IxOWVvNXRMXzJsdjVBb0o0WmNHZGRkNnZQT2hmRWJTb24xZExZUmlEcmFaOWE5d28xYk5YM1kteWRWb1paYndkUGZyWGc4SVpzZV9VY2JDd0tUWFREd9IBywFBVV95cUxQcGtQSHRSSGJpTG9VWTJfSEtKNFhRYkU5VG9tengxODZ5bVUtQzNQQ3FfcDM2UWVaSWJjeEhITXVxR0xBdGhha3N5Qjh4eG5pUGpnc1BmUTdPZDNYdzB1UDdYWWJ2Zm1rVmUtbWNFRjZ4NU1HSnpxY0dVMkRCMzVETEZfMWxza3ZPTnNsTEZMOG1Ma08wM2E0Nzk2TGVuc3dBbHYwMlRfazR3bnBIRWJEd0xBbjVTS1loMHFCMUU3RVhHODVucFJxaVB6RQ?oc=5",
+"s": "Yarn Testing: Count, Twist, Strength, Elongation, Uniformity and Hairiness Fibre2Fashion",
+"c": "YARN",
+"x": "Yarn Testing: Count, Twist, Strength, Elongation, Uniformity and Hairiness Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "108b54d7af132818",
+"d": "2026-10-13",
+"t": "YarnProof는 폴리에스테르 원산지 주장에 물리적 증거를 추가합니다.",
+"o": "YarnProof Adds Physical Evidence to Polyester Origin Claims",
+"u": "https://wwd.com/sourcing-journal/sustainability/yarnproof-unifi-polyester-origin-traceability-1239345832/",
+"s": "Unifi and regional yarn producers are embedding FibreTrace markers to help substantiate sourcing claims under USMCA and CAFTA-DR.",
+"c": "MATERIAL",
+"x": "Unifi and regional yarn producers are embedding FibreTrace markers to help substantiate sourcing claims under USMCA and CAFTA-DR.",
+"i": "",
+"g": [],
+"m": "WWD",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"WWD"
+]
+},
+{
+"id": "0fda97cc01257304",
+"d": "2026-10-13",
+"t": "네덜란드 국제협력차관, TEAM 그룹 산하 4A Yarn Dyeing Ltd. 방문",
+"o": "Netherlands Vice-Minister for International Cooperation Visits 4A Yarn Dyeing Ltd. of TEAM Group",
+"u": "https://textilefocus.com/netherlands-vice-minister-for-international-cooperation-visits-4a-yarn-dyeing-ltd-of-team-group/",
+"s": "Discussions focus on Sustainability, clean energy, responsible sourcing and Bangladesh’s post-LDC transition Mr. Steven Collet, Vice-Minister for International Cooperation of the Kingdom of the Netherlands, and Ms. Wampie Libon, Ambassador for Sustainable Development, today visited 4A Yarn Dyeing Lt",
+"c": "CHEMICAL",
+"x": "Discussions focus on Sustainability, clean energy, responsible sourcing and Bangladesh’s post-LDC transition Mr. Steven Collet, Vice-Minister for International Cooperation of the Kingdom of the Netherlands, and Ms. Wampie Libon, Ambassador for Sustainable Development, today visited 4A Yarn Dyeing Ltd, the flagship outerwear manufacturing facility of TEAM Group. They were accompanied by H.E. Joris van Bommel, Ambassador of the Netherlands to Bangladesh. Mr. Helal Hussain, Country Director Swisscontact Bangladesh, Mr. Selim Reza Hasan, Country Manager, Solidaridad Network Bangladesh, Mr. Bablur Rahman, Country Manager Bangladesh, Fair Wear Foundation, Mr. Muyeed Hasan, Country Manager AWARE, Bangladesh. The delegation was welcomed by Ms. Afroza Shahin, Managing Director, TEAM, Mr. Abdullah Hil Nakib, Deputy Managing Director TEAM. and the senior management of 4A Yarn Dyeing Ltd.. During the factory tour, they saw the facility’s rooftop solar plant, rainwater harvesting system, fair price shop, childcare facility and production floor. 4A Yarn Dyeing is LEED Platinum certified and was the first outerwear manufacturer to sign the UN Fashion Industry Charter for Climate Action. After the factory tour they saw a presentation on the TEAM Group’s sustainability strategy and practices and engaged into a strategic discussion. In a strategic discussion after the tour, the two sides exchanged views on: Bangladesh’s graduation from Least Developed Country status and the proposed Bangladesh–EU Free Trade Agreement Decarbonization strategies Traceability and digital product passport (DPP) Upcoming EU regulations and preparedness opportunities for partnership with Dutch brands development cooperation in clean energy, traceability, circularity and workforce development “The Netherlands h",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/AB_06124-copy.jpg.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 17,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "0fbceef11d4d7aac",
+"d": "2026-10-13",
+"t": "OSHIMA: 패브릭 인텔리전스를 보다 스마트한 제조로 전환",
+"o": "OSHIMA: Turning Fabric Intelligence into Smarter Manufacturing",
+"u": "https://www.indiantextilemagazine.in/oshima-turning-fabric-intelligence-into-smarter-manufacturing/",
+"s": "As the textile and apparel industries look beyond standalone automation, Taiwan-based OSHIMA is building closer connections between fabric inspection, production planning and cutting-room operations. In an exclusive interview at TITAS… The post OSHIMA: Turning Fabric Intelligence into Smarter Manufa",
+"c": "FABRIC",
+"x": "As the textile and apparel industries look beyond standalone automation, Taiwan-based OSHIMA is building closer connections between fabric inspection, production planning and cutting-room operations. In an exclusive interview at TITAS 2026, CEO Mr. Florian Finke discusses the company’s expanding technological capabilities, opportunities in technical textiles and its growing ambitions for the Indian market. BY Nithin Kumar H A fabric defect identified during inspection can still become an expensive production problem if the information never reaches the cutting room. The fabric may be inspected, graded and approved for production, yet the precise location of an imperfection can remain disconnected from the marker and spreading plan. By the time it is discovered on a cut component, the opportunity to address it efficiently may already have passed. Mr. Florian Finke , CEO For Mr. Florian Finke, CEO of OSHIMA, this gap between inspection and production represents an important opportunity for the next generation of textile and garment machinery. His vision is not simply to make individual machines faster or more automated, but to enable them to exchange information that manufacturers can use to improve their operations. Speaking to The Textile Magazine at TITAS 2026 in Taipei, Mr. Finke outlined how OSHIMA is bringing together its expertise in garment machinery, artificial intelligence and software development to create a more connected manufacturing environment. Founded in Taiwan in 1971, OSHIMA has built its business around equipment for fabric preparation, inspection, spreading, cutting, fusing and garment quality control. Over recent years, the company has expanded its focus to include AI-assisted inspection, digital production monitoring and the integration of manufactu",
+"i": "https://www.indiantextilemagazine.in/wp-content/uploads/2026/10/Oshima-1-scaled.jpg",
+"g": [],
+"m": "Indian Textile Magazine",
+"r": "해외",
+"v": 7,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Indian Textile Magazine",
+"주제검색 · 신소재"
+]
+},
+{
+"id": "05b2231f3f595a00",
+"d": "2026-10-13",
+"t": "ICE 면화 선물, 농작물 우려 속에 상승세 확대",
+"o": "ICE cotton futures extend gains amid crop concerns",
+"u": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxONGFmd3h0Rmg3RkRrbUdsSzBwOXRPMmJ5MERoN1ZOcjQyWW9PLWdxdWwwbFJnQ1pNQ3d6aU5PcUltVVpELTZkY1hNOXdvWl83b3F4emdodmM4LXFkLU14SWtsblVqWWQxWG03VDlnZGpXakZCWEdPSnh5Q2QtSTdfME5xRXh2SUU0Vm53dzQ3M0V4OXRONWk3dGRJT3JsdjVzV0R6VUNCUktuQTlmOVlyNjViZkpvbFFxQ2Z3RFBzaWl3QmViSDYyTg?oc=5",
+"s": "ICE cotton futures extend gains amid crop concerns Fibre2Fashion",
+"c": "MATERIAL",
+"x": "ICE cotton futures extend gains amid crop concerns Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -1891,11 +2794,12 @@
 "m": "Textile Focus",
 "r": "해외",
 "v": 11,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Textile Focus"
+"Textile Focus",
+"Indian Textile Magazine"
 ]
 },
 {
@@ -7375,11 +8279,12 @@
 "m": "Textile Today",
 "r": "해외",
 "v": 11,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Textile Today"
+"Textile Today",
+"주제검색 · 염색가공"
 ]
 },
 {
@@ -8913,11 +9818,12 @@
 "m": "Ecotextile News",
 "r": "해외",
 "v": 8,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Ecotextile News"
+"Ecotextile News",
+"주제검색 · 염색가공"
 ]
 },
 {
@@ -11240,6 +12146,27 @@
 "e": [],
 "ms": [
 "Knitting Industry"
+]
+},
+{
+"id": "edfff3b6da11d2e9",
+"d": "2026-09-29",
+"t": "[BITE 2016] 불에타지 않는 섬유로 시선집중, 소재전문기업 '우양신소재'",
+"o": "[BITE 2016] 불에타지 않는 섬유로 시선집중, 소재전문기업 '우양신소재'",
+"u": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFB2SjV5Y29YaU1uWHdhcGgzUW1USHVueDJjZkk5OTVFeElkd1NiRjlLbWZZR25KZDJqbFNLQjRlNWRmYkp3QU55dUJmRjVRNUtrclV2RGR2aFF5aDNIQ2pmWW9CUHlFMzDSAWtBVV95cUxQam45ZzJ5NEhoLU9pSTBXdERwU2RJbTBCR0JQMVZITW0yb2x2aWFNZVBSM0x3V3pBM2lmWkVyYlpFZnZwbFdFV2NFWDczZGtrM1E3eno4NUxsQzRvaGEtMm10Vi1qZWZ2OHI3NA?oc=5",
+"s": "[BITE 2016] 불에타지 않는 섬유로 시선집중, 소재전문기업 '우양신소재' 에이빙",
+"c": "MATERIAL",
+"x": "[BITE 2016] 불에타지 않는 섬유로 시선집중, 소재전문기업 '우양신소재' 에이빙",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
 ]
 },
 {
@@ -24550,6 +25477,27 @@
 ]
 },
 {
+"id": "f1ce35079955f2bf",
+"d": "2026-09-10",
+"t": "| 수요가 조심스러워 북인도 면사는 안정적",
+"o": "| North India cotton yarn stable as demand stays cautious",
+"u": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQbVFCMjJpRFQyR2lEUW9kMmtJVl9pWGkzY25lZnJKWVI4Q25GcUxhdzdoRWdySy1JNGtxY1gyeHlMUFNEMVVMX3drTEJqS3REdlpuTVlSWi1WcTg0SnZtSDlJOWVydXlaTkVXVWRNVENBaE5kUUp4WUlkaG5QLXREMXdveU9TWDlTRXA0a0FRU2VBNUhVY2pvMDU2c1ZkZXB3QUlKWGtqVllEY2I2UDM1VkswTTZ2RTEyZmEwUzJfOEs1eTgtUnJ4VUhsQzFUWXFpQkpIbTItVQ?oc=5",
+"s": "| North India cotton yarn stable as demand stays cautious Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| North India cotton yarn stable as demand stays cautious Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
 "id": "eb884baf18f2fe89",
 "d": "2026-09-10",
 "t": "쉬폰 원단 공급 업체",
@@ -33005,937 +33953,6 @@
 "e": [],
 "ms": [
 "Ecotextile News"
-]
-},
-{
-"id": "44850525a10962f3",
-"d": "2026-09-02",
-"t": "포이닉스, ‘패션·뷰티판 실리콘투’ 실행 돌입…한·중 유통망 잇는다",
-"o": "포이닉스, ‘패션·뷰티판 실리콘투’ 실행 돌입…한·중 유통망 잇는다",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148168",
-"s": "'제너럴아이디어'를 전개하는 포이닉스(대표 최범석)가 ‘패션·뷰티판 실리콘투’를 향한 중국 유통 사업을 본격적으로 구체화한다. 자체 브랜드의 중국 진출을 넘어 국내 K뷰티 브랜드를 확보하고 중국 현지 대형 라이브커머스 기업과 손잡으면서 한·중을 연결하는 유통 플랫폼 구축에 속도를 내고 있다.포이닉스는 최근 폰드그룹과 중국 시장 유통 및 사업 협력을 위한 업무협약(MOU)을 체결한 데 이어 중국 라이브커머스 기업 보관뤼스(Borgrise)와도 전략적 파트너십을 맺었다. 앞서 포이닉스가 밝힌 K패션·K뷰티의 생산·브랜딩·유통·해외 진출",
-"c": "RETAIL",
-"x": "'제너럴아이디어'를 전개하는 포이닉스(대표 최범석)가 ‘패션·뷰티판 실리콘투’를 향한 중국 유통 사업을 본격적으로 구체화한다. 자체 브랜드의 중국 진출을 넘어 국내 K뷰티 브랜드를 확보하고 중국 현지 대형 라이브커머스 기업과 손잡으면서 한·중을 연결하는 유통 플랫폼 구축에 속도를 내고 있다.포이닉스는 최근 폰드그룹과 중국 시장 유통 및 사업 협력을 위한 업무협약(MOU)을 체결한 데 이어 중국 라이브커머스 기업 보관뤼스(Borgrise)와도 전략적 파트너십을 맺었다. 앞서 포이닉스가 밝힌 K패션·K뷰티의 생산·브랜딩·유통·해외 진출",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148168_129569_2544_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "42a3b7ddf9191bcf",
-"d": "2026-09-02",
-"t": "Print Tech Bangladesh 2026에서는 섬유 인쇄 및 인쇄 기술 솔루션을 조명합니다.",
-"o": "Print Tech Bangladesh 2026 to spotlight textile printing and print technology solutions",
-"u": "https://textiletoday.com.bd/print-tech-bangladesh-2026-to-spotlight-textile-printing-and-print-technology-solutions",
-"s": "The 10th Print Tech Bangladesh will bring printing technology suppliers, manufacturers and industry buyers together in Dhaka from September 24–26, 2026. The three-day trade show will take place at the...",
-"c": "CHEMICAL",
-"x": "The 10th Print Tech Bangladesh will bring printing technology suppliers, manufacturers and industry buyers together in Dhaka from September 24–26, 2026. The three-day trade show will take place at the International Convention City Bashundhara (ICCB). The event will showcase technologies and solutions for textile and garment printing, digital printing, screen printing and sublimation printing. It will also cover pre-press, print finishing, postpress, inks, consumables, software, labels and paper converting. The exhibition comes as Bangladesh’s textile and apparel industry looks to improve product value, flexibility and production efficiency. New printing technologies can help manufacturers meet demand for customized designs, shorter production runs and faster turnaround. Visitors will include textile and garment manufacturers, exporters, factory owners, purchase managers, production professionals, R&D teams, quality controllers, brand managers, label printers and packaging professionals. Print Tech Bangladesh has previously been held in 2023, 2024 and 2025. The 2026 edition will mark its 10th edition, bringing a wider range of printing and related technologies under one platform. With printing playing a growing role in apparel value addition and product differentiation, the exhibition is expected to offer Bangladesh’s manufacturers a platform to assess technologies that can support the next stage of industry growth.",
-"i": "/storage/uploads/2026/9/printtechbanglades_17883241026985.jpg",
-"g": [
-"방글라데시"
-],
-"m": "Textile Today",
-"r": "해외",
-"v": 8,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Today"
-]
-},
-{
-"id": "41bc4987d23fe89c",
-"d": "2026-09-02",
-"t": "CAMX 2026 어워드 최종 후보에 오른 Unimat",
-"o": "Unimat shortlisted for CAMX 2026 award",
-"u": "https://innovationintextiles.com/unimat-shortlisted-for-camx-2026-award/",
-"s": "Unimat, manufactured by James Cropper Advanced Materials, has been shortlisted for the CAMX 2026 Unsurpassed Innovation Award, recognising breakthrough technologies that advance the composites and advanced materials industry. CAMX 2026 – the Composites and Advanced Materials Expo – will take place f",
-"c": "ETC",
-"x": "Unimat, manufactured by James Cropper Advanced Materials, has been shortlisted for the CAMX 2026 Unsurpassed Innovation Award, recognising breakthrough technologies that advance the composites and advanced materials industry. CAMX 2026 – the Composites and Advanced Materials Expo – will take place from September 21-24, at the Georgia World Congress Centre in Atlanta, Georgia. Developed using Vectis, James Cropper’s proprietary fibre alignment technology, Unimat is a highly aligned discontinuous carbon fibre material engineered from recycled and production-induced waste carbon fibre feedstocks. It was developed through a strategic collaboration between James Cropper Advanced Materials and Carbon Fiber Recycling (CFR) in the UK, creating a scalable pathway for transforming carbon fibre waste into high-value composite reinforcement. The nomination highlights a significant industry achievement, demonstrating that recycled carbon fibre can deliver the performance, consistency and manufacturing readiness required for demanding composite applications, without sacrificing sustainability goals. Working alongside industry partners committed to improving sustainability within aerospace, Carbon Fiber Recycling applies its proprietary recovery and refinement technologies to transform carbon fibre waste into a high-quality feedstock. James Cropper subsequently uses Vectis technology to create up to 95% alignment in Unimat. “Through our collaboration with CFR, we have shown that recycled carbon fibre can be transformed into an industrially scalable material suitable for some of the most demanding composite applications,” said Lauren Wolstencroft, head of marketing at James Cropper. Unimat is compatible with multiple composite manufacturing routes, including resin transfer moulding (RT",
-"i": "https://innovationintextiles.com/wp-content/uploads/2026/09/Unimat.jpg",
-"g": [],
-"m": "Innovation in Textiles",
-"r": "해외",
-"v": 12,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Innovation in Textiles"
-]
-},
-{
-"id": "35f84222ecfde499",
-"d": "2026-09-02",
-"t": "올리비아로렌, 5년 연속 ‘올해의 브랜드 대상’",
-"o": "올리비아로렌, 5년 연속 ‘올해의 브랜드 대상’",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148159",
-"s": "패션&라이프스타일 기업 OVLR(오뷔엘알, 대표 박이라)의 여성복 브랜드 올리비아로렌이 한국소비자포럼이 주최하는 ‘2026 올해의 브랜드 대상’ 여성복 부문 1위에 오르며 5년 연속 수상했다.‘올해의 브랜드 대상’은 매년 소비자 투표를 통해 한 해를 빛낸 브랜드를 선정하는 시상식이다. 올해는 약 77만명이 투표에 참여해 부문별 수상 브랜드를 선정했다.올리비아로렌은 5년 연속 여성복 부문 1위를 차지했다. 회사 측은 고객 니즈를 반영한 제품 다각화와 온·오프라인 채널 간 시너지 강화, 트렌드를 반영한 마케팅과 고객 소통 등을 주요 배",
-"c": "RETAIL",
-"x": "패션&라이프스타일 기업 OVLR(오뷔엘알, 대표 박이라)의 여성복 브랜드 올리비아로렌이 한국소비자포럼이 주최하는 ‘2026 올해의 브랜드 대상’ 여성복 부문 1위에 오르며 5년 연속 수상했다.‘올해의 브랜드 대상’은 매년 소비자 투표를 통해 한 해를 빛낸 브랜드를 선정하는 시상식이다. 올해는 약 77만명이 투표에 참여해 부문별 수상 브랜드를 선정했다.올리비아로렌은 5년 연속 여성복 부문 1위를 차지했다. 회사 측은 고객 니즈를 반영한 제품 다각화와 온·오프라인 채널 간 시너지 강화, 트렌드를 반영한 마케팅과 고객 소통 등을 주요 배",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148159_129546_3455_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "3174c4c25aa35460",
-"d": "2026-09-02",
-"t": "Resil Chemicals: 미래의 직물을 위한 화학 창조",
-"o": "Resil Chemicals: Creating the Chemistry for Tomorrow’s Textiles",
-"u": "https://www.indiantextilemagazine.in/resil-chemicals-creating-the-chemistry-for-tomorrows-textiles/",
-"s": "By K. Gopalakrishnan With a chemical portfolio spanning fibres, yarns, fabrics and garments, Resil Chemicals is strengthening its position as an innovation-led textile technology company. At India ITME, the company… The post Resil Chemicals: Creating the Chemistry for Tomorrow’s Textiles appeared fi",
-"c": "FABRIC",
-"x": "By K. Gopalakrishnan With a chemical portfolio spanning fibres, yarns, fabrics and garments, Resil Chemicals is strengthening its position as an innovation-led textile technology company. At India ITME, the company will showcase advanced solutions in textile finishing, technical textiles and sustainable processing, while highlighting the evolving convergence of chemistry, machinery and digitalisation. Ganesh Srinivasan, CEO, Resil Chemicals For Resil Chemicals, the future of textile chemistry lies increasingly in customization, technology and sustainability. As competition intensifies in conventional textile chemicals, the Bengaluru-based company is focusing on differentiated products, intellectual property, certified solutions and closer partnerships with brands and manufacturers. The strategy is already reflected in its portfolio. Resil is a major Indian manufacturer of silicone-based textile chemicals and resins, while its solutions extend across fibres, yarns, sewing threads, woven and knitted fabrics, garments and technical textiles. The company has also expanded into polyurethane chemistry, opening new opportunities in technical textiles and sustainable finishing. Speaking about the company’s innovation-led approach, Ganesh Srinivasan, CEO, Resil Chemicals, says “Competing solely on commodity chemicals and conventional technologies will not deliver sustainable, long-term growth.” he notes, highlighting the company’s focus on creating customized and “blue ocean” opportunities. Innovation at the Core Resil’s technology strategy is built around four pillars: product innovation, service excellence, sustainability, and trusted brand value. Innovation is backed by significant intellectual-property development. The company currently has around 24 patents, with additional",
-"i": "https://www.indiantextilemagazine.in/wp-content/uploads/2026/09/Resil-Images-2.png",
-"g": [],
-"m": "Indian Textile Magazine",
-"r": "해외",
-"v": 16,
-"h": 2,
-"w": "material",
-"e": [],
-"ms": [
-"Indian Textile Magazine",
-"주제검색 · 염색가공"
-]
-},
-{
-"id": "2de7ad4684874898",
-"d": "2026-09-02",
-"t": "Oeko-Tex는 추적성 확장을 목표로 합니다.",
-"o": "Oeko-Tex targets traceability expansion",
-"u": "https://www.ecotextile.com/2026090265323/news/shows-events/oeko-tex-targets-traceability-expansion/",
-"s": "Certification body plans to extend digital transaction tracking beyond organic cotton as regulations intensify scrutiny of textile sustainability claims ZURICH […] The post Oeko-Tex targets traceability expansion appeared first on Ecotextile News .",
-"c": "MATERIAL",
-"x": "Certification body plans to extend digital transaction tracking beyond organic cotton as regulations intensify scrutiny of textile sustainability claims ZURICH […] The post Oeko-Tex targets traceability expansion appeared first on Ecotextile News .",
-"i": "https://www.ecotextile.com/wp-content/uploads/2026/09/Digital-traceability.jpg",
-"g": [
-"오가닉코튼",
-"OEKO-TEX",
-"추적성"
-],
-"m": "Ecotextile News",
-"r": "해외",
-"v": 12,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Ecotextile News"
-]
-},
-{
-"id": "2944f771d2840e86",
-"d": "2026-09-02",
-"t": "섬수협, 프레미에르비죵 파리 20년 동행…K소재 ‘프리미엄’ 키웠다",
-"o": "섬수협, 프레미에르비죵 파리 20년 동행…K소재 ‘프리미엄’ 키웠다",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148169",
-"s": "한국섬유수출입협회(회장 방주득, 이하 섬수협)가 국내 섬유기업의 프랑스 프레미에르비죵 파리 참가를 20년간 지원하며 K-섬유의 글로벌 프리미엄 소재시장 진입을 뒷받침하고 있다.2007년 영풍필텍스 1개사로 시작한 한국 기업 참가는 올해 40개사로 확대됐으며 고감성·기능성·친환경 소재를 앞세워 글로벌 브랜드와의 접점을 넓히고 있다.섬수협은 중소벤처기업부 수출컨소시엄사업의 일환으로 9월 1일부터 3일까지 프랑스 파리에서 열리는 ‘2026 프랑스 파리 추계 프레미에르비죵’에 참가해 국내 섬유기업의 해외시장 진출과 글로벌 바이어 비즈니스",
-"c": "MATERIAL",
-"x": "한국섬유수출입협회(회장 방주득, 이하 섬수협)가 국내 섬유기업의 프랑스 프레미에르비죵 파리 참가를 20년간 지원하며 K-섬유의 글로벌 프리미엄 소재시장 진입을 뒷받침하고 있다.2007년 영풍필텍스 1개사로 시작한 한국 기업 참가는 올해 40개사로 확대됐으며 고감성·기능성·친환경 소재를 앞세워 글로벌 브랜드와의 접점을 넓히고 있다.섬수협은 중소벤처기업부 수출컨소시엄사업의 일환으로 9월 1일부터 3일까지 프랑스 파리에서 열리는 ‘2026 프랑스 파리 추계 프레미에르비죵’에 참가해 국내 섬유기업의 해외시장 진출과 글로벌 바이어 비즈니스",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148169_129570_4259_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 8,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "182bc39d499d84e0",
-"d": "2026-09-02",
-"t": "고객 돌아온 타겟, 매출 전망 또 높여",
-"o": "고객 돌아온 타겟, 매출 전망 또 높여",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81776",
-"s": "미국 대형 유통업체 타겟(Target)이 올해 연간 매출 전망을 다시 높였다. 가격을 낮추고 상품 구성과 재고 관리를 개선한 결과 고객 방문이 늘면서 실적 회복세가 이어지고 있어서다.타깃은 2026년 연간 순매출 증가율 전망을 기존 약 4%에서 5%로 상향했다. 2분기 동일점포 매출은 전년 동기보다 3.8% 늘어 시장 예상치 2.5%를 웃돌았으며, 고객 방문도 3.6% 증가했다. 고객 1인당 구매액은 거의 변하지 않아 매출 성장은 객단가보다 방문객 증가가 이끈 것으로 나타났다.고객 회복에는 가격 경쟁력 강화가 영향을 미쳤다. 타겟은",
-"c": "RETAIL",
-"x": "미국 대형 유통업체 타겟(Target)이 올해 연간 매출 전망을 다시 높였다. 가격을 낮추고 상품 구성과 재고 관리를 개선한 결과 고객 방문이 늘면서 실적 회복세가 이어지고 있어서다.타깃은 2026년 연간 순매출 증가율 전망을 기존 약 4%에서 5%로 상향했다. 2분기 동일점포 매출은 전년 동기보다 3.8% 늘어 시장 예상치 2.5%를 웃돌았으며, 고객 방문도 3.6% 증가했다. 고객 1인당 구매액은 거의 변하지 않아 매출 성장은 객단가보다 방문객 증가가 이끈 것으로 나타났다.고객 회복에는 가격 경쟁력 강화가 영향을 미쳤다. 타겟은",
-"i": "https://cdn.itnk.co.kr/news/photo/202609/81776_53152_54.png",
-"g": [],
-"m": "국제섬유신문",
-"r": "국내",
-"v": 9,
-"h": 1,
-"w": "retail",
-"e": [
-"target"
-],
-"ms": [
-"국제섬유신문"
-]
-},
-{
-"id": "1743414ad0c0094d",
-"d": "2026-09-02",
-"t": "업계 리더들, 65번째 Dornbirn GFC 개장",
-"o": "Industry leaders to open 65th Dornbirn GFC",
-"u": "https://innovationintextiles.com/industry-leaders-to-open-65th-dornbirn-gfc/",
-"s": "The 65th Dornbirn Global Fiber Congress (Dornbirn GFC) will open on September 16th in the Austrian town, with a high-level programme bringing together senior representatives from across the European fibres, textiles and nonwovens industries to address the technological, regulatory and economic force",
-"c": "FABRIC",
-"x": "The 65th Dornbirn Global Fiber Congress (Dornbirn GFC) will open on September 16 th in the Austrian town, with a high-level programme bringing together senior representatives from across the European fibres, textiles and nonwovens industries to address the technological, regulatory and economic forces reshaping the sector. Beginning at 9am in Hall A, the opening session will set the scene for the congress with perspectives on innovation, sustainability, circularity, European competitiveness and the continuing transformation of the fibre industry. Managing director of the congress, Béatrice Moureaux will officially open proceedings before Robert van de Kerkhof, president of the Austrian Fibers Institute, addresses the importance of innovation and the methodologies increasingly influencing the direction of the textile industry. A former Lenzing board member with extensive international experience in fibres and sustainability, van de Kerkhof will examine how developments including the European Green Deal and Product Environmental Footprint (PEF) methodology are helping shape future priorities for the industry. Demanding objectives The European fibre sector’s changing competitive environment will provide another major focus of the morning. Elke Hortmeyer of the Bremen Cotton Exchange will consider the challenges facing European fibres as the industry seeks to reconcile international competitiveness with increasingly demanding sustainability objectives, while Frédéric van Houte of CIRFS, the European Man-made Fibres Association, will provide the perspective of Europe’s man-made fibre producers. The important role of nonwovens as the other major fibre-processing industry will meanwhile be explored by Marines Lagemaat of EDANA, reflecting the increasingly broad scope of Dornbi",
-"i": "https://innovationintextiles.com/wp-content/uploads/2026/09/Do.jpg",
-"g": [
-"부직포"
-],
-"m": "Innovation in Textiles",
-"r": "해외",
-"v": 15,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Innovation in Textiles"
-]
-},
-{
-"id": "13d1d2bb8a96491f",
-"d": "2026-09-02",
-"t": "새로운 데이터에 따르면 폴리에스테르의 지배력이 드러났습니다.",
-"o": "New data reveals polyester’s dominence",
-"u": "https://apparelinsider.com/new-data-reveals-polyesters-dominence/",
-"s": "LONDON – Almost three in ten garments sold by major fashion retailers are made predominantly from polyester, new research has found. The fibre composition of more than 139,000 products, being retailed by major brands, was examined by researchers. The post New data reveals polyester’s dominence appea",
-"c": "MATERIAL",
-"x": "LONDON – Almost three in ten garments sold by major fashion retailers are made predominantly from polyester, new research has found. The fibre composition of more than 139,000 products, being retailed by major brands, was examined by researchers. This is Premium Content Only user with Online and Print subscription can access this. If you are a Free Subscriber, click here to upgrade. If you already have Online or Print subscription Login To Unlock The Content! Remember Me Lost your password? Don't have an account? Register The post New data reveals polyester’s dominence appeared first on Apparel Insider .",
-"i": "https://apparelinsider.com/wp-content/uploads/2026/08/YBk98-DYqY94KGJ-X7OldF3SuMJ9Zh-fi6lfJCdi_4U-Lgw-NxWVvovA5Pkk3XiA8DzmiEGGSRoTL7sBoBXICS74mB-m-oTfNX0UtKntBQeG3yMJeXHU5ZBEqgqy-4l9SZUTYhFBJQMkgTdiHyALognfRDoAv1_Qs2Ge8QxFR2NIGbxsnqWxFjysCfDqdvwQ-scaled.jpeg",
-"g": [],
-"m": "Apparel Insider",
-"r": "해외",
-"v": 10,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Apparel Insider"
-]
-},
-{
-"id": "12c4117bfa46b4a5",
-"d": "2026-09-02",
-"t": "PI Cottex는 Brückner 스텐터 투자를 기반으로 합니다.",
-"o": "PI Cottex builds on Brückner stenter investments",
-"u": "https://innovationintextiles.com/pi-cottex-builds-on-bruckner-stenter-investments/",
-"s": "India’s PI Cottex is planning further investment in finishing technology as it looks to increase production capacity from around 600 to 1,000 tons per month over the next two-to-five years. The Ludhiana-based company already operates four stenters, including two supplied by Brückner, one a six-chamb",
-"c": "CHEMICAL",
-"x": "India’s PI Cottex is planning further investment in finishing technology as it looks to increase production capacity from around 600 to 1,000 tons per month over the next two-to-five years. The Ludhiana-based company already operates four stenters, including two supplied by Brückner, one a six-chamber system and the other with ten-chambers, and says its experience with the German machinery manufacturer is encouraging it to consider further installations as part of its expansion plans. “The reliable performance, high process reliability and consistently high quality of the finishing results gave us the confidence to invest in Brückner technology again,” says PI Cottex managing director Jasdeep Singh. He points in particular to the dryer design of the Brückner machines, which enables certain processes to be carried out with fewer chambers while maintaining the required results. Other benefits include high production output, consistent heat-setting, improved shrinkage control and reduced energy consumption. Control parameters The investments form part of the continuing development of PI Cottex from a traditional contract finisher into a vertically integrated knitted fabric manufacturer. The company now carries out knitting, dyeing and finishing in-house, providing control over parameters including colour shade, fabric weight and width, shrinkage and hand feel. Its portfolio includes single jersey, piqué, terry, fleece, rib, interlock and waffle fabrics, along with activewear materials, primarily based on cotton and cotton-elastane blends. It also develops fabrics to individual customer requirements in terms of weight, width, fibre blend, colour and finish. Around 70-75% of production is currently exported, with PI Cottex supplying national and international brands across t",
-"i": "https://innovationintextiles.com/wp-content/uploads/2026/09/Cottex.jpg",
-"g": [],
-"m": "Innovation in Textiles",
-"r": "해외",
-"v": 15,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Innovation in Textiles"
-]
-},
-{
-"id": "112039a23344b834",
-"d": "2026-09-02",
-"t": "유럽 ​​섬유업계, 수입 소포에 대해 10유로의 처리 수수료 촉구",
-"o": "Europe textile sector urges €10 handling fee on import parcels",
-"u": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxOT1gyMkRIUGNEU2Nzc3FEdnBhdVY3WTdycEZmOVBxN1k2UUo3TnZHbF9qcjJYMkQxR0tDaENuRG94NXg4S0Mzd2JJU244clJtVXI0NE5taTVvTVlOZmJ4bU9kbjdpYXhXS1gyekVBa09QRVZOZG4zTGhoM3RvT0lvQklscXpkeWx4YUs1WER1eFNwTm1qLTUwUU52d09yS1lCRGNyZWhGQ0VMR1lld1M4NzNxbDJwb2pvSHlsejJzRFgtMVd3NkUwYS1sWEliU0ViMFFNTHBtQW8xUlZLVmdlOWtYRQ?oc=5",
-"s": "Europe textile sector urges €10 handling fee on import parcels Fibre2Fashion",
-"c": "MATERIAL",
-"x": "Europe textile sector urges €10 handling fee on import parcels Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "08a5a2c2d9670ca5",
-"d": "2026-09-02",
-"t": "| 인도의 ₹1,225 cr 섬유 투자로 새로운 생산 능력 주기가 촉발될 수 있음",
-"o": "| India's ₹1,225 cr textile capex could trigger a new capacity cycle",
-"u": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxPMFpyaV8yWUd6NlpwQUtWRTYzcWlJbThDWExHN1dPMnBVZ2p6YWNKc3RTU2tYM2RJaWlpRk9aYmpvTnJ1ZEE2Z1RuS2cxR19SRkVpcDBPaDI5MmdNQ1doTnlTVTJmR0FtcDh2Mk90ejNzTzhMWUhMbkZXUjlGSnhGU3R6dHFjbE9Xa1ZPQm85Wnl5SW5GY0FqZlNXa2d2Y0F3TGFBRGFzQjVKN1VmdGxWNFc1X250V1JxRFZrZDR3Q0ZWNnRkRl9HRUpsSFY0RDBVS2tqOWFqVG9uRHNBWjBjQ0t3?oc=5",
-"s": "| India's ₹1,225 cr textile capex could trigger a new capacity cycle Fibre2Fashion",
-"c": "MATERIAL",
-"x": "| India's ₹1,225 cr textile capex could trigger a new capacity cycle Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "주제검색 · 신소재",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"주제검색 · 신소재"
-]
-},
-{
-"id": "077292eef25e8734",
-"d": "2026-09-02",
-"t": "엔토스정보통신, 가혹 환경 극복하는 차세대 ‘특수 폴리머 신소재 초경량 PTZ 카메라’ 출시",
-"o": "엔토스정보통신, 가혹 환경 극복하는 차세대 ‘특수 폴리머 신소재 초경량 PTZ 카메라’ 출시",
-"u": "https://news.google.com/rss/articles/CBMia0FVX3lxTE1EdGlLN1JaZk1NSm5GWWY0UUNWWllzamIyUXh2YjJOZG12LTJvNVRIS2NwWkN6Q3czUElHS3hoWXVWQk9UYXl3UGFfQ2pTX0NXQnBoS1VSV2dHYlFSS3Nna3JtNWNCTS1VT3JV?oc=5",
-"s": "엔토스정보통신, 가혹 환경 극복하는 차세대 ‘특수 폴리머 신소재 초경량 PTZ 카메라’ 출시 보안뉴스",
-"c": "MATERIAL",
-"x": "엔토스정보통신, 가혹 환경 극복하는 차세대 ‘특수 폴리머 신소재 초경량 PTZ 카메라’ 출시 보안뉴스",
-"i": "",
-"g": [],
-"m": "주제검색 · 국내소재",
-"r": "국내",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"주제검색 · 국내소재"
-]
-},
-{
-"id": "0468bbfe475b3522",
-"d": "2026-09-02",
-"t": "Avantex Fashion Pitch에서 최종 후보 선정",
-"o": "Avantex Fashion Pitch names finalists",
-"u": "https://knittingindustry.com/avantex-fashion-pitch-names-finalists/",
-"s": "Ten innovators developing new technologies, materials and business models for the fashion and textile industries have been selected as finalists for the ninth Avantex Fashion Pitch. The international competition, organised by Messe Frankfurt France, culminates on 31 August 2026 with a Grand Finale i",
-"c": "FABRIC",
-"x": "Ten innovators developing new technologies, materials and business models for the fashion and textile industries have been selected as finalists for the ninth Avantex Fashion Pitch. The international competition, organised by Messe Frankfurt France, culminates on 31 August 2026 with a Grand Finale in the Agora at Texworld Apparel Sourcing Paris. The finalists will present their solutions before a jury comprising investors, industry professionals and fashion innovation specialists. An evening event at Le Balcon, the rooftop restaurant of Galeries Lafayette, will bring together finalists, jury members, partners and invited guests, culminating in the announcement of the 2026 Avantex Fashion Pitch winner. Messe Frankfurt France launched Avantex Fashion Pitch alongside its Avantex Paris trade show to identify emerging solutions with the potential to transform how fashion is designed, manufactured and consumed, while helping their developers gain industry visibility and accelerate growth. The competition is open to start-ups, innovative SMEs, NGOs, researchers and entrepreneurs developing products, services and technologies for the fashion and textile industries, with a particular emphasis on B2B and B2B2C business models. This year’s finalists span services, textile and raw material innovation, and design technologies. YAWYA, founded by Shikha Shah, is developing a body-scanning solution combined with an automated fitting service aimed at helping designers deliver bespoke fashion. Seconde Matière, led by Angela Hertault, operates a B2B marketplace designed to facilitate the sourcing, resale and management of surplus textiles, leather and fashion components. Ceyla Simeu’s YLI has developed a botanical treatment system for natural knitwear using selected plant extracts and mon",
-"i": "https://knittingindustry.com/wp-content/uploads/2026/08/Avantex.jpeg",
-"g": [],
-"m": "Knitting Industry",
-"r": "해외",
-"v": 9,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Knitting Industry"
-]
-},
-{
-"id": "f983b36acf0454bb",
-"d": "2026-09-01",
-"t": "ITMA 2027에서 더 스마트하고 더 연결됨",
-"o": "Smarter and more connected at ITMA 2027",
-"u": "https://innovationintextiles.com/smarter-and-more-connected-at-itma-2027/",
-"s": "On September 24th 2026 at 10am, the organisers of the ITMA 2027 textile machinery show will hold a live webinar entitled From Connected Factories to Competitive Advantage. As technology connects, more machines, processes, data and people across the factory, the next challenge is turning that connect",
-"c": "FABRIC",
-"x": "On September 24 th 2026 at 10am, the organisers of the ITMA 2027 textile machinery show will hold a live webinar entitled From Connected Factories to Competitive Advantage. As technology connects, more machines, processes, data and people across the factory, the next challenge is turning that connectivity into real business advantage. Industry leaders will explore how automation and digital innovation can improve productivity, quality, agility and operational resilience, and how manufacturers can make smarter technology investment decisions. Participants can register here . The rise of the intelligent garment factory is meanwhile the subject of the latest ITMA Blog. Automation challenge Walk into one of today’s large apparel factories and you’ll witness autonomous vehicles, intelligent transport systems, automated warehouses, machine vision and AI-driven production planning. Yet at the centre of all this technology remains a surprisingly familiar sight – banks of operators guiding fabrics through sewing machines. Joining two pieces of textile together continues to be one of manufacturing’s hardest automation challenges. Unlike steel, plastic or other rigid materials, fabrics stretch, wrinkle, distort and behave differently depending on their construction, weight and finish. Humans instinctively compensate for these variations. Robots still struggle. As a result, sewing remains the most labour-intensive stage of garment production and depending on the complexity of the products being made, typically accounts for between 30-50% of the workforce within a vertically integrated garment factory, according to industry studies by Better Work, the International Labour Organization (ILO) and apparel manufacturing researchers. Rather than attempting to replace sewing operators, ho",
-"i": "https://innovationintextiles.com/wp-content/uploads/2026/09/ITMA.jpg",
-"g": [
-"전시회"
-],
-"m": "Innovation in Textiles",
-"r": "해외",
-"v": 12,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Innovation in Textiles"
-]
-},
-{
-"id": "f4cc3097bb9e2277",
-"d": "2026-09-01",
-"t": "ITMA ASIA 2026에서 KARL MAYER: Warp 니트, Warp 준비 및 기술 직물에 대한 혁신",
-"o": "KARL MAYER During ITMA ASIA 2026: Innovations For Warp Knit, Warp Prep And Technical Textiles",
-"u": "https://www.textileworld.com/textile-world/knitting-apparel/2026/09/karl-mayer-during-itma-asia-2026-innovations-for-warp-knit-warp-prep-and-technical-textiles/",
-"s": "OBERTSHAUSEN, Germany — September 1, 2026 — At ITMA ASIA in Shanghai, KARL MAYER will once again demonstrate that it understands the challenges facing the Asian textile industry – and will present tailor-made solutions. It will do so across no fewer than three stages: Hall 4.1, Booth C18 for warp kn",
-"c": "FABRIC",
-"x": "OBERTSHAUSEN, Germany — September 1, 2026 — At ITMA ASIA in Shanghai, KARL MAYER will once again demonstrate that it understands the challenges facing the Asian textile industry – and will present tailor-made solutions. It will do so across no fewer than three stages: Hall 4.1, Booth C18 for warp knitting Hall 3, Booth A24 for warp preparation An accompanying mega Product Show at the company’s Changzhou site The Asian markets are among the most dynamic and innovative in the world and are a key part of KARL MAYER’s global strategy. Across Asia, rising labour, energy, and financing costs are compounded by continued price pressure from international brands. At the same time, sustainability requirements, shorter lead times, and smaller batch sizes are making the battle for margins even tougher. With its new machines and textile solutions for ITMA ASIA, KARL MAYER will directly address precisely these challenges. “Our closeness to customers in Asia helps us identify market requirements at an early stage and translate them into targeted innovations. That is why, at this trade fair, we will be showcasing solutions that are not only technologically leading but, above all, deliver one key benefit: they create measurable added value and long-term growth opportunities for our customers,” explains Lutz Wolf, CEO of KARL MAYER. The company will present its solutions to the challenges facing its customers at two exhibition booths in Shanghai. This approach will also allow KARL MAYER to engage with customers from both the warp knitting and warp preparation sectors within their own industry environment. In addition, KARL MAYER (CHINA) will host a Product Show at its Changzhou location, featuring further machine premieres. Performance Upgrade for the Next Generation of Warp Knitting In ",
-"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/09/KARL-MAYER-WARP_KNIT_Knitting_area_two_bar_tricotmachine.jpg",
-"g": [
-"경편",
-"전시회"
-],
-"m": "Textile World",
-"r": "해외",
-"v": 15,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile World"
-]
-},
-{
-"id": "f39cb2faa4c9d1e4",
-"d": "2026-09-01",
-"t": "신세계인터 ‘텐먼스’ 3년 만에 귀환…시즌리스 여성복 다시 승부",
-"o": "신세계인터 ‘텐먼스’ 3년 만에 귀환…시즌리스 여성복 다시 승부",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148102",
-"s": "신세계인터내셔날이 시즌리스 여성복 ‘텐먼스(10MONTH)’를 3년 만에 다시 꺼내 들었다. 빠르게 유행을 좇는 패스트패션과 고가 여성복 사이에서 ‘오래, 자주 입는 옷’을 앞세워 차별화에 나선다. 기존 시즌리스 콘셉트는 유지하면서 디자인과 소재, 가격 경쟁력을 재정비하고 오프라인까지 유통 접점을 넓혀 브랜드를 다시 키운다는 전략이다.신세계인터내셔날은 9월 1일 자체 디지털 플랫폼 신세계V(SHINSEGAE V)를 통해 여성복 브랜드 텐먼스를 재론칭한다고 밝혔다. 2023년 브랜드 운영을 중단한 이후 약 3년 만이다.텐먼스는 신세계",
-"c": "RETAIL",
-"x": "신세계인터내셔날이 시즌리스 여성복 ‘텐먼스(10MONTH)’를 3년 만에 다시 꺼내 들었다. 빠르게 유행을 좇는 패스트패션과 고가 여성복 사이에서 ‘오래, 자주 입는 옷’을 앞세워 차별화에 나선다. 기존 시즌리스 콘셉트는 유지하면서 디자인과 소재, 가격 경쟁력을 재정비하고 오프라인까지 유통 접점을 넓혀 브랜드를 다시 키운다는 전략이다.신세계인터내셔날은 9월 1일 자체 디지털 플랫폼 신세계V(SHINSEGAE V)를 통해 여성복 브랜드 텐먼스를 재론칭한다고 밝혔다. 2023년 브랜드 운영을 중단한 이후 약 3년 만이다.텐먼스는 신세계",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148102_129442_3951_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "f2d747804d38103e",
-"d": "2026-09-01",
-"t": "세자커피, 올리브영 남포타운점 입점…면세점 밖 시내 유통 확대",
-"o": "세자커피, 올리브영 남포타운점 입점…면세점 밖 시내 유통 확대",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148108",
-"s": "한국형 커피믹스 브랜드 세자커피는 지난 8월 28일 부산 중구 올리브영 남포타운점 3층 K-FOOD존에 입점했다고 1일 밝혔다.이번 입점은 세자커피의 첫 올리브영 판매처이자 공항 면세점 밖 첫 시내 오프라인 매장이다. 올리브영 남포타운점은 BIFF광장과 국제시장, 자갈치시장 등이 인접한 부산 남포동 관광 상권에 위치해 있다.세자커피는 1896년 조선의 커피 문화와 왕실 다과 문화에서 영감을 받은 콘셉트의 커피믹스다. 대표 상품인 ‘세자커피 1896 조선 오리지널 커피믹스’에는 볶음쌀 블렌딩을 적용했으며 설탕을 넣지 않은 제로슈거 방",
-"c": "RETAIL",
-"x": "한국형 커피믹스 브랜드 세자커피는 지난 8월 28일 부산 중구 올리브영 남포타운점 3층 K-FOOD존에 입점했다고 1일 밝혔다.이번 입점은 세자커피의 첫 올리브영 판매처이자 공항 면세점 밖 첫 시내 오프라인 매장이다. 올리브영 남포타운점은 BIFF광장과 국제시장, 자갈치시장 등이 인접한 부산 남포동 관광 상권에 위치해 있다.세자커피는 1896년 조선의 커피 문화와 왕실 다과 문화에서 영감을 받은 콘셉트의 커피믹스다. 대표 상품인 ‘세자커피 1896 조선 오리지널 커피믹스’에는 볶음쌀 블렌딩을 적용했으며 설탕을 넣지 않은 제로슈거 방",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148108_129452_60_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 9,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "f27afea95b0b8564",
-"d": "2026-09-01",
-"t": "아르마니, 털링턴이 그린 첫 캠페인... 새로운 체제 시작",
-"o": "아르마니, 털링턴이 그린 첫 캠페인... 새로운 체제 시작",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148127",
-"s": "조르지오 아르마니(Giorgio Armani)가 실바나 아르마니(Silvana Armani)와 레오 델오르코(Leo Dell’Orco)가 디자인한 첫 번째 컬렉션을 담은 2026 가을·겨울 캠페인을 공개했다. 1990년대 조르지오 아르마니 런웨이를 대표했던 모델 크리스티 털링턴(Christy Turlington)을 다시 기용해 브랜드의 기존 정체성과 새로운 체제의 연결에 초점을 맞췄다.이번 캠페인은 올리버 하들리 퍼치(Oliver Hadlee Pearch)가 촬영했다. 털링턴과 함께 리암 켈리(Liam Kelly), 아크바 샴지(A",
-"c": "RETAIL",
-"x": "조르지오 아르마니(Giorgio Armani)가 실바나 아르마니(Silvana Armani)와 레오 델오르코(Leo Dell’Orco)가 디자인한 첫 번째 컬렉션을 담은 2026 가을·겨울 캠페인을 공개했다. 1990년대 조르지오 아르마니 런웨이를 대표했던 모델 크리스티 털링턴(Christy Turlington)을 다시 기용해 브랜드의 기존 정체성과 새로운 체제의 연결에 초점을 맞췄다.이번 캠페인은 올리버 하들리 퍼치(Oliver Hadlee Pearch)가 촬영했다. 털링턴과 함께 리암 켈리(Liam Kelly), 아크바 샴지(A",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148127_129478_4358_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 7,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "f061ae49c9e73848",
-"d": "2026-09-01",
-"t": "케이스티파이, ‘짱구는 못말려’ 두 번째 협업…부산 센텀시티 팝업",
-"o": "케이스티파이, ‘짱구는 못말려’ 두 번째 협업…부산 센텀시티 팝업",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148113",
-"s": "케이스티파이가 애니메이션 ‘짱구는 못말려’와 두 번째 협업 컬렉션을 선보였다.이번 컬렉션은 짱구와 애니메이션 속 캐릭터를 활용한 커스텀 휴대전화 케이스와 액세서리 등으로 구성했다. 소비자가 캐릭터와 동물 코스튬, 스티커, 문구 등을 조합해 디자인을 선택할 수 있도록 한 것이 특징이다.‘짱구는 못말려 네임 커스텀 케이스’는 짱구의 동물 코스튬을 고른 뒤 애니메이션 스타일의 폰트로 이니셜을 추가할 수 있다. ‘짱구는 못말려 스티커 & 네임 커스텀 케이스’는 캐릭터와 스티커 디자인을 조합하고 원하는 문구를 넣는 방식이다.액세서리 제품인",
-"c": "RETAIL",
-"x": "케이스티파이가 애니메이션 ‘짱구는 못말려’와 두 번째 협업 컬렉션을 선보였다.이번 컬렉션은 짱구와 애니메이션 속 캐릭터를 활용한 커스텀 휴대전화 케이스와 액세서리 등으로 구성했다. 소비자가 캐릭터와 동물 코스튬, 스티커, 문구 등을 조합해 디자인을 선택할 수 있도록 한 것이 특징이다.‘짱구는 못말려 네임 커스텀 케이스’는 짱구의 동물 코스튬을 고른 뒤 애니메이션 스타일의 폰트로 이니셜을 추가할 수 있다. ‘짱구는 못말려 스티커 & 네임 커스텀 케이스’는 캐릭터와 스티커 디자인을 조합하고 원하는 문구를 넣는 방식이다.액세서리 제품인",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148113_129462_1415_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 7,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "e31c3582e0ea026c",
-"d": "2026-09-01",
-"t": "내셔널지오그래픽 키즈, 겨울 아우터 선판매로 라이브커머스 강화",
-"o": "내셔널지오그래픽 키즈, 겨울 아우터 선판매로 라이브커머스 강화",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148117",
-"s": "더네이쳐홀딩스가 전개하는 ‘내셔널지오그래픽 어패럴 키즈’는 26FW 시즌 아우터 얼리버드 라이브 방송에서 전년보다 높은 매출을 기록했다. 내셔널지오그래픽 어패럴 키즈는 지난 31일 진행한 ‘26FW 얼리버드 브랜드데이&라이브’ 방송 매출이 지난해 8월 진행한 25FW 아우터 선발매 라이브 방송보다 소폭 증가했다고 밝혔다.이번 방송은 2026년 FW 시즌을 앞두고 겨울 신상 아우터를 합리적인 가격에 먼저 구매하려는 소비자를 겨냥해 기획됐다. 방송에서는 ‘에어리 머스코비 라이트 다운 점퍼’, ‘에어리 후디 머스코비 라이트 다운 점퍼’,",
-"c": "RETAIL",
-"x": "더네이쳐홀딩스가 전개하는 ‘내셔널지오그래픽 어패럴 키즈’는 26FW 시즌 아우터 얼리버드 라이브 방송에서 전년보다 높은 매출을 기록했다. 내셔널지오그래픽 어패럴 키즈는 지난 31일 진행한 ‘26FW 얼리버드 브랜드데이&라이브’ 방송 매출이 지난해 8월 진행한 25FW 아우터 선발매 라이브 방송보다 소폭 증가했다고 밝혔다.이번 방송은 2026년 FW 시즌을 앞두고 겨울 신상 아우터를 합리적인 가격에 먼저 구매하려는 소비자를 겨냥해 기획됐다. 방송에서는 ‘에어리 머스코비 라이트 다운 점퍼’, ‘에어리 후디 머스코비 라이트 다운 점퍼’,",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148117_129471_356_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 9,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "dd933437e353e30d",
-"d": "2026-09-01",
-"t": "지금 스티치하고 나중에 스마트스티치로 결정하세요",
-"o": "Stitch now, decide later with Smart Stitch",
-"u": "https://innovationintextiles.com/stitch-now-decide-later-with-smart-stitch/",
-"s": "At the forthcoming 65th Dornbirn GFC conference taking place from September 16-18, Brussels, Belgium-headquartered Resortecs will provide full details of the development project behind the Helium Loop Anorak for the Swedish backcountry ski apparel manufacturer Peak Performance. “Until now, performan",
-"c": "ETC",
-"x": "At the forthcoming 65 th Dornbirn GFC conference taking place from September 16-18, Brussels, Belgium-headquartered Resortecs will provide full details of the development project behind the Helium Loop Anorak for the Swedish backcountry ski apparel manufacturer Peak Performance. “Until now, performance products that combine multiple materials, such as natural down insulation, zippers and elastic trims have been nearly impossible to recycle due to the complexity of disassembly at end-of-life,” says Resortecs marketing manager Sofia Scevaroli. “The Helium Loop Anorak, which will shortly be manufactured in commercial quantities, proves that advanced design in collaboration with the right partners can create real change.” Heat dissolvable Resortecs is the developer of Smart Stitch – a heat-activated sewing thread that is suitable for a variety of applications, from consumer apparel to workwear, and has been exhaustively tested on various production line configurations. It is also compatible with every stitching machine available on the market and in different colours and tenacities to enable full creativity in design and high quality in manufacturing. Smart Stitch is now widely available to manufacturers through a partnership with Amann Group – one of the word’s top three manufacturers of sewing thread – and enables the rapid delabelling of unsold or Grade B stock for reuse and targeted disassembly for repairs, such as replacing shoe soles or reflective ribbons and the recovery of high-value components and trims. “We’re increasingly working with manufacturers in the major fabric and garment assembly centres to spread the message that preparing for recycling can make solid sense to them too, not just the brands,” explains Resortecs CTO Acerina Trejo-Machin. “All high volume ",
-"i": "https://innovationintextiles.com/wp-content/uploads/2026/09/Res1.jpg",
-"g": [],
-"m": "Innovation in Textiles",
-"r": "해외",
-"v": 14,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Innovation in Textiles"
-]
-},
-{
-"id": "d288b4003eaecfbb",
-"d": "2026-09-01",
-"t": "군용 섬유 혁신의 품질 관리 중추",
-"o": "The Quality-Control Backbone of Military Textile Innovation",
-"u": "https://news.google.com/rss/articles/CBMiywFBVV95cUxQTGpWZmtpSzNsWUwxTHFmWE9ZTERHQjJseWZYYWcwd3pfRXR4aEtXeDVZNUZRYWtEUzVwdmozaTltS05YRHVtWGM1TjhvNDZMNmlyNEU0WmtjUlZaQXlDcVZFWG1LRkt4SkNYeXdoOFFLNUt0Wjh6VmpEZWFidGtLUDJ0UjBRVEF1bjJISEpxNEJmZWVCbVFVRGVOdmRKZVlFVE5uS2hSMG1xVjRiWEFJWFVVb2M1a2VSZ1k5RGQ5d1F0QkRIajhlQ3VFQQ?oc=5",
-"s": "The Quality-Control Backbone of Military Textile Innovation Mobility Engineering Technology",
-"c": "ETC",
-"x": "The Quality-Control Backbone of Military Textile Innovation Mobility Engineering Technology",
-"i": "",
-"g": [],
-"m": "주제검색 · 신소재",
-"r": "해외",
-"v": 10,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"주제검색 · 신소재"
-]
-},
-{
-"id": "cfc5f04ff65f0a1b",
-"d": "2026-09-01",
-"t": "아웃도어, 6월 이어 7~8월 매출도 부진…코오롱스포츠 누적 2위",
-"o": "아웃도어, 6월 이어 7~8월 매출도 부진…코오롱스포츠 누적 2위",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148116",
-"s": "주요 아웃도어 브랜드의 매출 부진이 6월부터 8월 중순까지 이어지고 있다. 업계 자료에 따르면 주요 9개 브랜드(노스페이스, 코오롱스포츠, 디스커버리 익스페디션, K2, 네파, 블랙야크, 아이더, 컬럼비아, 밀레)의 7월 합산 매출은 1519억원으로 전년 동기 대비 2.0% 감소했다.5월 냉감·경량 제품 판매 호조와 함께 반등했던 아웃도어 매출은 여름 시즌 들어 다시 주춤했다. 5월에는 9개 브랜드 중 8곳이 성장하며 합산 매출이 전년 동월 대비 4.9% 증가했다. 그러나 6월에는 7곳이 역신장하며 합산 매출이 6.7% 감소했고 7",
-"c": "RETAIL",
-"x": "주요 아웃도어 브랜드의 매출 부진이 6월부터 8월 중순까지 이어지고 있다. 업계 자료에 따르면 주요 9개 브랜드(노스페이스, 코오롱스포츠, 디스커버리 익스페디션, K2, 네파, 블랙야크, 아이더, 컬럼비아, 밀레)의 7월 합산 매출은 1519억원으로 전년 동기 대비 2.0% 감소했다.5월 냉감·경량 제품 판매 호조와 함께 반등했던 아웃도어 매출은 여름 시즌 들어 다시 주춤했다. 5월에는 9개 브랜드 중 8곳이 성장하며 합산 매출이 전년 동월 대비 4.9% 증가했다. 그러나 6월에는 7곳이 역신장하며 합산 매출이 6.7% 감소했고 7",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148116_129469_2540_v150.jpg",
-"g": [
-"냉감"
-],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "cb37e5481417ba7a",
-"d": "2026-09-01",
-"t": "KOTERI, AX·친환경 기술로 섬유산업 혁신 모색",
-"o": "KOTERI, AX·친환경 기술로 섬유산업 혁신 모색",
-"u": "https://news.google.com/rss/articles/CBMiREFVX3lxTE9XdkZydTVhMldBMWV0Q0FqM3NqZWM3c0syblRfVjJnajJhb2Y0Sm02TXQ3SDBFYWZ6cEpSanVydWNsZE5D?oc=5",
-"s": "KOTERI, AX·친환경 기술로 섬유산업 혁신 모색 tinnews.co.kr",
-"c": "MATERIAL",
-"x": "KOTERI, AX·친환경 기술로 섬유산업 혁신 모색 tinnews.co.kr",
-"i": "",
-"g": [],
-"m": "주제검색 · 국내소재",
-"r": "국내",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"주제검색 · 국내소재"
-]
-},
-{
-"id": "ca04698faf122374",
-"d": "2026-09-01",
-"t": "Kapoor Industries, Biancalani AIRO®24 제품군을 8대 기계로 확장",
-"o": "Kapoor Industries Expands Biancalani AIRO®24 Fleet to Eight Machines",
-"u": "https://textilefocus.com/kapoor-industries-expands-biancalani-airo24-fleet-to-eight-machines/",
-"s": "The Indian terry product manufacturer’s repeat investment highlights the role of finishing performance and local technical support in building long-term machinery partnerships. Kapoor Industries Limited has expanded its installed base of Biancalani AIRO®24 finishing machines to eight units across it",
-"c": "CHEMICAL",
-"x": "The Indian terry product manufacturer’s repeat investment highlights the role of finishing performance and local technical support in building long-term machinery partnerships. Kapoor Industries Limited has expanded its installed base of Biancalani AIRO®24 finishing machines to eight units across its manufacturing facilities in India. The repeat investment represents a significant milestone for Italian textile machinery manufacturer Biancalani and strengthens its position in the Indian textile finishing market. Kapoor Industries is one of India’s established manufacturers and exporters of premium terry products, including towels, bath mats, rugs and bathrobes. The company operates vertically integrated manufacturing facilities in Panipat and supplies international customers, primarily in the United States and Europe. As Kapoor Industries has expanded its production capacity, it has continued investing in the AIRO®24 platform to support the finishing requirements of its terry product lines. While an initial machine order can demonstrate interest in a particular technology, repeated investment provides a stronger indication of its performance under industrial production conditions. The presence of eight AIRO®24 machines suggests that the technology has delivered consistent results across multiple stages of Kapoor Industries’ expansion. AIRO®24 Supports Terry Fabric Finishing Biancalani’s AIRO®24 is designed for continuous, open-width tumble drying, softening and finishing of woven, knitted and nonwoven fabrics. The system uses controlled high-speed airflow to move fabric alternately through a treatment channel and against specially designed stainless-steel grids. This mechanical action can improve fabric softness, volume, drape and dimensional stability. For terry towels,",
-"i": "https://textilefocus.com/wp-content/uploads/2026/09/AIRO®24-Reshaping-Textile2.webp",
-"g": [],
-"m": "Textile Focus",
-"r": "해외",
-"v": 8,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Focus"
-]
-},
-{
-"id": "bd2b0fd17f2b2cb3",
-"d": "2026-09-01",
-"t": "Schotex Global®, 북유럽 영업 이사로 Mats Jengard 환영",
-"o": "Schotex Global® Welcomes Mats Jengard As Nordic Sales Director",
-"u": "https://www.textileworld.com/textile-world/knitting-apparel/2026/09/schotex-global-welcomes-mats-jengard-as-nordic-sales-director/",
-"s": "HONG KONG — September 1, 2026 — Sustainable and high-performance textile and textile technology developer Schotex Global® Co. Ltd. announces it has named outdoor industry sales veteran Mats Jengard as its head of sales for the Nordic region. Jengard brings more than 25 years of successful sales and ",
-"c": "ETC",
-"x": "HONG KONG — September 1, 2026 — Sustainable and high-performance textile and textile technology developer Schotex Global® Co. Ltd. announces it has named outdoor industry sales veteran Mats Jengard as its head of sales for the Nordic region. Mats Jengard Jengard brings more than 25 years of successful sales and project management experience to his position at Schotex. Based in Sweden, Jengard has served as sales manager for established outdoor performance brands, including Norrona, PrimaLoft and W.L. Gore & Associates. Designed in Switzerland, developed from European raw materials, and manufactured on European machinery, the Schotex Global collection pairs Swiss design heritage with the efficiency of Asian manufacturing. Schotex Global textiles range from its ACTIVE double weave constructions and FLEX single-layer textiles with exceptional 4-way stretch comfort to its TERRA natural fiber and technical synthetic blends and its SHIELD ultimate weather protection 2- or 3-layer laminates. “We see great potential for Schotex in Northern Europe with the addition of Mats to our team, and are excited for him to introduce our product offerings to the outdoor performance brands in his Nordic region,” said Schotex Co-Founder and CEO Gwen Hsu. “His deep experience with global brands, collaborative work style, and focus on guiding long-term partnership programs with exceptional customer service align perfectly with our company goals and working principles. He is also a passionate outdoorsman who understands exactly what our consumers need and look for in their garments.” Outside of work, Jengard enjoys alpine skiing, downhill biking, hiking, as well as golf. He resides in Trollhättan, Sweden, with his wife of 30 years, their kids and dog. Posted: September 1, 2026 Source: Schotex Gl",
-"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/09/Schotex-Mats-Jengard.png",
-"g": [],
-"m": "Textile World",
-"r": "해외",
-"v": 12,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile World"
-]
-},
-{
-"id": "b79f22ce7928c904",
-"d": "2026-09-01",
-"t": "2026년 8월의 10대 섬유 이야기",
-"o": "Top 10 Textile Stories of August 2026",
-"u": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxQV3pGT3A1ZW15amU2Q1Q5WmxtR2twZmxwS0VLUlVRX1lsQkVrMUhzTU4zOGJpSnZnV21kTi1rcVN0NkFjS01xaS04R1RscndhLUtXeWRGV2hIUU0xUDhnRFNjbmZqelBHa2Zma3hmWUlQSUVhaVZGU1lCNnhVX2RWY3Rub1J3S2Q3Q2tV?oc=5",
-"s": "Top 10 Textile Stories of August 2026 Fibre2Fashion",
-"c": "MATERIAL",
-"x": "Top 10 Textile Stories of August 2026 Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "b670929bad2d0cca",
-"d": "2026-09-01",
-"t": "Tiger Group, 미국 제조 공장 두 곳의 제조 및 조립 장비 판매",
-"o": "Tiger Group Sells Fabrication And Assembly Equipment From Two U.S. Manufacturing Plants",
-"u": "https://www.textileworld.com/textile-world/2026/09/tiger-group-sells-fabrication-and-assembly-equipment-from-two-u-s-manufacturing-plants/",
-"s": "LOS ANGELES — September 1, 2026 — Tiger Commercial & Industrial (C&I) has completed the sale of a portfolio of high-precision fabrication and assembly machinery and equipment (M&E), along with finished products and raw materials, from two U.S. plants. Conducted on behalf of the secured creditors, th",
-"c": "CHEMICAL",
-"x": "LOS ANGELES — September 1, 2026 — Tiger Commercial & Industrial (C&I) has completed the sale of a portfolio of high-precision fabrication and assembly machinery and equipment (M&E), along with finished products and raw materials, from two U.S. plants. Conducted on behalf of the secured creditors, the online auction featured M&E from the former Alpharetta, Georgia, and Dallas, Texas, facilities of Auzmet, a national manufacturer of exterior building solutions such as composite metal panels, architectural façades and insulated wall panels. Schlebach Quadro+ standing seam rollforming system Tiger marketed a broad mix of equipment from the two facilities, including CNC routers, electro-mechanical plate shears, CNC folding machines, electro-pneumatic saws, and smart routers by brands such as Miller, Lincoln Electric, FomIndustrie, Schechtl and Schlebach. Bidders in the 415-lot sale vied for plant-support M&E and rolling stock by brands such as Kaesar, Chevy and Mitsubishi, along with raw materials and finished-goods inventory originally valued at more than $1 million. Tiger’s in-house auction and operations team leveraged its proprietary database of repeat buyers in composites manufacturing to drive demand across the offering, managing the entire sale and removal process across both facilities within a tight 30-day deadline set by the landlord. “Our years of experience with aluminum fabrication equipment—including large-format panel builders from AXYZ Automation Group and units from Schechtl and Durma—gave us the ability to execute and quickly monetize the collateral,” said Jonathan Holiday, Senior Director of Tiger Commercial & Industrial. “The end result was a robust recovery for the secured creditors in a fraction of the usual timeframe.” Posted: September 1, 2026 Source:",
-"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/09/Tiger-Auzmet_1_for_Post_Sale_Wire_Sept_1.jpg",
-"g": [],
-"m": "Textile World",
-"r": "해외",
-"v": 9,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile World"
-]
-},
-{
-"id": "b30ba764e703f2a7",
-"d": "2026-09-01",
-"t": "누니, 美 타깃 1778개점 입점…글로벌 오프라인 유통 확대",
-"o": "누니, 美 타깃 1778개점 입점…글로벌 오프라인 유통 확대",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148132",
-"s": "미미박스(대표 하형석)가 전개하는 K뷰티 브랜드 누니(Nooni)가 대표 제품 ‘애플시드 립오일’을 앞세워 미국과 북유럽 등 글로벌 오프라인 유통망 확대에 속도를 낸다. 온라인에서 확보한 판매 성과를 바탕으로 미국 대형 유통사와 북유럽 리테일 체인까지 입점을 확대하며 글로벌 소비자 접점을 넓히는 모습이다.누니는 지난 8월 미국 백화점 노드스트롬(Nordstrom) 89개 매장에 입점한 데 이어 8월 말 북유럽 주요 리테일 체인 노멀(Normal) 약 300개 매장에서 판매를 시작했다.이달에는 미국 타깃(Target) 1778개 매장",
-"c": "RETAIL",
-"x": "미미박스(대표 하형석)가 전개하는 K뷰티 브랜드 누니(Nooni)가 대표 제품 ‘애플시드 립오일’을 앞세워 미국과 북유럽 등 글로벌 오프라인 유통망 확대에 속도를 낸다. 온라인에서 확보한 판매 성과를 바탕으로 미국 대형 유통사와 북유럽 리테일 체인까지 입점을 확대하며 글로벌 소비자 접점을 넓히는 모습이다.누니는 지난 8월 미국 백화점 노드스트롬(Nordstrom) 89개 매장에 입점한 데 이어 8월 말 북유럽 주요 리테일 체인 노멀(Normal) 약 300개 매장에서 판매를 시작했다.이달에는 미국 타깃(Target) 1778개 매장",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148132_129484_3531_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 9,
-"h": 1,
-"w": "retail",
-"e": [
-"target"
-],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "ac9cfc08214212c7",
-"d": "2026-09-01",
-"t": "지속 가능한 bio-based 패브릭 확장",
-"o": "Expanding sustainable, bio-based fabrics",
-"u": "https://news.google.com/rss/articles/CBMijwFBVV95cUxQckF5V0xDbnV4dmM5NlY3WXgzSzFVT2pIdXdCSWdNbzRFMGVhM3A2MHpHZHZlQzZxREVMbW1Qdl96dE9zY2d5WFMwZWhUZ3lpVC1TZTlEeEZSYnJLWWRsalpRWUlnb1kxMWczWWVSZWJOWG1hX1FGWXc5QVhLMDQ1ZlNac3VOaTFQd2FoOVRsdw?oc=5",
-"s": "Expanding sustainable, bio-based fabrics Specialty Fabrics Review",
-"c": "FABRIC",
-"x": "Expanding sustainable, bio-based fabrics Specialty Fabrics Review",
-"i": "",
-"g": [
-"바이오소재"
-],
-"m": "주제검색 · 신소재",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"주제검색 · 신소재"
-]
-},
-{
-"id": "a9934e69b00e4e7c",
-"d": "2026-09-01",
-"t": "TCL, 보다 쉬운 세탁 및 직물 관리를 위한 스마트 세탁기-건조기 출시",
-"o": "TCL Launches Smart Washer-Dryers for Easier Laundry and Fabric Care",
-"u": "https://news.google.com/rss/articles/CBMihgFBVV95cUxNaEFGNkYzRHBrN1RDVXlGNy04NUd6M25nbGlHRmRkTUYzS0VPZHJvREtFVFlRLVVsa09VazlMY2Rxd3pPd19ZS0FrVmJ1d1FBVGdiRW1wZGRadlpBMGNINFJpWkRfTFRaOHBsandrMVIyYWp1ckUyVkJzSWlweERMdzRMNzlWZw?oc=5",
-"s": "TCL Launches Smart Washer-Dryers for Easier Laundry and Fabric Care Pinoy Metro Geek",
-"c": "FABRIC",
-"x": "TCL Launches Smart Washer-Dryers for Easier Laundry and Fabric Care Pinoy Metro Geek",
-"i": "",
-"g": [],
-"m": "주제검색 · 신소재",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"주제검색 · 신소재"
-]
-},
-{
-"id": "a81f60f190de9d2d",
-"d": "2026-09-01",
-"t": "대만 섬유 혁신가들이 폐기물을 고성능 직물로 전환하다",
-"o": "Taiwan Textile Innovators Turn Waste Streams into High- Performance Fabrics",
-"u": "https://news.google.com/rss/articles/CBMixgFBVV95cUxPOU5CS3BaV2NSdzk5Umlqd25NZWZsbWNlOGRhSE5fUDdZbldoc0Jyd2NiVHRsSGxVZG9fVExSNTZXdl9qckprUWVISlAtb3lyRm01VFJweEhPWGluR0Z1UFZCVjN6SjVPUHpDWjlaX2tnT3NvdkZJUml3TjU4bjlQWjc5VUUxanNBVkZaQ2pxc3BuWEFZd0IwcDVQc1p3NDBTa1RrbHVYdjl5VUF3UWU4ejR0NGE0aERlMGFWbXVleEs3Ty1aMFHSAdIBQVVfeXFMUE1ud05VQzJhLUZ4ZjZDZFJjYXpYXzI0MTY2M1VUWUlhb0s2Z2hzUlRFZm5VUU5qdkd1VnJrRS0tLUttTzl6VW9KVDhCUjFKUWlPODNWOVV0cmRRaFdISkNPLVNyV2h6R2x1TkpybHpDT01hdUpFTFFnanBRY3ZkbGo4ZmtjclVkZ1RXVVVRMnR0OG82aVVfQkYxRFFSSGt4aG8tUnBoalpzcjZmSmhWcFM1amZIb0QxOVdPd3pSWl94Wi1fTWVEc0lnUm5MVU5Oc3B3?oc=5",
-"s": "Taiwan Textile Innovators Turn Waste Streams into High- Performance Fabrics Fibre2Fashion",
-"c": "FABRIC",
-"x": "Taiwan Textile Innovators Turn Waste Streams into High- Performance Fabrics Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 10,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "99312237e1d4b6a3",
-"d": "2026-09-01",
-"t": "소재 혁신으로 직물의 형태가 바뀌다",
-"o": "Material Innovation Reshapes Textiles",
-"u": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNU0dIRmM2c1hISDBPWjlfLWRGcy1hMC1ITHdLUlMzYWFiY0VCYnhBWlhFMmlqSVdBR0dFS3ZsWW9ZU2VTeHNJM25qVFFGU0FCY2N6RENjSVNnd255TVo3SGFyLXluWnZUS09pdlROQ3ZoWkY4NkhLd1JsT0ZyQXJKRXh6RG1JUXhPc3N6RmkwWk9NUQ?oc=5",
-"s": "Material Innovation Reshapes Textiles textileexcellence.com",
-"c": "ETC",
-"x": "Material Innovation Reshapes Textiles textileexcellence.com",
-"i": "",
-"g": [],
-"m": "주제검색 · 염색가공",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"주제검색 · 염색가공"
-]
-},
-{
-"id": "972c45b510a45e5a",
-"d": "2026-09-01",
-"t": "‘Texhibition 이스탄불’ 9월 9일 개막",
-"o": "‘Texhibition 이스탄불’ 9월 9일 개막",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81773",
-"s": "튀르키예 섬유산업의 원단과 부자재를 한자리에서 선보이는 ‘Texhibition Istanbul’이 오는 9월9일부터 11일까지 이스탄불 엑스포센터에서 열린다.올해 10회를 맞는 이번 행사에는 500개 이상의 기업이 참가해 2027~28 가을 · 겨울(F/W) 시즌을 겨냥한 원단과 소재, 부자재 등을 선보일 예정이다.전시 품목은 직물과 니트 원단, 원사, 데님, 섬유 부자재, 프린팅, 자수, 인조가죽 등으로 구성된다. 주최 측은 원단과 소재를 직접 비교하고 생산업체와 상담할 수 있도록 품목별로 전시 공간을 운영한다. 공식 배치도에는",
-"c": "FABRIC",
-"x": "튀르키예 섬유산업의 원단과 부자재를 한자리에서 선보이는 ‘Texhibition Istanbul’이 오는 9월9일부터 11일까지 이스탄불 엑스포센터에서 열린다.올해 10회를 맞는 이번 행사에는 500개 이상의 기업이 참가해 2027~28 가을 · 겨울(F/W) 시즌을 겨냥한 원단과 소재, 부자재 등을 선보일 예정이다.전시 품목은 직물과 니트 원단, 원사, 데님, 섬유 부자재, 프린팅, 자수, 인조가죽 등으로 구성된다. 주최 측은 원단과 소재를 직접 비교하고 생산업체와 상담할 수 있도록 품목별로 전시 공간을 운영한다. 공식 배치도에는",
-"i": "https://cdn.itnk.co.kr/news/photo/202609/81773_53141_5649.jpg",
-"g": [
-"데님"
-],
-"m": "국제섬유신문",
-"r": "국내",
-"v": 11,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"국제섬유신문"
-]
-},
-{
-"id": "8c787fea7fb0d8b8",
-"d": "2026-09-01",
-"t": "검색은 끝났다…AI가 고르는 화장품 ‘GEO 전쟁’",
-"o": "검색은 끝났다…AI가 고르는 화장품 ‘GEO 전쟁’",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148130",
-"s": "생성형 인공지능(AI)이 소비자의 뷰티 제품 탐색과 구매 과정에 개입하면서 브랜드의 디지털 마케팅 전략도 달라지고 있다. 검색 결과 상단 노출을 목표로 한 검색엔진최적화(SEO)를 넘어 챗GPT와 제미나이, 퍼플렉시티 등 생성형 AI의 답변에 브랜드와 제품이 포함되도록 관리하는 ‘생성형 엔진 최적화(GEO)’가 새로운 과제로 떠올랐다.GEO는 생성형 AI가 이용자의 질문에 답변할 때 특정 브랜드나 제품을 언급하거나 관련 웹페이지를 근거로 인용하도록 콘텐츠와 정보 구조를 관리하는 전략이다. 기존 SEO가 검색 결과에 나열되는 웹페이지",
-"c": "RETAIL",
-"x": "생성형 인공지능(AI)이 소비자의 뷰티 제품 탐색과 구매 과정에 개입하면서 브랜드의 디지털 마케팅 전략도 달라지고 있다. 검색 결과 상단 노출을 목표로 한 검색엔진최적화(SEO)를 넘어 챗GPT와 제미나이, 퍼플렉시티 등 생성형 AI의 답변에 브랜드와 제품이 포함되도록 관리하는 ‘생성형 엔진 최적화(GEO)’가 새로운 과제로 떠올랐다.GEO는 생성형 AI가 이용자의 질문에 답변할 때 특정 브랜드나 제품을 언급하거나 관련 웹페이지를 근거로 인용하도록 콘텐츠와 정보 구조를 관리하는 전략이다. 기존 SEO가 검색 결과에 나열되는 웹페이지",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148130_129480_2621_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "8afcbef6ca5b3088",
-"d": "2026-09-01",
-"t": "ICAC는 니트와 직조 의류가 2025년 전 세계 섬유 수출의 거의 60%를 차지했다고 밝혔습니다.",
-"o": "Knit and woven garments accounted for nearly 60% of global textile exports in 2025, ICAC says",
-"u": "https://www.ecotextile.com/2026090165286/radar/knit-and-woven-garments-accounted-for-nearly-60-of-global-textile-exports-in-2025-icac-says/",
-"s": "Data from the International Cotton Advisory Committee (ICAC) says knit and woven garments accounted for nearly 60% of world textile […] The post Knit and woven garments accounted for nearly 60% of global textile exports in 2025, ICAC says appeared first on Ecotextile News .",
-"c": "FABRIC",
-"x": "Data from the International Cotton Advisory Committee (ICAC) says knit and woven garments accounted for nearly 60% of world textile […] The post Knit and woven garments accounted for nearly 60% of global textile exports in 2025, ICAC says appeared first on Ecotextile News .",
-"i": "",
-"g": [],
-"m": "Ecotextile News",
-"r": "해외",
-"v": 13,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Ecotextile News"
-]
-},
-{
-"id": "85a71e4362f4715b",
-"d": "2026-09-01",
-"t": "혁신과 특수 직물이 Balavigna의 성장 여정을 주도합니다",
-"o": "Innovation and Specialized Fabrics Drive Balavigna’s Growth Journey",
-"u": "https://www.indiantextilemagazine.in/innovation-and-specialized-fabrics-drive-balavignas-growth-journey/",
-"s": "By MK Prabhakar Balavigna Weaving Mills Private Limited has established itself as a leading manufacturer of high-quality woven fabrics through its strong focus on innovation, specialization and customer-centric manufacturing. Part… The post Innovation and Specialized Fabrics Drive Balavigna’s Growth",
-"c": "FABRIC",
-"x": "By MK Prabhakar Balavigna Weaving Mills Private Limited has established itself as a leading manufacturer of high-quality woven fabrics through its strong focus on innovation, specialization and customer-centric manufacturing. Part of the diversified Balavigna Group of Companies, the company has manufacturing divisions in weaving, home textiles and garments, industrial fabrics, and weaving preparatory and wider-width fabrics, all located in Dindigul, Tamil Nadu. Over the years, it has successfully expanded its presence across several important international markets. Dr. M. Prabhu, Founder & Executive Director During an exclusive interaction at the company’s booth at the recently held Bharat Tex 2026 trade fair, Dr. M. Prabhu, Founder & Executive Director, shared insights into the company’s journey, product portfolio, manufacturing strengths, innovation initiatives, participation in the exhibition and future growth plans. A Remarkable Growth Story Balavigna was founded in 1995 by Dr. Prabhu, a textile technocrat who completed his B.S. in Textile Engineering in the United States, M.Tech in Textiles from Kanpur University and later earned a Ph.D. in Sustainable Textiles. Recalling the company’s humble beginnings, he said, “I am a first-generation entrepreneur. When we started, we had a turnover of around Rs. 24 lakh per annum. Today, we have grown into a Rs. 500-crore company. Similarly, we have expanded from a 12-loom unit to a 400-loom operation, with a total weaving capacity of nearly six million meters per month.” Apart from its four major manufacturing divisions, the group also operates two sister concerns—Shri Shanmuga Textiles and Soundaraja Texports. “At Shri Shanmuga Textiles, we have around 60 looms catering mainly to the Karur market with coarser fabrics. Soundar",
-"i": "https://www.indiantextilemagazine.in/wp-content/uploads/2026/09/Balavigna.png",
-"g": [
-"제직"
-],
-"m": "Indian Textile Magazine",
-"r": "해외",
-"v": 13,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Indian Textile Magazine"
-]
-},
-{
-"id": "82595e922ed016ec",
-"d": "2026-09-01",
-"t": "Lakshmi Mills의 FY26 순손실은 세금 비용 급증으로 Rs 15.55 Crore로 확대됩니다.",
-"o": "Lakshmi Mills’ FY26 Net Loss Widens to Rs 15.55 Crore as Tax Expense Surges",
-"u": "https://apparelresources.com/business-news/manufacturing/lakshmi-mills-fy26-net-loss-widens-rs-15-55-crore-tax-expense-surges/",
-"s": "The Lakshmi Mills Company Ltd, one of the oldest yarn and fabric manufacturing companies reported a net loss of Rs 15.55 crore (US $1.64 million) in FY26, widening significantly from a loss of Rs 4.68 crore (US $0.49 million) in FY25, despite the company turning profitable at the pre-tax level. The ",
-"c": "FABRIC",
-"x": "The Lakshmi Mills Company Ltd, one of the oldest yarn and fabric manufacturing companies reported a net loss of Rs 15.55 crore (US $1.64 million) in FY26, widening significantly from a loss of Rs 4.68 crore (US $0.49 million) in FY25, despite the company turning profitable at the pre-tax level. The textile company reported a […] The post Lakshmi Mills’ FY26 Net Loss Widens to Rs 15.55 Crore as Tax Expense Surges appeared first on Apparel Resources .",
-"i": "https://apparelresources.com/wp-content/uploads/2026/09/Lakshmi-Mills’-FY26-Net-Loss-Widens-to-Rs-15.55-Crore-as-Tax-Expense-Surges.jpg",
-"g": [],
-"m": "Apparel Resources",
-"r": "해외",
-"v": 9,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Apparel Resources"
-]
-},
-{
-"id": "7d4c283a7b354aa7",
-"d": "2026-09-01",
-"t": "독일은 섬유 폐기물이 증가하면서 순환성 문제에 직면해 있습니다.",
-"o": "Germany faces a circularity challenge as textile waste rises",
-"u": "https://textiletoday.com.bd/germany-faces-a-circularity-challenge-as-textile-waste-rises",
-"s": "Germany’s textile recycling sector is facing growing pressure as rising textile waste, contamination and weaker reuse markets challenge the country’s circular economy. Recyclers are struggling with hi...",
-"c": "MATERIAL",
-"x": "Germany’s textile recycling sector is facing growing pressure as rising textile waste, contamination and weaker reuse markets challenge the country’s circular economy. Recyclers are struggling with higher operating costs while demand for used textiles and recycled materials remains under pressure. Figure:The German Federation for Secondary Raw Materials and Waste Management (BVSE) is demanding a binding 30% recycled-content quota and reforms to extended producer responsibility (EPR). Germany consumes nearly 19 kg of textiles per person each year, equivalent to about 1.56 million tons of textiles annually. Around 1 million tons of textile waste are collected each year, highlighting the scale of the material flow that needs to be sorted, reused or recycled. The latest industry data shows that the quality of collected textiles has also deteriorated. Contaminants and non-textile waste in collection containers have increased from 10.8% in 2018 to between 15% and 20% today. Higher contamination makes sorting more expensive and reduces the share of material suitable for reuse or recycling. At the same time, the share of collected textiles designated for reuse fell from 62% in 2018 to 44% in 2023. Mechanical and material recycling increased to 35%, while thermal recovery, including incineration, nearly doubled from 12% to 21%. The industry is therefore calling for stronger economic incentives and policy support. The German Federation for Secondary Raw Materials and Waste Management (BVSE) is demanding a binding 30% recycled-content quota and reforms to extended producer responsibility (EPR). The policy direction is also changing at the EU level. New textile EPR rules are being developed to make producers financially responsible for the collection, sorting, reuse and recycling o",
-"i": "/storage/uploads/2026/9/germanyfacesacirc_17882380925279.png",
-"g": [
-"리사이클"
-],
-"m": "Textile Today",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Today"
-]
-},
-{
-"id": "715277a83f13f369",
-"d": "2026-09-01",
-"t": "브라운브레스, 알파드라이브원과 ‘UNFORCED LIFE’ 캠페인",
-"o": "브라운브레스, 알파드라이브원과 ‘UNFORCED LIFE’ 캠페인",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148125",
-"s": "브라운브레스(BROWNBREATH)가 글로벌 신인 보이그룹 알파드라이브원(ALPHA DRIVE ONE)을 2026 FW 시즌 전속 모델로 발탁했다. 신인 보이그룹과의 협업을 통해 브랜드가 지향하는 자유로운 이미지를 강화하고 빈티지 스트리트 무드를 앞세운 시즌 상품군을 선보인다.첫 번째 FALL 캠페인은 9월 1일부터 순차적으로 공개한다. ‘UNFORCED LIFE’를 콘셉트로 도시의 정해진 질서에서 벗어난 소년들이 밤거리를 달리며 자유를 찾아가는 이야기를 담았다. 방치된 듯한 공간과 멤버들이 함께 시간을 보내는 모습을 활용해 캠페인",
-"c": "RETAIL",
-"x": "브라운브레스(BROWNBREATH)가 글로벌 신인 보이그룹 알파드라이브원(ALPHA DRIVE ONE)을 2026 FW 시즌 전속 모델로 발탁했다. 신인 보이그룹과의 협업을 통해 브랜드가 지향하는 자유로운 이미지를 강화하고 빈티지 스트리트 무드를 앞세운 시즌 상품군을 선보인다.첫 번째 FALL 캠페인은 9월 1일부터 순차적으로 공개한다. ‘UNFORCED LIFE’를 콘셉트로 도시의 정해진 질서에서 벗어난 소년들이 밤거리를 달리며 자유를 찾아가는 이야기를 담았다. 방치된 듯한 공간과 멤버들이 함께 시간을 보내는 모습을 활용해 캠페인",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148125_129475_4042_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 7,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "6e3e19249f3c81ee",
-"d": "2026-09-01",
-"t": "랑방컬렉션, 김윤아·김신록·강말금과 만났다…‘변치 않는 우아함’",
-"o": "랑방컬렉션, 김윤아·김신록·강말금과 만났다…‘변치 않는 우아함’",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148084",
-"s": "한섬이 전개하는 랑방컬렉션(LANVIN COLLECTION)이 서로 다른 분야에서 자신만의 세계를 구축해온 여성들과 만나 브랜드가 추구하는 ‘우아함’을 새롭게 풀어낸다.랑방컬렉션은 2026 FW 시즌을 맞아 ‘THE LINK’를 테마로 한 캠페인을 공개했다. 이번 캠페인에는 배우 김신록과 강말금, 가수 김윤아가 참여해 각자의 시선과 삶의 태도를 랑방컬렉션의 브랜드 정체성과 연결했다.‘THE LINK’는 지적인 통찰과 주체적인 삶의 태도를 바탕으로 자신만의 가치를 만들어온 인물과 브랜드의 연결에 초점을 맞췄다. 각자의 영역에서 뚜렷한",
-"c": "RETAIL",
-"x": "한섬이 전개하는 랑방컬렉션(LANVIN COLLECTION)이 서로 다른 분야에서 자신만의 세계를 구축해온 여성들과 만나 브랜드가 추구하는 ‘우아함’을 새롭게 풀어낸다.랑방컬렉션은 2026 FW 시즌을 맞아 ‘THE LINK’를 테마로 한 캠페인을 공개했다. 이번 캠페인에는 배우 김신록과 강말금, 가수 김윤아가 참여해 각자의 시선과 삶의 태도를 랑방컬렉션의 브랜드 정체성과 연결했다.‘THE LINK’는 지적인 통찰과 주체적인 삶의 태도를 바탕으로 자신만의 가치를 만들어온 인물과 브랜드의 연결에 초점을 맞췄다. 각자의 영역에서 뚜렷한",
-"i": "http://www.ktnews.com/news/thumbnail/202608/148084_129398_4024_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 10,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
 ]
 }
 ]
