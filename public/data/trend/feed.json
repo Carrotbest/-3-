@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-10-16T23:06:44+00:00",
+"generated_at": "2026-10-17T22:44:42+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
-"filtered_out": 3816,
+"filtered_out": 3850,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 21,
-"scanned": 725,
-"kept": 286,
-"material": 213
+"scanned": 671,
+"kept": 265,
+"material": 195
 },
 "30": {
 "sources": 22,
-"scanned": 2891,
-"kept": 1095,
-"material": 803
+"scanned": 2810,
+"kept": 1063,
+"material": 785
 }
 }
 },
@@ -25,23 +25,23 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 499
+"n": 496
 },
 {
 "key": "RETAIL",
-"n": 383
+"n": 380
 },
 {
 "key": "FABRIC",
-"n": 244
+"n": 245
 },
 {
 "key": "ETC",
-"n": 205
+"n": 209
 },
 {
 "key": "CHEMICAL",
-"n": 106
+"n": 107
 },
 {
 "key": "YARN",
@@ -51,23 +51,23 @@
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 428
+"n": 425
 },
 {
 "key": "Fibre2Fashion",
-"n": 241
+"n": 236
 },
 {
 "key": "Ecotextile News",
-"n": 125
+"n": 127
 },
 {
 "key": "Textile Focus",
-"n": 116
+"n": 122
 },
 {
 "key": "국제섬유신문",
-"n": 85
+"n": 84
 },
 {
 "key": "Innovation in Textiles",
@@ -87,7 +87,7 @@
 },
 {
 "key": "주제검색 · 신소재",
-"n": 43
+"n": 44
 },
 {
 "key": "주제검색 · 국내소재",
@@ -137,15 +137,15 @@
 "tags": [
 {
 "key": "리사이클",
-"n": 107
+"n": 108
 },
 {
 "key": "방글라데시",
-"n": 105
+"n": 106
 },
 {
 "key": "전시회",
-"n": 66
+"n": 67
 },
 {
 "key": "데님",
@@ -160,12 +160,12 @@
 "n": 28
 },
 {
-"key": "바이오소재",
-"n": 26
+"key": "T2T",
+"n": 27
 },
 {
-"key": "T2T",
-"n": 26
+"key": "바이오소재",
+"n": 27
 },
 {
 "key": "스판덱스",
@@ -197,7 +197,7 @@
 },
 {
 "key": "효성",
-"n": 14
+"n": 15
 },
 {
 "key": "보온",
@@ -232,15 +232,15 @@
 "n": 7
 },
 {
-"key": "인도네시아",
-"n": 7
-},
-{
 "key": "자카드",
 "n": 6
 },
 {
 "key": "DPP",
+"n": 6
+},
+{
+"key": "인도네시아",
 "n": 6
 },
 {
@@ -280,11 +280,11 @@
 "n": 5
 },
 {
-"key": "환편",
+"key": "원사가격",
 "n": 4
 },
 {
-"key": "생분해",
+"key": "환편",
 "n": 4
 },
 {
@@ -304,12 +304,12 @@
 },
 {
 "key": "target",
-"n": 5,
+"n": 4,
 "label": "Target"
 },
 {
 "key": "amazon",
-"n": 4,
+"n": 3,
 "label": "Amazon"
 },
 {
@@ -331,27 +331,10 @@
 "key": "kohls",
 "n": 1,
 "label": "Kohl's"
-},
-{
-"key": "walmart",
-"n": 1,
-"label": "Walmart"
 }
 ]
 },
 "daily": [
-{
-"date": "2026-09-17",
-"total": 37,
-"by": {
-"MATERIAL": 11,
-"RETAIL": 16,
-"FABRIC": 3,
-"CHEMICAL": 3,
-"YARN": 1,
-"ETC": 3
-}
-},
 {
 "date": "2026-09-18",
 "total": 37,
@@ -435,10 +418,10 @@
 },
 {
 "date": "2026-09-25",
-"total": 20,
+"total": 21,
 "by": {
 "RETAIL": 4,
-"MATERIAL": 12,
+"MATERIAL": 13,
 "FABRIC": 2,
 "ETC": 1,
 "CHEMICAL": 1
@@ -670,12 +653,22 @@
 },
 {
 "date": "2026-10-16",
-"total": 37,
+"total": 39,
 "by": {
 "RETAIL": 16,
-"MATERIAL": 12,
+"MATERIAL": 14,
 "FABRIC": 8,
 "YARN": 1
+}
+},
+{
+"date": "2026-10-17",
+"total": 8,
+"by": {
+"ETC": 4,
+"MATERIAL": 2,
+"CHEMICAL": 1,
+"FABRIC": 1
 }
 }
 ],
@@ -684,8 +677,8 @@
 "tag": "리사이클",
 "label_en": "recycled",
 "recent": 69,
-"prior": 38,
-"delta": 31,
+"prior": 39,
+"delta": 30,
 "weeks": [
 0,
 0,
@@ -698,36 +691,15 @@
 16,
 13,
 26,
-12
-]
-},
-{
-"tag": "방글라데시",
-"label_en": "bangladesh",
-"recent": 66,
-"prior": 39,
-"delta": 27,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-23,
-20,
-15,
-14,
-24,
-9
+13
 ]
 },
 {
 "tag": "바이오소재",
 "label_en": "bio-based",
-"recent": 25,
+"recent": 26,
 "prior": 1,
-"delta": 24,
+"delta": 25,
 "weeks": [
 0,
 0,
@@ -740,15 +712,36 @@
 7,
 4,
 5,
-9
+10
+]
+},
+{
+"tag": "방글라데시",
+"label_en": "bangladesh",
+"recent": 65,
+"prior": 41,
+"delta": 24,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+22,
+20,
+15,
+14,
+24,
+11
 ]
 },
 {
 "tag": "전시회",
 "label_en": "performance days",
 "recent": 44,
-"prior": 22,
-"delta": 22,
+"prior": 23,
+"delta": 21,
 "weeks": [
 0,
 0,
@@ -761,15 +754,15 @@
 8,
 12,
 9,
-14
+15
 ]
 },
 {
 "tag": "데님",
 "label_en": "denim",
-"recent": 31,
-"prior": 17,
-"delta": 14,
+"recent": 32,
+"prior": 16,
+"delta": 16,
 "weeks": [
 0,
 0,
@@ -777,12 +770,12 @@
 0,
 0,
 0,
-12,
+11,
 6,
 5,
 13,
 8,
-4
+5
 ]
 },
 {
@@ -807,6 +800,27 @@
 ]
 },
 {
+"tag": "효성",
+"label_en": "hyosung",
+"recent": 14,
+"prior": 1,
+"delta": 13,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+1,
+0,
+2,
+4,
+0,
+8
+]
+},
+{
 "tag": "추적성",
 "label_en": "traceability",
 "recent": 15,
@@ -825,27 +839,6 @@
 0,
 8,
 6
-]
-},
-{
-"tag": "효성",
-"label_en": "hyosung",
-"recent": 13,
-"prior": 1,
-"delta": 12,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-1,
-0,
-2,
-4,
-0,
-7
 ]
 },
 {
@@ -953,6 +946,12 @@
 "first": "2026-09-28"
 },
 {
+"tag": "생분해",
+"label_en": "biodegradable",
+"n": 3,
+"first": "2026-09-28"
+},
+{
 "tag": "GRS",
 "label_en": "grs",
 "n": 3,
@@ -1014,6 +1013,183 @@
 }
 ],
 "articles": [
+{
+"id": "e6c2ade39e4674f1",
+"d": "2026-10-17",
+"t": "몰도바는 유럽에서 가장 빠르게 성장하는 스타트업 생태계로 선정되어 글로벌 순위에서 8계단 상승했습니다.",
+"o": "Moldova Named Europe’s Fastest-Growing Startup Ecosystem, Climbing Eight Places in Global Ranking",
+"u": "https://textilefocus.com/moldova-named-europes-fastest-growing-startup-ecosystem-climbing-eight-places-in-global-ranking/",
+"s": "Startup Moldova Foundation received an international award on behalf of Moldova’s startup ecosystem after the country was named Europe’s fastest-growing startup ecosystem at the Startup Ecosystem Awards 2026. According to StartupBlink, Moldova’s population-adjusted Global Startup Ecosystem Index sco",
+"c": "ETC",
+"x": "Startup Moldova Foundation received an international award on behalf of Moldova’s startup ecosystem after the country was named Europe’s fastest-growing startup ecosystem at the Startup Ecosystem Awards 2026. According to StartupBlink, Moldova’s population-adjusted Global Startup Ecosystem Index score increased by 91.9% between the 2025 and 2026 editions , the highest growth rate in Europe and the third-highest worldwide. The acceleration also translated into a significant improvement in Moldova’s international position. In the Global Startup Ecosystem Index 2026 , Moldova climbed eight places to rank 82nd globally and 21st in Eastern Europe . Chișinău ranks 464th worldwide and 35th in Eastern Europe , placing the capital among the world’s top 500 startup cities. StartupBlink describes Moldova as combining regulatory modernization, a founder-friendly business environment, EU-oriented reforms and a growing pool of technical talent . Its Global Startup Ecosystem Index evaluates ecosystems across three broad dimensions — startup quantity, ecosystem quality and the business environment — and in 2026 covers more than 1,500 cities and 120 countries. “This recognition is important because it shows that Moldova’s startup ecosystem is not growing around one company, one programme or one event — the ecosystem itself is becoming stronger. Moldova has the highest density of technological startups per capita in Europe and we see more founders building products for international markets, more investors looking at Moldova and a much denser network of accelerators, mentors, technology communities and partners supporting companies at different stages of growth. Moldova’s small domestic market has always pushed our entrepreneurs to think globally from the beginning. What is changing now ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/unnamed-1.jpg",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "dd7d300d37fec47b",
+"d": "2026-10-17",
+"t": "Textile-to-textile 재활용은 상업적 규모 달성에 있어 주요 경제 및 인프라 장벽에 직면해 있습니다.",
+"o": "Textile-to-textile recycling faces major economic and infrastructure barriers to achieving commercial scale",
+"u": "https://textilefocus.com/textile-to-textile-recycling-faces-major-economic-and-infrastructure-barriers-to-achieving-commercial-scale/",
+"s": "Textile-to-textile recycling has made significant technological progress but the industry still faces major economic and infrastructure barriers to achieving commercial scale, according to a 19-page report called “Textile-to-textile recycling: the business case”, from the global business information",
+"c": "MATERIAL",
+"x": "Textile-to-textile recycling has made significant technological progress but the industry still faces major economic and infrastructure barriers to achieving commercial scale, according to a 19-page report called “Textile-to-textile recycling: the business case”, from the global business information company Textiles Intelligence. Executive attention to sustainability has declined as companies focus more closely on margins, budgets and investment returns. At the same time, climate change is affecting supply chains, raw material prices remain volatile, and regulations relating to textile waste and circularity are becoming more stringent. Consequently, sustainability is increasingly being viewed as a financial and strategic issue rather than solely an environmental one. Textile-to-textile recycling can provide three main business benefits, namely: creating new revenue opportunities through circular products; reducing exposure to supply chain risks; and helping companies to comply with emerging regulations. However, the business case remains challenging because recycled fibres are generally more expensive than virgin alternatives and the infrastructure needed to collect, sort and process textile waste is still developing. Less than 1% of global fibre production comes from recycled pre-consumer and post-consumer textiles. Most recycled fibre is derived from other sources, particularly plastic bottles. Furthermore, only around 11% of post-consumer textile waste was collected and sorted into streams suitable for recycling last year. This limits the availability of suitable feedstock for textile-to-textile recycling. Nevertheless, technological developments in textile-to-textile recycling are continuing. Chemical recycling offers the potential to produce fibres with properties ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/Tvc-2026-10-08T112028.257-800x400-1.webp",
+"g": [
+"T2T",
+"리사이클"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "d8940268c2c6d43d",
+"d": "2026-10-17",
+"t": "Bangladesh의 섬유 미래는 고급 가공 기술에 달려 있습니다: Rolf Erik Schoeler, Benninger",
+"o": "Bangladesh’s Textile Future Lies in Advanced Processing Technology: Rolf Erik Schoeler, Benninger",
+"u": "https://textilefocus.com/bangladeshs-textile-future-lies-in-advanced-processing-technology-rolf-erik-schoeler-benninger/",
+"s": "Benninger is a Swiss textile machinery manufacturer with more than 160 years of experience in developing advanced textile processing solutions. The company specializes in machinery for processing woven and knitted fabrics, including dyeing and finishing, serving textile manufacturers worldwide. With",
+"c": "CHEMICAL",
+"x": "Benninger is a Swiss textile machinery manufacturer with more than 160 years of experience in developing advanced textile processing solutions. The company specializes in machinery for processing woven and knitted fabrics, including dyeing and finishing, serving textile manufacturers worldwide. With its latest technologies, including solutions for synthetic fibers and blended fabrics, Benninger aims to support the textile industry’s evolving needs and help manufacturers improve efficiency, quality, and competitiveness. In an exclusive interview with Textile Focus, Rolf Erik Schoeler, Global Head of Sales & Marketing at Benninger, shared his views on Bangladesh’s textile and apparel industry, current energy challenges, emerging opportunities in synthetic fibers, the adoption of advanced European technologies, and Benninger’s commitment to the Bangladesh market. A brief discussion is given below. Photo: Rolf Erik Schoeler, Global Head of Sales & Marketing, Benninger Textile Focus: How do you view the current position and future prospects of Bangladesh’s textile and apparel industry? Rolf Erik Schoeler: Bangladesh is one of the four major players in global textile and garment manufacturing, alongside China, India, and Vietnam. Despite the energy challenges and disruptions the country faces, I am confident that the people of Bangladesh will find solutions. They are already addressing these issues, and I believe the industry’s growth story will continue. I expect conventional cotton and lightweight blends to shift in market position, while Bangladesh increasingly explores opportunities in synthetic fibers and blended fabrics. The country has a fantastic workforce, a large production capacity, and highly competitive manufacturing costs. These strengths make Bangladesh an impo",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/DSC07218.JPG-scaled.jpeg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 17,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "a32fa0f926dccb60",
+"d": "2026-10-17",
+"t": "Lululemon은 책임이 커짐에 따라 목표 범위를 좁힙니다.",
+"o": "Lululemon narrows targets as accountability grows",
+"u": "https://www.ecotextile.com/2026101766546/news/fashion-retail/lululemon-narrows-targets-as-accountability-grows/",
+"s": "Senior VP says tighter scrutiny forces apparel businesses to prove sustainability’s value through delivery, not another round of ambitious promises […] The post Lululemon narrows targets as accountability grows appeared first on Ecotextile News .",
+"c": "ETC",
+"x": "Senior VP says tighter scrutiny forces apparel businesses to prove sustainability’s value through delivery, not another round of ambitious promises […] The post Lululemon narrows targets as accountability grows appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/10/Lululemon_store.jpg",
+"g": [],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
+]
+},
+{
+"id": "7efb7870bc0c0ab9",
+"d": "2026-10-17",
+"t": "2027년 섬유산업: 수요 약세와 비용 상승 속에서 마진 보호",
+"o": "Textiles in 2027: Protecting Margins Amid Weak Demand and Rising Costs",
+"u": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxQTHB4NFdlM2xKTFdBa0lJeTVsT0Q5YXZ4TXV6Mk1fMEFQZDBIbFlhemxzWUNYZnYzZW8yZmJxd0RPV2R6NU5jOHJjRnZjR3E3cEdtN0JZZm9rMW9oaDluNm5rQnM0S191WUh3VHJCSXczWHMtR2JyRlFnNkdRald3VW1HWkQ3NWhmb2hjSTljYk9pMDFWLWVycTZZWC16YzE3X19kVFo5RjVGckZLRmZKYUI0UmZQTUZYbndfV3VLY0RNRmFEQ3JBNjdORXk2Sk5RNGJFbmpsYzRnUDdVaXVV?oc=5",
+"s": "Textiles in 2027: Protecting Margins Amid Weak Demand and Rising Costs Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Textiles in 2027: Protecting Margins Amid Weak Demand and Rising Costs Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "1d1dd42e689eaca3",
+"d": "2026-10-17",
+"t": "NUB 텍스타일 클럽, 텍스타일 프리미어 리그(TPL) 시즌 1 개최",
+"o": "NUB Textile Club Organizes Textile Premier League (TPL) Season 1",
+"u": "https://textilefocus.com/nub-textile-club-organizes-textile-premier-league-tpl-season-1/",
+"s": "Northern University Bangladesh (NUB): The NUB Textile Club organized the Textile Premier League (TPL) Season 1, bringing together seven teams for a competitive sporting event aimed at promoting sportsmanship, teamwork, and unity among textile engineering students. In the tournament, TEX ENIGMA 48 em",
+"c": "ETC",
+"x": "Northern University Bangladesh (NUB): The NUB Textile Club organized the Textile Premier League (TPL) Season 1 , bringing together seven teams for a competitive sporting event aimed at promoting sportsmanship, teamwork, and unity among textile engineering students. In the tournament, TEX ENIGMA 48 emerged as the champion, while TEXTILE TITANS secured the runner-up position. The competition provided students with an opportunity to demonstrate their sporting skills, team spirit, and enthusiasm beyond academic activities. The event was attended by Prof. Dr. (Engr.) Md. Mostafizur Rahman , Dean, Faculty of Science and Engineering; G. M. Faysal , Head and Associate Professor, Department of Textile Engineering; Md. Nazmul Islam and Md. Rashel Hawlader Assistant Professor and Coordinator. Through this initiative, NUB Textile Club highlighted the importance of extracurricular activities in developing leadership, strengthening student relationships, and fostering a culture of healthy competition within the university community. The successful completion of TPL Season 1 marks an initiative to encourage sports and promote stronger connections among students of the Department of Textile Engineering at NUB. The post NUB Textile Club Organizes Textile Premier League (TPL) Season 1 appeared first on Textile Focus .",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/855038236_1127776899779720_6890034369403547314_n.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "1b70e0dac767e56f",
+"d": "2026-10-17",
+"t": "Gold Girl Co.와 Officina39는 색다른 소재를 데님의 새로운 언어로 전환합니다.",
+"o": "Gold Girl Co. and Officina39 turn unconventional materials into a new language for denim",
+"u": "https://textilefocus.com/gold-girl-co-and-officina39-turn-unconventional-materials-into-a-new-language-for-denim/",
+"s": "At Kingpins Amsterdam, on 14th and 15th October, Gold Girl Co. and Officina39 unveil RENEGADE RENAISSANCE, an experimental collaboration exploring the relationship between material and meaning through two conceptual garments: Marble Dreams and Midnight Journey. Conceived creatively by Marta and Glen",
+"c": "FABRIC",
+"x": "At Kingpins Amsterdam, on 14 th and 15 th October , Gold Girl Co. and Officina39 unveil RENEGADE RENAISSANCE , an experimental collaboration exploring the relationship between material and meaning through two conceptual garments: Marble Dreams and Midnight Journey . Conceived creatively by Marta and Glenda Goldschmied, founders of Gold Girl Co., the project asks how unconventional materials can move beyond their original purpose to express ideas of permanence, identity, ambition, and the paths we create through life. Officina39 acts as the project’s technical engine and creative enabler, translating the sisters’ vision into physical garments through chemistry, textile know-how, and material experimentation. Photo: Andrea Venier, Managing Director, Officina39, with Marta and Glenda Goldschmied, founders of Gold Girl Co. MARBLE DREAMS – What if fashion were made to endure? Created using marble dust, Marble Dreams explores permanence, longevity and identity in a culture increasingly defined by disposability. Inspired by the enduring presence of classical sculpture, it transforms a material associated with strength and monumentality into something intimately connected to the body. The piece asks whether beauty can be separated from durability – and whether an object that survives trends can become an extension of the person who wears it. For Officina39, the experiment also points toward future, more scalable applications rooted in the same philosophy: making longevity a creative value as well as a technical and commercial one. “Marble has always represented permanence, history and something built to outlast us,” says Marta Goldschmied, Co-Founder of Gold Girl Co. “We wanted to bring that idea into clothing and ask whether fashion can create objects that stay with us long en",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/Andrea-Venier-Managing-Director-Officina39-with-Marta-and-Glenda-Goldschmied-founders-of-Gold-Girl-Co.jpg",
+"g": [
+"데님"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "03f69d422902082f",
+"d": "2026-10-17",
+"t": "DLF Malls, 뷰티 리테일을 발견, 표현 및 경험의 세계로 변화시키는 BeYOUtiful의 세 번째 에디션 공개",
+"o": "DLF Malls Unveils the Third Edition of BeYOUtiful, Transforming Beauty Retail into a World of Discovery, Expression and Experience",
+"u": "https://textilefocus.com/dlf-malls-unveils-the-third-edition-of-beyoutiful-transforming-beauty-retail-into-a-world-of-discovery-expression-and-experience/",
+"s": "The multi-property campaign brings together 200+ leading beauty, wellness and lifestyle brands and 20+ experiential activations across DLF Malls DLF Malls, one of India’s leading retail and lifestyle destinations, announces the third edition of BeYOUtiful, its flagship beauty-led campaign, taking pl",
+"c": "ETC",
+"x": "The multi-property campaign brings together 200+ leading beauty, wellness and lifestyle brands and 20+ experiential activations across DLF Malls DLF Malls, one of India’s leading retail and lifestyle destinations, announces the third edition of BeYOUtiful, its flagship beauty-led campaign, taking place from 25 September to 11 October 2026 across DLF Mall of India, Noida; DLF Promenade, Delhi; DLF Avenue, Delhi; DLF Midtown Plaza and DLF Summit Plaza. Built around the thought of redefining beauty retail through discovery, experimentation and personalised experiences, BeYOUtiful 2026 reflects the evolving expectations of today’s beauty consumer. As consumers increasingly seek expert guidance, hands-on experiences and personalised recommendations, the campaign transforms DLF Malls into immersive destinations where beauty can be discovered, experienced and explored beyond the transaction. The campaign brings together 200+ participating brands and 20+ brand-led events and experiences, supported by on-ground activations, digital amplification and influencer engagement. Leading beauty and personal care names including Sephora, Nykaa Luxe, M·A·C, TIRA, SS Beauty, Armani Beauty, Bobbi Brown and KIKO, among others, are participating across the campaign. Consumers can look forward to an experiential calendar featuring Signature Glam Masterclasses, Fragrance Layering, Grooming for Men, Ayurvedic Skincare Consultations, Wellness Experiences, Beauty Crawls and Hair Consultations, alongside a host of brand-led engagements. The campaign will also offer 3X loyalty reward points, adding greater value to the consumer experience. Commenting on the campaign, Ms. Pushpa Bector, Group Executive Director & Business Head, DLF Retail, said: “With the third edition of BeYOUtiful, DLF Malls is con",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/BeYoutiful-Campaign-2026.jpeg",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
 {
 "id": "f3baee6338726356",
 "d": "2026-10-16",
@@ -1252,6 +1428,29 @@
 "e": [],
 "ms": [
 "Fibre2Fashion"
+]
+},
+{
+"id": "bb27dd852f11b56f",
+"d": "2026-10-16",
+"t": "| 인도 남부의 면사 가격은 구매자들이 신중한 입장을 유지함에 따라 안정세를 유지하고 있습니다.",
+"o": "| Cotton yarn prices hold steady in south India as buyers stay cautious",
+"u": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxPYnRVMWNnVzI4V2p5VW9nQTNSLS1xRk14bXRWbF93M21GdTBURkJOeWxJVEZSMjVHQ090bWVIX1FmNDlia0dTX0dhaXhaNGNoUGg0d1lWMWRtVkhKNWtSSUVMQ3kyY0gyS2w1RWxQZTR3MnFIS2xralhCcDl6anJ5eGpvVy1LWHZGUWQ0UExGd1VGVjNsOHRSWVFuYzB4bFQ2MTRjSFFpMm9QT3lncmhJclVvcS1MTUdqN1dVdXpZaGI2Nld2Rl8yaXNmZFJhbDFRQkkwVWhheGFGRmRfT0JSTVFsSUFERFY2UHc?oc=5",
+"s": "| Cotton yarn prices hold steady in south India as buyers stay cautious Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| Cotton yarn prices hold steady in south India as buyers stay cautious Fibre2Fashion",
+"i": "",
+"g": [
+"원사가격"
+],
+"m": "주제검색 · 신소재",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 신소재"
 ]
 },
 {
@@ -1796,6 +1995,31 @@
 "e": [],
 "ms": [
 "한국섬유신문"
+]
+},
+{
+"id": "046aa7045026e215",
+"d": "2026-10-16",
+"t": "Hyosung bio-based BDO 공장에서 상업 생산 시작",
+"o": "Hyosung starts commercial production at bio-based BDO plant",
+"u": "https://www.ecotextile.com/2026101666349/news/partner/hyosung-begins-commercial-production-at-integrated-bio-based-bdo-plant/",
+"s": "Company presents scalable bio innovation derived from sugarcane at Textile Exchange Conference and Performance Days Munich The next step in […] The post Hyosung starts commercial production at bio-based BDO plant appeared first on Ecotextile News .",
+"c": "MATERIAL",
+"x": "Company presents scalable bio innovation derived from sugarcane at Textile Exchange Conference and Performance Days Munich The next step in […] The post Hyosung starts commercial production at bio-based BDO plant appeared first on Ecotextile News .",
+"i": "https://www.ecotextile.com/wp-content/uploads/2026/10/Sugarcane.jpg",
+"g": [
+"바이오소재",
+"효성",
+"전시회"
+],
+"m": "Ecotextile News",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Ecotextile News"
 ]
 },
 {
@@ -14899,11 +15123,12 @@
 "m": "Ecotextile News",
 "r": "해외",
 "v": 8,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Ecotextile News"
+"Ecotextile News",
+"주제검색 · 염색가공"
 ]
 },
 {
@@ -17707,6 +17932,27 @@
 "e": [],
 "ms": [
 "Knitting Industry"
+]
+},
+{
+"id": "9f3b8825ed0eb997",
+"d": "2026-09-25",
+"t": "섬유 사업의 데이터 단편화를 해결하는 방법",
+"o": "How to Solve Data Fragmentation in Textile Businesses",
+"u": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPSUk3YmVQem5lNFJ6RVQtMzMzam1FU3UtX25tNHY0SHREd3htUWtVTzdYN3Q3V3RyanFDWEVFdmFPX0s5bjRiUnJFNzJkWU94azBtYTM3bmh5SWNHb2hXb2tQSXBvd3V0dlF0TFpyQ2RUZHRLT0FpanlITDU2dTMzaHlnSDhkbXZPZnJzWU5BRlJqSDgyQUNzTzdJeVF1VkNiMzdodmlXOFAwcWVQR3g0NFh0S1ZMbGxWbHRhdm4yTWpsWlk2ckkwY1RMbUNoUkJnRExPdnRPdWY1M1IteEVyRTlmTHk?oc=5",
+"s": "How to Solve Data Fragmentation in Textile Businesses Fibre2Fashion",
+"c": "MATERIAL",
+"x": "How to Solve Data Fragmentation in Textile Businesses Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -33757,250 +34003,6 @@
 "e": [],
 "ms": [
 "국제섬유신문"
-]
-},
-{
-"id": "54825a3a3eabe873",
-"d": "2026-09-07",
-"t": "UKFT는 F2F와 파트너십을 맺고 영국 섬유 소싱 정보를 강화합니다.",
-"o": "UKFT partners with F2F to strengthen UK textile sourcing intelligence",
-"u": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxOQVM0Nkw2bkF0Q3pwZ0o1Xzl6NkF0em9BZ1lLSHkybl9MMXpRWkYwRnY3UlZ5cDJ3eGZrMmJvOEdMRk9iWHpmWFhBbUNaNmVNd0hEWndoTGM0VTJhSWUwU2Q2ZXl3dVE1UHBkWnZqaU9RbUd5bWVWbzNTX2RwdVRsRDhTckthWE9vR1V0Mjh1enptTWpUSHU3NjR0R1ZOWGplNDZTY2lyWm9rVFZTTTNJR1JvOGpHaGg1WG42bGpGTmlRY1dWWF9QQm9OV2E5VUt6R3ZLdm9KSWl5LTZuSTdQNFhZYmxxTElP?oc=5",
-"s": "UKFT partners with F2F to strengthen UK textile sourcing intelligence Fibre2Fashion",
-"c": "MATERIAL",
-"x": "UKFT partners with F2F to strengthen UK textile sourcing intelligence Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "4f9b41cea836beac",
-"d": "2026-09-07",
-"t": "미미박스 누니, 美 타깃 1778개 매장 입점…오프라인 유통망 확대",
-"o": "미미박스 누니, 美 타깃 1778개 매장 입점…오프라인 유통망 확대",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148298",
-"s": "미국 뷰티 시장에서 온라인에서 반응을 확보한 K뷰티 브랜드가 대형 오프라인 유통망으로 접점을 넓히는 흐름이 이어지는 가운데 미미박스(MBX)의 K뷰티 브랜드 누니(Nooni)가 미국 타깃(Target) 전국 1778개 매장과 온라인몰 Target.com에 입점했다.누니는 지난 8월 미국 백화점 노드스트롬 89개 매장에 입점한 데 이어 이번 타깃 입점을 통해 미국 내 오프라인 유통 범위를 확대했다. 회사는 소셜미디어와 이커머스에서 확인한 제품 수요를 전국 단위 유통 채널로 연결한다는 계획이다.타깃에서는 누니의 대표 제품 ‘애플 립오일",
-"c": "RETAIL",
-"x": "미국 뷰티 시장에서 온라인에서 반응을 확보한 K뷰티 브랜드가 대형 오프라인 유통망으로 접점을 넓히는 흐름이 이어지는 가운데 미미박스(MBX)의 K뷰티 브랜드 누니(Nooni)가 미국 타깃(Target) 전국 1778개 매장과 온라인몰 Target.com에 입점했다.누니는 지난 8월 미국 백화점 노드스트롬 89개 매장에 입점한 데 이어 이번 타깃 입점을 통해 미국 내 오프라인 유통 범위를 확대했다. 회사는 소셜미디어와 이커머스에서 확인한 제품 수요를 전국 단위 유통 채널로 연결한다는 계획이다.타깃에서는 누니의 대표 제품 ‘애플 립오일",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148298_129879_2916_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 9,
-"h": 1,
-"w": "retail",
-"e": [
-"target"
-],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "4f6bfb97d295725a",
-"d": "2026-09-07",
-"t": "월마트, 25달러 패션으로 젊은층 공략",
-"o": "월마트, 25달러 패션으로 젊은층 공략",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81806",
-"s": "미국 최대 유통업체 월마트가 젊은 소비자를 겨냥한 여성 패션 브랜드 ‘시나리오(Sce-nario)’를 출시했다. 저가 유통업체 이미지를 벗고 패션 경쟁력을 높여 아마존 등 온라인 유통업체와의 경쟁을 강화하려는 전략이다.월마트가 지난달 27일 공개한 시나리오는 의류와 신발, 주얼리, 핸드백, 액세서리 등 280개 제품으로 구성됐다. 대부분 가격은 25달러 이하로 책정됐다. 빈티지풍 프린트와 자수, 데님 등을 활용한 ‘모던 보헤미안’ 스타일을 중심으로 상품군을 구성했다.특히 시나리오는 기존 월마트 여성복보다 젊은 고객층에 초점을 맞췄다",
-"c": "RETAIL",
-"x": "미국 최대 유통업체 월마트가 젊은 소비자를 겨냥한 여성 패션 브랜드 ‘시나리오(Sce-nario)’를 출시했다. 저가 유통업체 이미지를 벗고 패션 경쟁력을 높여 아마존 등 온라인 유통업체와의 경쟁을 강화하려는 전략이다.월마트가 지난달 27일 공개한 시나리오는 의류와 신발, 주얼리, 핸드백, 액세서리 등 280개 제품으로 구성됐다. 대부분 가격은 25달러 이하로 책정됐다. 빈티지풍 프린트와 자수, 데님 등을 활용한 ‘모던 보헤미안’ 스타일을 중심으로 상품군을 구성했다.특히 시나리오는 기존 월마트 여성복보다 젊은 고객층에 초점을 맞췄다",
-"i": "https://cdn.itnk.co.kr/news/photo/202609/81806_53262_358.jpg",
-"g": [
-"데님"
-],
-"m": "국제섬유신문",
-"r": "국내",
-"v": 11,
-"h": 1,
-"w": "retail",
-"e": [
-"walmart",
-"amazon"
-],
-"ms": [
-"국제섬유신문"
-]
-},
-{
-"id": "4c93d42e8bc4b1c2",
-"d": "2026-09-07",
-"t": "생분해성 포장소재부터 원스텝 열성형까지, 인터팩 차이나 2026",
-"o": "생분해성 포장소재부터 원스텝 열성형까지, 인터팩 차이나 2026",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148278",
-"s": "중국 상하이에서 열리는 인터팩 차이나 2026(Interpack China 2026)에서는 포장산업의 자동화와 친환경 기술을 선보이는 기업들이 참가한다. 스마트 포장기계부터 열성형 생산라인, 생분해성 포장소재, 종이 완충재 등 다양한 기술과 제품이 소개될 예정이다.포장 자동화 분야, 우한 렌톈 패키징 오토메이션 테크놀로지(Wuhan Rentian Packaging Automation Technology)가 사이드 푸시 일체형 케이스 패커인 제트엑스큐제트엘 100케이(ZXQZL 100K)를 선보인다. 제품 변경에 신속하게 대응할 수",
-"c": "MATERIAL",
-"x": "중국 상하이에서 열리는 인터팩 차이나 2026(Interpack China 2026)에서는 포장산업의 자동화와 친환경 기술을 선보이는 기업들이 참가한다. 스마트 포장기계부터 열성형 생산라인, 생분해성 포장소재, 종이 완충재 등 다양한 기술과 제품이 소개될 예정이다.포장 자동화 분야, 우한 렌톈 패키징 오토메이션 테크놀로지(Wuhan Rentian Packaging Automation Technology)가 사이드 푸시 일체형 케이스 패커인 제트엑스큐제트엘 100케이(ZXQZL 100K)를 선보인다. 제품 변경에 신속하게 대응할 수",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148278_129834_5319_v150.jpg",
-"g": [
-"생분해"
-],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 8,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "4be975aee863bead",
-"d": "2026-09-07",
-"t": "CII, 인도 섬유 산업 계획 수립",
-"o": "CII weaves plans for Indian textile industry",
-"u": "https://news.google.com/rss/articles/CBMid0FVX3lxTE5iYjlqYzk2dHFlZElqdWZXWWQtOHVFR0RJUjQ3ZXljNW03d3JrNHl5TE1YTXBjdGx4MW9aM21aMzduTlNMZEVIWHlaa04zcDg0VHFBcHpWSkhoUzVwVVh0b1FoRlVUYVg4VTF2eVlzSERlbG9NbU1z?oc=5",
-"s": "CII weaves plans for Indian textile industry Fibre2Fashion",
-"c": "MATERIAL",
-"x": "CII weaves plans for Indian textile industry Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "4a47708049b184ee",
-"d": "2026-09-07",
-"t": "| 인도네시아의 면화 보호조치가 아시아의 소싱 지도를 바꿀 것인가?",
-"o": "| Will Indonesia's cotton safeguards reshape Asia's sourcing map?",
-"u": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxPejJTMFV2X3ZZZjFzR01EMWpUamZpUzZIZ3V3N2thWnpSQ1FZTFdSQU1qT29YSGh1cHJiN1JiMVNhbU40OTBIYkpjS3h2eUZadzR6eTBNZGo3YzFtcGJZbkJLVUpiZVp5aHo1d2R2V1hRSGg0YnRtNE9fWUYtUllkdnc3YmwycVZNU1FjdExzbkROTlhyOFBucVg1Q2ZweUU0UE5UZ3pfTDEtWS01dkxQRWNhbVJ4VkxxUEpKbDc1XzJlUWVhYWhJLUZvUEozVG1Gc25JVkd4RnRqMTQ?oc=5",
-"s": "| Will Indonesia's cotton safeguards reshape Asia's sourcing map? Fibre2Fashion",
-"c": "MATERIAL",
-"x": "| Will Indonesia's cotton safeguards reshape Asia's sourcing map? Fibre2Fashion",
-"i": "",
-"g": [
-"인도네시아"
-],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "47fe8342d72de272",
-"d": "2026-09-07",
-"t": "이집트의 15억 4천만 달러 규모의 섬유 추진이 글로벌 소싱 허브에 도전할 수 있을까요?",
-"o": "Could Egypt’s $1.54 bn Textile Push Challenge Global Sourcing Hubs?",
-"u": "https://news.google.com/rss/articles/CBMixgFBVV95cUxPNUhGeHhEamd5ZlZxWU1ucVhfdk16RTg0a1JUUko3VWRyMFJobFNnR2o0ajVDR2hkU1BsSmRXV3V4cnhKeENLOVROZzlibzdSZ1BiZWdNMnZGM1BQQV9RQnF6RzhmNWt2ZGFuS2h6VTdPc0w3QVNnWVRYMGVRdnZzcEMxYXdXZTdOWUcxbUV5c1pObDl1NWg5SWc4WWNGYXhkQkpUMGJzM3JnRDlKOTZuUHNjZ0UxaG5VY1JLendLb1RkZndmdmc?oc=5",
-"s": "Could Egypt’s $1.54 bn Textile Push Challenge Global Sourcing Hubs? Fibre2Fashion",
-"c": "MATERIAL",
-"x": "Could Egypt’s $1.54 bn Textile Push Challenge Global Sourcing Hubs? Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "430ba7024b45533f",
-"d": "2026-09-07",
-"t": "크림XCU, 여의도 팝업으로 런위더 성장 지원",
-"o": "크림XCU, 여의도 팝업으로 런위더 성장 지원",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148308",
-"s": "트렌드 거래 플랫폼 크림(KREAM, 대표 김창욱)이 편의점 CU, 러닝 전문 브랜드 런위더(runwhither)와 함께 ‘크림 X CU READY TO RUN’을 전개하며 입점 브랜드 성장 지원을 오프라인 영역으로 확대한다.크림은 오는 13일까지 여의도 한강공원 내 ‘CU 러닝 스테이션(한강여의도3호점)’에서 런위더 팝업스토어를 운영한다. 러너들이 많이 찾는 여의도 한강공원에서 런위더의 주요 제품을 직접 경험할 수 있도록 브랜드와 소비자의 접점을 마련했다.CU는 현재 한강을 따라 총 20개의 러닝 스테이션을 운영하고 있으며 제주에",
-"c": "RETAIL",
-"x": "트렌드 거래 플랫폼 크림(KREAM, 대표 김창욱)이 편의점 CU, 러닝 전문 브랜드 런위더(runwhither)와 함께 ‘크림 X CU READY TO RUN’을 전개하며 입점 브랜드 성장 지원을 오프라인 영역으로 확대한다.크림은 오는 13일까지 여의도 한강공원 내 ‘CU 러닝 스테이션(한강여의도3호점)’에서 런위더 팝업스토어를 운영한다. 러너들이 많이 찾는 여의도 한강공원에서 런위더의 주요 제품을 직접 경험할 수 있도록 브랜드와 소비자의 접점을 마련했다.CU는 현재 한강을 따라 총 20개의 러닝 스테이션을 운영하고 있으며 제주에",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148308_129897_5517_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "405aa3476f40eea4",
-"d": "2026-09-07",
-"t": "Bangladesh의 RMG 부문은 생산성 향상을 위한 기술에 투자합니다.",
-"o": "Bangladesh's RMG sector bets on technology for a productivity edge",
-"u": "https://news.google.com/rss/articles/CBMi-wFBVV95cUxPVHdIWnI0UFM2d3ZzMXlzR2oyekViRTlsTDlfMDcwNGtYLWtBclFRbEhvWEZ4cjlxQ2c4dHZ2VUw2cExUYUJfUWp2ZVBVZ2hJbC1ValhVWmhFSjNSS3BkNTF3dVNuY3BtSm13VXFfaDJoQWJ1Q1AtRW81cG1sMGo4M2JXc2JqcWRGX3E5ei05VXFHZHJ3UFEtMjJhZWRWT3otR253UG5oaG9HamZGZ01HVnVJVHlMSjRHMGtEOFFTQ19Qa2pZYUNKZlYzX05QZFFiLUVHU24zUnZ1ekZua25uYmNSRkRIeFo4U3kxc0l6UzE1OEoyYTVlZEtzMA?oc=5",
-"s": "Bangladesh's RMG sector bets on technology for a productivity edge Fibre2Fashion",
-"c": "MATERIAL",
-"x": "Bangladesh's RMG sector bets on technology for a productivity edge Fibre2Fashion",
-"i": "",
-"g": [
-"방글라데시"
-],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "3e9fdb205dcf44ad",
-"d": "2026-09-07",
-"t": "미국 301조 조사로 인도 섬유 수출에 새로운 위험 제기",
-"o": "US Section 301 Probe Raises New Risks for Indian Textile Exports",
-"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxQQ3hrZWtvVHBBbU1fZkloRmh5dWJhVnlfR0JaZk54MlpMSFp3ckJMQzIxU2k5cVV1UjQxUldDVk9xaFlKT2xEd3VWZjg1akhvVTlJVTJ6d05sXzliSFdXNjltalZ1Y2xNTTlGT3FDTkJIbXkyWmlIcjVyWURTZUxsdFNvMFFFY3BpbmhOV2l6dUhGNFZsczJaMTZoTWlMZHVfOGZYa0Q3UXFlSzUwZ3VzSC01amVibzJGSHQxd3IwRk5xT0cySXFsVWQzaTI?oc=5",
-"s": "US Section 301 Probe Raises New Risks for Indian Textile Exports Fibre2Fashion",
-"c": "MATERIAL",
-"x": "US Section 301 Probe Raises New Risks for Indian Textile Exports Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "370c90bafcf4cc82",
-"d": "2026-09-07",
-"t": "섬유 공급망 전반에 걸친 유해 화학물질 관리",
-"o": "Managing Hazardous Chemicals Across the Textile Supply Chain",
-"u": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNWlF2SDUyY1FQd2ZDbEZ6RTJmV3ZJVFItQ1EwbkxUZWx6eURTa3VuVVFZR2VxYUJucER1T1dUQ3JocjFGRWoyajRIRmNvTVVQYkF6cEduV0xEbmtXUTl5ZlYwZDd1VXF3eXVSbkgxN1p1YXRLdXhYWkdkOFM5OWEwX0JraU9ZY0R1ZEZJd0RKRlZIODR1Nk40WXZHaGZMdkJBaVRza1Q2QmUwT0RsZ21ISE5oMnlCS3VfQzQ4Tm5lTmFkN0d5WjVF?oc=5",
-"s": "Managing Hazardous Chemicals Across the Textile Supply Chain Fibre2Fashion",
-"c": "MATERIAL",
-"x": "Managing Hazardous Chemicals Across the Textile Supply Chain Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
 ]
 }
 ]

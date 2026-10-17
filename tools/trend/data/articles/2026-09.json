@@ -2976,9 +2976,10 @@
   "score": 8,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Ecotextile News"
+   "Ecotextile News",
+   "주제검색 · 염색가공"
   ]
  },
  {
@@ -4123,6 +4124,30 @@
   "hits": 1,
   "sources": [
    "한국섬유신문"
+  ]
+ },
+ {
+  "key": "e305b32c7ffaaf2b",
+  "title": "Payntr Golf Appoints UA Golf Vet as Head of Sales",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQaWJGeS16OFE0aWdVREFiSmM5Y2g0VHdrSHBSb1QwYVRYUjVyNVJTdXVJeVhOdWU2N1lZeTlXNW9JdkdNRUNyZ0VRSU9rQXlMcHJjd25JZ0pEV1k4enlZXy1QRmktNzFjQ2w3X3NBZVIwd2Zod0M3VHpYd2kzVmtsTGt3VkhkUmpBOVpjUF92NTF4UGJCeGpNLWtlN0N2enlnWThsbXZ1aXl5STkw?oc=5",
+  "published": "2026-09-29",
+  "collected": "2026-10-17",
+  "summary": "Payntr Golf Appoints UA Golf Vet as Head of Sales SGB Media",
+  "content": "Payntr Golf Appoints UA Golf Vet as Head of Sales SGB Media",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
   ]
  },
  {
@@ -6451,6 +6476,30 @@
   "hits": 1,
   "sources": [
    "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "2c68dc468486fbbd",
+  "title": "Dysin Group to present dyes, chemicals and printing solutions at TIE–ITET Textile Innovation Expo 2026",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMizgFBVV95cUxNekNScHVDSU1EZkFscTlaN1ZYOWZoX3ZEekd6bHlkQWNTbUQwNjhZUENHX3hMNnRNVkp1dGhrdmhlaXZaQVI1dTBUMEMxRDhpekc0b1pwaDA1djRmZkNlTWE4TzZlS1hULThxQ3U2MzNCLWVBNE82S19wSXZLS083SVVFY2Z4VVZ3cXdsc3hVSnRpaE8ya2NmTHJ0TXV2Qm14Z3BtZW1iUTJLR0RrVUVPcVlNQ2thWHlnLTdjekxWRnRyX2doVEtpZGhhbG9XZw?oc=5",
+  "published": "2026-09-29",
+  "collected": "2026-10-17",
+  "summary": "Dysin Group to present dyes, chemicals and printing solutions at TIE–ITET Textile Innovation Expo 2026 Textile Today",
+  "content": "Dysin Group to present dyes, chemicals and printing solutions at TIE–ITET Textile Innovation Expo 2026 Textile Today",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 염색가공",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 염색가공"
   ]
  },
  {
@@ -13322,6 +13371,32 @@
   ]
  },
  {
+  "key": "c18e03e4b79ecef9",
+  "title": "Textile factory explosion kills nine in Bangladesh",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE0waV9MeHA1VFNxQVNtdHZHXzY0REZ4NFNhdTV5NzYyVnZTTVhoRFlRMVVYQS1Va2ZuUm5pR2xPMVJEcFRZOE9kQ0pvbzhnZlRyd01GS2x1MC1fdEdRNlIxZkdQeUlOUUFiNURDTmx4S1o0UQ?oc=5",
+  "published": "2026-09-25",
+  "collected": "2026-10-17",
+  "summary": "Textile factory explosion kills nine in Bangladesh Just Style",
+  "content": "Textile factory explosion kills nine in Bangladesh Just Style",
+  "image": "",
+  "image_tried": null,
+  "source": "Just Style",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "방글라데시"
+  ],
+  "entities": [],
+  "score": 3,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Just Style"
+  ]
+ },
+ {
   "key": "bdd870537357766e",
   "title": "India’s 5F Vision: Weaving a New Era for Cotton and Textiles",
   "title_ko": "인도의 5F 비전: 면화와 직물의 새로운 시대를 열다",
@@ -13705,6 +13780,30 @@
   "hits": 1,
   "sources": [
    "바이어 · Costco"
+  ]
+ },
+ {
+  "key": "9f3b8825ed0eb997",
+  "title": "How to Solve Data Fragmentation in Textile Businesses",
+  "title_ko": "섬유 사업의 데이터 단편화를 해결하는 방법",
+  "link": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPSUk3YmVQem5lNFJ6RVQtMzMzam1FU3UtX25tNHY0SHREd3htUWtVTzdYN3Q3V3RyanFDWEVFdmFPX0s5bjRiUnJFNzJkWU94azBtYTM3bmh5SWNHb2hXb2tQSXBvd3V0dlF0TFpyQ2RUZHRLT0FpanlITDU2dTMzaHlnSDhkbXZPZnJzWU5BRlJqSDgyQUNzTzdJeVF1VkNiMzdodmlXOFAwcWVQR3g0NFh0S1ZMbGxWbHRhdm4yTWpsWlk2ckkwY1RMbUNoUkJnRExPdnRPdWY1M1IteEVyRTlmTHk?oc=5",
+  "published": "2026-09-25",
+  "collected": "2026-10-17",
+  "summary": "How to Solve Data Fragmentation in Textile Businesses Fibre2Fashion",
+  "content": "How to Solve Data Fragmentation in Textile Businesses Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -16661,6 +16760,33 @@
   "hits": 1,
   "sources": [
    "Just Style"
+  ]
+ },
+ {
+  "key": "68b2b8330fdc4a8b",
+  "title": "Amazon Gives Merchants Tools to Manage Walmart, Shopify Inventory",
+  "title_ko": "Amazon는 판매자에게 Walmart, Shopify 재고 관리 도구를 제공합니다.",
+  "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPWWRudlpIYlV4ZmZOSjFNMkZJSFFndFBQaUtybjlKNHlhdmZfaUVhbnlzYkk3WmJGRVpMenN2MWoxMUNoelJBTHBYN05RekRCWk92NnZQMnhtY3Bjd0dLOG4zTEVpQW5WTmVLclVBNkY2N1kybm5JSFhlT191bEpfYkhrNEc2b0pfZ1o1dkppbWpYcWMxQm5PNWZhaUpjUGZzaTdaNQ?oc=5",
+  "published": "2026-09-24",
+  "collected": "2026-10-17",
+  "summary": "Amazon Gives Merchants Tools to Manage Walmart, Shopify Inventory The Information",
+  "content": "Amazon Gives Merchants Tools to Manage Walmart, Shopify Inventory The Information",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Walmart",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "walmart",
+   "amazon"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Walmart"
   ]
  },
  {
@@ -80320,6 +80446,30 @@
   "hits": 1,
   "sources": [
    "바이어 · PVH"
+  ]
+ },
+ {
+  "key": "07e5cb75a41846fd",
+  "title": "VSXY Q2 Deep Dive: Mixed Market Reaction as Regular Price Selling and Brand Investments Drive Results",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxPblJLcV9iNEJiOHN2TUFPbkNIQlNuVUQyUXBTbVJ5ckZyV3VDRkxnUThSc19yM0RjTjJnYTlkZDY2RUpiZzAxdTBUN3NIUngtbm5kT0NlbFc1WlcwTmNBaFNkTU5oUlRZTENNRlFvUVF4ZHVHb2NnQU9acWJJRFhaQU1OUXFsTTJaLUpVNFE2c3JNSkpKS1BnNlZCRHlWQ0FvU05CSFVZTFVUeDFxUDRHaUhjRGVVN1NVQ0g5cW91cmo0Vnd6QlhMaGs0N0hVZE9oMk9jNXh6bEtRUUEzMlZEaDYtdXBYTlZsTTBHM05NbXBPUlpB?oc=5",
+  "published": "2026-09-03",
+  "collected": "2026-10-17",
+  "summary": "VSXY Q2 Deep Dive: Mixed Market Reaction as Regular Price Selling and Brand Investments Drive Results StockStory",
+  "content": "VSXY Q2 Deep Dive: Mixed Market Reaction as Regular Price Selling and Brand Investments Drive Results StockStory",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Victoria's Secret",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Victoria's Secret"
   ]
  },
  {

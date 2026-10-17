@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-10-16T23:06:44+00:00",
+"generated_at": "2026-10-17T22:44:43+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3883,7 +3883,7 @@
 "period_end": null,
 "prev": -1.4,
 "yoy": -2.3,
-"stale": false
+"stale": true
 },
 {
 "metric": "crude_brent",
@@ -4199,6 +4199,13 @@
 ],
 "anf": [
 {
+"d": "2026-10-17",
+"t": "Abercrombie 및 Fitch 주식의 수익 전망이 주주에게 의미하는 것",
+"o": "What Abercrombie & Fitch Shares' Earnings Outlook Means For Shareholders",
+"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOODFqeTZfWVY5ZnJlY1BJTWpXRkQydTZfQ3ZUMXk3c3RfSG5wTXFGOFl2RXFNYTY5NjFCcTBtc0dYMjBuTkp6SWZ2Y3licGhiMVEtME90R2NTM2FrSXBEMmNzTFl1ZGtVcjdGZm5KQUIzYUJEMTcxLWJSblRwSlUyRmtQUVBiLXF5WUxaTVdCNThtQks1OWRiX2VPS2VYdkVwVlFrSVpObG82U3Ffb0JmMkdDMnNSekF6a0Rza1NIUFVhX0RTXzR4NFBGck9qQ3F20gHQAUFVX3lxTE44MWp5Nl9ZVjlmcmVjUElNaldGRDJ1Nl9DdlQxeTdzdF9IbnBNcUY4WXZFcU1hNjk2MUJxMG1zR1gyMG5OSnpJZnZjeWJwaGIxUS0wT3RHY1MzYWtJcEQyY3NMWXVka1VyN0ZmbkpBQjNhQkQxNzEtYlJuVHBKVTJGa1BRUGItcXlZTFpNV0I1OG1CSzU5ZGJfZU9LZVh2RXBWUWtJWk5sbzZTcV9vQmYyR0Myc1J6QXprRHNrU0hQVWFfRFNfNHg0UEZyT2pDcXY?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
+{
 "d": "2026-10-09",
 "t": "Abercrombie & Fitch, 매출 및 마진 증가 확인...",
 "o": "Abercrombie & Fitch sees sales and margin growt...",
@@ -4245,13 +4252,6 @@
 "t": "Abercrombie & Fitch(ANF) 2025년 4분기 수익: 결과, 시장 반응 및 내역",
 "o": "Abercrombie & Fitch (ANF) Q4 2025 Earnings: Results, Market Reaction & History",
 "u": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE8yUl9qMjh0RjMySlNRZEZUdnpMZzhaWW9qY2RoQTNvU2M3bnAyd3dNVU5wMEFUQnlyRkNETjNucVBGal8xMzN0N3NxWmc5UFAzYU5mRmJmdWg0WFFyZEhxTjRMNA?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-10-01",
-"t": "Abercrombie & Fitch (ANF) 2025년 3분기 수익: 결과, 시장 반응 및 내역",
-"o": "Abercrombie & Fitch (ANF) Q3 2025 Earnings: Results, Market Reaction & History",
-"u": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE1hZFphcnlBeWF5VDZjNW5aRVBadWFiazZoM3VVckE2QlFfVHdzZDNvRVhhYXNKYWRXbndhVXpONDhDVjdTd29ra3lkWkZLaXEtSV9BejBlMFZaMGpMMXdZOTd4UQ?oc=5",
 "m": "바이어 · Abercrombie & Fitch"
 }
 ],
