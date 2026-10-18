@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-10-17T22:44:42+00:00",
+"generated_at": "2026-10-18T22:40:48+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
-"filtered_out": 3850,
+"filtered_out": 3881,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 21,
-"scanned": 671,
-"kept": 265,
+"scanned": 673,
+"kept": 264,
 "material": 195
 },
 "30": {
 "sources": 22,
-"scanned": 2810,
-"kept": 1063,
-"material": 785
+"scanned": 2729,
+"kept": 1037,
+"material": 774
 }
 }
 },
@@ -25,15 +25,15 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 496
+"n": 498
 },
 {
 "key": "RETAIL",
-"n": 380
+"n": 378
 },
 {
 "key": "FABRIC",
-"n": 245
+"n": 242
 },
 {
 "key": "ETC",
@@ -45,17 +45,17 @@
 },
 {
 "key": "YARN",
-"n": 63
+"n": 66
 }
 ],
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 425
+"n": 423
 },
 {
 "key": "Fibre2Fashion",
-"n": 236
+"n": 234
 },
 {
 "key": "Ecotextile News",
@@ -63,31 +63,31 @@
 },
 {
 "key": "Textile Focus",
-"n": 122
-},
-{
-"key": "국제섬유신문",
-"n": 84
-},
-{
-"key": "Innovation in Textiles",
-"n": 82
+"n": 123
 },
 {
 "key": "Textile Today",
+"n": 85
+},
+{
+"key": "국제섬유신문",
+"n": 83
+},
+{
+"key": "Innovation in Textiles",
 "n": 81
 },
 {
 "key": "Knitting Industry",
-"n": 60
+"n": 59
 },
 {
 "key": "Textile World",
-"n": 50
+"n": 54
 },
 {
 "key": "주제검색 · 신소재",
-"n": 44
+"n": 43
 },
 {
 "key": "주제검색 · 국내소재",
@@ -95,7 +95,7 @@
 },
 {
 "key": "Indian Textile Magazine",
-"n": 39
+"n": 38
 },
 {
 "key": "Apparel Resources",
@@ -137,23 +137,23 @@
 "tags": [
 {
 "key": "리사이클",
-"n": 108
+"n": 110
 },
 {
 "key": "방글라데시",
-"n": 106
+"n": 108
 },
 {
 "key": "전시회",
-"n": 67
+"n": 66
 },
 {
 "key": "데님",
-"n": 48
+"n": 47
 },
 {
 "key": "울",
-"n": 28
+"n": 29
 },
 {
 "key": "제직",
@@ -168,12 +168,12 @@
 "n": 27
 },
 {
-"key": "스판덱스",
+"key": "베트남",
 "n": 21
 },
 {
-"key": "베트남",
-"n": 19
+"key": "스판덱스",
+"n": 21
 },
 {
 "key": "탄소",
@@ -184,12 +184,12 @@
 "n": 18
 },
 {
-"key": "r-PET",
+"key": "나일론",
 "n": 17
 },
 {
-"key": "나일론",
-"n": 16
+"key": "r-PET",
+"n": 17
 },
 {
 "key": "부직포",
@@ -212,11 +212,11 @@
 "n": 11
 },
 {
-"key": "관세",
-"n": 11
+"key": "플리스",
+"n": 10
 },
 {
-"key": "플리스",
+"key": "관세",
 "n": 10
 },
 {
@@ -224,11 +224,11 @@
 "n": 9
 },
 {
-"key": "캐시미어",
-"n": 8
+"key": "비스코스",
+"n": 7
 },
 {
-"key": "비스코스",
+"key": "캐시미어",
 "n": 7
 },
 {
@@ -335,17 +335,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-09-18",
-"total": 37,
-"by": {
-"ETC": 1,
-"RETAIL": 16,
-"MATERIAL": 13,
-"CHEMICAL": 2,
-"FABRIC": 5
-}
-},
 {
 "date": "2026-09-19",
 "total": 12,
@@ -653,22 +642,32 @@
 },
 {
 "date": "2026-10-16",
-"total": 39,
+"total": 40,
 "by": {
 "RETAIL": 16,
-"MATERIAL": 14,
+"MATERIAL": 15,
 "FABRIC": 8,
 "YARN": 1
 }
 },
 {
 "date": "2026-10-17",
-"total": 8,
+"total": 10,
 "by": {
 "ETC": 4,
-"MATERIAL": 2,
+"MATERIAL": 3,
 "CHEMICAL": 1,
-"FABRIC": 1
+"FABRIC": 2
+}
+},
+{
+"date": "2026-10-18",
+"total": 8,
+"by": {
+"MATERIAL": 3,
+"YARN": 3,
+"FABRIC": 1,
+"RETAIL": 1
 }
 }
 ],
@@ -676,8 +675,8 @@
 {
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 69,
-"prior": 39,
+"recent": 70,
+"prior": 40,
 "delta": 30,
 "weeks": [
 0,
@@ -691,7 +690,7 @@
 16,
 13,
 26,
-13
+15
 ]
 },
 {
@@ -718,8 +717,8 @@
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 65,
-"prior": 41,
+"recent": 66,
+"prior": 42,
 "delta": 24,
 "weeks": [
 0,
@@ -733,15 +732,15 @@
 15,
 14,
 24,
-11
+13
 ]
 },
 {
 "tag": "전시회",
 "label_en": "performance days",
 "recent": 44,
-"prior": 23,
-"delta": 21,
+"prior": 22,
+"delta": 22,
 "weeks": [
 0,
 0,
@@ -749,7 +748,7 @@
 0,
 0,
 0,
-20,
+19,
 3,
 8,
 12,
@@ -760,9 +759,9 @@
 {
 "tag": "데님",
 "label_en": "denim",
-"recent": 32,
+"recent": 31,
 "prior": 16,
-"delta": 16,
+"delta": 15,
 "weeks": [
 0,
 0,
@@ -770,7 +769,7 @@
 0,
 0,
 0,
-11,
+10,
 6,
 5,
 13,
@@ -821,11 +820,11 @@
 ]
 },
 {
-"tag": "추적성",
-"label_en": "traceability",
-"recent": 15,
-"prior": 3,
-"delta": 12,
+"tag": "T2T",
+"label_en": "textile-to-textile",
+"recent": 19,
+"prior": 8,
+"delta": 11,
 "weeks": [
 0,
 0,
@@ -833,20 +832,20 @@
 0,
 0,
 0,
+6,
 2,
-2,
-0,
-0,
-8,
-6
+4,
+6,
+7,
+2
 ]
 },
 {
 "tag": "캐시미어",
 "label_en": "cashmere",
 "recent": 1,
-"prior": 7,
-"delta": -6,
+"prior": 6,
+"delta": -5,
 "weeks": [
 0,
 0,
@@ -854,7 +853,7 @@
 0,
 0,
 0,
-2,
+1,
 5,
 0,
 0,
@@ -905,11 +904,11 @@
 ]
 },
 {
-"tag": "PFAS",
-"label_en": "pfas",
+"tag": "GOTS",
+"label_en": "gots",
 "recent": 2,
-"prior": 3,
-"delta": -1,
+"prior": 4,
+"delta": -2,
 "weeks": [
 0,
 0,
@@ -917,22 +916,16 @@
 0,
 0,
 0,
-1,
-2,
+0,
+4,
 1,
 0,
-0,
-1
+1,
+0
 ]
 }
 ],
 "fresh": [
-{
-"tag": "자카드",
-"label_en": "jacquard",
-"n": 6,
-"first": "2026-09-20"
-},
 {
 "tag": "ZDHC",
 "label_en": "zdhc",
@@ -1013,6 +1006,189 @@
 }
 ],
 "articles": [
+{
+"id": "f830800bf8981394",
+"d": "2026-10-18",
+"t": "포르투갈 섬유 수출은 2.4% 증가한 37억 8천만 유로를 기록했습니다.",
+"o": "Portugal textile exports rise 2.4% to €3.78 billion",
+"u": "https://textiletoday.com.bd/portugal-textile-exports-rise-24-to-eur378-billion",
+"s": "Key insights Non-knitted apparel exports: up 8.5% to €696.5 million Vietnam-bound exports: up 88.2% to €20.5 million Man-made staple fiber exports: down 26.4% to €112.8 million Portugal’s textile an...",
+"c": "MATERIAL",
+"x": "Key insights Non-knitted apparel exports: up 8.5% to €696.5 million Vietnam-bound exports: up 88.2% to €20.5 million Man-made staple fiber exports: down 26.4% to €112.8 million Portugal’s textile and clothing exports rose 2.4% year over year to €3.78 billion in the first eight months of 2026. It was supported by growth in technical fabrics, non-knitted apparel and non-EU markets. Courtesy: Collected Data from the Portuguese National Statistics Institute (INE) showed that exports to markets outside the European Union increased 5% to €1.09 billion. Exports to EU countries grew 1.3% to €2.69 billion, accounting for around 71% of total exports. Technical textiles and non-knitted apparel led product growth. Exports of coated, laminated and other treated fabrics rose 13.8% to €259.2 million, while non-knitted clothing exports increased 8.5% to €696.5 million. Knitted clothing remained the largest category, with exports of €1.46 billion, up 1.3%. However, man-made staple fiber exports fell 26.4% to €112.8 million, while man-made filament exports declined 11.2% to €53.6 million. These drops offset some gains in other product categories. Spain remained the largest export destination at €873.3 million, although sales slipped 0.1%. Exports to France rose 4.1% to €559.2 million, while shipments to the Netherlands increased 10.2% to €230.1 million. Exports to the United States grew 3.1% to €300.9 million. Emerging markets recorded faster growth. Exports to Vietnam surged 88.2% to €20.5 million, while shipments to Mexico rose 71.7% to €43.4 million. The figures show that technical fabrics and selected apparel categories are supporting Portugal’s export growth as demand varies across traditional markets. Expanding sales beyond Europe could provide additional growth opportunities, alth",
+"i": "/storage/uploads/2026/10/portugaltextileexp_17922637655493.jpg",
+"g": [
+"베트남"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "c025b9691179a5d3",
+"d": "2026-10-18",
+"t": "방적 성공: Green Mountain Spinnery는 환경에 미치는 영향을 줄이면서 원사 제조 공정을 유지합니다.",
+"o": "Spinning Success: Green Mountain Spinnery Keeps The Yarn-Making Process Alive While Reducing Environmental Impact",
+"u": "https://www.textileworld.com/textile-world/weaving-spinning/2026/10/spinning-success-green-mountain-spinnery-keeps-the-yarn-making-process-alive-while-reducing-environmental-impact/",
+"s": "PUTNEY, VT — September 30, 2026 — Nestled near the banks of the Connecticut River, Green Mountain Spinnery’s colorful yarn covers the entrance to its historic woolen mill headquarters in Putney, Vermont, a cheerful welcome to fiber artists and crafters alike. Green Mountain meticulously transforms r",
+"c": "YARN",
+"x": "PUTNEY, VT — September 30, 2026 — Nestled near the banks of the Connecticut River, Green Mountain Spinnery’s colorful yarn covers the entrance to its historic woolen mill headquarters in Putney, Vermont, a cheerful welcome to fiber artists and crafters alike. Green Mountain meticulously transforms raw wool into exquisite, finished skeins through a time-honored process. But that process is dependent on something else time-honored: A five-foot Davis & Furber-Whitin carding machine that is over a century old. Built right here in New England between 1908 and 1918, the carding machine sits alongside other machines dating back to the mid-1940s and early-1950s. About 10,000 pounds of wool goes through the mill a year. Imagine this machine made by two iconic Massachusetts companies has seen almost 1.1 million pounds of wool in its lifetime, and you can guess what kind of work it takes to maintain. Keeping that antique machinery running smoothly is the job of Scott Matthews, carding operator and a nine-year veteran. For Matthews, machine maintenance and fine tuning is almost a daily devotional. And perhaps the most important part of that routine is lubrication. Going Green in the Green Mountains About a decade ago the spinnery transitioned away from traditional petroleum-based products seeking a cleaner footprint. They tried various eco-friendly solutions before finally settling on Renewable Lubricants, which exceeds performance standards. Today, the shop utilizes 1-gallon containers of Bio-Slide Way Lubricant—an ISO 68 lubricant—for transfer cases, sliding parts, and other moving surfaces. They also purchase 11-ounce aerosol cans of Bio-Penetrating Lubricant —an NSF H1 food grade penetrant and light lubricant—for bearing shafts, and hard to reach spots. Bio-High Temp 180 E.P. G",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/10/Green-Mountain-Spinnery-sylvan-raw-w.jpg",
+"g": [
+"울"
+],
+"m": "Textile World",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "aafd99c46c517aee",
+"d": "2026-10-18",
+"t": "BTMA, 국내 1차 섬유산업 보호, 공정한 경쟁 보장, 수출 경쟁력 강화를 위한 증거 기반 정책 촉구",
+"o": "BTMA Calls for Evidence-Based Policies to Protect Domestic Primary Textile Industry, Ensure Fair Competition and Strengthen Export Competitiveness",
+"u": "https://textilefocus.com/btma-calls-for-evidence-based-policies-to-protect-domestic-primary-textile-industry-ensure-fair-competition-and-strengthen-export-competitiveness/",
+"s": "Following news reports published in several national dailies on 17 October 2026 regarding the withdrawal of bonded warehouse facilities for imports of 10–30 count cotton yarn, the Bangladesh Textile Mills Association (BTMA) wishes to clarify that any policy assessment on this issue should give equal",
+"c": "YARN",
+"x": "Following news reports published in several national dailies on 17 October 2026 regarding the withdrawal of bonded warehouse facilities for imports of 10–30 count cotton yarn, the Bangladesh Textile Mills Association (BTMA) wishes to clarify that any policy assessment on this issue should give equal importance to the USD 32 billion investment, production capacity and employment in the primary textile industry, particularly the spinning sector, as well as the availability of raw materials and international competitiveness of the export-oriented apparel industry. The withdrawal of bonded warehouse facilities does not mean a ban on yarn imports, nor does it introduce any new customs duty. Following the decision of an inter-ministerial committee, the relevant order issued by the National Board of Revenue (NBR) allows imports against bank guarantees equivalent to the applicable duties and taxes, without imposing any new duties or taxes. As banks generally issue guarantees against non-funded exposure, this arrangement is not expected to create a working capital constraint for importers. The objective is not to disrupt legitimate import and export activities, but to prevent misuse of facilities, safeguard government revenue and ensure a level playing field between domestically produced and imported yarn. Protecting Domestic Investment, Production and Employment The country’s spinning industry represents substantial domestic investment, extensive production infrastructure and significant employment opportunities. If the industry’s production and financial capacity can be restored, closed and partially closed spinning and weaving mills may be able to resume operations. This would help protect existing jobs while creating opportunities for additional employment. The normalisation",
+"i": "https://textilefocus.com/wp-content/uploads/2026/01/btma.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 13,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "a60330dba409b8d2",
+"d": "2026-10-18",
+"t": "Billion Rise Knitting, 새로운 Vietnam 시설로 글로벌 제조 및 편직 혁신 확장",
+"o": "Billion Rise Knitting Expands Global Manufacturing And Knitting Innovation With New Vietnam Facility",
+"u": "https://www.textileworld.com/textile-world/knitting-apparel/2026/10/billion-rise-knitting-expands-global-manufacturing-and-knitting-innovation-with-new-vietnam-facility/",
+"s": "HONG KONG — October 8, 2026 — To better serve and support increasing interest among apparel brands seeking greater geographic diversification with their sourcing needs, Billion Rise, a vertically integrated company focused on the manufacturing of textile-based materials for sportswear, swimwear, und",
+"c": "FABRIC",
+"x": "HONG KONG — October 8, 2026 — To better serve and support increasing interest among apparel brands seeking greater geographic diversification with their sourcing needs, Billion Rise, a vertically integrated company focused on the manufacturing of textile-based materials for sportswear, swimwear, underwear, and lingerie products, has opened its doors to a high-tech, new factory in Thanh Hoa, Vietnam. Backed by $100 million investment, the new Vietnam facility that is being developed in three phases, is an estimated 320,000 square meters in total size and is expected to have an annual production capacity of up to 100 million meters. Phase one of the facility is complete representing approximately 110,00 square meters. Additional knitting, dyeing and printing capacity will be added in phase two, to be completed in Q3 2027 and phase three to be completed in Q3 2029. “We’re pleased to give our customers greater sourcing flexibility with the addition of our Vietnam operation to our established manufacturing base in Qing Yuan China,” said Charles Chen, Billion Rise CEO and Owner. “After a decade of investment in developing the facility and building it to the same high standards our customers expect from us, we’re confident Vietnam will deliver the quality, technical expertise and consistency our brand partners require.” The Billion Rise Vietnam facility is being developed with sophisticated capabilities comparable to our China operation to include warp and weft knitting, dyeing, digital, flat-bed and heat-transfer printing, stentering, and finishing proficiencies. It also includes a cutting-edge wastewater treatment system and solar rooftop to help minimize our environmental footprint. According to JP Brogan, US managing director of sales and marketing for Billion Rise, major ",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/10/Billion_Rise_Vietnam_Factory.jpg",
+"g": [
+"베트남"
+],
+"m": "Textile World",
+"r": "해외",
+"v": 9,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "a52a1f55f292ac3f",
+"d": "2026-10-18",
+"t": "BTMA, 방적산업 보호와 수출경쟁력 균형 정책 촉구",
+"o": "BTMA urges balanced policy to protect spinning industry and export competitiveness",
+"u": "https://textiletoday.com.bd/btma-urges-balanced-policy-to-protect-spinning-industry-and-export-competitiveness",
+"s": "The Bangladesh Textile Mills Association (BTMA) has defended the withdrawal of traditional bond facilities for importing 10–30 count cotton yarn, arguing that the bank guarantee-based system can prote...",
+"c": "YARN",
+"x": "The Bangladesh Textile Mills Association (BTMA) has defended the withdrawal of traditional bond facilities for importing 10–30 count cotton yarn, arguing that the bank guarantee-based system can protect domestic spinning mills and government revenue without disrupting legitimate exports. In a statement issued on October 17, 2026, the association said policymakers should consider the interests of both the primary textile sector and the export-oriented ready-made garment (RMG) industry, taking into account the primary textile sector’s $32 billion investment, production capacity and employment. According to BTMA, the withdrawal of bond facilities does not ban yarn imports or introduce new customs duties. Instead, under an order issued by the National Board of Revenue (NBR) following an inter-ministerial committee decision, importers can bring in yarn against a bank guarantee equivalent to the applicable duties and taxes. The association said bank guarantees are generally issued as non-funded banking exposures and therefore are unlikely to reduce importers’ working capital. It added that the arrangement aims to prevent misuse of facilities, safeguard government revenue and ensure fair competition between locally produced and imported yarn. BTMA highlights domestic spinning investment BTMA said strengthening the domestic spinning industry could help restore production and financial capacity, reopen closed and partially closed spinning and weaving mills, and generate additional employment while protecting existing jobs. It also argued that improving the operational and financial position of these enterprises could support loan recovery by banks and financial institutions and help reduce non-performing loans. The association maintained that the policy issue extends beyond the ",
+"i": "/storage/uploads/2026/10/btmaurgesbalanced_17923385801864.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 13,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "7f8721ee47beeefa",
+"d": "2026-10-18",
+"t": "패션 브랜드 겨눈 AI 사이버공격…해킹 후 대응이 ‘신뢰’ 가른다",
+"o": "패션 브랜드 겨눈 AI 사이버공격…해킹 후 대응이 ‘신뢰’ 가른다",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149471",
+"s": "글로벌 패션업계에서 사이버공격이 잇따르며 고객 이탈뿐 아니라 온라인 판매 중단, 물류 차질, 주가 하락까지 피해가 확산되고 있다. 특히 AI를 활용한 신원 사칭과 외부 협력업체 계정 침해가 새로운 위협으로 떠오르면서 공격을 막는 보안 역량 못지않게 사고 이후의 신속하고 투명한 대응이 중요해지고 있다.영국 패션 유통업체 아소스(ASOS)와 TFG런던(TFG London)이 10월 잇따라 사이버공격을 받으면서 이러한 위험이 현실화됐다. 아소스에서는 일부 고객정보에 대한 무단 접근이 확인됐고, TFG런던은 전산시스템 장애로 온라인 주문과",
+"c": "RETAIL",
+"x": "글로벌 패션업계에서 사이버공격이 잇따르며 고객 이탈뿐 아니라 온라인 판매 중단, 물류 차질, 주가 하락까지 피해가 확산되고 있다. 특히 AI를 활용한 신원 사칭과 외부 협력업체 계정 침해가 새로운 위협으로 떠오르면서 공격을 막는 보안 역량 못지않게 사고 이후의 신속하고 투명한 대응이 중요해지고 있다.영국 패션 유통업체 아소스(ASOS)와 TFG런던(TFG London)이 10월 잇따라 사이버공격을 받으면서 이러한 위험이 현실화됐다. 아소스에서는 일부 고객정보에 대한 무단 접근이 확인됐고, TFG런던은 전산시스템 장애로 온라인 주문과",
+"i": "http://www.ktnews.com/news/thumbnail/202610/149471_132207_5458_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "2b70a7fec820d449",
+"d": "2026-10-18",
+"t": "Toray, 재활용 함량 93%의 복합섬유 개발",
+"o": "Toray develops composite fiber with 93% recycled content",
+"u": "https://textiletoday.com.bd/toray-develops-composite-fiber-with-93-recycled-content",
+"s": "Japanese materials manufacturer Toray Industries has developed a polyester-nylon composite fiber containing at least 93% recycled material by weight. The company has also introduced ARTIROSA® CX, a fa...",
+"c": "MATERIAL",
+"x": "Japanese materials manufacturer Toray Industries has developed a polyester-nylon composite fiber containing at least 93% recycled material by weight. The company has also introduced ARTIROSA® CX, a fabric designed for premium apparel markets, with commercial launch planned for the Autumn/Winter 2027 season. Figure: Toray develops composite fiber with 93% recycled content. The recycled content figure applies to the raw fiber, not the finished fabric or garment. The final percentage will depend on the material composition. Toray used its proprietary polymer design and composite spinning technologies to incorporate recycled materials into both the polyester and nylon components. The challenge is to increase recycled content while maintaining consistent quality and the performance required for premium textiles. ARTIROSA® CX features a dense, fine texture and a crisp feel. It targets men's and women's outerwear, urban outdoor clothing and high-end casual wear. Depending on the fabric construction and finishing process, it can be designed to provide properties such as water resistance and wind resistance. Toray said the water-repellent agents used for the fabric are not intentionally formulated with per- and polyfluoroalkyl substances (PFAS). The company plans to verify the technology's suitability for mass production and explore further increases in recycled content. It will also develop additional fabric options using nylon blends, natural fibers and different finishing techniques. Toray is targeting first-year sales of 200,000 meters for ARTIROSA® CX. The development aims to expand the use of recycled materials in premium textiles, where appearance, durability and functional performance are key requirements.",
+"i": "/storage/uploads/2026/10/toraydevelopscompo_17922640242959.jpg",
+"g": [
+"리사이클",
+"나일론"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 18,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "005fae1017281f9e",
+"d": "2026-10-18",
+"t": "Euratex는 섬유 지속가능성을 위한 EU 예산 지원을 요청합니다.",
+"o": "Euratex calls for EU budget support for textile sustainability",
+"u": "https://textiletoday.com.bd/euratex-calls-for-eu-budget-support-for-textile-sustainability",
+"s": "The European Apparel and Textile Confederation (Euratex) has urged European Union (EU) member states to protect funding for cleaner textile production, recycling and innovation under the bloc’s next l...",
+"c": "MATERIAL",
+"x": "The European Apparel and Textile Confederation (Euratex) has urged European Union (EU) member states to protect funding for cleaner textile production, recycling and innovation under the bloc’s next long-term budget. The trade body wants the EU’s 2028–2034 Multiannual Financial Framework (MFF) to help textile manufacturers invest in decarbonization, circular infrastructure and digitalization. The funding would support the industry in meeting the EU’s growing sustainability requirements. Euratex raised the issue as EU member states negotiate the next long-term budget. The organization stressed the need to ensure that textile businesses can access financial support as they adapt to new environmental and digital requirements. Cleaner production and recycling require investment in technology, infrastructure and industrial processes. Financial support could help manufacturers reduce emissions, improve resource efficiency and expand textile recycling. The proposed budget period covers seven years, from 2028 to 2034. Decisions on funding priorities will influence how European industries finance their transition toward more sustainable production. Euratex also wants policymakers to ensure that the transition does not leave established textile businesses behind. Supporting existing manufacturers alongside new technologies and circular business models will be important for maintaining the industry’s production base.",
+"i": "/storage/uploads/2026/10/euratexcallsforeu_17922643138840.png",
+"g": [
+"리사이클"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
 {
 "id": "e6c2ade39e4674f1",
 "d": "2026-10-17",
@@ -1121,6 +1297,50 @@
 "e": [],
 "ms": [
 "Fibre2Fashion"
+]
+},
+{
+"id": "71df0ceb7b0e52a5",
+"d": "2026-10-17",
+"t": "기능성 의류의 미래는 활동적인 편안함입니다: NUSPUN® 소개",
+"o": "The Future Of Performance Apparel Is Active Comfort: Introducing NUSPUN®",
+"u": "https://www.textileworld.com/textile-world/nonwovens-technical-textiles/2026/10/the-future-of-performance-apparel-is-active-comfort-introducing-nuspun/",
+"s": "SINGAPORE/ MUNICH — October 12, 2026 — Niber Technologies unveils NUSPUN®, its next-generation ingredient brand of laminates purpose-built for the functional apparel industry. Rooted in the company’s electrospun nanofiber technology, NUSPUN laminates enable a new category of Active Comfort to give p",
+"c": "MATERIAL",
+"x": "SINGAPORE/ MUNICH — October 12, 2026 — Niber Technologies unveils NUSPUN®, its next-generation ingredient brand of laminates purpose-built for the functional apparel industry. Rooted in the company’s electrospun nanofiber technology, NUSPUN laminates enable a new category of Active Comfort to give performance apparel both ultra-breathability and tunable weather protection. Weather shouldn’t dictate comfort For the performance textiles industry, weather protection has long come at the cost of comfort. PFAS (Per- and polyfluoroalkyl substances) has traditionally given garments an extra layer of waterproof protection, but as regulations against PFAS tighten, brands are under pressure to find alternatives. However, most PFAS-free options force a compromise between water protection and breathability. While some waterproof garments succeed at repelling water, comfort suffers during intense activity as trapped heat, built-up sweat, and humidity, leaving an uncomfortable feeling despite protection from the elements. That trade-off is exactly what NUSPUN® laminates are built to solve through ultra-breathable materials that protect from the elements, without sacrificing comfort. Electrospinning is the innovation behind NUSPUN® materials NUSPUN® laminates start with an electrospun 3D nanofiber web — built fiber by fiber, not cast or stretched like conventional membranes. That’s what lets moisture escape while keeping water out, delivering ultra-breathable performance with tunable weather protection. PFAS-free by design, NUSPUN membranes and laminates are manufactured without intentionally added PFAS materials. While PFAS-free membranes used to rely on a stretched film or a dense, non-porous coating, electrospinning builds the material fiber by fiber, giving direct control over exa",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/10/Niber-Technologies-NUSPUN-Layer-graphic.png",
+"g": [],
+"m": "Textile World",
+"r": "해외",
+"v": 14,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
+]
+},
+{
+"id": "3c3f626ce6891c02",
+"d": "2026-10-17",
+"t": "Bally Ribbon Mills, Advanced Textiles Expo 2026에서 고급 섬유 솔루션 전시 예정",
+"o": "Bally Ribbon Mills to Exhibit Advanced Textile Solutions at Advanced Textiles Expo 2026",
+"u": "https://www.textileworld.com/textile-world/nonwovens-technical-textiles/2026/10/bally-ribbon-mills-to-exhibit-advanced-textile-solutions-at-advanced-textiles-expo-2026/",
+"s": "BALLY, Pa. — October 15, 2026 — Bally Ribbon Mills (BRM), a designer, developer, and manufacturer of highly specialized engineered woven fabrics, will exhibit at Advanced Textiles Expo 2026, November 3–5 in Orlando, Florida. At Booth #805, BRM will showcase advanced narrow fabrics, webbings, high-pe",
+"c": "FABRIC",
+"x": "BALLY, Pa. — October 15, 2026 — Bally Ribbon Mills (BRM), a designer, developer, and manufacturer of highly specialized engineered woven fabrics, will exhibit at Advanced Textiles Expo 2026, November 3–5 in Orlando, Florida. At Booth #805, BRM will showcase advanced narrow fabrics, webbings, high-performance materials, and custom textile designs for demanding applications. BRM develops standard and custom textile solutions using a range of high-performance fibers, including Zylon®, Vectran®, Kevlar® 29, Nomex®, Kevlar® EXO , Spectra®, Dyneema®, and Teflon . The company’s precision weaving capabilities support application-specific designs for markets requiring durable, high-performance textile components. BRM’s woven materials also support next-generation exploration initiatives. Bally Ribbon Mills provided high-strength specialty tapes and webbing utilized in the parachute and landing systems that successfully deployed the Curiosity and Perseverance rovers on the Martian surface. The company is also developing materials for future Moon and deep-space missions. Fire-side Chat: Designing and Manufacturing Advanced Medical Textiles During ATA, Ted Fetterman, BRM vice president of sales and marketing, will lead a fire-side chat, “Designing and Manufacturing Advanced Medical Textiles,” on Tuesday, November 3, from 2:00–2:30 p.m. on the show floor. With more than 50 years of medical textile experience, Fetterman will discuss BRM’s work in the medical device market, lessons learned, and factors shaping the future of medical textiles. Advanced Textiles Expo attendees are invited to visit Booth #805 to learn how BRM combines advanced materials with precision weaving to create custom textile solutions. Posted: October 17, 2026 Source Bally Ribbon Mills (BRM)",
+"i": "https://wordpress.textileworld.com/wp-content/uploads/2026/10/Bally-Ribbon-Mills-narrow-fabric-photo.jpg",
+"g": [
+"제직"
+],
+"m": "Textile World",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile World"
 ]
 },
 {
@@ -1597,6 +1817,27 @@
 "v": 7,
 "h": 1,
 "w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "7870138f3cbca0ce",
+"d": "2026-10-16",
+"t": "검역 신청에 47개월? 섬유기업 발목 잡은 규제...12년째 제자리",
+"o": "검역 신청에 47개월? 섬유기업 발목 잡은 규제...12년째 제자리",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149394",
+"s": "1인 섬유기업이 자체 개발품의 사업화를 추진하는 과정에서 겪은 장기간의 규제와 행정적 어려움을 호소하며 정부에 제도 개선을 건의했다.오랜 기간 현장에서 규제 개선을 요구해 왔지만 관련 절차와 부처 간 협의가 원활하게 이뤄지지 않아 사업 추진에 어려움을 겪었다는 주장이다. 소규모 기업의 기술 개발과 사업화를 뒷받침해야 할 행정이 오히려 진입 장벽으로 작용하고 있다는 문제 제기다.섬유 분야 개발품을 사업화해 온 주식회사 다운울슐레트는 지난 12년간 규제 개선을 추진하며 관련 기관에 지속적으로 건의해 왔다. 기업 측은 이번 사안을 여덟",
+"c": "MATERIAL",
+"x": "1인 섬유기업이 자체 개발품의 사업화를 추진하는 과정에서 겪은 장기간의 규제와 행정적 어려움을 호소하며 정부에 제도 개선을 건의했다.오랜 기간 현장에서 규제 개선을 요구해 왔지만 관련 절차와 부처 간 협의가 원활하게 이뤄지지 않아 사업 추진에 어려움을 겪었다는 주장이다. 소규모 기업의 기술 개발과 사업화를 뒷받침해야 할 행정이 오히려 진입 장벽으로 작용하고 있다는 문제 제기다.섬유 분야 개발품을 사업화해 온 주식회사 다운울슐레트는 지난 12년간 규제 개선을 추진하며 관련 기관에 지속적으로 건의해 왔다. 기업 측은 이번 사안을 여덟",
+"i": "http://www.ktnews.com/news/thumbnail/202610/149394_132026_722_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 9,
+"h": 1,
+"w": "material",
 "e": [],
 "ms": [
 "한국섬유신문"
@@ -3562,11 +3803,12 @@
 "m": "Textile Focus",
 "r": "해외",
 "v": 8,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Textile Focus"
+"Textile Focus",
+"Textile World"
 ]
 },
 {
@@ -6296,11 +6538,12 @@
 "m": "Textile Today",
 "r": "해외",
 "v": 9,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Textile Today"
+"Textile Today",
+"주제검색 · 염색가공"
 ]
 },
 {
@@ -6606,13 +6849,14 @@
 "m": "Textile Today",
 "r": "해외",
 "v": 8,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [
 "nike"
 ],
 "ms": [
-"Textile Today"
+"Textile Today",
+"주제검색 · 염색가공"
 ]
 },
 {
@@ -33763,246 +34007,6 @@
 "ms": [
 "한국섬유신문",
 "주제검색 · 국내소재"
-]
-},
-{
-"id": "8a812bd5854a484a",
-"d": "2026-09-07",
-"t": "입큰, ‘뉴니스 베어 파우더 팩트’ 지그재그 라이브 진행",
-"o": "입큰, ‘뉴니스 베어 파우더 팩트’ 지그재그 라이브 진행",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148305",
-"s": "이넬화장품의 코스메틱 브랜드 입큰(IPKN)이 ‘뉴니스 베어 파우더 팩트’의 유통 접점을 넓힌다.입큰은 9월 7일 지그재그 라이브를 통해 뉴니스 베어 파우더 팩트를 선보인다. 방송에는 제품 공동개발에 참여한 뷰티 유튜버 오션이 출연해 제품 특징과 사용법 등을 소개할 예정이다.뉴니스 베어 파우더 팩트는 파우더 입자를 활용해 모공과 피부 요철을 정돈하는 베이스 메이크업 제품이다. 스킨케어 성분을 포함한 포뮬러를 적용했으며, 프로브엠피부임상연구센터에서 2026년 4월 21일부터 23일까지 성인 여성 30명을 대상으로 피부 저자극 테스트를",
-"c": "RETAIL",
-"x": "이넬화장품의 코스메틱 브랜드 입큰(IPKN)이 ‘뉴니스 베어 파우더 팩트’의 유통 접점을 넓힌다.입큰은 9월 7일 지그재그 라이브를 통해 뉴니스 베어 파우더 팩트를 선보인다. 방송에는 제품 공동개발에 참여한 뷰티 유튜버 오션이 출연해 제품 특징과 사용법 등을 소개할 예정이다.뉴니스 베어 파우더 팩트는 파우더 입자를 활용해 모공과 피부 요철을 정돈하는 베이스 메이크업 제품이다. 스킨케어 성분을 포함한 포뮬러를 적용했으며, 프로브엠피부임상연구센터에서 2026년 4월 21일부터 23일까지 성인 여성 30명을 대상으로 피부 저자극 테스트를",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148305_129894_5043_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "84a2294021b62527",
-"d": "2026-09-07",
-"t": "| 세계 면화 부족 현상은 정말로 끝났는가?",
-"o": "| Is the global cotton shortage really over?",
-"u": "https://news.google.com/rss/articles/CBMizwFBVV95cUxNYnZSLU5reGNLQVdpMndpc1RJZ0FpWUFuNmlPVlhwRFBOeVBiUTVtY1NrbllIV2VmYzJZaUJlTWhmR0VDbzlxZkpiRnRtQ3ZKdEY3ZlpBbGJVTnNRSEV6YTRkYTkzQTBxd1hQOTRZbFFnZkVTclFtOGJSRk05TjhiczB3THB1enE3ck1yRFJBOWpNUlZEMjV4dWFycUUxRHVVZTVMYUVXYWdsa2k4eUNiT1JXTUw4UHlTM05ES3pRemVKMXo0aU41OXZ1aXctWkU?oc=5",
-"s": "| Is the global cotton shortage really over? Fibre2Fashion",
-"c": "MATERIAL",
-"x": "| Is the global cotton shortage really over? Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "7eccb24b2a84cd93",
-"d": "2026-09-07",
-"t": "폴햄키즈, 아이 위한 ‘좋은 데님’ 기준…26FW ‘JUST DENIM",
-"o": "폴햄키즈, 아이 위한 ‘좋은 데님’ 기준…26FW ‘JUST DENIM",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148312",
-"s": "에이션패션(대표 박희찬)이 전개하는 키즈 캐주얼 브랜드 폴햄키즈(POLHAM KIDS)가 26FW ‘저스트데님(JUST DENIM)’ 컬렉션을 공개했다.저스트데님은 폴햄키즈가 축적해온 데님 노하우를 바탕으로 ‘우리 아이를 위한 좋은 데님은 무엇인가’라는 질문에서 출발했다. 불필요한 요소를 덜어내고 아이들이 편안하게 입고 움직이는 데 필요한 요소에 집중한 것이 특징이다.폴햄키즈는 이번 컬렉션에서 패브릭(FABRIC·원단), 핏(FIT), 피니싱(FINISHING·워싱)을 좋은 데님을 구성하는 핵심 요소로 정의하고 이를 ‘3F’ 기준으",
-"c": "FABRIC",
-"x": "에이션패션(대표 박희찬)이 전개하는 키즈 캐주얼 브랜드 폴햄키즈(POLHAM KIDS)가 26FW ‘저스트데님(JUST DENIM)’ 컬렉션을 공개했다.저스트데님은 폴햄키즈가 축적해온 데님 노하우를 바탕으로 ‘우리 아이를 위한 좋은 데님은 무엇인가’라는 질문에서 출발했다. 불필요한 요소를 덜어내고 아이들이 편안하게 입고 움직이는 데 필요한 요소에 집중한 것이 특징이다.폴햄키즈는 이번 컬렉션에서 패브릭(FABRIC·원단), 핏(FIT), 피니싱(FINISHING·워싱)을 좋은 데님을 구성하는 핵심 요소로 정의하고 이를 ‘3F’ 기준으",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148312_129904_1019_v150.jpg",
-"g": [
-"데님"
-],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 11,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "7ce03ec1210f104e",
-"d": "2026-09-07",
-"t": "열고정으로 인한 장력 제거",
-"o": "Removing the tension from heat-setting",
-"u": "https://knittingindustry.com/removing-the-tension-from-heat-setting/",
-"s": "Eltex, a member of TMAS, the Swedish textile machinery association, is helping textile manufacturers improve heat-setting consistency with its ACT-MULTI system, which individually monitors and automatically controls yarn tension across every yarn position. Heat-setting is a critical stage in the pro",
-"c": "FABRIC",
-"x": "Eltex, a member of TMAS, the Swedish textile machinery association, is helping textile manufacturers improve heat-setting consistency with its ACT-MULTI system, which individually monitors and automatically controls yarn tension across every yarn position. Heat-setting is a critical stage in the production of synthetic and blended yarns, where precise and consistent processing conditions are required to stabilise yarn structures, lock in twist and bulk, and ensure predictable performance during subsequent processes including dyeing and finishing, weaving, knitting and tufting. The technology is particularly relevant to carpet yarn production, where carefully controlled heat treatment relieves internal stresses and improves bulk, resilience, dimensional stability and dye uptake. Variations in yarn tension during heat-setting can consequently affect both processing consistency and finished carpet quality. ACT-MULTI addresses this challenge by individually monitoring and automatically controlling yarn tension on the input side of the heat-setting machine tunnel. The system offers a fast response for precise tension control and incorporates integrated yarn break detection. An external display enables operators to monitor the complete system, while active yarn positions can be learned rapidly when new orders are introduced. Tension and stop values can be adjusted independently for each tunnel, while sensor parameters can be configured for different yarn groups. This allows separate settings to be applied to yarns passing through individual tunnels. “The ACT-MULTI is designed to automatically control the tension of each yarn according to a predefined reference tension,” said Eltex CEO Brian Hicks. “The system operates independently for each tunnel and also includes a machine ",
-"i": "https://knittingindustry.com/wp-content/uploads/2026/09/Act1.jpg",
-"g": [],
-"m": "Knitting Industry",
-"r": "해외",
-"v": 9,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Knitting Industry"
-]
-},
-{
-"id": "78c06a53b5114af7",
-"d": "2026-09-07",
-"t": "MCPI와 IOCL이 Odisha에서 ₹5,000-Crore 폴리에스터 제조 프로젝트를 위해 손을 잡았습니다.",
-"o": "MCPI and IOCL join hands for ₹5,000-Crore Polyester Manufacturing Project in Odisha",
-"u": "https://www.indiantextilemagazine.in/mcpi-and-iocl-join-hands-for-%e2%82%b95000-crore-polyester-manufacturing-project-in-odisha/",
-"s": "Landmark partnership paves the way for a 900 TPD integrated polyester facility at Bhadrak, strengthening India’s domestic polyester ecosystem and advancing IOCL’s diversification into textiles MCPI Private Limited and Indian… The post MCPI and IOCL join hands for ₹5,000-Crore Polyester Manufacturing",
-"c": "MATERIAL",
-"x": "Landmark partnership paves the way for a 900 TPD integrated polyester facility at Bhadrak, strengthening India’s domestic polyester ecosystem and advancing IOCL’s diversification into textiles MCPI Private Limited and Indian Oil Corporation Limited (IOCL) have signed a Joint Venture (JV) Agreement to establish a ₹5,000-crore polyester yarn manufacturing facility at Bhadrak in Odisha, marking a significant milestone in the development of India’s domestic polyester value chain. The agreement was signed at IOCL’s Refinery Headquarters by Mr. Debi Prasad Patra, Managing Director & CEO, MCPI, and Mr. S.K. Papneja, Executive Director, on behalf of IOCL. The signing marks the culmination of more than a year of strategic collaboration between the two companies. The partnership follows the approval of the IOCL Board in December 2024 and final clearance from the Government of India in June 2026, paving the way for the formal creation of the joint venture and implementation of the project. The project brings together the complementary strengths of IOCL’s petrochemical capabilities and MCPI’s expertise in polyester and textiles, with the objective of creating a large-scale, technology-driven polyester manufacturing platform in Odisha. 900 TPD Continuous Polymerisation Facility At the heart of the project will be a 900 tonnes-per-day (TPD) Continuous Polymerisation (CP) unit, supported by downstream manufacturing facilities for Fully Drawn Yarn (FDY), Draw Textured Yarn (DTY) and polyester chips. These products are key building blocks for the textile industry and find applications across apparel, home textiles and industrial textiles. The integrated configuration will enable the facility to manufacture polyester products across different stages of the value chain, combining polymeri",
-"i": "https://www.indiantextilemagazine.in/wp-content/uploads/2026/09/MCPI-IOC.jpeg",
-"g": [],
-"m": "Indian Textile Magazine",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Indian Textile Magazine"
-]
-},
-{
-"id": "778359c8a1926846",
-"d": "2026-09-07",
-"t": "GLXY 글로벌 브랜드 큐레이션 강화...센텀시티·강남점에 전략매장",
-"o": "GLXY 글로벌 브랜드 큐레이션 강화...센텀시티·강남점에 전략매장",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148269",
-"s": "삼성물산 패션부문의 남성 캐주얼 브랜드 GLXY(갤럭시 라이프스타일)가 대표 상품의 성장세를 바탕으로 글로벌 브랜드 큐레이션을 결합한 전략 매장 ‘GLXY 스튜디오’를 선보였다.",
-"c": "RETAIL",
-"x": "삼성물산 패션부문의 남성 캐주얼 브랜드 GLXY(갤럭시 라이프스타일)가 대표 상품의 성장세를 바탕으로 글로벌 브랜드 큐레이션을 결합한 전략 매장 ‘GLXY 스튜디오’를 선보였다.",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148269_129820_3411_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "6f5dfe5ba3bf6cf7",
-"d": "2026-09-07",
-"t": "멀버리, 롯데百 부산 본점 부티크 1층 이전…국내 입지 확대",
-"o": "멀버리, 롯데百 부산 본점 부티크 1층 이전…국내 입지 확대",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148296",
-"s": "영국 라이프스타일 브랜드 멀버리(Mulberry)가 지난 9월 4일 롯데백화점 부산 본점 내 부티크를 1층으로 이전 오픈했다.새롭게 단장한 부티크는 멀버리의 최신 컬렉션을 한자리에서 살펴볼 수 있는 공간으로 구성했다. 특히 매장 내부에는 재사용이 가능한 집기와 가구를 적용해 브랜드가 추구하는 지속가능성에 대한 철학을 공간 전반에 반영했다.이번 이전은 멀버리가 국내 시장에서 브랜드 입지를 지속적으로 확대하는 흐름의 일환이다. 멀버리는 지난 8월 신세계면세점에 신규 매장을 오픈한 데 이어 롯데백화점 부산 본점 부티크를 이전하며 국내 오",
-"c": "RETAIL",
-"x": "영국 라이프스타일 브랜드 멀버리(Mulberry)가 지난 9월 4일 롯데백화점 부산 본점 내 부티크를 1층으로 이전 오픈했다.새롭게 단장한 부티크는 멀버리의 최신 컬렉션을 한자리에서 살펴볼 수 있는 공간으로 구성했다. 특히 매장 내부에는 재사용이 가능한 집기와 가구를 적용해 브랜드가 추구하는 지속가능성에 대한 철학을 공간 전반에 반영했다.이번 이전은 멀버리가 국내 시장에서 브랜드 입지를 지속적으로 확대하는 흐름의 일환이다. 멀버리는 지난 8월 신세계면세점에 신규 매장을 오픈한 데 이어 롯데백화점 부산 본점 부티크를 이전하며 국내 오",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148296_129885_3356_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 8,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "67a3dabd539225ae",
-"d": "2026-09-07",
-"t": "관세 구조가 직물 및 섬유 선택에 영향을 미치는 이유",
-"o": "Why Tariff Structures are Influencing Fabric and Fibre Choices",
-"u": "https://news.google.com/rss/articles/CBMiygFBVV95cUxQNmhnN1hFdWJlM0NjTjFvUnFvODNObzB4MXlXYlpxeDlZTG1maDFKd3p5cmJBNUhsWDc3UTR2cmlqSVR2S3duWE95SzltaEV4YXVqdHo0VlQxeEc3bm14Wnc0X2JZdVAtai1UUjBTYlRVZWZYUVlmekUxQkxmd050VGpsN290SnoxREx5M3BjSHNOQlFQOGU5cG96QTc1V3B4UVlTekQtTXlaeXpwOWVTSHZRUHZMSDh6NWd1NkNnRWRLSUZSdHdhTUF3?oc=5",
-"s": "Why Tariff Structures are Influencing Fabric and Fibre Choices Fibre2Fashion",
-"c": "FABRIC",
-"x": "Why Tariff Structures are Influencing Fabric and Fibre Choices Fibre2Fashion",
-"i": "",
-"g": [
-"관세"
-],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "653baa07a4cfa934",
-"d": "2026-09-07",
-"t": "탄소 음성 섬유 섬유 시장 규모 보고서(2033년)",
-"o": "Carbon-negative Textile Fibers Market Size Report, 2033",
-"u": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNczRRT0ZFM21naGRRaHJIWjFoeDM3TWlCVjdqWTViVDd0ek1BVXVfSDh3TUVNMGw1ZDdYQjY3Y2ZtN00telA3bk92TWgyZ2dhTnA3dDFPYU9kVEExUWY1TlF1Uy16c08yZWlhM1lrTHNOWFlJdDhnaktQY056dGZqZ1Y2MmU0ZG9xTmpLYUJkbVRJMnNiNHBEWUVnSU0?oc=5",
-"s": "Carbon-negative Textile Fibers Market Size Report, 2033 Grand View Research",
-"c": "MATERIAL",
-"x": "Carbon-negative Textile Fibers Market Size Report, 2033 Grand View Research",
-"i": "",
-"g": [],
-"m": "주제검색 · 신소재",
-"r": "해외",
-"v": 10,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"주제검색 · 신소재"
-]
-},
-{
-"id": "56de0001cb20a6f9",
-"d": "2026-09-07",
-"t": "공중부양 셔틀을 개척하는 SupraWeave 프로젝트",
-"o": "SupraWeave project pioneering a levitating shuttle",
-"u": "https://innovationintextiles.com/supraweave-project-pioneering-a-levitating-shuttle/",
-"s": "At the forthcoming Aachen-Dresden-Denkendorf International Textile Conference (ADD-ITC) 2026, which will take place from November 26-27 at the International Congress Centre in Dresden, Germany, Oliver de Haas of evico GmbH will provide details of the SupraWeave project. This is dedicated to fundamen",
-"c": "FABRIC",
-"x": "At the forthcoming Aachen-Dresden-Denkendorf International Textile Conference (ADD-ITC) 2026, which will take place from November 26-27 at the International Congress Centre in Dresden, Germany, Oliver de Haas of evico GmbH will provide details of the SupraWeave project. This is dedicated to fundamentally transforming circular weaving technology through the use of a superconducting weft insertion system. The goal is to process delicate, high-performance fibres such as glass and carbon on circular looms. Such fibres are indispensable in industries such as aerospace, automotive, and energy technology, but their fragility and the high mechanical stresses of conventional circular weaving processes have so far posed an insurmountable hurdle and processing is only currently possible on flatbed looms. The project’s main innovation is the use of superconducting magnetic bearings which enable frictionless, precise guidance of a levitating shuttle. This new weft insertion system is complemented by low-damage guidance of the warp and weft yarns enabling a level of material protection that has never been achieved before. A weft feeder for a Starlinger circular loom is being developed. © TU Dresden A holistic development approach is being taken in the project, ranging from the modelling of the magnetic bearings and yarn guidance to the adjustment of the fabric take-off, and on to the production and characterisation of the end products. Particular emphasis is being placed on validating the developed models and algorithms to ensure the high reliability and efficiency of the new technology. As part of the project, a weft feeder for a Starlinger circular loom is this year being developed by the Institute for Textile Machinery and High Performance Textile Materials at TU Dresden in collab",
-"i": "https://innovationintextiles.com/wp-content/uploads/2026/09/Erico1.jpg",
-"g": [
-"제직"
-],
-"m": "Innovation in Textiles",
-"r": "해외",
-"v": 18,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Innovation in Textiles"
-]
-},
-{
-"id": "55d92e8550249f8a",
-"d": "2026-09-07",
-"t": "2027 FW 니트…컬러·입체감 강세",
-"o": "2027 FW 니트…컬러·입체감 강세",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81804",
-"s": "2027~2028년 가을·겨울 니트웨어 시장에서 색상과 질감이 핵심 트렌드로 부상하고 있다. 캐시미어와 울, 모헤어 등 고급 천연섬유를 중심으로 선명한 컬러와 입체적인 표면을 강조한 원사가 늘면서 프리미엄 니트의 표현 방식도 한층 다양해지고 있다.이 같은 흐름은 지난 6월 이탈리아 피렌체에서 열린 국제 원사 전시회 ‘피티 이마지네 필라티(Pitti Immagine Filati)’에서도 두드러졌다. 단순히 부드럽고 가벼운 소재를 제안하는 데 그치지 않고, 원사 단계부터 색과 촉감, 조직감을 적극적으로 살린 제품이 대거 등장했다. 이에",
-"c": "FABRIC",
-"x": "2027~2028년 가을·겨울 니트웨어 시장에서 색상과 질감이 핵심 트렌드로 부상하고 있다. 캐시미어와 울, 모헤어 등 고급 천연섬유를 중심으로 선명한 컬러와 입체적인 표면을 강조한 원사가 늘면서 프리미엄 니트의 표현 방식도 한층 다양해지고 있다.이 같은 흐름은 지난 6월 이탈리아 피렌체에서 열린 국제 원사 전시회 ‘피티 이마지네 필라티(Pitti Immagine Filati)’에서도 두드러졌다. 단순히 부드럽고 가벼운 소재를 제안하는 데 그치지 않고, 원사 단계부터 색과 촉감, 조직감을 적극적으로 살린 제품이 대거 등장했다. 이에",
-"i": "https://cdn.itnk.co.kr/news/photo/202609/81804_53260_00.png",
-"g": [
-"캐시미어",
-"전시회"
-],
-"m": "국제섬유신문",
-"r": "국내",
-"v": 11,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"국제섬유신문"
 ]
 }
 ]
