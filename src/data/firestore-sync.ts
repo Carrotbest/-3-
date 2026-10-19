@@ -195,7 +195,10 @@ async function pushMergedNow<K extends CacheKey>(key: K, value: AppState[K]): Pr
     }
     // 기준선이 없으면(첫 스냅샷 실패, 새 키) 빈 기준선으로 합친다. 서버 항목은 하나도 빼지 않는다.
     const next = Array.isArray(theirs) ? mergeForKey(key, mine, theirs, base ?? []) as unknown[] : mine
-    if (NEVER_EMPTY_KEYS.has(key) && next.length === 0 && Array.isArray(theirs) && theirs.length > 0) {
+    // 지킬 값이 있었는데 결과가 비면 멈춘다. 서버가 이미 비어 있어도 마찬가지다(R336).
+    // 예전 조건은 `theirs.length > 0`이라, 서버가 한 번 잘못 비워진 뒤의 저장이 그 빈 상태를 굳혔다.
+    const hadRows = mine.length > 0 || (base?.length ?? 0) > 0 || (Array.isArray(theirs) && theirs.length > 0)
+    if (NEVER_EMPTY_KEYS.has(key) && next.length === 0 && hadRows) {
       throw new Error(`${key} 병합 결과가 비어 저장을 멈췄습니다.`)
     }
     const chunks = splitChunks(JSON.stringify(next))
@@ -328,7 +331,6 @@ function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }
     }
     try {
       const value = JSON.parse(json) as AppState[CacheKey]
-      lastRemoteValue.set(key, value)
       if (wouldWipeLocalData(key as CacheKey, value)) return
       // 중앙에 구버전 파서가 만든 낡은 TS가 남아 있을 수 있다.
       // 그 값이 정상 데이터를 덮지 않도록 막고, 소유자면 정상 로컬 값으로 중앙을 고쳐 쓴다.
@@ -340,6 +342,9 @@ function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }
           return
         }
       }
+      // 검증을 통과한 값만 복원값으로 쓴다. 거부한 값을 여기 담으면 `revertBlockedKey`가
+      // 그 빈 값으로 읽기 권한 사용자 화면을 되돌린다(R336).
+      lastRemoteValue.set(key, value)
       // 아직 안 올라간 내 편집이 스냅샷에 지워지지 못하게 병합한다.
       const localValue = (useAppStore.getState() as unknown as Record<string, unknown>)[key]
       const nextValue = mergeForKey(key, localValue, value) as AppState[CacheKey]
