@@ -795,19 +795,25 @@ export async function deleteDevelopmentRecord(identity: string): Promise<void> {
  * 여러 행을 한 번에 저장한다(붙여넣기·내용 지우기·되돌리기).
  * recalculate=false 면 값을 그대로 복원한다(되돌리기 전용).
  */
-export async function writeDevelopmentRecords(records: DevRecord[], recalculate = true, kind: AuditKind = "paste"): Promise<void> {
+/**
+ * 적용된 저장값을 돌려준다. 차단되면 `null`이다(R338).
+ * 되돌리기 스택이 **실제로 적용된 전후 한 쌍**을 잡아야 해서 반환값이 필요하다.
+ * 재계산과 sortOrder 고정이 직접 편집하지 않은 행도 바꾸므로 입력값으로는 대신할 수 없다.
+ */
+export async function writeDevelopmentRecords(records: DevRecord[], recalculate = true, kind: AuditKind = "paste"): Promise<DevRecord[] | null> {
   const state = useAppStore.getState()
   const before = state.records
   const next = recalculate ? recalculateDevelopmentRecords(records) : records
   const invalidFl = recalculate ? invalidFlEdits(before, next) : []
   if (invalidFl.length) {
     noticeBlocked("format", "DD 수정", [`FL#에 넣을 수 없는 값: ${[...new Set(invalidFl)].join(", ")}`], "FL#는 FL과 숫자 8자리만 넣을 수 있습니다. DROP은 Status 칸, 메모는 비고 칸에 적어 주세요.")
-    return
+    return null
   }
-  if (blockedByWarehouseDrift(state, { ...state, records: next }, "DD 붙여넣기")) return
+  if (blockedByWarehouseDrift(state, { ...state, records: next }, "DD 붙여넣기")) return null
   setAppState({ records: next })
   scheduleRecordsSave()
   void logAction({ kind, screen: "dd", changes: diffDevRecords(before, next) })
+  return next
 }
 
 export async function reorderDevelopmentRecords(orderedIdentities: readonly string[]): Promise<void> {

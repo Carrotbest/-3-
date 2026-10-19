@@ -672,6 +672,32 @@ function recordIdentity(record: DevRecord): string {
   return `${record._src.sheet}::${record._src.row}`
 }
 
+interface UndoRow {
+  key: string
+  /** 작업 전 값. null이면 그 작업이 새로 만든 행이다. */
+  before: DevRecord | null
+  /** 작업 후 값. null이면 그 작업이 지운 행이다. */
+  after: DevRecord | null
+}
+interface UndoEntry { rows: UndoRow[] }
+
+/**
+ * 적용 전후를 행 단위로 비교해 내가 건드린 행만 추린다(R338).
+ * 수식 재계산과 sortOrder 고정이 직접 편집하지 않은 행도 바꾸므로 **적용 결과**와 비교해야 한다.
+ */
+function diffRows(before: readonly DevRecord[], after: readonly DevRecord[]): UndoRow[] {
+  const prev = new Map(before.map((record) => [recordIdentity(record), record]))
+  const next = new Map(after.map((record) => [recordIdentity(record), record]))
+  const rows: UndoRow[] = []
+  next.forEach((record, key) => {
+    const old = prev.get(key) ?? null
+    if (!old) { rows.push({ key, before: null, after: record }); return }
+    if (JSON.stringify(old) !== JSON.stringify(record)) rows.push({ key, before: old, after: record })
+  })
+  prev.forEach((record, key) => { if (!next.has(key)) rows.push({ key, before: record, after: null }) })
+  return rows
+}
+
 /** 그리드에 추가하는 행은 접수 화면의 기본값도 비워 엑셀의 새 빈 행처럼 시작한다. */
 function createEmptyGridRecord(owner = ""): DevRecord {
   return { ...createBlankDevRecord(owner), opt: "", stage: "", devStatus: "", requestDate: "" }
@@ -1396,8 +1422,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     setRangeState(value)
   }
   const [menu, setMenu] = useState<{ x: number; y: number; kind: "cells" | "bottom" } | null>(null)          // 우클릭 메뉴 위치
-  const [undoStack, setUndoStack] = useState<DevRecord[][]>([])
-  const [redoStack, setRedoStack] = useState<DevRecord[][]>([])
+  const [undoStack, setUndoStack] = useState<UndoEntry[]>([])
+  const [redoStack, setRedoStack] = useState<UndoEntry[]>([])
   const [clipNotice, setClipNotice] = useState<string | null>(null)
   const clipRef = useRef<{ text: string; cut: boolean } | null>(null)              // 브라우저 클립보드 차단 시 대체 버퍼
   const cutRangeRef = useRef<{ top: number; bottom: number; left: number; right: number } | null>(null)
@@ -1421,8 +1447,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const styleHoverRef = useRef<StyleHoverLayerHandle>(null)
   const hoverTimerRef = useRef<number | null>(null)
 
-  const pushUndoSnapshot = (snapshot: DevRecord[]) => {
-    setUndoStack((current) => [...current, snapshot].slice(-50))
+  /** 적용된 전후 한 쌍에서 내가 바꾼 행만 추려 쌓는다(R338). 차단된 저장은 쌓지 않는다. */
+  const pushUndoEntry = (before: readonly DevRecord[], applied: readonly DevRecord[]) => {
+    const rows = diffRows(before, applied)
+    if (!rows.length) return
+    setUndoStack((current) => [...current, { rows }].slice(-50))
     setRedoStack([])
   }
 
@@ -2190,8 +2219,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       const order = rank.get(recordIdentity(record))
       return order === undefined || record.sortOrder === order ? record : { ...record, sortOrder: order }
     }) : edited
-    pushUndoSnapshot(before)
-    await writeDevelopmentRecords(next)
+    const applied = await writeDevelopmentRecords(next)
+    if (applied) pushUndoEntry(before, applied)
   }
 
   /** 선택 테두리 이동은 셀 값 이동과 행 블록 재배치를 한 경로에서 처리해 한 번에 되돌릴 수 있게 한다. */
@@ -2403,9 +2432,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const cut = at === -1 ? sorted.length : at + 1
     const merged = [...sorted.slice(0, cut), ...created, ...sorted.slice(cut)]
 
-    pushUndoSnapshot(before)
     setCopyMark(null)
-    await writeDevelopmentRecords(merged.map((record, index) => ({ ...record, sortOrder: index })))
+    const applied = await writeDevelopmentRecords(merged.map((record, index) => ({ ...record, sortOrder: index })))
+    if (applied) pushUndoEntry(before, applied)
     setRange(null)
     notify(`${created.length}개 행을 아래에 삽입했습니다.`)
   }
@@ -2434,8 +2463,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const applyCostRef = async (rowKey: string, ref: NonNullable<DevTechnical["costRef"]>) => {
     const before = useAppStore.getState().records
     const next = before.map((record) => recordIdentity(record) === rowKey ? { ...record, tech: { ...record.tech, costRef: ref } } : record)
-    pushUndoSnapshot(before)
-    await writeDevelopmentRecords(next, false, "edit")
+    const applied = await writeDevelopmentRecords(next, false, "edit")
+    if (applied) pushUndoEntry(before, applied)
   }
 
   const unlinkSelectedRequests = async () => {
@@ -2443,9 +2472,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const rows = linkTargetRows().filter((row) => row.tech?.requestLink)
     if (!rows.length || !window.confirm(`선택한 ${rows.length}행의 DEVELOPMENT REQUEST 연결을 해제할까요? 입력한 값은 그대로 둡니다.`)) return
     const before = useAppStore.getState().records
-    pushUndoSnapshot(before)
     const { next, removed } = removeRequestLinks(before, new Set(rows.map(recordIdentity)))
-    await writeDevelopmentRecords(next, false, "edit")
+    const applied = await writeDevelopmentRecords(next, false, "edit")
+    if (applied) pushUndoEntry(before, applied)
     notify(`${removed}행 연결을 해제했습니다.`)
   }
 
@@ -2456,9 +2485,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!brokenLinkRows.length) return
     if (!window.confirm(`가리키는 요청 옵션이 사라진 연결 ${brokenLinkRows.length}건을 끊을까요?\n담당과 무관하게 전체에서 정리합니다. 행과 입력한 값은 그대로 둡니다.`)) return
     const before = useAppStore.getState().records
-    pushUndoSnapshot(before)
     const { next, removed } = removeRequestLinks(before, new Set(brokenLinkRows.map(recordIdentity)))
-    await writeDevelopmentRecords(next, false, "edit")
+    const applied = await writeDevelopmentRecords(next, false, "edit")
+    if (applied) pushUndoEntry(before, applied)
     notify(`끊어진 연결 ${removed}건을 정리했습니다.`)
   }
 
@@ -2475,9 +2504,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const anchorIndex = anchor ? sorted.findIndex((record) => recordIdentity(record) === recordIdentity(anchor)) : -1
     const at = anchorIndex === -1 ? sorted.length : anchorIndex + (position === "below" ? 1 : 0)
     const merged = [...sorted.slice(0, at), ...created, ...sorted.slice(at)]
-    pushUndoSnapshot(before)
     setCopyMark(null)
-    await writeDevelopmentRecords(merged.map((record, index) => ({ ...record, sortOrder: index })))
+    const applied = await writeDevelopmentRecords(merged.map((record, index) => ({ ...record, sortOrder: index })))
+    if (applied) pushUndoEntry(before, applied)
     const first = displayedColumns[0], last = displayedColumns[displayedColumns.length - 1]
     if (first && last) {
       const firstCell = { row: recordIdentity(created[0]), col: first.id }
@@ -2675,24 +2704,66 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     setMenu({ x: event.clientX, y: event.clientY, kind: "cells" })
   }
 
-  const undoLast = async () => {
-    const snapshot = undoStack[undoStack.length - 1]
-    if (!snapshot) return
+  /**
+   * 되돌리기와 다시실행의 공통 적용(R338).
+   *
+   * **전부 아니면 전부다.** 묶음 안에 한 행이라도 현재 값이 그 작업의 결과와 다르면
+   * 그사이 다른 사람이 고친 것이라 아무것도 건드리지 않는다. 부분 적용을 허용하면
+   * 잘라내기와 행 이동처럼 여러 행이 한 몸인 작업이 절반만 되돌아가 순서가 깨진다.
+   *
+   * 한계: 아직 스냅샷으로 받지 못한 팀원의 같은 행 수정은 이 검사로 못 잡는다.
+   * 완전한 보장은 서버 트랜잭션에서 기대값을 확인해야 한다(별도 건).
+   */
+  const applyUndoEntry = async (entry: UndoEntry, direction: "undo" | "redo"): Promise<boolean> => {
     const current = useAppStore.getState().records
+    const byKey = new Map(current.map((record) => [recordIdentity(record), record]))
+    const expectOf = (row: UndoRow) => direction === "undo" ? row.after : row.before
+    const targetOf = (row: UndoRow) => direction === "undo" ? row.before : row.after
+
+    const conflicts = entry.rows.filter((row) => {
+      const expect = expectOf(row)
+      const now = byKey.get(row.key) ?? null
+      if (expect === null) return now !== null
+      if (now === null) return true
+      return JSON.stringify(now) !== JSON.stringify(expect)
+    })
+    if (conflicts.length) {
+      notify(`${conflicts.length}행을 그사이 다른 사람이 고쳐 되돌리지 않았습니다.`)
+      return false
+    }
+
+    const removals = new Set(entry.rows.filter((row) => targetOf(row) === null).map((row) => row.key))
+    const replacements = new Map(entry.rows
+      .filter((row) => targetOf(row) !== null)
+      .map((row) => [row.key, targetOf(row)!]))
+    const kept = current
+      .filter((record) => !removals.has(recordIdentity(record)))
+      .map((record) => replacements.get(recordIdentity(record)) ?? record)
+    // 되살린 행은 뒤에 붙인다. 화면 순서는 sortOrder가 정한다.
+    const restored = [...replacements.entries()]
+      .filter(([key]) => !byKey.has(key))
+      .map(([, record]) => record)
+    const applied = await writeDevelopmentRecords([...kept, ...restored], false, "revert")
+    return applied !== null
+  }
+
+  const undoLast = async () => {
+    const entry = undoStack[undoStack.length - 1]
+    if (!entry) return
+    // 실패하면 스택을 움직이지 않는다. 충돌을 정리한 뒤 다시 누를 수 있어야 한다.
+    if (!await applyUndoEntry(entry, "undo")) return
     setUndoStack((stack) => stack.slice(0, -1))
-    setRedoStack((stack) => [...stack, current].slice(-50))
-    await writeDevelopmentRecords(snapshot, false)
-    notify("이전 상태로 되돌렸습니다.")
+    setRedoStack((stack) => [...stack, entry].slice(-50))
+    notify(`${entry.rows.length}행을 되돌렸습니다.`)
   }
 
   const redoLast = async () => {
-    const snapshot = redoStack[redoStack.length - 1]
-    if (!snapshot) return
-    const current = useAppStore.getState().records
+    const entry = redoStack[redoStack.length - 1]
+    if (!entry) return
+    if (!await applyUndoEntry(entry, "redo")) return
     setRedoStack((stack) => stack.slice(0, -1))
-    setUndoStack((stack) => [...stack, current].slice(-50))
-    await writeDevelopmentRecords(snapshot, false)
-    notify("되돌린 작업을 다시 실행했습니다.")
+    setUndoStack((stack) => [...stack, entry].slice(-50))
+    notify(`${entry.rows.length}행을 다시 실행했습니다.`)
   }
 
   const onKey = (event: KeyboardEvent) => {
