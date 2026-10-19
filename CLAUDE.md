@@ -221,6 +221,7 @@
   - `ts`는 2026-10-13부터 병합 키다(`LIST_MERGE_IDS`, `번호|몇 번째`). 엑셀에서 들여온 옛 행 번호가 겹칠 수 있어 completed와 같은 방식이다. 같은 번호로 동시에 새로 등록하면 여전히 한쪽이 진다(TS 번호는 화면에서 매긴다).
   - 병합 키가 아닌 키(`study`, `events` 등)는 여전히 마지막 저장이 이긴다. 여러 명이 동시에 쓰는 키를 늘리면 여기 옮길 것.
   - 커밋 한 번의 요청 크기 한도는 10 MiB다. `completed`가 2026-09-22 기준 4.4MB다. 1팀 입고가 쌓이면 언젠가 닿는다.
+- **업무 완료와 일정 상태를 한 함수로 합치지 말 것**(R337, 2026-10-19). 완료 기준은 FL#이고 일정 기준은 Received date라 서로 다르다. `statusOf`는 FL#이나 완료 Status에서 **먼저 반환**하므로 그 아래에 일정 게이트를 끼워도 FL#만 있고 실물이 안 온 행은 계속 임박·지연에서 빠진다. 일정은 `scheduleStateOf`(`isScheduleOpen` + D-0~D-7) 하나로 보고, 화면 뱃지와 상태 필터는 `displayStatusOf`를 쓴다. **`displayStatusOf`에서 지연이 완료보다 앞선다.** FL#이 찍혔다고 완료로 보이면 실물이 안 온 지연 건을 놓친다. 그 행의 FL#은 FL# 열에 그대로 보인다. `kpis`는 완료·진행만 `statusOf`로 세고 지연·임박은 일정 기준으로 세므로 한 행이 완료이면서 지연일 수 있다. `src/data/weekly-report.ts`의 `statusOf`는 **같은 이름의 파일 안 지역 함수**다. `derive.ts`와 무관하니 고칠 때 섞지 말 것.
 - **공정 도달 비율(`도달 ÷ 진행 중`)에 주간 증감을 붙이지 말 것.** 분모가 움직이는 집단이라 신규 접수가 들어오면 내려가고, 완료 건이 진행 중에서 빠질 때도 내려간다. 완료 건은 네 공정 모두 도달로 세어졌으므로 분자와 분모가 같이 1씩 줄고, 비율이 100%가 아닌 이상 `(a-1)/(b-1)`은 늘 `a/b`보다 작다. 결과적으로 **접수도 완료도 활발한 주에 지표가 나빠 보인다.** 신호가 반대다. 주간 변화는 `processWeeklyFlow`(그 주에 공정을 통과한 건수)와 `weeklyIntakeBalance`(접수 대비 완료)로 본다. 비율은 현황 스냅샷으로만 쓴다.
 - TS 실시간공유 데이터 손실 이력 있음 — 동기화 손대기 전 `fabric-rnd-ts` 필독.
 - **캐시 비우기는 동기화 캐시(parsed)만 비우고 새로 고친다(R241, `clearSyncedCache`).** 스토어를 예시 데이터로 바꾼 채 동기화를 켜 두면 병합이 서버 행을 삭제로 읽을 수 있고, `clearCache`는 이 PC에만 있는 화학 첨부까지 지운다. SETTING은 사용자와 권한, 데이터 보호(키별 저장 방식, 크기, 10 MiB 대비, 서버 마지막 저장, 저장 실패), 작업 이력, 연동 네 탭이다. 브라우저에만 저장되고 아무 데서도 읽지 않는 설정 카드를 다시 만들지 말 것.
@@ -254,6 +255,7 @@
 | 주간 보고 문장 | DD | **완료=Received date**(FL# 아님), 진행=Received date 빈 건, 최근 7일. DROP·HOLD·REJECT 제외 |
 | HOME Overall status 주간 변화 | DD | 공정 통과는 월~일 주 기준(`processWeeklyFlow`), 접수·완료 균형은 **오늘에서 7일 전까지**(`weeklyIntakeBalance`, `recentWindow`). 창 기준이 서로 다르다. **공정 도달 비율의 주간 증감은 쓰지 않는다.** 아래 주의 항목 참조 |
 | HOME 스케줄 임박·지연 | DD | Due Date로 계산, **완료 판정은 Received date**(`isScheduleOpen`). FL#은 등록 번호일 뿐이라 실물 도착 기준으로 본다. **Due Date가 비면 임박·지연 어느 쪽에도 안 뜬다**(`daysLeft`=null이라 필터에서 제거) |
+| DEVELOPMENT 하위 목록·담당 레인 | DD | **완료는 FL#(`statusOf`), 지연·임박은 Received date와 D-0~D-7(`scheduleStateOf`)로 따로 센다**(R337). 뱃지와 상태 필터는 `displayStatusOf` 하나를 보고 우선순위는 멈춤, 지연, 임박, 완료, 진행이다. HOME과 같은 숫자가 나온다 |
 | RDDA 등록 | ~2026-07 대장 FL.# YYMM / 08~ DD Received | 동일 FL 1건(대장 우선) `mergedFlRegistrations` |
 | DEVELOPMENT | DD+대장 | `fabric-rnd-fl-ledger` |
 | DEVELOPMENT 스타일 타임라인 | DD | Style No. 묶음, **완료=Received date**, HOLD·DROP·REJECT 제외, 스타일 상태=옵션 중 최악 |
