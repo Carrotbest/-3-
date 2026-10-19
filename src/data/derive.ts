@@ -459,6 +459,37 @@ export function statusOf(rec: DevRecord, today = new Date()): StatusKey {
   return "progress"
 }
 
+export type ScheduleState = "closed" | "late" | "due" | "open"
+
+/**
+ * 일정 상태. HOME 임박·지연과 같은 기준 하나다(R337).
+ * 완료 판정(`statusOf`)과 독립이다. FL#이 찍혔어도 실물이 안 왔으면 일정은 열려 있다.
+ * 임박 창은 D-0에서 D-7이다. HOME(`homeKpiRecordDetails`)과 같은 창을 쓴다.
+ */
+export function scheduleStateOf(record: DevRecord, today = new Date()): ScheduleState {
+  if (!isScheduleOpen(record)) return "closed"
+  const remaining = daysLeft(record.dueDate, today)
+  if (remaining === null) return "open"
+  if (remaining < 0) return "late"
+  if (remaining <= 7) return "due"
+  return "open"
+}
+
+/**
+ * 화면 뱃지와 상태 필터가 함께 쓰는 한 단어 판정(R337).
+ * 우선순위는 멈춤, 지연, 임박, 완료, 진행이다.
+ * **지연이 완료보다 앞선다.** FL#이 찍혔다고 완료로 보이면 실물이 안 온 지연 건을 놓친다.
+ * 그 행의 FL#은 FL# 열에 그대로 보인다.
+ */
+export function displayStatusOf(record: DevRecord, today = new Date()): StatusKey {
+  const base = statusOf(record, today)
+  if (base === "hold") return "hold"
+  const schedule = scheduleStateOf(record, today)
+  if (schedule === "late") return "late"
+  if (schedule === "due") return "due"
+  return base === "done" ? "done" : "progress"
+}
+
 /**
  * 완료 건이 끝난 해.
  *
@@ -499,10 +530,10 @@ const LANE_URGENCY_RANK: Record<LaneUrgency, number> = {
 }
 
 function laneUrgency(record: DevRecord, today: Date): LaneUrgency {
-  const status = statusOf(record, today)
-  const remaining = daysLeft(record.dueDate, today)
-  if (status === "late" || remaining === 0) return "danger"
-  if (remaining !== null && remaining >= 1 && remaining <= 7) return "soon"
+  // 일정 판정 하나만 본다(R337). 예전에는 statusOf의 late와 D-0을 danger로 묶었다.
+  const schedule = scheduleStateOf(record, today)
+  if (schedule === "late") return "danger"
+  if (schedule === "due") return "soon"
   return "normal"
 }
 
@@ -606,21 +637,12 @@ export function kpis(records: readonly DevRecord[], today = new Date()): KpiSumm
   let late = 0
   let dueSoon = 0
   for (const record of records) {
-    switch (statusOf(record, today)) {
-      case "done":
-        done++
-        break
-      case "late":
-        late++
-        progress++
-        break
-      case "due":
-        dueSoon++
-        progress++
-        break
-      default:
-        progress++
-    }
+    // 업무 상태와 일정 상태를 따로 센다(R337). 한 행이 완료이면서 지연일 수 있다.
+    if (statusOf(record, today) === "done") done++
+    else progress++
+    const schedule = scheduleStateOf(record, today)
+    if (schedule === "late") late++
+    else if (schedule === "due") dueSoon++
   }
   return { total: records.length, progress, done, late, dueSoon }
 }

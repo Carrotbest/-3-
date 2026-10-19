@@ -60,6 +60,7 @@ import {
   categoryStyleList,
   completedLibrary,
   devTypeSplit,
+  displayStatusOf,
   isDoneThisYear,
   isInProgress,
   kpis,
@@ -67,7 +68,6 @@ import {
   ownerMonthlyFlTrend,
   processFunnel,
   receiptStatus,
-  statusOf,
   subpageCardStats,
   type CategoryOverviewDatum,
   type CategoryStyleRow,
@@ -134,7 +134,7 @@ type StatusFilter = "all" | "progress" | "done" | "due" | "late"
 const matchesStatusFilter = (row: DevRecord, filter: StatusFilter, today: Date): boolean => {
   if (filter === "all") return true
   if (filter === "done") return isDoneThisYear(row, today)
-  return statusOf(row, today) === filter
+  return displayStatusOf(row, today) === filter
 }
 
 const MINI_MIX_CLASS = [
@@ -646,7 +646,7 @@ function developmentListColumns(today: Date): DataTableColumn<DevRecord>[] {
     { id: "gdNo", header: "GD#", accessor: (row) => row.gdNo, cell: (row) => row.gdNo || "미기입" },
     { id: "owner", header: "담당", accessor: (row) => ownerDisplayName(row.owner), cell: (row) => (row.owner ? ownerDisplayName(row.owner) : "미지정") },
     { id: "stage", header: "현재 공정", accessor: (row) => row.stage, cell: (row) => row.stage || "—" },
-    { id: "status", header: "상태", accessor: (row) => STATUS[statusOf(row, today)].label, cell: (row) => <StatusBadge status={STATUS[statusOf(row, today)].label} /> },
+    { id: "status", header: "상태", accessor: (row) => STATUS[displayStatusOf(row, today)].label, cell: (row) => <StatusBadge status={STATUS[displayStatusOf(row, today)].label} /> },
     { id: "dueDate", header: "납기", accessor: (row) => row.dueDate, cell: (row) => fmtDate(row.dueDate) },
   ]
 }
@@ -1257,7 +1257,7 @@ function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChan
             <DialogHeader>
               <div className="flex flex-wrap items-center gap-2">
                 <DialogTitle>{title}{resolvedRecord?.opt ? ` · ${resolvedRecord.opt}` : ""}</DialogTitle>
-                {resolvedRecord ? <StatusBadge status={STATUS[statusOf(resolvedRecord)].label} /> : null}
+                {resolvedRecord ? <StatusBadge status={STATUS[displayStatusOf(resolvedRecord)].label} /> : null}
                 {libraryItem ? <Badge variant={libraryItem.source === "DD" ? "default" : "outline"}>{libraryItem.source}</Badge> : null}
               </div>
               <DialogDescription>{libraryItem ? `${libraryItem.flNo || "FL 미기재"} · 완료 ${fmtDateFull(libraryItem.completedAt)}` : "개발 항목과 공정·물성·이력 기술데이터입니다."}</DialogDescription>
@@ -1292,7 +1292,7 @@ function DevelopmentDetailDialog({ record = null, libraryItem = null, onOpenChan
                       ))}
                       <div><dt className="text-xs font-medium text-[var(--muted-foreground)]">접수일</dt><dd className="mt-1 text-sm text-[var(--foreground)]">{fmtDateFull(resolvedRecord.requestDate)}</dd></div>
                       <div><dt className="text-xs font-medium text-[var(--muted-foreground)]">완료일</dt><dd className="mt-1 text-sm text-[var(--foreground)]">{fmtDateFull(resolvedRecord.receivedDate)}</dd></div>
-                      <div><dt className="text-xs font-medium text-[var(--muted-foreground)]">Status</dt><dd className="mt-1 text-sm text-[var(--foreground)]">{resolvedRecord.devStatus || STATUS[statusOf(resolvedRecord)].label}</dd></div>
+                      <div><dt className="text-xs font-medium text-[var(--muted-foreground)]">Status</dt><dd className="mt-1 text-sm text-[var(--foreground)]">{resolvedRecord.devStatus || STATUS[displayStatusOf(resolvedRecord)].label}</dd></div>
                     </dl>
                     <div className="mt-6 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] p-4"><p className="text-xs font-medium text-[var(--muted-foreground)]">원본 위치</p><p className="mt-1 text-sm text-[var(--foreground)]">{resolvedRecord._src.sheet} · {resolvedRecord._src.row}행</p></div>
                   </>
@@ -1435,8 +1435,8 @@ function DevelopmentList() {
       {
         id: "status",
         header: "상태",
-        accessor: (row) => STATUS[statusOf(row, today)].label,
-        cell: (row) => <StatusBadge status={STATUS[statusOf(row, today)].label} />,
+        accessor: (row) => STATUS[displayStatusOf(row, today)].label,
+        cell: (row) => <StatusBadge status={STATUS[displayStatusOf(row, today)].label} />,
       },
     ]
   }, [today])
@@ -1493,7 +1493,7 @@ function DevelopmentList() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard icon={<Workflow aria-hidden="true" className="size-4" />} label="진행" value={summary.progress} caption="완료 전 개발 건" info="클릭하면 진행중 목록을 확인합니다." revealDelay={0} pressed={statusFilter === "progress"} onClick={() => openStatusPopup("progress", "진행 개발 목록")} visual={<ProcessMiniVisual items={cardStats.processMix} />} />
           <StatCard icon={<CheckCircle2 aria-hidden="true" className="size-4" />} label="완료" value={doneThisYear} caption={`${today.getFullYear()}년 완료 건`} info="Received date 기준입니다. 비어 있으면 FL 번호의 등록월로 연도를 봅니다. 지난 해 완료 건은 세지 않습니다." revealDelay={75} pressed={statusFilter === "done"} onClick={() => openStatusPopup("done", `${today.getFullYear()}년 완료 개발 목록`)} visual={<CategoryMiniVisual items={cardStats.categoryMix} />} />
-          <StatCard icon={<TimerReset aria-hidden="true" className="size-4" />} label="임박" value={summary.dueSoon} caption="납기까지 3일 이내" info="D-7 일정 분포와 임박 상태 건을 함께 확인합니다." tone="warning" revealDelay={150} pressed={statusFilter === "due"} onClick={() => openStatusPopup("due", "납기 임박 개발 목록")} visual={<BucketMiniVisual items={cardStats.dueBuckets} tone="warning" />} />
+          <StatCard icon={<TimerReset aria-hidden="true" className="size-4" />} label="임박" value={summary.dueSoon} caption="납기까지 7일 이내" info="D-7 일정 분포와 임박 상태 건을 함께 확인합니다." tone="warning" revealDelay={150} pressed={statusFilter === "due"} onClick={() => openStatusPopup("due", "납기 임박 개발 목록")} visual={<BucketMiniVisual items={cardStats.dueBuckets} tone="warning" />} />
           <StatCard icon={<TriangleAlert aria-hidden="true" className="size-4" />} label="지연" value={summary.late} caption="납기일 경과" info="지연 일수 구간별 건수입니다." tone="destructive" revealDelay={200} pressed={statusFilter === "late"} onClick={() => openStatusPopup("late", "지연 개발 목록")} visual={<BucketMiniVisual items={cardStats.lateBuckets} tone="destructive" />} />
         </div>
       ) : null}
