@@ -55,6 +55,13 @@ const LIST_MERGE_IDS: Record<string, (list: readonly unknown[]) => string[]> = {
 /** 이 키들은 화면에서 통째로 비울 일이 없다. 병합 결과가 비면 사고로 보고 쓰지 않는다. */
 const NEVER_EMPTY_KEYS = new Set<string>(["records", "completed", "fabricOverrides", "fabricEvents"])
 
+/**
+ * 마지막 항목을 지우는 것이 정상인 작은 목록(R339). 빈 배열을 정당한 값으로 받는다.
+ * **키를 함부로 늘리지 말 것.** 여기 들어온 키는 서버가 비면 전원 화면이 같이 빈다.
+ * 병합 키여야 하고(`MERGE_IDS`), 사람이 화면에서 마지막 하나까지 지울 수 있는 목록이어야 한다.
+ */
+const EMPTY_ALLOWED_KEYS = new Set<string>(["disposalRounds", "requestBoards"])
+
 /** 이 클라이언트가 마지막으로 본 원격 값. 병합 기준선이다. */
 const baseline = new Map<string, unknown[]>()
 /** 스냅샷으로 받은 최신 원격 값. 로컬 적용 여부와 무관하게 항상 갱신한다. */
@@ -277,6 +284,8 @@ function wouldWipeLocalData(key: CacheKey, value: unknown): boolean {
   // 파생 계산이 예외를 던져 화면이 통째로 백지가 됐다. 배열 자리에는 절대 넣지 않는다.
   if (value === null || value === undefined) return Array.isArray(local)
   if (!Array.isArray(value) || value.length > 0) return false
+  // 정상 삭제가 전파되어야 하는 키다. 빈 배열을 받는다(R339).
+  if (EMPTY_ALLOWED_KEYS.has(key)) return false
   return Array.isArray(local) && local.length > 0
 }
 
