@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-10-18T22:40:48+00:00",
+"generated_at": "2026-10-20T00:00:27+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -4156,6 +4156,13 @@
 },
 {
 "d": "2026-10-12",
+"t": "Lululemon, Under Armour는 이익 마진을 높이기 위해 제품 라인을 축소하고 있습니다.",
+"o": "Lululemon, Under Armour are cutting product lines to lift profit margins",
+"u": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOaWNpS3VtSi1jOElIaGdkUkdRa2U2azktWEtkMVNDY1NvV2dWY20yclR0WlJqcGZLMHVVSndzcndJR0Y5RjFncFg2Y3dWZWpZV3huOXJQc19MVktPWmFtNGFsZzJ4YmNwWXRSRlRaWndFQmcyV3BQV0Z4UFEwVE1Rd2htTldybmQwZGxpQQ?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-10-12",
 "t": "Under Armour, Inc. 클래스 A의 가격 대비 수익 비율 – HAN:U9R",
 "o": "Price to earnings ratio of Under Armour, Inc. Class A – HAN:U9R",
 "u": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPcUhza3NGcEc5bHhsX3RYV1lfWlpGSWRNUnRvT1FpY2dtZE1NdG5teUJFbk1NVTJQaWM4UTBseVZtbDU4Q2dRWnpITUUzcGRJSG01ZkY4LWEtZkt4VWlhd0Q2bVBRUVdUS0Y2MDFPeWZKT0xtNl9FS2RWRjFkOTlpeVFvT0dwRllVbnZwZ0V3eEFjcDlwUm5N?oc=5",
@@ -4188,13 +4195,6 @@
 "o": "Grab Under Armour apparel and gear from $14 with up to 41% off",
 "u": "https://news.google.com/rss/articles/CBMifEFVX3lxTE03Rzl0Qkh0Uk9JTEdLU0taSzZGX0EtSTFVN3J6cDQyQnRGaWxaVklzNHNFNy1JTUNvUTZ6eThOaVlZUXA3VkF5cEIzcHh6Y2ZER2RiUU5kWjgwYWdKeHFYUGg5NDlHV04td3NHRHU2RVhhOFpadFl6djVFeGY?oc=5",
 "m": "바이어 · Under Armour"
-},
-{
-"d": "2026-10-06",
-"t": "The Nature Conservancy, 섬유 부문의 극세사 오염을 줄이기 위해 극세사 행동 연합 출범",
-"o": "The Nature Conservancy Launches Microfiber Action Alliance To Reduce Microfiber Pollution In Textile Sector",
-"u": "https://www.textileworld.com/textile-world/2026/10/the-nature-conservancy-launches-microfiber-action-alliance-to-reduce-microfiber-pollution-in-textile-sector/",
-"m": "Textile World"
 }
 ],
 "anf": [
@@ -4257,6 +4257,13 @@
 ],
 "urban": [
 {
+"d": "2026-10-19",
+"t": "DoorDash가 제공하는 '러브 액츄얼리' 동창회: Anthropologie의 연휴 판매 안내 내부",
+"o": "‘Love Actually’ reunions, delivered by DoorDash: Inside Anthropologie’s holiday sales pitch",
+"u": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOMTBkNU9HZXpRM2dqTTRKLWlKbDJFUUtjMkRLaUhnNnRjTHJWTEtqS3oxQXRtbElzRzFqMm0tLU03VEJYd3Y5THQyOG5HR2M2WF9SakhKZ3hVLWtQMWZRa0lxbHRsektUcXI2Z0s1dGhKVm1taXNHMFJLR1RQTlFwMQ?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
 "d": "2026-10-15",
 "t": "2분기 요약: Urban Outfitters(NASDAQ:URBN) 대 기타 의류 소매업체 주식",
 "o": "Q2 Rundown: Urban Outfitters (NASDAQ:URBN) Vs Other Apparel Retailer Stocks",
@@ -4304,16 +4311,30 @@
 "o": "Urban Outfitters (UOF) Q3 2025 Earnings Report - Results, Call & Slides",
 "u": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNdTJnaHJvV3ltSlpnQzRnNjFTWkVJNDRiVTNnUzlHYlpBYnlaYm80ZzdQanNsZklRZmpNb0hJSEdWVktPN0MxQVBwZGVNSFBHd2MwQzFhZmVFU3ZsZE9EY2wyV0hIQVVsUVl0WGNJeUJRbnZORjVpMXJhWFIyR3hhemJMVQ?oc=5",
 "m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-09-25",
-"t": "Urban Outfitters (UOF) 2026년 1분기 수익 보고서 - 결과, 전화 및 슬라이드",
-"o": "Urban Outfitters (UOF) Q1 2026 Earnings Report - Results, Call & Slides",
-"u": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPV1FGX2lQYnFJYVZtQ0IzQW96TzdEbm5DbzdVcHk3eG5zRTlBRGZ4a2l0ei1ySVlTSmptMU0yMktUT2J4ZnRScFNnSVBPbmZhZ3huZlFGTTNsZnh5clo2emJUdzJNWE9jS1FTRndubXowMzdPaDRrajRORTd6R0RMTm9mdw?oc=5",
-"m": "바이어 · Urban Outfitters"
 }
 ],
 "amazon": [
+{
+"d": "2026-10-19",
+"t": "Tommy Hilfiger Polo 75% 할인—오늘 Amazon에서 단 $22",
+"o": "Tommy Hilfiger Polo 75% Off—Just $22 on Amazon Today",
+"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOVnd3NGdUU0RFek9BcXIzbUY2SVVuQVNkQVBtaXpaWUU5VnJRZXdXTWZMZGF1OUFkX3N1VHJQM1RyTkROX04wREJueVQxUXlfWEo3dDM4bGcwQVhETzM2Nmc1RDJBR0lidkl5WmU4N3dXb3NqWWlHMmlhcFNkNV9pTGYyYWd5cTBLNzhGREJjc1N2RmM0ak5yRnV1S0lfZExuUVJNRkJxVHZrcjA3U2MwdkxYeTI?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-10-19",
+"t": "이 이름 없는 골프 폴로는 현재 Amazon에서 10달러 미만입니다.",
+"o": "This No-Name Golf Polo Is Under $10 on Amazon Right Now",
+"u": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNS0dLMkhKaXhFOG9Ubmd2QklOcFlWRE45WHFCNU9UWFZtRE9VbkRtdzEtSVoxY2RBTktkdy1MZWRvdDNLaW1PS212RzVNeW80Qm95bTVGQzM3MnllZDFTbHZ2RjhLUFBUS0pGVzFEMGRSTkdrTGhOS2lTUlZ6Y3NRWWhDcVRVWGk4NXFLSw?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-10-19",
+"t": "Amazon에서 Tommy Hilfiger 긴팔 폴로 44% 할인",
+"o": "Tommy Hilfiger Long-Sleeve Polo 44% Off on Amazon",
+"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQdkc2alo4dUVock1wUnhtaUptcnVGMU9nTmlxNzNwcHpwT09ZOUxac29maDJMbko0dG02cERiX01HRHdiWXM2c3hkRENGRmx3VFY1b1ltSktGcWI5Y3RSM1JqUzM5TGpEYm9ISW9zcEY5ZGJRd0lyUGZxb1IwT2RSaTZWT2lrV25PckdXMTV3ZGpPWXRNYjl0WTMxeF8waV9WeVJhTnpGVi1MZWowZmFkQXNXekg?oc=5",
+"m": "바이어 · PVH"
+},
 {
 "d": "2026-10-15",
 "t": "이퀄베리, 아마존 행사 매출 401%↑…NAD+ 라인 성장 견인",
@@ -4348,30 +4369,16 @@
 "o": "센텔리안24, 미국 아마존 할인 행사 매출 전년 대비 1104% 증가",
 "u": "http://www.ktnews.com/news/articleView.html?idxno=149326",
 "m": "한국섬유신문"
-},
-{
-"d": "2026-10-13",
-"t": "ASOS 해킹됨, Amazon의 귀하 소개, 기후 소싱 위험, AI 통합 및 마이크로파이버",
-"o": "ASOS Hacked, Amazon’s About You, Climate Sourcing Risk, AI Consolidation, And Microfibres",
-"u": "https://www.theinterline.com/2026/10/13/asos-hacked-amazons-about-you-climate-sourcing-risk-ai-consolidation-and-microfibres/",
-"m": "The Interline"
-},
-{
-"d": "2026-10-13",
-"t": "$19 Amazon 보트 슈즈: Sperrys 대체 제품 40% 할인",
-"o": "$19 Amazon Boat Shoes: 40% Off Alternative to Sperrys",
-"u": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOUkhwczRJemFSY0JaSFZWTkQ4djZ0d2xMbWZkUV9iTWVYempMckg3NUVuZzM5SThvb0VmRWIwMkFzejY2SGVuZzFyd21wMHZFM1g0OFhNaGdjMFRBRm5UQkpoSGVQeVVEU2gwNVM5LTRjaWxTYWNKLTc0c3Qwd01sRHN5emNNd2JoTVF4YkRVc2lmQQ?oc=5",
-"m": "바이어 · Amazon"
-},
-{
-"d": "2026-10-12",
-"t": "Champion Performance Polo 30% 할인, $16 미만 Amazon",
-"o": "Champion Performance Polo 30% Off, Under $16 on Amazon",
-"u": "https://news.google.com/rss/articles/CBMijAFBVV95cUxPUC1FMXdRajFlaWUxS2lLTzNjTmdranA5c3lHbHRmWGNna0ZCcFFxTXlCX2lHcURKU0hxNS1KNWVBZVBqRmtwbUFsd1dfRENla19rUG9IaXdlbmFfUF8zd0h5OG1kRGpRYTFCQjVFZ2FtYl85Z0dSb2hsQVJHTGN4bEVYa1Z3V3FyWlFsdA?oc=5",
-"m": "바이어 · Amazon"
 }
 ],
 "nike": [
+{
+"d": "2026-10-15",
+"t": "무디스, Nike 전망을 부정적으로 하향, 2028회계연도 실적 하락 예상",
+"o": "Moody’s cuts Nike outlook to negative, sees earnings falling into fiscal 2028",
+"u": "https://news.google.com/rss/articles/CBMirwFBVV95cUxORkozY3pYdkFOOE9BN1l3YzNJQ2xjTl9uVXBGSVFHeG5yS2lzaXkzNUtQN3hSLWNROTY3ejFPLVJkd2Q3bjRCUzRyZGtnVjlTY2xpTjAzUENVMVNiNXQ3VkY4aEs5VXlUVzI1ZkdwMjJiVkdsTF9ob0h5WkowS19fdk92NXVUQjQxVEo3elZFUGpUVHpYUFNtU3dnTWxmeTRTUWJfYkdKYVE3N1NhUkI0?oc=5",
+"m": "바이어 · Nike"
+},
 {
 "d": "2026-10-12",
 "t": "JPMorgan, Citigroup, Pepsi, Micron 및 Nike는 Zacks Earnings Preview의 일부입니다.",
@@ -4420,16 +4427,23 @@
 "o": "How Weak Guidance At Nike Stock Has Changed Its Investment Story",
 "u": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxPbHNnOWJTRUotR09uZlV5TWQwaEtLSHI0RW50WkRXdjQzaVVnVmx6Z19Hbi1yOHdVS3l3RUE5cEJEZzZ3V2o5WGVjN1N0YVJ4R0JPVHhRRnZpSGFFUXRTZXRYMjZNUHc4ZWlxRDM4c0xPb0MyWnp3MkZna3lOT0Q5YnhEUThocWNlMnAxbkw5LUtFZDlkRkhoN2ZyT2I1LTRETFR1NjJqMlUzUm9BbUlFalZjMDRDZzktZEdiWEV5X1JYaGx6Nzh5MdIBzgFBVV95cUxPUVM2dS1XM3RvakNMa1Y1bXo5Y2I1eXBJdGpiNHloNVRTMFFnNDAzUms1RnpHZ2pqSFJqUmlLU0kwXzlMOGFpX3huWi1VOVpLS1hKS095MU95UUxXQzU5QlFEVWRucXZ1ZUdCR2JidGRHa2puM2wzeUpNd3h5TkUyMUo3UEVEdjh3R0hINS1LOHRHVkxtUTdFNmJ3ZnhoVWZ2NDlnNlNieklkcHNBNmdqdkVLNlNZOXUzWnVpWnZ6NnAxV2pGQkVLN1QzUmZGUQ?oc=5",
 "m": "바이어 · Nike"
-},
-{
-"d": "2026-10-08",
-"t": "미국 TNC, Nike, Patagonia, Lululemon을 통합하여 극세사 오염 억제",
-"o": "US' TNC unites Nike, Patagonia, Lululemon to curb microfibre pollution",
-"u": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxOblpMVG9TbW5tbjRLY3lLcVVBU0pXMlRPMVFlSFhPc25kV0tPRnZUaDd2VG16VjJkZ3RkNVhON2ZWYzd2RWF0ZldXeG5DU0Jqc0h1b1FXWUlBZUhEMk11RUxYNVRLcTJqZ1BJTjlTSjdQUXpCd3hnVFhPME00c0VTaDZDMlZVTkFZYWVPSmlQb0w2bzZ4eDFTR2JSd3Z3UXlMVlo5enBTc2x4NDZnQjA1NFM4YUxvbDBjSU55NXVrbjU0b1JzTGE2YjFmZDNka3pTWFU4a0FCemwzU09DQ0R3WGlnaWdBV3Jqemc?oc=5",
-"m": "Fibre2Fashion"
 }
 ],
 "pvh": [
+{
+"d": "2026-10-19",
+"t": "Tommy Hilfiger Polo 75% 할인—오늘 Amazon에서 단 $22",
+"o": "Tommy Hilfiger Polo 75% Off—Just $22 on Amazon Today",
+"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOVnd3NGdUU0RFek9BcXIzbUY2SVVuQVNkQVBtaXpaWUU5VnJRZXdXTWZMZGF1OUFkX3N1VHJQM1RyTkROX04wREJueVQxUXlfWEo3dDM4bGcwQVhETzM2Nmc1RDJBR0lidkl5WmU4N3dXb3NqWWlHMmlhcFNkNV9pTGYyYWd5cTBLNzhGREJjc1N2RmM0ak5yRnV1S0lfZExuUVJNRkJxVHZrcjA3U2MwdkxYeTI?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-10-19",
+"t": "Amazon에서 Tommy Hilfiger 긴팔 폴로 44% 할인",
+"o": "Tommy Hilfiger Long-Sleeve Polo 44% Off on Amazon",
+"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQdkc2alo4dUVock1wUnhtaUptcnVGMU9nTmlxNzNwcHpwT09ZOUxac29maDJMbko0dG02cERiX01HRHdiWXM2c3hkRENGRmx3VFY1b1ltSktGcWI5Y3RSM1JqUzM5TGpEYm9ISW9zcEY5ZGJRd0lyUGZxb1IwT2RSaTZWT2lrV25PckdXMTV3ZGpPWXRNYjl0WTMxeF8waV9WeVJhTnpGVi1MZWowZmFkQXNXekg?oc=5",
+"m": "바이어 · PVH"
+},
 {
 "d": "2026-10-18",
 "t": "패션업계 디자이너 물갈이 '다시 시작?'…일주일 새 3명 퇴임 발표",
@@ -4471,20 +4485,6 @@
 "o": "Calvin Klein Textured Polo Under $17 Looks More Expensive",
 "u": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOeTR1X2hCSnlhUVFGUEtuWEhpVHJlaGp1RDRiT3VZSnBCcWRMa2sxTnNtMDlJSGpVM0M3aDZDSTNKMlJkcXlzY0RpYUdQbTlMTGRPQVExd3lVLXdIdVRDRDF1QnNYODFEUDB4Z1NVZy1HYUNsOVJFRWpIMkZKVF9UcFBHZ2N3RmNaX3ZyR3pGTWQ?oc=5",
 "m": "바이어 · PVH"
-},
-{
-"d": "2026-10-09",
-"t": "Tommy Hilfiger 남성 폴로 셔츠 40% 할인—단 $22",
-"o": "Tommy Hilfiger Men's Polo Shirts 40% Off—Just $22",
-"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQQ2hyR1oxbFQ4QTRJNlhodTJyd0J3NUxmX3JPVFN3cmtWOTNPYUhpOGFlc1JiYjlQRFFRVDRUVWpUeUtFbk51TUVfM29PTDRRWGtJNFQ3Y0ZvM1pMS1RYY2t5bVYtRXUwLWdEc3dlVXRSTUo3NE80WV90cDFSazQ4bHN3TS1MQXltRTVlVmtmeDJacmtBYl9lcGpEMk1zS2NoS1VFb20xNDI4bk42YmM5bWlyem0?oc=5",
-"m": "바이어 · PVH"
-},
-{
-"d": "2026-10-06",
-"t": "타미 진스, 장원영과 완성한 2026 가을 캠페인",
-"o": "타미 진스, 장원영과 완성한 2026 가을 캠페인",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=149099",
-"m": "한국섬유신문"
 }
 ],
 "costco": [
@@ -4545,6 +4545,64 @@
 "m": "바이어 · Costco"
 }
 ],
+"kohls": [
+{
+"d": "2026-10-19",
+"t": "강한 소매 판매가 Kohl's 주식(KSS)에 대한 투자 사례를 변화시키고 있습니까?",
+"o": "Is Stronger Retail Sales Altering The Investment Case For Kohl's Stock (KSS)?",
+"u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxOLTRQSFRiNEZWMmRac1JRQjRHeHRKd3pRWUdJVFlWdS1Wamd3UnJuN25sdWJmd1pzSmgtMVl1RTBzUVhxQWNWRjVab3cwUUlod1Q0LXhsLUFJZXRSQU1WNUxCb2w0VkJYa2lxdGZZQklfTTQxWTZDbmJkV0tfaE5SSjVjXzVEd1FzREhWbVpjaTJGRFJRTXphWm5QWk9PcW1vaWkya0VSMVlFYTA1UndKYUNLdktLR1lhRlh30gHAAUFVX3lxTE5iaUgwVGIwR2lsb1VTMmt3VEZSclQ1S0Z1YVhZVnNQYU0zdUVxQU9abVcwd3BHOXdLZExNcFowekdiaFVvd2FHbHdjUEk0RDV5NEl3V0dhT1pVUkRWT1RhZGU4X3JVbWNiSDZHVF9Pc2xYbEd4eWNfbXhyV3JwV1lNeFFHVklYOS1Ta0pxdjJiZ3hEclpzQXFvdVJfQl9QYnhjb2pjRlQ5cmZRdXN2RktYY0lGZ2c5cm13QkZ6S2FaWA?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-10-18",
+"t": "Kohl's (KSS) 주식은 여전히 ​​수익에 대한 할인처럼 보입니다.",
+"o": "Kohl's (KSS) Stock Still Looks Like A Bargain On Earnings",
+"u": "https://news.google.com/rss/articles/CBMilwFBVV95cUxQOXFLN0YwOG9vRFpMQy1SZFp5TlJyNTI1bE9uSUozU2E0SHFjZzF1aFBkQkRkZ1FLTXBqTjhUSGUwSEQtdDBBdXFrdVNlUWZQVXU2c25DSll6dF9fREg0YTdaenJmWUxDQzczbno5a25zYVNWTDB1b0JQcWtzSTRmUmNzZlZaZ1dsTkh6d2VDUGNGMlZHTHhJ?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-10-11",
+"t": "실적 개선으로 Kohl's 주식(KSS) 투자 사례가 바뀔 수 있음",
+"o": "Earnings Beat Might Change The Case For Investing In Kohl's Stock (KSS)",
+"u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNYURMR0JSUmFkeTRxOFpfZjRjbFJINjM4ZWtGNFpjbUtoMW1kUF8yWVN0R0xRV2VtTWdYcUcyUFJ1RENTNXpiZjVzdWo5eXBiVmVJaWpCNVk4SERON1FxQUVzQk1YTjZiWDY3ZTFSN2M2SklMUEV2dXVWa0hnRm16NjdvRHVVNzktdENUVGxSSVU0VGtDbVlkMFNReFFjcm05QjUxQmdxV0ZucjlUWW1BUlJUU0k0dTEyVW4yZkVDQjXSAcABQVVfeXFMTWFETEdCUlJhZHk0cThaX2Y0Y2xSSDYzOGVrRjRaY21LaDFtZFBfMllTdEdMUVdlbU1nWHFHMlBSdURDUzV6YmY1c3VqOXlwYlZlSWlqQjVZOEhETjdRcUFFc0JNWE42Ylg2N2UxUjdjNkpJTFBFdnV1VmtIZ0ZtejY3b0R1VTc5LXRDVFRsUklVNFRrQ21ZZDBTUXhRY3JtOUI1MUJncVdGbnI5VFltQVJSVFNJNHUxMlVuMmZFQ0I1?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-10-11",
+"t": "Kohl's(NYSE:KSS) 수익이 소매주에 대한 평균을 능가하는 것은 무엇입니까?",
+"o": "What Does Kohl's (NYSE:KSS) Earnings Beat Mean for Retail Stocks?",
+"u": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPR01ZUkk1ek9uUkY0bXNNamhtZzRVZ0NqRHgzU1J4TW54dTI4WDlqTGl6WVBVUjBsMzY3WXVDQjZseExQc2tlNDhZU3NaX0xqR3ZmTUlCT0szazZQb2RfZFMwbFpsUkxCWTh3d3pLekRYS0Q3RkctWWJSNkNvcHQwLTE3YWw0TnlXd3lKVlEzRzRfRjFoS2JoSkE5WkJ4QUJJZklyLXpkcw?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-10-09",
+"t": "일반 상품 소매 주식의 2분기 수익 되돌아보기: Kohl's(NYSE:KSS) 대 나머지 팩",
+"o": "A Look Back at General Merchandise Retail Stocks’ Q2 Earnings: Kohl's (NYSE:KSS) Vs The Rest Of The Pack",
+"u": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNX1JaZGhhRW90WmIyR25TeVJLdGJCR2o0NHFwR09WNmZUNXNHa205U1lRd1ktOVVJZmlSNVhLZjBqVlBTT0xSUDhtYU9wcXJPWVd3MEhUTTB1MW1CMDRDbmdoM1c4bjg4Z2xNUzhJR1NkUkhnUWtua1h0WGlWZkZuQ05RdWtKaUZHN2R6YW9Wa0Z5a2xOUlBaeDNBdDh5NFh6bjNF?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-10-06",
+"t": "Kohl's, 2026 회계연도 전망 상향 조정: Kohl's 주식에 대한 의미",
+"o": "Kohl's raises fiscal 2026 outlook: what it means for Kohl's stock",
+"u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPSGJUXzExa29nTW5JNXI2RzRIaEU3QVdKb3FnTmxSVmw5R3pTLWF6ZE5OQlMyYlo2VG9zaHd5SGpnM2tudzF1UldNQzRvSzZtZkVBdFRNeVozT2cyM0J3X1FfWGJZV2VTdkRPU0Z6U04teHJYV3U5YkxIcHBuZ05NT0VVMmxfYnF1aGgyNFBvVHJhTlh3ZGQ3aU00eFJBcW16eUVUdUVjYU0wdnRkWXpBODRIbmtkZTFnREh4V0g2Ujk?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-10-05",
+"t": "C-suite 이직률이 계속됨에 따라 Kohl's의 새로운 머천다이징 책임자를 만나보세요",
+"o": "Meet the new head of merchandising at Kohl's as C-suite turnover continues",
+"u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNR2gySjJRekd6VnBhZ1VNLWg5MVVOaHRSTU93NWlUeXgxX1N4NUhTY2syMFNnSmhrZWVMbTZ3d0xScHliczR6WjRaX0JIWHBsMHc2ODl2dWxnZXlFZzBPRzd3aEpBRGdlWGptRVh3bjJpSUZKRzRSQXVqLXBmOFhfOXZONUtleVh0OURlX0JkQ3dfYjFGcEVvb3pjaG0tWlJORkE?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
+"d": "2026-10-05",
+"t": "Kohl's 주식은 더 강한 2분기 실적과 가이던스 증가를 보고합니다",
+"o": "Kohl's stock reports stronger Q2 earnings and guidance increase",
+"u": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPaTF2SV9UX3dIVWZzNmhyRE5PN1pTUWpTWkk1VVFqTXN3V3o3S2t4OWhnYmhCT1ZhR3FfVFlJYnFYdFNQOUZMSjRyWTFiNjRqZFg4WVNsZmxkOGppWDdodEdjN09scS1Gd214dEhuWF9FdzdPaDVYemlLMnF2WHdla1h0VVNRRnlpdW1UUzkzNDE5MkltejZQU1R5R3lOcjFZRHZBeGY5NklhV2d0eXlHMmpzQVNtN2cteUN6bjNXUkpMM19N?oc=5",
+"m": "바이어 · Kohl's"
+}
+],
 "aeo": [
 {
 "d": "2026-10-14",
@@ -4601,64 +4659,6 @@
 "o": "American Eagle Outfitters, Inc. (NYSE:AEO) Plans $0.12 Quarterly Dividend",
 "u": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNbjFSM25qX3Jjamwwb3VrWEhkaFdxZHhQQjEycEs4MXB6S0w2UVdRY3hGVjF0MGNjLS1nVXF3cF9XTE1FakoxTUtocS1yV3RkOTIxcmpzTldiQUtDZnluY3NWUlMxSndBVzRzLWd5dzl5NXhOQXI3QTd2REFmUGZONjZuYmRZWXZ1VDhVZ3FhQzd2dkhManFOcUNMWUZ4VWpSZzFhM0YtWUlsT1RLS19sWlVHRjBMWDVVQWpxM2JWekxlQUV3YzQtYVB3?oc=5",
 "m": "바이어 · American Eagle"
-}
-],
-"kohls": [
-{
-"d": "2026-10-18",
-"t": "Kohl's (KSS) 주식은 여전히 ​​수익에 대한 할인처럼 보입니다.",
-"o": "Kohl's (KSS) Stock Still Looks Like A Bargain On Earnings",
-"u": "https://news.google.com/rss/articles/CBMilwFBVV95cUxQOXFLN0YwOG9vRFpMQy1SZFp5TlJyNTI1bE9uSUozU2E0SHFjZzF1aFBkQkRkZ1FLTXBqTjhUSGUwSEQtdDBBdXFrdVNlUWZQVXU2c25DSll6dF9fREg0YTdaenJmWUxDQzczbno5a25zYVNWTDB1b0JQcWtzSTRmUmNzZlZaZ1dsTkh6d2VDUGNGMlZHTHhJ?oc=5",
-"m": "바이어 · Kohl's"
-},
-{
-"d": "2026-10-11",
-"t": "실적 개선으로 Kohl's 주식(KSS) 투자 사례가 바뀔 수 있음",
-"o": "Earnings Beat Might Change The Case For Investing In Kohl's Stock (KSS)",
-"u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNYURMR0JSUmFkeTRxOFpfZjRjbFJINjM4ZWtGNFpjbUtoMW1kUF8yWVN0R0xRV2VtTWdYcUcyUFJ1RENTNXpiZjVzdWo5eXBiVmVJaWpCNVk4SERON1FxQUVzQk1YTjZiWDY3ZTFSN2M2SklMUEV2dXVWa0hnRm16NjdvRHVVNzktdENUVGxSSVU0VGtDbVlkMFNReFFjcm05QjUxQmdxV0ZucjlUWW1BUlJUU0k0dTEyVW4yZkVDQjXSAcABQVVfeXFMTWFETEdCUlJhZHk0cThaX2Y0Y2xSSDYzOGVrRjRaY21LaDFtZFBfMllTdEdMUVdlbU1nWHFHMlBSdURDUzV6YmY1c3VqOXlwYlZlSWlqQjVZOEhETjdRcUFFc0JNWE42Ylg2N2UxUjdjNkpJTFBFdnV1VmtIZ0ZtejY3b0R1VTc5LXRDVFRsUklVNFRrQ21ZZDBTUXhRY3JtOUI1MUJncVdGbnI5VFltQVJSVFNJNHUxMlVuMmZFQ0I1?oc=5",
-"m": "바이어 · Kohl's"
-},
-{
-"d": "2026-10-11",
-"t": "Kohl's(NYSE:KSS) 수익이 소매주에 대한 평균을 능가하는 것은 무엇입니까?",
-"o": "What Does Kohl's (NYSE:KSS) Earnings Beat Mean for Retail Stocks?",
-"u": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPR01ZUkk1ek9uUkY0bXNNamhtZzRVZ0NqRHgzU1J4TW54dTI4WDlqTGl6WVBVUjBsMzY3WXVDQjZseExQc2tlNDhZU3NaX0xqR3ZmTUlCT0szazZQb2RfZFMwbFpsUkxCWTh3d3pLekRYS0Q3RkctWWJSNkNvcHQwLTE3YWw0TnlXd3lKVlEzRzRfRjFoS2JoSkE5WkJ4QUJJZklyLXpkcw?oc=5",
-"m": "바이어 · Kohl's"
-},
-{
-"d": "2026-10-09",
-"t": "일반 상품 소매 주식의 2분기 수익 되돌아보기: Kohl's(NYSE:KSS) 대 나머지 팩",
-"o": "A Look Back at General Merchandise Retail Stocks’ Q2 Earnings: Kohl's (NYSE:KSS) Vs The Rest Of The Pack",
-"u": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNX1JaZGhhRW90WmIyR25TeVJLdGJCR2o0NHFwR09WNmZUNXNHa205U1lRd1ktOVVJZmlSNVhLZjBqVlBTT0xSUDhtYU9wcXJPWVd3MEhUTTB1MW1CMDRDbmdoM1c4bjg4Z2xNUzhJR1NkUkhnUWtua1h0WGlWZkZuQ05RdWtKaUZHN2R6YW9Wa0Z5a2xOUlBaeDNBdDh5NFh6bjNF?oc=5",
-"m": "바이어 · Kohl's"
-},
-{
-"d": "2026-10-06",
-"t": "Kohl's, 2026 회계연도 전망 상향 조정: Kohl's 주식에 대한 의미",
-"o": "Kohl's raises fiscal 2026 outlook: what it means for Kohl's stock",
-"u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPSGJUXzExa29nTW5JNXI2RzRIaEU3QVdKb3FnTmxSVmw5R3pTLWF6ZE5OQlMyYlo2VG9zaHd5SGpnM2tudzF1UldNQzRvSzZtZkVBdFRNeVozT2cyM0J3X1FfWGJZV2VTdkRPU0Z6U04teHJYV3U5YkxIcHBuZ05NT0VVMmxfYnF1aGgyNFBvVHJhTlh3ZGQ3aU00eFJBcW16eUVUdUVjYU0wdnRkWXpBODRIbmtkZTFnREh4V0g2Ujk?oc=5",
-"m": "바이어 · Kohl's"
-},
-{
-"d": "2026-10-05",
-"t": "C-suite 이직률이 계속됨에 따라 Kohl's의 새로운 머천다이징 책임자를 만나보세요",
-"o": "Meet the new head of merchandising at Kohl's as C-suite turnover continues",
-"u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNR2gySjJRekd6VnBhZ1VNLWg5MVVOaHRSTU93NWlUeXgxX1N4NUhTY2syMFNnSmhrZWVMbTZ3d0xScHliczR6WjRaX0JIWHBsMHc2ODl2dWxnZXlFZzBPRzd3aEpBRGdlWGptRVh3bjJpSUZKRzRSQXVqLXBmOFhfOXZONUtleVh0OURlX0JkQ3dfYjFGcEVvb3pjaG0tWlJORkE?oc=5",
-"m": "바이어 · Kohl's"
-},
-{
-"d": "2026-10-05",
-"t": "Kohl's 주식은 더 강한 2분기 실적과 가이던스 증가를 보고합니다",
-"o": "Kohl's stock reports stronger Q2 earnings and guidance increase",
-"u": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPaTF2SV9UX3dIVWZzNmhyRE5PN1pTUWpTWkk1VVFqTXN3V3o3S2t4OWhnYmhCT1ZhR3FfVFlJYnFYdFNQOUZMSjRyWTFiNjRqZFg4WVNsZmxkOGppWDdodEdjN09scS1Gd214dEhuWF9FdzdPaDVYemlLMnF2WHdla1h0VVNRRnlpdW1UUzkzNDE5MkltejZQU1R5R3lOcjFZRHZBeGY5NklhV2d0eXlHMmpzQVNtN2cteUN6bjNXUkpMM19N?oc=5",
-"m": "바이어 · Kohl's"
-},
-{
-"d": "2026-09-27",
-"t": "Kohl's(KSS)는 수익이 전망을 상회함에 따라 4% 저평가될 수 있습니다.",
-"o": "Kohl's (KSS) Could Be 4% Undervalued As Earnings Beat Lifts Outlook",
-"u": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxQNTVsWW03V1BnZ1ZkaDA1ZVctVkpoUkhPX1ZmRXA2bmpPRFZNZDRZbDNZbm8zR1JXUmNYVU5WeXg0S0VBMjJvQ1ZrV2stcU5SVUNyMlBxWVNBU0Q1OU1EeXpNalNxWDl6YUt3al9aZXNrYTBLX3YtNHJHZ2N3YlhWUnRKOFNicGRkbmJaOVlXMnhCblhxUHJZVmpxWmNHdHhUOHdobzVfdEFMYXZHOXlpVTJPMHJ3bmIwclA00gHAAUFVX3lxTE1iai1UZHZJOFNNdlg4TmlQQ0p1WDBnb0oteXA0TXA5bnF1QUlYRXdvNEtTZmFRS0NEUjNWeEhiX2UzRjl1WGRQMDFXYzFnU19LU3FtWU5mUnhKdzNGcUVZT0JYX1Voa0JNOEQ4MllMNVpYd2hEbUptRXVMQV9RQjJoNnFXSzVMR0x6QVZSTF8yN3U3dllhdk9IenluajlEZXJlcTNBOF9ETENZd2pDZ0hGcHBVVnRKR09STlFYVGZ2bA?oc=5",
-"m": "바이어 · Kohl's"
 }
 ],
 "target": [
@@ -4837,6 +4837,13 @@
 ],
 "duluth": [
 {
+"d": "2026-10-19",
+"t": "WD-40® 브랜드와 Duluth Trading Company, 한정판 의류 및 액세서리 컬렉션을 위해 협력",
+"o": "WD-40® Brand and Duluth Trading Company Team Up for Limited-Edition Apparel and Accessories Collection",
+"u": "https://news.google.com/rss/articles/CBMizgFBVV95cUxNTDY4YTJ3eXRPV09JeDhPSUR5SldCWnNoX3dqQ1ZyMWR0cGlqSTExWk5LMmZiV3pqR29lOVN0OER5cTltWlFKbjFaRVoxc3oyRnV0ZFdHSmluNkVaLXB6YmJqUV8zRHBybDF0YjQzTWlvVVNYUHh6RFYwN25nc2lkeE1sMnU4bUttSnU5bTYxZmtDWHpYeWhkSTFiNkZaTXhWSTNKbEQwYWpJNFFRQVA3TmNxOWxxT0xBSU9Halk2WUM5RjFsS1dRTXpOaF9IQQ?oc=5",
+"m": "바이어 · Duluth Trading"
+},
+{
 "d": "2026-10-14",
 "t": "Duluth Trading과 WD-40® 브랜드 출시 협업으로 한정판 의류 및 장비 출시",
 "o": "Duluth Trading and WD-40® Brand Launch Collaboration Featuring Limited-Edition Apparel and Gear",
@@ -4883,13 +4890,6 @@
 "t": "Duluth Trading (DLTH) 2026 회계연도 2분기 실적 발표: 마진 확대 및 더 높은 EBITDA 지침",
 "o": "Duluth Trading (DLTH) Q2 Fiscal 2026 Earnings Call: Margin Expansion and Higher EBITDA Guidance",
 "u": "https://news.google.com/rss/articles/CBMickFVX3lxTFBKVVdEd2ZiOUViN3RDN3I4Sk1UOXlMbXBUWTBlQlEzWW1RNHhQamJqTEZPRzUtRWd5N0NINDZtTFAxV0xOYnJaWlMtNUh0akwzVUdlTEJmeFo3RDJxamlISXBmZXV3MUd0MVlkSFBvOU9VZw?oc=5",
-"m": "바이어 · Duluth Trading"
-},
-{
-"d": "2026-09-03",
-"t": "Duluth Holdings Inc., 2026년 2분기 재무 결과 발표",
-"o": "Duluth Holdings Inc. Announces Second Quarter 2026 Financial Results",
-"u": "https://news.google.com/rss/articles/CBMixAFBVV95cUxOeTJtSm5WZzBjVTFxMW9ScXV1eWI4RWFIZG5hdWRHZ244WGlfR25FVTRpT21JRlZKTDlOQm1XYVVfMUJSM19WSENuSHhIcHktT2ctU1hOUzhCT09UTEMtZEJhOEI3ZXo0NDB2ZG5PZGpPN2pVOGNIVHRDQ0tjOE1GTmF4SXhsQ29ZeFpKd1FQbXYyZEJmSE4tNkhyU0tWeGttRXo2UlBxNnpTWDdMNmJQQ2dkbWFMUjlvTF82OWNLOUQ1bTY2?oc=5",
 "m": "바이어 · Duluth Trading"
 }
 ]
