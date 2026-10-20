@@ -66,11 +66,20 @@ const specSummary = (yarn: CostYarnLine): string => {
   return components.map((item) => `${item.fiber || "성분"}${item.nominal ? ` ${item.nominal}${item.unit}` : ""}`).join(" + ")
 }
 
+/** Firebase 오류 코드만 덧붙인다(R340). message 전문에는 필드 경로와 값이 섞여 나와 코드만 쓴다. */
+const errorTail = (error: unknown): string => {
+  const code = (error as { code?: string })?.code
+  return code ? ` (${code})` : ""
+}
+
 const normalizeComponentMode = (component: YarnComponent): YarnComponent => {
   const fiber = FIBER_ALIASES[component.fiber.trim().toLowerCase()] ?? component.fiber.trim()
-  return fiber === "Spandex"
-    ? { ...component, mode: "draft", factor: 3 }
-    : { ...component, mode: "plain", factor: undefined }
+  if (fiber === "Spandex") return { ...component, mode: "draft", factor: 3 }
+  // **`factor: undefined`로 두지 말 것**(R340). 값 없는 키가 만들어져 Firestore가 저장을 통째로 거부한다.
+  // `ignoreUndefinedProperties`가 꺼져 있어 문서 어디든 undefined가 하나라도 있으면 던진다.
+  const plain: YarnComponent = { ...component, mode: "plain" }
+  delete plain.factor
+  return plain
 }
 const normalizeSpecModes = (spec: YarnSpec): YarnSpec => ({ ...spec, components: spec.components.map(normalizeComponentMode) })
 const normalizeInputModes = (input: CostInput): CostInput => ({ ...input, yarns: input.yarns.map((yarn) => ({ ...yarn, spec: yarn.spec ? normalizeSpecModes(yarn.spec) : yarn.spec })) })
@@ -141,7 +150,7 @@ export function CostSheetDialog({ open, onOpenChange, rows, canEdit, onSaved, st
       const ordered = [...docs].sort((left, right) => right.version - left.version)
       setVersions(ordered)
       if (ordered[0]) loadVersion(ordered[0])
-    }).catch(() => { if (live) setError("계산서 이력을 불러오지 못했습니다.") })
+    }).catch((error) => { if (live) setError(`계산서 이력을 불러오지 못했습니다.${errorTail(error)}`) })
       .finally(() => { if (live) setLoading(false) })
     return () => { live = false }
   }, [open, row])
@@ -232,7 +241,7 @@ export function CostSheetDialog({ open, onOpenChange, rows, canEdit, onSaved, st
         sheet: buildSheet(), ...(blend ? { blend: { labelText: blend.labelText, label: blend.label } } : {}), note,
       })
       setVersions((items) => [saved, ...items]); setSelectedId(saved.id); onSaved(rowKeyOf(row), refOf(saved))
-    } catch { setError("계산서 저장에 실패했습니다. 다시 시도해 주세요.") } finally { setSaving(false) }
+    } catch (error) { setError(`계산서 저장에 실패했습니다. 다시 시도해 주세요.${errorTail(error)}`) } finally { setSaving(false) }
   }
   const overwrite = async () => {
     if (!current || !ratioValid) return
@@ -241,7 +250,7 @@ export function CostSheetDialog({ open, onOpenChange, rows, canEdit, onSaved, st
       const updated = { ...current, sheet: buildSheet(), ...(blend ? { blend: { labelText: blend.labelText, label: blend.label } } : { blend: undefined }), note }
       await updateCostSheet(current.id, { sheet: updated.sheet, ...(updated.blend ? { blend: updated.blend } : {}), note })
       setVersions((items) => items.map((item) => item.id === current.id ? updated : item)); onSaved(rowKeyOf(row), refOf(updated))
-    } catch { setError("계산서 수정에 실패했습니다. 다시 시도해 주세요.") } finally { setSaving(false) }
+    } catch (error) { setError(`계산서 수정에 실패했습니다. 다시 시도해 주세요.${errorTail(error)}`) } finally { setSaving(false) }
   }
 
   const field = "h-8 px-2 text-xs"
