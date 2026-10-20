@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-10-20T00:00:27+00:00",
+"generated_at": "2026-10-20T00:30:39+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3656,14 +3656,14 @@
 },
 {
 "period": "2026-10",
-"value": 1355.29
+"value": 1343.297
 }
 ],
-"value": 1355.29,
+"value": 1343.297,
 "period": "2026-10",
 "period_end": null,
-"prev": -0.3,
-"yoy": -4.8,
+"prev": -1.2,
+"yoy": -5.6,
 "stale": false
 },
 {
@@ -3753,10 +3753,6 @@
 "source_url": "https://fred.stlouisfed.org/series/CPIAPPSL",
 "points": [
 {
-"period": "2025-07",
-"value": 131.354
-},
-{
 "period": "2025-08",
 "value": 131.694
 },
@@ -3803,14 +3799,18 @@
 {
 "period": "2026-08",
 "value": 136.457
+},
+{
+"period": "2026-09",
+"value": 136.875
 }
 ],
-"value": 136.457,
-"period": "2026-08",
+"value": 136.875,
+"period": "2026-09",
 "period_end": null,
-"prev": 0.0,
-"yoy": 3.6,
-"stale": true
+"prev": 0.3,
+"yoy": 3.4,
+"stale": false
 },
 {
 "metric": "us_apparel_inventory_ratio",
@@ -3826,64 +3826,64 @@
 "source_url": "https://fred.stlouisfed.org/series/MRTSIR448USS",
 "points": [
 {
-"period": "2025-07",
-"value": 2.16
-},
-{
 "period": "2025-08",
-"value": 2.14
+"value": 2.05
 },
 {
 "period": "2025-09",
-"value": 2.17
+"value": 2.08
 },
 {
 "period": "2025-10",
-"value": 2.14
+"value": 2.05
 },
 {
 "period": "2025-11",
-"value": 2.14
+"value": 2.04
 },
 {
 "period": "2025-12",
-"value": 2.15
+"value": 2.06
 },
 {
 "period": "2026-01",
-"value": 2.16
+"value": 2.08
 },
 {
 "period": "2026-02",
-"value": 2.1
+"value": 2.02
 },
 {
 "period": "2026-03",
-"value": 2.11
+"value": 2.02
 },
 {
 "period": "2026-04",
-"value": 2.13
+"value": 2.05
 },
 {
 "period": "2026-05",
-"value": 2.11
+"value": 2.03
 },
 {
 "period": "2026-06",
-"value": 2.14
+"value": 2.05
 },
 {
 "period": "2026-07",
-"value": 2.11
+"value": 2.03
+},
+{
+"period": "2026-08",
+"value": 2.02
 }
 ],
-"value": 2.11,
-"period": "2026-07",
+"value": 2.02,
+"period": "2026-08",
 "period_end": null,
-"prev": -1.4,
-"yoy": -2.3,
-"stale": true
+"prev": -0.5,
+"yoy": -1.5,
+"stale": false
 },
 {
 "metric": "crude_brent",
