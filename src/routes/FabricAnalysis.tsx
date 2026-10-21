@@ -63,6 +63,14 @@ export function FabricAnalysis() {
   const [printJob, setPrintJob] = useState<AnalysisRequest[] | null>(null)
 
   useEffect(() => { void loadAnalysisRecipients().then(setRecipients).catch(() => setRecipients([])) }, [])
+
+  /*
+   * 탭을 옮기면 체크를 푼다(2026-10-21 박향근 지시). 안 풀면 지금 목록에 보이지도 않는 건이
+   * 선택에 남아 출력·메일 버튼의 건수에 섞여 들어간다. 56건을 뽑으려다 엉뚱한 건이 같이 나간다.
+   * 상단 KPI 카드도 탭을 바꾸므로 핸들러가 아니라 activeState 변화에 건다.
+   * 검색어와 Urgent 토글은 일부러 두지 않는다. 글자를 칠 때마다 풀리면 고른 것을 계속 잃는다.
+   */
+  useEffect(() => { setSelected(new Set()) }, [activeState])
   const showNotice = (message: string) => { setNotice(message); window.setTimeout(() => setNotice(""), 6000) }
   const filtered = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("ko-KR")
