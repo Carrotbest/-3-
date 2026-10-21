@@ -13,8 +13,14 @@ type PageProps = { item: AnalysisRequest; urls: Record<string, string>; stamp: s
 
 /** RDDA 월간 리포트가 전역 @page 를 A4 가로로 쓴다. 이 출력만 세로로 바꾸려고 인쇄 직전에 붙인다. */
 const PAGE_STYLE = "@page { size: A4 portrait; margin: 12mm; }"
-/** 사진이 안 뜨면 이만큼만 기다리고 그냥 인쇄한다. 종이가 안 나오는 것이 더 나쁘다. */
-const IMAGE_WAIT_MS = 4000
+/**
+ * 사진이 안 뜨면 이만큼만 기다리고 그냥 인쇄한다. 종이가 안 나오는 것이 더 나쁘다.
+ * 사진 한 장이 150KB 로 쥐어짜여 있을 때 정한 4초인데, 2026-10-21 부터 분석 사진은
+ * 압축하지 않아 한 장이 최대 3MB 다. 56건을 고르면 받을 양이 20배가 된다.
+ * 그래서 장수에 맞춰 늘린다. 이 타이머는 마지막으로 사진 한 장이 뜰 때마다 다시 시작하므로,
+ * 느리게라도 계속 들어오는 동안은 기다리고 아주 끊겼을 때만 끝낸다.
+ */
+const imageWaitMs = (count: number) => Math.min(4000 + count * 600, 40000)
 
 /** 짝 배열을 2개씩 끊어 한 줄에 라벨·값 두 쌍을 앉힌다. */
 function chunkPairs(items: [string, string][]): [string, string][][] {
@@ -224,7 +230,7 @@ export function AnalysisPrintDeck({ records, onDone }: Props) {
       // afterprint 를 안 부르는 브라우저가 있어 한 번 더 건다. finished 로 두 번 실행을 막는다.
       window.setTimeout(finish, 800)
     }
-    const delay = loaded >= expected ? 120 : IMAGE_WAIT_MS
+    const delay = loaded >= expected ? 120 : imageWaitMs(expected)
     const id = window.setTimeout(run, delay)
     return () => window.clearTimeout(id)
   }, [resolved, loaded, expected, onDone])

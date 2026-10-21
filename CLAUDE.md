@@ -92,7 +92,8 @@
 - **양식과 파서는 `request-template.ts`의 `TEMPLATE_COLUMNS` 하나를 공유한다.** 내려받기는 그 순서로 쓰고 파서는 2행 열 이름으로 위치를 찾는다. 필수 열 이름을 바꾸면 기존 양식 파일이 깨지고, 나중에 더한 열은 `optional`로 둬 옛 양식도 읽게 한다.
 - 옵션 원단 사양은 YARN DETAIL(원사), CONS(조직), W'T(중량 g/m2) 세 칸이다(`RequestOption.construction`, `weight`, 분리 전 데이터에는 없음). CONS는 `src/data/constructions.ts` `CONSTRUCTIONS`(작지 파서와 공유) 목록에서만 고른다. 셀은 드롭다운 편집, 붙여넣기와 채우기는 `matchConstruction`(대소문자, 공백, 하이픈 무시)으로 목록 표기에 맞추고 없으면 건너뛴다. 엑셀 양식은 숨김 `LISTS` 시트를 참조하는 목록 검증을 걸고, 업로드에서 목록 밖 값은 버리지 않고 경고로 알린다. DD 불러오기와 연결의 빈 칸 채우기는 `construction`, `weight`를 DD 행 같은 필드로 넘긴다. 기존 YARN DETAIL에 섞인 조직과 중량은 자동으로 나누지 않는다.
 - 업로드 병합 키는 `차트 + Garment No.`다. 기존 건은 `reqId`와 사진 경로를 지킨다. 안 지키면 재업로드마다 사진이 날아간다.
-- 사진은 Firebase Storage(`requests/{reqId}/full.webp`, `thumb.webp`). 원본 1200px, 썸네일 400px webp로 줄여 올린다.
+- 사진은 Firebase Storage(`requests/{reqId}/full.webp`, `thumb.webp`). REQUEST는 원본 1200px, 썸네일 400px webp로 줄여 올린다.
+- **분석 사진(`profile: "analysis"`)은 압축하지 않는다**(2026-10-21 박향근 지시). 2.8MB 이하면 원본 바이트 그대로 올리고, 넘을 때만 2400→1800→1400→1100px로 내려가며 2.8MB 아래로 맞춘다. 예전에는 900px·품질 0.4·150KB로 쥐어짰고 그 저장본이 의뢰서 출력에 그대로 나가 원단 조직이 뭉개졌다. **2.8MB는 `storage.rules`의 `< 3MB`에 걸리지 않으려는 여유다.** 둘 중 하나만 고치지 말 것. 썸네일은 240px 그대로다. 목록이 행마다 원본을 끌어오면 안 된다. 사진이 20배 커졌으므로 다건 인쇄 대기(`imageWaitMs`)도 장수에 맞춰 늘려 두었다. 한쪽만 되돌리면 사진 빠진 종이가 나간다.
 - 사진 칸은 끌어 놓기로도 받는다(R306). 핸들러는 `ImageCell` 안에만 달고 `td`에는 달지 않는다. OS 파일 드래그는 `mousedown`이 안 와서 셀 범위 선택과 부딪히지 않는다. `onDragOver`의 `preventDefault`를 빼면 사진이 새 탭으로 열리고, `onDrop`의 `stopPropagation`을 빼면 상위 놓기 대상이 같은 파일을 또 받는다. `window`나 `document`에 `dragover`·`drop` 리스너를 달지 말 것. 엑셀 업로드와 분석 의뢰 창의 놓기 대상을 가로챈다.
 - 사진이 있는 칸에 호버하면 오른쪽 위에 삭제 버튼이 뜬다(R308, `removeImage`). `askConfirm`으로 한 번 되묻고, 기록에서 `imagePath`·`imageThumbPath`를 `undefined`로 떼고 Storage 파일도 지운다. **Storage 삭제를 `await`해서 기록 정리를 막지 말 것.** 같은 경로에 덮어쓰므로 파일이 쌓이지 않는다. 보기 전용(전체 탭·보관함)에서는 추가·교체·삭제 버튼과 끌어 놓기가 모두 막힌다.
 - `/request?focus=reqId`는 필터를 풀고 해당 스타일의 Garment No. 셀을 선택·스크롤·강조한 뒤 `focus` 파라미터를 지운다.

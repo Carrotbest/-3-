@@ -1,5 +1,6 @@
-// FABRIC REQUEST의 garment 사진 전용 저장소.
-// 원본을 그대로 올리면 목록 로딩이 느려지므로 원본·썸네일 두 벌로 줄여 올린다.
+// FABRIC REQUEST의 garment 사진과 FABRIC ANALYSIS의 의뢰·분석 사진 저장소.
+// 원본·썸네일 두 벌을 올린다. 목록은 썸네일만 받아야 행마다 원본을 끌어오지 않는다.
+// REQUEST는 원본도 1200px로 줄이고, ANALYSIS는 3MB 아래면 원본 그대로 올린다(아래 참조).
 // 화학 첨부(attachments.ts)는 IndexedDB 로컬 저장이라 팀 공유가 안 된다. 여기는 Firebase Storage를 쓴다.
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage"
 
@@ -11,9 +12,23 @@ const FULL_QUALITY = 0.82
 /** 목록 썸네일. 긴 변 400px */
 const THUMB_EDGE = 400
 const THUMB_QUALITY = 0.75
-const ANALYSIS_FULL_EDGE = 900
-const ANALYSIS_FULL_QUALITIES = [0.7, 0.55, 0.4] as const
-const ANALYSIS_FULL_TARGET_SIZE = 150 * 1024
+/*
+ * 분석 사진은 압축하지 않는다(2026-10-21 박향근 지시). 원본 바이트 그대로 올린다.
+ * 예전에는 긴 변 900px, 품질 0.4까지 내려 150KB 안으로 쥐어짰다. 그 저장본이 의뢰서
+ * 출력의 참고 사진으로 그대로 나가는데, 원단 조직처럼 결이 고운 부분이 뭉개졌다.
+ *
+ * 줄이는 경우는 하나뿐이다. `storage.rules`가 3MB 미만만 받으므로 그보다 큰 원본은
+ * 올라가지 않는다. 그때만 3MB 아래로 내리고, 목표 용량을 더 낮게 잡지 않는다.
+ * 규칙이 `< 3MB`라 딱 맞추면 경계에서 튕긴다. 2.8MB를 목표로 둔다.
+ */
+const ANALYSIS_FULL_LIMIT = Math.round(2.8 * 1024 * 1024)
+const ANALYSIS_SHRINK_STEPS = [
+  { edge: 2400, quality: 0.92 },
+  { edge: 1800, quality: 0.86 },
+  { edge: 1400, quality: 0.8 },
+  { edge: 1100, quality: 0.7 },
+] as const
+/** 목록 썸네일은 그대로 줄인다. 행마다 받는 그림이라 원본을 쓰면 목록이 느려진다. */
 const ANALYSIS_THUMB_EDGE = 240
 const ANALYSIS_THUMB_QUALITY = 0.6
 /** storage.rules의 상한과 같은 값이다. 함께 고친다. */
@@ -89,9 +104,12 @@ export async function uploadRequestImage(reqId: string, file: File, options?: { 
     if (bitmap) {
       try {
         if (profile === "analysis") {
-          for (const quality of ANALYSIS_FULL_QUALITIES) {
-            full = (await drawToBlob(bitmap, ANALYSIS_FULL_EDGE, quality)) ?? file
-            if (full.size <= ANALYSIS_FULL_TARGET_SIZE) break
+          // 3MB 아래면 손대지 않는다. 넘을 때만 그 아래로 내린다.
+          if (file.size > ANALYSIS_FULL_LIMIT) {
+            for (const step of ANALYSIS_SHRINK_STEPS) {
+              full = (await drawToBlob(bitmap, step.edge, step.quality)) ?? file
+              if (full.size <= ANALYSIS_FULL_LIMIT) break
+            }
           }
           thumb = (await drawToBlob(bitmap, ANALYSIS_THUMB_EDGE, ANALYSIS_THUMB_QUALITY)) ?? file
         } else {
@@ -104,8 +122,10 @@ export async function uploadRequestImage(reqId: string, file: File, options?: { 
     }
   }
 
-  if (profile === "analysis" && file.size > MAX_SOURCE_SIZE && (full === file || thumb === file)) {
-    throw new Error("사진을 줄이지 못했습니다. 3MB 이하 사진을 올려 주세요.")
+  // storage.rules 가 3MB 미만만 받는다. 줄이기에 실패했거나 리사이즈가 없는 환경이면
+  // 여기서 막는다. 그냥 보내면 서버가 거부하고 화면에는 원인 모를 실패만 남는다.
+  if (full.size >= MAX_SOURCE_SIZE || thumb.size >= MAX_SOURCE_SIZE) {
+    throw new Error("사진을 3MB 아래로 줄이지 못했습니다. 더 작은 사진을 올려 주세요.")
   }
 
   await uploadBytes(ref(appStorage(), imagePath), full, { contentType: full.type || file.type })
