@@ -543,8 +543,10 @@ input.dd-date::-webkit-calendar-picker-indicator {
 
 /* ------------------------------------------------------------------
  * FABRIC ANALYSIS A4 출력(R258 → R265 개편). 의뢰서와 리포트가 같은 뼈대를 쓴다.
- * 대시보드 톤앤매너의 문서다(R284). 가로선만 쓰고 색은 인디고 하나다.
- * R265 무테 옅은 회색(안 읽힘)과 R282 검은 격자(엑셀 복제)를 둘 다 지난 결과다. 어느 쪽으로도 되돌리지 말 것.
+ * 대시보드 톤앤매너의 문서다(R284). 색은 인디고 하나다.
+ * 2026-10-21 에 박향근 지시로 세로선까지 두른 정식 격자가 됐다. 선은 0.1mm 검정이다.
+ * 그 전 이력은 R265 무테 옅은 회색(종이에서 안 읽힘)과 R282 검은 격자(굵어서 엑셀 복제처럼 보임)다.
+ * 지금은 격자를 쓰되 선을 아주 가늘게 두어 그 둘을 피한다. **선을 굵히면 R282 로 되돌아간다.**
  * 세로 @page 는 CSS 가 아니라 AnalysisPrintDeck 이 인쇄 직전에 붙이는 <style> 이 정한다.
  * 위 RDDA 블록이 body * 를 숨기므로 여기서는 우리 뿌리만 다시 보이게 한다.
  * 인쇄 길이 기준: A4 세로 여백 12mm → 가로 186mm, 세로 273mm.
@@ -565,9 +567,20 @@ input.dd-date::-webkit-calendar-picker-indicator {
   .an-print-root { position: static !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; translate: none !important; transform: none !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
   .an-print-deck { display: block !important; background: #fff; color: #0f172a; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .an-print-page {
-    --an-ink: #0f172a; --an-soft: #475569; --an-faint: #94a3b8;
-    --an-rule: #e2e8f0; --an-accent: #4f46e5; --an-accent-soft: #eef2ff; --an-accent-line: #c7d2fe; --an-tint: #f8fafc;
-    box-sizing: border-box; width: 186mm; font-size: 9.5pt; line-height: 1.4; color: var(--an-ink);
+    /*
+     * 선은 검정이다(2026-10-21 박향근 지시). 종이에서 안 보인다는 지적이다.
+     * 인디고는 맨 위 제목 아래 굵은 줄과 구역 제목 띠 둘에만 남긴다. 그 둘이 문서의 강조점이고
+     * 나머지를 검정 가는 선으로 두면 R282 엑셀 격자와 달리 가로선 위주라 답답해지지 않는다.
+     */
+    --an-ink: #0f172a; --an-soft: #334155; --an-faint: #64748b;
+    /*
+     * `--an-tint` 는 라벨 칸 음영이다. 예전 #f8fafc 는 화면에서만 보이고 종이에서는 백지와 구분이 안 됐다
+     * (2026-10-21 박향근 지적). 레이저 출력에서 라벨 열이 눈에 들어오는 선까지 올렸다.
+     * 더 내리면 다시 안 보이고, 더 올리면 라벨 글자가 음영에 묻힌다.
+     * `--an-accent-soft` 는 의뢰 항목 알약 전용이다. 구역 제목 음영은 쓰지 않는다.
+     */
+    --an-rule: #000; --an-accent: #4f46e5; --an-accent-soft: #eef2ff; --an-accent-line: #000; --an-tint: #e3e8ee;
+    box-sizing: border-box; width: 186mm; font-size: 8.5pt; line-height: 1.4; color: var(--an-ink);
     page-break-after: always; break-after: page; break-inside: avoid;
   }
   .an-print-page:last-child { page-break-after: auto; break-after: auto; }
@@ -583,70 +596,109 @@ input.dd-date::-webkit-calendar-picker-indicator {
    */
   .an-sheet-fixed { display: flex; flex-direction: column; height: 271mm; overflow: hidden; }
   .an-sheet-fixed > * { flex: none; }
-  /* SWATCH 와 참고 사진을 한 줄에 나란히 둔다. 위아래로 쌓으면 둘 다 납작해진다. */
   /*
+   * 참고 사진과 실물 SWATCH 를 테두리 하나 안에 넣고 세로선으로 1:4 로 가른다
+   * (2026-10-21 박향근 지시). 이 칸이 남은 높이를 전부 먹는다.
+   *
+   * 사진이 왼쪽인 데는 이유가 있다. 원단이 칸보다 크면 사람이 넘치게 붙이는데,
+   * SWATCH 를 바깥쪽(오른쪽)에 두면 넘친 원단이 종이 밖으로 나가 사진과 다른 칸을 안 덮는다.
+   * **SWATCH 칸 가운데에는 글자도 선도 넣지 말 것.** 큰 원단을 붙이면 그대로 가려진다.
+   * 안내 문구는 오른쪽 아래 구석이고 경계는 실선이 아니라 점선 안내선이다.
+   *
    * `overflow: hidden` 과 `min-height: 0` 이 함께 있어야 한다. 둘 중 하나만 빼면
-   * 의뢰 정보 글이 아주 길 때(실측 500자 부근) 이 줄이 눌리면서 SWATCH 상자가
-   * 아래 분석 결과 표를 덮는다. 줄어들다 잘리는 것이 겹치는 것보다 낫다.
+   * 의뢰 정보 글이 아주 길 때 이 칸이 눌리면서 아래 분석 결과 표를 덮는다.
+   * 줄어들다 잘리는 것이 겹치는 것보다 낫다.
    */
-  .an-sheet-row { display: flex; gap: 4mm; min-height: 0; overflow: hidden; flex: 1 1 auto !important; }
-  .an-sheet-row > .an-block { display: flex; flex-direction: column; min-height: 0; overflow: hidden; flex: 1 1 0; }
-  .an-sheet-row > .an-block > .an-swatch { flex: 1 1 auto; height: auto; min-height: 0; }
-  .an-sheet-row > .an-block > .an-shots { display: flex; grid-template-columns: none; flex: 1 1 auto; min-height: 0; }
-  .an-sheet-row .an-shot { flex: 1 1 auto; height: auto; }
+  /*
+   * 참고 사진과 실물 SWATCH 가 점선 테두리 하나를 같이 쓴다(2026-10-21 박향근 안).
+   * 사진은 그 안 좌상단에 흘려 두고(float) 테두리를 주지 않는다.
+   * 사진 칸을 따로 가르지 않는 이유가 둘이다. 사진이 없는 의뢰가 있어 빈 상자가 남으면 어색하고,
+   * 세로로 가르면 사진 아래 70mm 넘는 공간이 죽는다. 흘려 두면 SWATCH 가 그 아래까지 쓴다.
+   * **가운데에는 글자도 선도 넣지 말 것.** 원단이 칸보다 크면 그대로 가려진다.
+   * 안내 문구는 오른쪽 아래 구석이다.
+   *
+   * 사진 폭은 `--an-photo-w` 하나로 정한다. 라벨의 왼쪽 칸 폭도 같은 값을 받아
+   * 라벨이 사진 위에 가운데로 선다. 둘을 따로 적으면 어긋난다.
+   * 높이는 4:3 이다. 화면의 의뢰 사진 칸(`AnalysisDetailDialog` 의 `aspect-[4/3]`)과 같은 비율이라
+   * 사진이 상자에 그대로 들어가고 위아래 빈 띠가 생기지 않는다.
+   */
+  .an-media { --an-photo-w: 60mm; display: flex; flex-direction: column; min-height: 0; overflow: hidden; flex: 1 1 auto !important; }
+  /* 라벨은 점선 안 맨 위에 선다. 구분선은 쓰지 않는다(2026-10-21). */
+  .an-media-tags { display: flex; margin-bottom: 1.5mm; font-size: 6.5pt; font-weight: 700; letter-spacing: 0.06em; color: var(--an-soft); }
+  .an-media-tags > span { flex: 1 1 auto; text-align: center; }
+  .an-media-tags > span:first-child:not(:only-child) { flex: none; width: var(--an-photo-w); }
+  .an-media-box { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; padding: 2mm; border: 0.1mm dashed var(--an-rule); border-radius: 1.5mm; }
+  .an-media-shot { float: left; width: var(--an-photo-w); aspect-ratio: 4 / 3; margin: 0 3mm 2mm 0; }
+  .an-media-shot img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .an-media-hint { position: absolute; right: 2.5mm; bottom: 1.8mm; font-size: 6.5pt; letter-spacing: 0.06em; color: var(--an-faint); }
 
   /* 머리말 */
-  .an-head { margin-bottom: 5mm; }
-  .an-head-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8mm; padding-bottom: 3mm; border-bottom: 0.7mm solid var(--an-accent); }
+  /* 머리말과 의뢰 정보 사이를 좁힌다(2026-10-21). 예전에는 머리말 5mm + 블록 4mm 로 9mm 가 떴다. */
+  .an-head { margin-bottom: 1.5mm; }
+  .an-head-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8mm; padding-bottom: 2mm; border-bottom: 0.7mm solid var(--an-accent); }
   .an-eyebrow { margin: 0; font-size: 7pt; font-weight: 700; letter-spacing: 0.26em; color: var(--an-accent); }
-  .an-head h1 { margin: 1.5mm 0 0; font-size: 19pt; font-weight: 700; letter-spacing: -0.015em; }
-  .an-sub { margin: 0.8mm 0 0; font-size: 8pt; font-weight: 600; letter-spacing: 0.14em; color: var(--an-soft); }
+  .an-head h1 { margin: 1mm 0 0; font-size: 18pt; font-weight: 700; letter-spacing: -0.015em; }
+  .an-sub { margin: 0.6mm 0 0; font-size: 7pt; font-weight: 600; letter-spacing: 0.14em; color: var(--an-soft); }
   .an-head-no { text-align: right; white-space: nowrap; }
-  .an-head-no strong { display: block; font-size: 14pt; font-weight: 700; letter-spacing: 0.04em; }
-  .an-head-no em { display: inline-block; margin-top: 1.5mm; padding: 0.6mm 2.4mm; border-radius: 6mm; background: #b45309; color: #fff; font-style: normal; font-size: 7.5pt; font-weight: 700; letter-spacing: 0.1em; }
+  .an-head-no strong { display: block; font-size: 13pt; font-weight: 700; letter-spacing: 0.04em; }
+  /* 큰 줄(strong)이 Source code, 작은 줄이 AN 번호다(2026-10-21). 순서를 되돌리지 말 것. */
+  .an-head-code { display: block; margin-top: 0.8mm; font-size: 10pt; font-weight: 600; letter-spacing: 0.02em; color: var(--an-soft); }
+  .an-head-no em { display: inline-block; margin-top: 1.2mm; padding: 0.5mm 2.2mm; border-radius: 6mm; background: #b45309; color: #fff; font-style: normal; font-size: 7pt; font-weight: 700; letter-spacing: 0.1em; }
 
   /* 머리말 아래 요약 띠 */
-  .an-meta { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 3mm; border: 0.2mm solid var(--an-rule); border-radius: 1.5mm; background: var(--an-tint); overflow: hidden; }
-  .an-meta > div { padding: 2mm 3mm; border-left: 0.2mm solid var(--an-rule); }
-  .an-meta > div:first-child { border-left: 0; }
-  .an-meta span { display: block; font-size: 6.8pt; font-weight: 700; letter-spacing: 0.1em; color: var(--an-soft); text-transform: uppercase; }
-  .an-meta b { display: block; margin-top: 0.8mm; font-size: 10pt; font-weight: 600; }
+  /*
+   * 머리말 요약은 격자가 아니라 한 줄 띠다(2026-10-21 박향근 지시).
+   * 예전에는 네 칸 격자에 라벨과 값을 두 줄로 쌓아 머리말이 두껍고 아래 표와 겹쳐 보였다.
+   * 테두리도 음영도 쓰지 않는다. 제목 아래 인디고 줄이 이 띠를 이미 묶어 준다.
+   * 네 항목을 25%씩 고르게 벌린다(2026-10-21). 아래 표의 22/28/22/28 에 맞추지 않는다.
+   * 격자선이 없어 맞춰도 보이지 않고, 고르게 벌리는 편이 띠로 읽힌다.
+   * 값은 줄바꿈을 막지 않는다. 이름이 길면 그 칸에서 접히게 두는 편이 넘쳐 겹치는 것보다 낫다.
+   */
+  .an-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5mm 4mm; margin-top: 2.5mm; }
+  .an-meta > div { display: flex; align-items: baseline; gap: 2mm; min-width: 0; }
+  .an-meta span { flex: none; font-size: 6pt; font-weight: 700; letter-spacing: 0.12em; color: var(--an-soft); text-transform: uppercase; white-space: nowrap; }
+  .an-meta b { min-width: 0; font-size: 8.5pt; font-weight: 600; word-break: break-word; }
 
   /* 구역 제목 */
-  .an-block { margin-top: 4mm; break-inside: avoid; }
-  .an-block > h2 { display: flex; align-items: center; gap: 2mm; margin: 0 0 2mm; padding: 1.6mm 3mm; border-radius: 1.5mm; background: var(--an-accent-soft); font-size: 9.5pt; font-weight: 700; color: var(--an-ink); }
-  .an-block > h2::before { content: ""; width: 1.2mm; height: 4mm; border-radius: 1mm; background: var(--an-accent); }
+  .an-block { margin-top: 2.5mm; break-inside: avoid; }
+  /* 구역 제목은 음영 없이 굵은 글자와 인디고 막대로만 선다(2026-10-21). */
+  .an-block > h2 { display: flex; align-items: center; gap: 2mm; margin: 0 0 1.5mm; padding: 1.2mm 0; font-size: 8.5pt; font-weight: 700; color: var(--an-ink); }
+  .an-block > h2::before { content: ""; width: 1.2mm; height: 3.2mm; border-radius: 1mm; background: var(--an-accent); }
 
-  /* 표: 가로선만 */
+  /*
+   * 표는 세로선까지 두른 정식 격자다(2026-10-21 박향근 지시).
+   * 예전에는 가로선만 썼다(R265·R282 를 지난 결과). 선이 0.1mm 가는 검정이라
+   * 격자를 둘러도 엑셀 복제처럼 답답해지지 않는다. 가늘기를 올리면 그때 답답해진다.
+   * 행 높이는 의뢰 정보 구역을 예전의 70% 수준으로 눌러 둔 값이다.
+   */
   .an-grid { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  .an-grid th, .an-grid td { border-bottom: 0.2mm solid var(--an-rule); padding: 1.2mm 3mm; vertical-align: top; word-break: break-word; }
-  .an-grid th { background: var(--an-tint); font-size: 8pt; font-weight: 700; color: var(--an-soft); text-align: left; }
-  .an-grid td { font-size: 10pt; font-weight: 500; }
-  .an-grid tbody tr:first-child th, .an-grid tbody tr:first-child td { border-top: 0.2mm solid var(--an-rule); }
-  .an-grid td + th { border-left: 0.2mm solid var(--an-rule); }
-  .an-grid td:empty::after { content: ""; display: block; min-height: 4.5mm; }
+  .an-grid th, .an-grid td { border: 0.1mm solid var(--an-rule); padding: 0.5mm 2.5mm; vertical-align: top; word-break: break-word; }
+  .an-grid th { background: var(--an-tint); font-size: 7.5pt; font-weight: 700; color: var(--an-soft); text-align: left; }
+  .an-grid td { font-size: 9pt; font-weight: 500; }
+  .an-grid td:empty::after { content: ""; display: block; min-height: 3.5mm; }
+
+  /* 의뢰 항목 알약. 한 줄에 흘려 쓰고 줄이 넘치면 자연스럽게 접힌다. */
+  .an-chips { display: block; margin: -0.3mm 0; }
+  .an-chips em { display: inline-block; margin: 0.3mm 1.2mm 0.3mm 0; padding: 0.3mm 2mm; border-radius: 4mm; background: var(--an-accent-soft); font-style: normal; font-weight: 600; }
+  /* 분석 결과 기입란은 손으로 적는 자리다. 글자만 줄이고 칸 높이는 건드리지 않는다. */
+  .an-grid-write th, .an-grid-write td { padding: 1.2mm 2.5mm; }
   .an-grid-write td { height: 7mm; background: #fff; }
 
   /* 실물 swatch 붙이는 자리 */
-  .an-swatch { display: flex; align-items: center; justify-content: center; height: 82mm; border: 0.5mm dashed var(--an-accent-line); border-radius: 2mm; background: #fff; }
-  .an-swatch span { font-size: 8pt; letter-spacing: 0.08em; color: var(--an-faint); }
 
   /* 수령·담당·반환 */
   .an-sign { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; margin-top: 2.5mm; }
-  .an-sign span { display: block; font-size: 7.5pt; font-weight: 700; color: var(--an-soft); }
-  .an-sign i { display: block; margin-top: 4.5mm; border-bottom: 0.2mm solid var(--an-rule); }
+  .an-sign span { display: block; font-size: 7pt; font-weight: 700; color: var(--an-soft); }
+  .an-sign i { display: block; margin-top: 4.5mm; border-bottom: 0.1mm solid var(--an-rule); }
 
-  /* 사진. 의뢰서는 한 장 안에 들어가야 해서 높이를 고정한다(R344). */
-  .an-shots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4mm; }
-  .an-shot { box-sizing: border-box; height: 42mm; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 0.2mm solid var(--an-rule); border-radius: 2mm; background: var(--an-tint); }
-  .an-shot img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  /* 리포트 사진. 의뢰서의 참고 사진(.an-media-shot)과 다른 칸이다. 섞지 말 것. */
   .an-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
   .an-photos div { break-inside: avoid; }
-  .an-photos img { display: block; width: 100%; height: 40mm; object-fit: contain; border: 0.2mm solid var(--an-rule); border-radius: 2mm; background: var(--an-tint); }
-  .an-photos span { display: block; margin-top: 1mm; font-size: 7.5pt; color: var(--an-soft); }
-  .an-empty { margin: 0; padding: 6mm 3mm; border: 0.3mm dashed var(--an-rule); border-radius: 2mm; font-size: 8.5pt; text-align: center; color: var(--an-faint); }
+  .an-photos img { display: block; width: 100%; height: 40mm; object-fit: contain; border: 0.1mm solid var(--an-rule); border-radius: 2mm; background: #fff; }
+  .an-photos span { display: block; margin-top: 1mm; font-size: 7pt; color: var(--an-soft); }
+  .an-empty { margin: 0; padding: 6mm 3mm; border: 0.1mm dashed var(--an-rule); border-radius: 2mm; font-size: 7.5pt; text-align: center; color: var(--an-faint); }
 
-  .an-foot { display: flex; justify-content: space-between; margin-top: 5mm; padding-top: 2mm; border-top: 0.2mm solid var(--an-rule); font-size: 7.5pt; color: var(--an-faint); }
+  .an-foot { display: flex; justify-content: space-between; margin-top: 3mm; padding-top: 1.5mm; border-top: 0.1mm solid var(--an-rule); font-size: 6pt; color: var(--an-faint); }
 }
 
 /* RDDA 원단 성과 행 강조(R211). 등급은 src/data/fabric-performance.ts 에서 정한다. */

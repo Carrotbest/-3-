@@ -31,8 +31,13 @@ function Head({ item, kind, sub, meta }: { item: AnalysisRequest; kind: string; 
         <h1>{kind}</h1>
         <p className="an-sub">{sub}</p>
       </div>
+      {/*
+        Source code 가 AN 번호보다 실무에서 자주 찾는 값이라 큰 자리를 준다(2026-10-21 박향근 지시).
+        Source code 가 비어 있으면 AN 번호가 다시 큰 자리로 올라오고 작은 줄은 만들지 않는다.
+      */}
       <div className="an-head-no">
-        <strong>{item.anNo}</strong>
+        <strong>{item.sourceCode || item.anNo}</strong>
+        {item.sourceCode ? <span className="an-head-code">{item.anNo}</span> : null}
         {item.requestType === "Urgent" ? <em>URGENT</em> : null}
       </div>
     </div>
@@ -44,16 +49,55 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   return <section className="an-block"><h2>{title}</h2>{children}</section>
 }
 
-/** 라벨·값 표. 짧은 항목은 2쌍씩, 긴 글은 전폭 한 줄이다. */
+/**
+ * 의뢰 항목을 단어별 알약으로 끊어 보인다(2026-10-21 박향근 지시).
+ * 쉼표로 적힌 값을 그대로 끊는다. 쉼표가 없으면 알약 하나다. 빈 값은 평범한 글자로 둔다.
+ */
+function ItemChips({ value }: { value: string }) {
+  const items = value.split(",").map((part) => part.trim()).filter(Boolean)
+  if (!items.length || (items.length === 1 && items[0] === "-")) return <>{value}</>
+  return <span className="an-chips">{items.map((item, index) => <em key={`${item}-${index}`}>{item}</em>)}</span>
+}
+
+/** 긴 글 줄 중 의뢰 항목만 알약으로 그린다. */
+const WIDE_CHIP_LABELS = new Set(["Request item"])
+
+/**
+ * 라벨·값 표. 짧은 항목은 2쌍씩, 긴 글은 전폭 한 줄이다.
+ *
+ * 열을 다섯으로 잡은 이유는 Fabric content 한 줄 때문이다(2026-10-21).
+ * 혼용율은 길고 중량은 세 자리라, 28%씩 반씩 나눠 주면 혼용율만 두 줄로 접힌다.
+ * 그 줄만 값 칸을 8:2로 쓰려고 열을 쪼개 두고 colspan 으로 다시 붙인다.
+ * `table-layout: fixed` 라 colgroup 폭이 곧 실제 폭이다. 합이 100%가 아니면 어긋난다.
+ */
+const WIDE_PAIR = ["Fabric content", "Weight (gsm)"]
+
 function Grid({ pairs, wide }: { pairs: [string, string][]; wide?: [string, string][] }) {
   return <table className="an-grid">
-    <colgroup><col style={{ width: "22%" }} /><col style={{ width: "28%" }} /><col style={{ width: "22%" }} /><col style={{ width: "28%" }} /></colgroup>
+    <colgroup>
+      <col style={{ width: "22%" }} /><col style={{ width: "28%" }} />
+      <col style={{ width: "22%" }} /><col style={{ width: "15%" }} /><col style={{ width: "13%" }} />
+    </colgroup>
     <tbody>
-      {chunkPairs(pairs).map((row, index) => <tr key={index}>
-        {row.map(([label, value]) => <Fragment key={label}><th>{label}</th><td>{value}</td></Fragment>)}
-        {row.length === 1 ? <><th /><td /></> : null}
+      {chunkPairs(pairs).map((row, index) => {
+        // 혼용율과 중량 줄만 8:2로 쓴다. 50% 대 13% 다.
+        if (row.length === 2 && row[0][0] === WIDE_PAIR[0] && row[1][0] === WIDE_PAIR[1]) {
+          return <tr key={index}>
+            <th>{row[0][0]}</th><td colSpan={2}>{row[0][1]}</td>
+            <th>{row[1][0]}</th><td>{row[1][1]}</td>
+          </tr>
+        }
+        return <tr key={index}>
+          {row.map(([label, value], cell) => <Fragment key={label}>
+            <th>{label}</th><td colSpan={cell === 1 ? 2 : undefined}>{value}</td>
+          </Fragment>)}
+          {row.length === 1 ? <><th /><td colSpan={2} /></> : null}
+        </tr>
+      })}
+      {(wide ?? []).map(([label, value]) => <tr key={label}>
+        <th>{label}</th>
+        <td colSpan={4}>{WIDE_CHIP_LABELS.has(label) ? <ItemChips value={value} /> : value}</td>
       </tr>)}
-      {(wide ?? []).map(([label, value]) => <tr key={label}><th>{label}</th><td colSpan={3}>{value}</td></tr>)}
     </tbody>
   </table>
 }
@@ -70,22 +114,27 @@ function RequestPage({ item, urls, stamp, onImageSettled }: PageProps) {
     ["Requester", item.requester || "-"],
     ["Department", item.department || "-"],
   ]
-  // 1건이 반드시 한 장이다(R344). 참고 사진과 SWATCH 가 한 줄에 왼쪽·오른쪽으로 서서
-  // 머리말·의뢰 정보·분석 결과·꼬리말을 뺀 남은 높이를 둘이 나눠 먹는다.
-  // 사진이 없으면 SWATCH 가 그 폭까지 혼자 쓴다. 순서는 2026-10-21 박향근 지시다.
+  // 1건이 반드시 한 장이다(R344). 참고 사진과 실물 SWATCH 가 한 칸 안에서 1:4 로 갈라져
+  // 머리말·의뢰 정보·분석 결과·꼬리말을 뺀 남은 높이를 전부 먹는다.
+  // 사진을 왼쪽에 둔 이유는 2026-10-21 박향근 지시이기도 하고, 원단이 칸보다 클 때
+  // 오른쪽 바깥으로 넘치게 두는 편이 사진과 다른 칸을 안 덮기 때문이다.
   return <section className="an-print-page an-sheet-fixed">
     <Head item={item} kind="분석 의뢰서" sub="FABRIC ANALYSIS REQUEST" meta={meta} />
     <Block title="의뢰 정보 (Request)">
       <Grid pairs={analysisHeadFields(item)} wide={analysisNoteLines(item)} />
     </Block>
-    <div className="an-sheet-row">
-      {photo ? <Block title="참고 사진 (Reference)">
-        <div className="an-shots"><div className="an-shot"><img src={photo} alt="" onLoad={onImageSettled} onError={onImageSettled} /></div></div>
-      </Block> : null}
-      <Block title="실물 SWATCH (Original Fabric Swatch)">
-        <div className="an-swatch"><span>원단을 이 칸에 붙여 주세요</span></div>
-      </Block>
-    </div>
+    <section className="an-block an-media">
+      <h2>참고 사진 &amp; 실물 SWATCH</h2>
+      <div className="an-media-box">
+        {/* 라벨은 점선 안에 둔다. 사진이 없으면 그쪽 라벨을 빼고 SWATCH 가 혼자 쓴다. */}
+        <div className="an-media-tags">
+          {photo ? <span>참고 사진 (Reference)</span> : null}
+          <span>실물 SWATCH (Original Fabric Swatch)</span>
+        </div>
+        {photo ? <div className="an-media-shot"><img src={photo} alt="" onLoad={onImageSettled} onError={onImageSettled} /></div> : null}
+        <span className="an-media-hint">원단을 이 칸에 붙여 주세요</span>
+      </div>
+    </section>
     <Block title="분석 결과 (R&D 기입)">
       <table className="an-grid an-grid-write">
         <colgroup><col style={{ width: "22%" }} /><col style={{ width: "78%" }} /></colgroup>
