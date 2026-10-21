@@ -572,6 +572,9 @@ export function TS() {
       attachment,
       state: form.state,
       source: "web",
+      // 신규 뱃지 판정용(R341). 접수일은 사람이 과거로 고를 수 있어 쓸 수 없다.
+      // 엑셀 들여오기(mergeTsRecords)에는 찍지 않는다. 찍으면 옛 행 전부가 신규가 된다.
+      createdAt: new Date().toISOString(),
     }
     saveTsRecords([newRow, ...latest])
     setForm(initialForm())

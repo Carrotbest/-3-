@@ -3,8 +3,10 @@ import { LogOut, Menu, UserCog } from "lucide-react"
 import { useLocation } from "react-router-dom"
 
 import { AccountSettingsDialog, COMPANY_EMAIL_DOMAIN } from "@/components/auth/AccountSettingsDialog"
+import { NavBadge } from "@/components/layout/NavBadge"
 import { PresenceStack } from "@/components/layout/PresenceStack"
 import { Button } from "@/components/ui/button"
+import { navBadgeKeyForPath, useNavBadges } from "@/data/nav-badges"
 import { routeDefinitions } from "@/routes/route-config"
 import { signOutUser, useAuthStore, useScreenAccess } from "@/data/auth"
 
@@ -19,6 +21,11 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
   const approval = useAuthStore((state) => state.approval)
   const [accountOpen, setAccountOpen] = useState(false)
   const screenAccess = useScreenAccess(pathname)
+  // 이 화면은 들어온 지 3초 뒤 읽음 처리된다(App.tsx). 그래서 이 표시는 그 3초만 보인다.
+  // 무엇 때문에 들어왔는지 확인할 짬을 주는 것이 목적이다.
+  const badges = useNavBadges()
+  const currentBadgeKey = navBadgeKeyForPath(pathname)
+  const currentBadge = currentBadgeKey ? badges[currentBadgeKey] : undefined
   // 소유자는 편집. 팀원은 지금 화면의 권한을 보인다(R217). 등록되지 않은 경로는 승인 여부로만 본다.
   const canWrite = isOwner || (approval === "approved" && screenAccess !== "read")
   // 사내 보안 공지(2026-09-14): 외부 서비스는 개인 메일 사용 권장. 소유자 외 회사 메일 계정에 알림 점을 띄운다.
@@ -46,6 +53,9 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
         <h1 className="shrink-0 whitespace-nowrap text-2xl font-semibold tracking-tight text-[var(--foreground)]">
           {currentRoute?.title ?? ""}
         </h1>
+        {currentBadge ? (
+          <NavBadge kind={currentBadge.kind} count={currentBadge.count} tone="var(--primary)" />
+        ) : null}
         {currentRoute?.subtitle ? (
           <>
             <span aria-hidden="true" className="h-6 w-px shrink-0 bg-[var(--border)]" />

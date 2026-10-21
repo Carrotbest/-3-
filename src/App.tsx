@@ -17,6 +17,7 @@ import { loadAllCache, saveCacheLocal } from "@/data/cache"
 import { startStateSync, stopStateSync } from "@/data/firestore-sync"
 import { loadEmbeddedAppData, markEmbeddedAppDataApplied } from "@/data/embedded-workbooks"
 import { loadLedgerArchive } from "@/data/ledger-archive"
+import { initNavSeen, markNavSeen } from "@/data/nav-badges"
 import { canAccessScreenPath } from "@/data/screen-permissions"
 import { cn } from "@/lib/utils"
 import { Development } from "@/routes/Development"
@@ -91,6 +92,17 @@ function AppLayout() {
     window.history.scrollRestoration = "manual"
     return () => { window.history.scrollRestoration = previous }
   }, [])
+
+  // 신규 뱃지(R341). 계정이 바뀌면 그 사람의 읽음 기준선을 올린다.
+  const navSeenUid = useAuthStore((state) => state.user?.uid ?? null)
+  useEffect(() => { initNavSeen(navSeenUid) }, [navSeenUid])
+
+  // 들어온 뒤 3초 머물러야 읽음으로 본다. 그 전에 떠나면 뱃지를 지우지 않는다.
+  // 즉시 지우면 숫자를 보기도 전에 사라져 무엇이 새로 왔는지 확인할 수 없다.
+  useEffect(() => {
+    const timer = window.setTimeout(() => markNavSeen(pathname), 3000)
+    return () => window.clearTimeout(timer)
+  }, [pathname])
 
   // 로컬 데이터(IndexedDB·seed·localStorage 이관)를 모두 반영한 뒤에야 실시간 동기화를 시작한다.
   // 순서가 뒤바뀌면 중앙 스냅샷이 먼저 반영됐다가 로컬 값에 다시 덮여 화면이 튄다.

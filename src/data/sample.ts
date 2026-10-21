@@ -273,6 +273,8 @@ export interface TsRecord {
   attachment?: string
   state: TsState
   source?: "excel" | "web"
+  /** 웹 등록 시각(ISO). 신규 뱃지 판정에만 쓴다. 엑셀로 들여온 옛 행에는 없다(R341). */
+  createdAt?: string
 }
 
 export function sampleTs(): TsRecord[] {

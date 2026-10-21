@@ -3,9 +3,11 @@ import { ArrowRight, ChevronDown } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { NavBadge } from "@/components/layout/NavBadge"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/data/auth"
+import { navBadgeKeyForPath, useNavBadges, type NavBadge as NavBadgeValue } from "@/data/nav-badges"
 import { canAccessScreenPath } from "@/data/screen-permissions"
 import { cn } from "@/lib/utils"
 import { navigationGroups, type NavigationItem } from "@/routes/route-config"
@@ -22,9 +24,10 @@ interface SidebarLinkProps {
   collapsed: boolean
   onNavigate: () => void
   active?: boolean
+  badge?: NavBadgeValue
 }
 
-function SidebarLink({ item, collapsed, onNavigate, active = false }: SidebarLinkProps) {
+function SidebarLink({ item, collapsed, onNavigate, active = false, badge }: SidebarLinkProps) {
   const link = (
     <NavLink
       to={item.path}
@@ -33,8 +36,12 @@ function SidebarLink({ item, collapsed, onNavigate, active = false }: SidebarLin
       data-active={active ? "true" : undefined}
       className="nav-glass group flex h-10 items-center gap-2.5 rounded-[12px] pl-2 pr-3 text-[11.5px] text-[var(--sidebar-foreground)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)]"
     >
-      <span className="nav-glass-icon flex size-7 shrink-0 items-center justify-center rounded-[8px]">
+      <span className="nav-glass-icon relative flex size-7 shrink-0 items-center justify-center rounded-[8px]">
         <item.icon aria-hidden="true" className="size-4" />
+        {/* 접으면 라벨이 사라져 알약이 보이지 않는다. 아이콘 어깨에 점만 남긴다. */}
+        {collapsed && badge ? (
+          <NavBadge kind={badge.kind} count={badge.count} dot className="absolute -right-0.5 -top-0.5" />
+        ) : null}
       </span>
       <span
         className={cn(
@@ -44,6 +51,8 @@ function SidebarLink({ item, collapsed, onNavigate, active = false }: SidebarLin
       >
         {item.label}
       </span>
+      {/* 제목 바로 옆에 붙인다. 오른쪽 끝으로 밀면 이름과 떨어져 무엇의 숫자인지 흐려진다. */}
+      {!collapsed && badge ? <NavBadge kind={badge.kind} count={badge.count} className="-ml-1" /> : null}
       {!collapsed ? <ArrowRight aria-hidden="true" className="nav-glass-arrow ml-auto size-3.5 shrink-0" /> : null}
     </NavLink>
   )
@@ -64,6 +73,12 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
   const screenPermissions = useAuthStore((state) => state.screenPermissions)
   const [openMap, setOpenMap] = useState<Record<string, boolean>>({})
   const [revealed, setRevealed] = useState(false)
+  const badges = useNavBadges()
+  // 하위 메뉴(children)에는 달지 않는다. 상위 항목만 센다.
+  const badgeOf = (path: string): NavBadgeValue | undefined => {
+    const key = navBadgeKeyForPath(path)
+    return key ? badges[key] : undefined
+  }
   const visibleNavigationGroups = navigationGroups
     .map((group) => ({
       ...group,
@@ -151,7 +166,7 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   if (!item.children) {
-                    return <SidebarLink key={item.path} item={item} collapsed={showCollapsed} onNavigate={handleNavigate} />
+                    return <SidebarLink key={item.path} item={item} collapsed={showCollapsed} onNavigate={handleNavigate} badge={badgeOf(item.path)} />
                   }
 
                   const isParentActive = location.pathname === item.path || item.children.some((child) => location.pathname === child.path)
@@ -162,7 +177,7 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
                     <Fragment key={item.path}>
                       <div className="flex items-center gap-1">
                         <div className="min-w-0 flex-1">
-                          <SidebarLink item={item} collapsed={showCollapsed} onNavigate={handleNavigate} active={isParentActive} />
+                          <SidebarLink item={item} collapsed={showCollapsed} onNavigate={handleNavigate} active={isParentActive} badge={badgeOf(item.path)} />
                         </div>
                         {!showCollapsed ? (
                           <button
