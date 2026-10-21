@@ -12,11 +12,11 @@ type ReferenceItemsState = {
   error: string
 }
 
-function useReferenceSubscription(collectionName: string, count?: number, ownerOnly = false): ReferenceItemsState {
+function useReferenceSubscription(collectionName: string, count?: number, ownerOnly = false, allowed = true): ReferenceItemsState {
   const approval = useAuthStore((state) => state.approval)
   const isOwner = useAuthStore((state) => state.isOwner)
   const [state, setState] = useState<ReferenceItemsState>({ items: [], loading: false, error: "" })
-  const approved = ownerOnly ? isOwner : isOwner || approval === "approved"
+  const approved = allowed && (ownerOnly ? isOwner : isOwner || approval === "approved")
 
   useEffect(() => {
     if (!approved) {
@@ -50,8 +50,12 @@ export function useRecentReferences(count: number): ReferenceItemsState {
   return useReferenceSubscription("referenceItems", count)
 }
 
-export function useBuyerProtocols(): ReferenceItemsState {
-  return useReferenceSubscription("buyerProtocols", undefined, true)
+/**
+ * 바이어 원문 매뉴얼. 소유자 전용이 아니라 `/protocol` 화면 권한을 따른다(R342).
+ * 권한이 없으면 구독 자체를 하지 않으므로 규칙에 걸려 오류 문구가 뜨는 일이 없다.
+ */
+export function useBuyerProtocols(allowed: boolean): ReferenceItemsState {
+  return useReferenceSubscription("buyerProtocols", undefined, false, allowed)
 }
 
 export function referenceToMaterial(item: ReferenceItem): MaterialItem {

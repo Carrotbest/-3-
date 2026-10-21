@@ -12,6 +12,8 @@ export const SCREEN_PERMISSION_OPTIONS = [
   { key: "study", label: "TECHNICAL REFERENCES", paths: ["/study"] },
   { key: "rdda", label: "RDDA REPORT", paths: ["/rdda"] },
   { key: "fabricAnalysis", label: "FABRIC ANALYSIS", paths: ["/fabric-analysis"] },
+  // 바이어 기밀 문서다. 기본은 없음이고 소유자가 사람별로 읽기를 준다(R342).
+  { key: "protocol", label: "BUYER PROTOCOLS", paths: ["/protocol"] },
   { key: "costSheet", label: "COST SHEET", paths: ["/cost"] },
   { key: "fabricTrend", label: "FABRIC TREND", paths: ["/trend/fabric", "/trend/macro"] },
   { key: "portfolio", label: "PORTFOLIO", paths: ["/trend/portfolio"] },
@@ -69,11 +71,25 @@ export const ACCESS_LABELS: Record<ScreenAccess, string> = { none: "없음", rea
 /** 권한 표에 보이는 묶음. SETTING은 소유자 전용이라 표에 넣지 않는다. excelBackup은 기능이라 허용/차단 두 단계다. */
 export const ACCESS_GROUPS: { label: string; keys: ScreenPermissionKey[] }[] = [
   { label: "업무", keys: ["home", "fabricRequest", "development", "ddMaster", "warehouse", "warehouseFabric1", "calendar"] },
-  { label: "분석·자료", keys: ["rdda", "fabricAnalysis", "costSheet", "fabricTrend", "portfolio", "processInnovation", "ts", "study"] },
+  { label: "분석·자료", keys: ["rdda", "fabricAnalysis", "costSheet", "fabricTrend", "portfolio", "processInnovation", "ts", "study", "protocol"] },
   { label: "기능", keys: ["excelBackup", "warehouseOutbound"] },
 ]
 
 export const FEATURE_KEYS: readonly ScreenPermissionKey[] = ["excelBackup", "warehouseOutbound"]
+
+/**
+ * 팀원에게 편집을 주지 않는 화면(R342). 권한 표에 없음·읽기 두 단계만 띄운다.
+ * 바이어 기준표 개정은 소유자만 한다. Firestore 규칙도 쓰기를 소유자로 막아 두었으므로
+ * 여기서 편집을 열면 화면에서만 열리고 저장은 permission denied가 난다.
+ */
+export const READ_ONLY_KEYS: readonly ScreenPermissionKey[] = ["protocol"]
+
+/**
+ * 저장된 값이 없을 때 fallback 대신 "없음"으로 시작하는 화면(R342).
+ * 이것이 없으면 normalizeScreenAccess의 fallback("edit")이 먹어서
+ * 키를 새로 더하는 순간 기존 승인 사용자 전원이 바이어 기밀 문서를 보게 된다.
+ */
+export const DEFAULT_NONE_KEYS: readonly ScreenPermissionKey[] = ["protocol"]
 
 export function createScreenAccess(level: ScreenAccess): ScreenAccessMap {
   return Object.fromEntries(SCREEN_PERMISSION_OPTIONS.map((option) => [option.key, option.key === "setting" ? "none" : level])) as ScreenAccessMap
@@ -93,6 +109,8 @@ export function normalizeScreenAccess(access: unknown, legacy: unknown, fallback
     if (isAccess(stored)) return [option.key, stored]
     const flag = old?.[option.key]
     if (typeof flag === "boolean") return [option.key, flag ? "edit" : "none"]
+    // 기밀 화면은 아직 아무도 정해 주지 않았다는 뜻이므로 열지 않는다.
+    if (DEFAULT_NONE_KEYS.includes(option.key)) return [option.key, "none"]
     return [option.key, fallback]
   })) as ScreenAccessMap
 }

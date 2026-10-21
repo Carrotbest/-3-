@@ -77,14 +77,18 @@ service cloud.firestore {
       allow create, update, delete: if isOwner();
     }
 
-    // 바이어 시험 프로토콜은 바이어 기밀 문서라 소유자만 읽는다. 직급 권한이 생기면 여기서 연다.
+    // 바이어 시험 프로토콜은 바이어 기밀 문서다. 2026-10-21에 읽기만 승인 사용자로 열었다(R342).
+    // 누가 보는지는 SETTING 권한 표의 BUYER PROTOCOLS 열이 정하고, 화면이 구독 자체를 막는다.
+    // 규칙은 그 뒤를 받치는 마지막 방어선이라 쓰기는 소유자로 남긴다. 기준표 개정은 소유자만 한다.
     match /buyerProtocols/{docId} {
-      allow read, write: if isOwner();
+      allow read: if isApproved();
+      allow write: if isOwner();
     }
 
     // 바이어 시험 기준 매트릭스(취합본 엑셀 개정본). buyerProtocols와 같은 권한으로 묶는다.
     match /protocolMatrix/{docId} {
-      allow read, write: if isOwner();
+      allow read: if isApproved();
+      allow write: if isOwner();
     }
 
     // 원문 매뉴얼에서 뽑은 변경 후보(검토 대기). 승인되면 protocolMatrix 새 버전이 된다.

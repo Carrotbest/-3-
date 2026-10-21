@@ -2,6 +2,7 @@ import { useMemo, useState, type CSSProperties } from "react"
 import { useSearchParams } from "react-router-dom"
 
 import { GROUP_FIGURES } from "@/components/protocol/TechFigures"
+import { useScreenAccess } from "@/data/auth"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { displaySummaryOf, titleOf, type ReferenceItem } from "@/data/reference-schema"
 import { useBuyerProtocols } from "@/data/references"
@@ -146,9 +147,9 @@ function SectionLabel({ label, value, warning = false }: { label: string; value:
   </div>
 }
 
-function TabNav({ active, onSelect, badges }: { active: TabId; onSelect: (tab: TabId) => void; badges?: Partial<Record<TabId, number>> }) {
-  return <nav role="tablist" aria-label="바이어 시험 기준 탭" className="grid grid-cols-2 overflow-hidden rounded-[6px] border border-[var(--border)] sm:grid-cols-5">
-    {TAB_ITEMS.map((tab, index) => {
+function TabNav({ active, onSelect, badges, tabs }: { active: TabId; onSelect: (tab: TabId) => void; badges?: Partial<Record<TabId, number>>; tabs: typeof TAB_ITEMS }) {
+  return <nav role="tablist" aria-label="바이어 시험 기준 탭" className={`grid grid-cols-2 overflow-hidden rounded-[6px] border border-[var(--border)] ${tabs.length === 5 ? "sm:grid-cols-5" : "sm:grid-cols-4"}`}>
+    {tabs.map((tab, index) => {
       const selected = active === tab.id
       const badge = badges?.[tab.id] ?? 0
       return <button key={tab.id} type="button" role="tab" aria-selected={selected} onClick={() => onSelect(tab.id)} className={`relative flex h-12 items-center justify-center gap-2 px-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--ring)] ${index % 2 === 1 ? "border-l border-[var(--border)]" : ""} ${index > 0 ? "sm:border-l sm:border-[var(--border)]" : ""} ${index >= 2 ? "border-t border-[var(--border)] sm:border-t-0" : ""} ${selected ? "bg-[var(--card)] text-[var(--foreground)]" : "bg-[color-mix(in_oklab,var(--muted)_55%,var(--card))] text-[var(--muted-foreground)] hover:bg-[var(--card)] hover:text-[var(--foreground)]"}`}>
@@ -593,12 +594,18 @@ function ManualsTab({ items, buyerName, onOpen }: { items: ReferenceItem[]; buye
 export function BuyerProtocols() {
   const [searchParams, setSearchParams] = useSearchParams()
   const rawTab = searchParams.get("tab")
-  const active: TabId = rawTab === "buyer" || rawTab === "revisions" || rawTab === "manuals" || rawTab === "review" ? rawTab : "matrix"
+  // 검토(REVIEW)는 기준표를 개정하는 소유자 작업이다. 읽기 권한만 있는 팀원에게는 탭 자체를 주지 않는다(R342).
+  const protocolAccess = useScreenAccess("/protocol")
+  const canEdit = protocolAccess === "edit"
+  const canView = canEdit || protocolAccess === "read"
+  const tabs = canEdit ? TAB_ITEMS : TAB_ITEMS.filter((tab) => tab.id !== "review")
+  const requested = rawTab === "buyer" || rawTab === "revisions" || rawTab === "manuals" || rawTab === "review" ? rawTab : "matrix"
+  const active: TabId = tabs.some((tab) => tab.id === requested) ? requested : "matrix"
   const [query, setQuery] = useState("")
   const [selectedItem, setSelectedItem] = useState<ReferenceItem | null>(null)
   const { revisions, latest, master, loading, error } = useProtocolMatrix()
   const reviews = useProtocolReviews()
-  const manuals = useBuyerProtocols()
+  const manuals = useBuyerProtocols(canView)
   const manualItems = manuals.items.filter((item) => protocolBuyer(item) !== BUYER_ALL)
   const pendingRevisions = revisions.filter((revision) => revision.status === "pending")
   const pendingDiffs = pendingRevisions.flatMap((revision) => (revision.diffs ?? []).map((diff) => ({ ...diff, revDate: revision.revDate })))
@@ -634,7 +641,7 @@ export function BuyerProtocols() {
 
   return <section className="-mt-1 min-w-0 space-y-5 pb-4">
     <HeaderBlock master={master} pendingCount={pendingRevisions.length} />
-    <TabNav active={active} onSelect={selectTab} badges={{ review: reviewPending }} />
+    <TabNav active={active} onSelect={selectTab} badges={{ review: reviewPending }} tabs={tabs} />
     <div aria-live="polite" className="min-h-[70vh]">
       {active === "matrix" ? <MatrixTab master={master} pendingDiffs={pendingDiffs} query={query} onQuery={setQuery} /> : null}
       {active === "buyer" ? <BuyerTab master={master} manuals={manualItems} pendingDiffs={pendingDiffs} selectedBuyerId={buyerParam} onSelectBuyer={selectBuyer} onManuals={openManuals} /> : null}

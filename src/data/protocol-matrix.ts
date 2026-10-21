@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { collection, onSnapshot } from "firebase/firestore"
 
-import { useAuthStore } from "./auth"
+import { useScreenAccess } from "./auth"
 import { db } from "./firebase"
 
 /**
@@ -118,11 +118,13 @@ export function useProtocolMatrix(): State & {
   selectVersion: (version: string | null) => void
 } {
   const [pref, setPref] = useState(readVersionPref)
-  const isOwner = useAuthStore((state) => state.isOwner)
+  // 소유자 전용이 아니라 화면 권한으로 본다(R342). 읽기만 있어도 기준표는 보인다.
+  const access = useScreenAccess("/protocol")
+  const canView = access === "read" || access === "edit"
   const [state, setState] = useState<State>({ revisions: [], loading: false, error: "" })
 
   useEffect(() => {
-    if (!isOwner) {
+    if (!canView) {
       setState({ revisions: [], loading: false, error: "" })
       return
     }
@@ -133,7 +135,7 @@ export function useProtocolMatrix(): State & {
         .sort((a, b) => b.revDate.localeCompare(a.revDate) || compareVersion(b.version, a.version) || a.id.localeCompare(b.id))
       setState({ revisions, loading: false, error: "" })
     }, () => setState({ revisions: [], loading: false, error: "기준표를 불러오지 못했습니다." }))
-  }, [isOwner])
+  }, [canView])
 
   const versions = state.revisions.filter((revision) => revision.kind === "master").sort((a, b) => compareVersion(b.version, a.version))
   const latest = versions[0] ?? null

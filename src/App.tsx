@@ -183,7 +183,8 @@ function AppLayout() {
             <Route path="/rdda" element={<Rdda />} />
             <Route path="/ts" element={<TS />} />
             <Route path="/study" element={<TechnicalReferences />} />
-            <Route path="/protocol" element={isOwnerRaw ? <BuyerProtocols /> : <ScreenAccessDenied />} />
+            {/* 화면 권한으로 연다(R342). 바깥 canViewCurrentPath가 이미 막아 준다. */}
+            <Route path="/protocol" element={<BuyerProtocols />} />
             <Route path="/fabric-analysis" element={<FabricAnalysis />} />
             <Route path="/cost" element={<CostSheets />} />
             <Route path="/fabric/:key" element={<FabricDetail />} />

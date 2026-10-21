@@ -19,6 +19,7 @@ import {
   ACCESS_GROUPS,
   ACCESS_LABELS,
   FEATURE_KEYS,
+  READ_ONLY_KEYS,
   SCREEN_PERMISSION_OPTIONS,
   type ScreenAccess,
   type ScreenAccessMap,
@@ -52,17 +53,25 @@ const HEAD_LABEL_H = 46
 const NO_DEPARTMENT = "__none__"
 
 const isFeature = (key: ScreenPermissionKey) => FEATURE_KEYS.includes(key)
-const levelsFor = (key: ScreenPermissionKey): ScreenAccess[] => isFeature(key) ? ["none", "edit"] : ["none", "read", "edit"]
+/** 팀원에게 편집을 못 주는 화면(R342). 규칙이 쓰기를 소유자로 막아 두어 화면만 열면 저장이 거부된다. */
+const isReadOnly = (key: ScreenPermissionKey) => READ_ONLY_KEYS.includes(key)
+const levelsFor = (key: ScreenPermissionKey): ScreenAccess[] =>
+  isFeature(key) ? ["none", "edit"] : isReadOnly(key) ? ["none", "read"] : ["none", "read", "edit"]
 /** 셀 글자. HOME 은 블러·공개, 기능 열은 차단·허용이다. */
 function levelText(key: ScreenPermissionKey, level: ScreenAccess): string {
   if (isFeature(key)) return level === "none" ? "차단" : "허용"
   if (key === "home") return ({ none: "없음", read: "블러", edit: "공개" } as const)[level]
   return ACCESS_LABELS[level]
 }
-/** 전 화면 일괄에서 기능 열은 읽기가 없다. 읽기를 고르면 차단으로 둔다. */
+/** 전 화면 일괄에서 기능 열은 읽기가 없다. 읽기를 고르면 차단으로 둔다. 읽기 전용 화면은 편집을 읽기로 낮춘다. */
+const bulkLevel = (key: ScreenPermissionKey, level: ScreenAccess): ScreenAccess => {
+  if (isFeature(key)) return level === "read" ? "none" : level
+  if (isReadOnly(key)) return level === "edit" ? "read" : level
+  return level
+}
 const bulkAccess = (access: ScreenAccessMap, level: ScreenAccess): ScreenAccessMap => ({
   ...access,
-  ...Object.fromEntries(ALL_COLUMN_KEYS.map((key) => [key, isFeature(key) && level === "read" ? "none" : level])) as Partial<ScreenAccessMap>,
+  ...Object.fromEntries(ALL_COLUMN_KEYS.map((key) => [key, bulkLevel(key, level)])) as Partial<ScreenAccessMap>,
   setting: "none",
 })
 
