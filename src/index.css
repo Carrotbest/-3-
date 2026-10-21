@@ -552,16 +552,48 @@ input.dd-date::-webkit-calendar-picker-indicator {
 .an-print-deck { display: none; }
 
 @media print {
+  /*
+   * 여러 장을 한 번에 뽑으려면 인쇄 뿌리가 **반드시 일반 흐름에 있어야 한다**(R343).
+   * 예전에는 `position: fixed; inset: 0` 이었다. 고정 요소는 쪽 나눔을 타지 못하고
+   * 모든 장에 같은 자리로 겹쳐 찍힌다. 56건을 고르면 56장이 한 자리에 포개지고,
+   * 장 수는 visibility 로 숨긴 앱 본문의 높이가 정해서 3장만 나왔다.
+   * 그래서 뿌리를 body 바로 밑으로 보내고(createPortal) 형제들을 display:none 으로 치운다.
+   * visibility:hidden 은 자리를 그대로 차지해서 빈 장을 만든다. 다시 fixed 로 되돌리지 말 것.
+   */
+  body.an-printing > *:not(.an-print-root) { display: none !important; }
   .an-print-root, .an-print-root * { visibility: visible !important; }
-  .an-print-root { position: fixed !important; inset: 0 !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; translate: none !important; transform: none !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
+  .an-print-root { position: static !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; translate: none !important; transform: none !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
   .an-print-deck { display: block !important; background: #fff; color: #0f172a; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .an-print-page {
     --an-ink: #0f172a; --an-soft: #475569; --an-faint: #94a3b8;
     --an-rule: #e2e8f0; --an-accent: #4f46e5; --an-accent-soft: #eef2ff; --an-accent-line: #c7d2fe; --an-tint: #f8fafc;
     box-sizing: border-box; width: 186mm; font-size: 9.5pt; line-height: 1.4; color: var(--an-ink);
-    page-break-after: always; break-after: page;
+    page-break-after: always; break-after: page; break-inside: avoid;
   }
   .an-print-page:last-child { page-break-after: auto; break-after: auto; }
+
+  /*
+   * 의뢰서는 1건이 반드시 한 장이다(R344, 2026-10-21 박향근 요청).
+   * 내용 높이에 맡기면 넘쳐서 두 장이 된다. 그래서 종이 한 장 높이에 묶고
+   * 남는 공간은 SWATCH 칸이 먹는다. 사진이 붙는 건은 사진 칸이 먼저 자리를 가져가고
+   * SWATCH 가 그만큼 줄어든다. 블록을 더하거나 글자를 키우면 이 균형이 깨진다.
+   * 높이는 A4 세로 297mm 에서 위아래 여백 12mm 씩을 뺀 273mm 인데,
+   * 반올림으로 1mm만 넘쳐도 빈 장이 한 장 더 붙어서 271mm 로 둔다.
+   * 리포트(an-print-page 만 붙는 쪽)는 사진 수가 들쭉날쭉해 묶지 않는다.
+   */
+  .an-sheet-fixed { display: flex; flex-direction: column; height: 271mm; overflow: hidden; }
+  .an-sheet-fixed > * { flex: none; }
+  /* SWATCH 와 참고 사진을 한 줄에 나란히 둔다. 위아래로 쌓으면 둘 다 납작해진다. */
+  /*
+   * `overflow: hidden` 과 `min-height: 0` 이 함께 있어야 한다. 둘 중 하나만 빼면
+   * 의뢰 정보 글이 아주 길 때(실측 500자 부근) 이 줄이 눌리면서 SWATCH 상자가
+   * 아래 분석 결과 표를 덮는다. 줄어들다 잘리는 것이 겹치는 것보다 낫다.
+   */
+  .an-sheet-row { display: flex; gap: 4mm; min-height: 0; overflow: hidden; flex: 1 1 auto !important; }
+  .an-sheet-row > .an-block { display: flex; flex-direction: column; min-height: 0; overflow: hidden; flex: 1 1 0; }
+  .an-sheet-row > .an-block > .an-swatch { flex: 1 1 auto; height: auto; min-height: 0; }
+  .an-sheet-row > .an-block > .an-shots { display: flex; grid-template-columns: none; flex: 1 1 auto; min-height: 0; }
+  .an-sheet-row .an-shot { flex: 1 1 auto; height: auto; }
 
   /* 머리말 */
   .an-head { margin-bottom: 5mm; }
@@ -593,20 +625,20 @@ input.dd-date::-webkit-calendar-picker-indicator {
   .an-grid tbody tr:first-child th, .an-grid tbody tr:first-child td { border-top: 0.2mm solid var(--an-rule); }
   .an-grid td + th { border-left: 0.2mm solid var(--an-rule); }
   .an-grid td:empty::after { content: ""; display: block; min-height: 4.5mm; }
-  .an-grid-write td { height: 8.5mm; background: #fff; }
+  .an-grid-write td { height: 7mm; background: #fff; }
 
   /* 실물 swatch 붙이는 자리 */
   .an-swatch { display: flex; align-items: center; justify-content: center; height: 82mm; border: 0.5mm dashed var(--an-accent-line); border-radius: 2mm; background: #fff; }
   .an-swatch span { font-size: 8pt; letter-spacing: 0.08em; color: var(--an-faint); }
 
   /* 수령·담당·반환 */
-  .an-sign { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; margin-top: 3mm; }
+  .an-sign { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; margin-top: 2.5mm; }
   .an-sign span { display: block; font-size: 7.5pt; font-weight: 700; color: var(--an-soft); }
-  .an-sign i { display: block; margin-top: 6mm; border-bottom: 0.2mm solid var(--an-rule); }
+  .an-sign i { display: block; margin-top: 4.5mm; border-bottom: 0.2mm solid var(--an-rule); }
 
-  /* 사진 */
+  /* 사진. 의뢰서는 한 장 안에 들어가야 해서 높이를 고정한다(R344). */
   .an-shots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4mm; }
-  .an-shot { box-sizing: border-box; height: 50mm; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 0.2mm solid var(--an-rule); border-radius: 2mm; background: var(--an-tint); }
+  .an-shot { box-sizing: border-box; height: 42mm; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 0.2mm solid var(--an-rule); border-radius: 2mm; background: var(--an-tint); }
   .an-shot img { max-width: 100%; max-height: 100%; object-fit: contain; }
   .an-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
   .an-photos div { break-inside: avoid; }

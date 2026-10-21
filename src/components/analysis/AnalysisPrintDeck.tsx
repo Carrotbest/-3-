@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 
 import {
   ANALYSIS_WRITE_LINES, analysisHeadFields, analysisLeadText, analysisNoteLines,
@@ -69,14 +70,22 @@ function RequestPage({ item, urls, stamp, onImageSettled }: PageProps) {
     ["Requester", item.requester || "-"],
     ["Department", item.department || "-"],
   ]
-  return <section className="an-print-page">
+  // 1건이 반드시 한 장이다(R344). 참고 사진과 SWATCH 가 한 줄에 왼쪽·오른쪽으로 서서
+  // 머리말·의뢰 정보·분석 결과·꼬리말을 뺀 남은 높이를 둘이 나눠 먹는다.
+  // 사진이 없으면 SWATCH 가 그 폭까지 혼자 쓴다. 순서는 2026-10-21 박향근 지시다.
+  return <section className="an-print-page an-sheet-fixed">
     <Head item={item} kind="분석 의뢰서" sub="FABRIC ANALYSIS REQUEST" meta={meta} />
     <Block title="의뢰 정보 (Request)">
       <Grid pairs={analysisHeadFields(item)} wide={analysisNoteLines(item)} />
     </Block>
-    <Block title="실물 SWATCH (Original Fabric Swatch)">
-      <div className="an-swatch"><span>원단을 이 칸에 붙여 주세요</span></div>
-    </Block>
+    <div className="an-sheet-row">
+      {photo ? <Block title="참고 사진 (Reference)">
+        <div className="an-shots"><div className="an-shot"><img src={photo} alt="" onLoad={onImageSettled} onError={onImageSettled} /></div></div>
+      </Block> : null}
+      <Block title="실물 SWATCH (Original Fabric Swatch)">
+        <div className="an-swatch"><span>원단을 이 칸에 붙여 주세요</span></div>
+      </Block>
+    </div>
     <Block title="분석 결과 (R&D 기입)">
       <table className="an-grid an-grid-write">
         <colgroup><col style={{ width: "22%" }} /><col style={{ width: "78%" }} /></colgroup>
@@ -88,9 +97,6 @@ function RequestPage({ item, urls, stamp, onImageSettled }: PageProps) {
         <div><span>swatch 반환일</span><i /></div>
       </div>
     </Block>
-    {photo ? <Block title="참고 사진 (Reference)">
-      <div className="an-shots"><div className="an-shot"><img src={photo} alt="" onLoad={onImageSettled} onError={onImageSettled} /></div></div>
-    </Block> : null}
     <Foot item={item} kind="분석 의뢰서" stamp={stamp} />
   </section>
 }
@@ -128,6 +134,12 @@ export function AnalysisPrintDeck({ records, onDone }: Props) {
   const printedRef = useRef(false)
   const stamp = useMemo(() => analysisPrintStamp(), [])
   const expected = paths.filter((path) => urls[path]).length
+
+  // 이 덱이 떠 있는 동안에만 인쇄 CSS 가 앱 본문을 치운다. RDDA·COST SHEET 출력은 건드리지 않는다.
+  useEffect(() => {
+    document.body.classList.add("an-printing")
+    return () => document.body.classList.remove("an-printing")
+  }, [])
 
   useEffect(() => {
     if (!paths.length) { setResolved(true); return }
@@ -169,9 +181,15 @@ export function AnalysisPrintDeck({ records, onDone }: Props) {
   }, [resolved, loaded, expected, onDone])
 
   const onImageSettled = () => setLoaded((value) => value + 1)
-  return <div className="an-print-deck an-print-root" aria-hidden>
-    {records.map((item) => analysisSheetMode(item) === "request"
-      ? <RequestPage key={item.id} item={item} urls={urls} stamp={stamp} onImageSettled={onImageSettled} />
-      : <ReportPage key={item.id} item={item} urls={urls} stamp={stamp} onImageSettled={onImageSettled} />)}
-  </div>
+  // 인쇄 뿌리를 body 바로 밑에 둔다(R343). 화면 레이아웃 안에 있으면 조상의 overflow·transform 때문에
+  // 일반 흐름으로는 잘려서, 예전에는 position:fixed 로 피했다. 고정 요소는 쪽 나눔을 못 타서
+  // 여러 장이 한 자리에 겹쳐 찍힌다. 인쇄 CSS 는 body.an-printing 으로 형제들을 치운다.
+  return createPortal(
+    <div className="an-print-deck an-print-root" aria-hidden>
+      {records.map((item) => analysisSheetMode(item) === "request"
+        ? <RequestPage key={item.id} item={item} urls={urls} stamp={stamp} onImageSettled={onImageSettled} />
+        : <ReportPage key={item.id} item={item} urls={urls} stamp={stamp} onImageSettled={onImageSettled} />)}
+    </div>,
+    document.body,
+  )
 }
