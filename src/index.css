@@ -617,19 +617,24 @@ input.dd-date::-webkit-calendar-picker-indicator {
    * **가운데에는 글자도 선도 넣지 말 것.** 원단이 칸보다 크면 그대로 가려진다.
    * 안내 문구는 오른쪽 아래 구석이다.
    *
-   * 사진 폭은 `--an-photo-w` 하나로 정한다. 라벨의 왼쪽 칸 폭도 같은 값을 받아
-   * 라벨이 사진 위에 가운데로 선다. 둘을 따로 적으면 어긋난다.
-   * 높이는 4:3 이다. 화면의 의뢰 사진 칸(`AnalysisDetailDialog` 의 `aspect-[4/3]`)과 같은 비율이라
-   * 사진이 상자에 그대로 들어가고 위아래 빈 띠가 생기지 않는다.
+   * **사진 상자에 비율을 고정하지 말 것**(2026-10-21). 예전에는 4:3 가로 상자였는데
+   * 실제 가먼트 사진은 세로로 긴 것이 많아 높이에 먼저 걸렸다. 60mm 폭을 줘도 35mm 로
+   * 줄어 종이에서 우표만 하게 나왔다. 지금은 폭과 높이에 상한만 주고 사진이 긴 쪽을 채운다.
+   * 세로 사진은 높이 `--an-photo-h` 까지, 가로 사진은 폭 `--an-photo-w` 까지 커진다.
+   * 상자는 사진 크기에 맞춰 줄어든다(float 는 내용에 맞춰 줄어든다).
+   *
+   * 라벨의 왼쪽 칸 폭은 `--an-photo-w` 를 그대로 받는다. 사진이 그보다 좁아도 몇 mm 차이다.
+   * `--an-photo-h` 를 키울 때는 점선 칸 안쪽 높이(약 104mm)를 넘기지 말 것.
+   * 넘기면 사진 아래 SWATCH 자리가 사라진다.
    */
-  .an-media { --an-photo-w: 60mm; display: flex; flex-direction: column; min-height: 0; overflow: hidden; flex: 1 1 auto !important; }
+  .an-media { --an-photo-w: 62mm; --an-photo-h: 80mm; display: flex; flex-direction: column; min-height: 0; overflow: hidden; flex: 1 1 auto !important; }
   /* 라벨은 점선 안 맨 위에 선다. 구분선은 쓰지 않는다(2026-10-21). */
   .an-media-tags { display: flex; margin-bottom: 1.5mm; font-size: 6.5pt; font-weight: 700; letter-spacing: 0.06em; color: var(--an-soft); }
   .an-media-tags > span { flex: 1 1 auto; text-align: center; }
   .an-media-tags > span:first-child:not(:only-child) { flex: none; width: var(--an-photo-w); }
   .an-media-box { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; padding: 2mm; border: 0.1mm dashed var(--an-rule); border-radius: 1.5mm; }
-  .an-media-shot { float: left; width: var(--an-photo-w); aspect-ratio: 4 / 3; margin: 0 3mm 2mm 0; }
-  .an-media-shot img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .an-media-shot { float: left; margin: 0 3mm 2mm 0; }
+  .an-media-shot img { display: block; width: auto; height: auto; max-width: var(--an-photo-w); max-height: var(--an-photo-h); }
   .an-media-hint { position: absolute; right: 2.5mm; bottom: 1.8mm; font-size: 6.5pt; letter-spacing: 0.06em; color: var(--an-faint); }
 
   /* 머리말 */
