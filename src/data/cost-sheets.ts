@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, limit as fsLimit, orderBy, query, updateDoc, where } from "firebase/firestore"
+import { addDoc, collection, deleteDoc, doc, getDocs, limit as fsLimit, orderBy, query, updateDoc, where } from "firebase/firestore"
 
 import type { FabricCostSheet } from "./fabric-cost"
 import { auth, db } from "./firebase"
@@ -54,6 +54,20 @@ export async function updateCostSheet(
   patch: Partial<Pick<CostSheetDoc, "sheet" | "blend" | "note">>,
 ): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), patch)
+}
+
+/**
+ * 한 FL 의 계산서를 버전째 지운다(R348, 2026-10-21 박향근 확정).
+ *
+ * 자료실 목록은 FL 당 최신 버전 한 줄만 보이므로, 그 줄을 지우면 v1 부터 전부 지운다.
+ * 최신 한 개만 지우면 화면에서 사라진 자리에 이전 버전이 올라와 지운 것과 보이는 것이 어긋난다.
+ * **되돌릴 수 없다.** 호출 전에 몇 건이 지워지는지 사람에게 보이고 확인을 받을 것.
+ * `firestore.rules` 는 `costSheets` 삭제를 소유자만 허용한다. 팀원이 부르면 permission-denied 다.
+ */
+export async function deleteCostSheetGroup(groupId: string): Promise<number> {
+  const versions = await listCostSheets({ groupId })
+  for (const item of versions) await deleteDoc(doc(db, COLLECTION, item.id))
+  return versions.length
 }
 
 export async function listCostSheets(filter: {

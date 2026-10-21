@@ -229,6 +229,12 @@ const PINNED_COLUMNS: MasterColumn[] = [
   { id: "styleNo", label: "Style No.", width: 140, mono: true, value: (row) => row.styleNo },
 ]
 
+/** COST 칸의 단가 표기. 반올림해 소수점 둘째 자리까지만 보인다(2026-10-21 박향근 지시). */
+const costMoney = (value: number | undefined | null): string =>
+  typeof value === "number" && Number.isFinite(value)
+    ? value.toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : ""
+
 const GROUPS: MasterGroup[] = [
   {
     key: "request", label: "개발 REQUEST", color: "var(--chart-1)", columns: [
@@ -332,9 +338,13 @@ const GROUPS: MasterGroup[] = [
   },
   {
     key: "cost", label: "COST", color: "var(--chart-3)", columns: [
-      { id: "costKrwPerYd", label: "₩/yd", width: 92, align: "right", number: true, value: (row) => row.tech?.costRef?.netKrwPerYd ?? null },
-      { id: "costUsdPerYd", label: "$/yd", width: 84, align: "right", number: true, value: (row) => row.tech?.costRef?.netPerYd ?? null },
-      { id: "costAt", label: "계산일", width: 84, value: (row) => row.tech?.costRef?.at ? new Date(row.tech.costRef.at).toISOString().slice(0, 10) : "", render: (row) => {
+      // 2026-10-21 박향근 지시로 ₩/yd 를 빼고 $/yd, $/kg, UPDATED 셋으로 맞췄다.
+      // 단가는 반올림해 소수점 둘째 자리까지만 보인다. 원래 값은 원가계산서에 그대로 있다.
+      { id: "costUsdPerYd", label: "$/yd", width: 84, align: "right", number: true, value: (row) => row.tech?.costRef?.netPerYd ?? null, render: (row) => <span>{costMoney(row.tech?.costRef?.netPerYd)}</span> },
+      // netPerKg 는 2026-10-21에 costRef 에 더한 값이다. 그 전에 저장된 행은 비어 있다.
+      // 짐작으로 채우지 않는다. 그 행의 계산서를 다시 저장하면 값이 들어온다.
+      { id: "costUsdPerKg", label: "$/kg", width: 84, align: "right", number: true, value: (row) => row.tech?.costRef?.netPerKg ?? null, render: (row) => <span>{costMoney(row.tech?.costRef?.netPerKg)}</span> },
+      { id: "costAt", label: "UPDATED", width: 92, value: (row) => row.tech?.costRef?.at ? new Date(row.tech.costRef.at).toISOString().slice(0, 10) : "", render: (row) => {
         const at = row.tech?.costRef?.at
         const stale = at ? Date.now() - at > COST_STALE_DAYS * 86400000 : false
         return <span className={stale ? "text-[var(--warning)]" : ""}>{at ? new Date(at).toISOString().slice(0, 10) : ""}</span>
@@ -703,7 +713,7 @@ function createEmptyGridRecord(owner = ""): DevRecord {
   return { ...createBlankDevRecord(owner), opt: "", stage: "", devStatus: "", requestDate: "" }
 }
 
-const COMPUTED_COLUMN_IDS = new Set(["opt", "optionProgress", "actualBalance", "costKrwPerYd", "costUsdPerYd", "costAt"])
+const COMPUTED_COLUMN_IDS = new Set(["opt", "optionProgress", "actualBalance", "costUsdPerYd", "costUsdPerKg", "costAt"])
 
 const TECH_PATHS: Record<string, string[]> = {
   project: ["project"],

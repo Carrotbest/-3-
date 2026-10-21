@@ -229,6 +229,7 @@ export function CostSheetDialog({ open, onOpenChange, rows, canEdit, onSaved, st
   const refOf = (doc: CostSheetDoc): NonNullable<DevTechnical["costRef"]> => ({
     sheetId: doc.id, groupId: doc.groupId, version: doc.version, at: doc.at,
     netKrwPerYd: doc.sheet.result.netKrwPerYd, netPerYd: doc.sheet.result.netPerYd,
+    netPerKg: doc.sheet.result.netPerKg,
   })
   const saveNew = async () => {
     if (!ratioValid) return

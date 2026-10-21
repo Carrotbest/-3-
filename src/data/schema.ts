@@ -84,6 +84,8 @@ export interface DevTechnical {
     at: number
     netKrwPerYd: number
     netPerYd: number
+    /** USD/kg. 2026-10-21에 더했다. 그 전에 저장된 행에는 없어 DD의 $/kg 칸이 빈다. */
+    netPerKg?: number
   }
 }
 
