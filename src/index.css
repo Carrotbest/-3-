@@ -541,6 +541,38 @@ input.dd-date::-webkit-calendar-picker-indicator {
   .rdda-print-kpis strong { font-size: 24pt; }
 }
 
+/*
+ * FABRIC ANALYSIS 전체 탭은 보기 전용이다(R348, 2026-10-21 박향근 지시).
+ * 틀과 바깥에서 안쪽으로 옅어지는 회색이 편집이 안 되는 화면임을 알린다.
+ * 덮개는 pointer-events: none 이다. 전체 탭에서도 KPI 칸과 탭 단추는 눌러야 한다.
+ * 이 저장소에는 테마 토글이 없어 어두운 모드는 OS 설정만 탄다. 그래서 미디어 질의로 적는다.
+ */
+.an-preview { position: relative; border-radius: 0.75rem; }
+.an-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(100 116 139 / 0.3);
+  background:
+    linear-gradient(to right,  rgb(100 116 139 / 0.11), rgb(100 116 139 / 0) 110px),
+    linear-gradient(to left,   rgb(100 116 139 / 0.11), rgb(100 116 139 / 0) 110px),
+    linear-gradient(to bottom, rgb(100 116 139 / 0.11), rgb(100 116 139 / 0) 80px),
+    linear-gradient(to top,    rgb(100 116 139 / 0.11), rgb(100 116 139 / 0) 80px);
+}
+@media (prefers-color-scheme: dark) {
+  .an-preview::after {
+    box-shadow: inset 0 0 0 1px rgb(148 163 184 / 0.26);
+    background:
+      linear-gradient(to right,  rgb(148 163 184 / 0.1), rgb(148 163 184 / 0) 110px),
+      linear-gradient(to left,   rgb(148 163 184 / 0.1), rgb(148 163 184 / 0) 110px),
+      linear-gradient(to bottom, rgb(148 163 184 / 0.1), rgb(148 163 184 / 0) 80px),
+      linear-gradient(to top,    rgb(148 163 184 / 0.1), rgb(148 163 184 / 0) 80px);
+  }
+}
+
 /* ------------------------------------------------------------------
  * FABRIC ANALYSIS A4 출력(R258 → R265 개편). 의뢰서와 리포트가 같은 뼈대를 쓴다.
  * 대시보드 톤앤매너의 문서다(R284). 색은 인디고 하나다.
