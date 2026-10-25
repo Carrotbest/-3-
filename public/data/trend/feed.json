@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-10-24T22:46:48+00:00",
+"generated_at": "2026-10-25T22:51:52+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
-"filtered_out": 4422,
+"filtered_out": 4452,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 22,
-"scanned": 580,
-"kept": 226,
-"material": 154
+"scanned": 581,
+"kept": 225,
+"material": 153
 },
 "30": {
 "sources": 22,
-"scanned": 2715,
-"kept": 1036,
-"material": 762
+"scanned": 2672,
+"kept": 1014,
+"material": 741
 }
 }
 },
@@ -25,15 +25,15 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 476
+"n": 478
 },
 {
 "key": "RETAIL",
-"n": 410
+"n": 406
 },
 {
 "key": "FABRIC",
-"n": 234
+"n": 237
 },
 {
 "key": "ETC",
@@ -41,7 +41,7 @@
 },
 {
 "key": "CHEMICAL",
-"n": 107
+"n": 106
 },
 {
 "key": "YARN",
@@ -51,15 +51,15 @@
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 440
+"n": 437
 },
 {
 "key": "Fibre2Fashion",
-"n": 208
+"n": 210
 },
 {
 "key": "Ecotextile News",
-"n": 124
+"n": 123
 },
 {
 "key": "Textile Focus",
@@ -67,15 +67,15 @@
 },
 {
 "key": "국제섬유신문",
-"n": 99
+"n": 98
+},
+{
+"key": "Textile Today",
+"n": 83
 },
 {
 "key": "Innovation in Textiles",
 "n": 83
-},
-{
-"key": "Textile Today",
-"n": 80
 },
 {
 "key": "Knitting Industry",
@@ -95,11 +95,11 @@
 },
 {
 "key": "주제검색 · 국내소재",
-"n": 34
+"n": 35
 },
 {
 "key": "Apparel Resources",
-"n": 32
+"n": 31
 },
 {
 "key": "Apparel Insider",
@@ -137,15 +137,15 @@
 "tags": [
 {
 "key": "방글라데시",
-"n": 106
+"n": 108
 },
 {
 "key": "리사이클",
-"n": 95
+"n": 94
 },
 {
 "key": "전시회",
-"n": 61
+"n": 60
 },
 {
 "key": "데님",
@@ -156,12 +156,12 @@
 "n": 33
 },
 {
-"key": "울",
-"n": 27
+"key": "제직",
+"n": 25
 },
 {
-"key": "제직",
-"n": 26
+"key": "울",
+"n": 25
 },
 {
 "key": "T2T",
@@ -192,12 +192,12 @@
 "n": 17
 },
 {
-"key": "r-PET",
+"key": "효성",
 "n": 15
 },
 {
-"key": "효성",
-"n": 15
+"key": "r-PET",
+"n": 14
 },
 {
 "key": "보온",
@@ -205,7 +205,7 @@
 },
 {
 "key": "리오셀",
-"n": 11
+"n": 12
 },
 {
 "key": "리넨",
@@ -236,6 +236,10 @@
 "n": 7
 },
 {
+"key": "렌징",
+"n": 6
+},
+{
 "key": "DPP",
 "n": 6
 },
@@ -246,10 +250,6 @@
 {
 "key": "GOTS",
 "n": 6
-},
-{
-"key": "렌징",
-"n": 5
 },
 {
 "key": "흡한속건",
@@ -272,10 +272,6 @@
 "n": 5
 },
 {
-"key": "DTY",
-"n": 4
-},
-{
 "key": "횡편",
 "n": 4
 },
@@ -293,6 +289,10 @@
 },
 {
 "key": "스트레치",
+"n": 3
+},
+{
+"key": "DTY",
 "n": 3
 }
 ],
@@ -330,17 +330,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-09-25",
-"total": 21,
-"by": {
-"RETAIL": 4,
-"MATERIAL": 13,
-"FABRIC": 2,
-"ETC": 1,
-"CHEMICAL": 1
-}
-},
 {
 "date": "2026-09-26",
 "total": 6,
@@ -661,22 +650,31 @@
 "CHEMICAL": 2,
 "ETC": 1
 }
+},
+{
+"date": "2026-10-25",
+"total": 9,
+"by": {
+"FABRIC": 3,
+"MATERIAL": 5,
+"YARN": 1
+}
 }
 ],
 "momentum": [
 {
 "tag": "전시회",
 "label_en": "performance days",
-"recent": 48,
+"recent": 47,
 "prior": 13,
-"delta": 35,
+"delta": 34,
 "weeks": [
 0,
 0,
 0,
 0,
 0,
-3,
+2,
 3,
 8,
 12,
@@ -688,16 +686,16 @@
 {
 "tag": "리사이클",
 "label_en": "recycled",
-"recent": 64,
-"prior": 31,
-"delta": 33,
+"recent": 62,
+"prior": 32,
+"delta": 30,
 "weeks": [
 0,
 0,
 0,
 0,
 0,
-5,
+4,
 12,
 16,
 13,
@@ -718,13 +716,13 @@
 0,
 0,
 0,
-2,
+1,
 6,
 5,
 13,
 8,
 5,
-12
+13
 ]
 },
 {
@@ -772,8 +770,8 @@
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 62,
-"prior": 44,
+"recent": 63,
+"prior": 45,
 "delta": 18,
 "weeks": [
 0,
@@ -781,34 +779,13 @@
 0,
 0,
 0,
-11,
+10,
 20,
 15,
 14,
 24,
 13,
-9
-]
-},
-{
-"tag": "T2T",
-"label_en": "textile-to-textile",
-"recent": 18,
-"prior": 5,
-"delta": 13,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-2,
-4,
-6,
-7,
-2,
-2
+12
 ]
 },
 {
@@ -830,6 +807,27 @@
 4,
 5,
 4
+]
+},
+{
+"tag": "T2T",
+"label_en": "textile-to-textile",
+"recent": 17,
+"prior": 6,
+"delta": 11,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+2,
+4,
+6,
+7,
+2,
+2
 ]
 },
 {
@@ -919,6 +917,12 @@
 ],
 "fresh": [
 {
+"tag": "렌징",
+"label_en": "lenzing",
+"n": 6,
+"first": "2026-10-01"
+},
+{
 "tag": "DPP",
 "label_en": "digital product passport",
 "n": 6,
@@ -929,12 +933,6 @@
 "label_en": "viscose",
 "n": 6,
 "first": "2026-10-06"
-},
-{
-"tag": "렌징",
-"label_en": "lenzing",
-"n": 5,
-"first": "2026-10-01"
 },
 {
 "tag": "흡한속건",
@@ -998,6 +996,207 @@
 }
 ],
 "articles": [
+{
+"id": "dc1d9c7019108538",
+"d": "2026-10-25",
+"t": "Benninger는 Bangladesh의 진화하는 염색 산업에서 강력한 성장 잠재력을 보고 있습니다.",
+"o": "Benninger sees strong growth potential in Bangladesh’s evolving dyeing industry",
+"u": "https://textiletoday.com.bd/benninger-sees-strong-growth-potential-in-bangladeshs-evolving-dyeing-industry",
+"s": "Swiss textile machinery manufacturer Benninger is positioning resource efficiency, process know-how and flexible fabric processing at the centre of this transition. During a recent interview, Textile...",
+"c": "FABRIC",
+"x": "Swiss textile machinery manufacturer Benninger is positioning resource efficiency, process know-how and flexible fabric processing at the centre of this transition. During a recent interview, Textile Today spoke with Rolf Erik Schoeler, Global Head of Sales & Marketing at Benninger, about sustainability in dyeing, Benninger’s technology differentiation, Bangladesh’s market potential and how machinery investments can translate into stronger production and business performance. Figure: Rolf Erik Schoeler, Global Head of Sales & Marketing at Benninger. Textile Today: Sustainability remains a major concern in textile dyeing. How is Benninger responding to demands for lower water and energy consumption? Rolf Erik Schoeler: Resource efficiency has been built into Benninger’s machinery philosophy for a long time. For example, FabricMaster’s winch and filter are integrated into the machine, which reduces unnecessary external infrastructure and lowers the amount of water circulating through the system. Thus, less water has to be circulated and heated, the overall process becomes more efficient. We have customers in the US and Central America running certain black dyeing processes at below 30 litres of water per kilogram of fabric. Textile Today: What differentiates Benninger from other machinery suppliers in such a competitive market? Rolf Erik Schoeler: The dyeing and finishing machinery market is extremely competitive. Despite that, Benninger has been in textile machinery for more than 160 years and intends to remain and grow. The key difference is that Benninger does not only understand machinery; it understands dyeing and process technology. That process knowledge is incorporated into the machine and its automation. A machine has to help a customer achieve reproducible resul",
+"i": "/storage/uploads/2026/10/benningerseesstron_1792890708434.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 11,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today",
+"주제검색 · 염색가공"
+]
+},
+{
+"id": "cc7775208bd91959",
+"d": "2026-10-25",
+"t": "친환경 섬유 넘어 첨단모빌리티 소재부품 도약",
+"o": "친환경 섬유 넘어 첨단모빌리티 소재부품 도약",
+"u": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE1kWDM4VG9RQjlGVDZfSmY5dHNwaW9abHAwd0JlWnFrV2pLemtaQ0dyNk53SElYUk1aU2Y3NlhQMkRVSFZXUWZXQXFBNDhEd2R0bGpBNmJCQVdTTGRzYUZRbWxIVm9tUdIBZkFVX3lxTE1kWDM4VG9RQjlGVDZfSmY5dHNwaW9abHAwd0JlWnFrV2pLemtaQ0dyNk53SElYUk1aU2Y3NlhQMkRVSFZXUWZXQXFBNDhEd2R0bGpBNmJCQVdTTGRzYUZRbWxIVm9tUQ?oc=5",
+"s": "친환경 섬유 넘어 첨단모빌리티 소재부품 도약 동아일보",
+"c": "MATERIAL",
+"x": "친환경 섬유 넘어 첨단모빌리티 소재부품 도약 동아일보",
+"i": "",
+"g": [],
+"m": "주제검색 · 국내소재",
+"r": "국내",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 국내소재"
+]
+},
+{
+"id": "b5731af5dbdc5936",
+"d": "2026-10-25",
+"t": "Bangladesh의 threadBridge, H&M 재단의 Global Change Award 2026 수상",
+"o": "Bangladesh’s threadBridge wins H&M Foundation’s Global Change Award 2026",
+"u": "https://textiletoday.com.bd/bangladeshs-threadbridge-wins-hm-foundations-global-change-award-2026",
+"s": "Bangladeshi technology startup threadBridge has won the H&amp;M Foundation’s Global Change Award 2026 for its AI-powered smart glasses. The glasses help fabric inspectors detect defects in real time...",
+"c": "FABRIC",
+"x": "Bangladeshi technology startup threadBridge has won the H&M Foundation’s Global Change Award 2026 for its AI-powered smart glasses. The glasses help fabric inspectors detect defects in real time before fabric is cut, reducing material waste and improving quality control in textile manufacturing. Md Ridwan Hossain, Co-Founder at threadBridge and Mohammad Maaz, threadBridge received the award at Stockholm City Hall on 22 October. Figure: Md Ridwan Hossain, Co-Founder at threadBridge and Mohammad Maaz, threadBridge received the award . Often described as the “Nobel Prize of Fashion,” the Global Change Award recognizes innovations aimed at transforming the fashion and textile industries. threadBridge was the only Bangladeshi company among this year’s 10 winners, which also included innovators from India, the United States, Sweden, the United Kingdom, France and Tanzania. The award highlights Bangladesh’s growing potential to develop locally engineered technologies for the global textile and apparel industry, extending its role beyond garment manufacturing to innovation in production processes. According to threadBridge, around 90% of fabric in many factories reaches the cutting stage without inspection. Defects identified later can lead to material waste, additional energy consumption and higher production costs. Its smart glasses are designed to help inspectors identify such defects earlier, allowing manufacturers to address quality issues before cutting begins. Alongside the smart glasses, the startup has developed a high-speed fabric inspection module that can be integrated into existing inspection machines. The company is piloting the module with garment manufacturers in Bangladesh. Both technologies are designed to support, rather than replace, human inspectors by comb",
+"i": "/storage/uploads/2026/10/bangladeshsthreadbr_17928901771860.png",
+"g": [
+"방글라데시"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "a1e1093d6ae8aa62",
+"d": "2026-10-25",
+"t": "새로운 기계를 넘어서: Bangladesh의 섬유 산업에 기술 채택을 통해 생산 및 에너지 비용 절감",
+"o": "Beyond New Machines: Reducing Production and Energy Costs Through Technology Adoption in Bangladesh’s Textile Industry",
+"u": "https://textilefocus.com/beyond-new-machines-reducing-production-and-energy-costs-through-technology-adoption-in-bangladeshs-textile-industry/",
+"s": "Bangladesh’s textile industry is at a critical crossroads. For decades, local textile and spinning mills have played a vital role in developing the country’s textile value chain by supplying yarn to the export-oriented garment sector. However, the economics of textile manufacturing have changed sign",
+"c": "YARN",
+"x": "Bangladesh’s textile industry is at a critical crossroads. For decades, local textile and spinning mills have played a vital role in developing the country’s textile value chain by supplying yarn to the export-oriented garment sector. However, the economics of textile manufacturing have changed significantly. Rising energy prices, unreliable gas and electricity supplies, higher wages, expensive financing, imported raw materials and intensifying competition from countries such as India and China are placing unprecedented pressure on mill profitability. The industry’s challenge is no longer simply how to produce more yarn. Instead, the priority is how to produce every kilogram of yarn at a lower cost while maintaining quality and competitiveness. Technology adoption must therefore become a central pillar of the industry’s long-term strategy. Figure: Awabin Araf, Director (Supply Chain & Procurement Strategist), DBL Group The Challenges Extend Beyond Machinery One of the most common misconceptions about technological upgrading is that competitiveness can be achieved simply by purchasing new machinery. In reality, Bangladesh’s textile industry faces several interconnected challenges. Many mills continue to operate with ageing machinery and outdated production systems. Compared with modern equipment, older machines may consume more electricity, require more frequent maintenance and deliver lower productivity. However, replacing an entire production line demands substantial capital investment, particularly when high interest rates and financing costs are already putting manufacturers under financial pressure. Energy availability presents another major challenge. Gas shortages have repeatedly forced textile and spinning mills to operate below capacity, while expensive alternat",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/Business-Portrait-Against-Rural-Mural.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 19,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "9b9bca21565a4b9d",
+"d": "2026-10-25",
+"t": "인도 ICAR-CIRCOT, 목화 따기 장갑 기술 MOU 체결",
+"o": "India's ICAR-CIRCOT signs cotton-picking glove technology MoU",
+"u": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxQZHZWNDRId0lIQWpLODZieEhjZVNlM05EUGQxdmJ5TmcwajBVcnJkTENMb295S2R2Q3ZuMENxMlBvTGtlQXVidWNrQ2M2bkRJNFNreFFyUW0xQ3NHbnhPd2QyNEFrUDhDU3VQZEQtR1VVdDYxdk9tMDNtd0RyUUx2MkpHai1md2NxNnU1N2g0ZC04bHdYNUZCZWE3Rkxxal9WM19sc25nd3NRMk5uUmFYSUVJaTFlMWd0aldNQklON2lBVFI4cko2WWI5N3pGV3lUNTByWGFuZm5LU0I2a2MzQlIxVDhUcmc?oc=5",
+"s": "India's ICAR-CIRCOT signs cotton-picking glove technology MoU Fibre2Fashion",
+"c": "MATERIAL",
+"x": "India's ICAR-CIRCOT signs cotton-picking glove technology MoU Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "9b53819e64b7071d",
+"d": "2026-10-25",
+"t": "Kingpins 암스테르담은 데님 디자인, 기술 및 제조를 연결합니다",
+"o": "Kingpins Amsterdam connects denim design, technology, and manufacturing",
+"u": "https://textiletoday.com.bd/kingpins-amsterdam-connects-denim-design-technology-and-manufacturing",
+"s": "Key insights More than 100 mills, garment factories, and suppliers were expected at the show. Lenzing and Kaihara launched the REMOD denim collection, while the TENCEL™ Lyocell–HV100 network reached...",
+"c": "MATERIAL",
+"x": "Key insights More than 100 mills, garment factories, and suppliers were expected at the show. Lenzing and Kaihara launched the REMOD denim collection, while the TENCEL™ Lyocell–HV100 network reached nearly 50 mills in 13 countries. The LYCRA Company, Advance Denim, Archroma, and Jeanologia presented new materials and production technologies. The Jeanius Hub brought together nearly 20 innovators across fibers, dyes, recycling, machinery, and digital solutions. Figure: At Kingpins Amsterdam, Spinnova participated as an innovative partner, showcasing its groundbreaking technology that transforms certified wood and waste materials into textile fibers without harmful chemicals or dissolving. Kingpins Amsterdam brought together global denim manufacturers, fiber producers, chemical suppliers, technology developers, and designers on October 14–15, 2026, at SugarFactory in the Netherlands. More than 100 mills, garment factories, and suppliers gathered at the show. The central challenge was to make innovation practical. With rising costs and market uncertainty affecting the industry, new technologies need to work with existing production systems, deliver measurable benefits, and meet commercial requirements. A major highlight was the introduction of new materials and denim collections. Lenzing and Japanese denim manufacturer Kaihara Corporation launched the REMOD collection. This lineup combines three TENCEL™ Lyocell fiber types to create different textures, fabric structures, and comfort levels, including cotton-inspired and linen-inspired effects. Lenzing also announced the third cohort of its TENCEL™ Lyocell–HV100 mill-partner network. The network expanded from 17 mills in five countries in October 2025 to 37 mills in April 2026, reaching nearly 50 mills across 13 countries by",
+"i": "/storage/uploads/2026/10/kingpinsamsterdamc_17929015096570.png",
+"g": [
+"리오셀",
+"데님",
+"렌징"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 11,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today",
+"주제검색 · 염색가공"
+]
+},
+{
+"id": "55523b79f73a1d12",
+"d": "2026-10-25",
+"t": "전자섬유를 사용해 의류에 직조한 세계 최초의 터치스크린",
+"o": "World’s first touchscreen woven into clothing using electronic fibers",
+"u": "https://textilefocus.com/worlds-first-touchscreen-woven-into-clothing-using-electronic-fibers/",
+"s": "A washable, flexible garment integrates thousands of microchips into touch-sensitive fibers, creating a wearable screen that displays videos, responds to touch, and connects wirelessly to devices. (Nanowerk News) Researchers at the National University of Singapore’s College of Design and Engineering",
+"c": "FABRIC",
+"x": "A washable, flexible garment integrates thousands of microchips into touch-sensitive fibers, creating a wearable screen that displays videos, responds to touch, and connects wirelessly to devices. (Nanowerk News) Researchers at the National University of Singapore’s College of Design and Engineering (CDE) have developed a fiber that functions as pixels and senses touch at the same time, integrating 54 of them into a sleeve to create the world’s first touchscreen built into a garment. The sleeve displays images and video, responds to finger presses and connects wirelessly to other devices, yet stays as washable, breathable and flexible as ordinary clothing. The team’s invention enables garments to act as a direct interface to a wearer’s health data and digital devices, with no rigid screen involved. The screens that we are familiar with, such as those on phones and laptops, typically present graphical user interfaces (GUIs) on flat, rigid panels that display information and enable interaction. Textiles, woven from one-dimensional fibers, have never matched this capability. A full-color, touch-sensitive display that can be threaded like yarn was, until now, out of reach. The fibers support the functions early generations of smartphones could perform. The 96-by-54-pixel display can run a calculator, show a photo gallery, play a video, work as a compass, respond to voice commands, receive images over Bluetooth, and read and display body temperature. (Image: NUS) “What made this possible was our ability to construct the GUI system from electronic building blocks in fibre form — similar to traditional yarn, but with the sophisticated electronic functionality built directly into the fibres,” said Asst Prof Khudiyev. The team, led by Assistant Professor Tural Khudiyev from the ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/id70464_1.jpg",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 17,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "33c1fc45dfa59284",
+"d": "2026-10-25",
+"t": "인도와 독일, 베를린에서 무역 및 기술 관계 논의",
+"o": "India & Germany discuss trade & technology ties in Berlin",
+"u": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOckNzNTF5dEM4dldvYUZ1ZHJJTG10XzFnXzhqOHJCQl9zMUpuaGE1Q3cwTW4tMkNINUVNaFpSWU04STByclVZQnZaOFhmVE5VOUp1UXd6Z2ZSeHBBQm14M0kwLWNJb3JCVVB0dXBMaVcwcUlZd1cwYkFCQWJNVWRadk5HaXhWOUxERzFrWTVSanpSQ1I4MUxQMlMwWk1pSU5WZ2RQZXU2WENVeklKb0NvNUtqTXZoV0g1bXZZc25rTW1CSV9YR3IxOFpkVQ?oc=5",
+"s": "India & Germany discuss trade & technology ties in Berlin Fibre2Fashion",
+"c": "MATERIAL",
+"x": "India & Germany discuss trade & technology ties in Berlin Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
+{
+"id": "0371a614066047b9",
+"d": "2026-10-25",
+"t": "| 브라질의 완제품 의류 수입량이 섬유 원자재를 앞지릅니다.",
+"o": "| Brazil's finished apparel imports outpace textile raw materials",
+"u": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxPWTJkYU85VzhXVURXaEZBd1FPbktUODhQVmU0RS10Q0ZZb1YwZG9NeWk3Rm8wdUltTTNqUmtPS0xVYUU4RlVDWlA0bmRJdlBOTGxrZ0xYSHY1eVp3cmtsb2ViQ3BvTHRGekZDRkIzMVd1LXRYSnFWa1F6ZVlPNEljcWF3YTB2SWhDZS1pcnNhbFVwbEs2STFPQmQ4U1dIZFJNUEpWaHFqeVJVeUhYR0tmS1ZqUE9WQnoyRlJXV1gxdDl0TUtPdXJLcFlEcXBVWDlMV3BkQ2pWZnJkQmxzSEwxMkxpcWZCM3ZuNWxZTlhR?oc=5",
+"s": "| Brazil's finished apparel imports outpace textile raw materials Fibre2Fashion",
+"c": "MATERIAL",
+"x": "| Brazil's finished apparel imports outpace textile raw materials Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
+]
+},
 {
 "id": "c19b220eae9fe967",
 "d": "2026-10-24",
@@ -33743,210 +33942,6 @@
 "ms": [
 "Knitting Industry",
 "주제검색 · 염색가공"
-]
-},
-{
-"id": "e7a137b7bcf2aca6",
-"d": "2026-09-10",
-"t": "Heberlein은 중국 시장에 대한 의지를 강화합니다.",
-"o": "Heberlein reinforces its commitment to the Chinese market",
-"u": "https://textilefocus.com/heberlein-reinforces-its-commitment-to-the-chinese-market/",
-"s": "Advanced DTY jet technology and a new service hub bring performance and technical support closer to customers. Wattwil, Switzerland, September 9, 2026 – Heberlein, globally recognised as a leading provider of air interlacing and air texturing jets for synthetic filament yarns, is consolidating its s",
-"c": "YARN",
-"x": "Advanced DTY jet technology and a new service hub bring performance and technical support closer to customers . Wattwil, Switzerland, September 9, 2026 – Heberlein, globally recognised as a leading provider of air interlacing and air texturing jets for synthetic filament yarns, is consolidating its success in the Chinese market with its APh- and APe-series for DTY applications. Particularly in the field of Air Covering, Heberlein technologies combine excellent quality with significant savings in compressed-air consumption. A new service hub in Shengze City underlines the company’s long-term commitment in the Chinese market. SlideJet-FT15-2 with the APe-series Over the past 20 years, Heberlein has achieved considerable success in China. The Swiss brand stands for innovation, reliability and trust. Heberlein DTY jets are used both for the retrofitting of existing facilities and in new investments. Compressed-air consumption is an important KPI for mills, as compressed air is a cost-intensive resource. Heberlein’s compressed-air-saving technology therefore gives its solutions a major competitive advantage. Heberlein will present its successful APh- and APe-series at upcoming ITMA Asia + CITME 2026. Air Covering for required yarn qualities Demand for Air Covering has been high in the Chinese market. Air Covering combines elastane with a covering yarn by interlacing the two components at regular intervals using a controlled air jet. The resulting yarns offer good stretch, comfort and surface properties. They are widely used in leggings and sportswear, underwear, hosiery and socks. Other applications include stretch fabrics for trousers and jeans, elasticated cuffs, as well as medical and compression textiles. Heberlein Air Covering Solutions Air Covering offers a wide range ",
-"i": "https://textilefocus.com/wp-content/uploads/2026/09/image-9.png",
-"g": [
-"DTY"
-],
-"m": "Textile Focus",
-"r": "해외",
-"v": 11,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Focus"
-]
-},
-{
-"id": "debec0cbd688a1d6",
-"d": "2026-09-10",
-"t": "젠틀몬스터, 뉴욕 소호 플래그십 스토어 리뉴얼",
-"o": "젠틀몬스터, 뉴욕 소호 플래그십 스토어 리뉴얼",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148471",
-"s": "젠틀몬스터(Gentle Monster)가 미국 뉴욕 맨해튼 소호 플래그십 스토어를 리뉴얼했다.2018년 문을 연 뉴욕 소호 매장은 이번 리뉴얼을 통해 공간 구성과 설치 작품을 재정비했다. 젠틀몬스터는 매장에 브랜드의 디자인과 예술적 방향성을 반영한 키네틱 작품과 오브제를 배치했다.대표 설치작 ‘자이언트 헤드 키네틱(Giant Head Kinetic)’을 재해석한 신작 ‘글로시 헤드 키네틱(Glossy Head Kinetic)’도 처음 공개했다. 작품은 세 개의 얼굴 형태로 구성됐으며, 광택이 있는 표면과 움직이는 눈꺼풀, 서로 교차",
-"c": "RETAIL",
-"x": "젠틀몬스터(Gentle Monster)가 미국 뉴욕 맨해튼 소호 플래그십 스토어를 리뉴얼했다.2018년 문을 연 뉴욕 소호 매장은 이번 리뉴얼을 통해 공간 구성과 설치 작품을 재정비했다. 젠틀몬스터는 매장에 브랜드의 디자인과 예술적 방향성을 반영한 키네틱 작품과 오브제를 배치했다.대표 설치작 ‘자이언트 헤드 키네틱(Giant Head Kinetic)’을 재해석한 신작 ‘글로시 헤드 키네틱(Glossy Head Kinetic)’도 처음 공개했다. 작품은 세 개의 얼굴 형태로 구성됐으며, 광택이 있는 표면과 움직이는 눈꺼풀, 서로 교차",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148471_130196_2937_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "d04187147dab6a83",
-"d": "2026-09-10",
-"t": "폴리에스테르 직물 공급업체",
-"o": "Polyester Fabric Suppliers",
-"u": "https://news.google.com/rss/articles/CBMif0FVX3lxTFByazlfY0pOaXM5NlFmWVFQdXZoWERCSEdwaTFiYVpFWGNoODl2eHJHcWRPcFQ1QU9XY0hFQUJoZTRyRDVnQXRXbi1sYk8yRHdsV3RXcllFRzdxWmZPd0gwZWJ2TFR4bmNHWmJqMjR5ZUR0eFAyTHV3SWFEOXhFSnc?oc=5",
-"s": "Polyester Fabric Suppliers Fibre2Fashion",
-"c": "MATERIAL",
-"x": "Polyester Fabric Suppliers Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 10,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "cfaf4f414f899aa3",
-"d": "2026-09-10",
-"t": "Archroma는 유황 염료 혁신으로 영예를 얻었습니다.",
-"o": "Archroma honoured for sulphur dye breakthrough",
-"u": "https://www.ecotextile.com/2026091065513/news/dyes-chemicals/archroma-honoured-for-sulphur-dye-breakthrough/",
-"s": "ICIS Innovation Award recognises how FiberColors creates sustainable dyes from wool waste PRATTELN – Textile chemical specialist Archroma has won […] The post Archroma honoured for sulphur dye breakthrough appeared first on Ecotextile News .",
-"c": "MATERIAL",
-"x": "ICIS Innovation Award recognises how FiberColors creates sustainable dyes from wool waste PRATTELN – Textile chemical specialist Archroma has won […] The post Archroma honoured for sulphur dye breakthrough appeared first on Ecotextile News .",
-"i": "https://www.ecotextile.com/wp-content/uploads/2026/04/Archroma-Orta.jpg",
-"g": [
-"울"
-],
-"m": "Ecotextile News",
-"r": "해외",
-"v": 17,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Ecotextile News"
-]
-},
-{
-"id": "c8abd386bf706ccf",
-"d": "2026-09-10",
-"t": "천의얼굴 데님, 서울 코엑스 더플라츠에서 펼쳐진다",
-"o": "천의얼굴 데님, 서울 코엑스 더플라츠에서 펼쳐진다",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148485",
-"s": "국내 데님 시장에 새로운 글로벌 장이 열린다. 그동안 국내에서는 데님을 전문적으로 다루는 국제 규모의 전시와 산업 행사를 찾아보기 어려웠던 가운데 글로벌 데님 전문 플랫폼 데님스앤진스 Denimsandjeans D&J가 처음으로 한국을 찾는다.D&J Korea가 오는 9월 22일부터 23일까지 서울 코엑스 2층 더 플라츠에서 개최돼 한국의 데님 브랜드와 데님원단 소싱기업 이분야 스타트업 전문가 들에게 관심을 고조시킬 전망이다.단순히 원단과 의류를 보여주는 전시회에 그치지 않고 학생부터 디자이너 브랜드 관계자 제조 및 소싱 전문가 데",
-"c": "RETAIL",
-"x": "국내 데님 시장에 새로운 글로벌 장이 열린다. 그동안 국내에서는 데님을 전문적으로 다루는 국제 규모의 전시와 산업 행사를 찾아보기 어려웠던 가운데 글로벌 데님 전문 플랫폼 데님스앤진스 Denimsandjeans D&J가 처음으로 한국을 찾는다.D&J Korea가 오는 9월 22일부터 23일까지 서울 코엑스 2층 더 플라츠에서 개최돼 한국의 데님 브랜드와 데님원단 소싱기업 이분야 스타트업 전문가 들에게 관심을 고조시킬 전망이다.단순히 원단과 의류를 보여주는 전시회에 그치지 않고 학생부터 디자이너 브랜드 관계자 제조 및 소싱 전문가 데",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148485_130221_4432_v150.jpg",
-"g": [
-"데님",
-"전시회"
-],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "be64adc83afe0a82",
-"d": "2026-09-10",
-"t": "폐섬유 폴리에스터사, 상업생산 돌입",
-"o": "폐섬유 폴리에스터사, 상업생산 돌입",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81845",
-"s": "폐섬유에서 회수한 폴리에스터 원료를 다시 필라멘트사로 만드는 섬유 재활용 기술이 상업생산 단계로 확대된다. 미국 재활용 기업 Circ가 재생 PET칩을 공급하고 중국 성홍화섬신재료가 이를 원사로 양산하는 방식이다.Circ와 성홍화섬신재료는 지난달 재생 폴리에스터 필라멘트사의 상업생산 확대를 위한 파트너십을 체결했다.계약에 따라 성홍은 Circ의 재생 PET칩을 구매해 재생원료를 함유한 필라멘트사를 상업 규모로 생산한다.Circ는 폴리에스터와 셀룰로오스가 혼합된 폐섬유에서 각각의 원료를 분리·회수하는 섬유-섬유(textile-to-t",
-"c": "MATERIAL",
-"x": "폐섬유에서 회수한 폴리에스터 원료를 다시 필라멘트사로 만드는 섬유 재활용 기술이 상업생산 단계로 확대된다. 미국 재활용 기업 Circ가 재생 PET칩을 공급하고 중국 성홍화섬신재료가 이를 원사로 양산하는 방식이다.Circ와 성홍화섬신재료는 지난달 재생 폴리에스터 필라멘트사의 상업생산 확대를 위한 파트너십을 체결했다.계약에 따라 성홍은 Circ의 재생 PET칩을 구매해 재생원료를 함유한 필라멘트사를 상업 규모로 생산한다.Circ는 폴리에스터와 셀룰로오스가 혼합된 폐섬유에서 각각의 원료를 분리·회수하는 섬유-섬유(textile-to-t",
-"i": "https://cdn.itnk.co.kr/news/photo/202609/81845_53339_598.png",
-"g": [
-"r-PET",
-"리사이클"
-],
-"m": "국제섬유신문",
-"r": "국내",
-"v": 15,
-"h": 2,
-"w": "material",
-"e": [],
-"ms": [
-"국제섬유신문",
-"주제검색 · 국내소재"
-]
-},
-{
-"id": "b9381bf2cc6d2544",
-"d": "2026-09-10",
-"t": "인도의 조직화된 의류 소매 수익은 2027 회계연도에 12-13% 증가할 것입니다: Crisil",
-"o": "India’s Organised Apparel Retail Revenue to Grow 12-13% in FY27: Crisil",
-"u": "https://apparelresources.com/business-news/retail/indias-organised-apparel-retail-revenue-grow-12-13-fy27-crisil/",
-"s": "India’s organised apparel retail sector is expected to record revenue growth of 12-13% this fiscal, slightly lower than the 15% growth reported last fiscal, as consumers diversify discretionary spending beyond apparel, according to an analysis by Crisil Ratings of 41 organised apparel retailers, rep",
-"c": "RETAIL",
-"x": "India’s organised apparel retail sector is expected to record revenue growth of 12-13% this fiscal, slightly lower than the 15% growth reported last fiscal, as consumers diversify discretionary spending beyond apparel, according to an analysis by Crisil Ratings of 41 organised apparel retailers, representing around 28% of the organised apparel market. Growth is expected to […] The post India’s Organised Apparel Retail Revenue to Grow 12-13% in FY27: Crisil appeared first on Apparel Resources .",
-"i": "https://apparelresources.com/wp-content/uploads/2026/09/India’s-Organised-Apparel-Retail-Revenue-to-Grow-12-13-in-FY27-Crisil.jpg",
-"g": [],
-"m": "Apparel Resources",
-"r": "해외",
-"v": 9,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"Apparel Resources"
-]
-},
-{
-"id": "b494e5142c83373d",
-"d": "2026-09-10",
-"t": "팀버랜드, 50년 문화적 유산 조명하다",
-"o": "팀버랜드, 50년 문화적 유산 조명하다",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148475",
-"s": "글로벌 아웃도어 라이프스타일 브랜드 팀버랜드(Timberland)가 9월 10일 지난 50여 년간 브랜드 정체성을 함께 만들어온 사람과 문화, 커뮤니티를 조명하는 글로벌 캠페인 ‘The A-Z of Timberland’를 론칭했다.워크부츠에서 출발해 음악과 패션, 스포츠 등 다양한 문화 영역으로 확장해 온 팀버랜드의 역사를 ‘A-Z 사전’ 형식으로 풀어낸 캠페인이다. 지난 반세기 동안 소비자와 커뮤니티가 팀버랜드 제품을 각자의 방식으로 해석하면서 형성된 이야기와 문화적 코드를 담았다.캠페인은 브랜드 아카이브와 현대적인 콘텐츠, 소비",
-"c": "RETAIL",
-"x": "글로벌 아웃도어 라이프스타일 브랜드 팀버랜드(Timberland)가 9월 10일 지난 50여 년간 브랜드 정체성을 함께 만들어온 사람과 문화, 커뮤니티를 조명하는 글로벌 캠페인 ‘The A-Z of Timberland’를 론칭했다.워크부츠에서 출발해 음악과 패션, 스포츠 등 다양한 문화 영역으로 확장해 온 팀버랜드의 역사를 ‘A-Z 사전’ 형식으로 풀어낸 캠페인이다. 지난 반세기 동안 소비자와 커뮤니티가 팀버랜드 제품을 각자의 방식으로 해석하면서 형성된 이야기와 문화적 코드를 담았다.캠페인은 브랜드 아카이브와 현대적인 콘텐츠, 소비",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148475_130203_3459_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 8,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "b2e36ada9616ccef",
-"d": "2026-09-10",
-"t": "섬유에서 섬유 기회까지: Ismail Hossain Tushar, Bangladesh의 울 생태계 개발을 위한 새로운 역할 맡다",
-"o": "From Textile to Fibre Opportunity: Ismail Hossain Tushar Takes on a New Role to Develop Bangladesh’s Wool Ecosystem",
-"u": "https://textilefocus.com/from-textile-to-fibre-opportunity-ismail-hossain-tushar-takes-on-a-new-role-to-develop-bangladeshs-wool-ecosystem/",
-"s": "Bangladesh has built one of the world’s most extensive textile and apparel manufacturing ecosystems, with strong capabilities across spinning, knitting, weaving, dyeing, finishing, garment manufacturing and product development. Yet, when it comes to wool, the country’s story remains relatively limit",
-"c": "CHEMICAL",
-"x": "Bangladesh has built one of the world’s most extensive textile and apparel manufacturing ecosystems, with strong capabilities across spinning, knitting, weaving, dyeing, finishing, garment manufacturing and product development. Yet, when it comes to wool, the country’s story remains relatively limited. Ismail Hossain Tushar, with more than 13 years of experience across Bangladesh’s textile value chain, is taking on a new role with The Woolmark Company to explore how Bangladesh’s strong manufacturing capabilities can connect with the global wool ecosystem—and help develop a new story for wool in Bangladesh. Figure: Ismail Hossain Tushar, Business Development & Technical Representative (Bangladesh), The Woolmark Company Against this backdrop, Ismail Hossain Tushar is beginning a new professional chapter with The Woolmark Company as Business Development & Technical Representative – Bangladesh , effective 10 September 2026. But the significance of the move extends beyond a new professional appointment. At the centre of his activities will be a broader question: how can Bangladesh build a meaningful ecosystem around wool, and how can its existing textile capabilities connect with the wider global wool industry? Looking at wool through the Bangladesh textile lens Tushar brings more than 13 years of experience across different areas of Bangladesh’s textile industry. A Textile Engineering graduate from Ahsanullah University of Science and Technology (AUST), he later complemented his technical background with an MBA in Marketing from BRAC University and a Postgraduate Diploma in Textile Management from Bangladesh University of Textiles (BUTEX). His professional experience has included roles with Shore to Shore, Groz-Beckert, Dysin Group and Sieger Spintech, providing exposure to",
-"i": "https://textilefocus.com/wp-content/uploads/2026/09/Ismail-Hossain-Tushar.jpg",
-"g": [
-"울",
-"제직",
-"방글라데시"
-],
-"m": "Textile Focus",
-"r": "해외",
-"v": 19,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Focus"
 ]
 }
 ]

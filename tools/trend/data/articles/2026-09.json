@@ -540,9 +540,10 @@
   "score": 5,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Textile Today"
+   "Textile Today",
+   "주제검색 · 염색가공"
   ]
  },
  {
@@ -14763,6 +14764,32 @@
   ]
  },
  {
+  "key": "4964395ca9db131c",
+  "title": "Costco Shares Slip After 11% Jump in Quarterly Sales",
+  "title_ko": "Costco 주가는 분기별 매출 11% 증가 후 하락",
+  "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPdVFNRnZ5akd2WDRKblVZekhnV19CeV9qZkZGR0ItSHlJQ3lXNXc1MmVPMlVyMGpPV2tRWXZLYmZ1VFNkbFkySWJIRFoxZWxrN1N0b2Z0eWc0amxoNklQZGdXdjl4MXU5aUpHWUJJNUZfY21sN2QzMkFhZVR0cUFHZlptbjEyVWFCNU9CRkxYU0I4WFltTGVyS1BlYk5pb1NfZl9hV1lUbHJ0b3VPUWNZdA?oc=5",
+  "published": "2026-09-25",
+  "collected": "2026-10-25",
+  "summary": "Costco Shares Slip After 11% Jump in Quarterly Sales TradingView",
+  "content": "Costco Shares Slip After 11% Jump in Quarterly Sales TradingView",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
+  ]
+ },
+ {
   "key": "46a5fee8454a9d8a",
   "title": "EU’s New Greenwashing Rules Put Fashion’s Sustainability Claims in Crosshairs",
   "title_ko": null,
@@ -16796,7 +16823,7 @@
   "summary": "The US-Africa Trade Desk has launched the Trans-Atlantic Cotton Partnership with Mauritius, Lesotho and Kenya at the UN General Assembly […] The post US-Africa cotton partnership launches appeared first on Ecotextile News .",
   "content": "The US-Africa Trade Desk has launched the Trans-Atlantic Cotton Partnership with Mauritius, Lesotho and Kenya at the UN General Assembly […] The post US-Africa cotton partnership launches appeared first on Ecotextile News .",
   "image": "",
-  "image_tried": "2026-09-24T23:35:40+00:00",
+  "image_tried": "2026-10-25T22:51:50+00:00",
   "source": "Ecotextile News",
   "region": "해외",
   "category": "MATERIAL",
