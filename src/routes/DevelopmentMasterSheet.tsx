@@ -1318,7 +1318,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   /**
    * 보고용 숫자를 만들어 팝업을 띄운다.
    *
-   * 완료 판정이 화면과 다르다. 화면은 FL#, 보고는 실물 도착일(Received date)이다.
+   * 진행은 HOME과 같은 기준(DD Status "진행중")이고, 완료만 화면과 다르다.
+   * 화면의 완료는 FL#, 보고의 완료는 실물 도착일(Received date)이다.
    * FDS가 늦어 FL이 다음 주로 넘어가는 건이 흔해서 팀은 실물 기준으로 보고한다.
    * 자세한 이유는 `src/data/weekly-report.ts` 머리말에 적어 두었다.
    */
@@ -3144,7 +3145,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         {sortBy ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setSortBy(null)}><X className="size-4" />정렬 해제</Button> : null}
         {Object.keys(columnFilters).length ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setColumnFilters({})}><FilterX className="size-4" />필터 해제 ({Object.keys(columnFilters).length})</Button> : null}
         {/* 밖으로 내보내는 동작 둘. 테두리를 남겨 편집 도구와 구분한다. */}
-        <Button type="button" size="sm" variant="outline" title="주간 업무 보고에 붙일 현황 문장을 만듭니다. 완료는 Received date 기준입니다" onClick={openWeeklyReport}><ClipboardList className="size-4" />주간 보고</Button>
+        <Button type="button" size="sm" variant="outline" title="주간 업무 보고에 붙일 현황 문장을 만듭니다. 진행은 HOME과 같고 완료는 Received date 기준입니다" onClick={openWeeklyReport}><ClipboardList className="size-4" />주간 보고</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
         <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
         {canBackup ? <Button type="button" size="sm" variant="outline" disabled={backupExporting} title="DD 전체와 창고 상태·이력, 샘플대장을 필드 그대로 엑셀로 내려받습니다" onClick={() => void exportBackup()}>{backupExporting ? <Loader2 className="size-4 animate-spin" /> : <DatabaseBackup className="size-4" />}엑셀 백업</Button> : null}
@@ -3375,11 +3376,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>주간 보고 문장</DialogTitle>
-          <DialogDescription>최근 7일 기준입니다. 탭을 골라 고친 뒤 복사하세요.</DialogDescription>
+          <DialogDescription>완료와 신규는 최근 7일 기준입니다. 탭을 골라 고친 뒤 복사하세요.</DialogDescription>
           <p className="text-[11px] leading-relaxed text-[var(--muted-foreground)]">
-            <strong className="font-semibold text-[var(--foreground)]">완료는 Received date 기준입니다.</strong> FL# 기준이 아닙니다.
+            <strong className="font-semibold text-[var(--foreground)]">진행은 HOME과 같은 기준입니다.</strong> DD Status가 진행중인 행을 셉니다.
+            <strong className="font-semibold text-[var(--foreground)]"> 완료는 Received date 기준입니다.</strong> FL# 기준이 아닙니다.
             FDS가 늦어 FL 등록이 다음 주로 넘어가는 건도 원단을 받았으면 완료로 셉니다.
-            화면의 진행·완료 숫자와 다른 것이 정상입니다. DROP·HOLD·REJECT는 양쪽 모두에서 뺍니다.
+            DROP·HOLD·REJECT는 양쪽 모두에서 뺍니다. 실물을 받았는데 Status가 진행중인 행은 진행과 완료 양쪽에 듭니다.
             담당 탭의 카테고리 항목은 DD에 적힌 공정일로 만든 뼈대입니다. 협의 내용과 판단은 직접 채우세요.
             요약은 개발 건 이름으로 묶고, 상세는 FL#과 조직까지 한 줄씩 적습니다.
           </p>

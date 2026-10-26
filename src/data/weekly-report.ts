@@ -1,20 +1,29 @@
 /**
  * 주간 업무 보고용 집계.
  *
- * **웹 화면의 완료 판정과 기준이 다르다. 일부러 다르다.**
- * DD MASTER는 FL#이 형식에 맞게 들어오면 완료로 올린다(`recalculateDevelopmentRecords`).
- * 그런데 팀이 보고할 때 쓰는 완료는 **원단 실물을 받은 날(Received date)**이다.
- * 리뷰용 원단을 받는 날과 FL 등록에 필요한 FDS를 받는 날 사이 간격이 커서, 이번 주에 원단을
- * 받아 리뷰까지 끝냈는데 FDS가 늦어 FL은 다음 주에 등록되는 일이 흔하다. 그런 건은 화면에서는
- * 진행 중이지만 팀 기준으로는 이번 주 완료다.
+ * **진행은 HOME과 같은 기준이고, 완료만 화면과 다르다.**
  *
- * 그래서 화면은 화면대로 두고, 보고용 숫자만 이 파일에서 따로 센다.
- * 두 기준을 하나로 합치려 하지 말 것. 합치면 둘 중 한쪽이 반드시 틀어진다.
+ * 진행은 `derive.ts`의 `isInProgress`(DD Status 컬럼이 "진행중")를 그대로 쓴다.
+ * HOME의 "N건 진행 중" 카드와 언제나 같은 수가 나온다. 2026-10-26에 박향근이 맞추라고 정했다.
+ * 예전에는 "Received date가 공란인 건"을 진행으로 셌는데, 실물을 받았는데 Status를 진행중으로
+ * 둔 행이 진행에도 완료에도 안 들어가 보고서에서 통째로 사라졌다(실데이터 4건).
+ * **이 기준을 "수취일 공란"으로 되돌리지 말 것.** 그 구멍이 다시 열린다.
+ *
+ * 완료는 **원단 실물을 받은 날(Received date)**이고 보고 구간 안인 건이다.
+ * DD MASTER는 FL#이 형식에 맞게 들어오면 완료로 올리지만(`recalculateDevelopmentRecords`),
+ * 리뷰용 원단을 받는 날과 FL 등록에 필요한 FDS를 받는 날 사이 간격이 커서, 이번 주에 원단을
+ * 받아 리뷰까지 끝냈는데 FDS가 늦어 FL은 다음 주에 등록되는 일이 흔하다.
+ * **완료를 FL# 기준으로 되돌리지 말 것.**
+ *
+ * 진행은 지금 열려 있는 건을 세는 스냅샷이고 완료는 구간 안에 끝난 건을 세는 흐름이다.
+ * 종류가 다르므로 **한 행이 진행과 완료 양쪽에 들 수 있다.** 실물을 받았는데 Status가 아직
+ * 진행중인 행이 그렇다. HOME의 진행 카드와 완료 카드도 같은 식으로 겹친다. 버그가 아니다.
  *
  * 담당별 문장은 DD에 적힌 것까지만 만든다. "as is ok", "overweight 로 중량 개선 재가공 요청"
  * 같은 판단과 협의 내용은 데이터에 없다. 뼈대를 뽑아 주고 나머지는 사람이 채운다.
  */
 import { normalizeCategory } from "./xlsx-parsers"
+import { isInProgress } from "./derive"
 import { toDate } from "./format"
 import { ownerDisplayName, type DevRecord } from "./schema"
 
@@ -168,12 +177,14 @@ function buildSections(
   today: Date,
   freshRows: Set<DevRecord>,
   level: ReportDetailLevel,
+  doneSet: ReadonlySet<DevRecord>,
 ): WeeklyReportSection[] {
   return REPORT_CATEGORIES.flatMap((category) => {
     const scoped = rows.filter((record) => normalizeCategory(record.category) === category.key)
     if (!scoped.length) return []
-    const progress = scoped.filter((record) => !receivedKey(record)).length
-    const label = `${category.label} (진행 ${progress}건 / 완료 ${scoped.length - progress}건)`
+    // 완료 묶음은 구간 안에 실물이 온 건이다. 수취일이 있어도 구간 밖이면 진행에 남는다.
+    const done = scoped.filter((record) => doneSet.has(record)).length
+    const label = `${category.label} (진행 ${scoped.length - done}건 / 완료 ${done}건)`
 
     if (level === "detail") {
       const groups = new Map<string, { order: number; subject: string; state: string; count: number; fresh: number }>()
@@ -233,8 +244,8 @@ function buildSections(
         .map((item) => item.text)
     }
 
-    const doneLines = summarize(scoped.filter((record) => receivedKey(record)), false)
-    const progressLines = summarize(scoped.filter((record) => !receivedKey(record)), true)
+    const doneLines = summarize(scoped.filter((record) => doneSet.has(record)), false)
+    const progressLines = summarize(scoped.filter((record) => !doneSet.has(record)), true)
     const lines = doneLines.length && progressLines.length
       ? ["[완료]", ...doneLines, "[진행]", ...progressLines]
       : [...doneLines, ...progressLines]
@@ -263,10 +274,13 @@ export function buildWeeklyReport(
 
   const inRange = (key: string | null): boolean => Boolean(key && key >= from && key <= to)
 
-  // 보고 기준 진행 중 = 실물이 아직 안 온 건. 화면의 진행 중(FL# 기준)과 다르다.
-  const progressRows = counted.filter((record) => !receivedKey(record))
+  // 진행은 HOME과 같은 기준이다(Status "진행중"). 수취일을 보지 않는다.
+  const progressRows = counted.filter(isInProgress)
   const doneRows = counted.filter((record) => inRange(receivedKey(record)))
   const freshRows = progressRows.filter((record) => inRange(requestKey(record)))
+  // 두 묶음이 겹칠 수 있으므로 문장은 합집합으로 만든다. 같은 행이 두 줄로 나오면 안 된다.
+  const reportRows = [...new Set([...progressRows, ...doneRows])]
+  const doneSet = new Set(doneRows)
 
   const categoryCount = new Map<string, number>()
   let uncategorized = 0
@@ -303,8 +317,8 @@ export function buildWeeklyReport(
     owners: [...ownerMap.values()].sort((left, right) =>
       right.done - left.done || right.progress - left.progress || left.owner.localeCompare(right.owner, "ko-KR")),
     // 진행 건과 이번 구간 완료 건을 함께 적는다. 예전에 끝난 건은 보고서에 올릴 내용이 없다.
-    sections: owner ? buildSections([...progressRows, ...doneRows], today, new Set(freshRows), "summary") : [],
-    detailSections: owner ? buildSections([...progressRows, ...doneRows], today, new Set(freshRows), "detail") : [],
+    sections: owner ? buildSections(reportRows, today, new Set(freshRows), "summary", doneSet) : [],
+    detailSections: owner ? buildSections(reportRows, today, new Set(freshRows), "detail", doneSet) : [],
   }
 }
 
