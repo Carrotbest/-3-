@@ -155,6 +155,7 @@
 - 사내 표기 파서는 혼방(`T/R 70/30 30's/1`), 커버링(`cvr sp/pe 20/40`), 단독(`CM26'S/1`) 세 형식만 받는다. 꼬리(`SLUB (ISL504) 3:1`)는 버리고 **맨숫자 굵기(`Span 20`)는 `null`이다. 방적사인지 필라멘트인지 추측하지 말 것.** `FIBER_ALIASES`는 더하기만 한다. **`PE`는 입력만 받고 출력에 쓰지 않는다**(폴리에틸렌 혼동). 성분이 하나뿐인 원사는 굵기가 비율에 영향이 없다(굵기 0이면 원사가 통째로 사라지던 버그).
 - 저장은 **별도 컬렉션 `costSheets`**다. 버전이 쌓이는 이력이라 `state`에 두지 않는다. 문서 하나가 한 버전이고 `groupId`로 묶여 `version`이 올라간다(`saveCostSheet`가 기존 최대 버전+1). DD 레코드에는 포인터와 열 표시용 요약 `tech.costRef`만 넣는다(`sheetId`, `groupId`, `version`, `at`, `netKrwPerYd`, `netPerYd`). **`records`에 계산서 본문을 넣지 말 것.** 배열 통째로 재업로드되는 구조라 편집 비용이 계속 커진다.
 - **`firestore.rules`의 `costSheets`는 수동 배포다.** `.github/workflows`에 firebase 배포가 없고 `deploy.yml`은 Pages 빌드만 한다. 규칙을 안 올리면 맨 아래 `allow read, write: if false`에 걸려 저장이 permission denied로 막힌다. `firebase deploy --only firestore:rules`.
+- **화면 실물 확인은 2026-10-27에 끝났다.** 박향근이 팝업, 자료실, DD MASTER FL# 클릭을 다 열어 보고 이상 없다고 했다. 더 볼 것이 남아 있지 않다.
 - 권한 키는 `costSheet`(`/cost`)다. `normalizeScreenPermissions`가 없는 키를 `true`로 채우므로 기존 승인 사용자에게 바로 보인다.
 - DD MASTER COST 열 그룹 3열(₩/yd, $/yd, 계산일)은 `tech.costRef`를 읽는 보기 전용이다(`COMPUTED_COLUMN_IDS`). 기본 접힘이고 `dd-export.ts` 내보내기에는 넣지 않는다.
 - **마스터 단가가 바뀌어도 저장된 계산서를 자동으로 고치지 않는다.** `COST_STALE_DAYS`(180일)를 넘기면 계산일 칸과 자료실에 경과 배지만 띄우고 사람이 다시 계산한다.
@@ -295,6 +296,5 @@
 - 자료 라이브러리: 박향근 분류 검토(검토용 엑셀), 본문 전문 검색, 섬유 용어집 web book 화면.
 - RDDA 월 재계산·KPI 대조, RDDA REPORT 파싱.
 - DEVELOPMENT 담당자 process status 재배치(미결).
-- COST SHEET R272 원사 시세표(붙여넣기 입력). 원가계산의 마지막 조각이다.
-- COST SHEET 화면 실물 확인 미완. 계산은 기준값으로 맞췄지만 팝업·자료실·FL# 클릭을 아직 아무도 안 봤다. `firebase deploy --only firestore:rules` 를 먼저 돌려야 저장이 된다.
+- COST SHEET 원사 시세표(붙여넣기 입력). 원가계산의 마지막 조각이다. 지시서 번호는 착수할 때 새로 딴다.
 - 미결: 원본 `6085.xlsx` 수정 여부(수정본만 따로 있다. 진행 중 견적에 원본을 쓰면 옛 오류가 살아 있다), 6085 안의 `E7 Span 30de` 대 `D11 SPAN 20D` 불일치, 엑셀 K22/K25 단일행 제한(편직·염색이 한 줄씩. 행 삽입이 필요해 손대지 않았다).
