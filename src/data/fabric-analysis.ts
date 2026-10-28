@@ -70,9 +70,12 @@ export const analysisTodayValue = localDateValue
 export interface AnalysisWeeklyPoint {
   week: string
   label: string
+  /** 그 주에 의뢰된 건수. 막대 전체 높이다. */
   requested: number
-  finished: number
-  leadDays: number | null
+  /** 그중 지금 완료인 건. */
+  done: number
+  /** 그중 아직 완료가 아닌 건. requested - done. */
+  pending: number
 }
 
 const dateValue = (value: string): Date | null => {
@@ -101,14 +104,16 @@ export function analysisWeeklySeries(list: readonly AnalysisRequest[], today = n
       const date = dateValue(value)
       return Boolean(date && date >= start && date < finish)
     }
-    const completed = list.filter((item) => item.state === "완료" && inWeek(item.finishedAt))
-    const leads = completed.map(analysisLeadDays).filter((days): days is number => days != null)
+    // 분자와 분모의 주를 맞춘다. 막대 높이가 그 주 의뢰 건수라서,
+    // 완료도 "그 주에 의뢰된 건 중 완료인 것"으로 센다.
+    const requestedRows = list.filter((item) => item.state !== "작성" && inWeek(item.requestedAt))
+    const done = requestedRows.filter((item) => item.state === "완료").length
     return {
       week: localDateValue(start),
       label: `${start.getMonth() + 1}/${start.getDate()}`,
-      requested: list.filter((item) => item.state !== "작성" && inWeek(item.requestedAt)).length,
-      finished: completed.length,
-      leadDays: leads.length ? Number((leads.reduce((sum, days) => sum + days, 0) / leads.length).toFixed(1)) : null,
+      requested: requestedRows.length,
+      done,
+      pending: requestedRows.length - done,
     }
   })
 }
