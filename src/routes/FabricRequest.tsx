@@ -8,21 +8,23 @@
  * 행 높이는 사용자가 조절하되 글자 길이에 따라 자동으로 늘리지는 않는다.
  * 넘치는 셀 안에서만 세로 스크롤한다.
  */
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react"
 import { FlPerfMark } from "@/components/fabric/PerfBadge"
 import { Archive, ChevronDown, ChevronRight, ClipboardPaste, Copy, Download, Eraser, Flame, ImagePlus, Loader2, Pencil, Plus, Redo2, RotateCcw, Rows3, Scissors, Trash2, Undo2, Upload } from "lucide-react"
 import * as XLSX from "xlsx"
 import { useNavigate, useSearchParams } from "react-router-dom"
+import { buildRequestStyleFromAnalysis, hasLiveRequestLink } from "@/data/analysis-to-request"
 import { CONSTRUCTIONS, matchConstruction } from "@/data/constructions"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { buildFabricLedger } from "@/data/fabric-ledger"
 import { applyRequestLinks, clearRequestLinksByLineId, ddRecordsByLineId, ensureRequestLineIds, liveRequestLineIds, requestDdStatus } from "@/data/request-link"
-import { requestProcessStage, type ProcessStage } from "@/data/request-process-stage"
+import { isDroppedStage, isFlCompletedStage, requestProcessStage, type ProcessStage } from "@/data/request-process-stage"
 import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindColor, buildBoardArchive, canDeleteBoard, canManageBoard, closeBoard, migrateChartsToBoards, nextBoardSeq, removeBoardWithStyles, reopenBoard, resultOf } from "@/data/request-board"
 import type { AuditKind } from "@/data/audit"
 
 import { ProcessStageChip } from "@/components/request/ProcessStageChip"
 import { ReadOnlyBanner } from "@/components/layout/ReadOnlyBanner"
+import { AnalysisImportDialog } from "@/components/request/AnalysisImportDialog"
 import { DdCandidateDialog } from "@/components/request/DdCandidateDialog"
 import { ProcessStageDialog } from "@/components/request/ProcessStageDialog"
 import { RequestBoardHeader } from "@/components/request/RequestBoardHeader"
@@ -43,9 +45,29 @@ import { FillHandle, selectionShadow, type CellMove, type CellRect, type CellRef
 import { downloadBlob } from "@/data/dd-export"
 import { deleteRequestImage, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
 import { buildRequestWorkbook, mergeRequestStyles, parseRequestWorkbook, requestTemplateFileName } from "@/data/request-template"
-import { MEMBERS, REQUEST_RESULTS, styleRemarkText, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
+import { MEMBERS, REQUEST_RESULTS, styleRemarkText, type AnalysisRequest, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
 import { loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
-import { saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore, writeDevelopmentRecords } from "@/store/useAppStore"
+import { saveAnalysisRequests, saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore, writeDevelopmentRecords } from "@/store/useAppStore"
+
+/**
+ * 뷰포트 밖으로 넘치는 팝업을 안쪽으로 밀어 넣는다(R357).
+ * 높이를 상수로 어림하면 항목이 늘 때마다 아래가 잘린다. 그려 놓고 실제로 재서 옮긴다.
+ * 첫 칠에서는 `ready`가 거짓이라 보이지 않게 두고, 자리를 잡은 뒤에 보인다.
+ */
+function useViewportAnchor(anchor: { x: number; y: number } | null, gap = 8) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
+  useLayoutEffect(() => {
+    if (!anchor) { setPos(null); return }
+    const el = ref.current
+    if (!el) return
+    const box = el.getBoundingClientRect()
+    const left = Math.max(gap, Math.min(anchor.x, window.innerWidth - box.width - gap))
+    const top = Math.max(gap, Math.min(anchor.y, window.innerHeight - box.height - gap))
+    setPos({ left, top })
+  }, [anchor, gap])
+  return { ref, pos }
+}
 
 // ─────────────────────────────────────────────── 열 정의
 
@@ -734,6 +756,7 @@ export function FabricRequest() {
   const requests = useAppStore((state) => state.requests)
   const requestBoards = useAppStore((state) => state.requestBoards)
   const requestArchive = useAppStore((state) => state.requestArchive)
+  const analysisRequests = useAppStore((state) => state.analysisRequests)
   const authUser = useAuthStore((state) => state.user)
   const isOwner = useAuthStore((state) => state.isOwner)
   const boardMigrationRef = useRef(false)
@@ -805,6 +828,9 @@ export function FabricRequest() {
   const [activeBoard, setActiveBoard] = useState<string>(() => { try { return window.localStorage.getItem("fabric.request.activeBoard") || ALL_BOARDS } catch { return ALL_BOARDS } })
   const readOnly = activeBoard === ALL_BOARDS || activeBoard === ARCHIVE_VIEW
   const [boardDialog, setBoardDialog] = useState<"create" | "edit" | null>(null)
+  /** 분석 화면에서 넘어온 가져오기 대상(R352). 비어 있으면 팝업이 닫힌다. */
+  const [analysisImport, setAnalysisImport] = useState<AnalysisRequest[]>([])
+  const [analysisBusy, setAnalysisBusy] = useState(false)
   const [closeOpen, setCloseOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [archiveSelected, setArchiveSelected] = useState<string | null>(null)
@@ -814,7 +840,11 @@ export function FabricRequest() {
   const [editCell, setEditCell] = useState<(CellRef & { seed?: string }) | null>(null)
   const [range, setRange] = useState<{ anchor: CellRef; focus: CellRef } | null>(null)
   const [rowMenu, setRowMenu] = useState<{ x: number; y: number; cell: CellRef } | null>(null)
+  const menuAnchor = useMemo(() => rowMenu ? { x: rowMenu.x, y: rowMenu.y } : null, [rowMenu])
+  const rowMenuPos = useViewportAnchor(menuAnchor)
   const [confirmPrompt, setConfirmPrompt] = useState<ConfirmPrompt | null>(null)
+  const confirmAnchor = useMemo(() => confirmPrompt ? { x: confirmPrompt.x - 24, y: confirmPrompt.y - 12 } : null, [confirmPrompt])
+  const confirmPos = useViewportAnchor(confirmAnchor)
   // 보기 전용이면 묻지 않고 바로 알린다. 확인까지 받아 놓고 저장에서 막으면 두 번 속게 된다(R295).
   const askConfirm = (anchor: { x: number; y: number }, message: string, run: () => void, options?: { confirmLabel?: string; danger?: boolean }) => {
     if (readOnly) { setNotice({ kind: "error", text: READ_ONLY_HINT }); return }
@@ -893,6 +923,37 @@ export function FabricRequest() {
   }
 
   /**
+   * 옵션이 모두 끝나면 결과를 완료로 올린다(R359, R362).
+   * 끝난 옵션은 FL완료이거나 회색(DROP·REJECT)이다. HOLD와 미연결은 아니다.
+   *
+   * 한 방향이다. 올리기만 하고 되돌리지 않는다. DD 연결이 잠깐 끊겨도 결과가 진행중으로 돌아가면
+   * 사람이 정리해 둔 보드가 흔들린다.
+   * 사람이 고른 드롭·보류는 건드리지 않는다. 진행중인 건만 대상이다.
+   * 활성 보드만 본다. 보고 있지 않은 보드까지 고치면 그 보드 이력에 영문 모를 결과 변경이 쌓인다.
+   */
+  useEffect(() => {
+    if (readOnly || !activeBoardInfo || !currentUserCanEditKey("requests")) return
+    const now = new Date().toISOString()
+    let changed = 0
+    const next = requests.map((style) => {
+      if (style.boardId !== activeBoard || resultOf(style) !== "진행중" || style.options.length === 0) return style
+      // FL완료이거나 회색(DROP·REJECT)이면 그 옵션은 끝난 것이다(R362).
+      // 전부 회색인 건도 완료로 올린다. 결과 열에서 종결로 보여야 보드를 닫을 수 있다.
+      const closed = style.options.every((option) => {
+        const stage = requestProcessStage(ddByLine, option)
+        return isFlCompletedStage(stage) || isDroppedStage(stage)
+      })
+      if (!closed) return style
+      changed += 1
+      return { ...style, result: "완료" as const, resultAt: now, updatedAt: now }
+    })
+    if (!changed) return
+    if (commitRequests(next)) setNotice({ kind: "ok", text: `옵션이 모두 끝나 결과를 완료로 바꿨습니다. ${changed}건` })
+    // commitRequests는 매 렌더 새로 만들어지는 함수라 의존성에 넣지 않는다. 넣으면 effect가 끝없이 돈다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requests, ddByLine, activeBoard, activeBoardInfo, readOnly])
+
+  /**
    * 요청 옵션 하나를 DD 행 하나에 묶는다. 연결 정보는 DD 행 tech.requestLink 에만 저장한다.
    * 되돌리기는 이 화면 스택에 넣지 않는다. SETTING 작업 이력에 남고, 해제는 DD MASTER 팝업에서 한다.
    */
@@ -935,6 +996,37 @@ export function FabricRequest() {
   }
   function saveMutation(next: RequestStyle[]) { if (next === requests || readOnly) { if (readOnly) commitRequests(next); return } pushSnapshot(); commitRequests(next) }
 
+  /*
+   * 분석 건을 스타일로 만든다(R352).
+   * 되돌리기 스택에 넣지 않는다. 되돌리면 스타일만 사라지고 분석 쪽 `requestReqId`는 남아
+   * 그 건을 다시 넘길 수 없게 된다. 보드 종결이 스냅샷을 쌓지 않는 것과 같은 이유다.
+   */
+  const importFromAnalysis = async () => {
+    if (!analysisImport.length || analysisBusy) return
+    if (readOnly || !activeBoardInfo) { setNotice({ kind: "error", text: "받을 보드를 먼저 고르세요." }); return }
+    setAnalysisBusy(true)
+    try {
+      const base = nextBoardSeq(requests, activeBoard)
+      const pairs = analysisImport.map((item, index) => ({
+        analysis: item,
+        style: buildRequestStyleFromAnalysis(item, { boardId: activeBoard, chart: activeBoardInfo.name, seq: base + index }),
+      }))
+      // 작업 이력에는 신규 접수(intake)로 남긴다. AuditKind에 "가져오기"는 없다.
+      if (!commitRequests([...requests, ...pairs.map((pair) => pair.style)], "intake")) return
+      // 분석 쪽에 되돌아올 길을 남긴다. 요청 저장이 성공한 뒤에만 기록한다.
+      const linkById = new Map(pairs.map((pair) => [pair.analysis.id, pair.style.reqId]))
+      const now = new Date().toISOString()
+      saveAnalysisRequests(useAppStore.getState().analysisRequests.map((item) => {
+        const reqId = linkById.get(item.id)
+        return reqId ? { ...item, requestReqId: reqId, updatedAt: now } : item
+      }))
+      setAnalysisImport([])
+      setNotice({ kind: "ok", text: `분석 ${pairs.length}건을 「${activeBoardInfo.name}」 보드로 가져왔습니다. 옵션 사양을 채우세요.` })
+    } finally {
+      setAnalysisBusy(false)
+    }
+  }
+
   const upsert = (next: RequestStyle) => {
     const exists = requests.some((item) => item.reqId === next.reqId)
     const prepared = exists ? next : { ...next, boardId: activeBoard, chart: activeBoardInfo?.name ?? "", seq: next.seq || nextBoardSeq(requests, activeBoard) }
@@ -969,15 +1061,48 @@ export function FabricRequest() {
     setNotice({ kind: "ok", text: `DD 연결 ${removed}건을 함께 끊었습니다.` })
   }
 
-  const remove = (style: RequestStyle, anchor: { x: number; y: number }) => {
+  /**
+   * 지워진 스타일을 가리키던 분석 건의 `requestReqId`를 끊는다(R360).
+   * 안 끊으면 분석 화면에 REQ 딱지가 남고 그 건을 다시 넘길 수 없다.
+   * 분석 편집 권한이 없으면 조용히 넘어간다. 분석 화면은 살아 있는 스타일만 REQ로 치므로(2절)
+   * 끊지 못한 값이 남아도 사람에게는 잘못 보이지 않는다.
+   */
+  const unlinkAnalysis = (reqIds: readonly string[]) => {
+    const gone = new Set(reqIds)
+    if (!gone.size || !currentUserCanEditKey("analysisRequests")) return
+    const now = new Date().toISOString()
+    let changed = false
+    const next = useAppStore.getState().analysisRequests.map((item) => {
+      if (!item.requestReqId || !gone.has(item.requestReqId)) return item
+      changed = true
+      const { requestReqId: _unused, ...rest } = item
+      return { ...rest, updatedAt: now }
+    })
+    if (changed) saveAnalysisRequests(next)
+  }
+
+  /**
+   * 고른 스타일을 통째로 지운다(R355). 옵션, DD 연결, 사진이 함께 사라진다.
+   * 되돌리기 스택에 넣지 않는다. 사진 파일은 되돌릴 수 없어 스택에 넣으면 반쪽만 되살아난다.
+   */
+  const removeStyles = (targets: readonly RequestStyle[], anchor: { x: number; y: number }) => {
     setRowMenu(null)
-    askConfirm(anchor, `${style.garmentNo || "이 의뢰"} 건을 삭제할까요?\n옵션 ${style.options.length}건이 함께 지워집니다.`, () => {
-      commitRequests(requests.filter((item) => item.reqId !== style.reqId))
-      void dropDdLinks(style.options.map((option) => option.lineId))
+    if (!targets.length) return
+    const ids = new Set(targets.map((style) => style.reqId))
+    const optionCount = targets.reduce((sum, style) => sum + style.options.length, 0)
+    const message = targets.length === 1
+      ? `${targets[0].garmentNo || "이 의뢰"} 건을 삭제할까요?\n옵션 ${optionCount}건이 함께 지워집니다.`
+      : `고른 ${targets.length}건을 삭제할까요?\n옵션 ${optionCount}건이 함께 지워집니다.`
+    askConfirm(anchor, message, () => {
+      commitRequests(requests.filter((item) => !ids.has(item.reqId)))
+      unlinkAnalysis(targets.map((style) => style.reqId))
+      void dropDdLinks(targets.flatMap((style) => style.options.map((option) => option.lineId)))
       // 사진은 없으면 조용히 넘어간다. 실패해도 원장 삭제는 그대로 둔다.
-      void deleteRequestImage(style.reqId).catch(() => undefined)
+      targets.forEach((style) => { void deleteRequestImage(style.reqId).catch(() => undefined) })
     }, { confirmLabel: "삭제", danger: true })
   }
+
+  const remove = (style: RequestStyle, anchor: { x: number; y: number }) => removeStyles([style], anchor)
 
   /**
    * 스타일 맨 아래에 옵션 라인을 한 줄 붙인다. 편집 팝업을 열지 않고 표에서 바로 만든다.
@@ -1043,6 +1168,26 @@ export function FabricRequest() {
     }
     return map
   }, [ddByLine, visible])
+
+  /*
+   * 분석 화면에서 넘어온 건을 받는다(R352). 여기서 바로 만들지 않고 팝업으로 확인받는다.
+   * 어느 보드에 들어가는지 사람이 보고 정해야 한다.
+   * 파라미터는 읽자마자 지운다. 남겨 두면 새로 고칠 때마다 팝업이 다시 뜬다.
+   */
+  useEffect(() => {
+    const raw = searchParams.get("fromAnalysis")
+    if (!raw) return
+    const ids = new Set(raw.split(",").filter(Boolean))
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete("fromAnalysis")
+    setSearchParams(nextParams, { replace: true })
+    // 지워진 스타일을 가리키는 링크는 끊긴 것으로 본다(R360). 분석 화면의 넘기기 판정과 같아야 한다.
+    // 같지 않으면 분석 화면은 넘길 수 있다고 보내 놓고 여기서 "찾지 못했습니다"로 막는다.
+    const live = new Set(requests.map((style) => style.reqId))
+    const targets = analysisRequests.filter((item) => ids.has(item.id) && item.state === "완료" && !hasLiveRequestLink(item, live))
+    if (!targets.length) { setNotice({ kind: "error", text: "가져올 분석 건을 찾지 못했습니다. 이미 넘겼거나 완료 상태가 아닙니다." }); return }
+    setAnalysisImport(targets)
+  }, [searchParams, setSearchParams, analysisRequests, requests])
 
   useEffect(() => {
     const reqId = searchParams.get("focus")
@@ -1115,6 +1260,21 @@ export function FabricRequest() {
     if (column.scope === "style") return { kind: "style", style: slot.style }
     return slot.option ? { kind: "option", style: slot.style, option: slot.option } : null
   }
+  /** 지금 선택 범위가 걸친 스타일 묶음. 위에서 아래 순서를 지키고 같은 스타일은 한 번만 담는다. */
+  const selectedStyles = useMemo(() => {
+    if (!range) return []
+    const from = Math.min(range.anchor.row, range.focus.row)
+    const to = Math.max(range.anchor.row, range.focus.row)
+    const seen = new Set<string>()
+    const picked: RequestStyle[] = []
+    for (let row = from; row <= to; row += 1) {
+      const style = slots[row]?.style
+      if (!style || seen.has(style.reqId)) continue
+      seen.add(style.reqId)
+      picked.push(style)
+    }
+    return picked
+  }, [range, slots])
   const editableCell = (cell: CellRef) => cell.col !== "image" && editKindOf(cell.col) !== null && (cellLine(cell) !== null || visibleColumns[colIndexOf.get(cell.col) ?? -1]?.scope === "option")
   const setCellAnchor = (cell: CellRef, extend = false) => setRange((current) => extend && current ? { ...current, focus: cell } : { anchor: cell, focus: cell })
   const selectWholeRow = (row: number, extend = false) => {
@@ -1697,7 +1857,19 @@ export function FabricRequest() {
       const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true })
       const parsed = parseRequestWorkbook(workbook)
       const ignored = parsed.styles.filter((style) => style.chart.trim() && style.chart.trim() !== activeBoardInfo.name).length
-      const incoming = parsed.styles.map((style) => ({ ...style, boardId: activeBoard, chart: activeBoardInfo.name }))
+      // 스타일 열이 없는 파일(분석 내려받기)은 번호를 보드 기준으로 다시 매긴다.
+      // 이미 있는 Garment No.는 그 스타일의 번호를 그대로 쓴다. 재업로드로 순서가 흔들리지 않게 하려는 것이다.
+      const renumber = parsed.derivedColumns.includes("seq")
+      const seqByGarment = new Map(requests
+        .filter((style) => style.boardId === activeBoard)
+        .map((style) => [style.garmentNo.trim().toLocaleUpperCase("en-US"), style.seq]))
+      let nextSeq = nextBoardSeq(requests, activeBoard)
+      const incoming = parsed.styles.map((style) => {
+        const base = { ...style, boardId: activeBoard, chart: activeBoardInfo.name }
+        if (!renumber) return base
+        const found = seqByGarment.get(style.garmentNo.trim().toLocaleUpperCase("en-US"))
+        return { ...base, seq: found ?? nextSeq++ }
+      })
       const { merged, added, updated, droppedLineIds } = mergeRequestStyles(requests, incoming)
       commitRequests(merged, "upload")
       // 파일에서 빠진 옵션에 DD 행이 연결돼 있으면 알리기만 한다. 업로드로 DD 연결을 자동으로 풀지 않는다.
@@ -1717,7 +1889,7 @@ export function FabricRequest() {
       const style = line.style
       switch (column.id) {
         case "image":
-          return <ImageCell style={style} readOnly={readOnly} onUploaded={(paths) => patchStyle(style.reqId, paths)} onOpen={() => setPreview(style)} onDelete={(anchor) => removeImage(style, anchor)} />
+          return <ImageCell style={style} readOnly={readOnly} onUploaded={(paths) => patchStyle(style.reqId, { ...paths, imageFrom: undefined })} onOpen={() => setPreview(style)} onDelete={(anchor) => removeImage(style, anchor)} />
         case "garmentNo": return <span className="font-mono">{style.garmentNo}</span>
         case "boardName": {
           const board = requestBoards.find((item) => item.boardId === style.boardId)
@@ -1850,8 +2022,10 @@ export function FabricRequest() {
   const deleteBoard = () => {
     if (!activeBoardInfo || !isOwner) return
     const boardName = activeBoardInfo.name
+    const removedReqIds = requests.filter((style) => style.boardId === activeBoardInfo.boardId).map((style) => style.reqId)
     const next = removeBoardWithStyles(requests, requestBoards, activeBoardInfo.boardId)
     saveRequestsAndBoards(next.requests, next.boards, "clear")
+    unlinkAnalysis(removedReqIds)
     setUndoStack([]); setRedoStack([]); setActiveBoard(ALL_BOARDS); setBoardDialog(null); setDeleteOpen(false)
     setNotice({ kind: "ok", text: `보드 "${boardName}"와 스타일 ${next.removedStyles}건을 삭제했습니다.` })
   }
@@ -2132,6 +2306,13 @@ export function FabricRequest() {
                         const allDone = closedByStyle.get(style.reqId)?.allFl ?? false
                         return <div title="DD에 연결된 옵션 수 / 전체 옵션 수" className={`mt-0.5 text-[9px] tabular-nums ${allDone ? "text-[var(--chart-2)]" : "text-[var(--muted-foreground)]"}`}>DD {linkedCount}/{style.options.length}</div>
                       })() : null}
+                      {/* 분석에서 넘어온 건은 되돌아갈 길을 둔다(R352). 격자 칸이라 글라스 효과를 쓰지 않는다. */}
+                      {style.analysisAnNo ? <button
+                        type="button"
+                        title={`분석 ${style.analysisAnNo}에서 넘어온 건입니다`}
+                        className="mt-0.5 rounded-sm bg-sky-500/15 px-1 text-[9px] font-medium text-sky-700 hover:bg-sky-500/25 dark:text-sky-300"
+                        onClick={(event) => { event.stopPropagation(); navigate(`/fabric-analysis?q=${encodeURIComponent(style.analysisAnNo ?? "")}`) }}
+                      >AN</button> : null}
                       <span
                         aria-hidden="true"
                         title="끌어서 행 높이 조절 · 더블클릭: 기본 높이"
@@ -2203,8 +2384,9 @@ export function FabricRequest() {
         <div className="fixed inset-0 z-[85]" onMouseDown={() => setRowMenu(null)} onContextMenu={(event) => { event.preventDefault(); setRowMenu(null) }} />
         <div
           role="menu"
+          ref={rowMenuPos.ref}
           className="fixed z-[90] w-44 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-1 text-xs shadow-lg"
-          style={{ left: Math.min(rowMenu.x, window.innerWidth - 192), top: Math.min(rowMenu.y, window.innerHeight - 140) }}
+          style={{ left: rowMenuPos.pos?.left ?? rowMenu.x, top: rowMenuPos.pos?.top ?? rowMenu.y, visibility: rowMenuPos.pos ? "visible" : "hidden" }}
         >
           <p className="truncate px-2 py-1 text-[10px] text-[var(--muted-foreground)]">{menuLine?.style.garmentNo || "선택 영역"}</p>
           {[
@@ -2226,7 +2408,7 @@ export function FabricRequest() {
           <button type="button" role="menuitem" disabled={!undoStack.length} onClick={() => { setRowMenu(null); undoLast() }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)] disabled:opacity-40"><Undo2 className="size-3.5" /><span className="flex-1">되돌리기</span><span className="text-[10px]">Ctrl+Z</span></button>
           <button type="button" role="menuitem" disabled={!redoStack.length} onClick={() => { setRowMenu(null); redoLast() }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)] disabled:opacity-40"><Redo2 className="size-3.5" /><span className="flex-1">다시 실행</span><span className="text-[10px]">Ctrl+Y</span></button>
           </>}
-          {menuLine && !readOnly ? <><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setMoveStyle(menuLine.style); setRowMenu(null) }}><Rows3 className="size-3.5" />다른 보드로 옮기기</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setDraft(menuLine.style); setRowMenu(null) }}><Pencil className="size-3.5" />스타일 수정</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--destructive)] hover:bg-[var(--muted)]" onClick={() => remove(menuLine.style, { x: rowMenu.x, y: rowMenu.y })}><Trash2 className="size-3.5" />스타일 삭제</button></> : null}
+          {menuLine && !readOnly ? <><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setMoveStyle(menuLine.style); setRowMenu(null) }}><Rows3 className="size-3.5" />다른 보드로 옮기기</button><button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { setDraft(menuLine.style); setRowMenu(null) }}><Pencil className="size-3.5" />스타일 수정</button>{selectedStyles.length > 1 ? <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--destructive)] hover:bg-[var(--muted)]" onClick={() => removeStyles(selectedStyles, { x: rowMenu.x, y: rowMenu.y })}><Trash2 className="size-3.5" />고른 행 {selectedStyles.length}건 삭제</button> : null}<button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[var(--destructive)] hover:bg-[var(--muted)]" onClick={() => remove(menuLine.style, { x: rowMenu.x, y: rowMenu.y })}><Trash2 className="size-3.5" />스타일 삭제</button></> : null}
         </div>
       </> : null}
 
@@ -2236,8 +2418,9 @@ export function FabricRequest() {
         <div
           role="alertdialog"
           aria-label="확인"
+          ref={confirmPos.ref}
           className="fixed z-[100] w-64 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-3 text-xs shadow-lg"
-          style={{ left: Math.min(Math.max(8, confirmPrompt.x - 24), window.innerWidth - 272), top: Math.min(Math.max(8, confirmPrompt.y - 12), window.innerHeight - 136) }}
+          style={{ left: confirmPos.pos?.left ?? confirmPrompt.x, top: confirmPos.pos?.top ?? confirmPrompt.y, visibility: confirmPos.pos ? "visible" : "hidden" }}
         >
           <p className="whitespace-pre-wrap leading-snug">{confirmPrompt.message}</p>
           <div className="mt-3 flex justify-end gap-1.5">
@@ -2334,6 +2517,20 @@ export function FabricRequest() {
       <RequestBoardDialog open={boardDialog !== null} mode={boardDialog ?? "create"} board={boardDialog === "edit" ? activeBoardInfo ?? undefined : undefined} boards={requestBoards} teams={[...new Set(requestBoards.map((board) => board.team).filter(Boolean))]} isOwner={isOwner} canDelete={Boolean(activeBoardInfo && canDeleteBoard(activeBoardInfo, isOwner))} onSubmit={submitBoard} onDelete={() => { setBoardDialog(null); setDeleteOpen(true) }} onOpenChange={(open) => { if (!open) setBoardDialog(null) }} />
       <RequestBoardCloseDialog open={closeOpen} board={activeBoardInfo} styles={scoped} onConfirm={closeActiveBoard} onOpenChange={setCloseOpen} />
       <BoardDeleteDialog open={deleteOpen} board={activeBoardInfo} styleCount={deleteStats.styles} optionCount={deleteStats.options} linkedCount={deleteStats.linked} onConfirm={deleteBoard} onOpenChange={setDeleteOpen} />
+      <AnalysisImportDialog
+        targets={analysisImport}
+        boards={openBoards.map((board) => ({ boardId: board.boardId, name: board.name }))}
+        boardId={activeBoardInfo?.boardId ?? null}
+        blockedReason={openBoards.length === 0
+          ? "진행 중인 보드가 없습니다. 새 보드를 먼저 만드세요."
+          : null}
+        canCreateBoard={currentUserCanEditKey("requestBoards")}
+        busy={analysisBusy}
+        onSelectBoard={(boardId) => setActiveBoard(boardId)}
+        onCreateBoard={() => setBoardDialog("create")}
+        onConfirm={() => void importFromAnalysis()}
+        onClose={() => setAnalysisImport([])}
+      />
       <MoveStyleDialog open={moveStyle !== null} boards={openBoards.filter((board) => board.boardId !== activeBoard)} onOpenChange={(open) => { if (!open) setMoveStyle(null) }} onMove={(boardId) => { if (!moveStyle) return; const board = openBoards.find((item) => item.boardId === boardId); if (!board) return; saveMutation(requests.map((style) => style.reqId === moveStyle.reqId ? { ...style, boardId, chart: board.name, seq: nextBoardSeq(requests, boardId), updatedAt: new Date().toISOString() } : style)); setMoveStyle(null) }} />
 
       <PreviewDialog style={preview} onClose={() => setPreview(null)} />

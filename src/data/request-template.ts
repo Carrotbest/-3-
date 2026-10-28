@@ -22,12 +22,24 @@ type Band = "기본" | "ORIGINAL" | "분석" | "의뢰" | "옵션"
 interface TemplateColumn {
   band: Band
   head: string
+  /** 이름을 바꾸기 전 양식 파일을 계속 읽기 위한 옛 열 이름(R353). 내려받기는 `head`만 쓴다. */
+  aliases?: readonly string[]
   width: number
   /** 스타일 단위 값인지 옵션 라인 값인지 */
   scope: "style" | "option"
   key: string
   /** 나중에 더한 열. 이 열이 없는 옛 양식 파일도 읽는다. */
   optional?: boolean
+  /**
+   * 파일에 없어도 되는 열(R354). 업로드할 때 활성 보드에서 값이 정해진다.
+   * `optional`과 다르다. `optional`은 "옛 양식에 없던 열"이고 이쪽은 "분석 내려받기가 일부러 뺀 열"이다.
+   */
+  derivable?: boolean
+  /**
+   * REQUEST 화면 열 너비(px, R354). `FabricRequest.tsx`의 `FIXED_COLUMNS`·`GROUPS` 값을 그대로 옮긴 것이다.
+   * 화면 너비를 고치면 여기도 같이 고친다. 엑셀 폭은 글자 수 단위라 `screenWidth / 7`로 환산한다.
+   */
+  screenWidth?: number
 }
 
 /**
@@ -35,30 +47,30 @@ interface TemplateColumn {
  * CONS와 W'T는 YARN DETAIL에서 나눈 열이라 optional이다. 열 이름을 바꾸면 기존 양식 파일이 깨진다.
  */
 export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
-  { band: "기본", head: "순번", width: 6, scope: "style", key: "seq" },
-  { band: "기본", head: "차트", width: 20, scope: "style", key: "chart" },
-  { band: "기본", head: "단계", width: 7, scope: "style", key: "stage" },
-  { band: "ORIGINAL", head: "Garment Number", width: 15, scope: "style", key: "garmentNo" },
-  { band: "ORIGINAL", head: "Brand", width: 13, scope: "style", key: "brand" },
-  { band: "ORIGINAL", head: "Fabric Contents", width: 24, scope: "style", key: "contents" },
-  { band: "ORIGINAL", head: "Fabric Construction", width: 18, scope: "style", key: "origConstruction" },
-  { band: "ORIGINAL", head: "Weight (g/m2)", width: 11, scope: "style", key: "origWeight" },
-  { band: "분석", head: "Yarn analysis", width: 30, scope: "style", key: "yarnAnalysis" },
-  { band: "분석", head: "Construction (개발)", width: 18, scope: "style", key: "devConstruction" },
-  { band: "분석", head: "Comment", width: 24, scope: "style", key: "comment" },
-  { band: "분석", head: "분석 담당", width: 11, scope: "style", key: "analyst" },
-  { band: "의뢰", head: "URGENT", width: 8, scope: "style", key: "urgent" },
-  { band: "의뢰", head: "의뢰자", width: 11, scope: "style", key: "requester" },
-  { band: "의뢰", head: "개발 담당", width: 11, scope: "style", key: "developer" },
-  { band: "의뢰", head: "개발", width: 30, scope: "style", key: "devPlan" },
-  { band: "옵션", head: "Opt", width: 6, scope: "option", key: "no" },
-  { band: "옵션", head: "YARN DETAIL", width: 30, scope: "option", key: "yarnDetail" },
-  { band: "옵션", head: "CONS", width: 18, scope: "option", key: "construction", optional: true },
-  { band: "옵션", head: "W'T", width: 8, scope: "option", key: "weight", optional: true },
-  { band: "옵션", head: "COLOR", width: 18, scope: "option", key: "color" },
-  { band: "옵션", head: "DYEING METHOD", width: 13, scope: "option", key: "dyeingMethod" },
+  { band: "기본", head: "스타일", aliases: ["순번"], width: 6, scope: "style", key: "seq", derivable: true },
+  { band: "기본", head: "차트", width: 20, scope: "style", key: "chart", derivable: true },
+  { band: "기본", head: "단계", width: 7, scope: "style", key: "stage", derivable: true },
+  { band: "ORIGINAL", head: "Garment Number", width: 15, scope: "style", key: "garmentNo", screenWidth: 120 },
+  { band: "ORIGINAL", head: "Brand", width: 13, scope: "style", key: "brand", screenWidth: 100 },
+  { band: "ORIGINAL", head: "Fabric Contents", width: 24, scope: "style", key: "contents", screenWidth: 150 },
+  { band: "ORIGINAL", head: "Fabric Construction", width: 18, scope: "style", key: "origConstruction", screenWidth: 120 },
+  { band: "ORIGINAL", head: "Weight (g/m2)", width: 11, scope: "style", key: "origWeight", screenWidth: 80 },
+  { band: "분석", head: "Yarn analysis", width: 30, scope: "style", key: "yarnAnalysis", screenWidth: 180 },
+  { band: "분석", head: "Construction (개발)", width: 18, scope: "style", key: "devConstruction", screenWidth: 120 },
+  { band: "분석", head: "Comment", width: 24, scope: "style", key: "comment", screenWidth: 160 },
+  { band: "분석", head: "분석 담당", width: 11, scope: "style", key: "analyst", screenWidth: 90 },
+  { band: "의뢰", head: "URGENT", width: 8, scope: "style", key: "urgent", screenWidth: 64 },
+  { band: "의뢰", head: "의뢰자", width: 11, scope: "style", key: "requester", screenWidth: 90 },
+  { band: "의뢰", head: "개발 담당", width: 11, scope: "style", key: "developer", screenWidth: 90 },
+  { band: "의뢰", head: "개발", width: 30, scope: "style", key: "devPlan", screenWidth: 200 },
+  { band: "옵션", head: "Opt", width: 6, scope: "option", key: "no", screenWidth: 50 },
+  { band: "옵션", head: "YARN DETAIL", width: 30, scope: "option", key: "yarnDetail", screenWidth: 180 },
+  { band: "옵션", head: "CONS", width: 18, scope: "option", key: "construction", optional: true, screenWidth: 130 },
+  { band: "옵션", head: "W'T", width: 8, scope: "option", key: "weight", optional: true, screenWidth: 64 },
+  { band: "옵션", head: "COLOR", width: 18, scope: "option", key: "color", screenWidth: 120 },
+  { band: "옵션", head: "DYEING METHOD", width: 13, scope: "option", key: "dyeingMethod", screenWidth: 90 },
   // R291에서 스타일 단위로 옮겼다. 열 위치와 이름은 옛 양식 파일을 계속 읽기 위해 그대로 둔다.
-  { band: "옵션", head: "REMARK", width: 26, scope: "style", key: "remark" },
+  { band: "옵션", head: "REMARK", width: 26, scope: "style", key: "remark", screenWidth: 220 },
 ]
 
 const BAND_COLOR: Record<Band, string> = {
@@ -72,12 +84,12 @@ const BAND_COLOR: Record<Band, string> = {
 const HEADER_FILL = "FFEFF1F5"
 const BORDER = "FFBFBFBF"
 
-const columnIndex = (key: string): number => TEMPLATE_COLUMNS.findIndex((column) => column.key === key)
+const columnIndex = (columns: readonly TemplateColumn[], key: string): number => columns.findIndex((column) => column.key === key)
 
 /** 밴드가 이어지는 구간을 병합 범위로 접는다. */
-function bandRanges(): { band: Band; from: number; to: number }[] {
+function bandRanges(columns: readonly TemplateColumn[]): { band: Band; from: number; to: number }[] {
   const ranges: { band: Band; from: number; to: number }[] = []
-  TEMPLATE_COLUMNS.forEach((column, index) => {
+  columns.forEach((column, index) => {
     const last = ranges[ranges.length - 1]
     if (last && last.band === column.band) last.to = index
     else ranges.push({ band: column.band, from: index, to: index })
@@ -121,7 +133,22 @@ const cellOf = (style: RequestStyle, option: RequestOption | null, key: string):
  * 스타일 1건은 옵션 수만큼 행을 쓴다. 스타일 값은 첫 행에만 적는다. 엑셀에서 읽기 좋고
  * 파서도 그 규칙으로 되읽는다.
  */
-export async function buildRequestWorkbook(styles: readonly RequestStyle[] = []): Promise<Blob> {
+export interface RequestWorkbookOptions {
+  /** 기본 밴드(스타일·차트·단계)를 빼고 쓴다. 분석 내려받기 전용(R354). */
+  dropBasicBand?: boolean
+  /** 스타일마다 최소 이만큼 행을 만든다. 남는 줄은 Opt 번호만 적힌 빈 줄이다. */
+  minOptionRows?: number
+  /** 스타일 밴드(scope가 style인 열)를 그 스타일의 행 수만큼 세로 병합한다. */
+  mergeStyleCells?: boolean
+  /** 열 너비를 REQUEST 화면 비율로 맞춘다(7절). */
+  matchScreenWidths?: boolean
+}
+
+export async function buildRequestWorkbook(
+  styles: readonly RequestStyle[] = [],
+  options: RequestWorkbookOptions = {},
+): Promise<Blob> {
+  const columns = options.dropBasicBand ? TEMPLATE_COLUMNS.filter((column) => column.band !== "기본") : TEMPLATE_COLUMNS
   // exceljs는 CJS라 번들러와 Node에서 default 위치가 달라진다. 둘 다 받아 준다.
   const loaded = await import("exceljs")
   const ExcelJS = ((loaded as unknown as { default?: typeof loaded }).default ?? loaded)
@@ -129,10 +156,16 @@ export async function buildRequestWorkbook(styles: readonly RequestStyle[] = [])
   workbook.creator = "Fabric R&D"
   workbook.created = new Date()
 
-  const ws = workbook.addWorksheet("REQUEST", { views: [{ state: "frozen", xSplit: 4, ySplit: 2 }] })
-  TEMPLATE_COLUMNS.forEach((column, index) => { ws.getColumn(index + 1).width = column.width })
+  const frozen = columnIndex(columns, "garmentNo") + 1
+  const ws = workbook.addWorksheet("REQUEST", { views: [{ state: "frozen", xSplit: frozen, ySplit: 2 }] })
+  // 엑셀 폭 1은 기본 글꼴 숫자 한 자 폭이다. 화면 px를 7로 나누면 두 화면이 거의 같은 비율로 보인다.
+  const widthOf = (column: TemplateColumn): number => {
+    if (!options.matchScreenWidths || column.screenWidth === undefined) return column.width
+    return Math.min(42, Math.max(6, Math.round(column.screenWidth / 7)))
+  }
+  columns.forEach((column, index) => { ws.getColumn(index + 1).width = widthOf(column) })
 
-  for (const range of bandRanges()) {
+  for (const range of bandRanges(columns)) {
     if (range.to > range.from) ws.mergeCells(1, range.from + 1, 1, range.to + 1)
     const cell = ws.getCell(1, range.from + 1)
     cell.value = range.band
@@ -144,7 +177,7 @@ export async function buildRequestWorkbook(styles: readonly RequestStyle[] = [])
 
   const headRow = ws.getRow(2)
   headRow.height = 28
-  TEMPLATE_COLUMNS.forEach((column, index) => {
+  columns.forEach((column, index) => {
     const cell = headRow.getCell(index + 1)
     cell.value = column.head
     cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_FILL } }
@@ -158,14 +191,18 @@ export async function buildRequestWorkbook(styles: readonly RequestStyle[] = [])
 
   let rowIndex = 3
   for (const style of styles) {
-    const options: (RequestOption | null)[] = style.options.length ? style.options : [null]
-    options.forEach((option, offset) => {
+    const own: (RequestOption | null)[] = style.options.length ? style.options : [null]
+    // 모자라는 만큼 빈 줄을 붙인다. 빈 줄에는 Opt 번호만 적힌다(아래 cellOf 설명).
+    const pad = Math.max(0, (options.minOptionRows ?? 0) - own.length)
+    const lines: (RequestOption | null)[] = [...own, ...Array.from({ length: pad }, () => null)]
+    const startRow = rowIndex
+    lines.forEach((option, offset) => {
       const row = ws.getRow(rowIndex++)
-      TEMPLATE_COLUMNS.forEach((column, index) => {
-        // 스타일 값은 첫 행에만. 아래 옵션 행은 비워 둬야 파서가 같은 스타일로 묶는다.
-        const value = column.scope === "style" && offset > 0 ? null : cellOf(style, option, column.key)
+      columns.forEach((column, index) => {
         const cell = row.getCell(index + 1)
-        cell.value = value
+        if (column.scope === "style" && offset > 0) cell.value = null
+        else if (column.key === "no") cell.value = offset + 1
+        else cell.value = cellOf(style, option, column.key)
         cell.font = { size: 9 }
         cell.alignment = { vertical: "top", wrapText: true }
         cell.border = {
@@ -174,6 +211,13 @@ export async function buildRequestWorkbook(styles: readonly RequestStyle[] = [])
         }
       })
     })
+    const endRow = rowIndex - 1
+    if (options.mergeStyleCells && endRow > startRow) {
+      columns.forEach((column, index) => {
+        if (column.scope !== "style") return
+        ws.mergeCells(startRow, index + 1, endRow, index + 1)
+      })
+    }
   }
 
   // 안내 시트. 파서는 REQUEST 시트만 읽으므로 여기 내용은 자유다.
@@ -211,7 +255,7 @@ export async function buildRequestWorkbook(styles: readonly RequestStyle[] = [])
   // CONS 드롭다운. 목록이 길어 수식 문자열로 못 넣으므로 숨김 시트를 참조한다.
   const lists = workbook.addWorksheet("LISTS", { state: "hidden" })
   CONSTRUCTIONS.forEach((name, index) => { lists.getCell(index + 1, 1).value = name })
-  const consColumn = columnIndex("construction") + 1
+  const consColumn = columnIndex(columns, "construction") + 1
   const lastRow = Math.max(rowIndex, 3) + 500
   for (let row = 3; row < lastRow; row += 1) {
     ws.getCell(row, consColumn).dataValidation = {
@@ -261,6 +305,8 @@ export interface RequestParseResult {
   styles: RequestStyle[]
   /** 사람이 고칠 수 있는 문제만 담는다. 치명적이면 throw 한다. */
   warnings: string[]
+  /** 파일에 없어서 화면이 채워야 하는 열(R354). 지금은 seq, chart, stage 셋이다. */
+  derivedColumns: string[]
 }
 
 /**
@@ -279,9 +325,12 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
   // CONS와 W'T가 없는 옛 양식은 두 값을 비운 채 읽는다.
   const header = (grid[1] ?? []).map((value) => asText(value))
   const indexByKey = new Map<string, number>()
+  const derived: string[] = []
   for (const column of TEMPLATE_COLUMNS) {
-    const found = header.findIndex((head) => head === column.head)
+    const names = [column.head, ...(column.aliases ?? [])]
+    const found = header.findIndex((head) => names.includes(head))
     if (found >= 0) indexByKey.set(column.key, found)
+    else if (column.derivable) derived.push(column.key)
     else if (!column.optional) throw new Error(`양식이 다릅니다. 2행에 "${column.head}" 열이 없습니다. 내려받은 양식을 그대로 쓰세요.`)
   }
 
@@ -300,6 +349,9 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
     const excelRow = r + 1
     const garmentNo = asText(at(row, "garmentNo"))
     const hasOption = optionKeys.some((key) => asText(at(row, key)) !== "")
+    // Opt 번호만 적힌 줄은 내려받은 양식의 빈 자리다. 경고 없이 건너뛴다(R354).
+    const onlyOptNo = !hasOption && asText(at(row, "no")) !== ""
+      && TEMPLATE_COLUMNS.every((column) => column.key === "no" || asText(at(row, column.key)) === "")
     const hasAnything = TEMPLATE_COLUMNS.some((column) => asText(at(row, column.key)) !== "")
     if (!hasAnything) continue
 
@@ -340,7 +392,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
       current.remark = [current.remark ?? "", trailingRemark].filter(Boolean).join("\n")
     }
     if (!hasOption) {
-      if (!trailingRemark) warnings.push(`${excelRow}행: Garment Number도 옵션 값도 없어 건너뛰었습니다.`)
+      if (!trailingRemark && !onlyOptNo) warnings.push(`${excelRow}행: Garment Number도 옵션 값도 없어 건너뛰었습니다.`)
       continue
     }
     if (!current) {
@@ -351,7 +403,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
   }
 
   if (styles.length === 0) throw new Error("읽어 들인 스타일이 없습니다. Garment Number를 채웠는지 확인해 주세요.")
-  return { styles, warnings }
+  return { styles, warnings, derivedColumns: derived }
 }
 
 function readOption(

@@ -123,3 +123,21 @@ export function requestProcessStage(byLine: Map<string, DevRecord[]>, option: Re
     record,
   }
 }
+
+/**
+ * 이 옵션이 FL완료까지 갔는가(R359).
+ * 멈춘 건(HOLD·DROP·REJECT)과 미연결은 거짓이다. 멈춘 것은 끝난 것이 아니다.
+ */
+export function isFlCompletedStage(stage: ProcessStage): boolean {
+  if (!stage.linked || stage.halted) return false
+  const last = stage.steps[stage.steps.length - 1]
+  return Boolean(last && last.key === "fl" && stage.currentIndex === stage.steps.length - 1)
+}
+
+/**
+ * 화면에서 회색으로 죽은 옵션인가(R362). DROP과 REJECT뿐이다.
+ * HOLD는 앰버다. 멈춘 것이지 끝난 것이 아니라 종결로 세지 않는다(2026-10-07 확정).
+ */
+export function isDroppedStage(stage: ProcessStage): boolean {
+  return stage.halted === "DROP" || stage.halted === "REJECT"
+}

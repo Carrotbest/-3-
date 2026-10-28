@@ -169,6 +169,18 @@ export interface RequestStyle {
    * 값이 `undefined`면 아직 옮기지 않은 옛 데이터다. 읽을 때는 `styleRemarkText`를 쓴다.
    */
   remark?: string
+  /**
+   * 이 스타일이 넘어온 분석 건 id(R352). 없으면 분석에서 오지 않은 건이다.
+   * 엑셀 양식(`TEMPLATE_COLUMNS`)에는 없다. 웹에서만 사는 값이다.
+   */
+  analysisId?: string
+  /** 넘어온 분석 건의 AN 번호. 표시용이며 판정에 쓰지 않는다. */
+  analysisAnNo?: string
+  /**
+   * 사진이 분석 건에서 빌려 온 것인가(R361). 경로가 `requests/analysis-{분석id}/...`를 가리킨다.
+   * 의뢰 화면에서 사진을 새로 올리면 이 값을 뗀다. 삭제는 `reqId` 기준이라 이 값과 무관하다.
+   */
+  imageFrom?: "analysis"
   options: RequestOption[]
   createdAt: string
   updatedAt: string
