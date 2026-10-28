@@ -5,7 +5,6 @@ import {
   CalendarDays,
   Calculator,
   ClipboardList,
-  FlaskConical,
   Globe2,
   Layers3,
   LayoutDashboard,
@@ -83,6 +82,7 @@ export const navigationGroups: NavigationGroup[] = [
         path: "/development/workspace",
         icon: LayoutGrid,
         children: [
+          { label: "PROGRESS OVERVIEW", path: "/development" },
           { label: "EU", path: "/development/eu" },
           { label: "SEASON", path: "/development/season" },
           { label: "CORE", path: "/development/core" },
@@ -90,7 +90,6 @@ export const navigationGroups: NavigationGroup[] = [
         ],
       },
       { label: "COST SHEET", path: "/cost", icon: Calculator },
-      { label: "PROGRESS OVERVIEW", path: "/development", icon: FlaskConical },
       { label: "WAREHOUSE", path: "/warehouse", icon: Boxes },
     ],
   },

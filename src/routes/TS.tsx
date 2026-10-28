@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { materialsOf, tsMaterials } from "@/data/derive"
-import { fmtDate, tsRequester } from "@/data/format"
+import { fmtDate, toDate, tsRequester } from "@/data/format"
 import { httpsMaterialLink, MEMBERS, ownerDisplayName } from "@/data/schema"
 import { type TsRecord, type TsState } from "@/data/sample"
 import { saveTsRecords, useAppStore } from "@/store/useAppStore"
@@ -38,6 +38,12 @@ const TS_STATE_DOT: Record<TsState, string> = {
   등록: "bg-sky-500",
   처리중: "bg-amber-500",
   완료: "bg-emerald-500",
+}
+
+/** 정렬용 접수일. 날짜를 못 읽는 행은 맨 아래로 보낸다(R366). */
+function tsReceivedTime(row: TsRecord): number {
+  const date = toDate(row.receivedAt)
+  return date ? date.getTime() : Number.NEGATIVE_INFINITY
 }
 
 function TsStateChip({ state }: { state: TsState }) {
@@ -426,11 +432,18 @@ export function TS() {
   }), [rows])
   const filteredRows = useMemo(() => {
     const query = search.normalize("NFKC").trim().toLocaleLowerCase("ko-KR")
-    return rows.filter((row) => {
+    const matched = rows.filter((row) => {
       if (activeState && row.state !== activeState) return false
       if (!query) return true
       return [row.subject, row.from, tsRequester(row).dept, row.advisor, row.inquiry]
         .some((value) => value.normalize("NFKC").toLocaleLowerCase("ko-KR").includes(query))
+    })
+    // 최근 접수일이 맨 위다. 세 탭이 이 배열 하나를 쓴다(R366).
+    return matched.sort((left, right) => {
+      const gap = tsReceivedTime(right) - tsReceivedTime(left)
+      if (gap !== 0) return gap
+      // 같은 날이면 번호가 큰 쪽이 위다.
+      return right.id.localeCompare(left.id, "en")
     })
   }, [activeState, rows, search])
   const columns: DataTableColumn<TsRecord>[] = [

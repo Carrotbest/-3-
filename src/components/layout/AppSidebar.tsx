@@ -22,7 +22,7 @@ interface AppSidebarProps {
 interface SidebarLinkProps {
   item: NavigationItem
   collapsed: boolean
-  onNavigate: () => void
+  onNavigate: (path: string) => void
   active?: boolean
   badge?: NavBadgeValue
 }
@@ -31,8 +31,8 @@ function SidebarLink({ item, collapsed, onNavigate, active = false, badge }: Sid
   const link = (
     <NavLink
       to={item.path}
-      end={item.path === "/" || item.path === "/development"}
-      onClick={onNavigate}
+      end={item.path === "/"}
+      onClick={() => onNavigate(item.path)}
       data-active={active ? "true" : undefined}
       className="nav-glass group flex h-10 items-center gap-2.5 rounded-[12px] pl-2 pr-3 text-[11.5px] text-[var(--sidebar-foreground)] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)]"
     >
@@ -67,6 +67,17 @@ function SidebarLink({ item, collapsed, onNavigate, active = false, badge }: Sid
   )
 }
 
+/** 그 경로를 가진 상위 항목의 path. 상위 자신이거나 하위 중 하나면 그 묶음이다. */
+function parentPathForNavigation(path: string): string | null {
+  for (const group of navigationGroups) {
+    for (const item of group.items) {
+      if (!item.children) continue
+      if (item.path === path || item.children.some((child) => child.path === path)) return item.path
+    }
+  }
+  return null
+}
+
 export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleCollapsed }: AppSidebarProps) {
   const location = useLocation()
   const isOwner = useAuthStore((state) => state.isOwner)
@@ -83,7 +94,12 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
     .map((group) => ({
       ...group,
       // ownerOnly 항목은 화면 권한을 주더라도 소유자에게만 보인다.
-      items: group.items.filter((item) => item.ownerOnly ? isOwner : isOwner || canAccessScreenPath(item.path, screenPermissions)),
+      items: group.items
+        .filter((item) => item.ownerOnly ? isOwner : isOwner || canAccessScreenPath(item.path, screenPermissions))
+        // 하위 메뉴도 같은 판정을 받는다. PROGRESS OVERVIEW는 상위 DD MASTER와 권한 키가 다르다(R364).
+        .map((item) => item.children
+          ? { ...item, children: item.children.filter((child) => isOwner || canAccessScreenPath(child.path, screenPermissions)) }
+          : item),
     }))
     .filter((group) => group.items.length > 0)
 
@@ -92,11 +108,13 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
   const overlay = collapsed && revealed
   const closeReveal = () => {
     setRevealed(false)
-    setOpenMap({})
   }
-  const handleNavigate = () => {
+  const handleNavigate = (path: string) => {
     onMobileClose()
-    closeReveal()
+    setRevealed(false)
+    // 고른 항목이 속한 묶음은 열어 둔다. 그 밖으로 옮길 때만 접는다(R365).
+    const keep = parentPathForNavigation(path)
+    setOpenMap((current) => (keep && current[keep] ? { [keep]: true } : {}))
   }
 
   return (
@@ -215,7 +233,7 @@ export function AppSidebar({ collapsed, mobileOpen, onMobileClose, onToggleColla
                                   key={child.path}
                                   to={child.path}
                                   end
-                                  onClick={handleNavigate}
+                                  onClick={() => handleNavigate(child.path)}
                                   tabIndex={isOpen ? undefined : -1}
                                   className="nav-glass block rounded-[10px] px-3 py-1.5 text-[11px] text-[var(--muted-foreground)] [--nav-origin:10px_50%] outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--sidebar-ring)]"
                                 >
