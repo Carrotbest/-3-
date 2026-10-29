@@ -817,7 +817,7 @@ const TECH_PATHS: Record<string, string[]> = {
   developer: ["development", "developer"], co: ["development", "co"], developmentNo: ["development", "developmentNo"], arrangeNo: ["arrangeNo"], yarnDetail: ["yarnDetail"], bodyNo: ["bodyNo"],
   finishingA: ["finishingSlots", "a"], finishingB: ["finishingSlots", "b"], finishingC: ["finishingSlots", "c"], finishingD: ["finishingSlots", "d"],
   yarnMill: ["mills", "yarn"], yarnStatus: ["processDates", "yarn"], knittingMill: ["mills", "knitting"], knittingStatus: ["processDates", "knitting"], dyeingMill: ["mills", "dyeing"], dyeingStatus: ["processDates", "dyeing"], finishingMill: ["mills", "finishing"], finishingStatus: ["processDates", "finishing"],
-  // 목표일(R369). 격자에 열로 서지 않고 공정 날짜 칸 편집기 안에서만 쓴다.
+  // 목표일(R369). 격자에 `yarnTarget` 등 네 열로 서며 기본 숨김이다.
   // 저장은 완료일과 같은 `commitCell` 길을 타야 Ctrl+Z가 함께 되돌린다.
   yarnTarget: ["targetDates", "yarn"], knittingTarget: ["targetDates", "knitting"], dyeingTarget: ["targetDates", "dyeing"], finishingTarget: ["targetDates", "finishing"],
   fds: ["sampleDates", "fds"], yds: ["sampleDates", "yds"], optionProgress: ["optionProgress"], review: ["review"], actualWidth: ["actual", "width"], actualWeight: ["actual", "weight"], actualBalance: ["actual", "balance"], shrinkageLength: ["actual", "shrinkageLength"], shrinkageWidth: ["actual", "shrinkageWidth"],
