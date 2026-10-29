@@ -910,13 +910,13 @@ function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string, 
   if (!path) return record
   const tech = structuredClone(record.tech ?? {}) as DevTechnical
   setNested(tech as unknown as Record<string, unknown>, path, value === "" ? undefined : value)
-  // 목표일을 넣으면 실행일이 비어 있을 때만 같은 날로 따라 채운다(R369, 2026-10-29 박향근 안).
-  // 처음에는 둘이 같아 괄호가 안 뜨고, 사람이 실행일을 고치는 순간 `(+3)`처럼 차이가 드러난다.
-  // **이미 적힌 실행일은 건드리지 않는다.** 진행 중인 건의 실적을 목표로 되돌리면 안 된다.
-  const autoProcess = TARGET_PROCESS_BY_COLUMN[column.id]
-  if (autoProcess && input.trim() && !String(record.tech?.processDates?.[autoProcess] ?? "").trim()) {
-    setNested(tech as unknown as Record<string, unknown>, ["processDates", autoProcess], input)
-  }
+  // **목표일을 완료일 칸에 따라 적지 말 것(R372).** R369가 괄호를 안 띄우려고 그렇게 했다가 뺐다.
+  // `processDates`는 `dd-workflow.ts`의 `reached()`가 `날짜 <= 오늘`로 읽는다. 목표일을 복사해 두면
+  // 그 날이 지나는 순간 **아무도 손대지 않은 공정이 도달로 잡힌다.** `processReached`, `stage`,
+  // HOME 공정 카운트, 주간 보고, DD 내보내기가 전부 그 값을 완료로 센다. 접수 때 가공 목표일이
+  // 필수라 새 행은 전부 이 경로를 탔다. R369가 고치려던 "실제 지연이 지표에서 사라진다"가
+  // 반대 방향으로 되살아난다. 화면은 자동 채움 없이도 같다. `scheduleCellRender`가 완료일이 비면
+  // 목표일을 기울임꼴로 보여 주고 `scheduleToneOf`가 빈 완료일을 그대로 overdue로 잡는다.
   if (column.id === "co") {
     const devType = input === "GD" ? "GD" : input === "국내" ? "국내" : undefined
     return { ...record, tech, devType }
