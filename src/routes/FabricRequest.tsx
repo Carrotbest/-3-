@@ -104,15 +104,15 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
   { key: "analysis", label: "분석", color: "var(--chart-2)", columns: [
     { id: "yarnAnalysis", label: "Yarn analysis", width: 180, scope: "style" },
     { id: "devConstruction", label: "Cons.(개발)", width: 120, scope: "style" },
-    { id: "comment", label: "Comment", width: 160, scope: "style" },
     { id: "analyst", label: "분석 담당", width: 90, scope: "style" },
+    { id: "comment", label: "Comment", width: 160, scope: "style" },
   ] },
   { key: "request", label: "의뢰", color: "var(--chart-3)", columns: [
-    { id: "result", label: "결과", width: 76, scope: "style", align: "center" },
     { id: "urgent", label: "URGENT", width: 64, scope: "style", align: "center" },
     { id: "requester", label: "의뢰자", width: 90, scope: "style" },
+    { id: "devPlan", label: "개발 POINT", width: 200, scope: "style" },
     { id: "developer", label: "개발 담당", width: 90, scope: "style" },
-    { id: "devPlan", label: "개발", width: 200, scope: "style" },
+    { id: "result", label: "결과", width: 76, scope: "style", align: "center" },
   ] },
   { key: "option", label: "옵션", color: "var(--warning)", columns: [
     { id: "optNo", label: "Opt", width: 50, scope: "option", align: "center" },
@@ -232,28 +232,31 @@ const SORT_LABEL: Record<SortKey, string> = {
 const newId = (): string =>
   globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-const blankStyle = (): RequestStyle => ({
-  reqId: newId(),
-  chart: "",
-  stage: "분석",
-  seq: 0,
-  garmentNo: "",
-  brand: "",
-  contents: "",
-  origConstruction: "",
-  origWeight: "",
-  yarnAnalysis: "",
-  devConstruction: "",
-  comment: "",
-  analyst: "",
-  urgent: false,
-  requester: "",
-  developer: "",
-  devPlan: "",
-  options: [],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-})
+const blankStyle = (): RequestStyle => {
+  const reqId = newId()
+  return {
+    reqId,
+    chart: "",
+    stage: "분석",
+    seq: 0,
+    garmentNo: "",
+    brand: "",
+    contents: "",
+    origConstruction: "",
+    origWeight: "",
+    yarnAnalysis: "",
+    devConstruction: "",
+    comment: "",
+    analyst: "",
+    urgent: false,
+    requester: "",
+    developer: "",
+    devPlan: "",
+    options: blankOptions(reqId),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+}
 
 /** 옵션 번호는 삭제 후에도 1부터 다시 매긴다. optId는 그 번호를 따라간다. */
 const renumber = (reqId: string, options: RequestOption[]): RequestOption[] =>
@@ -269,6 +272,11 @@ const blankOption = (reqId: string, no: number): RequestOption => ({
   color: "",
   dyeingMethod: "",
 })
+
+/** 새 스타일은 옵션 4줄로 시작한다(R370, 2026-10-29 박향근 확정). */
+const DEFAULT_OPTION_COUNT = 4
+const blankOptions = (reqId: string, count = DEFAULT_OPTION_COUNT): RequestOption[] =>
+  Array.from({ length: count }, (_, index) => blankOption(reqId, index + 1))
 
 const text = (value: string | number | undefined): string =>
   value === undefined || value === "" ? "" : String(value)
@@ -538,7 +546,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
           </div>
 
           <div className="mt-3">
-            {field("개발", <textarea className="h-20 rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" value={value.devPlan} onChange={(event) => set("devPlan", event.target.value)} />)}
+            {field("개발 POINT", <textarea className="h-20 rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" value={value.devPlan} onChange={(event) => set("devPlan", event.target.value)} />)}
             {field("Remark", <textarea className="mt-3 h-20 w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" placeholder="스타일 코멘트. 여러 줄로 적습니다" value={styleRemarkText(value)} onChange={(event) => set("remark", event.target.value)} />)}
           </div>
 
@@ -1232,7 +1240,7 @@ export function FabricRequest() {
     const firstSeq = nextBoardSeq(requests, activeBoard)
     const added = Array.from({ length: count }, (_, index) => {
       const style = blankStyle()
-      return { ...style, boardId: activeBoard, chart: nextChart, stage: nextStage, seq: firstSeq + index, options: renumber(style.reqId, [blankOption(style.reqId, 1)]) }
+      return { ...style, boardId: activeBoard, chart: nextChart, stage: nextStage, seq: firstSeq + index, options: renumber(style.reqId, blankOptions(style.reqId)) }
     })
     saveMutation([...requests, ...added])
     setBottomMenu(null)
@@ -1843,7 +1851,7 @@ export function FabricRequest() {
   const downloadTemplate = async () => {
     setNotice(null)
     try {
-      downloadBlob(await buildRequestWorkbook(visible), requestTemplateFileName())
+      downloadBlob(await buildRequestWorkbook(visible, { minOptionRows: 4, mergeStyleCells: true, matchScreenWidths: true }), requestTemplateFileName())
     } catch (error) {
       setNotice({ kind: "error", text: error instanceof Error ? error.message : "양식을 만들지 못했습니다." })
     }
@@ -2044,7 +2052,7 @@ export function FabricRequest() {
   }
   const reopenArchivedBoard = (boardId: string) => { saveRequestBoards(reopenBoard(requestBoards, boardId, actor)); setActiveBoard(boardId) }
   const downloadArchive = async (archive: RequestArchive) => {
-    try { downloadBlob(await buildRequestWorkbook(archive.styles), requestTemplateFileName()) }
+    try { downloadBlob(await buildRequestWorkbook(archive.styles, { minOptionRows: 4, mergeStyleCells: true, matchScreenWidths: true }), requestTemplateFileName()) }
     catch (error) { setNotice({ kind: "error", text: error instanceof Error ? error.message : "엑셀을 만들지 못했습니다." }) }
   }
 

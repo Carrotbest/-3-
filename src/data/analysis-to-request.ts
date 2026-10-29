@@ -26,7 +26,7 @@ export interface AnalysisTransferOptions {
 /**
  * 분석 1건 → 스타일 1건.
  *
- * 옵션은 빈 줄 하나만 만든다(2026-10-28 박향근 확정). 개발 목표 사양은 분석값과 다를 수 있어
+ * 옵션은 빈 줄 네 개를 만든다(R370, 2026-10-29 박향근 확정). 개발 목표 사양은 분석값과 다를 수 있어
  * 사람이 직접 적는다. `yarnDetail`, `construction`, `weight`에 분석 결과를 넣지 말 것.
  *
  * `garmentNo`에는 분석의 `sourceCode`를 넣는다(R353).
@@ -35,16 +35,16 @@ export interface AnalysisTransferOptions {
 export function buildRequestStyleFromAnalysis(item: AnalysisRequest, opts: AnalysisTransferOptions): RequestStyle {
   const now = new Date().toISOString()
   const reqId = newId()
-  const option: RequestOption = {
-    optId: `${reqId}#1`,
+  const options: RequestOption[] = Array.from({ length: 4 }, (_, index) => ({
+    optId: `${reqId}#${index + 1}`,
     lineId: newId(),
-    no: 1,
+    no: index + 1,
     yarnDetail: "",
     construction: "",
     weight: "",
     color: "",
     dyeingMethod: "",
-  }
+  }))
   return {
     reqId,
     chart: opts.chart,
@@ -75,7 +75,7 @@ export function buildRequestStyleFromAnalysis(item: AnalysisRequest, opts: Analy
      */
     ...(item.imagePath ? { imagePath: item.imagePath, imageFrom: "analysis" as const } : {}),
     ...(item.imageThumbPath ? { imageThumbPath: item.imageThumbPath } : {}),
-    options: [option],
+    options,
     createdAt: now,
     updatedAt: now,
   }

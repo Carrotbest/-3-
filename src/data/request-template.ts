@@ -14,8 +14,8 @@ import * as XLSX from "xlsx"
 
 import { CONSTRUCTIONS, matchConstruction } from "./constructions"
 import { legacyBoardId } from "./request-board"
-import { styleRemarkText } from "./schema"
-import type { RequestOption, RequestStyle } from "./schema"
+import { REQUEST_RESULTS, styleRemarkText } from "./schema"
+import type { RequestOption, RequestResult, RequestStyle } from "./schema"
 
 type Band = "기본" | "ORIGINAL" | "분석" | "의뢰" | "옵션"
 
@@ -57,12 +57,13 @@ export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
   { band: "ORIGINAL", head: "Weight (g/m2)", width: 11, scope: "style", key: "origWeight", screenWidth: 80 },
   { band: "분석", head: "Yarn analysis", width: 30, scope: "style", key: "yarnAnalysis", screenWidth: 180 },
   { band: "분석", head: "Construction (개발)", width: 18, scope: "style", key: "devConstruction", screenWidth: 120 },
-  { band: "분석", head: "Comment", width: 24, scope: "style", key: "comment", screenWidth: 160 },
   { band: "분석", head: "분석 담당", width: 11, scope: "style", key: "analyst", screenWidth: 90 },
+  { band: "분석", head: "Comment", width: 24, scope: "style", key: "comment", screenWidth: 160 },
   { band: "의뢰", head: "URGENT", width: 8, scope: "style", key: "urgent", screenWidth: 64 },
   { band: "의뢰", head: "의뢰자", width: 11, scope: "style", key: "requester", screenWidth: 90 },
+  { band: "의뢰", head: "개발 POINT", aliases: ["개발"], width: 30, scope: "style", key: "devPlan", screenWidth: 200 },
   { band: "의뢰", head: "개발 담당", width: 11, scope: "style", key: "developer", screenWidth: 90 },
-  { band: "의뢰", head: "개발", width: 30, scope: "style", key: "devPlan", screenWidth: 200 },
+  { band: "의뢰", head: "결과", width: 9, scope: "style", key: "result", optional: true, screenWidth: 76 },
   { band: "옵션", head: "Opt", width: 6, scope: "option", key: "no", screenWidth: 50 },
   { band: "옵션", head: "YARN DETAIL", width: 30, scope: "option", key: "yarnDetail", screenWidth: 180 },
   { band: "옵션", head: "CONS", width: 18, scope: "option", key: "construction", optional: true, screenWidth: 130 },
@@ -117,6 +118,7 @@ const cellOf = (style: RequestStyle, option: RequestOption | null, key: string):
     case "requester": return style.requester || null
     case "developer": return style.developer || null
     case "devPlan": return style.devPlan || null
+    case "result": return style.result ?? null
     case "remark": return styleRemarkText(style) || null
     case "no": return option ? option.no : null
     case "yarnDetail": return option ? option.yarnDetail || null : null
@@ -298,6 +300,12 @@ const asUrgent = (value: unknown): boolean => {
   return text === "V" || text === "O" || text === "Y" || text === "TRUE" || text === "1"
 }
 
+/** 결과는 네 값만 받는다. 그 밖의 글자는 빈 값으로 둔다. 경고도 띄우지 않는다. */
+const asResult = (value: unknown): RequestResult | undefined => {
+  const text = asText(value).trim()
+  return (REQUEST_RESULTS as readonly string[]).includes(text) ? (text as RequestResult) : undefined
+}
+
 const newId = (): string =>
   globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
@@ -375,6 +383,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
         requester: asText(at(row, "requester")),
         developer: asText(at(row, "developer")),
         devPlan: asText(at(row, "devPlan")),
+        ...(asResult(at(row, "result")) ? { result: asResult(at(row, "result")) } : {}),
         remark: asText(at(row, "remark")),
         options: [],
         createdAt: now,
