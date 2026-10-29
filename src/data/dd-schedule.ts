@@ -11,7 +11,7 @@
  * 그러면 안 된다. 날짜만 바뀌고 이력이 빠지면 근거 없는 지연과 구별이 안 된다.
  * 여기 함수들은 성공 여부를 돌려주고 부르는 쪽이 사용자에게 알린다.
  */
-import { addDoc, collection, doc, getDoc, getDocs, limit as fsLimit, orderBy, query, runTransaction, where } from "firebase/firestore"
+import { collection, doc, getDoc, getDocs, limit as fsLimit, orderBy, query, runTransaction, setDoc, where } from "firebase/firestore"
 
 import { db, auth } from "./firebase"
 import { currentUserCanEditKey, currentUserCanWrite } from "./auth"
@@ -57,6 +57,8 @@ export interface DdScheduleBaseline {
 /** 일정 한 칸이 바뀐 사건 1건. */
 export interface DdScheduleChange {
   id: string
+  /** 문서 ID와 같다. 재시도해도 같은 값을 써서 중복 기록을 막는다. */
+  opId: string
   rowKey: string
   field: "dueDate" | DdProcess
   before: string
@@ -169,11 +171,14 @@ export async function appendScheduleChange(input: {
   after: string
   reasonCode?: DdDelayReason | ""
   memo?: string
+  /** 재시도해도 같은 값을 넘긴다. 문서 ID가 되어 중복 기록을 막는다. */
+  opId: string
 }): Promise<boolean> {
   if (!canWriteSchedule()) return false
   const email = auth.currentUser?.email ?? ""
   if (!email) return false
   const payload = {
+    opId: input.opId,
     rowKey: input.rowKey,
     field: input.field,
     before: String(input.before ?? "").trim(),
@@ -186,7 +191,8 @@ export async function appendScheduleChange(input: {
     name: actorName(),
   }
   try {
-    await addDoc(collection(db, LOG_COLLECTION), payload)
+    // 규칙이 create만 허용하므로 같은 opId로 두 번 쓰면 두 번째가 거부된다. 그게 의도다.
+    await setDoc(doc(db, LOG_COLLECTION, input.opId), payload)
     return true
   } catch {
     return false

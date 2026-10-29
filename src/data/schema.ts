@@ -18,6 +18,13 @@ export interface DevTechnical {
   mills?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
   // 공정별 완료일 (기존 processReached 판정에 쓰는 Status 원본값)
   processDates?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
+  /**
+   * 공정 목표일(R370). 지키려는 날짜다. 완료일과 같은 칸에 담지 않는다.
+   * 예전에는 목표를 `processDates`에 적었다가 끝나면 덮어써서 약속이 남지 않았다.
+   * `processDates`는 **완료일(실적)** 의미를 그대로 유지한다. `processReached`,
+   * 공정 도달 판정, 주간 보고, 내보내기가 전부 그 의미로 읽고 있다. 건드리지 말 것.
+   */
+  targetDates?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
   /** 개발 건 별칭(Project). DD의 Style No. 오른쪽 열에서 사람이 적는 웹 전용 값. */
   project?: string
   // 개발 사양

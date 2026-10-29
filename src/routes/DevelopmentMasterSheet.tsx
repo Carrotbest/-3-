@@ -23,6 +23,7 @@ import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEIN
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
+import { appendScheduleChange, dayGap, DD_DELAY_REASON_LABEL, scheduleRowKey, type DdDelayReason, type DdProcess } from "@/data/dd-schedule"
 import { fmtDate, fmtDateMd, isDateValue, normalizeDateInput, toDate } from "@/data/format"
 import { loadViewFlag, loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
 import { ensureRequestLineIds, removeRequestLinks, requestCandidates, requestLinkIndex, requestToIntakeRecords, resolveRequestLink } from "@/data/request-link"
@@ -175,6 +176,73 @@ const receiptDateRender = (value: (record: DevRecord) => CellValue): NonNullable
   return <span className="text-[var(--destructive)]">미수취</span>
 }
 
+/** 오늘을 YYYY-MM-DD로. 날짜 비교는 시각을 쓰지 않는다. 시간대 경계에서 하루가 밀린다. */
+const todayKey = (): string => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+}
+
+/** 공정 날짜 열 id에서 공정을 찾는다. 이 네 칸만 완료와 목표를 함께 다룬다(R369). */
+const SCHEDULE_PROCESS_BY_COLUMN: Record<string, DdProcess> = {
+  yarnStatus: "yarn", knittingStatus: "knitting", dyeingStatus: "dyeing", finishingStatus: "finishing",
+}
+
+const SCHEDULE_PROCESS_LABEL: Record<DdProcess, string> = {
+  yarn: "원사", knitting: "편직", dyeing: "염색", finishing: "가공",
+}
+
+/**
+ * 칸이 지금 어떤 상태인지(R369, 2026-10-29 박향근 안).
+ *
+ * `untouched`는 목표와 실행이 아직 같은 날, 곧 아무도 손대지 않은 상태다. 접수 때 목표를 넣으면
+ * 실행일이 같은 날로 자동으로 채워지므로 처음에는 모든 칸이 여기 있다. 사람이 실행일을 고치는
+ * 순간 `late`나 `early`로 갈린다. **괄호가 없다는 것이 곧 "아직 안 고쳤다"는 신호다.**
+ * 그 상태로 날짜가 지나면 `overdue`로 잡는다. 안 그러면 지나간 예정일이 제때 끝난 것처럼 보인다.
+ */
+type ScheduleTone = "overdue" | "late" | "early" | "untouched" | "plain"
+
+function scheduleToneOf(record: DevRecord, process: DdProcess): ScheduleTone {
+  const actual = String(record.tech?.processDates?.[process] ?? "").trim()
+  const target = String(record.tech?.targetDates?.[process] ?? "").trim()
+  if (!target) return "plain"
+  if (actual && actual !== target) return actual > target ? "late" : "early"
+  // 실행일이 비었거나 목표와 같다. 아직 손대지 않은 칸이다.
+  if (isStoppedRecord(record)) return "plain"
+  return target < todayKey() ? "overdue" : "untouched"
+}
+
+/**
+ * 공정 일정 칸(R369). 실제 날짜를 적고 목표와 어긋난 만큼만 괄호로 덧붙인다.
+ *
+ * `10-14 (+3)`처럼 읽는다. 뺄셈을 사람이 하지 않아도 된다. 표를 훑는 목적은
+ * "며칠 밀렸나"이지 "목표가 며칠이었나"가 아니다.
+ * **같으면 아무것도 띄우지 않는다.** 대부분의 칸이 조용해지고 어긋난 것만 눈에 들어온다.
+ *
+ * `+`는 지연이라 빨강, `-`는 당긴 것이라 파랑이다. **초록을 쓰지 않는다.**
+ * 빨강과 초록으로 가르면 적록색약이 구별하지 못한다. 빨강과 파랑은 그 문제가 없다.
+ *
+ * 날짜 차이는 **달력일**이다. 영업일로 세면 공휴일 표가 필요하고 사람이 암산으로 검증하지 못한다.
+ *
+ * **열의 `value`는 완료일 그대로다.** 복사, 붙여넣기, 검색, 정렬, 엑셀 내보내기가 그 값을 쓴다.
+ */
+const scheduleCellRender = (process: DdProcess): NonNullable<MasterColumn["render"]> => (record) => {
+  const actual = String(record.tech?.processDates?.[process] ?? "").trim()
+  const target = String(record.tech?.targetDates?.[process] ?? "").trim()
+  if (!actual && !target) return <></>
+  if (!actual) {
+    return <span className="italic text-[var(--muted-foreground)]" title="목표일입니다. 실행일이 비어 있습니다">{dateText(target)}</span>
+  }
+  const tone = scheduleToneOf(record, process)
+  const diff = target ? dayGap(target, actual) : 0
+  return <span title={target ? `목표 ${dateText(target)}` : undefined}>
+    {dateText(actual)}
+    {diff !== 0 ? <span className={diff > 0 ? "ml-0.5 text-[var(--destructive)]" : "ml-0.5 text-sky-600 dark:text-sky-400"}>
+      ({diff > 0 ? "+" : ""}{diff})
+    </span> : null}
+    {tone === "overdue" ? <span className="sr-only">목표일이 지났는데 아직 실행일을 고치지 않았습니다</span> : null}
+  </span>
+}
+
 /**
  * 스크롤바 위에서 누른 mousedown 인지 본다(R318).
  * 스크롤바는 요소의 클라이언트 영역(clientWidth·clientHeight) 밖에 있다. 거기서 온 누름은
@@ -278,14 +346,24 @@ const GROUPS: MasterGroup[] = [
   },
   {
     key: "schedule", label: "공정 SCHEDULE", color: "var(--warning)", editorLayout: "schedule", columns: [
-      { id: "yarnMill", label: "업체", width: 65, sub: "원사", value: (row) => row.tech?.mills?.yarn },
-      { id: "yarnStatus", label: "완료일", width: 76, date: true, sub: "원사", value: (row) => row.tech?.processDates?.yarn },
-      { id: "knittingMill", label: "업체", width: 65, sub: "편직", value: (row) => row.tech?.mills?.knitting },
-      { id: "knittingStatus", label: "완료일", width: 76, date: true, sub: "편직", value: (row) => row.tech?.processDates?.knitting },
-      { id: "dyeingMill", label: "업체", width: 65, sub: "염색", value: (row) => row.tech?.mills?.dyeing },
-      { id: "dyeingStatus", label: "완료일", width: 76, date: true, sub: "염색", value: (row) => row.tech?.processDates?.dyeing },
-      { id: "finishingMill", label: "업체", width: 65, sub: "가공", value: (row) => row.tech?.mills?.finishing },
-      { id: "finishingStatus", label: "완료일", width: 76, date: true, sub: "가공", value: (row) => row.tech?.processDates?.finishing },
+      // 공정마다 업체, 목표, 완료 세 칸이다(R369).
+      // **목표 열은 기본으로 숨어 있다**(`DEFAULT_HIDDEN`). 평소 화면은 업체와 완료 두 칸이고,
+      // 완료 칸이 `10-18/10-20` 꼴로 둘 다 보여 준다. 목표를 넣을 때만 도구줄에서 펼친다.
+      // 팝업 편집기로 두 값을 받아 봤다가 되돌렸다(2026-10-29). Tab과 Enter로 칸을 넘기지 못하고
+      // 복사, 붙여넣기, 아래로 채우기가 막혀 입력이 더 불편해졌다. 표는 읽기보다 쓰기를 자주 한다.
+      // 완료 열의 `value`는 완료일 그대로다. 복사, 정렬, 검색, 엑셀 내보내기가 그 값을 쓴다.
+      { id: "yarnMill", label: "업체", width: 62, sub: "원사", value: (row) => row.tech?.mills?.yarn },
+      { id: "yarnTarget", label: "목표", width: 76, date: true, sub: "원사", value: (row) => row.tech?.targetDates?.yarn },
+      { id: "yarnStatus", label: "완료", width: 86, date: true, sub: "원사", value: (row) => row.tech?.processDates?.yarn, render: scheduleCellRender("yarn") },
+      { id: "knittingMill", label: "업체", width: 62, sub: "편직", value: (row) => row.tech?.mills?.knitting },
+      { id: "knittingTarget", label: "목표", width: 76, date: true, sub: "편직", value: (row) => row.tech?.targetDates?.knitting },
+      { id: "knittingStatus", label: "완료", width: 86, date: true, sub: "편직", value: (row) => row.tech?.processDates?.knitting, render: scheduleCellRender("knitting") },
+      { id: "dyeingMill", label: "업체", width: 62, sub: "염색", value: (row) => row.tech?.mills?.dyeing },
+      { id: "dyeingTarget", label: "목표", width: 76, date: true, sub: "염색", value: (row) => row.tech?.targetDates?.dyeing },
+      { id: "dyeingStatus", label: "완료", width: 86, date: true, sub: "염색", value: (row) => row.tech?.processDates?.dyeing, render: scheduleCellRender("dyeing") },
+      { id: "finishingMill", label: "업체", width: 62, sub: "가공", value: (row) => row.tech?.mills?.finishing },
+      { id: "finishingTarget", label: "목표", width: 76, date: true, sub: "가공", value: (row) => row.tech?.targetDates?.finishing },
+      { id: "finishingStatus", label: "완료", width: 86, date: true, sub: "가공", value: (row) => row.tech?.processDates?.finishing, render: scheduleCellRender("finishing") },
     ],
   },
   {
@@ -360,6 +438,8 @@ const COMPANY_COLOR_COLUMN_IDS = new Set(["co", "yarnMill", "knittingMill", "dye
 const SCHEDULE_DATE_COLUMN_IDS = new Set(["yarnStatus", "knittingStatus", "dyeingStatus", "finishingStatus"])
 /** 회색 농도 50%. 30행 DIMMED_ROW_BG(24%)보다 진하다. 글자는 그대로 두고 배경만 덮는다. */
 const PAST_SCHEDULE_BG = "color-mix(in srgb, var(--muted-foreground) 50%, var(--card))"
+/** 목표일이 지났는데 완료가 빈 칸(R369). 옅게 깐다. 글자는 그대로 읽혀야 한다. */
+const OVERDUE_SCHEDULE_BG = "color-mix(in srgb, var(--destructive) 14%, var(--card))"
 /**
  * 자정 기준 일 단위 값. `toDate`는 값이 이미 Date면 원본을 그대로 돌려주므로
  * `setHours`로 비교하면 레코드의 날짜를 자정으로 덮어쓴다. 복사본으로 계산한다.
@@ -367,7 +447,18 @@ const PAST_SCHEDULE_BG = "color-mix(in srgb, var(--muted-foreground) 50%, var(--
 const dayStamp = (date: Date): number => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 const GROUP_COLUMNS = GROUPS.flatMap((group) => group.columns)
 /** 숨길 수 있는 열은 그룹 열뿐이다. 담당·Status·Style No. 고정 열은 숨기지 않는다. */
-const DEFAULT_HIDDEN: Record<string, boolean> = Object.fromEntries(GROUP_COLUMNS.map((column) => [column.id, false]))
+/** 공정 목표일 열 네 개. 기본으로 숨어 있고 도구줄 버튼으로 한 번에 펼친다(R369). */
+const TARGET_COLUMN_IDS = ["yarnTarget", "knittingTarget", "dyeingTarget", "finishingTarget"] as const
+const TARGET_PROCESS_BY_COLUMN: Record<string, DdProcess> = {
+  yarnTarget: "yarn", knittingTarget: "knitting", dyeingTarget: "dyeing", finishingTarget: "finishing",
+}
+/**
+ * 목표일 열만 기본 숨김이다. 평소 화면을 좁게 두려는 것이다.
+ * `loadViewGroups`는 저장된 값에 있는 키만 덮어쓰므로, 기존 사용자도 이 넷은 숨은 채로 시작한다.
+ */
+const DEFAULT_HIDDEN: Record<string, boolean> = Object.fromEntries(
+  GROUP_COLUMNS.map((column) => [column.id, (TARGET_COLUMN_IDS as readonly string[]).includes(column.id)]),
+)
 const GROUP_COLUMN_IDS = new Set(GROUP_COLUMNS.map((column) => column.id))
 // 핀 고정 열도 그룹(고정 핵심)처럼 너비 조절·저장 대상에 포함한다.
 const RESIZABLE_COLUMNS = [...PINNED_COLUMNS, ...GROUP_COLUMNS]
@@ -488,8 +579,9 @@ const INTAKE_DEL_WIDTH = 36
  */
 const INTAKE_GRID_ORDER = [
   "yarnDetail", "construction", "targetWeight", "color", "dyeing",
-  "yarnMill", "yarnStatus", "knittingMill", "knittingStatus",
-  "dyeingMill", "dyeingStatus", "finishingMill", "finishingStatus",
+  // 접수 창에서는 목표일을 완료일 앞에 세운다. 접수 시점에 적는 것은 목표이지 완료가 아니다(R369).
+  "yarnMill", "yarnTarget", "yarnStatus", "knittingMill", "knittingTarget", "knittingStatus",
+  "dyeingMill", "dyeingTarget", "dyeingStatus", "finishingMill", "finishingTarget", "finishingStatus",
   "co", "developmentNo", "arrangeNo", "finishingA", "finishingB", "finishingC", "finishingD", "remark",
 ]
 /**
@@ -499,8 +591,8 @@ const INTAKE_GRID_ORDER = [
  */
 const INTAKE_GRID_WIDTHS: Record<string, number> = {
   yarnDetail: 300, construction: 112, targetWeight: 72, color: 112, dyeing: 96,
-  yarnMill: 64, yarnStatus: 94, knittingMill: 64, knittingStatus: 94,
-  dyeingMill: 64, dyeingStatus: 94, finishingMill: 64, finishingStatus: 94,
+  yarnMill: 64, yarnTarget: 94, yarnStatus: 94, knittingMill: 64, knittingTarget: 94, knittingStatus: 94,
+  dyeingMill: 64, dyeingTarget: 94, dyeingStatus: 94, finishingMill: 64, finishingTarget: 94, finishingStatus: 94,
   co: 66, developmentNo: 110, arrangeNo: 100,
   finishingA: 84, finishingB: 84, finishingC: 84, finishingD: 84, remark: 200,
 }
@@ -508,12 +600,16 @@ const INTAKE_GRID_WIDTHS: Record<string, number> = {
 const INTAKE_WIDTH_KEY = "dd-intake-col-widths-v1"
 const INTAKE_MIN_WIDTH = 56
 const INTAKE_MAX_WIDTH = 600
-const INTAKE_GRID_LABELS: Record<string, string> = { yarnDetail: "Yarn", targetWeight: "Target wt'" }
+// 가공 목표일만 별표를 단다. 저장 차단 대상이라 머리에서 드러나야 한다(R369).
+const INTAKE_GRID_LABELS: Record<string, string> = { yarnDetail: "Yarn", targetWeight: "Target wt'", finishingTarget: "목표 *" }
 /**
  * 맨 윗줄에 적으면 아래 옵션까지 같이 채우는 열. 한 작지의 옵션은 대개 같은 날 같은 공정을 끝낸다.
  * 아래 줄에서 따로 고친 값은 건드리지 않는다. 윗줄의 예전 값과 같은 줄만 따라 내려간다.
  */
-const INTAKE_FILLDOWN_IDS = new Set(["yarnStatus", "knittingStatus", "dyeingStatus", "finishingStatus"])
+const INTAKE_FILLDOWN_IDS = new Set([
+  "yarnTarget", "yarnStatus", "knittingTarget", "knittingStatus",
+  "dyeingTarget", "dyeingStatus", "finishingTarget", "finishingStatus",
+])
 
 /** Body 는 DD 열에 없다. FDS/YDS 요청서의 BODY 와 같은 값(tech.bodyNo)이고, 비면 opt 로 만든다. */
 const INTAKE_BODY_COLUMN: MasterColumn = {
@@ -721,6 +817,9 @@ const TECH_PATHS: Record<string, string[]> = {
   developer: ["development", "developer"], co: ["development", "co"], developmentNo: ["development", "developmentNo"], arrangeNo: ["arrangeNo"], yarnDetail: ["yarnDetail"], bodyNo: ["bodyNo"],
   finishingA: ["finishingSlots", "a"], finishingB: ["finishingSlots", "b"], finishingC: ["finishingSlots", "c"], finishingD: ["finishingSlots", "d"],
   yarnMill: ["mills", "yarn"], yarnStatus: ["processDates", "yarn"], knittingMill: ["mills", "knitting"], knittingStatus: ["processDates", "knitting"], dyeingMill: ["mills", "dyeing"], dyeingStatus: ["processDates", "dyeing"], finishingMill: ["mills", "finishing"], finishingStatus: ["processDates", "finishing"],
+  // 목표일(R369). 격자에 열로 서지 않고 공정 날짜 칸 편집기 안에서만 쓴다.
+  // 저장은 완료일과 같은 `commitCell` 길을 타야 Ctrl+Z가 함께 되돌린다.
+  yarnTarget: ["targetDates", "yarn"], knittingTarget: ["targetDates", "knitting"], dyeingTarget: ["targetDates", "dyeing"], finishingTarget: ["targetDates", "finishing"],
   fds: ["sampleDates", "fds"], yds: ["sampleDates", "yds"], optionProgress: ["optionProgress"], review: ["review"], actualWidth: ["actual", "width"], actualWeight: ["actual", "weight"], actualBalance: ["actual", "balance"], shrinkageLength: ["actual", "shrinkageLength"], shrinkageWidth: ["actual", "shrinkageWidth"],
   knitInch: ["knitSpec", "inch"], knitGauge: ["knitSpec", "gauge"], knitNeedles: ["knitSpec", "needles"], loopF: ["knitSpec", "loopF"], loopT: ["knitSpec", "loopT"], loopB: ["knitSpec", "loopB"],
   greigeWidth: ["stageData", "greige", "width"], greigeWeight: ["stageData", "greige", "weight"], tenterWidth: ["stageData", "tenter", "width"], tenterWeight: ["stageData", "tenter", "weight"], washWidth: ["stageData", "wash", "width"], washWeight: ["stageData", "wash", "weight"],
@@ -811,6 +910,13 @@ function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string, 
   if (!path) return record
   const tech = structuredClone(record.tech ?? {}) as DevTechnical
   setNested(tech as unknown as Record<string, unknown>, path, value === "" ? undefined : value)
+  // 목표일을 넣으면 실행일이 비어 있을 때만 같은 날로 따라 채운다(R369, 2026-10-29 박향근 안).
+  // 처음에는 둘이 같아 괄호가 안 뜨고, 사람이 실행일을 고치는 순간 `(+3)`처럼 차이가 드러난다.
+  // **이미 적힌 실행일은 건드리지 않는다.** 진행 중인 건의 실적을 목표로 되돌리면 안 된다.
+  const autoProcess = TARGET_PROCESS_BY_COLUMN[column.id]
+  if (autoProcess && input.trim() && !String(record.tech?.processDates?.[autoProcess] ?? "").trim()) {
+    setNested(tech as unknown as Record<string, unknown>, ["processDates", autoProcess], input)
+  }
   if (column.id === "co") {
     const devType = input === "GD" ? "GD" : input === "국내" ? "국내" : undefined
     return { ...record, tech, devType }
@@ -1106,7 +1212,6 @@ function InlineDateEditor({ initialValue, onCommit, onCancel }: { initialValue: 
       : <DateValuePreview raw={raw} className="absolute left-1 top-[calc(100%+2px)] z-[65] whitespace-nowrap rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 shadow-sm" />}
   </div>
 }
-
 /**
  * FL# 인라인 편집기. 타자는 F, L, 숫자만 받고 10자에서 멈춘다.
  * 치는 동안에는 지역 상태만 들고 있고, 저장은 `commitCell` 이 형식을 보고 결정한다.
@@ -1212,7 +1317,13 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const pastScheduleStyle = scheduleDate && !sel.inRange && dayStamp(scheduleDate) < dayStamp(new Date())
     ? { backgroundColor: PAST_SCHEDULE_BG }
     : null
-  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...companyColorStyle, ...pastScheduleStyle, ...dimStyle }
+  // 목표가 지났는데 완료가 비었으면 옅은 붉은 배경으로 덮는다(R369). 지금 조치가 필요한 유일한 상태라
+  // 지나간 공정의 회색보다 이쪽이 이긴다. 끝난 건의 지연은 배경을 쓰지 않는다.
+  const scheduleProcess = SCHEDULE_PROCESS_BY_COLUMN[column.id]
+  const overdueStyle = scheduleProcess && !sel.inRange && scheduleToneOf(record, scheduleProcess) === "overdue"
+    ? { backgroundColor: OVERDUE_SCHEDULE_BG }
+    : null
+  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...companyColorStyle, ...pastScheduleStyle, ...overdueStyle, ...dimStyle }
   if (editEnabled && active && !fixed) {
     return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
   }
@@ -1677,7 +1788,18 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     setColumnFilters((current) => { const copy = { ...current }; delete copy[columnId]; return copy })
   }
   const showColumn = (columnId: string) => setHidden({ ...hiddenColumns, [columnId]: false })
-  const showAllColumns = () => setHidden({ ...DEFAULT_HIDDEN })
+  /**
+   * 공정 목표일 네 열을 한 번에 펼치고 접는다(R369).
+   * 평소에는 접어 두고 목표를 넣을 때만 편다. 펼친 상태는 각자 브라우저에 남는다.
+   */
+  const targetColumnsShown = TARGET_COLUMN_IDS.every((id) => !hiddenColumns[id])
+  const toggleTargetColumns = () => setHidden({
+    ...hiddenColumns,
+    ...Object.fromEntries(TARGET_COLUMN_IDS.map((id) => [id, targetColumnsShown])),
+  })
+  // "모두 다시 보이기"는 글자 그대로 전부 편다. `DEFAULT_HIDDEN`으로 되돌리면
+  // 목표일 넷이 기본 숨김이라 펼쳐 둔 열이 도로 접힌다(R369).
+  const showAllColumns = () => setHidden(Object.fromEntries(GROUP_COLUMNS.map((column) => [column.id, false])))
   const startColumnResize = (column: MasterColumn, event: ReactMouseEvent<HTMLSpanElement>) => {
     event.preventDefault()
     event.stopPropagation()
@@ -2923,6 +3045,14 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       setIntakeError(`필수 항목을 입력하세요: ${missing.map((id) => intakeColumns.find((column) => column.id === id)?.label ?? id).join(" · ")}`)
       return
     }
+    // 가공 목표일은 옵션마다 받는다(R369, 2026-10-29 박향근). 언제 끝낼 것인가가 이 건의 약속이고,
+    // 접수 때 비워 두면 나중에 아무도 안 채운다. 원사·편직·염색 목표는 아직 모를 수 있어 선택이다.
+    const noTarget = intake.reduce<number[]>((rows, record, index) =>
+      String(record.tech?.targetDates?.finishing ?? "").trim() ? rows : [...rows, index + 1], [])
+    if (noTarget.length > 0) {
+      setIntakeError(`가공 목표일을 입력하세요. 비어 있는 옵션: ${noTarget.join(", ")}번`)
+      return
+    }
     // 신규 접수의 담당은 본인 이름만 넣는다. 관리자는 예외다(2026-10-13 박향근 확정, 가안).
     // 남의 이름으로 접수하면 그 사람이 모르는 행이 그 사람 탭에 생긴다(R319와 같은 이유).
     if (!isAdmin && intake.some((record) => !matchesOwnerName(record.owner ?? "", myName))) {
@@ -2993,11 +3123,55 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     }
     const next = updateRecordCell(record, column, raw, allowedFor(column, optionsById))
     if (next !== record) {
+      // 사유는 저장 전에 판단한다. 저장 뒤에는 이전 목표일이 record에서 이미 바뀌어 있다.
+      askDelayReason(record, column, raw)
       const identity = recordIdentity(record)
       await commitRecords((records) => records.map((item) => recordIdentity(item) === identity ? next : item))
     }
     if (move) moveSelection(move, false, move === "left" || move === "right", origin)
   }
+
+  /** 목표일을 뒤로 미룬 뒤 사유를 받는 줄. 날짜는 이미 저장됐고 사유는 뒤따르는 기록이다. */
+  const [reasonPrompt, setReasonPrompt] = useState<{ rowKey: string; process: DdProcess; before: string; after: string } | null>(null)
+  const [reasonCode, setReasonCode] = useState<DdDelayReason>("knittingLate")
+  const [reasonMemo, setReasonMemo] = useState("")
+
+  /**
+   * 목표일을 **뒤로** 미뤘으면 사유 창을 연다(R369).
+   *
+   * 처음 채우거나 앞당기는 것은 그냥 저장한다. 납기가 빈 행이 아직 많아,
+   * 처음 채우는 것까지 막으면 더 안 채운다. 저장은 어느 쪽이든 막지 않는다.
+   * 날짜는 이미 저장됐고 사유는 뒤따르는 기록이다.
+   */
+  const askDelayReason = (record: DevRecord, column: MasterColumn, raw: string) => {
+    const process = TARGET_PROCESS_BY_COLUMN[column.id]
+    if (!process) return
+    const before = String(record.tech?.targetDates?.[process] ?? "").trim()
+    const after = normalizeDateInput(raw).trim()
+    if (!before || !after || after <= before) return
+    setReasonCode(`${process}Late` as DdDelayReason)
+    setReasonMemo("")
+    setReasonPrompt({ rowKey: scheduleRowKey(record), process, before, after })
+  }
+
+  /** 사유를 남긴다. 건너뛰면 `reasonCode`가 빈 채로 기록돼 "사유 미입력"으로 센다. */
+  const saveReason = async (skip: boolean) => {
+    const prompt = reasonPrompt
+    if (!prompt) return
+    setReasonPrompt(null)
+    if (!skip && reasonCode === "other" && !reasonMemo.trim()) { notify("기타를 고르면 메모를 적어 주세요."); setReasonPrompt(prompt); return }
+    const ok = await appendScheduleChange({
+      rowKey: prompt.rowKey,
+      field: prompt.process,
+      before: prompt.before,
+      after: prompt.after,
+      reasonCode: skip ? "" : reasonCode,
+      memo: skip ? "" : reasonMemo,
+      opId: crypto.randomUUID(),
+    })
+    if (!ok) notify("사유를 남기지 못했습니다. 날짜는 저장됐습니다.")
+  }
+
   const [exporting, setExporting] = useState(false)
   const [backupExporting, setBackupExporting] = useState(false)
   const exportBackup = async () => {
@@ -3146,6 +3320,10 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         {Object.keys(columnFilters).length ? <Button type="button" size="sm" variant="ghost" className="text-[var(--muted-foreground)]" onClick={() => setColumnFilters({})}><FilterX className="size-4" />필터 해제 ({Object.keys(columnFilters).length})</Button> : null}
         {/* 밖으로 내보내는 동작 둘. 테두리를 남겨 편집 도구와 구분한다. */}
         <Button type="button" size="sm" variant="outline" title="주간 업무 보고에 붙일 현황 문장을 만듭니다. 진행은 HOME과 같고 완료는 Received date 기준입니다" onClick={openWeeklyReport}><ClipboardList className="size-4" />주간 보고</Button>
+        <Button type="button" size="sm" variant={targetColumnsShown ? "default" : "outline"}
+          aria-pressed={targetColumnsShown}
+          title={targetColumnsShown ? "공정 목표일 열 네 개를 접습니다" : "공정 목표일 열 네 개를 펼쳐 입력합니다"}
+          onClick={toggleTargetColumns}><CalendarDays className="size-4" />목표일 {targetColumnsShown ? "접기" : "펼치기"}</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
         <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
         {canBackup ? <Button type="button" size="sm" variant="outline" disabled={backupExporting} title="DD 전체와 창고 상태·이력, 샘플대장을 필드 그대로 엑셀로 내려받습니다" onClick={() => void exportBackup()}>{backupExporting ? <Loader2 className="size-4 animate-spin" /> : <DatabaseBackup className="size-4" />}엑셀 백업</Button> : null}
@@ -3488,6 +3666,37 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           <Button type="button" size="sm" variant="outline" disabled={!fdsYdsRows.length} onClick={copyFdsYds}><Copy className="size-4" />표 복사</Button>
           <Button type="button" size="sm" variant="outline" disabled={!fdsYdsRows.length || fdsYdsExporting} onClick={() => void exportFdsYds()}><Download className="size-4" />엑셀 내려받기</Button>
           <Button type="button" size="sm" variant="outline" onClick={() => setFdsYdsOpen(false)}>닫기</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog open={Boolean(reasonPrompt)} onOpenChange={(open) => { if (!open) void saveReason(true) }}>
+      <DialogContent className="w-[94vw] max-w-none sm:w-[520px]">
+        <DialogHeader>
+          <DialogTitle>목표일을 미룬 사유</DialogTitle>
+          <DialogDescription>
+            {reasonPrompt ? `${SCHEDULE_PROCESS_LABEL[reasonPrompt.process]} 목표를 ${dateText(reasonPrompt.before)}에서 ${dateText(reasonPrompt.after)}로 미뤘습니다.` : ""}
+          </DialogDescription>
+          <p className="text-[11px] leading-relaxed text-[var(--muted-foreground)]">
+            날짜는 이미 저장됐습니다. 사유는 뒤따르는 기록입니다. 건너뛰어도 변경 사실은 남습니다.
+          </p>
+        </DialogHeader>
+        <DialogBody className="space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="dd-reason-code">사유</Label>
+            <select id="dd-reason-code" value={reasonCode} onChange={(event) => setReasonCode(event.target.value as DdDelayReason)}
+              className="h-9 w-full rounded-[var(--radius)] border border-[var(--input)] bg-transparent px-2 text-sm text-[var(--foreground)]">
+              {(Object.keys(DD_DELAY_REASON_LABEL) as DdDelayReason[]).map((code) => <option key={code} value={code}>{DD_DELAY_REASON_LABEL[code]}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="dd-reason-memo">메모{reasonCode === "other" ? " (기타는 필수)" : ""}</Label>
+            <Input id="dd-reason-memo" value={reasonMemo} onChange={(event) => setReasonMemo(event.target.value)} placeholder="한 줄로 적어 주세요" />
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <Button type="button" size="sm" variant="outline" onClick={() => void saveReason(true)}>건너뛰기</Button>
+          <Button type="button" size="sm" onClick={() => void saveReason(false)}>남기기</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
