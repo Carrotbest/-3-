@@ -28,6 +28,66 @@ const ALL = "전체"
 // 등록 단계는 쓰지 않는다(웹에서 접수하면 곧바로 처리중). 선택지는 처리중·완료 둘뿐이다.
 const TS_STATES: TsState[] = ["처리중", "완료"]
 
+// 기간 프리셋 id. 연도는 "y2026" 꼴로 데이터에서 만들어 붙인다.
+const PERIOD_ALL = "all"
+const MONTH_PRESETS = [
+  { id: "m1", label: "최근 1개월", months: 1 },
+  { id: "m3", label: "최근 3개월", months: 3 },
+  { id: "m6", label: "최근 6개월", months: 6 },
+] as const
+
+/** 날짜를 YYYYMMDD 정수로 만든다. 시간대 경계 문제를 피하려고 시각을 쓰지 않는다. */
+function dayKeyOf(date: Date): number {
+  return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
+}
+
+/** input[type=date] 값(YYYY-MM-DD)을 dayKey로. 형식이 아니면 null. */
+function dayKeyOfInput(value: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
+  return Number(value.replace(/-/g, ""))
+}
+
+/**
+ * 지금 걸린 기간을 dayKey 구간으로 돌려준다. 거를 필요가 없으면 null.
+ * 직접 지정(from·to) 중 하나라도 값이 있으면 그쪽이 프리셋을 이긴다.
+ */
+function tsPeriodRange(preset: string, from: string, to: string): { start: number; end: number } | null {
+  const fromKey = dayKeyOfInput(from)
+  const toKey = dayKeyOfInput(to)
+  if (from.trim() || to.trim()) {
+    if (fromKey === null && toKey === null) return null
+    return { start: fromKey ?? 0, end: toKey ?? 99999999 }
+  }
+  if (preset === PERIOD_ALL) return null
+  const month = MONTH_PRESETS.find((item) => item.id === preset)
+  if (month) {
+    const today = new Date()
+    // new Date(y, m - N, d)는 월말 넘침을 자동 보정한다(5/31의 3개월 전은 3/3).
+    const start = new Date(today.getFullYear(), today.getMonth() - month.months, today.getDate())
+    return { start: dayKeyOf(start), end: dayKeyOf(today) }
+  }
+  const year = Number(preset.replace(/^y/, ""))
+  if (!Number.isFinite(year) || year <= 0) return null
+  return { start: year * 10000 + 101, end: year * 10000 + 1231 }
+}
+
+/** 엑셀 파일명에 붙일 기간 조각. 한글과 공백을 쓰지 않는다. */
+function tsPeriodSlug(preset: string, from: string, to: string): string {
+  const fromKey = dayKeyOfInput(from)
+  const toKey = dayKeyOfInput(to)
+  if (from.trim() || to.trim()) {
+    if (fromKey !== null && toKey !== null) return `${fromKey}-${toKey}`
+    if (fromKey !== null) return `FROM${fromKey}`
+    if (toKey !== null) return `TO${toKey}`
+    return "ALL"
+  }
+  if (preset === PERIOD_ALL) return "ALL"
+  const month = MONTH_PRESETS.find((item) => item.id === preset)
+  if (month) return `M${month.months}`
+  const year = Number(preset.replace(/^y/, ""))
+  return Number.isFinite(year) && year > 0 ? `Y${year}` : "ALL"
+}
+
 // DD 마스터 상태 칩(ddStatusStyle)과 동일한 톤앤매너.
 const TS_STATE_STYLE: Record<TsState, string> = {
   등록: "bg-sky-500/15 text-sky-700 dark:text-sky-300 ring-1 ring-inset ring-sky-500/30",
@@ -194,7 +254,7 @@ function nextTsId(rows: readonly TsRecord[]): string {
   return `${prefix}${String(max + 1).padStart(3, "0")}`
 }
 
-function exportTechnicalServices(rows: readonly TsRecord[]): string {
+function exportTechnicalServices(rows: readonly TsRecord[], periodSlug: string): string {
   const exportRows = rows.map((row) => {
     const requester = tsRequester(row)
     return {
@@ -220,7 +280,7 @@ function exportTechnicalServices(rows: readonly TsRecord[]): string {
   const worksheet = XLSX.utils.json_to_sheet(exportRows)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, "TS")
-  const fileName = `Technical_Services_export_${localDate().replace(/-/g, "")}.xlsx`
+  const fileName = `Technical_Services_export_${periodSlug}_${localDate().replace(/-/g, "")}.xlsx`
   XLSX.writeFile(workbook, fileName, { compression: true })
   return fileName
 }
@@ -425,6 +485,23 @@ export function TS() {
   const [exporting, setExporting] = useState(false)
   const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null)
 
+  // 기간 필터. 프리셋과 직접 지정을 따로 들고, 직접 지정에 값이 있으면 그쪽이 이긴다.
+  // 되맞추는 useEffect를 두지 않는다(R297).
+  const [period, setPeriod] = useState<string>(PERIOD_ALL)
+  const [periodFrom, setPeriodFrom] = useState("")
+  const [periodTo, setPeriodTo] = useState("")
+
+  // 데이터에 실제로 있는 연도만 버튼으로 세운다. 최신 연도가 왼쪽이다.
+  const yearOptions = useMemo(() => {
+    const set = new Set<number>()
+    rows.forEach((row) => {
+      const date = toDate(row.receivedAt)
+      if (date) set.add(date.getFullYear())
+    })
+    return [...set].sort((left, right) => right - left)
+  }, [rows])
+  const periodCustom = Boolean(periodFrom.trim() || periodTo.trim())
+
   const counts = useMemo(() => ({
     received: rows.filter((row) => row.state === "등록").length,
     processing: rows.filter((row) => row.state === "처리중").length,
@@ -432,7 +509,15 @@ export function TS() {
   }), [rows])
   const filteredRows = useMemo(() => {
     const query = search.normalize("NFKC").trim().toLocaleLowerCase("ko-KR")
+    const range = tsPeriodRange(period, periodFrom, periodTo)
     const matched = rows.filter((row) => {
+      if (range) {
+        const date = toDate(row.receivedAt)
+        // 접수일을 못 읽는 행은 어느 기간에도 속하지 않는다. 기간을 걸면 빠진다.
+        if (!date) return false
+        const key = dayKeyOf(date)
+        if (key < range.start || key > range.end) return false
+      }
       if (activeState && row.state !== activeState) return false
       if (!query) return true
       return [row.subject, row.from, tsRequester(row).dept, row.advisor, row.inquiry]
@@ -445,7 +530,7 @@ export function TS() {
       // 같은 날이면 번호가 큰 쪽이 위다.
       return right.id.localeCompare(left.id, "en")
     })
-  }, [activeState, rows, search])
+  }, [activeState, period, periodFrom, periodTo, rows, search])
   const columns: DataTableColumn<TsRecord>[] = [
     { id: "id", header: "# T/S", accessor: (r) => r.id, headerClassName: "w-24" },
     { id: "receivedAt", header: "Date", accessor: (r) => r.receivedAt, cell: (r) => fmtDate(r.receivedAt), headerClassName: "w-28" },
@@ -542,7 +627,7 @@ export function TS() {
     setExporting(true)
     setActionNotice(null)
     try {
-      const fileName = exportTechnicalServices(rows)
+      const fileName = exportTechnicalServices(filteredRows, tsPeriodSlug(period, periodFrom, periodTo))
       setActionNotice({ tone: "success", message: `${fileName} 새 파일 다운로드를 시작했습니다.` })
     } catch (error) {
       setActionNotice({ tone: "error", message: error instanceof Error ? error.message : "TS 엑셀을 내보내지 못했습니다." })
@@ -601,7 +686,7 @@ export function TS() {
         subtitle="Technical Service 등록부터 Trouble shooting 결과까지 웹에서 관리합니다."
         actions={(
           <div className="flex flex-wrap justify-end gap-2">
-            <Button type="button" disabled={exporting || rows.length === 0} onClick={exportRows}>
+            <Button type="button" disabled={exporting || filteredRows.length === 0} onClick={exportRows}>
               <Download aria-hidden="true" />
               {exporting ? "내보내는 중" : "엑셀 내보내기"}
             </Button>
@@ -703,13 +788,57 @@ export function TS() {
           fillToPageSize
           onRowClick={(record) => { setSelectedRow(record); setOpenInEdit(false) }}
           toolbar={(
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <Tabs value={activeState ?? ALL} onValueChange={(value) => setActiveState(value === ALL ? null : value as TsState)}>
-                <TabsList aria-label="TS 상태 필터">
-                  {[ALL, ...TS_STATES].map((state) => <TabsTrigger key={state} value={state}>{state}</TabsTrigger>)}
-                </TabsList>
-              </Tabs>
-              <Input className="lg:max-w-sm" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Subject · 요청자 · 담당 · 의뢰 내용 검색" aria-label="TS 목록 검색" />
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <Tabs value={activeState ?? ALL} onValueChange={(value) => setActiveState(value === ALL ? null : value as TsState)}>
+                  <TabsList aria-label="TS 상태 필터">
+                    {[ALL, ...TS_STATES].map((state) => <TabsTrigger key={state} value={state}>{state}</TabsTrigger>)}
+                  </TabsList>
+                </Tabs>
+                <Input className="lg:max-w-sm" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Subject · 요청자 · 담당 · 의뢰 내용 검색" aria-label="TS 목록 검색" />
+              </div>
+              <div className="flex flex-wrap items-center gap-2" role="group" aria-label="TS 기간 필터">
+                <span className="text-xs font-semibold text-[var(--muted-foreground)]">기간</span>
+                {[{ id: PERIOD_ALL, label: ALL }, ...MONTH_PRESETS.map((item) => ({ id: item.id as string, label: item.label as string })), ...yearOptions.map((year) => ({ id: `y${year}`, label: String(year) }))].map((option) => {
+                  const active = !periodCustom && period === option.id
+                  return (
+                    <Button
+                      key={option.id}
+                      type="button"
+                      size="sm"
+                      variant={active ? "default" : "outline"}
+                      aria-pressed={active}
+                      onClick={() => { setPeriod(option.id); setPeriodFrom(""); setPeriodTo("") }}
+                    >{option.label}</Button>
+                  )
+                })}
+                <span aria-hidden="true" className="mx-1 h-5 w-px bg-[var(--border)]" />
+                <Input
+                  className="h-8 w-[9.5rem] text-xs"
+                  type="date"
+                  value={periodFrom}
+                  max={periodTo || undefined}
+                  onChange={(event) => setPeriodFrom(event.target.value)}
+                  aria-label="기간 시작일"
+                />
+                <span aria-hidden="true" className="text-xs text-[var(--muted-foreground)]">~</span>
+                <Input
+                  className="h-8 w-[9.5rem] text-xs"
+                  type="date"
+                  value={periodTo}
+                  min={periodFrom || undefined}
+                  onChange={(event) => setPeriodTo(event.target.value)}
+                  aria-label="기간 종료일"
+                />
+                {periodCustom ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => { setPeriod(PERIOD_ALL); setPeriodFrom(""); setPeriodTo("") }}
+                  >기간 해제</Button>
+                ) : null}
+              </div>
             </div>
           )}
         />
