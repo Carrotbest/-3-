@@ -160,3 +160,63 @@ export async function deleteRequestImage(reqId: string): Promise<void> {
     }
   }
 }
+
+/** 엑셀에 박을 사진 한 장. exceljs는 webp를 모르므로 jpeg로 바꿔 넘긴다. */
+export interface ExportImage {
+  data: ArrayBuffer
+  extension: "jpeg"
+  width: number
+  height: number
+}
+
+/** 내려받기 한 번 동안만 사진을 읽는다. 한 장 실패해도 나머지는 내보낸다(R371). */
+export async function loadExportImages(
+  entries: readonly { key: string; path: string }[],
+): Promise<Map<string, ExportImage>> {
+  const out = new Map<string, ExportImage>()
+  const queue = [...entries]
+  const worker = async () => {
+    for (;;) {
+      const item = queue.shift()
+      if (!item) return
+      try {
+        const url = await requestImageUrl(item.path)
+        if (!url) continue
+        const response = await fetch(url)
+        if (!response.ok) continue
+        const blob = await response.blob()
+        const converted = await toJpegForExcel(blob)
+        if (converted) out.set(item.key, converted)
+      } catch {
+        // 한 장 실패가 내려받기를 막지 않는다.
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: 4 }, worker))
+  return out
+}
+
+/** webp/png를 jpeg로 바꾼다. 투명 부분은 흰색으로 채운다. */
+async function toJpegForExcel(blob: Blob): Promise<ExportImage | null> {
+  if (typeof createImageBitmap !== "function") return null
+  let bitmap: ImageBitmap
+  try {
+    bitmap = await createImageBitmap(blob)
+  } catch {
+    return null
+  }
+  const width = bitmap.width
+  const height = bitmap.height
+  const canvas = document.createElement("canvas")
+  canvas.width = width
+  canvas.height = height
+  const context = canvas.getContext("2d")
+  if (!context) { bitmap.close(); return null }
+  context.fillStyle = "#ffffff"
+  context.fillRect(0, 0, width, height)
+  context.drawImage(bitmap, 0, 0)
+  bitmap.close()
+  const jpeg = await new Promise<Blob | null>((resolve) => canvas.toBlob((value) => resolve(value), "image/jpeg", 0.82))
+  if (!jpeg) return null
+  return { data: await jpeg.arrayBuffer(), extension: "jpeg", width, height }
+}

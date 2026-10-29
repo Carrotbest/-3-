@@ -7,8 +7,7 @@
  * 옵션은 라인으로 푼다. Garment No.가 채워진 행이 스타일이고, 그 아래 Garment No.가 빈 행은
  * 직전 스타일의 옵션 라인이다. 스타일 행 자체에 옵션 값이 있으면 그것이 1번 옵션이 된다.
  *
- * 사진은 양식에 넣지 않는다. 엑셀 이미지 셀은 원본 차트에서도 #VALUE!로 깨져 있었다.
- * 사진은 웹 화면에서만 올린다.
+ * 사진은 내려받기 때 그림 레이어에 넣는다. 업로드는 웹 화면에서만 한다.
  */
 import * as XLSX from "xlsx"
 
@@ -30,6 +29,8 @@ interface TemplateColumn {
   key: string
   /** 나중에 더한 열. 이 열이 없는 옛 양식 파일도 읽는다. */
   optional?: boolean
+  /** 내려받기 전용 열. 값이 셀에 들어가지 않는다. 사진이 그렇다(R371). */
+  exportOnly?: boolean
   /**
    * 파일에 없어도 되는 열(R354). 업로드할 때 활성 보드에서 값이 정해진다.
    * `optional`과 다르다. `optional`은 "옛 양식에 없던 열"이고 이쪽은 "분석 내려받기가 일부러 뺀 열"이다.
@@ -49,7 +50,7 @@ interface TemplateColumn {
 export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
   { band: "기본", head: "스타일", aliases: ["순번"], width: 6, scope: "style", key: "seq", derivable: true },
   { band: "기본", head: "차트", width: 20, scope: "style", key: "chart", derivable: true },
-  { band: "기본", head: "단계", width: 7, scope: "style", key: "stage", derivable: true },
+  { band: "ORIGINAL", head: "사진", width: 13, scope: "style", key: "image", optional: true, exportOnly: true, screenWidth: 88 },
   { band: "ORIGINAL", head: "Garment Number", width: 15, scope: "style", key: "garmentNo", screenWidth: 120 },
   { band: "ORIGINAL", head: "Brand", width: 13, scope: "style", key: "brand", screenWidth: 100 },
   { band: "ORIGINAL", head: "Fabric Contents", width: 24, scope: "style", key: "contents", screenWidth: 150 },
@@ -104,7 +105,6 @@ const cellOf = (style: RequestStyle, option: RequestOption | null, key: string):
   switch (key) {
     case "seq": return style.seq || null
     case "chart": return style.chart || null
-    case "stage": return style.stage
     case "garmentNo": return style.garmentNo || null
     case "brand": return style.brand || null
     case "contents": return style.contents || null
@@ -136,7 +136,7 @@ const cellOf = (style: RequestStyle, option: RequestOption | null, key: string):
  * 파서도 그 규칙으로 되읽는다.
  */
 export interface RequestWorkbookOptions {
-  /** 기본 밴드(스타일·차트·단계)를 빼고 쓴다. 분석 내려받기 전용(R354). */
+  /** 기본 밴드(스타일·차트)를 빼고 쓴다. 분석 내려받기 전용(R354). */
   dropBasicBand?: boolean
   /** 스타일마다 최소 이만큼 행을 만든다. 남는 줄은 Opt 번호만 적힌 빈 줄이다. */
   minOptionRows?: number
@@ -144,6 +144,8 @@ export interface RequestWorkbookOptions {
   mergeStyleCells?: boolean
   /** 열 너비를 REQUEST 화면 비율로 맞춘다(7절). */
   matchScreenWidths?: boolean
+  /** 스타일 `reqId` → 사진. 넘기지 않으면 사진 없이 만든다(R371). */
+  images?: ReadonlyMap<string, { data: ArrayBuffer; extension: "jpeg"; width: number; height: number }>
 }
 
 export async function buildRequestWorkbook(
@@ -202,7 +204,8 @@ export async function buildRequestWorkbook(
       const row = ws.getRow(rowIndex++)
       columns.forEach((column, index) => {
         const cell = row.getCell(index + 1)
-        if (column.scope === "style" && offset > 0) cell.value = null
+        if (column.exportOnly) { /* 그림 레이어에만 그린다. 셀은 비워 둔다. */ }
+        else if (column.scope === "style" && offset > 0) cell.value = null
         else if (column.key === "no") cell.value = offset + 1
         else cell.value = cellOf(style, option, column.key)
         cell.font = { size: 9 }
@@ -214,6 +217,20 @@ export async function buildRequestWorkbook(
       })
     })
     const endRow = rowIndex - 1
+    const picture = options.images?.get(style.reqId)
+    const imageCol = columnIndex(columns, "image")
+    if (picture && imageCol >= 0) {
+      const imageId = workbook.addImage({ buffer: picture.data as ArrayBuffer, extension: picture.extension })
+      // 칸 안쪽에 맞춰 줄인다. 엑셀 기본 행 높이는 20px, 열 폭 1은 7px이다.
+      const boxW = widthOf(columns[imageCol]) * 7 - 8
+      const boxH = (endRow - startRow + 1) * 20 - 8
+      const scale = Math.min(boxW / picture.width, boxH / picture.height, 1)
+      ws.addImage(imageId, {
+        tl: { col: imageCol + 0.08, row: startRow - 1 + 0.08 },
+        ext: { width: Math.round(picture.width * scale), height: Math.round(picture.height * scale) },
+        editAs: "oneCell",
+      })
+    }
     if (options.mergeStyleCells && endRow > startRow) {
       columns.forEach((column, index) => {
         if (column.scope !== "style") return
@@ -234,18 +251,18 @@ export async function buildRequestWorkbook(
     "   Opt / YARN DETAIL / CONS / W'T / COLOR / DYEING METHOD 만 채웁니다.",
     "   REMARK는 스타일 1건에 한 칸입니다. 첫 행에만 적고, 여러 줄로 써도 됩니다.",
     "   Garment Number가 비어 있는 행은 바로 위 스타일의 옵션으로 읽습니다.",
-    "3. 단계는 분석 또는 개발만 씁니다. 비우면 분석으로 들어갑니다.",
-    "4. URGENT는 V 또는 O로 표시합니다. 비우면 해제입니다.",
-    "5. Weight는 숫자만 씁니다. 단위는 g/m2 입니다.",
-    "6. 업로드하면 차트명과 Garment Number가 같은 건은 갱신하고, 없으면 새로 추가합니다.",
+    "3. URGENT는 V 또는 O로 표시합니다. 비우면 해제입니다.",
+    "4. Weight는 숫자만 씁니다. 단위는 g/m2 입니다.",
+    "5. 업로드하면 차트명과 Garment Number가 같은 건은 갱신하고, 없으면 새로 추가합니다.",
     "   기존 건을 갱신할 때 웹에서 올린 garment 사진은 그대로 남습니다.",
-    "7. garment 사진은 이 양식으로 올릴 수 없습니다. 웹 화면의 사진 칸에서 직접 올려 주세요.",
+    "6. garment 사진은 이 양식으로 올릴 수 없습니다. 웹 화면의 사진 칸에서 직접 올려 주세요.",
     "   엑셀에 붙인 이미지는 파일이 옮겨 다니면서 깨지기 때문에 웹에 보관합니다.",
-    "8. 옵션의 원단 사양은 세 칸으로 나눠 씁니다.",
+    "7. 옵션의 원단 사양은 세 칸으로 나눠 씁니다.",
     "   YARN DETAIL에는 원사 사양만 적습니다. 예: CM 30'S/1 + SP 20D",
     "   CONS는 셀의 드롭다운 목록에서 조직을 고릅니다. 표기를 맞추려고 목록 밖 값은 받지 않습니다.",
     "   W'T는 중량을 숫자로만 적습니다. 단위는 g/m2 입니다.",
     "   목록에 없는 조직이 필요하면 원단 R&D팀에 목록 추가를 요청하세요.",
+    "8. 사진과 결과 칸은 보기 전용입니다. 이 파일에서 고쳐도 웹에 올라가지 않습니다.",
   ]
   lines.forEach((line, index) => {
     const cell = guide.getCell(index + 1, 1)
@@ -313,7 +330,7 @@ export interface RequestParseResult {
   styles: RequestStyle[]
   /** 사람이 고칠 수 있는 문제만 담는다. 치명적이면 throw 한다. */
   warnings: string[]
-  /** 파일에 없어서 화면이 채워야 하는 열(R354). 지금은 seq, chart, stage 셋이다. */
+  /** 파일에 없어서 화면이 채워야 하는 열(R354). 지금은 seq와 chart 둘이다. */
   derivedColumns: string[]
 }
 
@@ -368,7 +385,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
       current = {
         reqId: newId(),
         chart: asText(at(row, "chart")),
-        stage: asText(at(row, "stage")) === "개발" ? "개발" : "분석",
+        stage: "분석",
         seq: Number(asNumber(at(row, "seq"))) || styles.length + 1,
         garmentNo,
         brand: asText(at(row, "brand")),
@@ -473,6 +490,8 @@ export function mergeRequestStyles(existing: readonly RequestStyle[], incoming: 
       // 진행중으로 돌아가고 보드 이력에 결과 변경이 찍힌다(2026-10-13 검토).
       result: previous.result,
       resultAt: previous.resultAt,
+      // 단계는 양식에서 빠졌으므로 재업로드 때 기존 값을 지킨다(R371).
+      stage: previous.stage,
       imagePath: previous.imagePath,
       imageThumbPath: previous.imageThumbPath,
       createdAt: previous.createdAt,

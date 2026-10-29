@@ -43,7 +43,7 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/compon
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FillHandle, selectionShadow, type CellMove, type CellRect, type CellRef } from "@/components/data-table/grid-selection"
 import { downloadBlob } from "@/data/dd-export"
-import { deleteRequestImage, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
+import { deleteRequestImage, loadExportImages, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
 import { buildRequestWorkbook, mergeRequestStyles, parseRequestWorkbook, requestTemplateFileName } from "@/data/request-template"
 import { MEMBERS, REQUEST_RESULTS, styleRemarkText, type AnalysisRequest, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
 import { loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
@@ -1851,7 +1851,10 @@ export function FabricRequest() {
   const downloadTemplate = async () => {
     setNotice(null)
     try {
-      downloadBlob(await buildRequestWorkbook(visible, { minOptionRows: 4, mergeStyleCells: true, matchScreenWidths: true }), requestTemplateFileName())
+      const images = await loadExportImages(visible
+        .filter((style) => style.imageThumbPath || style.imagePath)
+        .map((style) => ({ key: style.reqId, path: (style.imageThumbPath ?? style.imagePath) as string })))
+      downloadBlob(await buildRequestWorkbook(visible, { minOptionRows: 4, mergeStyleCells: true, matchScreenWidths: true, images }), requestTemplateFileName())
     } catch (error) {
       setNotice({ kind: "error", text: error instanceof Error ? error.message : "양식을 만들지 못했습니다." })
     }
@@ -2052,7 +2055,12 @@ export function FabricRequest() {
   }
   const reopenArchivedBoard = (boardId: string) => { saveRequestBoards(reopenBoard(requestBoards, boardId, actor)); setActiveBoard(boardId) }
   const downloadArchive = async (archive: RequestArchive) => {
-    try { downloadBlob(await buildRequestWorkbook(archive.styles, { minOptionRows: 4, mergeStyleCells: true, matchScreenWidths: true }), requestTemplateFileName()) }
+    try {
+      const images = await loadExportImages(archive.styles
+        .filter((style) => style.imageThumbPath || style.imagePath)
+        .map((style) => ({ key: style.reqId, path: (style.imageThumbPath ?? style.imagePath) as string })))
+      downloadBlob(await buildRequestWorkbook(archive.styles, { minOptionRows: 4, mergeStyleCells: true, matchScreenWidths: true, images }), requestTemplateFileName())
+    }
     catch (error) { setNotice({ kind: "error", text: error instanceof Error ? error.message : "엑셀을 만들지 못했습니다." }) }
   }
 

@@ -23,7 +23,7 @@ import { analysisLeadDays, analysisTodayValue, analysisWeeklySeries, canDeleteAn
 import { buildRequestWorkbook } from "@/data/request-template"
 import { loadAnalysisRecipients } from "@/data/mail-recipients"
 import type { MailAddress } from "@/data/mail-draft"
-import { deleteRequestImage, requestImageUrl } from "@/data/request-image"
+import { deleteRequestImage, loadExportImages, requestImageUrl } from "@/data/request-image"
 import { ANALYSIS_STATES, LEGACY_ANALYSIS_CANCELLED, type AnalysisRequest, type AnalysisState } from "@/data/schema"
 import { saveAnalysisRequests, useAppStore } from "@/store/useAppStore"
 
@@ -312,7 +312,10 @@ export function FabricAnalysis() {
     }
     try {
       const styles = pick.targets.map((item, index) => buildRequestStyleFromAnalysis(item, { boardId: "", chart: "", seq: index + 1 }))
-      const blob = await buildRequestWorkbook(styles, { dropBasicBand: true, minOptionRows: 4, mergeStyleCells: true, matchScreenWidths: true })
+      const images = await loadExportImages(styles
+        .filter((style) => style.imageThumbPath || style.imagePath)
+        .map((style) => ({ key: style.reqId, path: (style.imageThumbPath ?? style.imagePath) as string })))
+      const blob = await buildRequestWorkbook(styles, { dropBasicBand: true, minOptionRows: 4, mergeStyleCells: true, matchScreenWidths: true, images })
       const url = URL.createObjectURL(blob)
       const anchor = document.createElement("a")
       anchor.href = url
