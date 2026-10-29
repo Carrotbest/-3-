@@ -60,6 +60,26 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // 공정 일정 확정 목표(baseline). 개발 건 1건당 문서 1개이고 문서 ID가 고정이다.
+    // 한 번 확정하면 아무도 고치거나 지우지 못한다. 재설정 1회 제한이 이 규칙으로 선다.
+    // 레코드 안에 두면 행 전체 단위 병합에 덮이므로 권위값을 여기 둔다.
+    match /scheduleBaseline/{rowKey} {
+      allow read: if isApproved();
+      allow create: if isApproved()
+                    && request.resource.data.confirmedBy == request.auth.token.email
+                    && request.resource.data.rowKey == rowKey;
+      allow update, delete: if false;
+    }
+
+    // 일정 변경 이력. 덧붙이기 전용이고 보관 기간이 없다.
+    // auditLog(90일)보다 오래 남아야 담당자별 납기 준수율을 셀 수 있다.
+    match /scheduleLog/{docId} {
+      allow read: if isApproved();
+      allow create: if isApproved()
+                    && request.resource.data.by == request.auth.token.email;
+      allow update, delete: if false;
+    }
+
     // 원가계산서는 버전이 쌓이는 이력이라 state가 아닌 별도 컬렉션이다.
     // 수정은 허용하되 새 문서는 로그인 이메일을 작성자로 기록한다.
     match /costSheets/{docId} {
