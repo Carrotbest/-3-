@@ -27,6 +27,8 @@ export interface DevTechnical {
   targetDates?: { yarn?: string; knitting?: string; dyeing?: string; finishing?: string }
   /** 개발 건 별칭(Project). DD의 Style No. 오른쪽 열에서 사람이 적는 웹 전용 값. */
   project?: string
+  /** 납기 구분(R375). `"지정"`이면 사업부나 1팀이 준 납기다. 비면 우리가 정한 값이다. */
+  dueDateFixed?: string
   // 개발 사양
   yarnDetail?: string
   arrangeNo?: string

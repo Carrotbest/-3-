@@ -314,7 +314,8 @@ const GROUPS: MasterGroup[] = [
       { id: "category", label: "Category", width: 104, value: (row) => row.category, options: DD_CATEGORY_OPTIONS, render: (row) => <span className={ddCategoryTextClass(row.category)}>{text(row.category)}</span> },
       { id: "planner", label: "Planner", width: 92, suggest: true, value: (row) => row.planner },
       { id: "requestDate", label: "Request Date", width: 76, date: true, value: (row) => row.requestDate },
-      { id: "dueDate", label: "Due Date", width: 76, date: true, value: (row) => row.dueDate, render: (row) => <span className={ddWarnings(row).some((item) => item.key === "due") ? "text-[var(--destructive)]" : ""}>{dateText(row.dueDate)}</span> },
+      { id: "dueDate", label: "Due Date", width: 76, date: true, value: (row) => row.dueDate, render: (row) => <span className={`${ddWarnings(row).some((item) => item.key === "due") ? "text-[var(--destructive)]" : ""} ${row.tech?.dueDateFixed === "지정" ? "font-semibold" : ""}`} title={row.tech?.dueDateFixed === "지정" ? "지정 납기입니다" : undefined}>{dateText(row.dueDate)}</span> },
+      { id: "dueDateFixed", label: "납기 구분", width: 64, align: "center", value: (row) => row.tech?.dueDateFixed ?? "", options: ["", "지정"] },
     ],
   },
   {
@@ -817,6 +818,7 @@ const COMPUTED_COLUMN_IDS = new Set(["opt", "optionProgress", "actualBalance", "
 
 const TECH_PATHS: Record<string, string[]> = {
   project: ["project"],
+  dueDateFixed: ["dueDateFixed"],
   origBrand: ["original", "brand"], origContents: ["original", "contents"], origConstruction: ["original", "construction"], origWeight: ["original", "weight"], origYarn: ["original", "yarn"], origComments: ["original", "comments"],
   developer: ["development", "developer"], co: ["development", "co"], developmentNo: ["development", "developmentNo"], arrangeNo: ["arrangeNo"], yarnDetail: ["yarnDetail"], bodyNo: ["bodyNo"],
   finishingA: ["finishingSlots", "a"], finishingB: ["finishingSlots", "b"], finishingC: ["finishingSlots", "c"], finishingD: ["finishingSlots", "d"],
@@ -3152,7 +3154,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   /** 목표일을 뒤로 미룬 뒤 사유를 받는 줄. 날짜는 이미 저장됐고 사유는 뒤따르는 기록이다. */
-  const [reasonPrompt, setReasonPrompt] = useState<{ rowKey: string; process: DdProcess; before: string; after: string } | null>(null)
+  const [reasonPrompt, setReasonPrompt] = useState<{ rowKey: string; field: "dueDate" | DdProcess; before: string; after: string } | null>(null)
   const [reasonCode, setReasonCode] = useState<DdDelayReason>("knittingLate")
   const [reasonMemo, setReasonMemo] = useState("")
 
@@ -3164,14 +3166,26 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
    * 날짜는 이미 저장됐고 사유는 뒤따르는 기록이다.
    */
   const askDelayReason = (record: DevRecord, column: MasterColumn, raw: string) => {
+    const after = normalizeDateInput(raw).trim()
+    // 지정 납기를 뒤로 미룰 때만 묻는다(R375). 자체 납기는 우리가 정한 값이라 그냥 바뀐다.
+    if (column.id === "dueDate") {
+      if (record.tech?.dueDateFixed !== "지정") return
+      const before = String(record.dueDate ?? "").trim()
+      if (!before || !after || after <= before) return
+      // 납기에 맞는 기본 사유가 없다. `other`로 열어 메모를 받는다.
+      // 지정 납기를 미루는 일은 드물고, 그때는 설명이 남는 편이 맞다.
+      setReasonCode("other")
+      setReasonMemo("")
+      setReasonPrompt({ rowKey: scheduleRowKey(record), field: "dueDate", before, after })
+      return
+    }
     const process = TARGET_PROCESS_BY_COLUMN[column.id]
     if (!process) return
     const before = String(record.tech?.targetDates?.[process] ?? "").trim()
-    const after = normalizeDateInput(raw).trim()
     if (!before || !after || after <= before) return
     setReasonCode(`${process}Late` as DdDelayReason)
     setReasonMemo("")
-    setReasonPrompt({ rowKey: scheduleRowKey(record), process, before, after })
+    setReasonPrompt({ rowKey: scheduleRowKey(record), field: process, before, after })
   }
 
   /** 사유를 남긴다. 건너뛰면 `reasonCode`가 빈 채로 기록돼 "사유 미입력"으로 센다. */
@@ -3182,7 +3196,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!skip && reasonCode === "other" && !reasonMemo.trim()) { notify("기타를 고르면 메모를 적어 주세요."); setReasonPrompt(prompt); return }
     const ok = await appendScheduleChange({
       rowKey: prompt.rowKey,
-      field: prompt.process,
+      field: prompt.field,
       before: prompt.before,
       after: prompt.after,
       reasonCode: skip ? "" : reasonCode,
@@ -3693,9 +3707,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     <Dialog open={Boolean(reasonPrompt)} onOpenChange={(open) => { if (!open) void saveReason(true) }}>
       <DialogContent className="w-[94vw] max-w-none sm:w-[520px]">
         <DialogHeader>
-          <DialogTitle>목표일을 미룬 사유</DialogTitle>
+          <DialogTitle>{reasonPrompt?.field === "dueDate" ? "납기를 미룬 사유" : "목표일을 미룬 사유"}</DialogTitle>
           <DialogDescription>
-            {reasonPrompt ? `${SCHEDULE_PROCESS_LABEL[reasonPrompt.process]} 목표를 ${dateText(reasonPrompt.before)}에서 ${dateText(reasonPrompt.after)}로 미뤘습니다.` : ""}
+            {reasonPrompt
+              ? reasonPrompt.field === "dueDate"
+                ? `지정 납기를 ${dateText(reasonPrompt.before)}에서 ${dateText(reasonPrompt.after)}로 미뤘습니다.`
+                : `${SCHEDULE_PROCESS_LABEL[reasonPrompt.field]} 목표를 ${dateText(reasonPrompt.before)}에서 ${dateText(reasonPrompt.after)}로 미뤘습니다.`
+              : ""}
           </DialogDescription>
           <p className="text-[11px] leading-relaxed text-[var(--muted-foreground)]">
             날짜는 이미 저장됐습니다. 사유는 뒤따르는 기록입니다. 건너뛰어도 변경 사실은 남습니다.
