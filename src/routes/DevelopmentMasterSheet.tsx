@@ -315,7 +315,6 @@ const GROUPS: MasterGroup[] = [
       { id: "planner", label: "Planner", width: 92, suggest: true, value: (row) => row.planner },
       { id: "requestDate", label: "Request Date", width: 76, date: true, value: (row) => row.requestDate },
       { id: "dueDate", label: "Due Date", width: 76, date: true, value: (row) => row.dueDate, render: (row) => <span className={`${ddWarnings(row).some((item) => item.key === "due") ? "text-[var(--destructive)]" : ""} ${row.tech?.dueDateFixed === "지정" ? "font-semibold" : ""}`} title={row.tech?.dueDateFixed === "지정" ? "지정 납기입니다" : undefined}>{dateText(row.dueDate)}</span> },
-      { id: "dueDateFixed", label: "납기 구분", width: 64, align: "center", value: (row) => row.tech?.dueDateFixed ?? "", options: ["", "지정"] },
     ],
   },
   {
@@ -546,26 +545,43 @@ function compareManualOrder(a: DevRecord, b: DevRecord): number {
 // 신규 작지 접수 전용 구성: 결과/DATA/REVIEW 제외. REQUEST·ORIGINAL은 옵션 공통, DETAIL·SCHEDULE은 옵션별.
 const groupByKey = (key: GroupKey) => GROUPS.find((group) => group.key === key)!
 const INTAKE_CORE = PINNED_COLUMNS.filter((column) => column.id !== "status") // 담당·Style No.
-const INTAKE_REQUEST = groupByKey("request").columns.filter((column) => column.id !== "opt")
+/**
+ * 접수 창 전용 납기 칸 둘(R377). 표에는 서지 않는다.
+ *
+ * 어느 칸에 적었는지가 곧 납기 종류다. 둘은 같은 `dueDate` 하나를 보고,
+ * 한쪽에 적으면 다른 쪽은 저절로 빈다. `GROUPS`에 넣지 말 것. 표에 열이 는다.
+ */
+const INTAKE_DUE_COLUMNS: MasterColumn[] = [
+  { id: "intakeDueGiven", label: "지정 납기", width: 76, date: true, value: (row) => row.tech?.dueDateFixed === "지정" ? row.dueDate : "" },
+  { id: "intakeDueOwn", label: "일반 납기", width: 76, date: true, value: (row) => row.tech?.dueDateFixed === "지정" ? "" : row.dueDate },
+]
+// Due Date는 접수 창에서 종류별 칸 둘로 받는다(R377). 그 자리에 끼워 넣는다.
+const INTAKE_REQUEST = groupByKey("request").columns
+  .filter((column) => column.id !== "opt")
+  .flatMap((column) => column.id === "dueDate" ? INTAKE_DUE_COLUMNS : [column])
 const INTAKE_ORIGINAL = groupByKey("original").columns
 /**
  * 신규 접수에서 반드시 받아야 하는 항목. 라벨의 `*`, 빈 칸 붉은 테두리, 저장 차단이 모두 이 목록을 본다.
  *
  * Due Date가 비면 HOME 스케줄의 임박·지연 집계에서 그 건이 통째로 빠진다(daysLeft가 null).
  * 어디에도 안 뜨는 건을 만들지 않으려고 접수 단계에서 막는다.
+ * 납기 검사는 종류별 칸을 합친 sharedDraft.dueDate에서 따로 한다.
  * 엑셀 업로드는 과거 시트를 그대로 들여오는 길목이라 여기에 걸지 않는다.
  */
-const INTAKE_REQUIRED_IDS = new Set(["owner", "styleNo", "season", "category", "buyer", "planner", "dueDate"])
+const INTAKE_REQUIRED_IDS = new Set(["owner", "styleNo", "season", "category", "buyer", "planner"])
 const DETAIL_GROUP = groupByKey("detail")
 const SCHEDULE_GROUP = groupByKey("schedule")
 
 /** 옵션 공통(REQUEST·ORIGINAL·담당·Style) 필드를 from → to 로 복사한다. DETAIL·SCHEDULE 등 옵션별 필드는 유지. */
 function applySharedFields(from: DevRecord, to: DevRecord): DevRecord {
+  const tech = { ...to.tech, original: { ...from.tech?.original } }
+  if (from.tech?.dueDateFixed) tech.dueDateFixed = from.tech.dueDateFixed
+  else delete tech.dueDateFixed
   return {
     ...to,
     owner: from.owner, styleNo: from.styleNo, season: from.season, buyer: from.buyer,
     category: from.category, planner: from.planner, requestDate: from.requestDate, dueDate: from.dueDate,
-    tech: { ...to.tech, original: { ...from.tech?.original } },
+    tech,
   }
 }
 
@@ -818,7 +834,6 @@ const COMPUTED_COLUMN_IDS = new Set(["opt", "optionProgress", "actualBalance", "
 
 const TECH_PATHS: Record<string, string[]> = {
   project: ["project"],
-  dueDateFixed: ["dueDateFixed"],
   origBrand: ["original", "brand"], origContents: ["original", "contents"], origConstruction: ["original", "construction"], origWeight: ["original", "weight"], origYarn: ["original", "yarn"], origComments: ["original", "comments"],
   developer: ["development", "developer"], co: ["development", "co"], developmentNo: ["development", "developmentNo"], arrangeNo: ["arrangeNo"], yarnDetail: ["yarnDetail"], bodyNo: ["bodyNo"],
   finishingA: ["finishingSlots", "a"], finishingB: ["finishingSlots", "b"], finishingC: ["finishingSlots", "c"], finishingD: ["finishingSlots", "d"],
@@ -904,6 +919,19 @@ function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string, 
     case "planner": return { ...record, planner: input }
     case "requestDate": return { ...record, requestDate: input }
     case "dueDate": return { ...record, dueDate: input }
+    // 접수 창 납기 칸 둘(R377). 적은 칸이 종류를 정한다.
+    // `undefined`를 넣지 말고 키를 지운다. 값 없는 키는 Firestore가 거부한다(R340).
+    case "intakeDueGiven": {
+      const tech = { ...(record.tech ?? {}) }
+      if (input.trim()) tech.dueDateFixed = "지정"
+      else delete tech.dueDateFixed
+      return { ...record, dueDate: input, tech }
+    }
+    case "intakeDueOwn": {
+      const tech = { ...(record.tech ?? {}) }
+      delete tech.dueDateFixed
+      return { ...record, dueDate: input, tech }
+    }
     case "construction": return { ...record, construction: input }
     case "targetWeight": return { ...record, weight: input === "" ? "" : Number(input) }
     case "color": return { ...record, color: input }
@@ -3081,6 +3109,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const missing = [...INTAKE_REQUIRED_IDS].filter((id) => !String(fieldValueOf(sharedDraft, id) ?? "").trim())
     if (missing.length > 0) {
       setIntakeError(`필수 항목을 입력하세요: ${missing.map((id) => intakeColumns.find((column) => column.id === id)?.label ?? id).join(" · ")}`)
+      return
+    }
+    // 납기는 종류별 칸 둘 중 하나로 받는다(R377). 둘 다 비면 막는다.
+    // Due Date가 비면 HOME 스케줄 임박과 지연에서 그 건이 통째로 빠진다.
+    if (!String(sharedDraft.dueDate ?? "").trim()) {
+      setIntakeError("납기를 입력하세요. 지정 납기나 일반 납기 중 한 칸에 적습니다.")
       return
     }
     // 가공 목표일은 옵션마다 받는다(R369, 2026-10-29 박향근). 언제 끝낼 것인가가 이 건의 약속이고,
