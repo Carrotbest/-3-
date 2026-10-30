@@ -54,7 +54,7 @@ export interface DevTechnical {
   actual?: {
     width?: number | null
     weight?: number | null
-    balance?: number | null
+    balance?: number | null // Target 대비 실측 중량 차이. 퍼센트 숫자다(-10.1 = -10.1%). 소수 비율이 아니다
     shrinkageLength?: number | null
     shrinkageWidth?: number | null
   }

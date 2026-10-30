@@ -101,7 +101,7 @@ function reached(value: string | undefined, today: Date): boolean {
 
 /**
  * 담당자 DD의 행 수식을 웹 데이터에 재현한다.
- * C열 옵션순번, AN열 완료/전체, AR열 실측 Balance와 공정 도달 상태를 매 저장 때 다시 계산한다.
+ * C열 옵션순번, AN열 완료/전체, AR열 실측 Balance(퍼센트 숫자)와 공정 도달 상태를 매 저장 때 다시 계산한다.
  */
 export function recalculateDevelopmentRecords(records: readonly DevRecord[], today = new Date()): DevRecord[] {
   const groups = new Map<string, DevRecord[]>()
@@ -144,7 +144,11 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
     const formula = calculated.get(identity(record))
     const targetWeight = typeof record.weight === "number" ? record.weight : Number(record.weight)
     const actualWeight = record.tech?.actual?.weight
-    const balance = targetWeight && typeof actualWeight === "number" ? (actualWeight - targetWeight) / targetWeight : record.tech?.actual?.balance
+    // Target 대비 실측 중량의 차이를 퍼센트 숫자로 둔다. 축률 L/W와 같은 단위다.
+    // 둘 중 하나가 없으면 뜻이 없으므로 null이다. undefined를 두면 Firestore가 저장을 거부한다.
+    const balance = Number.isFinite(targetWeight) && targetWeight !== 0 && typeof actualWeight === "number"
+      ? ((actualWeight - targetWeight) / targetWeight) * 100
+      : null
     const tech = {
       ...record.tech,
       optionProgress: hasStyleNo ? formula?.optionProgress ?? record.tech?.optionProgress : "",

@@ -102,7 +102,7 @@ const COLUMNS: ExportColumn[] = [
 
   { head: "Actual", sub: "Width", width: 7.2, value: (r) => num(r.tech?.actual?.width) },
   { head: "Actual", sub: "Weight", width: 12.2, value: (r) => num(r.tech?.actual?.weight) },
-  { head: "Actual", sub: "Balance", width: 12.2, value: (r) => num(r.tech?.actual?.balance) },
+  { head: "Actual", sub: "Balance%", width: 12.2, value: (r) => num(r.tech?.actual?.balance) },
   { head: "Actual", sub: "축률(L)%", width: 8.7, value: (r) => num(r.tech?.actual?.shrinkageLength) },
   { head: "Actual", sub: "축률(W)%", width: 12.2, value: (r) => num(r.tech?.actual?.shrinkageWidth) },
   { head: "Knitting", sub: "Inch", width: 7.2, value: (r) => str(r.tech?.knitSpec?.inch) },
