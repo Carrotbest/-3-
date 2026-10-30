@@ -1134,9 +1134,10 @@ function GuardedTextInput({ column, value, disabled, className, floatingHint = f
 }
 
 function EditorField({ column, draft, onChange, optionsById, requiredIds, readOnly = false }: { column: MasterColumn; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {
+  const canEditLocked = useAuthStore((state) => state.isOwner)
   const value = String(column.value(draft, null) ?? "")
   const computed = COMPUTED_COLUMN_IDS.has(column.id)
-  const disabled = readOnly || computed
+  const disabled = readOnly || computed || isLockedCell(draft, column, canEditLocked)
   const required = requiredIds?.has(column.id) ?? false
   const invalid = required && !value.trim()
   const set = (raw: string) => onChange(updateRecordCell(draft, column, raw, allowedFor(column, optionsById)))
@@ -1183,8 +1184,20 @@ const GD_ONLY_COLUMN_IDS = new Set(["fds", "yds"])
  * 이 셀을 고칠 수 없는가. 열 자체가 수식·대장 연결이거나, GD 전용 열인데 국내 건인 경우다.
  * 붙여넣기·채우기·지우기까지 같은 판정을 쓴다. 한 곳만 막으면 다른 경로로 값이 들어간다.
  */
-const isLockedCell = (record: DevRecord, column: MasterColumn): boolean =>
-  isFixedColumn(column) || (GD_ONLY_COLUMN_IDS.has(column.id) && !isGdRecord(record))
+/**
+ * 납기가 굳었는가(R376). 원사가 입고되면 Due Date가 확정된다는 2026-10-30 결정이다.
+ *
+ * **Due Date가 비어 있으면 잠그지 않는다.** 엑셀 업로드 경로에는 접수 필수 검사가 걸리지
+ * 않아, 과거 시트에서 온 행 중 Due Date가 비고 원사 완료일만 있는 건이 있다.
+ * 조건 없이 잠그면 그런 행은 영영 납기를 못 채운다.
+ */
+const isDueDateLocked = (record: DevRecord): boolean =>
+  Boolean(String(record.tech?.processDates?.yarn ?? "").trim()) && Boolean(String(record.dueDate ?? "").trim())
+
+const isLockedCell = (record: DevRecord, column: MasterColumn, canEditLocked = false): boolean =>
+  isFixedColumn(column)
+  || (GD_ONLY_COLUMN_IDS.has(column.id) && !isGdRecord(record))
+  || (column.id === "dueDate" && !canEditLocked && isDueDateLocked(record))
 
 /**
  * 인라인 편집기 네 종류(날짜·수기·선택·제안)가 공유하는 키 처리.
@@ -1306,6 +1319,7 @@ interface GridCellProps {
   options?: readonly string[]
   editSeed?: string
   editEnabled: boolean
+  canEditLocked: boolean
   actions: GridActions
 }
 
@@ -1313,7 +1327,7 @@ interface GridCellProps {
  * 선택이 한 칸 움직일 때 표 전체가 다시 그려지지 않도록 memo 로 감싼다.
  * 그래서 props 는 전부 원시값이거나 참조가 고정된 값이어야 한다(CellSel 객체를 그대로 넘기면 memo 가 깨진다).
  */
-const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, dimmed, moveStyle, options, editSeed, editEnabled, actions }: GridCellProps) {
+const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, dimmed, moveStyle, options, editSeed, editEnabled, canEditLocked, actions }: GridCellProps) {
   const costClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => () => { if (costClickTimer.current) clearTimeout(costClickTimer.current) }, [])
   const sel: CellSel = { inRange: selIn, isActive: selActive, top: selTop, bottom: selBottom, left: selLeft, right: selRight, handle: selHandle, moveEdge: selMoveEdge }
@@ -1324,7 +1338,7 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const onContextMenu = (event: ReactMouseEvent<HTMLTableCellElement>) => actions.contextMenu(event, rowId, column.id)
   const onFillStart = actions.fillStart
   const costClickable = column.id === "flNo" && isCompletedFlNo(record.flNo) && isDomesticCostRecord(record)
-  const fixed = isLockedCell(record, column)
+  const fixed = isLockedCell(record, column, canEditLocked)
   const align = `${alignOf(column) === "center" ? "text-center" : "text-left"} ${column.number ? "tabular-nums" : ""}`
   const highlight = sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""
   // 종료된 행의 회색은 클래스로는 다른 배경 클래스에 밀리므로 인라인으로 덮는다. 글자색은 건드리지 않는다.
@@ -1365,7 +1379,9 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
     // 왜 안 되는지 알 길이 없다. beginCellEdit 가 권한을 보고 안내를 띄운다.
     if (!fixed) onEdit()
   }
-  return <td data-col-id={column.id} title={typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
+  return <td data-col-id={column.id} title={column.id === "dueDate" && fixed && isDueDateLocked(record)
+    ? "원사가 입고되어 납기가 확정됐습니다. 바꾸려면 관리자에게 요청하세요."
+    : typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
 })
 
 function EditorGroup({ label, color, columns, draft, onChange, optionsById, layout, requiredIds, readOnly }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; layout?: "schedule" | "data"; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {
@@ -2320,7 +2336,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const rowIndex = rowIndexOf.get(cellRef.row)
     const colIndex = colIndexOf.get(cellRef.col)
     const column = colIndex === undefined ? undefined : displayedColumns[colIndex]
-    if (rowIndex === undefined || !filtered[rowIndex] || !column || isLockedCell(filtered[rowIndex], column)) return
+    if (rowIndex === undefined || !filtered[rowIndex] || !column || isLockedCell(filtered[rowIndex], column, isAdmin)) return
     setCopyMark(null)
     setEditSeed(initial)
     setEditCell(cellRef)
@@ -2421,7 +2437,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       for (let col = source.left; col <= source.right; col += 1) {
         const sourceColumn = displayedColumns[col]
         const targetColumn = displayedColumns[target.left + col - source.left]
-        if (!sourceColumn || !targetColumn || isFixedColumn(sourceColumn) || isLockedCell(targetRecord, targetColumn)) continue
+        if (!sourceColumn || !targetColumn || isFixedColumn(sourceColumn) || isLockedCell(targetRecord, targetColumn, isAdmin)) continue
         moves.push({ sourceRecord, sourceColumn, targetRecord, targetColumn, value: rawCellText(sourceRecord, sourceColumn) })
       }
     }
@@ -2455,7 +2471,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       const fromRecord = filtered[sourceRow]
       const column = displayedColumns[colIndex]
       const fromColumn = displayedColumns[sourceCol]
-      if (!record || !fromRecord || !column || !fromColumn || isLockedCell(record, column)) return
+      if (!record || !fromRecord || !column || !fromColumn || isLockedCell(record, column, isAdmin)) return
       const identity = recordIdentity(record)
       const draft = edits.get(identity) ?? record
       const next = updateRecordCell(draft, column, rawCellText(fromRecord, fromColumn), allowedFor(column, optionsById))
@@ -2508,7 +2524,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         let draft = base
         for (let col = area.left; col <= area.right; col += 1) {
           const column = displayedColumns[col]
-          if (!column || isLockedCell(record, column)) continue
+          if (!column || isLockedCell(record, column, isAdmin)) continue
           const source = edits.get(recordIdentity(fromRecord)) ?? fromRecord
           const next = updateRecordCell(draft, column, rawCellText(source, column), allowedFor(column, optionsById))
           if (next !== draft) { draft = next; changed += 1 }
@@ -2528,7 +2544,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const edits = new Map<string, DevRecord>()
     let changed = 0
     const replaceCell = (record: DevRecord, column: MasterColumn) => {
-      if (isLockedCell(record, column)) return
+      if (isLockedCell(record, column, isAdmin)) return
       const identity = recordIdentity(record)
       const draft = edits.get(identity) ?? record
       const linked = ledgerByRecord.get(identity) ?? null
@@ -2724,7 +2740,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         let draft = edits.get(identity) ?? record
         for (let c = area.left; c <= area.right; c += 1) {
           const column = displayedColumns[c]
-          if (!column || isLockedCell(record, column)) continue
+          if (!column || isLockedCell(record, column, isAdmin)) continue
           draft = updateRecordCell(draft, column, "")
         }
         if (draft !== record) edits.set(identity, draft)
@@ -2755,7 +2771,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           if (!record) continue
           for (let c = area.left; c <= area.right; c += 1) {
             const column = displayedColumns[c]
-            if (!column || isLockedCell(record, column)) continue
+            if (!column || isLockedCell(record, column, isAdmin)) continue
             if (!isAcceptableCellValue(column, value, allowedFor(column, optionsById))) continue
             targets += 1
           }
@@ -2776,7 +2792,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           let draft = base
           for (let c = area.left; c <= area.right; c += 1) {
             const column = displayedColumns[c]
-            if (!column || isLockedCell(record, column)) continue
+            if (!column || isLockedCell(record, column, isAdmin)) continue
             if (!isAcceptableCellValue(column, value, allowedFor(column, optionsById))) { invalid += 1; continue }
             const next = updateRecordCell(draft, column, value, allowedFor(column, optionsById))
             if (next !== draft) { draft = next; filled += 1 }
@@ -2803,7 +2819,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         let draft = edits.get(recordIdentity(record)) ?? record
         for (let c = cut.left; c <= cut.right; c += 1) {
           const column = displayedColumns[c]
-          if (!column || isLockedCell(record, column)) continue
+          if (!column || isLockedCell(record, column, isAdmin)) continue
           draft = updateRecordCell(draft, column, "")
         }
         put(record, draft)
@@ -2828,7 +2844,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       for (let c = 0; c < targetWidth; c += 1) {
         const column = displayedColumns[rect.left + c]
         if (!column) break
-        if (isLockedCell(record, column)) { skipped += 1; continue }
+        if (isLockedCell(record, column, isAdmin)) { skipped += 1; continue }
         const raw = grid[r % gridHeight][c % gridWidth] ?? ""
         if (!isAcceptableCellValue(column, raw, allowedFor(column, optionsById))) { invalid += 1; continue }
         draft = updateRecordCell(draft, column, raw, allowedFor(column, optionsById))
@@ -3127,7 +3143,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           let draft = base
           for (let col = area.left; col <= area.right; col += 1) {
             const targetColumn = displayedColumns[col]
-            if (!targetColumn || isLockedCell(target, targetColumn)) continue
+            if (!targetColumn || isLockedCell(target, targetColumn, isAdmin)) continue
             const next = updateRecordCell(draft, targetColumn, raw, allowedFor(targetColumn, optionsById))
             if (next !== draft) { draft = next; changed += 1 }
           }
@@ -3169,7 +3185,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const after = normalizeDateInput(raw).trim()
     // 지정 납기를 뒤로 미룰 때만 묻는다(R375). 자체 납기는 우리가 정한 값이라 그냥 바뀐다.
     if (column.id === "dueDate") {
-      if (record.tech?.dueDateFixed !== "지정") return
+      if (record.tech?.dueDateFixed !== "지정" && !isDueDateLocked(record)) return
       const before = String(record.dueDate ?? "").trim()
       if (!before || !after || after <= before) return
       // 납기에 맞는 기본 사유가 없다. `other`로 열어 메모를 받는다.
@@ -3524,7 +3540,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   return <GridCell key={`${group.key}-${column.id}`} record={record} column={column} rowId={rowId} width={widthOf(column)} ledger={linked} active={isActive(column.id)}
                     selIn={cs.inRange} selActive={cs.isActive} selTop={cs.top} selBottom={cs.bottom} selLeft={cs.left} selRight={cs.right} selHandle={cs.handle} selMoveEdge={cs.moveEdge}
                     fillPreview={inFillPreview(rowIdx, column.id)} dimmed={rowDimmed} moveStyle={movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1)}
-                    options={optionsById[column.id] ?? column.options} editSeed={editSeed} editEnabled={editEnabled} actions={gridActions} />
+                    options={optionsById[column.id] ?? column.options} editSeed={editSeed} editEnabled={editEnabled} canEditLocked={isAdmin} actions={gridActions} />
                 }))}
               </tr>
             })}
