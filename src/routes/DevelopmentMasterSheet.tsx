@@ -452,6 +452,10 @@ const TARGET_COLUMN_IDS = ["yarnTarget", "knittingTarget", "dyeingTarget", "fini
 const TARGET_PROCESS_BY_COLUMN: Record<string, DdProcess> = {
   yarnTarget: "yarn", knittingTarget: "knitting", dyeingTarget: "dyeing", finishingTarget: "finishing",
 }
+/** 공정 완료 열 넷. 이 칸은 한 칸으로 목표와 완료를 순서대로 받는다(R374). */
+const PROCESS_BY_STATUS_COLUMN: Record<string, DdProcess> = {
+  yarnStatus: "yarn", knittingStatus: "knitting", dyeingStatus: "dyeing", finishingStatus: "finishing",
+}
 /**
  * 목표일 열만 기본 숨김이다. 평소 화면을 좁게 두려는 것이다.
  * `loadViewGroups`는 저장된 값에 있는 키만 덮어쓰므로, 기존 사용자도 이 넷은 숨은 채로 시작한다.
@@ -909,7 +913,23 @@ function updateRecordCell(record: DevRecord, column: MasterColumn, raw: string, 
   const path = TECH_PATHS[column.id]
   if (!path) return record
   const tech = structuredClone(record.tech ?? {}) as DevTechnical
-  setNested(tech as unknown as Record<string, unknown>, path, value === "" ? undefined : value)
+  const next = value === "" ? undefined : value
+  // 공정 완료 칸은 한 칸으로 목표와 완료를 순서대로 받는다(R374).
+  // 목표와 완료가 모두 비어 있을 때 친 첫 날짜만 목표다. 나머지는 완료다.
+  // 완료를 먼저 보는 이유는 R369 전 행에 targetDates가 없기 때문이다.
+  // 목표부터 보면 그 행의 완료일을 고칠 때마다 값이 목표로 샌다.
+  // 지우기는 채운 역순이다. 완료가 있으면 완료부터 지운다.
+  const statusProcess = PROCESS_BY_STATUS_COLUMN[column.id]
+  const schedulePath = statusProcess
+    ? [String(record.tech?.processDates?.[statusProcess] ?? "").trim() || String(record.tech?.targetDates?.[statusProcess] ?? "").trim()
+        ? "processDates"
+        : "targetDates",
+       statusProcess]
+    : null
+  const deletePath = statusProcess && next === undefined
+    ? [String(record.tech?.processDates?.[statusProcess] ?? "").trim() ? "processDates" : "targetDates", statusProcess]
+    : null
+  setNested(tech as unknown as Record<string, unknown>, deletePath ?? schedulePath ?? path, next)
   // **목표일을 완료일 칸에 따라 적지 말 것(R372).** R369가 괄호를 안 띄우려고 그렇게 했다가 뺐다.
   // `processDates`는 `dd-workflow.ts`의 `reached()`가 `날짜 <= 오늘`로 읽는다. 목표일을 복사해 두면
   // 그 날이 지나는 순간 **아무도 손대지 않은 공정이 도달로 잡힌다.** `processReached`, `stage`,
