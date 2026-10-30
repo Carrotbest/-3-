@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-10-29T00:29:57+00:00",
+"generated_at": "2026-10-30T00:30:17+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -4081,296 +4081,6 @@
 "Nike": "NKE"
 },
 "news": {
-"carters": [
-{
-"d": "2026-10-28",
-"t": "Carter's, Inc.는 주당 85센트의 수익을 올릴 것으로 예상됩니다 - 수익 미리보기",
-"o": "Carter's, Inc. expected to post earnings of 85 cents a share - Earnings Preview",
-"u": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxPeklFYmhuczRJOWZzSzN1djVWV0ZiQ09HX19yZW1La3JZdXhtcTBld0N6SVRXc2VhUzNBQVBzYnIxdHp5Tk9wbVU5a1BuSVNQbDg0b3I4N3hRNU10LUFJX01HSlhzbjhGaXB4M1RGVVE1Qkw4d09OWW9sVmJtVkdKZkJoQmZjQXM2dG44R3NsQkZHeF9rRUFkSy1RTUJEU0xHWUtUQVJNNlBfTFRnRXZjbVJlRURlS3JDb3RQbWU1VUthX0k5a0pBNmlCZURIME1wLTMyT0VYZFBtMWJEMHc?oc=5",
-"m": "바이어 · Carter's"
-},
-{
-"d": "2026-09-22",
-"t": "CRI 2026년 2분기 수익: Carter's, EPS보다 큰 폭의 EPS를 기록했지만 주가는 거의 변동하지 않음 - 실적 가속화 추천",
-"o": "CRI Q2 2026 Earnings: Carter's Posts Outsized EPS Beat, but Stock Barely Budges - Earnings Acceleration Picks",
-"u": "https://news.google.com/rss/articles/CBMivAFBVV95cUxPZWwyTnFZcDQ0YTNIblJwQmZId3JVcExNbEpLS3ZVVnQ2OHZrV3ZMcHF1ZURIbXF2N1pFbklsU0NESUlUaHowSWVvQ1hYMlpRX1lHbGRwZXBjT1lkSXpPNVVMeXJYZjZMUnZHRjlvMV9OSnU5SFI0eEduX01ZeElydGMycGpRc29IWUdZUHJYTG4tcUJ2U2tGWXZ5cGtBRDkzS0g0bklkNjg3bVBxYS1qeWw4Q1JKTmVMem53cQ?oc=5",
-"m": "바이어 · Carter's"
-},
-{
-"d": "2026-09-17",
-"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도 - 합의 실패율",
-"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - Consensus Miss Rate",
-"u": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNZkpxUFNBYmVveU5DNHFQR0w0dlBoWlZCZWRMMzBmSDFxdDdBR2xPS1RWZjZwSG15UU1wUHpIQ3RZRGYwM1prdjhoWlNCMnNHcU1ZelF1VzY1bVBzM1N0ZmFoLVBxNjFydzVWajRMQWpuckZ2MEE2aWRQdFRFX1BBSGFjdEViakVqbnZuR2NXN0UzWFNDZ1RWZzhRejRWVy1BY3NpbGFCOHphdmJVZEgzZ1ExM0hXalQ2OE1HdDNPc25lbTNT?oc=5",
-"m": "바이어 · Carter's"
-},
-{
-"d": "2026-09-17",
-"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도함 - CEO 수익 명세서",
-"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - CEO Earnings Statement",
-"u": "https://news.google.com/rss/articles/CBMi_gFBVV95cUxNV0pzZFNaMVJiRVg2UFc2U09KRXlJdlk2SGlzTlNaYk9JXzdtU0NjNzQ0TG4wZ1NpOThJaloyQmlVcEpuOTVobkF6bW1vR3RDWndORG5GYXFfSXRlQkozZC13ZXlpLXl0Rk1Xb0hhVU5ab3A4VjhNejJ1UWxuVm5IVE9LRWN1dHFFOUR0TlNYMFkxM3B0ejRacEJfemlpckJhaElJcV9hT3NpUGJxMk1VeXRmbTZ4ZTZNTmhfclhmYTU0STFkUU1lUTVpM3lTLVB4dGliOGF3QlB5R2V3VzNRXzgtallxSEJERG43WWRzYUg3YTNzQ3RvRHhCbVQ0UQ?oc=5",
-"m": "바이어 · Carter's"
-},
-{
-"d": "2026-09-17",
-"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도 - 낮은 성장 수익",
-"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - Low Growth Earnings",
-"u": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNZkpxUFNBYmVveU5DNHFQR0w0dlBoWlZCZWRMMzBmSDFxdDdBR2xPS1RWZjZwSG15UU1wUHpIQ3RZRGYwM1prdjhoWlNCMnNHcU1ZelF1VzY1bVBzM1N0ZmFoLVBxNjFydzVWajRMQWpuckZ2MEE2aWRQdFRFX1BBSGFjdEViakVqbnZuR2NXN0UzWFNDZ1RWZzhRejRWVy1BY3NpbGFCOHphdmJVZEgzZ1ExM0hXalQ2OE1HdDNPc25lbTNT?oc=5",
-"m": "바이어 · Carter's"
-},
-{
-"d": "2026-09-17",
-"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도",
-"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence",
-"u": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNUE1KWHhjM3JXTG8tRzY2XzlKdFFQZnNVTzJrQWFmZ01sSDcyT0R0SnFqRFhiXzNIMFVVSVc2Nm5pZ1Z3R0plQ3FvLUdTLTFUaEVPSzd4Q25FR1NKVl81VHV1ZDM0MGlwME1IdWlKQUdMSlpDRlB2T05TWExwOG5KUWxieHUtRzIxRnctQUh6b0NuOU1PcG5SR09VN3RfaHVZR0tZeXg3UncwdVo1eFplNG1PRGRHX1FYUFEwbVhiMjJ5WEthR3c?oc=5",
-"m": "바이어 · Carter's"
-},
-{
-"d": "2026-09-17",
-"t": "Carter's: 관세 역풍이 변하면서 매력적임(NYSE:CRI)",
-"o": "Carter's: Attractive As Tariff Headwind Inflects (NYSE:CRI)",
-"u": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOM2Z3WDE1bHEtUldTZkFqNUF6VWRYcmxpRTBqd21jeFdGa2txcXFpSXpEV1ZQN1hfZlNEdEplTi1CLUs0bzItb1RaaDAtc3NFa3JsQm9raHEwVjAwZVlrRTBKV3JoNnhYWkdZQkJDdmI1d25VYmEyQ0JDMmxOUHlKR1IyM2JmUzRlcEY3M05GbWQ?oc=5",
-"m": "바이어 · Carter's"
-},
-{
-"d": "2026-09-17",
-"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도 - 수익 안정성 보고서",
-"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - Earnings Stability Report",
-"u": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOTmxIbUt0UXZxVWViOERqa3k2M1Atb1VHYWNZbHREZjIxR2JqSFFBOGliQmxrbnJDOWlZSEljaVM1c1p4bmhtM24xcUFUN3paSnVPWmE2SFV4TXpOYTVmZlpRdDM0WFhXeTNiTDdrWmhHd2ZGUERtV3JqZmZQVHBqazF0RWpBRnpPWF9wd01NRmw4dUdHSi1ySkJib2Y1QjRJVEUxekduUURVTFdNS21IeHloOHVrWVlxMndLRjFYMnJ6aTJmck1RZG1R?oc=5",
-"m": "바이어 · Carter's"
-}
-],
-"ua": [
-{
-"d": "2026-10-28",
-"t": "UBS, Under Armour가 2027년 전망 유지",
-"o": "UBS Sees Under Armour Holding Its 2027 Outlook",
-"u": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOVE45cllCT3NvelVtd2RNUVZQOTk0VlNJZHBaMGZrbk9OdHpWZ0tLN1lpeDg4bE15aS1TUWlqRi02alUtdjhIWFdRLTFUemlmZDBLcktfQWJjMG1BTHh2T2hXTUFoWVVyeVBKVzBqUklPcC0yUkpNSWhPQ1VwNTJJRQ?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-10-24",
-"t": "Under Armour 주식: Under Armour는 결과 날짜를 설정하고 해당 분기의 수익을 보고합니다.",
-"o": "Under Armour stock: Under Armour sets results date and reports revenue for the quarter",
-"u": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxOM3JDZHlUZkxOTzlkNzBCTTZzN1VJNzBrSkRNRUV4d2ZyUHRPZXBfSHNtdE5SaXI2QnBmbEc0NF8waUtjc1pxaFRLUDZNVksyemFNbWtwTTJCNjhWTVZJN2JlcktQLTNOZEdveHo1YThTUExwR0lMclhXOWdjRzNlc2owM0lsclg1cHV3dGpJX2hERTVydHJjcEdXU2FFMDkwZ2tTLTlLV0l3dHlNWndoRi02dG1YNllwTG5OQlZGMXBzb3pfQVZENTk4REIwT05DclFfdE94R1l0WUlr?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-10-23",
-"t": "소매 판매 확산으로 체육 의류 주가 하락: Lululemon과 Under Armour는 4% 하락, Nike는 2% 후퇴",
-"o": "Athletic Apparel Stocks Fall as Retail Selling Spreads: Lululemon and Under Armour Drop 4%, Nike Retreats 2%",
-"u": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxNakFDSzVnT0ZaSGVrdjhBUHhOZ0RBaURzSGk5QUExMWpKbUktZUF4TGJGMzFYTDFUX3pMQ3ZuT1hJNUNBUTVfdWRmMkpVUXdRTTBYc0xkUzRveEpJQkFsUC1ZbGJUdllWX1Z1NWRaS2ZFNmh2TjYzcmgwc3FzQl9HU1YwTFRVUkt4Sm1VNDRKYVl0MU84b3pwa2tVUWpkZlJ0UWM1WTcxTzh5Y0Z1VHdiUWkzRWxnTjZzRWZQMEhsWlpGUkNUTW1pSEhSMmJ0RkxRZm9uQ1VpZWNpWWlOajdTai1B?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-10-16",
-"t": "Under Armour(UAA)는 11월 6일 수익을 앞두고 할인 거래되고 있나요?",
-"o": "Is Under Armour (UAA) Trading At A Discount Ahead Of Its November 6 Earnings?",
-"u": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxNQTZWbG02Q0d4U1l5SWM1Wmp4VGt6UnplU0hLSEY0dXBtVGkzTHlPMUFfbnc5WkJnbW83emNzemM2RzhHYnZLQ2JWdGpaZm1uYTVPWGtIVGdlMkVvVDItSmhPN0dYWVotY1lOOHptbTYtakpYX3lpNmdmcU4zY2NMbkZweXJDRkNZdElnU0N0RnFEQ3g0S0c5TFNDUkRoR0lpelJEc0lZV0licFJ4R0J1YmR1d3VlNUNNd3dLeGp3VW90QVlVdFJVMjlDRGxzcmpKTVEw0gHYAUFVX3lxTFBQU3U1VE1xSXZ3UzZiVkRlRkhnbE93X1Ftd1RFcnZYNXk4NWkyTUNjT3dLWjRNU1g4UUUtaFlGd0t0cG5xeVUyR19oeDhHMV8yY2xsajN1SGNsai16T3p2VW5FQXgydEpCYklSb0poNlFRY0p2d1VsNU9fOW9yZlQyek5ZTkFLTzNhSnI3UjUxQnZpSmdXVVBVU0pGUGsxUTFlMDRVTE9KXzMxV0pnN09Ld1NWNlF6bjlZbW5uZGNSbjdwdEUzSElKd0lnWWNyNnFzV1pqZlZBZA?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-10-15",
-"t": "임의소비재 - 의류 및 액세서리 주식 2분기 결과: Under Armour 벤치마킹(NYSE:UAA)",
-"o": "Consumer Discretionary - Apparel and Accessories Stocks Q2 Results: Benchmarking Under Armour (NYSE:UAA)",
-"u": "https://news.google.com/rss/articles/CBMi8wFBVV95cUxObkxDX2dkMm96MEphQ3gyelAxTVA4YWU1VVZST0NoR0VCZDhoR0I5ck9sdDhtSm5jdEs5RlY2M29KZmNEeV9WNC1sanRMc1lCaFluWjI4bHZKa3JuZEJDVXZBNVZOcTh3YjFUdW1LTmxOc01kTU1EVnRqaHFIMWh1Sl9mR1FCdFdQUmdwWUp0bWExTGhSMlZhaEtkUFNWdUxZX1pEMXVzTVY2aTM4Q0E2YUljYk9GazBmcXE1UzNYVVZaVldMVG85UG16SWEwZjRfeWUtd09MaVE1ckU4YjdrWWZGakhndDZvWWpIaG5HcUpRUTQ?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-10-12",
-"t": "Lululemon, Under Armour는 이익 마진을 높이기 위해 제품 라인을 축소하고 있습니다.",
-"o": "Lululemon, Under Armour are cutting product lines to lift profit margins",
-"u": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOaWNpS3VtSi1jOElIaGdkUkdRa2U2azktWEtkMVNDY1NvV2dWY20yclR0WlJqcGZLMHVVSndzcndJR0Y5RjFncFg2Y3dWZWpZV3huOXJQc19MVktPWmFtNGFsZzJ4YmNwWXRSRlRaWndFQmcyV3BQV0Z4UFEwVE1Rd2htTldybmQwZGxpQQ?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-10-12",
-"t": "Under Armour, Inc. 클래스 A의 가격 대비 수익 비율 – HAN:U9R",
-"o": "Price to earnings ratio of Under Armour, Inc. Class A – HAN:U9R",
-"u": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPcUhza3NGcEc5bHhsX3RYV1lfWlpGSWRNUnRvT1FpY2dtZE1NdG5teUJFbk1NVTJQaWM4UTBseVZtbDU4Q2dRWnpITUUzcGRJSG01ZkY4LWEtZkt4VWlhd0Q2bVBRUVdUS0Y2MDFPeWZKT0xtNl9FS2RWRjFkOTlpeVFvT0dwRllVbnZwZ0V3eEFjcDlwUm5N?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-10-10",
-"t": "Under Armour는 제품 SKU를 25% 줄여 재고를 간소화합니다.",
-"o": "Under Armour Cuts Product SKUs 25% to Streamline Inventory",
-"u": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE41d1BYVVRnQnZqSy1XMndndE9qaVlPNWNTQTF1VHJMMHJLZ0czWUxVb2otNGNTZTFHSnRRYzVMYnNtcnYtTWlmcTNYNmhtaS1oRDR2Wi16YmQ?oc=5",
-"m": "바이어 · Under Armour"
-}
-],
-"anf": [
-{
-"d": "2026-10-22",
-"t": "Abercrombie 및 Fitch(ANF)는 수익 낙관론 구축으로 완전히 가치가 있습니까?",
-"o": "Is Abercrombie & Fitch (ANF) Fully Valued As Earnings Optimism Builds?",
-"u": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPczFocWEwYzFSNi1WcTdLUlhxcUpUSkkxZDdsaFl5a0xta3RvTXFfQ3lDZXlCQkpmNWltQmx0bDctZU9JZjk1ZVBkWDRneExtTlg3cjdfU0JMNHVIZUJOemV2WDVMSnNwS180ajZkUUFocWs5dm90QmJ6Yk5xcTFnSDlqUTQ5ZTNRckhoX0c4cXVveU5xNlZzajExUUNCS01fOV80MFlEblo3MnJGQjhUNThPYVZiZ0I0Z0NpRU5tdnBYMlVUM2tXNnlXONIB0AFBVV95cUxNSXBjbEJLR25uQ2xicTNZXzBtaF9Ibk5FWmR3Nm44ekUxd0hJVGJWUjR5S1A3ZVJIek5uUWtaQkZ6N0swWjM3Q29MbXdwZXZ3RWgwOFJfTV82R2U0VVY5eFBBMGNqY29vRWtaSTdFX1RVbkNHUEU3NzdBQVNUTkF3ZWE2ZGlpT2pUTlk4NldRVFlzdGl6ZExPZy1vejhYNVhIWGhqOUZrNDJ2cnF6YXlqVTB4RlB3bUVlNlQ0SDJqSk5uVlZkMGFKckxhOWt2U19i?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-10-20",
-"t": "Abercrombie 및 Fitch 주식은 American Eagle의 9.09에 비해 13.85배의 수익으로 거래됩니다.",
-"o": "Abercrombie & Fitch stock trades at 13.85 times earnings versus American Eagle's 9.09",
-"u": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNMjAyMnB6b1R2TUMwYjh3dHdJMDFhOENxcGdZR0taYWl2TVByXzZ5WlJaTUowNW5GWVJuaGphTVZQXzMxNGt2SG8yaTZpZjVLdlZSU0hZYUw5OHA4Y3RaUlVqbTliYjJBNFdqeXZ0YXl1ZXZGY210NXo0eEhfR2Ztek5LdzFwZzdSUGtDRVItNGRrQVpKcGF3YVJEbUs1Q2RDM1o2UWRnQ1BBaF83XzZlcTlDOFcyb29mSmtRaUpySnlzQQ?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-10-17",
-"t": "Abercrombie 및 Fitch 주식의 수익 전망이 주주에게 의미하는 것",
-"o": "What Abercrombie & Fitch Shares' Earnings Outlook Means For Shareholders",
-"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOODFqeTZfWVY5ZnJlY1BJTWpXRkQydTZfQ3ZUMXk3c3RfSG5wTXFGOFl2RXFNYTY5NjFCcTBtc0dYMjBuTkp6SWZ2Y3licGhiMVEtME90R2NTM2FrSXBEMmNzTFl1ZGtVcjdGZm5KQUIzYUJEMTcxLWJSblRwSlUyRmtQUVBiLXF5WUxaTVdCNThtQks1OWRiX2VPS2VYdkVwVlFrSVpObG82U3Ffb0JmMkdDMnNSekF6a0Rza1NIUFVhX0RTXzR4NFBGck9qQ3F20gHQAUFVX3lxTE44MWp5Nl9ZVjlmcmVjUElNaldGRDJ1Nl9DdlQxeTdzdF9IbnBNcUY4WXZFcU1hNjk2MUJxMG1zR1gyMG5OSnpJZnZjeWJwaGIxUS0wT3RHY1MzYWtJcEQyY3NMWXVka1VyN0ZmbkpBQjNhQkQxNzEtYlJuVHBKVTJGa1BRUGItcXlZTFpNV0I1OG1CSzU5ZGJfZU9LZVh2RXBWUWtJWk5sbzZTcV9vQmYyR0Myc1J6QXprRHNrU0hQVWFfRFNfNHg0UEZyT2pDcXY?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-10-09",
-"t": "Abercrombie & Fitch, 매출 및 마진 증가 확인...",
-"o": "Abercrombie & Fitch sees sales and margin growt...",
-"u": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNV0l0VlNwTjNZMVp6emYwUy11SllDZFNlSTFvUmpjZ0k5QXo0WWE2NzJwNlZXRElrUUhaNFF1bEFPSGhzMlZyNHdITHpEdTVtMXhaOF90LXdqaGJCZGZRY1VfMzU3emw5S19waVBiT0VxLXNobUpmcEFkc3hOdmNfNmFGWENRT1cyY3I4Z3ZES0RLenRBYjNpOXJ4bmxJb2k5MENKZ3JVU3dKb0E?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-10-06",
-"t": "Abercrombie & Fitch (ANF) 수익 내역 및 추세",
-"o": "Abercrombie & Fitch (ANF) Earnings History & Trends",
-"u": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9MazVSSnN2WUxvRkhsVzhPUzZraEVqak0wY0FSb0lWS0tjUThVWUpxTnpPRGxZWkdib1VtWUt6VldSZG9MX3h6aktubDdfZ0Q3SXRMZWJUbEc3N0RoSklWR2tR?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-10-05",
-"t": "Zacks, Abercrombie 및 Fitch 주식에 대한 수익 예측 상향 조정",
-"o": "Zacks raises earnings forecast for Abercrombie & Fitch stock",
-"u": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPME5mNVdqdURTVk1DekRsZTF4TDNCb1IwOEkwYjVGeF9PV0FfRDR5NXVGdzRteDZnLTVteXliQ25aalJrVktJenBMQUdwXzZTamhJUXhJVDFPdVNfOHlrZGU2T3VWOHJWcjhnQTRXWnFtek9aeUs0eWZ3czlBZUJpakR1UkEwc1BncTc1R2hSVk4xMnByMmNJQ09yM1RGTVVFNXlTaWE3MHdtMU1iclIxMGNSY0gzMzV2Z2RsSkl3?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-10-04",
-"t": "Abercrombie 및 Fitch 주식, 강력한 2분기 실적 보고",
-"o": "Abercrombie & Fitch stock reports strong Q2 earnings",
-"u": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxQZkd5c1c5TV9GT1J0clBZaHFTNElFY0VZT0VUX2R6eGd2aFVjMnNEUXg1ZWxGTVlvTWx6Y0VTb2ZhdHkyY1BGRmhIa3NQWlB0MmpPX2lGTmVRcXUwSkpnZEh3VTJDNk15ek9fRERPSklua1kyN2JmRjZzM3g5bm9YWE9Bb1ZzQ2FaZGhjbTRmb25haHNMaWp0S19mamw5ZXdoYkZuTENuR19lcUZjR2R6TDJmdUtyYktm?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-10-04",
-"t": "NFL 의류 출시가 Abercrombie(ANF)의 투자 내러티브를 바꾸었나요?",
-"o": "Did NFL Apparel Launch Just Shift Abercrombie's (ANF) Investment Narrative?",
-"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxPbzAwbVdpNFY3czlMT1ZjMXVnSkhvQ0VkcmE0bW1ZRGVKSmdmTkEtY1VERmtJUUxMTzBHaFBqNldxa0xFcmNsWTUzWFhyNGE5WFlydThqekR4YTBZWW16Y0NzUzJ2bE9jODZGNUtMQklPckFCVGhzMWtyTEpVZUFRWnBPZUN6M0V1RnBERTFxcnF4LVl5UlZ4M09fQ0ZyMThQdS1yMjkzS2ozanlzSVpRMFNoMWozOVlJdEFVaExqX3Q2LUk5eDF6SHlWRVpacGVo0gHQAUFVX3lxTE9vMDBtV2k0VjdzOUxPVmMxdWdKSG9DRWRyYTRtbVlEZUpKZ2ZOQS1jVURGa0lRTExPMEdoUGo2V3FrTEVyY2xZNTNYWHI0YTlYWXJ1OGp6RHhhMFlZbXpjQ3NTMnZsT2M4NkY1S0xCSU9yQUJUaHMxa3JMSlVlQVFacE9lQ3ozRXVGcERFMXFycXgtWXlSVngzT19DRnIxOFB1LXIyOTNLajNqeXNJWlEwU2gxajM5WUl0QVVoTGpfdDYtSTl4MXpIeVZFWlpwZWg?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-}
-],
-"urban": [
-{
-"d": "2026-10-19",
-"t": "DoorDash가 제공하는 '러브 액츄얼리' 동창회: Anthropologie의 연휴 판매 안내 내부",
-"o": "‘Love Actually’ reunions, delivered by DoorDash: Inside Anthropologie’s holiday sales pitch",
-"u": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOMTBkNU9HZXpRM2dqTTRKLWlKbDJFUUtjMkRLaUhnNnRjTHJWTEtqS3oxQXRtbElzRzFqMm0tLU03VEJYd3Y5THQyOG5HR2M2WF9SakhKZ3hVLWtQMWZRa0lxbHRsektUcXI2Z0s1dGhKVm1taXNHMFJLR1RQTlFwMQ?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-10-15",
-"t": "2분기 요약: Urban Outfitters(NASDAQ:URBN) 대 기타 의류 소매업체 주식",
-"o": "Q2 Rundown: Urban Outfitters (NASDAQ:URBN) Vs Other Apparel Retailer Stocks",
-"u": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPbzh6LS14MXFLYTdyLTR0dkp1Y3M4czZGdjNZaU9Fd2wxS0E0YzVaSTBjNGQyQ293SHdRNHNWQkdKWjk4cTFRRjJZeWhpUTlLMEpJOUctUXlzV1ZGaDV6NGhLYmJ6eXdQYVpMN1N5bGRrVWxvQjZNcGRYeWF2TWhfLVNNZm9IOEkxbEVDaGZfdEN2Q1hkNW9MU3RtN2pzcUFR?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-10-14",
-"t": "기록적인 판매가 Urban Outfitters 주식에 미치는 영향",
-"o": "How Record Sales Will Impact Urban Outfitters Stock",
-"u": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxPRTVNOGp5OU1KVzJmcl9NZHVqZFc0WmZkTk9aUHdsQnZxclVzazRTU2w2cHNVamFhcXFQM1ZTZTR6NDlicHRra2pNV3ZEdy1KbHpTelZnWXpRVlRKZjhLUEhYVHJKeUtVOGtmUmhNUmVzaUQzOFc3aEdNN19wNG5wSmtLRjU0MVhObjhUbWx5VlZWRExnZjJjbW8yRGxqd0lIUnVGUjdCdnF1RE9aZmlfWnBzQVZic2Nya2R3eWJoYkJ5UdIBxwFBVV95cUxPOXlyT0RBemV2dV80WDNzSW5xV0VabXdGb1JhTEJNREE0RTQ4WTVnMmNUS21kdHpLcmVvT3hEaEYxSmwxRDFRc3Mwb2tqQ0RZQTc1Smp5RmxWUGhoYTNGUkQ4d1FHaWlPNURSN044ZVV3dUpkNmIyd3NGT3Y1andPNVpUUzZIMHhJd0tMXzJfdkNHYUxyMS02UVFDcm5NNXp1bnRMLWtXV29ZZUwyaHNxX2phZUFpeV9ueHpxaDlpMUQwRUpHd3Fn?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-09-29",
-"t": "Urban Outfitters, Inc.의 기본 주당 이익(기본 EPS) – HAN:UOF",
-"o": "Basic earnings per share (basic EPS) of Urban Outfitters, Inc. – HAN:UOF",
-"u": "https://news.google.com/rss/articles/CBMingFBVV95cUxORUk2V09jR0owa3hzUXdyb3NWdWV3b2kzVC1FRkwySmZFREpiRnVoNktjTlBkQ3ZnX2tKR2FybERiYUdUSW9TeWZ0TGhxdjdpdGhIaW80UU5SQlFxT000NDdLUGtqTWo0YjM3NGN5Z2lRVXh6RUdVNXZncW1nRWJjRXVsamdYZ2FCOTFZc2UwcVQ4MjN3WFBMLUJVWm9KQQ?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-09-26",
-"t": "Urban Outfitters 주식의 2분기 실적 기록이 투자 스토리를 어떻게 바꾸었나요?",
-"o": "How Record Q2 Results At Urban Outfitters Stock Have Changed Its Investment Story",
-"u": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxQNDhXQjFyUTZKSzRxMnNqLVpTdTdZRVpuZmR0cXFRZ2MyeDhtQVJRanBmSXBjRGRYLW8xMlJxZ19fRGtJcjJ3QnJqNW1vZ2EybEg4YWc1VGhSN1VELXMzQ1B2T1lVWVhlQnFiSEpjN0EwRHpYem5CQUtDcFozT08tRDA0RWp5Rms1aVhRLWpKcFdiSWdEZEF3Z1BPOG84dDNOX2duT3pUSzB0Nm1uZ3RuSHl6ZjdwTjdJQXFHbXcxZWVFWm8zMS16bE9uS25FUkFxazlN0gHTAUFVX3lxTFA0OFdCMXJRNkpLNHEyc2otWlN1N1lFWm5mZHRxcVFnYzJ4OG1BUlFqcGZJcGNEZFgtbzEyUnFnX19Ea0lyMndCcmo1bW9nYTJsSDhhZzVUaFI3VUQtczNDUHZPWVVZWGVCcWJISmM3QTBEelh6bkJBS0NwWjNPTy1EMDRFanlGazVpWFEtakpwV2JJZ0RkQXdnUE84bzh0M05fZ25PelRLMHQ2bW5ndG5IeXpmN3BON0lBcUdtdzFlZUVabzMxLXpsT25LbkVSQXFrOU0?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-09-25",
-"t": "Urban Outfitters (UOF) 2026년 3분기 수익 보고서 - 결과, 전화 및 슬라이드",
-"o": "Urban Outfitters (UOF) Q3 2026 Earnings Report - Results, Call & Slides",
-"u": "https://news.google.com/rss/articles/CBMib0FVX3lxTFByaHJHLVBnS0VfYnU1QzUwdnBkc1ZXYlo5UUxOVVIxbEJUUnVBdUUwWnowd1JMQmNYZWhBTkw1dTNYaTNkY0NXbUUxdmVWTUl3OU12cU9PNFl0T0EtNVlwWDlweThUWm1Vc2I2Q0NROA?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-09-25",
-"t": "Urban Outfitters(URBN)가 지난 수익 보고서 이후 5.1% 하락한 이유는 무엇입니까?",
-"o": "Why Is Urban Outfitters (URBN) Down 5.1% Since Last Earnings Report?",
-"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPMDdkdE0tMTFmSjRLbWZPalU5bnVhRU9tMlpOb3ZyTEpBV2NmMEU4bS02SXB6aXZPLTNFczVqNDhDMDcyck1WTHR6dkFXbzBVcHhpVFp6Ny1YcVlPVkVxdWhodFlWVVR6eFpLOE5nRDZGQWJDT2pkdlBGRThrYXJ5UHNMb01mV0FrSXRLZnh0anc1MkpkUnZZTUw4bw?oc=5",
-"m": "바이어 · Urban Outfitters"
-},
-{
-"d": "2026-09-25",
-"t": "Urban Outfitters (UOF) 2025년 3분기 수익 보고서 - 결과, 전화 및 슬라이드",
-"o": "Urban Outfitters (UOF) Q3 2025 Earnings Report - Results, Call & Slides",
-"u": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNdTJnaHJvV3ltSlpnQzRnNjFTWkVJNDRiVTNnUzlHYlpBYnlaYm80ZzdQanNsZklRZmpNb0hJSEdWVktPN0MxQVBwZGVNSFBHd2MwQzFhZmVFU3ZsZE9EY2wyV0hIQVVsUVl0WGNJeUJRbnZORjVpMXJhWFIyR3hhemJMVQ?oc=5",
-"m": "바이어 · Urban Outfitters"
-}
-],
-"amazon": [
-{
-"d": "2026-10-28",
-"t": "정샘물뷰티, 美 프라임데이 매출 86.8% 증가",
-"o": "정샘물뷰티, 美 프라임데이 매출 86.8% 증가",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=149735",
-"m": "한국섬유신문"
-},
-{
-"d": "2026-10-28",
-"t": "웹 세미나: 소매업체 준비: Amazon 및 전체 식품 공급업체 요구 사항 탐색",
-"o": "Webinar: Retailer Ready: Navigating Amazon & Whole Foods Supplier Requirements",
-"u": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPRFZ1RTVibDBZRUZybThMb29qWWZyemp4WjBpczB2WFRaSjFjR1JfXzN5NnZMWUpXTExrS0dHTENKdVAwYy1hcTZQaXBuYjhJYmlVLVRmRnpFRjh4NVpXT3ZCRkgtV3F3bkJ5U3l2MGYxd3FUaDYwRGtxcXB0cldlWUdNMTJGXzNWZjJ1R1ZSMjNtYlRRUXdOTktTZm1kNUtGYklKbXRaYw?oc=5",
-"m": "바이어 · Amazon"
-},
-{
-"d": "2026-10-28",
-"t": "이퀄베리, 아마존 챔피언 수상…해외 판로 확대",
-"o": "이퀄베리, 아마존 챔피언 수상…해외 판로 확대",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=149734",
-"m": "한국섬유신문"
-},
-{
-"d": "2026-10-27",
-"t": "[현장]아마존, 2027년 사업전략 \"K뷰티 100만 달러 셀러 키운다\"",
-"o": "[현장]아마존, 2027년 사업전략 \"K뷰티 100만 달러 셀러 키운다\"",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=149706",
-"m": "한국섬유신문"
-},
-{
-"d": "2026-10-26",
-"t": "Amazon 에센셜 코튼 폴로 단돈 $6.81—수축을 위한 사이즈 업",
-"o": "Amazon Essentials Cotton Polo Just $6.81—Size Up for Shrinkage",
-"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPQlNfUEVyMGx1dmlZSUVZZ2lPaDF3NXRoaTVILWhzQ19aS3NSTS12dDNyZVFzYnBQY3hoLUgtNkxpTHRBUGppMmt0SHdpQklIOWlRb2ROWU1PbVVOUXZWRDlIUUZHN29uNm5sZk54Uy1xbVd1UHdTNVdZRWd1c0Y0YjBMZ3J1aDZ0OGVzMW5qNE5zcE4tZ2lfc3l6eEhmdnBGSTRSSmRkTVRCNGx5bTZiN1BNbTA?oc=5",
-"m": "바이어 · Amazon"
-},
-{
-"d": "2026-10-22",
-"t": "미미박스 누니, 아마존 가을 행사서 유럽 일평균 실적 10.2배 증가",
-"o": "미미박스 누니, 아마존 가을 행사서 유럽 일평균 실적 10.2배 증가",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=149576",
-"m": "한국섬유신문"
-},
-{
-"d": "2026-10-21",
-"t": "Amazon, Trainium 칩의 인공 지능(AI)용 TorchNeuron 오픈 소싱을 통해 Nvidia의 선두에 도전",
-"o": "Amazon Challenges Nvidia’s Lead by Open-Sourcing TorchNeuron for Artificial Intelligence (AI) on Trainium Chips",
-"u": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxQZmVsaGRLcUl4WGoyY1NRYnJFdG1WcUpfSlFxYUZ4RlpwNHRlN1h0ZWhCc2E0NnFjNGJrTms1SW1DdWJzbno4ZndWRkJNTEExUnZpUFJVVzIzeXFNdHd4UmliX3pCczNGaDdsTFN6d1FpeEJNYmZwaGZaMWZ2bGNXOGZWN2gzTUtuc2YzaVBKMEN1N000VDlyOW9YdHIzRXhxcW9DenNHTm5hVWdPQmVaR0hvdmYzYjFYQV85NTZGaFItZzdZYktuQzdfQ1Q0U3AzWGpyNWNLcDExODVhVFc4RG9nazlkeWM1bC0tOWNB?oc=5",
-"m": "바이어 · Amazon"
-},
-{
-"d": "2026-10-19",
-"t": "Tommy Hilfiger Polo 75% 할인—오늘 Amazon에서 단 $22",
-"o": "Tommy Hilfiger Polo 75% Off—Just $22 on Amazon Today",
-"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOVnd3NGdUU0RFek9BcXIzbUY2SVVuQVNkQVBtaXpaWUU5VnJRZXdXTWZMZGF1OUFkX3N1VHJQM1RyTkROX04wREJueVQxUXlfWEo3dDM4bGcwQVhETzM2Nmc1RDJBR0lidkl5WmU4N3dXb3NqWWlHMmlhcFNkNV9pTGYyYWd5cTBLNzhGREJjc1N2RmM0ak5yRnV1S0lfZExuUVJNRkJxVHZrcjA3U2MwdkxYeTI?oc=5",
-"m": "바이어 · PVH"
-}
-],
 "kohls": [
 {
 "d": "2026-10-26",
@@ -4487,7 +4197,158 @@
 "m": "바이어 · American Eagle"
 }
 ],
+"anf": [
+{
+"d": "2026-10-29",
+"t": "예상보다 나은 결과와 견고한 전망으로 Abercrombie 및 Fitch(ANF) 주가 상승 촉진",
+"o": "Better-Than-Expected Results and Solid Outlook Fuel Abercrombie & Fitch (ANF) Share Gains",
+"u": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOcUN0cXp2bFJRbnpxei1FZUFHcW5LQVdpQVRkUTN3bnFUT1B0MTNrZnZSZmJXcHM0WFk2STI0MGMzNERqN2JpUzFkaHdabnI4UEREOFlJOUFVal9uSktXQnA0bk00T01vaFFXZXpyN1FoSjZKaDU3d3F6X1dTdlZ5RjlPZ1RBSWlhWmhVUkd1SDhLR19lOFZsMWcyWXAtUU5xMklRZQ?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
+{
+"d": "2026-10-29",
+"t": "플레이키즈 클럽, 아베크롬비 키즈로 고객 접점 확대",
+"o": "플레이키즈 클럽, 아베크롬비 키즈로 고객 접점 확대",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149766",
+"m": "한국섬유신문"
+},
+{
+"d": "2026-10-22",
+"t": "Abercrombie 및 Fitch(ANF)는 수익 낙관론 구축으로 완전히 가치가 있습니까?",
+"o": "Is Abercrombie & Fitch (ANF) Fully Valued As Earnings Optimism Builds?",
+"u": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPczFocWEwYzFSNi1WcTdLUlhxcUpUSkkxZDdsaFl5a0xta3RvTXFfQ3lDZXlCQkpmNWltQmx0bDctZU9JZjk1ZVBkWDRneExtTlg3cjdfU0JMNHVIZUJOemV2WDVMSnNwS180ajZkUUFocWs5dm90QmJ6Yk5xcTFnSDlqUTQ5ZTNRckhoX0c4cXVveU5xNlZzajExUUNCS01fOV80MFlEblo3MnJGQjhUNThPYVZiZ0I0Z0NpRU5tdnBYMlVUM2tXNnlXONIB0AFBVV95cUxNSXBjbEJLR25uQ2xicTNZXzBtaF9Ibk5FWmR3Nm44ekUxd0hJVGJWUjR5S1A3ZVJIek5uUWtaQkZ6N0swWjM3Q29MbXdwZXZ3RWgwOFJfTV82R2U0VVY5eFBBMGNqY29vRWtaSTdFX1RVbkNHUEU3NzdBQVNUTkF3ZWE2ZGlpT2pUTlk4NldRVFlzdGl6ZExPZy1vejhYNVhIWGhqOUZrNDJ2cnF6YXlqVTB4RlB3bUVlNlQ0SDJqSk5uVlZkMGFKckxhOWt2U19i?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
+{
+"d": "2026-10-20",
+"t": "Abercrombie 및 Fitch 주식은 American Eagle의 9.09에 비해 13.85배의 수익으로 거래됩니다.",
+"o": "Abercrombie & Fitch stock trades at 13.85 times earnings versus American Eagle's 9.09",
+"u": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNMjAyMnB6b1R2TUMwYjh3dHdJMDFhOENxcGdZR0taYWl2TVByXzZ5WlJaTUowNW5GWVJuaGphTVZQXzMxNGt2SG8yaTZpZjVLdlZSU0hZYUw5OHA4Y3RaUlVqbTliYjJBNFdqeXZ0YXl1ZXZGY210NXo0eEhfR2Ztek5LdzFwZzdSUGtDRVItNGRrQVpKcGF3YVJEbUs1Q2RDM1o2UWRnQ1BBaF83XzZlcTlDOFcyb29mSmtRaUpySnlzQQ?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
+{
+"d": "2026-10-17",
+"t": "Abercrombie 및 Fitch 주식의 수익 전망이 주주에게 의미하는 것",
+"o": "What Abercrombie & Fitch Shares' Earnings Outlook Means For Shareholders",
+"u": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOODFqeTZfWVY5ZnJlY1BJTWpXRkQydTZfQ3ZUMXk3c3RfSG5wTXFGOFl2RXFNYTY5NjFCcTBtc0dYMjBuTkp6SWZ2Y3licGhiMVEtME90R2NTM2FrSXBEMmNzTFl1ZGtVcjdGZm5KQUIzYUJEMTcxLWJSblRwSlUyRmtQUVBiLXF5WUxaTVdCNThtQks1OWRiX2VPS2VYdkVwVlFrSVpObG82U3Ffb0JmMkdDMnNSekF6a0Rza1NIUFVhX0RTXzR4NFBGck9qQ3F20gHQAUFVX3lxTE44MWp5Nl9ZVjlmcmVjUElNaldGRDJ1Nl9DdlQxeTdzdF9IbnBNcUY4WXZFcU1hNjk2MUJxMG1zR1gyMG5OSnpJZnZjeWJwaGIxUS0wT3RHY1MzYWtJcEQyY3NMWXVka1VyN0ZmbkpBQjNhQkQxNzEtYlJuVHBKVTJGa1BRUGItcXlZTFpNV0I1OG1CSzU5ZGJfZU9LZVh2RXBWUWtJWk5sbzZTcV9vQmYyR0Myc1J6QXprRHNrU0hQVWFfRFNfNHg0UEZyT2pDcXY?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
+{
+"d": "2026-10-09",
+"t": "Abercrombie & Fitch, 매출 및 마진 증가 확인...",
+"o": "Abercrombie & Fitch sees sales and margin growt...",
+"u": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNV0l0VlNwTjNZMVp6emYwUy11SllDZFNlSTFvUmpjZ0k5QXo0WWE2NzJwNlZXRElrUUhaNFF1bEFPSGhzMlZyNHdITHpEdTVtMXhaOF90LXdqaGJCZGZRY1VfMzU3emw5S19waVBiT0VxLXNobUpmcEFkc3hOdmNfNmFGWENRT1cyY3I4Z3ZES0RLenRBYjNpOXJ4bmxJb2k5MENKZ3JVU3dKb0E?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
+{
+"d": "2026-10-06",
+"t": "Abercrombie & Fitch (ANF) 수익 내역 및 추세",
+"o": "Abercrombie & Fitch (ANF) Earnings History & Trends",
+"u": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9MazVSSnN2WUxvRkhsVzhPUzZraEVqak0wY0FSb0lWS0tjUThVWUpxTnpPRGxZWkdib1VtWUt6VldSZG9MX3h6aktubDdfZ0Q3SXRMZWJUbEc3N0RoSklWR2tR?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
+{
+"d": "2026-10-05",
+"t": "Zacks, Abercrombie 및 Fitch 주식에 대한 수익 예측 상향 조정",
+"o": "Zacks raises earnings forecast for Abercrombie & Fitch stock",
+"u": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPME5mNVdqdURTVk1DekRsZTF4TDNCb1IwOEkwYjVGeF9PV0FfRDR5NXVGdzRteDZnLTVteXliQ25aalJrVktJenBMQUdwXzZTamhJUXhJVDFPdVNfOHlrZGU2T3VWOHJWcjhnQTRXWnFtek9aeUs0eWZ3czlBZUJpakR1UkEwc1BncTc1R2hSVk4xMnByMmNJQ09yM1RGTVVFNXlTaWE3MHdtMU1iclIxMGNSY0gzMzV2Z2RsSkl3?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+}
+],
+"urban": [
+{
+"d": "2026-10-19",
+"t": "DoorDash가 제공하는 '러브 액츄얼리' 동창회: Anthropologie의 연휴 판매 안내 내부",
+"o": "‘Love Actually’ reunions, delivered by DoorDash: Inside Anthropologie’s holiday sales pitch",
+"u": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOMTBkNU9HZXpRM2dqTTRKLWlKbDJFUUtjMkRLaUhnNnRjTHJWTEtqS3oxQXRtbElzRzFqMm0tLU03VEJYd3Y5THQyOG5HR2M2WF9SakhKZ3hVLWtQMWZRa0lxbHRsektUcXI2Z0s1dGhKVm1taXNHMFJLR1RQTlFwMQ?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
+"d": "2026-10-15",
+"t": "2분기 요약: Urban Outfitters(NASDAQ:URBN) 대 기타 의류 소매업체 주식",
+"o": "Q2 Rundown: Urban Outfitters (NASDAQ:URBN) Vs Other Apparel Retailer Stocks",
+"u": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPbzh6LS14MXFLYTdyLTR0dkp1Y3M4czZGdjNZaU9Fd2wxS0E0YzVaSTBjNGQyQ293SHdRNHNWQkdKWjk4cTFRRjJZeWhpUTlLMEpJOUctUXlzV1ZGaDV6NGhLYmJ6eXdQYVpMN1N5bGRrVWxvQjZNcGRYeWF2TWhfLVNNZm9IOEkxbEVDaGZfdEN2Q1hkNW9MU3RtN2pzcUFR?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
+"d": "2026-10-14",
+"t": "기록적인 판매가 Urban Outfitters 주식에 미치는 영향",
+"o": "How Record Sales Will Impact Urban Outfitters Stock",
+"u": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxPRTVNOGp5OU1KVzJmcl9NZHVqZFc0WmZkTk9aUHdsQnZxclVzazRTU2w2cHNVamFhcXFQM1ZTZTR6NDlicHRra2pNV3ZEdy1KbHpTelZnWXpRVlRKZjhLUEhYVHJKeUtVOGtmUmhNUmVzaUQzOFc3aEdNN19wNG5wSmtLRjU0MVhObjhUbWx5VlZWRExnZjJjbW8yRGxqd0lIUnVGUjdCdnF1RE9aZmlfWnBzQVZic2Nya2R3eWJoYkJ5UdIBxwFBVV95cUxPOXlyT0RBemV2dV80WDNzSW5xV0VabXdGb1JhTEJNREE0RTQ4WTVnMmNUS21kdHpLcmVvT3hEaEYxSmwxRDFRc3Mwb2tqQ0RZQTc1Smp5RmxWUGhoYTNGUkQ4d1FHaWlPNURSN044ZVV3dUpkNmIyd3NGT3Y1andPNVpUUzZIMHhJd0tMXzJfdkNHYUxyMS02UVFDcm5NNXp1bnRMLWtXV29ZZUwyaHNxX2phZUFpeV9ueHpxaDlpMUQwRUpHd3Fn?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
+"d": "2026-09-29",
+"t": "Urban Outfitters, Inc.의 기본 주당 이익(기본 EPS) – HAN:UOF",
+"o": "Basic earnings per share (basic EPS) of Urban Outfitters, Inc. – HAN:UOF",
+"u": "https://news.google.com/rss/articles/CBMingFBVV95cUxORUk2V09jR0owa3hzUXdyb3NWdWV3b2kzVC1FRkwySmZFREpiRnVoNktjTlBkQ3ZnX2tKR2FybERiYUdUSW9TeWZ0TGhxdjdpdGhIaW80UU5SQlFxT000NDdLUGtqTWo0YjM3NGN5Z2lRVXh6RUdVNXZncW1nRWJjRXVsamdYZ2FCOTFZc2UwcVQ4MjN3WFBMLUJVWm9KQQ?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
+"d": "2026-09-26",
+"t": "Urban Outfitters 주식의 2분기 실적 기록이 투자 스토리를 어떻게 바꾸었나요?",
+"o": "How Record Q2 Results At Urban Outfitters Stock Have Changed Its Investment Story",
+"u": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxQNDhXQjFyUTZKSzRxMnNqLVpTdTdZRVpuZmR0cXFRZ2MyeDhtQVJRanBmSXBjRGRYLW8xMlJxZ19fRGtJcjJ3QnJqNW1vZ2EybEg4YWc1VGhSN1VELXMzQ1B2T1lVWVhlQnFiSEpjN0EwRHpYem5CQUtDcFozT08tRDA0RWp5Rms1aVhRLWpKcFdiSWdEZEF3Z1BPOG84dDNOX2duT3pUSzB0Nm1uZ3RuSHl6ZjdwTjdJQXFHbXcxZWVFWm8zMS16bE9uS25FUkFxazlN0gHTAUFVX3lxTFA0OFdCMXJRNkpLNHEyc2otWlN1N1lFWm5mZHRxcVFnYzJ4OG1BUlFqcGZJcGNEZFgtbzEyUnFnX19Ea0lyMndCcmo1bW9nYTJsSDhhZzVUaFI3VUQtczNDUHZPWVVZWGVCcWJISmM3QTBEelh6bkJBS0NwWjNPTy1EMDRFanlGazVpWFEtakpwV2JJZ0RkQXdnUE84bzh0M05fZ25PelRLMHQ2bW5ndG5IeXpmN3BON0lBcUdtdzFlZUVabzMxLXpsT25LbkVSQXFrOU0?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
+"d": "2026-09-25",
+"t": "Urban Outfitters (UOF) 2026년 3분기 수익 보고서 - 결과, 전화 및 슬라이드",
+"o": "Urban Outfitters (UOF) Q3 2026 Earnings Report - Results, Call & Slides",
+"u": "https://news.google.com/rss/articles/CBMib0FVX3lxTFByaHJHLVBnS0VfYnU1QzUwdnBkc1ZXYlo5UUxOVVIxbEJUUnVBdUUwWnowd1JMQmNYZWhBTkw1dTNYaTNkY0NXbUUxdmVWTUl3OU12cU9PNFl0T0EtNVlwWDlweThUWm1Vc2I2Q0NROA?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
+"d": "2026-09-25",
+"t": "Urban Outfitters(URBN)가 지난 수익 보고서 이후 5.1% 하락한 이유는 무엇입니까?",
+"o": "Why Is Urban Outfitters (URBN) Down 5.1% Since Last Earnings Report?",
+"u": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPMDdkdE0tMTFmSjRLbWZPalU5bnVhRU9tMlpOb3ZyTEpBV2NmMEU4bS02SXB6aXZPLTNFczVqNDhDMDcyck1WTHR6dkFXbzBVcHhpVFp6Ny1YcVlPVkVxdWhodFlWVVR6eFpLOE5nRDZGQWJDT2pkdlBGRThrYXJ5UHNMb01mV0FrSXRLZnh0anc1MkpkUnZZTUw4bw?oc=5",
+"m": "바이어 · Urban Outfitters"
+},
+{
+"d": "2026-09-25",
+"t": "Urban Outfitters (UOF) 2025년 3분기 수익 보고서 - 결과, 전화 및 슬라이드",
+"o": "Urban Outfitters (UOF) Q3 2025 Earnings Report - Results, Call & Slides",
+"u": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNdTJnaHJvV3ltSlpnQzRnNjFTWkVJNDRiVTNnUzlHYlpBYnlaYm80ZzdQanNsZklRZmpNb0hJSEdWVktPN0MxQVBwZGVNSFBHd2MwQzFhZmVFU3ZsZE9EY2wyV0hIQVVsUVl0WGNJeUJRbnZORjVpMXJhWFIyR3hhemJMVQ?oc=5",
+"m": "바이어 · Urban Outfitters"
+}
+],
 "nike": [
+{
+"d": "2026-10-29",
+"t": "Nike는 2027년에 Topsports의 온라인 판매 승인을 종료합니다. Topsports는 재고 환매 및 판촉 보조금을 모색하고 있다고 말합니다.",
+"o": "Nike to End Topsports' Online Sales Authorization in 2027; Topsports Says It Is Seeking Inventory Buyback and Promotional Subsidies",
+"u": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1OV1NsalFzOUZQdEZmdkVkZjhjVU9PNGZwV3llUVlsc0huLWZGSWtzT2pKWWtWcHlmM1JhcTJMRV9jZjM0QnVPdU5SZVZBS3BzekFESmVWdC04R0g1ZUFJVG5nUFFYX2JzbFlXYlZYa0ZQSW1ua3c?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-10-29",
+"t": "나이키 ACG, 북촌 한옥에 아웃도어 베이스캠프 연다",
+"o": "나이키 ACG, 북촌 한옥에 아웃도어 베이스캠프 연다",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149756",
+"m": "한국섬유신문"
+},
+{
+"d": "2026-10-29",
+"t": "Corteiz, Mystique Nike Shox R419 및 콜라보레이션 의류의 도쿄 팝업 발표",
+"o": "Corteiz Announces Tokyo Pop-up for the Mystique Nike Shox R419 and Collaborative Apparel",
+"u": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxQejRFcm1UU1huV3lRTlM2SHdIeDR6bGpFVEFJLWlwMWtqOFRWR28zZFk4WUM4eWF6bzk3OThnM1VQTDlhUFI3WnhCUnFURFZxM2ZyMGtVWk9fajJpOHI3N3FXamlMYy1GV0tyZXg4REV6a015VjhZTkJENHNweGgyXzdqRkttT2prNWRnN085dmduN2JoYnhBZDlZUTg4QWNVX2RvN3FDc2RJVXM?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-10-29",
+"t": "Nike, Asics, Decathlon는 2030년까지 100억 달러에 도달할 것으로 예상되는 스포츠 용품, 의류 제조 분야로 인도 투자를 늘립니다.",
+"o": "Nike, Asics, Decathlon ramp up India bets as sports goods, apparel manufacturing expected to reach $10 billion by 2030",
+"u": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxPNk91X1g0MV81QkNYNnpOTlk5QndvM2pucWpZdWVUeEpRTlp0VUFqSWQ4eF96S09aMGJ1MEgtY2VSRWFwS3V5Rm5EMDhHUktoTS0zem5pRUhSMHJ1anQ3ODQ2TWdJdnZhdmF4U0Rxdnc2OUlxYWpwTDlkWjNaSjNCUTBZckc1dzVnNUVVazhhb05kU2FUVUd3R0x3UFM4UnJsaHZidzRxaFdzMEVVbEZLOTQ0SHNZSDJnQmpNU3EtZmdyc0VGNjIzbl9VWXRiLVBKM0RsWWhPRXlYWGZqSllzZDRHaDhUUkdCbnpQRTVabkR6a1BDVkJN0gH8AUFVX3lxTE1fYUtSX2ZTWWdRVlZUbDBkSGk1Wk9NaDZRdUx5QnZZV3g3RHl3cks5LS1IamRjVGZ4VHU1NVh6eFo3ZFBLY3p3dWZ3ek43YnRyR2xFX2RUZXVEXzFRR01iT3ZpRW04SmE3VkIxVi1FMG5VdGdKdFBaNUFqQWRlZEJXdllnaEpvNGVUMjJjT3RnZzV5OFI3cTFHZkpzejlpcHF3VDdnbjhWYlFNeDBYeGFEcTFPN0FkLWgtdEp5eDRiYS1qRXJYRUN5VVhsZnZtZFJUMXY1T1J5VkNtZ0psMlB3LWRpZllhcUJOblNjQ0xsd0hETXVpZHhXS2hfZw?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-10-29",
+"t": "Nike의 스니커즈 로퍼가 검은색 악어로 변신합니다",
+"o": "Nike’s Sneaker Loafer Is Getting a Black Croc Makeover",
+"u": "https://wwd.com/footwear-news/sneaker-news/nike-air-max-dolce-croc-ir8665-001-ir8665-600-release-date-1239392127/",
+"m": "WWD"
+},
 {
 "d": "2026-10-28",
 "t": "Nike Tech, 6개의 새로운 의류 플랫폼으로 Fleece를 넘어 확장",
@@ -4508,41 +4369,6 @@
 "o": "US' Nike teams up with Megan Rapinoe for new apparel line",
 "u": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxObmJXYndfbS1jaW1IWlVydjBSNnFzSDFHYzV4ZFQxZnZweWdXWktIWVY0MzFHYTZMWmZtYUZLLUxOOU9TeFBuZ3lCSzZxZ1Z5cGlsM0IxVFVMUjQ1U0dYSWNjVVViVEMwdGhmRXAyeURUdXNpNFpPR0ttR3FDeWpGX1pDLW9RdEQyTEx3aEI4SzJXVXZTOVU0cVJjRW5Ibi1HNHhueWswZWtVcHc2UF9HMG9PWENYZ1otZExNaDdCVXpjR3l6Q3lFZV9jbUNTcGZ4ZlE?oc=5",
 "m": "Fibre2Fashion"
-},
-{
-"d": "2026-10-26",
-"t": "첫 번째 모습: Outkast가 Nike를 사용하여 가장 예상치 못한 Georgia Bulldogs 의류 컬렉션을 만들었습니다.",
-"o": "First look: Outkast just created the most unexpected Georgia Bulldogs apparel collection with Nike",
-"u": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxQY3hFQ2M3MlFpam5ZRGlUVlRSSWFFNU1MS21Nd1dhMUc2WmpvbE5GUTZFX2ZWQmp3Y0hhU3ZsODVRemZXUGRfRkRjc3VaRWxzMzYyQUl1dUhydXZoTTZhRmdBa2hqS0hwTktYcWNYbS15dHFXLUx2YWpZSFJ3d0cxRms4cUt2WjVWLTV4eTFZN203X1VVT0dtVmNKYXFXazBjdmVoTjVOSEVxVjAybHVOSjh4bkhib3dKMDNIVjNZeDRJa2prb0JMX2lDRTlfM1dPNGR1VWpZbmg?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-10-26",
-"t": "Outkast, Nike, UGA와 협력하여 애틀랜타에서 열리는 첫 번째 조지아-플로리다 경기를 위한 특별 에디션 의류 제작",
-"o": "Outkast teams up with Nike, UGA on special-edition apparel for 1st Georgia-Florida game in Atlanta",
-"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxQSGMwdWRELS1aY2lGVTl4TXRJemdUTmt4STN6dE5YRFhzelNUdmRIU21idFZOUF9aZk5fRzFabkVaY2tYc0NkM1hWMVEzbVJ4bldxRHMtWGxxZ081bzZ2dGZXZzdFcW05YlFJVjlLMTZmemVXSHNwZlc2cF92RTRNSmEyaS1KbXFSVEh5YzFSSExSTHNVaEhlY3V5MUR3ckxCMlkzNnRFZzFUcjdNSUt1Z05ucmdXNS00REtud2lVZkpRaDJKQ1BvWGRhVHnSAeABQVVfeXFMTW91NjNrOUctRkQ5VDlubEZWYnB0cWFJS1dvNklMMk43ZHJobFV3RVpqdWVBcHJTb1NTblJqOXh5ajR3Wm84enNmajZ5TzVVaTV5dWpoNHdrYjZsalFWbmpYSF93ZzZXODVRdF95cmlDZm9raEZNZ3hLUTA5cXV0ZWp5TV9vZ1cxQUFneUJaOTRHQkNDOUl4Vng2VEpTamFaS25wemlQZ3dpSzNNMWE4WVlNa3NXVjhWc1g5MDZEMG84Zk5wZmdVM0RsSGVPZnRmQlBTOUdadlctczEwVks2Z20?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-10-26",
-"t": "Nike는 이번 주말 애틀랜타에서 열리는 첫 번째 조지아 대 플로리다 경쟁 게임과 ATLiens 30주년을 기념하기 위해 독점적인 UGA x Outkast 의류 컬렉션을 출시합니다. Mercedes-Benz에서 하루만 팝업을 열게 됩니다.",
-"o": "Nike launches an exclusive UGA x Outkast apparel collection to celebrate the 1st Georgia vs. Florida rivalry game played in Atlanta this weekend & 30 years of ATLiens—with a one day only pop-up at Mercedes-Benz",
-"u": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBaWncwVXdRQk9xb2VIcWF1WkZDZ2R3djBqRDdJeHJTMzlCZ0dXcWJLRkxCSnQ3cW9KdG9OLTMySnJRcy1ZVElZMGNfeWNZc0gzQVBhaG84dzRqU1lva1o0RGdmRXhUWGRLQklaNFlQeUk?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-10-23",
-"t": "Nike 기술 재도입: 스타일을 보호하기 위해 설계된 스포츠웨어 혁신 — Nike, Inc.",
-"o": "Reintroducing Nike Tech: Sportswear Innovation Engineered to Protect In Style — NIKE, Inc.",
-"u": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxOODlCMjlWWmUyMmRpZ2xxQl9TbWlSQXZ1dEJlVXRnaEdmaEhYdmhYSEhBNDBhS2NmU0QzM1RucHZ0N25ueE5uLXQ2RHA5bXFmM2xzVTJiQzRCOFAtajhiOTZCVmc1Mnl6ckUtSWtLVUxEakxJSVVsVzRXdDJleXVDalpZQWNZclo4N095TE52OXlLX0ZnYWM5SHhPUXltempRcjFFRkJDQW9HMU5zZE00QW5VSFhDNC16?oc=5",
-"m": "주제검색 · 염색가공"
-},
-{
-"d": "2026-10-23",
-"t": "Nike Tech, 방수 SF3 컬렉션이 주도하는 6개의 새로운 의류 플랫폼으로 복귀",
-"o": "Nike Tech Returns With Six New Apparel Platforms Led by Waterproof SF3 Collection",
-"u": "https://news.google.com/rss/articles/CBMiigFBVV95cUxPQTU1RElVWVB0WFlyNjR4VUVlbUw4RmNjZ3FyNjk5S19tRDZ0ZWhCMld3RURuLU5nN3NRaTNtV2ZtRV9nbUtDam5XdjZ1RUNLblJDVXcxY2FsOHRZWnBYWmpKbEsyZTh0ZEpkcGZEeXNQZl9aNmItNG9PUW1DSUVuWWlWNXVVM2dpY2c?oc=5",
-"m": "주제검색 · 염색가공"
 }
 ],
 "costco": [
@@ -4661,7 +4487,86 @@
 "m": "Retail Dive"
 }
 ],
+"amazon": [
+{
+"d": "2026-10-29",
+"t": "Amazon에서 Tommy Hilfiger x Cadillac F1 드라이버 폴로 8% 할인",
+"o": "Tommy Hilfiger x Cadillac F1 Drivers Polo 8% Off on Amazon",
+"u": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNN2ZaekxZUHJYcks2M2xQTVdvT0NxaGRleHBjTWNYTmJfbVhhY1pmcE9URFFOMjk2d2s0bVVtUWozaDBQdDJxeTdfVUpDRHpBSkdvOXZTY0ZBNG5LUGZYMXdMZWxqTTlRaHBjSHdUY053SS1wNExtc1g2bXltbi16aTB1VUVjaGdhQ1dF?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-10-29",
+"t": "Under Armour Sportstyle 로고 티셔츠 Amazon에서 30% 할인",
+"o": "Under Armour Sportstyle Logo Tee 30% Off on Amazon",
+"u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxQQXNfUE1pSzdyc1dOZk03V2lhTTZCcnNpeVQzSHgyVXpBSzRjcmtScnlGS2I5Qkl3aWVpZDlOYU9pRUlGZTctQklDRXliT0taMDhXMjdVelgtd3ZoMmlJOHBPZW1CZk1ubzJJM2dfMi00SlhjLU9DR041b2VsTXYzZFdxLTMyX0c1QWd1Umc4ekN3SEg1V3FLRkdrdF83b20wbFE?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-10-29",
+"t": "4,000개 이상의 Amazon 리뷰가 있는 $13 Quick-Dry 폴로는 그만한 가치가 있습니다",
+"o": "$13 Quick-Dry Polo With 4,000+ Amazon Reviews Is Worth It",
+"u": "https://news.google.com/rss/articles/CBMirAFBVV95cUxPRkhMc1Z1N0ZYNXpabEowTU9nWVJGWU9rM0tsZGNBSi03cmNFcmpld2FrODFHRng0SEdiRGFVX084bzhyblJBU2lKN1dxdVVGX1R6czBDcDBhVThqYUMybUs4bkd6VjFJMmtlaGI2bXl0OWhPR1NBY0p3YnlTc2lLRDJneGZiNXF5VVlVRDdNYkliZXY1aXBsaWhIeHZVMWtlY1BXR3lVU3RNS00z?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-10-29",
+"t": "정샘물뷰티, 아마존 프라임 데이 매출 86.8% 증가",
+"o": "정샘물뷰티, 아마존 프라임 데이 매출 86.8% 증가",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149771",
+"m": "한국섬유신문"
+},
+{
+"d": "2026-10-28",
+"t": "정샘물뷰티, 美 프라임데이 매출 86.8% 증가",
+"o": "정샘물뷰티, 美 프라임데이 매출 86.8% 증가",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149735",
+"m": "한국섬유신문"
+},
+{
+"d": "2026-10-28",
+"t": "웹 세미나: 소매업체 준비: Amazon 및 전체 식품 공급업체 요구 사항 탐색",
+"o": "Webinar: Retailer Ready: Navigating Amazon & Whole Foods Supplier Requirements",
+"u": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPRFZ1RTVibDBZRUZybThMb29qWWZyemp4WjBpczB2WFRaSjFjR1JfXzN5NnZMWUpXTExrS0dHTENKdVAwYy1hcTZQaXBuYjhJYmlVLVRmRnpFRjh4NVpXT3ZCRkgtV3F3bkJ5U3l2MGYxd3FUaDYwRGtxcXB0cldlWUdNMTJGXzNWZjJ1R1ZSMjNtYlRRUXdOTktTZm1kNUtGYklKbXRaYw?oc=5",
+"m": "바이어 · Amazon"
+},
+{
+"d": "2026-10-28",
+"t": "이퀄베리, 아마존 챔피언 수상…해외 판로 확대",
+"o": "이퀄베리, 아마존 챔피언 수상…해외 판로 확대",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149734",
+"m": "한국섬유신문"
+},
+{
+"d": "2026-10-27",
+"t": "[현장]아마존, 2027년 사업전략 \"K뷰티 100만 달러 셀러 키운다\"",
+"o": "[현장]아마존, 2027년 사업전략 \"K뷰티 100만 달러 셀러 키운다\"",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149706",
+"m": "한국섬유신문"
+}
+],
 "walmart": [
+{
+"d": "2026-10-30",
+"t": "Wal-Mart de México 실적 발표에서 회복력 있는 전략을 보여주다",
+"o": "Wal-Mart de México Earnings Call Shows Resilient Strategy",
+"u": "https://news.google.com/rss/articles/CBMirgFBVV95cUxOai1xWFRSc1Z5cV9kUThNSmp3akdOaVAwam4zekJkVklIUVFlY1JvNHMza2ZIM3dpbW9lbHExeWN2aDQxVmphYmZFUUJEdkwyTGM2NkhNN01mQzdJM2pUYnY5aXJtMXhYTHZKNkVrdnoxT1ZoRVktWVVMdzVFZk5oRHJaYVB1NTJISHQtWlRVUU1XZlYzbjJrQmJLNHNDclh1bG9JSUJzZXFhUkFBRXc?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-10-29",
+"t": "Walmart에서 보다 지속 가능한 소싱의 10년을 되돌아보며",
+"o": "Reflecting on a Decade of More Sustainable Sourcing at Walmart",
+"u": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQd0x3SG1ORUlFNmxrYVhNMFlzS0d3ZHVYQjd1T1N3SkNyT0JLUVZuandXa0JUZGhVcDF1cXhWR3ZHanNtYkF4V1pkMU0wdnppS25Jb1JfTzdXQzdwdG02MUFRVDJ5REphZ0dzQU9aT0t3MmNyZ3AzU0Iwdm90c2xLQzJBeUJtbjdad1l4MUREVW9aUEVVTXc5NmpEdmhVeVpYVUlzRk9RWHI?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-10-29",
+"t": "월마트 드 멕시코, S.A.B. 드 C.V. 2026년 3분기 - 실적 - 실적발표회(OTCMKTS:WMMVY) 2026-10-29",
+"o": "Wal-Mart de México, S.A.B. de C.V. 2026 Q3 - Results - Earnings Call Presentation (OTCMKTS:WMMVY) 2026-10-29",
+"u": "https://news.google.com/rss/articles/CBMitgFBVV95cUxOeDMzajYwYnZiYldtLV9ma21TaWJ0S0lMcXZlcVhyXzR1bVNnRjctd0s1b3dwQnpyZVVOaEtHdVFrTnVMYmJYSFdWNzVPbUplSUMxQUZiVWZ2S05PNjNWV18wY2NSbHZFUkY0dDBLUENnWXBOZHl1TnVBVW5xeGN2TkZheUh1MXFKSDByazV0MzQ3SlpBM0hORW5ZbUxXMy1TSG5HdnhOS09RallUNGFvRFBqMERyQQ?oc=5",
+"m": "바이어 · Walmart"
+},
 {
 "d": "2026-10-28",
 "t": "Walmart(WMT)가 수익 프리미엄을 계속 정당화할 수 있습니까?",
@@ -4696,27 +4601,64 @@
 "o": "Wal-Mart de Mexico SAB de CV (OTCMKTS:WMMVY) Releases Quarterly Earnings Results",
 "u": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxOQXBPVjRLMGpid0NjdkEtUTJKLWZad2lPWmpKNEVQV0RxZVdibXNuVkJ1VTJqZlNCekk2dWYtc1ZnNnNIcG52UlhUODU2czc0aEhzQm9CRWtqS3EtRU8yeWVybm1Zb0FKQXdDVzJUQ3hpaWZSbGlzWXFPZnJTb2NaTHVrMU81eUtldkpadk11dmRDVDJ2SWtIOFRWa0czejRpTlJMeldxMmhuaG5CTTVoNjF0RjdFdzBQUnVETHJFT2VaX1NEVDk1a2NSZ0NiZXZVbkVjTFAwMEE?oc=5",
 "m": "바이어 · Walmart"
+}
+],
+"ua": [
+{
+"d": "2026-10-29",
+"t": "Under Armour Sportstyle 로고 티셔츠 Amazon에서 30% 할인",
+"o": "Under Armour Sportstyle Logo Tee 30% Off on Amazon",
+"u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxQQXNfUE1pSzdyc1dOZk03V2lhTTZCcnNpeVQzSHgyVXpBSzRjcmtScnlGS2I5Qkl3aWVpZDlOYU9pRUlGZTctQklDRXliT0taMDhXMjdVelgtd3ZoMmlJOHBPZW1CZk1ubzJJM2dfMi00SlhjLU9DR041b2VsTXYzZFdxLTMyX0c1QWd1Umc4ekN3SEg1V3FLRkdrdF83b20wbFE?oc=5",
+"m": "바이어 · Under Armour"
 },
 {
-"d": "2026-10-26",
-"t": "Walmart 주식은 더 높은 수익 예측 없이 10월에 15% 상승했습니다. 2031년까지 갈 수 있는 곳은 다음과 같습니다",
-"o": "Walmart Stock Rose 15% in October Without a Higher Earnings Forecast. Here’s Where It Could Go by 2031",
-"u": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxPaHFyajlUNnM5X1hQdERxVmtYU0xIQkFkcVN5cTFXNHpfWWdiakF6VjBLZFpUM0lSLTAtUTRvTUNkZUhNX2NLaFRtOFFUd3EyVmJ2R3NleFVqbVhqUUZVOC1IXzF6Q1lsRlZ2SG91enJ1c0JnaF9Gel9IVmFtTkJudEdrY3pqeVpLSDZPN1VuZzdBOUNnY1g4TV85YmFMbEdQQ3A5eW9ieWVMQzhfVjhDR1ZEcVNqWGdaeS0wQUYzajAzSEk?oc=5",
-"m": "바이어 · Walmart"
+"d": "2026-10-28",
+"t": "UBS, Under Armour가 2027년 전망 유지",
+"o": "UBS Sees Under Armour Holding Its 2027 Outlook",
+"u": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOVE45cllCT3NvelVtd2RNUVZQOTk0VlNJZHBaMGZrbk9OdHpWZ0tLN1lpeDg4bE15aS1TUWlqRi02alUtdjhIWFdRLTFUemlmZDBLcktfQWJjMG1BTHh2T2hXTUFoWVVyeVBKVzBqUklPcC0yUkpNSWhPQ1VwNTJJRQ?oc=5",
+"m": "바이어 · Under Armour"
 },
 {
-"d": "2026-10-26",
-"t": "Walmart, 시가총액 1조 달러 돌파를 목표로 삼중 연휴 세일 개시",
-"o": "Walmart launches triple holiday sales aiming to push stock past $1 trillion market cap",
-"u": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNSjg2T3lsdTg5UmpqU3h3d0NGQjFSWUtoSllnT2V2dEhoeTQyeVBwajlKUGl6cTRoaFlWZ1FsbEczeDF2dWtmUnd1TXJ1SlBrTU9zZGpnU2phNXB4STF4cC1QV1U3NzFicGJoSWlvdlR2bjhXVXA1VGZ1TzBjQzhjTnhRRUh1cWdyZWt1ZWc2UGhtelFuYTltd19vdUlycWk3UmJ3SnJ2RlAwRlVtM0dR?oc=5",
-"m": "바이어 · Walmart"
+"d": "2026-10-24",
+"t": "Under Armour 주식: Under Armour는 결과 날짜를 설정하고 해당 분기의 수익을 보고합니다.",
+"o": "Under Armour stock: Under Armour sets results date and reports revenue for the quarter",
+"u": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxOM3JDZHlUZkxOTzlkNzBCTTZzN1VJNzBrSkRNRUV4d2ZyUHRPZXBfSHNtdE5SaXI2QnBmbEc0NF8waUtjc1pxaFRLUDZNVksyemFNbWtwTTJCNjhWTVZJN2JlcktQLTNOZEdveHo1YThTUExwR0lMclhXOWdjRzNlc2owM0lsclg1cHV3dGpJX2hERTVydHJjcEdXU2FFMDkwZ2tTLTlLV0l3dHlNWndoRi02dG1YNllwTG5OQlZGMXBzb3pfQVZENTk4REIwT05DclFfdE94R1l0WUlr?oc=5",
+"m": "바이어 · Under Armour"
 },
 {
-"d": "2026-10-26",
-"t": "공급 측면: Walmart 구매자가 공급업체 성공을 위한 팁에 대해 논의합니다.",
-"o": "The Supply Side: Walmart buyers discuss tips for supplier success",
-"u": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPdEU5Zi1QWmp1c3VabUZCMlVac3NOTmpzclhSUmVFbkNfNTZocFJTUWlRVEQ5QU1Ud1dHMjlpV3ZMVFJnWThpQUdnRFhXZlo3eGh3VU5FUkJabDhtZ0hFRnZJY1JTUjY0Yl8zaWdnWlh1QkhFckt4MFBXZUJfU3RjVnQyVTM4a0lWV0p3ZUpYN3VvSnd6YzJnUTJIWWk0Q1E?oc=5",
-"m": "바이어 · Walmart"
+"d": "2026-10-23",
+"t": "소매 판매 확산으로 체육 의류 주가 하락: Lululemon과 Under Armour는 4% 하락, Nike는 2% 후퇴",
+"o": "Athletic Apparel Stocks Fall as Retail Selling Spreads: Lululemon and Under Armour Drop 4%, Nike Retreats 2%",
+"u": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxNakFDSzVnT0ZaSGVrdjhBUHhOZ0RBaURzSGk5QUExMWpKbUktZUF4TGJGMzFYTDFUX3pMQ3ZuT1hJNUNBUTVfdWRmMkpVUXdRTTBYc0xkUzRveEpJQkFsUC1ZbGJUdllWX1Z1NWRaS2ZFNmh2TjYzcmgwc3FzQl9HU1YwTFRVUkt4Sm1VNDRKYVl0MU84b3pwa2tVUWpkZlJ0UWM1WTcxTzh5Y0Z1VHdiUWkzRWxnTjZzRWZQMEhsWlpGUkNUTW1pSEhSMmJ0RkxRZm9uQ1VpZWNpWWlOajdTai1B?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-10-16",
+"t": "Under Armour(UAA)는 11월 6일 수익을 앞두고 할인 거래되고 있나요?",
+"o": "Is Under Armour (UAA) Trading At A Discount Ahead Of Its November 6 Earnings?",
+"u": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxNQTZWbG02Q0d4U1l5SWM1Wmp4VGt6UnplU0hLSEY0dXBtVGkzTHlPMUFfbnc5WkJnbW83emNzemM2RzhHYnZLQ2JWdGpaZm1uYTVPWGtIVGdlMkVvVDItSmhPN0dYWVotY1lOOHptbTYtakpYX3lpNmdmcU4zY2NMbkZweXJDRkNZdElnU0N0RnFEQ3g0S0c5TFNDUkRoR0lpelJEc0lZV0licFJ4R0J1YmR1d3VlNUNNd3dLeGp3VW90QVlVdFJVMjlDRGxzcmpKTVEw0gHYAUFVX3lxTFBQU3U1VE1xSXZ3UzZiVkRlRkhnbE93X1Ftd1RFcnZYNXk4NWkyTUNjT3dLWjRNU1g4UUUtaFlGd0t0cG5xeVUyR19oeDhHMV8yY2xsajN1SGNsai16T3p2VW5FQXgydEpCYklSb0poNlFRY0p2d1VsNU9fOW9yZlQyek5ZTkFLTzNhSnI3UjUxQnZpSmdXVVBVU0pGUGsxUTFlMDRVTE9KXzMxV0pnN09Ld1NWNlF6bjlZbW5uZGNSbjdwdEUzSElKd0lnWWNyNnFzV1pqZlZBZA?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-10-15",
+"t": "임의소비재 - 의류 및 액세서리 주식 2분기 결과: Under Armour 벤치마킹(NYSE:UAA)",
+"o": "Consumer Discretionary - Apparel and Accessories Stocks Q2 Results: Benchmarking Under Armour (NYSE:UAA)",
+"u": "https://news.google.com/rss/articles/CBMi8wFBVV95cUxObkxDX2dkMm96MEphQ3gyelAxTVA4YWU1VVZST0NoR0VCZDhoR0I5ck9sdDhtSm5jdEs5RlY2M29KZmNEeV9WNC1sanRMc1lCaFluWjI4bHZKa3JuZEJDVXZBNVZOcTh3YjFUdW1LTmxOc01kTU1EVnRqaHFIMWh1Sl9mR1FCdFdQUmdwWUp0bWExTGhSMlZhaEtkUFNWdUxZX1pEMXVzTVY2aTM4Q0E2YUljYk9GazBmcXE1UzNYVVZaVldMVG85UG16SWEwZjRfeWUtd09MaVE1ckU4YjdrWWZGakhndDZvWWpIaG5HcUpRUTQ?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-10-12",
+"t": "Lululemon, Under Armour는 이익 마진을 높이기 위해 제품 라인을 축소하고 있습니다.",
+"o": "Lululemon, Under Armour are cutting product lines to lift profit margins",
+"u": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOaWNpS3VtSi1jOElIaGdkUkdRa2U2azktWEtkMVNDY1NvV2dWY20yclR0WlJqcGZLMHVVSndzcndJR0Y5RjFncFg2Y3dWZWpZV3huOXJQc19MVktPWmFtNGFsZzJ4YmNwWXRSRlRaWndFQmcyV3BQV0Z4UFEwVE1Rd2htTldybmQwZGxpQQ?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
+"d": "2026-10-12",
+"t": "Under Armour, Inc. 클래스 A의 가격 대비 수익 비율 – HAN:U9R",
+"o": "Price to earnings ratio of Under Armour, Inc. Class A – HAN:U9R",
+"u": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPcUhza3NGcEc5bHhsX3RYV1lfWlpGSWRNUnRvT1FpY2dtZE1NdG5teUJFbk1NVTJQaWM4UTBseVZtbDU4Q2dRWnpITUUzcGRJSG01ZkY4LWEtZkt4VWlhd0Q2bVBRUVdUS0Y2MDFPeWZKT0xtNl9FS2RWRjFkOTlpeVFvT0dwRllVbnZwZ0V3eEFjcDlwUm5N?oc=5",
+"m": "바이어 · Under Armour"
 }
 ],
 "vsco": [
@@ -4779,6 +4721,20 @@
 ],
 "pvh": [
 {
+"d": "2026-10-29",
+"t": "PVH Corp.(NYSE:PVH) 주식은 $0.04의 분기별 배당금을 지급합니다.",
+"o": "PVH Corp. (NYSE:PVH) Shares to Pay Quarterly Dividend of $0.04",
+"u": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOUGdHMmdabzhLb1NmSzBObmMwczRtQmlVM3R6QmJFRlJpeW9FWkhEenltckZnWk1vSXgzQXd2RWNnWjhTX1c1eEtxcWozaVdzWU9XdjI5b0ZQb3ZTM00xdmVnekJxN2l1aUt3UWlDYUNQN2FFWHRheWRlZlRyc2NZVUdJc3NiY3FUbGtKWkstN05tRFFLRTRSWHZKN2N2UTV3T0JXWFJnOWJFSU9USW1ua3RSbloyYWpzVFQ2NQ?oc=5",
+"m": "바이어 · PVH"
+},
+{
+"d": "2026-10-29",
+"t": "Amazon에서 Tommy Hilfiger x Cadillac F1 드라이버 폴로 8% 할인",
+"o": "Tommy Hilfiger x Cadillac F1 Drivers Polo 8% Off on Amazon",
+"u": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNN2ZaekxZUHJYcks2M2xQTVdvT0NxaGRleHBjTWNYTmJfbVhhY1pmcE9URFFOMjk2d2s0bVVtUWozaDBQdDJxeTdfVUpDRHpBSkdvOXZTY0ZBNG5LUGZYMXdMZWxqTTlRaHBjSHdUY053SS1wNExtc1g2bXltbi16aTB1VUVjaGdhQ1dF?oc=5",
+"m": "바이어 · Amazon"
+},
+{
 "d": "2026-10-19",
 "t": "Tommy Hilfiger Polo 75% 할인—오늘 Amazon에서 단 $22",
 "o": "Tommy Hilfiger Polo 75% Off—Just $22 on Amazon Today",
@@ -4818,20 +4774,6 @@
 "t": "Amazon에서 Tommy Hilfiger 긴팔 폴로 38% 할인",
 "o": "Tommy Hilfiger Long-Sleeve Polo 38% Off on Amazon",
 "u": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOX1lVbGFrcEhxVms3R2hxTVhqN0UyQ0R2SGRJY0ZDQS1jNDNMa1lReldSUWI0c2hBb3Y2eDY1SzBld054YjlwT1BNUzcxVTB4VmFoWTYxdzVMTEJfQVhsT1FIeUxsUlJNb1ZzbGsxel9xZHdRWEtfT0F2OGk3N283c0ZEZ1FuS0hFMWdvMlNUem9YcGtLX205WkJBU3hrX0J5WVBFUXVDTQ?oc=5",
-"m": "바이어 · PVH"
-},
-{
-"d": "2026-10-13",
-"t": "Logos Up Front: 런웨이 크루넥이 인디언 옷장에 상륙하는 방법",
-"o": "Logos Up Front: How the Runway Crewneck Is Landing in Indian Wardrobes",
-"u": "https://apparelresources.com/fashion-news/trends/logos-front-runway-crewneck-landing-indian-wardrobes/",
-"m": "Apparel Resources"
-},
-{
-"d": "2026-10-11",
-"t": "PVH Corp. R (PVH.DE) 2026년 4분기 실적 보고서",
-"o": "PVH Corp. R (PVH.DE) Q4 FY2026 earnings call transcript",
-"u": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPVndWVFhrLUd2LUZnVWlkd1JmNlhCVVo0WGtrcUJ0aEJUanVEaXlVWWtPazMwaDcyNXljTVc2SWhCSmJDSE1IVlk0UjctUUpsajBVcFdlUVp5QzQ5LVFLeFNtVjVmNm92OUxTUzFZTW5DU1FxSk1vOVQzT0pQUkRUc29zSno5LXZ3RjB4dWo4eVRVZw?oc=5",
 "m": "바이어 · PVH"
 }
 ],
@@ -4891,6 +4833,64 @@
 "o": "Duluth Trading (DLTH) Q2 Fiscal 2026 Earnings Call: Margin Expansion and Higher EBITDA Guidance",
 "u": "https://news.google.com/rss/articles/CBMickFVX3lxTFBKVVdEd2ZiOUViN3RDN3I4Sk1UOXlMbXBUWTBlQlEzWW1RNHhQamJqTEZPRzUtRWd5N0NINDZtTFAxV0xOYnJaWlMtNUh0akwzVUdlTEJmeFo3RDJxamlISXBmZXV3MUd0MVlkSFBvOU9VZw?oc=5",
 "m": "바이어 · Duluth Trading"
+}
+],
+"carters": [
+{
+"d": "2026-10-28",
+"t": "Carter's, Inc.는 주당 85센트의 수익을 올릴 것으로 예상됩니다 - 수익 미리보기",
+"o": "Carter's, Inc. expected to post earnings of 85 cents a share - Earnings Preview",
+"u": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxPeklFYmhuczRJOWZzSzN1djVWV0ZiQ09HX19yZW1La3JZdXhtcTBld0N6SVRXc2VhUzNBQVBzYnIxdHp5Tk9wbVU5a1BuSVNQbDg0b3I4N3hRNU10LUFJX01HSlhzbjhGaXB4M1RGVVE1Qkw4d09OWW9sVmJtVkdKZkJoQmZjQXM2dG44R3NsQkZHeF9rRUFkSy1RTUJEU0xHWUtUQVJNNlBfTFRnRXZjbVJlRURlS3JDb3RQbWU1VUthX0k5a0pBNmlCZURIME1wLTMyT0VYZFBtMWJEMHc?oc=5",
+"m": "바이어 · Carter's"
+},
+{
+"d": "2026-09-22",
+"t": "CRI 2026년 2분기 수익: Carter's, EPS보다 큰 폭의 EPS를 기록했지만 주가는 거의 변동하지 않음 - 실적 가속화 추천",
+"o": "CRI Q2 2026 Earnings: Carter's Posts Outsized EPS Beat, but Stock Barely Budges - Earnings Acceleration Picks",
+"u": "https://news.google.com/rss/articles/CBMivAFBVV95cUxPZWwyTnFZcDQ0YTNIblJwQmZId3JVcExNbEpLS3ZVVnQ2OHZrV3ZMcHF1ZURIbXF2N1pFbklsU0NESUlUaHowSWVvQ1hYMlpRX1lHbGRwZXBjT1lkSXpPNVVMeXJYZjZMUnZHRjlvMV9OSnU5SFI0eEduX01ZeElydGMycGpRc29IWUdZUHJYTG4tcUJ2U2tGWXZ5cGtBRDkzS0g0bklkNjg3bVBxYS1qeWw4Q1JKTmVMem53cQ?oc=5",
+"m": "바이어 · Carter's"
+},
+{
+"d": "2026-09-17",
+"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도 - 합의 실패율",
+"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - Consensus Miss Rate",
+"u": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNZkpxUFNBYmVveU5DNHFQR0w0dlBoWlZCZWRMMzBmSDFxdDdBR2xPS1RWZjZwSG15UU1wUHpIQ3RZRGYwM1prdjhoWlNCMnNHcU1ZelF1VzY1bVBzM1N0ZmFoLVBxNjFydzVWajRMQWpuckZ2MEE2aWRQdFRFX1BBSGFjdEViakVqbnZuR2NXN0UzWFNDZ1RWZzhRejRWVy1BY3NpbGFCOHphdmJVZEgzZ1ExM0hXalQ2OE1HdDNPc25lbTNT?oc=5",
+"m": "바이어 · Carter's"
+},
+{
+"d": "2026-09-17",
+"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도함 - CEO 수익 명세서",
+"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - CEO Earnings Statement",
+"u": "https://news.google.com/rss/articles/CBMi_gFBVV95cUxNV0pzZFNaMVJiRVg2UFc2U09KRXlJdlk2SGlzTlNaYk9JXzdtU0NjNzQ0TG4wZ1NpOThJaloyQmlVcEpuOTVobkF6bW1vR3RDWndORG5GYXFfSXRlQkozZC13ZXlpLXl0Rk1Xb0hhVU5ab3A4VjhNejJ1UWxuVm5IVE9LRWN1dHFFOUR0TlNYMFkxM3B0ejRacEJfemlpckJhaElJcV9hT3NpUGJxMk1VeXRmbTZ4ZTZNTmhfclhmYTU0STFkUU1lUTVpM3lTLVB4dGliOGF3QlB5R2V3VzNRXzgtallxSEJERG43WWRzYUg3YTNzQ3RvRHhCbVQ0UQ?oc=5",
+"m": "바이어 · Carter's"
+},
+{
+"d": "2026-09-17",
+"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도 - 낮은 성장 수익",
+"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - Low Growth Earnings",
+"u": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNZkpxUFNBYmVveU5DNHFQR0w0dlBoWlZCZWRMMzBmSDFxdDdBR2xPS1RWZjZwSG15UU1wUHpIQ3RZRGYwM1prdjhoWlNCMnNHcU1ZelF1VzY1bVBzM1N0ZmFoLVBxNjFydzVWajRMQWpuckZ2MEE2aWRQdFRFX1BBSGFjdEViakVqbnZuR2NXN0UzWFNDZ1RWZzhRejRWVy1BY3NpbGFCOHphdmJVZEgzZ1ExM0hXalQ2OE1HdDNPc25lbTNT?oc=5",
+"m": "바이어 · Carter's"
+},
+{
+"d": "2026-09-17",
+"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도",
+"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence",
+"u": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNUE1KWHhjM3JXTG8tRzY2XzlKdFFQZnNVTzJrQWFmZ01sSDcyT0R0SnFqRFhiXzNIMFVVSVc2Nm5pZ1Z3R0plQ3FvLUdTLTFUaEVPSzd4Q25FR1NKVl81VHV1ZDM0MGlwME1IdWlKQUdMSlpDRlB2T05TWExwOG5KUWxieHUtRzIxRnctQUh6b0NuOU1PcG5SR09VN3RfaHVZR0tZeXg3UncwdVo1eFplNG1PRGRHX1FYUFEwbVhiMjJ5WEthR3c?oc=5",
+"m": "바이어 · Carter's"
+},
+{
+"d": "2026-09-17",
+"t": "Carter's: 관세 역풍이 변하면서 매력적임(NYSE:CRI)",
+"o": "Carter's: Attractive As Tariff Headwind Inflects (NYSE:CRI)",
+"u": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOM2Z3WDE1bHEtUldTZkFqNUF6VWRYcmxpRTBqd21jeFdGa2txcXFpSXpEV1ZQN1hfZlNEdEplTi1CLUs0bzItb1RaaDAtc3NFa3JsQm9raHEwVjAwZVlrRTBKV3JoNnhYWkdZQkJDdmI1d25VYmEyQ0JDMmxOUHlKR1IyM2JmUzRlcEY3M05GbWQ?oc=5",
+"m": "바이어 · Carter's"
+},
+{
+"d": "2026-09-17",
+"t": "Carter's Inc.(CRI) 2026년 2분기 수익: EPS는 수익 침묵에도 불구하고 추정치를 317% 압도 - 수익 안정성 보고서",
+"o": "Carter's Inc. (CRI) Q2 2026 Earnings: EPS Crushes Estimates by 317% Despite Revenue Silence - Earnings Stability Report",
+"u": "https://news.google.com/rss/articles/CBMiygFBVV95cUxOTmxIbUt0UXZxVWViOERqa3k2M1Atb1VHYWNZbHREZjIxR2JqSFFBOGliQmxrbnJDOWlZSEljaVM1c1p4bmhtM24xcUFUN3paSnVPWmE2SFV4TXpOYTVmZlpRdDM0WFhXeTNiTDdrWmhHd2ZGUERtV3JqZmZQVHBqazF0RWpBRnpPWF9wd01NRmw4dUdHSi1ySkJib2Y1QjRJVEUxekduUURVTFdNS21IeHloOHVrWVlxMndLRjFYMnJ6aTJmck1RZG1R?oc=5",
+"m": "바이어 · Carter's"
 }
 ]
 }
