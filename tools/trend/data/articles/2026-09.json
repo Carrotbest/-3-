@@ -5215,6 +5215,32 @@
   ]
  },
  {
+  "key": "997f1f527c3faf00",
+  "title": "Vietnam's GDP growth forecast raised to 8.7% for Q3 2026",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxNVVdoaE1WQ0Z2cThRa3hUX3dYYlZjQ3g3M2ViaFFRRTZWX1d0SHdHN1hScjRJY3Q5MktXa0l1WExqTEc3eldDbFhRWVYyUTktelhvMGg0cVdIREdfRVBfS0xadkg5LUdNa1RUME1IMHRXSjMyOXNwNHVxeDRfR19FYkVLTHYxQ2pSWkptS2pXNjBQZ29TVXhDaHJqSmd4YThFNFEtd0JCY1gyQjEwQXNWMXN4ZnNBY0g2UVloMnRvOC1UczhONUhKZDQ5RnV4N0xlSE9DMnFR?oc=5",
+  "published": "2026-09-29",
+  "collected": "2026-10-31",
+  "summary": "Vietnam's GDP growth forecast raised to 8.7% for Q3 2026 Fibre2Fashion",
+  "content": "Vietnam's GDP growth forecast raised to 8.7% for Q3 2026 Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [
+   "베트남"
+  ],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "991f007d38323a22",
   "title": "The Real Ghostbusters’ 40th Anniversary Apparel Now Available on Amazon",
   "title_ko": null,
@@ -11783,9 +11809,10 @@
   "score": 14,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Textile Today"
+   "Textile Today",
+   "주제검색 · 신소재"
   ]
  },
  {

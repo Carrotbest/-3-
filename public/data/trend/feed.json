@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-10-31T00:13:18+00:00",
+"generated_at": "2026-10-31T23:51:20+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
-"filtered_out": 4994,
+"filtered_out": 5020,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 20,
-"scanned": 567,
-"kept": 234,
-"material": 175
+"scanned": 588,
+"kept": 238,
+"material": 178
 },
 "30": {
 "sources": 22,
-"scanned": 2740,
-"kept": 1059,
-"material": 772
+"scanned": 2765,
+"kept": 1064,
+"material": 776
 }
 }
 },
@@ -29,7 +29,7 @@
 },
 {
 "key": "RETAIL",
-"n": 400
+"n": 399
 },
 {
 "key": "FABRIC",
@@ -37,7 +37,7 @@
 },
 {
 "key": "ETC",
-"n": 201
+"n": 202
 },
 {
 "key": "CHEMICAL",
@@ -51,11 +51,11 @@
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 433
+"n": 432
 },
 {
 "key": "Fibre2Fashion",
-"n": 201
+"n": 200
 },
 {
 "key": "Ecotextile News",
@@ -67,15 +67,15 @@
 },
 {
 "key": "Textile Focus",
-"n": 106
+"n": 107
+},
+{
+"key": "Textile Today",
+"n": 82
 },
 {
 "key": "Innovation in Textiles",
 "n": 82
-},
-{
-"key": "Textile Today",
-"n": 81
 },
 {
 "key": "Knitting Industry",
@@ -87,7 +87,7 @@
 },
 {
 "key": "주제검색 · 신소재",
-"n": 49
+"n": 48
 },
 {
 "key": "Textile World",
@@ -107,7 +107,7 @@
 },
 {
 "key": "주제검색 · 염색가공",
-"n": 14
+"n": 15
 },
 {
 "key": "WWD",
@@ -141,7 +141,7 @@
 },
 {
 "key": "방글라데시",
-"n": 94
+"n": 95
 },
 {
 "key": "전시회",
@@ -149,11 +149,11 @@
 },
 {
 "key": "데님",
-"n": 50
+"n": 52
 },
 {
 "key": "바이오소재",
-"n": 42
+"n": 43
 },
 {
 "key": "울",
@@ -480,9 +480,9 @@
 },
 {
 "date": "2026-10-15",
-"total": 46,
+"total": 47,
 "by": {
-"FABRIC": 6,
+"FABRIC": 7,
 "ETC": 4,
 "MATERIAL": 17,
 "RETAIL": 11,
@@ -642,10 +642,10 @@
 },
 {
 "date": "2026-10-30",
-"total": 24,
+"total": 25,
 "by": {
 "RETAIL": 5,
-"MATERIAL": 10,
+"MATERIAL": 11,
 "CHEMICAL": 3,
 "ETC": 3,
 "FABRIC": 2,
@@ -654,17 +654,21 @@
 },
 {
 "date": "2026-10-31",
-"total": 0,
-"by": {}
+"total": 3,
+"by": {
+"RETAIL": 1,
+"CHEMICAL": 1,
+"ETC": 1
+}
 }
 ],
 "momentum": [
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 62,
+"recent": 63,
 "prior": 32,
-"delta": 30,
+"delta": 31,
 "weeks": [
 0,
 0,
@@ -677,7 +681,7 @@
 24,
 13,
 12,
-11
+12
 ]
 },
 {
@@ -702,6 +706,27 @@
 ]
 },
 {
+"tag": "바이오소재",
+"label_en": "bio-based",
+"recent": 32,
+"prior": 11,
+"delta": 21,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+7,
+4,
+6,
+10,
+8,
+8
+]
+},
+{
 "tag": "전시회",
 "label_en": "performance days",
 "recent": 41,
@@ -720,27 +745,6 @@
 15,
 11,
 6
-]
-},
-{
-"tag": "바이오소재",
-"label_en": "bio-based",
-"recent": 31,
-"prior": 11,
-"delta": 20,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-7,
-4,
-6,
-10,
-8,
-7
 ]
 },
 {
@@ -807,10 +811,10 @@
 ]
 },
 {
-"tag": "울",
-"label_en": "wool",
-"recent": 19,
-"prior": 7,
+"tag": "데님",
+"label_en": "denim",
+"recent": 32,
+"prior": 20,
 "delta": 12,
 "weeks": [
 0,
@@ -819,11 +823,11 @@
 0,
 0,
 2,
-3,
-2,
 5,
+13,
 8,
-1,
+6,
+13,
 5
 ]
 },
@@ -987,6 +991,76 @@
 }
 ],
 "articles": [
+{
+"id": "fb6353b2fa351a6b",
+"d": "2026-10-31",
+"t": "무신사가 키운 K인디 패션, 국내 판도 바꾸고 해외 흔든다",
+"o": "무신사가 키운 K인디 패션, 국내 판도 바꾸고 해외 흔든다",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=149807",
+"s": "무신사와 함께 성장한 토종 인디 브랜드들이 한국 패션시장의 새로운 강자로 자리 잡았다. 글로벌 시장조사기관 유로모니터가 올해 발표한 2025년 패션 소매시장 분석에 따르면 한국 패션 소매시장 전체 매출에서 인디 브랜드(독립 디자이너 브랜드)가 차지하는 비중은 37%로 중국(23%), 대만과 일본(각 18%), 미국(14%)보다 높았다.한국 인디 패션 브랜드의 2021~2025년 소매매출 연평균 성장률은 7.3%로 일반 패션 브랜드(4.8%)와 럭셔리 패션 브랜드(4.5%)를 앞섰다. 전체 패션 소매매출에서 국내 브랜드가 차지하는 비",
+"c": "RETAIL",
+"x": "무신사와 함께 성장한 토종 인디 브랜드들이 한국 패션시장의 새로운 강자로 자리 잡았다. 글로벌 시장조사기관 유로모니터가 올해 발표한 2025년 패션 소매시장 분석에 따르면 한국 패션 소매시장 전체 매출에서 인디 브랜드(독립 디자이너 브랜드)가 차지하는 비중은 37%로 중국(23%), 대만과 일본(각 18%), 미국(14%)보다 높았다.한국 인디 패션 브랜드의 2021~2025년 소매매출 연평균 성장률은 7.3%로 일반 패션 브랜드(4.8%)와 럭셔리 패션 브랜드(4.5%)를 앞섰다. 전체 패션 소매매출에서 국내 브랜드가 차지하는 비",
+"i": "http://www.ktnews.com/news/thumbnail/202610/149807_132867_4821_v150.jpg",
+"g": [],
+"m": "한국섬유신문",
+"r": "국내",
+"v": 6,
+"h": 1,
+"w": "retail",
+"e": [],
+"ms": [
+"한국섬유신문"
+]
+},
+{
+"id": "ba744cc83b18d164",
+"d": "2026-10-31",
+"t": "Chloris, 상업용 데님 생산을 위한 bio-based 염료 개발",
+"o": "Chloris advances bio-based dye for commercial denim production",
+"u": "https://textiletoday.com.bd/chloris-advances-bio-based-dye-for-commercial-denim-production",
+"s": "Utah-based biotechnology company Chloris Colors is working to scale its bio-based dye, Claessen Blue, across commercial denim production. It is using third-party certifications to support adoption by...",
+"c": "CHEMICAL",
+"x": "Utah-based biotechnology company Chloris Colors is working to scale its bio-based dye, Claessen Blue, across commercial denim production. It is using third-party certifications to support adoption by textile mills and global brands. Figure: Claessen Blue has received ISCC PLUS certification, making it the first bio-based dye globally to achieve it. The dye is designed to run on existing indigo dyeing lines and deliver denim aesthetics similar to conventional indigo. It offers an alternative to synthetic indigo through a milder dyeing process that avoids harsh reducing agents such as sodium hydrosulfite. The company says the process also uses lower alkalinity and can reduce water and energy demand while producing cleaner wastewater. These features could help denim manufacturers reduce the environmental impact of conventional indigo dyeing. Claessen Blue has received ISCC PLUS certification, making it the first bio-based dye globally to achieve it. ISCC PLUS verifies the use of bio-based, bio-circular and recycled feedstocks through independent auditing and a mass balance chain-of-custody system. The dye has also received USDA BioPreferred and TÜV Austria OK biobased certifications, which verify its bio-based carbon content. It is produced through fermentation using 100% renewable, plant-based feedstock and has achieved the highest four-star rating under TÜV Austria's OK biobased scheme. In addition, Claessen Blue has obtained OEKO-TEX Eco Passport certification and ZDHC Manufacturing Restricted Substances List (MRSL) v3.1 Level 3 conformance, addressing chemical safety and management requirements. The dye is also approved as a chemical input under Global Organic Textile Standard (GOTS) 7.0 for processing that meets the standard's requirements. \" Our certifications cover ",
+"i": "/storage/uploads/2026/10/chlorisadvancesbio_17934216359032.jpg",
+"g": [
+"바이오소재",
+"데님"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 14,
+"h": 3,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today",
+"주제검색 · 신소재",
+"주제검색 · 염색가공"
+]
+},
+{
+"id": "59cc91f9eb46fbda",
+"d": "2026-10-31",
+"t": "TRC 2026에서는 섬유 분야의 지속 가능한 디지털 혁신을 발전시키기 위해 글로벌 전문가를 모았습니다.",
+"o": "TRC 2026 Brought Together Global Experts to Advance Sustainable and Digital Innovation in Textiles",
+"u": "https://textilefocus.com/trc-2026-brought-together-global-experts-to-advance-sustainable-and-digital-innovation-in-textiles/",
+"s": "Building on the decade-long success of the Textile Research Conference (TRC), first introduced by CRISAT (Centre of Research & Innovation in Science, Arts & Technology) in 2014, the 7th Textile Research Conference (TRC) 2026 successfully brought together researchers, academics, industry leaders, pol",
+"c": "ETC",
+"x": "Building on the decade-long success of the Textile Research Conference (TRC), first introduced by CRISAT (Centre of Research & Innovation in Science, Arts & Technology) in 2014, the 7 th Textile Research Conference (TRC) 2026 successfully brought together researchers, academics, industry leaders, policymakers and students from Bangladesh and abroad at BGMEA University of Fashion & Technology (BUFT), Dhaka, creating a vibrant platform for knowledge exchange and collaboration on the future of the textile and apparel sector. Jointly organised by CRISAT and BUFT, the conference showcased pioneering research and innovative solutions addressing some of the industry’s most pressing challenges, including sustainability, circularity, digital transformation, advanced manufacturing, smart textiles and renewable energy. The conference featured more than 20 research presentations across parallel technical sessions. Researchers presented findings on topics ranging from biodegradable dyes, bio-based textile composites and intelligent textile sensors to artificial intelligence applications, textile waste forecasting models, sustainable packaging solutions and renewable energy adoption within textile manufacturing. A major highlight of the conference was the keynote address delivered by Professor Engr. Dr. Hafsa Jamshaid of National Textile University (NTU), Pakistan, entitled “Beyond Recycling: Transforming Textile Waste into High-Value Technical Textiles and Advanced Materials.” The presentation explored innovative pathways for textile waste valorisation and circular material development. The conference also welcomed Nihong Pang from Chengdu Qinggong Polytechnic University, China, who shared valuable insights on navigating emerging European sustainability regulations and compliance re",
+"i": "https://textilefocus.com/wp-content/uploads/2026/10/TRC-2026-.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
 {
 "id": "f5b32e96be812fb2",
 "d": "2026-10-30",
@@ -1230,6 +1304,27 @@
 "e": [],
 "ms": [
 "Ecotextile News"
+]
+},
+{
+"id": "a7bcf3403c944c4e",
+"d": "2026-10-30",
+"t": "박 총리, 13개 산업 부문에 빈곤 완화세 10% 발표",
+"o": "Pak PM announces 10% poverty alleviation tax on 13 industrial sectors",
+"u": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxQd0NsSGh2Qm5GOWRZbW9kc1VIMmsyam5nMnNObE9VVGhQZUx6b3lzeXozeWZUTExkTzg4RGNjbVF5eVpwSFE2NzFxZUtfdkZaei1mRTdKbTlhNDFLaHhjZDRQUjRta1VtWElvOTlRaUVkWkdSUWxXc0U1RzRVVVdyR3RxclM5ZGVrSVlETGpPcU9iejloSnB6a0NEankzUjVqXzhBQjVwLUJUdVZxV3M1d2RHVGdwZXJrMTYwMHpOVEVOdTRqc3hnZzhWQXJ2ckZMU0NPX0laRU5WQ0NPUDU4NzNRZDZiOFdobm9sTksyb0R4VzE3UVE?oc=5",
+"s": "Pak PM announces 10% poverty alleviation tax on 13 industrial sectors Fibre2Fashion",
+"c": "MATERIAL",
+"x": "Pak PM announces 10% poverty alleviation tax on 13 industrial sectors Fibre2Fashion",
+"i": "",
+"g": [],
+"m": "Fibre2Fashion",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Fibre2Fashion"
 ]
 },
 {
@@ -2985,11 +3080,12 @@
 "m": "Fibre2Fashion",
 "r": "해외",
 "v": 10,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Fibre2Fashion"
+"Fibre2Fashion",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -12316,11 +12412,12 @@
 "m": "Ecotextile News",
 "r": "해외",
 "v": 11,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Ecotextile News"
+"Ecotextile News",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -12346,6 +12443,29 @@
 "e": [],
 "ms": [
 "Textile Focus"
+]
+},
+{
+"id": "76c4d32db5248d6e",
+"d": "2026-10-15",
+"t": "데님은 2027-28년 블루박스를 벗어났습니다.",
+"o": "Denim Is Breaking Out Of The Blue Box For 2027–28",
+"u": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPajNhQ0JvT0Y1R3lZVDNsRTFMT24tOGt6ZnFMa3dVd2g3dm5zTjRFMTNRMEVUWUxOdjBUZHh5MXBiYXhzWWpuX3VpU082MVZvNDItRklrbVRsLV8teU1Xd0dGMFdfbmx6ajFRRXZJZW5ob1JLRi04MU9qQTRKN2txeGoxRUFXNFctZ2JhRnE4QlQxQWZFanBFNGhJaGUwaUluOUE?oc=5",
+"s": "Denim Is Breaking Out Of The Blue Box For 2027–28 Textile Excellence",
+"c": "FABRIC",
+"x": "Denim Is Breaking Out Of The Blue Box For 2027–28 Textile Excellence",
+"i": "",
+"g": [
+"데님"
+],
+"m": "주제검색 · 염색가공",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"주제검색 · 염색가공"
 ]
 },
 {
@@ -27576,11 +27696,12 @@
 "m": "Textile Today",
 "r": "해외",
 "v": 14,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Textile Today"
+"Textile Today",
+"주제검색 · 신소재"
 ]
 },
 {
@@ -33858,111 +33979,6 @@
 "e": [],
 "ms": [
 "Fibre2Fashion"
-]
-},
-{
-"id": "d1254f2101f56464",
-"d": "2026-09-17",
-"t": "Fabric.AI, Kopin과의 공동 신경 I/o™ 기술에 대한 지적 재산권 변호사로 Haynes Boone을 유지",
-"o": "Fabric.AI Retains Haynes Boone as Intellectual Property Counsel for Joint Neural I/o™ Technology with Kopin",
-"u": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPRWpuQjNVMnZzbk9PZEFYTGpyNlgxMzQ4MmhnNVpkVTVZQUZLYkJaV281aWpSemdyNkZGeVE5dF9Sc2tlRE1OSl9fcTVGQjRlcVBqa2VZTHJNU1h2NlNzZkQ4UEJCVVl0UktJYVZ0Mm0tNXdnNV9mVEU5OXg3MXdIZW1kYXhOX1dXbjBmY2w1dHQyWWwyTWNXb3RxSi0tMENab09URXM1TlZTR3RMR2tSd2N3NE9UbjFYRWlGOW1iMzFrYkdnYnd1T3ZWSnptWU5XMFZRYkltWXZUOVAwQmpXU1JaS0Q?oc=5",
-"s": "Fabric.AI Retains Haynes Boone as Intellectual Property Counsel for Joint Neural I/o™ Technology with Kopin Quiver Quantitative",
-"c": "FABRIC",
-"x": "Fabric.AI Retains Haynes Boone as Intellectual Property Counsel for Joint Neural I/o™ Technology with Kopin Quiver Quantitative",
-"i": "",
-"g": [],
-"m": "주제검색 · 신소재",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"주제검색 · 신소재"
-]
-},
-{
-"id": "cb4afd2bfec32dad",
-"d": "2026-09-17",
-"t": "ELiAR 스마트 센서는 섬유 염색에 실시간 제어를 제공합니다.",
-"o": "ELiAR Smart Sensors bring real-time control to textile dyeing",
-"u": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOT2ZWSXdhbktyODY5ajZkMWtpclo1eUlENXFkMkxyc2pKRV9ZVzUzWFhUa3hXQUd1RHdFSVNQOHlTeElIT1c3THQxT0dES0l4YThnQ1JxZERNR05KS1JHeURDakNQSUo4NWZLTFZkSEJ5MGphc3V1c3d1MkExRXdsYms3cGlta0MweEFaVkQyME1tSVg0N2trbDdfTHBqbkU4MEhhcWdyOVBoVU1DT0g3aVJyWW1vaEl3ZVYtRzNCSWp5Z0Vxc01mUzgxS1Q?oc=5",
-"s": "ELiAR Smart Sensors bring real-time control to textile dyeing fibre2fashion.com",
-"c": "CHEMICAL",
-"x": "ELiAR Smart Sensors bring real-time control to textile dyeing fibre2fashion.com",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 10,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "bf141e6ee8a3b507",
-"d": "2026-09-17",
-"t": "US' 갭, A.P.C. 37피스 한정판 패션 컬렉션 공개",
-"o": "US' Gap, A.P.C. unveil 37-piece limited-edition fashion collection",
-"u": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxPeHFvak9IaWZGWlpGcDJBbXBPR24wSzd1OFh3Yl9iZFdQbzVaQzF4VDdJeV9NVUtLd3dXT0ZoaWVaeGtleWlaNlpjQ3VxRi1xeVpuTkw5WlpIYldEa2xWdGl2dXpJcE1YazNwZm1Zay04NExteGZpVXQ3WW1tN0ZEWkRHa3BoUXJIQ1o3bU1uRVppZXZuYUhNNGdWYU04X283cElzQVFFVl9tdExUalA5bThQWk5RMlpuNDE3a2ZjcDdRV1k5TnFobG1STWxSWjVOaDZST1FvYThxUk0?oc=5",
-"s": "US' Gap, A.P.C. unveil 37-piece limited-edition fashion collection fibre2fashion.com",
-"c": "MATERIAL",
-"x": "US' Gap, A.P.C. unveil 37-piece limited-edition fashion collection fibre2fashion.com",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "b4e840b8480b2dab",
-"d": "2026-09-17",
-"t": "어메이징 송, 한국 시장 공식 진출…글로벌 확장 시동",
-"o": "어메이징 송, 한국 시장 공식 진출…글로벌 확장 시동",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148665",
-"s": "중국 디자이너 핸드백 브랜드 어메이징 송(AMAZING SONG)이 한국 시장에 공식 진출하며 글로벌 사업 확대에 나선다.어메이징 송은 ‘여성이 여성을 지지한다(Women Supporting Women)’는 브랜드 정신과 ‘Love and Share’를 핵심 가치로 전개하는 핸드백 브랜드다. 가방을 자기표현의 수단으로 바라보고, 일상에서 오래 사용할 수 있는 디자인을 지향한다.이번 한국 진출을 통해 국내 소비자와의 접점을 넓히고 패션과 라이프스타일, 자기표현을 중심으로 브랜드 인지도를 확대할 계획이다. 특히 다양한 패션 문화와 라이",
-"c": "RETAIL",
-"x": "중국 디자이너 핸드백 브랜드 어메이징 송(AMAZING SONG)이 한국 시장에 공식 진출하며 글로벌 사업 확대에 나선다.어메이징 송은 ‘여성이 여성을 지지한다(Women Supporting Women)’는 브랜드 정신과 ‘Love and Share’를 핵심 가치로 전개하는 핸드백 브랜드다. 가방을 자기표현의 수단으로 바라보고, 일상에서 오래 사용할 수 있는 디자인을 지향한다.이번 한국 진출을 통해 국내 소비자와의 접점을 넓히고 패션과 라이프스타일, 자기표현을 중심으로 브랜드 인지도를 확대할 계획이다. 특히 다양한 패션 문화와 라이",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148665_130590_2327_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "b3b51f5101dda0c6",
-"d": "2026-09-17",
-"t": "“로고 헷갈려” 뉴발란스, 데카트론 러닝화에 상표권 침해 소송",
-"o": "“로고 헷갈려” 뉴발란스, 데카트론 러닝화에 상표권 침해 소송",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148678",
-"s": "뉴발란스는 데카트론의 러닝 브랜드 키프런(KIPRUN)이 사용한 신발 측면 심벌이 자사의 대표적인 ‘N’ 상표와 혼동될 정도로 유사하다며 미국 법원에 소송을 제기했다. 세계 최대 스포츠용품 유통기업 중 하나인 데카트론과 2025년 매출 92억 달러를 기록한 뉴발란스의 충돌이라는 점에서 이번 사건은 단순한 모방상품 분쟁을 넘어 스포츠 브랜드의 ‘시각적 자산’ 보호 범위를 가늠할 사례로 주목된다.뉴발란스는 지난 9월 15일 미국 매사추세츠 연방지방법원에 데카트론 아메리카(Decathlon America LLC)와 데카트론 USA를 상대",
-"c": "RETAIL",
-"x": "뉴발란스는 데카트론의 러닝 브랜드 키프런(KIPRUN)이 사용한 신발 측면 심벌이 자사의 대표적인 ‘N’ 상표와 혼동될 정도로 유사하다며 미국 법원에 소송을 제기했다. 세계 최대 스포츠용품 유통기업 중 하나인 데카트론과 2025년 매출 92억 달러를 기록한 뉴발란스의 충돌이라는 점에서 이번 사건은 단순한 모방상품 분쟁을 넘어 스포츠 브랜드의 ‘시각적 자산’ 보호 범위를 가늠할 사례로 주목된다.뉴발란스는 지난 9월 15일 미국 매사추세츠 연방지방법원에 데카트론 아메리카(Decathlon America LLC)와 데카트론 USA를 상대",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148678_130607_576_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 9,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
 ]
 }
 ]
