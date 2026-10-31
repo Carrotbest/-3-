@@ -2114,7 +2114,7 @@
   "summary": "In denim, the more predominant wood-based fiber is lyocell. Here is how some mills are using modal for denim fabrics to achieve different qualities.",
   "content": "In denim, the more predominant wood-based fiber is lyocell. Here is how some mills are using modal for denim fabrics to achieve different qualities.",
   "image": "",
-  "image_tried": "2026-10-01T00:12:47+00:00",
+  "image_tried": "2026-10-31T00:13:18+00:00",
   "source": "WWD",
   "region": "해외",
   "category": "MATERIAL",
@@ -6626,6 +6626,30 @@
   ]
  },
  {
+  "key": "2cd555d0aca46a37",
+  "title": "| South Indian cotton yarn remains weak, prices down in Mumbai",
+  "title_ko": "| 남인도 면사는 여전히 약세를 보이고 있으며 뭄바이에서는 가격이 하락하고 있습니다.",
+  "link": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxPWUxERUhpdDJQZ0EyVFU3a1FOTHhyYzBENmVXSWJ1M29mQ0tEZWNFWWhVRnNOeDd6SWJHdnBnY2l4bWkwZFFUX2NKcWx1YTUxTFNVdl9oMjNteUdYeXBnRW9XTG5JSVZjM01lQkFpUC1IdkpweWtvTzdfc2l4M0xlZVdzaWZNazVQVURYSzIzSVZ6LTI0VVNrcndHOGR5RnhyWTFISTdyYWV4U2VTVjlYUEFhdWo1RFZIeHhuM1J6aDBFU1ZTRVVfRUV5eDJMUFR4QXJLcmNHbnZKWWpiLXNfTkU5NDUtY29uVy1z?oc=5",
+  "published": "2026-09-29",
+  "collected": "2026-10-31",
+  "summary": "| South Indian cotton yarn remains weak, prices down in Mumbai Fibre2Fashion",
+  "content": "| South Indian cotton yarn remains weak, prices down in Mumbai Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
+  ]
+ },
+ {
   "key": "2cc521505a5c414a",
   "title": "ClickHouse Expands Collaboration With Microsoft, Bringing Fabric Integration, Deeper OneLake Interoperability, and Enterprise Deployment Flexibility",
   "title_ko": null,
@@ -10540,6 +10564,30 @@
   "hits": 1,
   "sources": [
    "주제검색 · 신소재"
+  ]
+ },
+ {
+  "key": "27f5ed9c538ce82f",
+  "title": "VSXY Stock Drops Despite Strong Q2 Earnings Momentum",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMifEFVX3lxTFBIZFlTM3RoU2g3YzBtSUdwTjVUdUhFSkJQRUVZOEhncGFOSHpIamI5TzNQaUY1T3pyNUdZRTNIOEJXTnlxVVJQeG5udUFWWDFhSTBnUUFlVlpFSEgzVnVQcV9tVWY0LWtwbG5nVXB2WWNKYjNZVzRFLWYtWk0?oc=5",
+  "published": "2026-09-28",
+  "collected": "2026-10-31",
+  "summary": "VSXY Stock Drops Despite Strong Q2 Earnings Momentum StocksToTrade",
+  "content": "VSXY Stock Drops Despite Strong Q2 Earnings Momentum StocksToTrade",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Victoria's Secret",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Victoria's Secret"
   ]
  },
  {
@@ -29198,6 +29246,30 @@
   ]
  },
  {
+  "key": "185cdb8e8568121b",
+  "title": "India-New Zealand FTA ratified, to take effect on October 20",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxQX3Vncnhlc0Z6cHh2SF84WDJsMkNMZzhJZXR1TXhCVHk1WEtxd2oyYWZ1VUVidndTRm5zNURDUzNlNHMwVUw1eFBaRjFEbW43c0VBbFRuSm5ZMmlTN0ZaVlJ5ZXJBSmdDQ245aWtsLXROMXFCSEZ6Szg0S2NkMnBSWjVjR0FzZmJ3YlVPa2pmcGo3ZzlsVlo3ZGhFVGlWendYOXc2cEJyZUoyMThlYTZJNVFPUkdud1lENlo1ajdTdWdOZ2VrSzZIbVl4cEd4ZWk4ZzhBcWp3?oc=5",
+  "published": "2026-09-21",
+  "collected": "2026-10-31",
+  "summary": "India-New Zealand FTA ratified, to take effect on October 20 Fibre2Fashion",
+  "content": "India-New Zealand FTA ratified, to take effect on October 20 Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "13b7e528d89a0c4f",
   "title": "젝시믹스, 일본 7번째 정규 매장 도쿄에 오픈…오프라인 확장 ‘속도’",
   "title_ko": "젝시믹스, 일본 7번째 정규 매장 도쿄에 오픈…오프라인 확장 ‘속도’",
@@ -33487,6 +33559,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Costco"
+  ]
+ },
+ {
+  "key": "74002e189d4ee78a",
+  "title": "| Weak demand drags cotton yarn prices lower in South India",
+  "title_ko": "| 수요 약화로 인도 남부 지역 면사 가격 하락",
+  "link": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQcDVBU0hxSVd1SE1ldFVrdkNTVlQ3N1ZsVGxpLWFUci1vS0lhOTBqZUx5bGJpVHUzU1FHT3F0SjlUdXpraElIUndGYU1fUUcxMEdvX2JqM2xIMkxFQTgtS2VnOWFET3JIdzRXRFhVc0dTYXZxZF81bzFjeTBXZ2JfdEVZU24xM0ktVHVQR0xqYThzemRRWHhYLXZVaWc2MXpfSmlzYWFjSEpiNlJIdkJ2cHFudExkRnNVblZNMTlJWE1FdHY4ajg1allyRmNrMUR2N0QzT012RlYtaV9YWUNzeXQ4NndwS2pt?oc=5",
+  "published": "2026-09-18",
+  "collected": "2026-10-31",
+  "summary": "| Weak demand drags cotton yarn prices lower in South India Fibre2Fashion",
+  "content": "| Weak demand drags cotton yarn prices lower in South India Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "원사가격"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
