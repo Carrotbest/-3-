@@ -1532,8 +1532,9 @@ export async function applyFabricActions(inputs: ReadonlyArray<ApplyFabricAction
     if (!item) continue
     const rules: WarehouseRule[] = []
     if (input.action === "CONFIRM" || input.action === "UNCONFIRM") rules.push("confirm")
-    if (input.action === "OUTBOUND" || input.action === "UNOUTBOUND") rules.push("outbound")
-    if (input.action === "DISPOSE" || input.action === "EXHAUST" || input.action === "UNRECEIVE" || input.action === "RESTORE") rules.push("lifecycle")
+    if (input.action === "OUTBOUND") rules.push("outbound")
+    if (input.action === "DISPOSE" || input.action === "EXHAUST") rules.push("lifecycle")
+    if (input.action === "RESTORE" || input.action === "UNRECEIVE" || input.action === "UNOUTBOUND") rules.push("restore")
     if (input.action === "NOTE" && input.storageNo?.trim() && input.storageNo.trim() !== item.storageNo.trim()) rules.push("storageNo")
     const changesYds = input.action !== "RECEIVE" && (
       (input.yds !== undefined && input.yds !== item.yds)
@@ -1548,7 +1549,8 @@ export async function applyFabricActions(inputs: ReadonlyArray<ApplyFabricAction
     }
   }
   const beforeEvents = state.fabricEvents
-  const recordIds = fabricRecordIdIndex(buildFabricLedger(state.records, state.completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true }))
+  const fullLedger = buildFabricLedger(state.records, state.completed, state.fabricOverrides, state.fabricEvents, { includeRemoved: true })
+  const recordIds = fabricRecordIdIndex(fullLedger)
   const occurredAt = new Date().toISOString()
   const overrideMap = new Map<string, FabricLedgerOverride>()
   state.fabricOverrides.forEach((item) => {
@@ -1559,12 +1561,16 @@ export async function applyFabricActions(inputs: ReadonlyArray<ApplyFabricAction
   const undoOverrides: FabricUndoEntry["overrides"] = []
   const replacedKeys = new Set<string>()
   const replacedRecordIds = new Set<string>()
+  // 출고 합계는 원장이 낸 값을 그대로 받는다(R379). 원장은 도착 상태가 입고 대기인 기록을
+  // 만나면 그 원단의 출고를 0부터 다시 센다. 여기서 이벤트를 직접 더하면 그 초기화가 빠져서
+  // 화면이 보여 주는 출고 합계와 자동 소진 판정이 서로 다른 숫자를 본다. 복구를 거친 원단이
+  // 보유 재고를 고치는 순간 이력으로 넘어가던 원인이다. 이벤트를 다시 더하지 말 것.
   const outboundTotals = new Map<string, number>()
   const canceledOutbounds = canceledOutboundIds(state.fabricEvents)
-  state.fabricEvents.forEach((event) => {
-    if (event.action !== "OUTBOUND" || canceledOutbounds.has(event.id) || typeof event.qty !== "number" || !Number.isFinite(event.qty) || event.qty <= 0) return
-    const identity = event.recordId ?? recordIdForFabricKey(state, event.fabricKey, recordIds) ?? event.fabricKey
-    outboundTotals.set(identity, (outboundTotals.get(identity) ?? 0) + event.qty)
+  fullLedger.forEach((item) => {
+    if (!(item.outboundTotal > 0)) return
+    const identity = recordIdForFabricKey(state, item.key, recordIds) ?? item.key
+    outboundTotals.set(identity, item.outboundTotal)
   })
   const newEvents: FabricLedgerEvent[] = []
   let records = state.records

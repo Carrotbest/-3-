@@ -588,7 +588,7 @@ function applySharedFields(from: DevRecord, to: DevRecord): DevRecord {
 // ─────────────────────────────────────────────── 신규 작지 접수: 옵션 그리드
 const INTAKE_GRID_ROW_H = 32
 const INTAKE_GRID_HEAD_H = 26
-/** 기본으로 보이는 옵션 줄 수. 이보다 많으면 표 안에서만 스크롤한다. 팝업 높이는 옵션 수와 무관하게 고정된다. */
+/** 기본으로 보이는 옵션 줄 수. 이보다 많으면 표 안에서만 스크롤한다. 적으면 그만큼 상자가 줄어 팝업 아래에 빈 자리가 남지 않는다(R378). */
 const INTAKE_GRID_ROWS = 8
 const INTAKE_GRID_HEIGHT = INTAKE_GRID_HEAD_H * 2 + INTAKE_GRID_ROW_H * INTAKE_GRID_ROWS
 const INTAKE_NO_WIDTH = 34
@@ -734,7 +734,7 @@ function IntakeOptionGrid({ records, optionsById, onChangeRow, onRemoveRow }: { 
     }
     headTop.push(<th key={`sub-${run.key}-${start}`} colSpan={run.span} className={`sticky top-0 z-30 bg-[var(--muted)] text-center ${headCell}`}>{run.label}</th>)
   }
-  return <div className="overflow-auto rounded-[var(--radius)] border border-[var(--border)]" style={{ height: INTAKE_GRID_HEIGHT }}>
+  return <div className="overflow-x-scroll overflow-y-auto rounded-[var(--radius)] border border-[var(--border)]" style={{ maxHeight: INTAKE_GRID_HEIGHT }}>
     <table className="table-fixed border-separate border-spacing-0" style={{ width: tableWidth, minWidth: tableWidth }}>
       <colgroup>
         <col style={{ width: INTAKE_NO_WIDTH }} />

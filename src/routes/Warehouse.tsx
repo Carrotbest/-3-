@@ -69,7 +69,7 @@ const TAB_META: Record<WarehouseTab, { label: string; description: string }> = {
   HISTORY: { label: "이력", description: "전량 소진 또는 폐기된 원단" },
 }
 
-type WarehouseColumnId = "storageNo" | "styleNo" | "flNo" | "millRef" | "owner" | "stock" | "confirm" | "rackNo"
+type WarehouseColumnId = "storageNo" | "styleNo" | "flNo" | "millRef" | "owner" | "stock" | "confirm" | "lifecycle" | "rackNo"
   | "season" | "buyer" | "category" | "requestDate" | "completedAt"
   | "originalRef" | "planner" | "yarnDetail" | "construction" | "content" | "weight" | "color" | "dyeing" | "flSource" | "supplier" | "priceYd" | "priceLb" | "dueDate"
   | "yarnMill" | "yarnDate" | "knittingMill" | "knittingDate" | "dyeingMill" | "dyeingDate" | "finishingMill" | "finishingDate"
@@ -98,6 +98,8 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
     { id: "storageNo", label: "R&D No.", width: 86 },
     { id: "stock", label: "Stock", width: 96 },
     { id: "confirm", label: "입고확인", width: 76 },
+    // 이력 탭에서만 보인다(R382). 입고확인 칸이 그 탭에서 늘 빈칸이라 자리를 넘겨받았다.
+    { id: "lifecycle", label: "상태", width: 112 },
     // 빈 칸을 찾아 넣는 rack 관리(창고팀 협의 2026-09-14). 창고보관 탭에서만 보인다.
     { id: "rackNo", label: "Rack No.", width: 84 },
   ] },
@@ -392,6 +394,9 @@ function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
     case "owner": return item.owner
     case "stock": return item.yds === null ? "" : `${item.balance ?? 0}/${item.yds}`
     case "confirm": return item.status !== "WAREHOUSE" ? "" : item.confirmedAt ? "확인" : "미확인"
+    // 열 머리 ▼ 필터가 이 값을 쓴다. 폐기 사유를 여기 붙이면 필터 값이 사유마다 갈라지므로 붙이지 않는다.
+    // 사유는 화면 render 에만 보인다.
+    case "lifecycle": return item.status === "EXHAUSTED" ? "소진 완료" : item.status === "DISPOSED" ? "폐기" : ""
     case "rackNo": return item.rackNo ?? ""
     case "season": return first(item.season, led?.seasonRaw)
     case "buyer": return item.buyer
@@ -766,6 +771,24 @@ export function Warehouse() {
     return { get: (item: FabricLedgerItem) => map.get(item.key) ?? (item.storageNo.trim() ? map.get(`no:${item.storageNo.trim()}`) : undefined) }
   }, [fabricEvents])
 
+  // 이력 탭 상태 열이 보일 폐기 사유(R382). 원단마다 가장 최근 폐기 기록의 사유 하나를 담는다.
+  // 찾는 방법은 historyEnteredAt 과 같다. DD 값이 바뀌면 원장 key 가 달라질 수 있어 R&D No. 로도 찾는다.
+  const historyReason = useMemo(() => {
+    const map = new Map<string, { at: string; reason: string }>()
+    for (const event of fabricEvents) {
+      if (event.toStatus !== "DISPOSED") continue
+      const reason = (event.reason ?? "").trim()
+      if (!reason) continue
+      const at = event.recordedAt ?? event.occurredAt ?? ""
+      for (const id of [event.fabricKey, event.storageNo ? `no:${event.storageNo.trim()}` : ""]) {
+        if (!id) continue
+        const previous = map.get(id)
+        if (!previous || at > previous.at) map.set(id, { at, reason })
+      }
+    }
+    return { get: (item: FabricLedgerItem) => (map.get(item.key) ?? (item.storageNo.trim() ? map.get(`no:${item.storageNo.trim()}`) : undefined))?.reason ?? "" }
+  }, [fabricEvents])
+
   // 열 필터를 통과한 행. 정렬을 걸지 않으면 원장이 준 대장 순서를 그대로 쓴다.
   const visibleRows = useMemo(() => {
     const active = Object.entries(columnFilters).filter(([, values]) => values.length > 0)
@@ -800,7 +823,12 @@ export function Warehouse() {
     : COLUMN_GROUPS.map((group) => ({ ...group, columns: group.columns.filter((column) => !FABRIC1_ONLY_COLUMNS.has(column.id)) }))
   const visibleGroups = scopeGroups
     .filter((group) => !group.collapsible || openGroups[group.key as keyof typeof openGroups])
-    .map((group) => group.key !== "fixed" ? group : { ...group, columns: group.columns.filter((column) => tab !== "READY" && (column.id !== "rackNo" || tab === "WAREHOUSE")) })
+    // 입고 대기는 고정 열이 아직 뜻이 없어 통째로 숨긴다. Rack No. 와 입고확인은 창고보관,
+    // 상태는 이력에서만 보인다(R382). 이력 탭에서 입고확인 칸이 늘 빈칸이라 그 자리를 상태가 받는다.
+    .map((group) => group.key !== "fixed" ? group : { ...group, columns: group.columns.filter((column) => tab !== "READY"
+      && (column.id !== "rackNo" || tab === "WAREHOUSE")
+      && (column.id !== "confirm" || tab === "WAREHOUSE")
+      && (column.id !== "lifecycle" || tab === "HISTORY")) })
     .filter((group) => group.columns.length > 0)
   const visibleColumns = visibleGroups.flatMap((group) => group.columns)
   const fixedColumns = visibleColumns.filter((column) => COLUMN_GROUPS[0].columns.some((fixed) => fixed.id === column.id))
@@ -1209,6 +1237,7 @@ export function Warehouse() {
       case "yarnDetail": return led?.yarnDetail ?? ""
       case "color": return led?.color ?? ""
       case "dyeing": return led?.dyeingSide ?? ""
+      case "lifecycle": return item.status === "EXHAUSTED" ? "소진 완료" : item.status === "DISPOSED" ? "폐기" : ""
       default: return ""
     }
   }
@@ -1234,14 +1263,29 @@ export function Warehouse() {
     if (id === "owner") return <TextCell value={item.owner} />
     if (id === "stock") {
       const balance = item.balance === null ? null : Math.max(0, item.balance)
+      // 폐기 건의 앞 숫자는 남은 재고가 아니라 버린 수량이다(R382). 창고팀 보고서 「폐기 yds」가 그 값을 더한다.
+      // 숫자를 0으로 바꾸지 말 것. 왜 숫자가 남아 있는지는 상태 열과 이 안내가 말한다.
+      const stockTitle = item.yds === null ? "더블클릭해서 재고 입력"
+        : item.status === "DISPOSED" ? `폐기 수량 ${formatYds(balance ?? 0)} yds · 입고 ${formatYds(item.yds)} yds`
+        : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds · 더블클릭해서 수정`
       // 한 번 클릭은 셀 선택만 한다. 팝업이 바로 뜨면 더블클릭으로 여는 수정 창이 가려진다.
-      return <span className={`flex h-full w-full items-center overflow-hidden whitespace-nowrap tabular-nums ${balance === 0 ? "text-[var(--muted-foreground)]" : ""}`} title={item.yds === null ? "더블클릭해서 재고 입력" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds · 더블클릭해서 수정`}>{item.yds === null ? "" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds`}</span>
+      return <span className={`flex h-full w-full items-center overflow-hidden whitespace-nowrap tabular-nums ${balance === 0 ? "text-[var(--muted-foreground)]" : ""}`} title={stockTitle}>{item.yds === null ? "" : `${formatYds(balance ?? 0)}/${formatYds(item.yds)}yds`}</span>
     }
     if (id === "confirm") {
       if (item.status !== "WAREHOUSE") return <TextCell value="" />
       return item.confirmedAt
         ? <span className="text-[11px] font-medium text-[var(--muted-foreground)]" title={`창고 확인 ${fmtDateFull(item.confirmedAt)}`}>확인</span>
         : <span className="text-[11px] font-medium text-[var(--destructive)]">미확인</span>
+    }
+    // 소진 완료와 폐기를 그 자리에서 가른다(R382). 이력 탭에만 뜨는 열이다.
+    if (id === "lifecycle") {
+      if (item.status === "EXHAUSTED") return <span className="text-[11px] font-medium text-[var(--muted-foreground)]" title="다 써서 나간 원단입니다. 잔량은 0입니다.">소진 완료</span>
+      if (item.status !== "DISPOSED") return <TextCell value="" />
+      const reason = historyReason.get(item)
+      return <span className="flex h-full w-full items-center gap-1 overflow-hidden whitespace-nowrap" title={reason ? `폐기 · ${reason}` : "폐기"}>
+        <span className="shrink-0 text-[11px] font-medium text-[var(--destructive)]">폐기</span>
+        {reason ? <span className="truncate text-[11px] text-[var(--muted-foreground)]">{reason}</span> : null}
+      </span>
     }
     if (id === "season") return <TextCell value={cellValue(item, "season")} />
     if (id === "buyer") return <TextCell value={item.buyer} />
@@ -1594,7 +1638,7 @@ export function Warehouse() {
                 seen.add(key)
                 if (column.id === "rackNo") {
                   if (target.rackNo && target.status === "WAREHOUSE") rackTargets.set(target.key, target)
-                } else if (["storageNo", "stock", "confirm"].includes(column.id)) {
+                } else if (["storageNo", "stock", "confirm", "lifecycle"].includes(column.id)) {
                   skippedProtected = true
                 } else if (target.sample?.sourceSheet === FABRIC1_INTAKE_SHEET && FABRIC1_EDITABLE.has(column.id) && cellValue(target, column.id).trim()) {
                   fabricTargets.push({ item: target, columnId: column.id })
@@ -2039,17 +2083,17 @@ export function Warehouse() {
         {tab === "WAREHOUSE" && canEditScope && canRequestOutbound ? <span aria-hidden="true" className="h-5 w-px shrink-0 bg-[var(--border)]" /> : null}
         {tab === "WAREHOUSE" && canEditScope ? <div className="flex shrink-0 items-center gap-2">
           <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} className="border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200 dark:hover:bg-amber-500/20" title={selectedRows.length ? "창고팀에서 커팅을 마친 후 누르세요" : "출고할 원단을 먼저 선택하세요."} onClick={() => guardedAction("outbound", selectedRows, () => openAction("OUTBOUND", selectedRows))}><Send />출고 확정</Button>
-          <Button type="button" size="sm" variant="outline" disabled={!hasSelectedActiveOutbound} title={hasSelectedActiveOutbound ? "선택한 원단의 최근 출고를 취소합니다" : "취소할 출고가 있는 원단을 선택하세요."} onClick={() => guardedAction("outbound", selectedRows, () => openAction("UNOUTBOUND", selectedRows))}><PackageX />출고 취소</Button>
+          <Button type="button" size="sm" variant="outline" disabled={!hasSelectedActiveOutbound} title={hasSelectedActiveOutbound ? "선택한 원단의 최근 출고를 취소합니다" : "취소할 출고가 있는 원단을 선택하세요."} onClick={() => guardedAction("restore", selectedRows, () => openAction("UNOUTBOUND", selectedRows))}><PackageX />출고 취소</Button>
         </div> : null}
         {tab === "WAREHOUSE" && canEditScope ? <span aria-hidden="true" className="h-5 w-px shrink-0 bg-[var(--border)]" /> : null}
         {(tab === "READY" || tab === "WAREHOUSE") && canEditScope ? <div className="flex shrink-0 items-center gap-2">
           {tab === "WAREHOUSE" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => guardedAction("lifecycle", selectedRows, () => openAction("EXHAUST", selectedRows))}><PackageOpen />소진</Button> : null}
           <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => guardedAction("lifecycle", selectedRows, () => openAction("DISPOSE", selectedRows))}><Trash2 />폐기</Button>
-          {tab === "WAREHOUSE" && teamScope !== "team1" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => guardedAction("lifecycle", selectedRows, () => openAction("UNRECEIVE", selectedRows))}><PackageOpen />입고 대기로</Button> : null}
+          {tab === "WAREHOUSE" && teamScope !== "team1" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => guardedAction("restore", selectedRows, () => openAction("UNRECEIVE", selectedRows))}><PackageOpen />입고 대기로</Button> : null}
         </div> : null}
-        {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => guardedAction("lifecycle", selectedRows, () => openAction("RESTORE", selectedRows, "WAREHOUSE"))}><PackageCheck />창고 보관으로</Button> : null}
-        {tab === "HISTORY" && canEditScope && teamScope !== "team1" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => guardedAction("lifecycle", selectedRows, () => openAction("RESTORE", selectedRows, "READY"))}><PackageOpen />입고 대기로</Button> : null}
-        {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!hasSelectedActiveOutbound} title={hasSelectedActiveOutbound ? "선택한 원단의 최근 출고를 취소합니다" : "취소할 출고가 있는 원단을 선택하세요."} onClick={() => guardedAction("outbound", selectedRows, () => openAction("UNOUTBOUND", selectedRows))}><PackageX />출고 취소</Button> : null}
+        {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => guardedAction("restore", selectedRows, () => openAction("RESTORE", selectedRows, "WAREHOUSE"))}><PackageCheck />창고 보관으로</Button> : null}
+        {tab === "HISTORY" && canEditScope && teamScope !== "team1" ? <Button type="button" size="sm" variant="outline" disabled={!selectedRows.length} onClick={() => guardedAction("restore", selectedRows, () => openAction("RESTORE", selectedRows, "READY"))}><PackageOpen />입고 대기로</Button> : null}
+        {tab === "HISTORY" && canEditScope ? <Button type="button" size="sm" variant="outline" disabled={!hasSelectedActiveOutbound} title={hasSelectedActiveOutbound ? "선택한 원단의 최근 출고를 취소합니다" : "취소할 출고가 있는 원단을 선택하세요."} onClick={() => guardedAction("restore", selectedRows, () => openAction("UNOUTBOUND", selectedRows))}><PackageX />출고 취소</Button> : null}
         {tab === "WAREHOUSE" && teamScope !== "team1" ? <Button type="button" size="sm" variant={unconfirmedOnly ? "default" : "outline"} aria-pressed={unconfirmedOnly} onClick={() => setUnconfirmedOnly((current) => !current)}>미확인 {unconfirmedCount}건</Button> : null}
         {hiddenCount > 0 ? <Button type="button" size="sm" variant={hiddenOnly ? "default" : "outline"} aria-pressed={hiddenOnly} title="선택 삭제로 목록에서 감춘 행입니다" onClick={() => setHiddenOnly((current) => !current)}>숨긴 행 {hiddenCount}건</Button> : null}
         {hiddenOnly && canEditScope ? <Button type="button" size="sm" disabled={!selectedRows.length} onClick={() => void restoreHiddenRows()}><PackageCheck />되살리기</Button> : null}

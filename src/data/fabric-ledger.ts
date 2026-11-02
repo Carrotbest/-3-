@@ -696,6 +696,15 @@ export function buildFabricLedger(
       intakeMap.delete(itemKey)
       intakeByMap.delete(itemKey)
     }
+    // 소진에서 창고 보관으로 되돌리는 것은 나갔던 원단이 돌아왔다는 뜻이다(R381, 2026-11-02
+    // 박향근 확정). 재가공 때문에 전량 반출했다가 같은 번호로 다시 들어오는 경우가 그것이다.
+    // 출고 기간을 거기서 끝내고 0부터 다시 센다. 그러지 않으면 복구 직후 잔량이 0이라
+    // 보유 재고를 고치는 순간 자동 소진이 다시 걸려 그 행이 이력으로 넘어간다.
+    // 입고 시각과 등록자는 지우지 않는다. 번호와 입고 기록이 그대로 살아 있기 때문이다.
+    // **폐기(DISPOSED)에서의 복구는 여기 들지 않는다.** 폐기는 출고와 무관하다.
+    if (event.action === "RESTORE" && event.fromStatus === "EXHAUSTED" && event.toStatus === "WAREHOUSE") {
+      outboundMap.delete(itemKey)
+    }
     if (event.action === "RECEIVE") {
       const previous = intakeMap.get(itemKey) ?? ""
       if (event.occurredAt > previous) {
@@ -740,7 +749,14 @@ export function buildFabricLedger(
     } : item
     // 대장 전용 행은 상세에서 고친 값이 override.fields에 쌓인다. 본문 필드에 얹고 실무 값도 덮어쓴다.
     const patched = override?.fields ? applyCoreFieldOverrides(merged, override.fields) : merged
-    const stocked = { ...patched, yds, outbound, outboundTotal, balance, intakeAt, intakeByEmail: intakeByMap.get(item.key) ?? "", confirmedAt, lastMovedAt, lastOutbound }
+    // 소진 완료는 정의상 잔량이 없다(R382, 2026-11-02 박향근 확정). 수동 소진(EXHAUST)과
+    // 대장 이관분은 출고 기록 없이 상태만 바뀌어서 `yds - 0` 이 그대로 남아 이력 탭 Stock 칸에
+    // `1/1` 로 떴다. 다 써서 나간 원단이 재고를 들고 있는 것처럼 보인다.
+    // **폐기(DISPOSED)에는 걸지 말 것.** 폐기는 잔량이 곧 버린 수량이고
+    // `warehouse-export.ts` 의 창고팀 보고서 「폐기 yds」가 그 값을 더한다. 0으로 만들면 집계가 0이 된다.
+    // 저장값은 건드리지 않는다. 원장이 내는 값만 0이다. 복구하면 상태가 바뀌므로 잔량이 저절로 돌아온다.
+    const shownBalance = patched.status === "EXHAUSTED" && balance !== null ? 0 : balance
+    const stocked = { ...patched, yds, outbound, outboundTotal, balance: shownBalance, intakeAt, intakeByEmail: intakeByMap.get(item.key) ?? "", confirmedAt, lastMovedAt, lastOutbound }
     return { ...stocked, fields: { ...deriveFields(stocked), ...(override?.fields ?? {}) } }
   }).filter((item) => options.includeRemoved || item.status !== "REMOVED").sort((left, right) => {
     const statusComparison = statusRank[left.status] - statusRank[right.status]
