@@ -280,7 +280,9 @@ export function saveAnalysisRequests(list: AnalysisRequest[], kind: AuditKind = 
 
 export function addTeamEvent(event: CalendarEvent): void {
   const id = event.id ?? globalThis.crypto?.randomUUID?.() ?? String(Date.now())
-  const next = [...useAppStore.getState().events, { ...event, id }]
+  // 신규 표시의 기준(R387). 값 없는 키를 만들면 Firestore가 문서를 통째로 거부하므로 늘 문자열을 넣는다.
+  const createdAt = event.createdAt ?? new Date().toISOString()
+  const next = [...useAppStore.getState().events, { ...event, id, createdAt }]
   setAppState({ events: next })
   void saveCache("events", next)
 }

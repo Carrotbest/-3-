@@ -224,6 +224,22 @@
 - 전송하는 것은 `pathname`까지다. 셀과 행과 선택 범위를 보내지 않는다. 화면 이름보다 잘게 드러내면 협업 정보가 아니라 감시로 읽힌다.
 - 자기 자신은 아바타에서 뺐다(바로 옆에 본인 이메일이 있다). 목록이 비면 `null`을 반환해 빈 자리를 남기지 않는다. 최대 4명 + `+N`이다. 구독 실패는 빈 배열로 받아 규칙 게시 전에는 오류 없이 아무것도 안 보인다.
 
+## CALENDAR (`src/routes/Calendar.tsx`, `src/data/calendar-events.ts`, `src/data/calendar-reminder.ts`)
+- 팀 일정은 저장 키 `events` 하나다. HOME 「팀 일정」 카드(`TeamSchedule`), HOME 오늘 브리핑(`today-briefing.ts`), `/calendar`가 같은 배열을 본다. **병합 키가 아니라 마지막 저장이 이긴다.** 반복 일정은 원본 1건만 저장하고 `expandRepeats`가 보이는 기간에만 펼친다.
+- **새 일정에 「신규」가 붙는다**(R387, 2026-11-04 박향근 확정). 자리는 둘이다. **왼쪽 사이드바 CALENDAR 메뉴의 건수 뱃지**와 **캘린더 화면 안 그 일정**(달력 칸 미팅 카드, 출장·휴가 연속 바, 오른쪽 「선택 기간의 일정」 목록)이다. 박향근이 말한 "네비게이터"가 사이드바다. HOME 팀 일정 카드는 범위 밖이다.
+  - 기준은 `CalendarEvent.createdAt`(ISO)이고 `addTeamEvent`가 찍는다. **`updateTeamEvent`는 찍지 않는다.** 찍으면 고칠 때마다 신규로 되살아난다. `{ ...item, ...event }` 라서 수정 폼이 그 키를 만들지 않는 한 원래 값이 산다. **수정 폼에 `createdAt`을 넣지 말 것.** 값 없는 키를 만들면 Firestore가 문서를 거부한다(R340).
+  - `createdAt`이 없는 옛 일정과 데모 일정은 신규가 아니다. `nav-badges.ts`의 기존 규칙과 같다.
+  - 읽음 기준선은 **R341 사이드바 뱃지 장치를 그대로 쓴다.** `NAV_BADGE_SOURCES`에 `calendar` 한 줄을 더한 것이 전부고 `AppSidebar`와 `Topbar`는 손대지 않았다. 기준선은 사용자 계정별로 그 브라우저에만 남는다.
+  - **캘린더 화면은 들어온 시점의 기준선을 얼려 둔다**(`navSeenAt("calendar")`를 `useState` 초기값으로). `App.tsx`가 3초 뒤 기준선을 올리므로 매 렌더 다시 읽으면 **보고 있는 동안 딱지가 눈앞에서 사라진다.** 얼려 두면 그 방문 내내 남고, 떠났다 다시 오면 없다. 이것이 "캘린더를 닫고 나가면 사라진다"는 확정 사항이다. 보는 동안 팀원이 넣은 일정은 다음 방문까지 신규로 남는데, 그건 의도한 결과다.
+- **일정 임박 알림(R387).** 시작 시간이 적힌 팀 일정에 대해 **15분·10분·5분 전**에 화면 오른쪽 아래 카드로 알린다. `ScheduleReminder`를 `App.tsx` 레이아웃에 걸어 **어느 화면에 있든** 뜬다. **라우트 하나에 가두지 말 것.**
+  - **대상은 시간이 적힌 팀 일정 전부다. 담당자로 거르지 않는다**(2026-11-04 박향근 확정). 시간이 비면 알리지 않는다. 종일 일정에 분 단위 알림은 뜻이 없고, 그 규칙이 곧 대상 선별이다.
+  - **중복 발사 방지가 셋이다. 하나라도 빼지 말 것.** ① 단계를 구간으로 가른다(`reminderBucket`, 15분=(10,15], 10분=(5,10], 5분=(0,5]). `남은 시간 <= 단계`로 보면 6분 남았을 때 15분과 10분이 한꺼번에 울린다. ② 울리기 전에 `claimReminder`가 localStorage를 **그 자리에서 다시 읽고** 찜한다. 탭 여러 개 중 먼저 온 쪽만 울린다. ③ 숨은 탭은 재지 않고(`visibilityState`), 다시 보일 때 한 번 잰다. 첫 측정을 0~5초 흩어 두는 것도 탭끼리 같은 순간에 찜하러 들어가는 것을 줄이려는 것이다.
+  - 찜 저장소는 `fabric.calendar-reminded.v1.{uid}`이고 어제 것은 버린다. **`CACHE_KEYS`에 넣지 말 것.** 개인 브라우저 값이다.
+  - 켜고 끄는 자리는 **상단바 계정 설정 팝업의 「일정 알림」 탭**이고 저장은 `view-prefs`의 `calendar-reminder-v1`(기본 켜짐)이다. 체크박스는 저장 버튼이 없고 누르는 순간 저장된다. **새 저장 경로를 만들지 말 것.**
+  - **브라우저 알림(Notification API)은 쓰지 않는다**(2026-11-04 확정). 권한 요청 창을 띄우지 말 것. 소리, 진동, 깜빡임도 없다.
+  - 카드는 `z-[90]`이다. 팝업(`z-50`) 위, 파싱 오버레이(`z-[100]`)와 `UpdateBanner`(`z-[1000]`) 아래다. 시작 시각이 지나면 스스로 걷고 한 일정에 카드는 하나다(늦은 단계가 앞 단계를 대신한다).
+  - 캘린더 화면 권한이 없는 사람에게는 띄우지 않는다(`canAccessScreenPath("/calendar", …)`).
+
 ## 권한 (`src/data/screen-permissions.ts`, `src/data/departments.ts`, `src/components/settings/UserApprovalPanel.tsx`)
 - R217: 사용자 문서 `users/{uid}`에 화면별 `access`(none/read/edit)와 `department`를 둔다. 예전 `screenPermissions`(불리언)는 라우팅·사이드바 호환용으로 access에서 파생해 같이 저장한다. access가 없는 기존 사용자는 불리언 true를 편집으로 읽어 동작이 바뀌지 않는다.
 - 부서 기본값은 `DEPARTMENTS` 한 곳(통합원단부 1·2·3팀, 정산관리팀, 사업부서). **3팀이 원단 R&D(우리 팀)다**(2026-09-17 사용자 확인). 1팀은 디자인·마케팅 성격의 소싱 위주 팀으로 FABRIC REQUEST를 쓰는 유관부서다. 가입 화면에서 부서를 골라 신청하면 그 부서 기본 권한이 문서에 들어가고, 승인하면 바로 적용된다. 승인 대기 중에는 신청 문서의 access를 믿지 않고 부서 기본값을 보인다(소유자가 손댄 뒤 `permissionsUpdatedAt`부터는 저장값). 승인은 권한이 하나 이상일 때만 된다.
@@ -293,7 +309,7 @@
 ## 보기 설정 (`src/data/view-prefs.ts`)
 - 열 너비와 그룹 펼침/접힘은 **개인 브라우저(localStorage)에만** 남는다. `CACHE_KEYS`에 없어 Firestore로 안 올라간다. 한 사람이 바꿔도 팀원 화면은 그대로다.
 - 계정이 아니라 브라우저에 붙는다. 공용 PC에서는 앞사람 설정이 보이고, 다른 PC로 가면 기본값에서 시작한다.
-- 키: `dd-col-widths-v2`, `dd-intake-col-widths-v1`, `dd-open-groups-v1`, `dd-hidden-cols-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `fabric.request.rowHeights`, `fabric.request.hiddenCols`, `fabric.request.activeBoard`, `home-today-briefing-hidden-v1`.
+- 키: `dd-col-widths-v2`, `dd-intake-col-widths-v1`, `dd-open-groups-v1`, `dd-hidden-cols-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `fabric.request.rowHeights`, `fabric.request.hiddenCols`, `fabric.request.activeBoard`, `home-today-briefing-hidden-v1`, `calendar-reminder-v1`.
 - 검색·필터·정렬·탭·선택은 일부러 저장하지 않는다. 남아 있으면 다음에 열었을 때 행이 왜 안 보이는지 헷갈린다.
 - **예외: DD MASTER 행 드래그 순서(`sortOrder`)는 레코드에 저장돼 팀 전체가 공유한다.** 보기 설정이 아니다.
 

@@ -1,6 +1,7 @@
 import { create } from "zustand"
 
 import { useAuthStore } from "./auth"
+import { isTeamEventType } from "./calendar-events"
 import { loadTrendStatus } from "./trend"
 import { useAppStore } from "../store/useAppStore"
 
@@ -30,6 +31,7 @@ export const NAV_BADGE_SOURCES: NavBadgeSource[] = [
   { key: "request", path: "/request", kind: "count" },
   { key: "analysis", path: "/fabric-analysis", kind: "count" },
   { key: "ts", path: "/ts", kind: "count" },
+  { key: "calendar", path: "/calendar", kind: "count" },
   { key: "rdda", path: "/rdda", kind: "updated" },
   { key: "trendFabric", path: "/trend/fabric", kind: "updated" },
   { key: "trendMacro", path: "/trend/macro", kind: "updated" },
@@ -126,6 +128,21 @@ export function markNavSeen(path: string): void {
   useNavSeenStore.setState({ seen: next })
 }
 
+/**
+ * 지금 저장된 읽음 기준선(epoch ms). 읽을 수 없으면 `NaN`이다.
+ *
+ * 화면에 들어오면 3초 뒤 `markNavSeen`이 기준선을 올린다(`App.tsx`).
+ * 그래서 화면 안에서 신규를 표시하려면 **들어온 시점에 이 값을 한 번 얼려 두고** 그것으로 가른다.
+ * 매 렌더 다시 읽으면 보고 있는 동안 딱지가 눈앞에서 사라진다.
+ */
+export function navSeenAt(key: string): number {
+  const state = useNavSeenStore.getState()
+  const uid = state.uid ?? useAuthStore.getState().user?.uid ?? null
+  if (!uid) return Number.NaN
+  const value = state.uid === uid ? state.seen[key] : readStored(uid)[key]
+  return parse(value)
+}
+
 const parse = (value: string | undefined | null): number => {
   if (!value) return Number.NaN
   return Date.parse(value)
@@ -162,6 +179,7 @@ export function useNavBadges(): Record<string, NavBadge> {
   const requests = useAppStore((state) => state.requests)
   const analysisRequests = useAppStore((state) => state.analysisRequests)
   const ts = useAppStore((state) => state.ts)
+  const events = useAppStore((state) => state.events)
   const rddaReports = useAppStore((state) => state.rddaReports)
 
   // 로그인 전과 승인 전에는 띄우지 않는다. 저장할 곳도 없고 볼 자격도 아직 없다.
@@ -177,6 +195,10 @@ export function useNavBadges(): Record<string, NavBadge> {
 
   const tsCount = countNewer(ts, parse(seen.ts))
   if (tsCount > 0) badges.ts = { kind: "count", count: tsCount }
+
+  // 팀 일정은 등록 시각(createdAt)이 기준이다. 수정은 신규로 치지 않는다.
+  const calendarCount = countNewer(events.filter((event) => isTeamEventType(event.type)), parse(seen.calendar))
+  if (calendarCount > 0) badges.calendar = { kind: "count", count: calendarCount }
 
   const rddaAt = latest(rddaReports.map((report) => report.updatedAt))
   const rddaSeen = parse(seen.rdda)

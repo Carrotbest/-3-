@@ -14,6 +14,7 @@ import { REPEAT_LABELS, TEAM_EVENT_META, TEAM_EVENT_TYPES, expandRepeats, isTeam
 import { assignLanes } from "@/data/calendar-lanes"
 import { fmtDateFull } from "@/data/format"
 import { dayToneText, holidayName } from "@/data/holidays"
+import { navSeenAt } from "@/data/nav-badges"
 import type { CalendarEvent } from "@/data/sample"
 import { MEMBERS } from "@/data/schema"
 import { addTeamEvent, deleteTeamEvent, updateTeamEvent, useAppStore } from "@/store/useAppStore"
@@ -140,10 +141,27 @@ const formStateFromEvent = (event: CombinedEvent): EventFormState => ({
   repeatUntil: event.repeatUntil ?? "",
 })
 
+/**
+ * 신규 딱지(R387). 달력 칸과 오른쪽 목록이 같은 말을 쓴다.
+ * 깜빡임·번짐 그림자·`backdrop-filter`를 넣지 말 것. 표가 떨린다.
+ */
+function NewMark({ className }: { className: string }) {
+  return <span className={`inline-flex h-[15px] shrink-0 items-center rounded-full px-1.5 text-[9px] font-bold leading-none ${className}`}>신규</span>
+}
+
 export function Calendar() {
   const events = useAppStore((state) => state.events)
   const today = useMemo(() => new Date(), [])
   const todayKey = dateKey(today)
+  // 신규 표시(R387). **화면에 들어온 시점의 기준선을 얼려 둔다.**
+  // `App.tsx`가 3초 뒤 기준선을 올리므로, 매번 다시 읽으면 보고 있는 동안 딱지가 사라진다.
+  // 캘린더를 떠나면 이 컴포넌트가 사라지고, 다시 들어올 때는 올라간 기준선을 읽어 딱지가 없다.
+  const [calendarSeenAt] = useState(() => navSeenAt("calendar"))
+  const isNewEvent = (item: CombinedEvent): boolean => {
+    if (Number.isNaN(calendarSeenAt) || !item.createdAt) return false
+    const at = Date.parse(item.createdAt)
+    return !Number.isNaN(at) && at > calendarSeenAt
+  }
   // HOME 브리핑에서 일정을 누르면 ?d=YYYY-MM-DD로 들어온다. 형식이 틀리면 오늘로 떨어진다.
   const [searchParams] = useSearchParams()
   const initialKey = useMemo(() => {
@@ -407,7 +425,7 @@ export function Calendar() {
                             onDragStart={(dragEvent) => startEventDrag(item, dragEvent)}
                             className={`group pointer-events-auto relative flex h-5 min-w-0 items-center px-2 text-[10px] font-semibold text-white shadow-sm diary-trip-draw motion-reduce:animate-none ${item.id ? "cursor-pointer" : ""} ${half ? "rounded-full" : `${bar.isStart ? "rounded-l-full" : "rounded-l-none"} ${bar.isEnd ? "rounded-r-full" : "rounded-r-none"}`}`}
                           >
-                            {bar.isStart ? <span className="truncate pr-5">{pendingDeleteId === item.id ? "삭제?" : `${item.title}${item.owner ? ` · ${item.owner}` : ""}`}</span> : null}
+                            {bar.isStart ? <span className="flex min-w-0 items-center gap-1 pr-5">{isNewEvent(item) ? <NewMark className="bg-white/30 text-white" /> : null}<span className="truncate">{pendingDeleteId === item.id ? "삭제?" : `${item.title}${item.owner ? ` · ${item.owner}` : ""}`}</span></span> : null}
                             {item.id ? <button type="button" onClick={(event) => requestDelete(item, event)} aria-label={pendingDeleteId === item.id ? `${item.title} 삭제 확인` : `${item.title} 삭제`} className={`absolute right-1 inline-flex size-4 items-center justify-center rounded-full bg-black/25 text-white transition-opacity motion-reduce:transition-none ${pendingDeleteId === item.id ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"}`}><X aria-hidden="true" className="size-3" /></button> : null}
                           </div>
                         )
@@ -469,7 +487,7 @@ export function Calendar() {
                                   style={{ borderLeftColor: item.type === "external" ? "var(--chart-1)" : "var(--chart-2)" }}
                                   className={`group relative min-w-0 rounded-[calc(var(--radius)-2px)] border border-l-[3px] bg-[var(--card)] px-2 py-1.5 shadow-sm ${item.id ? `cursor-pointer ${hoverLift}` : ""} ${item.type === "external" ? "border-dashed border-[var(--chart-1)]" : "border-solid border-[var(--chart-2)]"}`}
                                 >
-                                  <div className="truncate pr-5 text-xs font-semibold text-[var(--foreground)]">{item.time ? <span className="mr-1 tabular-nums text-[var(--muted-foreground)]">{item.time}</span> : null}{pendingDeleteId === item.id ? "삭제?" : item.title}{item.repeat ? <Repeat aria-label="반복 일정" className="ml-1 inline size-3 align-[-1px] text-[var(--muted-foreground)]" /> : null}</div>
+                                  <div className="truncate pr-5 text-xs font-semibold text-[var(--foreground)]">{isNewEvent(item) ? <NewMark className="mr-1 bg-[color-mix(in_srgb,var(--primary)_16%,transparent)] align-[-2px] text-[var(--primary)]" /> : null}{item.time ? <span className="mr-1 tabular-nums text-[var(--muted-foreground)]">{item.time}</span> : null}{pendingDeleteId === item.id ? "삭제?" : item.title}{item.repeat ? <Repeat aria-label="반복 일정" className="ml-1 inline size-3 align-[-1px] text-[var(--muted-foreground)]" /> : null}</div>
                                   <div className="mt-0.5 truncate text-[10px] text-[var(--muted-foreground)]">{[item.place, item.owner ? `담당 ${item.owner}` : ""].filter(Boolean).join(" · ") || TEAM_EVENT_META[item.type].label}</div>
                                   {item.id ? <button type="button" onMouseDown={(event) => event.stopPropagation()} onClick={(event) => requestDelete(item, event)} aria-label={pendingDeleteId === item.id ? `${item.title} 삭제 확인` : `${item.title} 삭제`} className={`absolute right-1 top-1 inline-flex size-5 items-center justify-center rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] transition-opacity hover:text-[var(--destructive)] motion-reduce:transition-none ${pendingDeleteId === item.id ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"}`}><X aria-hidden="true" className="size-3" /></button> : null}
                                 </div>
@@ -504,7 +522,7 @@ export function Calendar() {
                     <li key={`${item.id ?? item.title}-${index}`} className="group relative border-b border-dashed border-[var(--border)] p-4 last:border-b-0">
                       <button type="button" disabled={!item.id} onClick={() => openEditDialog(item)} className={`w-full pr-8 text-left disabled:cursor-default ${item.id ? hoverLift : ""}`}>
                         <span className="block text-[10px] font-semibold tabular-nums text-[var(--muted-foreground)]">{dottedDate(item.date)}{end > item.date ? ` ~ ${dottedDate(end)}` : ""}</span>
-                        <span className="mt-2 flex flex-wrap items-center gap-2"><Badge variant="outline" className={TEAM_EVENT_META[item.type].chip}>{TEAM_EVENT_META[item.type].label}</Badge><strong className="text-sm text-[var(--foreground)]">{pendingDeleteId === item.id ? "삭제?" : item.title}</strong></span>
+                        <span className="mt-2 flex flex-wrap items-center gap-2">{isNewEvent(item) ? <NewMark className="bg-[color-mix(in_srgb,var(--primary)_16%,transparent)] text-[var(--primary)]" /> : null}<Badge variant="outline" className={TEAM_EVENT_META[item.type].chip}>{TEAM_EVENT_META[item.type].label}</Badge><strong className="text-sm text-[var(--foreground)]">{pendingDeleteId === item.id ? "삭제?" : item.title}</strong></span>
                         <span className="mt-2 block text-xs text-[var(--muted-foreground)]">{[item.time ?? "종일", item.endTime ? `~ ${item.endTime}` : "", item.place, item.owner ? `담당 ${item.owner}` : ""].filter(Boolean).join(" · ")}</span>
                         {item.note ? <span className="mt-1 block text-xs text-[var(--muted-foreground)]">{item.note}</span> : null}
                       </button>

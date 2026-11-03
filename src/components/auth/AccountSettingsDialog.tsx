@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react"
-import { KeyRound, Loader2, Mail, UserRound } from "lucide-react"
+import { BellRing, KeyRound, Loader2, Mail, UserRound } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { changeOwnName, changeOwnPassword, requestLoginEmailChange, useAuthStore } from "@/data/auth"
+import { setReminderEnabled, useReminderEnabled } from "@/data/calendar-reminder"
 
-type AccountTab = "password" | "email" | "name"
+type AccountTab = "password" | "email" | "name" | "alert"
 
 /** 회사 메일 도메인. 외부 서비스 가입에 회사 계정을 쓰지 말라는 사내 공지(2026-09-14)에 따라 새 이메일로는 막는다. */
 export const COMPANY_EMAIL_DOMAIN = /@hansoll\.com$/i
@@ -30,6 +31,7 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
   const [newName, setNewName] = useState("")
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
+  const reminderEnabled = useReminderEnabled()
 
   useEffect(() => {
     if (!open) return
@@ -119,9 +121,16 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
           {tabButton("password", "비밀번호 변경", <KeyRound className="size-3.5" />)}
           {tabButton("email", "로그인 이메일 변경", <Mail className="size-3.5" />)}
           {tabButton("name", "이름 변경", <UserRound className="size-3.5" />)}
+          {tabButton("alert", "일정 알림", <BellRing className="size-3.5" />)}
         </div>
 
-        {tab === "email" && isOwner ? <p className="rounded-md bg-[var(--muted)] px-3 py-2 text-xs leading-relaxed text-[var(--muted-foreground)]">
+        {tab === "alert" ? <div className="space-y-2">
+          <label htmlFor="account-schedule-reminder" className="flex w-fit cursor-pointer items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] px-3 py-2 text-sm">
+            <input id="account-schedule-reminder" type="checkbox" checked={reminderEnabled} onChange={(event) => setReminderEnabled(event.target.checked)} className="size-4 accent-[var(--primary)]" />
+            일정 임박 알림 받기
+          </label>
+          <p className="text-[11px] leading-relaxed text-[var(--muted-foreground)]">시작 시간이 적힌 팀 일정에 대해 15분·10분·5분 전에 화면 오른쪽 아래로 알림이 뜹니다. 어느 화면을 보고 있든 뜨고, 시간을 적지 않은 일정은 알리지 않습니다. 이 설정은 지금 쓰는 브라우저에만 남습니다.</p>
+        </div> : tab === "email" && isOwner ? <p className="rounded-md bg-[var(--muted)] px-3 py-2 text-xs leading-relaxed text-[var(--muted-foreground)]">
           소유자 계정은 로그인 이메일을 바꾸지 않습니다. 이메일을 바꾸면 소유자 권한이 사라집니다.
         </p> : <form className="space-y-3" onSubmit={(event) => { event.preventDefault(); void submit() }}>
           {tab !== "name" ? <div className="grid gap-1.5">
@@ -160,7 +169,7 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
       </DialogBody>
       <DialogFooter>
         <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onOpenChange(false)}>닫기</Button>
-        {tab === "email" && isOwner ? null : <Button type="button" size="sm" disabled={busy || (tab === "password" ? !canSubmitPassword : tab === "email" ? !canSubmitEmail : !canSubmitName)} onClick={() => void submit()}>
+        {tab === "alert" || (tab === "email" && isOwner) ? null : <Button type="button" size="sm" disabled={busy || (tab === "password" ? !canSubmitPassword : tab === "email" ? !canSubmitEmail : !canSubmitName)} onClick={() => void submit()}>
           {busy ? <Loader2 className="size-4 animate-spin" /> : null}{tab === "password" ? "비밀번호 변경" : tab === "email" ? "확인 메일 보내기" : "이름 변경"}
         </Button>}
       </DialogFooter>

@@ -365,6 +365,8 @@ export type EventType = "meeting" | "external" | "leave" | "trip"
 
 export interface CalendarEvent {
   id?: string
+  /** 등록 시각(ISO). 신규 표시의 기준이다(R387). 이 값이 없는 옛 일정은 신규가 아니다. */
+  createdAt?: string
   date: string
   endDate?: string
   type: EventType
