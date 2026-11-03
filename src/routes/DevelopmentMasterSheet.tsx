@@ -456,6 +456,10 @@ const TARGET_PROCESS_BY_COLUMN: Record<string, DdProcess> = {
 const PROCESS_BY_STATUS_COLUMN: Record<string, DdProcess> = {
   yarnStatus: "yarn", knittingStatus: "knitting", dyeingStatus: "dyeing", finishingStatus: "finishing",
 }
+/** 공정 → 목표 열 id. 복사할 때 목표 열이 같은 범위에 있는지 보려고 쓴다(R383). */
+const TARGET_COLUMN_BY_PROCESS: Record<DdProcess, string> = {
+  yarn: "yarnTarget", knitting: "knittingTarget", dyeing: "dyeingTarget", finishing: "finishingTarget",
+}
 /**
  * 목표일 열만 기본 숨김이다. 평소 화면을 좁게 두려는 것이다.
  * `loadViewGroups`는 저장된 값에 있는 키만 덮어쓰므로, 기존 사용자도 이 넷은 숨은 채로 시작한다.
@@ -2372,22 +2376,48 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   const cancelCellEdit = () => { setEditCell(null); setEditSeed(undefined) }
 
-  /** 복사·붙여넣기에 쓰는 원본 값(화면 표기 "—" 가 아닌 실제 값). */
-  const rawCellText = (record: DevRecord, column: MasterColumn): string => {
+  /**
+   * 복사·붙여넣기에 쓰는 원본 값(화면 표기 "—" 가 아닌 실제 값).
+   *
+   * 공정 완료 칸은 완료일이 비면 **목표일을 대신 담는다**(R383). 화면이 그 칸에 목표일을
+   * 기울임꼴로 보여 주고 있어서, 완료일만 읽으면 보이는 날짜가 복사에서 통째로 빠진다.
+   *
+   * 단 `scopeIds`에 그 공정의 목표 열이 함께 있으면 폴백하지 않는다. 목표 열을 펼쳐 둔
+   * 채로 범위를 복사하면 목표 열이 제 값을 따로 나르는데, 완료 칸까지 같은 날짜를 담으면
+   * 붙여넣는 쪽에서 목표가 먼저 채워진 뒤 완료 칸이 `processDates`로 가서 **아무도 손대지
+   * 않은 공정에 완료일이 생긴다.** R372가 막아 둔 바로 그 사고다.
+   */
+  const rawCellText = (record: DevRecord, column: MasterColumn, scopeIds?: ReadonlySet<string>): string => {
     const linked = ledgerByRecord.get(recordIdentity(record)) ?? null
     const value = column.value(record, linked)
-    return value === null || value === undefined ? "" : String(value)
+    const text = value === null || value === undefined ? "" : String(value)
+    if (text.trim()) return text
+    const process = PROCESS_BY_STATUS_COLUMN[column.id]
+    if (!process) return text
+    if (scopeIds?.has(TARGET_COLUMN_BY_PROCESS[process])) return text
+    return String(record.tech?.targetDates?.[process] ?? "")
+  }
+
+  /** 복사·이동·채우기가 훑는 열 구간의 id 집합. `rawCellText`의 목표일 폴백 판단에 쓴다. */
+  const scopeIdsOf = (left: number, right: number): ReadonlySet<string> => {
+    const ids = new Set<string>()
+    for (let col = left; col <= right; col += 1) {
+      const column = displayedColumns[col]
+      if (column) ids.add(column.id)
+    }
+    return ids
   }
 
   const rangeToTsv = (box: NonNullable<typeof rect>): string => {
     const lines: string[] = []
+    const scope = scopeIdsOf(box.left, box.right)
     for (let r = box.top; r <= box.bottom; r += 1) {
       const record = filtered[r]
       if (!record) continue
       const cells: string[] = []
       for (let c = box.left; c <= box.right; c += 1) {
         const column = displayedColumns[c]
-        cells.push(column ? rawCellText(record, column) : "")
+        cells.push(column ? rawCellText(record, column, scope) : "")
       }
       lines.push(cells.join("\t"))
     }
@@ -2457,6 +2487,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       return
     }
 
+    const scope = scopeIdsOf(source.left, source.right)
     const moves: { sourceRecord: DevRecord; sourceColumn: MasterColumn; targetRecord: DevRecord; targetColumn: MasterColumn; value: string }[] = []
     for (let row = source.top; row <= source.bottom; row += 1) {
       const sourceRecord = filtered[row]
@@ -2466,7 +2497,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         const sourceColumn = displayedColumns[col]
         const targetColumn = displayedColumns[target.left + col - source.left]
         if (!sourceColumn || !targetColumn || isFixedColumn(sourceColumn) || isLockedCell(targetRecord, targetColumn, isAdmin)) continue
-        moves.push({ sourceRecord, sourceColumn, targetRecord, targetColumn, value: rawCellText(sourceRecord, sourceColumn) })
+        moves.push({ sourceRecord, sourceColumn, targetRecord, targetColumn, value: rawCellText(sourceRecord, sourceColumn, scope) })
       }
     }
     if (!moves.length) { notify("이동할 수 있는 셀이 없습니다."); return }
@@ -2492,6 +2523,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   /** 채우기 핸들은 원본 사각형의 값을 행/열 패턴 그대로 반복한다. */
   const commitFill = async (source: CellRect, target: CellRect) => {
     if (!editEnabled) { notify(editDeniedMessage); return }
+    const scope = scopeIdsOf(source.left, source.right)
     const edits = new Map<string, DevRecord>()
     let changed = 0
     const write = (rowIndex: number, colIndex: number, sourceRow: number, sourceCol: number) => {
@@ -2502,7 +2534,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       if (!record || !fromRecord || !column || !fromColumn || isLockedCell(record, column, isAdmin)) return
       const identity = recordIdentity(record)
       const draft = edits.get(identity) ?? record
-      const next = updateRecordCell(draft, column, rawCellText(fromRecord, fromColumn), allowedFor(column, optionsById))
+      const next = updateRecordCell(draft, column, rawCellText(fromRecord, fromColumn, scope), allowedFor(column, optionsById))
       if (next !== draft) { edits.set(identity, next); changed += 1 }
     }
 
@@ -2538,6 +2570,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     let hasSource = false
     // Ctrl+클릭으로 더한 영역도 영역마다 같은 규칙으로 채운다.
     for (const area of allRects) {
+      const scope = scopeIdsOf(area.left, area.right)
       const single = area.top === area.bottom && area.left === area.right
       const sourceRow = single ? area.top - 1 : area.top
       const startRow = single ? area.top : area.top + 1
@@ -2554,7 +2587,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           const column = displayedColumns[col]
           if (!column || isLockedCell(record, column, isAdmin)) continue
           const source = edits.get(recordIdentity(fromRecord)) ?? fromRecord
-          const next = updateRecordCell(draft, column, rawCellText(source, column), allowedFor(column, optionsById))
+          const next = updateRecordCell(draft, column, rawCellText(source, column, scope), allowedFor(column, optionsById))
           if (next !== draft) { draft = next; changed += 1 }
         }
         if (draft !== base) edits.set(identity, draft)
@@ -2612,9 +2645,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!text) text = clipRef.current?.text ?? ""
     if (!text) { notify("삽입할 내용이 없습니다.") ; return }
 
+    // 담당 열이 복사 범위에 없으면 담당이 빈 행이 생겨 담당 탭 어디에도 안 뜬다.
+    const blankOwner = owner === ALL ? "" : owner
     const grid = text.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n").map((line) => line.split("\t"))
     const created = grid.map((line) => {
-      let draft = createBlankDevRecord()
+      let draft = createBlankDevRecord(blankOwner)
       line.forEach((value, index) => {
         const column = displayedColumns[rect.left + index]
         if (column && !isFixedColumn(column)) draft = updateRecordCell(draft, column, value, allowedFor(column, optionsById))
@@ -2688,6 +2723,67 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const applied = await writeDevelopmentRecords(next, false, "edit")
     if (applied) pushUndoEntry(before, applied)
     notify(`끊어진 연결 ${removed}건을 정리했습니다.`)
+  }
+
+  /**
+   * 선택 행을 그대로 복제해 아래에 세운다(R383, 2026-11-03 박향근 확정).
+   *
+   * 클립보드를 거치지 않으므로 숨긴 목표일 열과 TSV에 안 담기는 값까지 그대로 따라온다.
+   * 업체·목표일·완료일·납기·스펙은 남기고 **결과 RESULT 그룹만 비운다.**
+   * - `flNo`: 번호는 원장에서 하나뿐이다. 복제하면 창고와 원장이 같은 번호를 두 행에서 본다.
+   * - `receivedDate`, `sampleDates`: 새 행은 아직 받은 것이 없다.
+   * - `requestLink`: 한 요청 옵션에는 DD 행 하나만 붙는다. 복제하면 요청 쪽 후보에서 사라진다.
+   * - `costRef`: 원가계산서 포인터다. 계산하지 않은 행이 남의 계산서를 가리키면 안 된다.
+   * - `optionProgress`: 옵션 완료 집계값이다.
+   * `devStatus`는 `진행중`으로 되돌린다. 완료·DROP 행을 복제해 그 상태가 따라오면
+   * HOME 카드와 주간 보고가 하지도 않은 건을 센다.
+   */
+  const duplicateSelectedRows = async () => {
+    if (!editEnabled) { notify(editDeniedMessage); return }
+    const rows = selectedRows()
+    if (!rows.length) { notify("복제할 행을 고르세요."); return }
+
+    const created = rows.map((row) => {
+      const blank = createBlankDevRecord(row.owner)
+      const tech = structuredClone(row.tech ?? {}) as DevTechnical
+      // 값 없는 키를 남기지 말고 지운다. Firestore 가 `undefined` 가 든 문서를 거부한다(R340).
+      delete tech.requestLink
+      delete tech.costRef
+      delete tech.sampleDates
+      delete tech.optionProgress
+      // FDS/YDS 요청서의 BODY 값. 표에 없는 숨은 값이라 사람이 보고 고칠 수 없다.
+      // 물려받으면 요청서에 같은 BODY 가 두 줄 나간다. 지우면 `bodyLabel` 이 `opt` 로 다시 만든다.
+      delete tech.bodyNo
+      delete tech.intakeSource
+      return {
+        ...row,
+        tech,
+        flNo: "",
+        receivedDate: "",
+        devStatus: "진행중",
+        // 새 행의 고유 식별자. 원본과 같은 `_src` 를 쓰면 두 행이 한 행으로 취급된다.
+        _src: blank._src,
+      }
+    })
+
+    const before = useAppStore.getState().records
+    const rank = rankOf(before)
+    const sorted = [...before].sort((a, b) => (rank.get(recordIdentity(a)) ?? 0) - (rank.get(recordIdentity(b)) ?? 0))
+    const anchor = rows[rows.length - 1]
+    const anchorIndex = sorted.findIndex((record) => recordIdentity(record) === recordIdentity(anchor))
+    const at = anchorIndex === -1 ? sorted.length : anchorIndex + 1
+    const merged = [...sorted.slice(0, at), ...created, ...sorted.slice(at)]
+
+    setCopyMark(null)
+    const applied = await writeDevelopmentRecords(merged.map((record, index) => ({ ...record, sortOrder: index })))
+    if (applied) pushUndoEntry(before, applied)
+    const first = displayedColumns[0], last = displayedColumns[displayedColumns.length - 1]
+    if (first && last) {
+      const firstCell = { row: recordIdentity(created[0]), col: first.id }
+      setRange({ anchor: firstCell, focus: { row: recordIdentity(created[created.length - 1]), col: last.id } })
+      scrollCellIntoView(firstCell)
+    }
+    notify(`${created.length}개 행을 복제했습니다. FL#과 수취일은 비웁니다.`)
   }
 
   const insertBlankRows = async (position: "above" | "below") => {
@@ -3604,6 +3700,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             { key: "copy", label: "복사", hint: "Ctrl+C", icon: <Copy className="size-3.5" />, run: () => void copyRange(), disabled: false },
             { key: "cut", label: "잘라내기", hint: "Ctrl+X", icon: <Scissors className="size-3.5" />, run: () => void copyRange(true), disabled: !editEnabled },
             { key: "paste", label: "붙여넣기", hint: "Ctrl+V", icon: <ClipboardPaste className="size-3.5" />, run: () => void pasteRange(), disabled: !editEnabled },
+            { key: "duplicate", label: "선택 행 복제", hint: "아래에 추가", icon: <Rows3 className="size-3.5" />, run: () => void duplicateSelectedRows(), disabled: !editEnabled },
             { key: "insert", label: "복사한 행 삽입", hint: "아래에 추가", icon: <Rows3 className="size-3.5" />, run: () => void insertCopiedRows(), disabled: !editEnabled },
             { key: "insert-above", label: "위에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("above"), disabled: !editEnabled },
             { key: "insert-below", label: "아래에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("below"), disabled: !editEnabled },
