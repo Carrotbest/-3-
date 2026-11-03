@@ -2726,10 +2726,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   /**
-   * 선택 행을 그대로 복제해 아래에 세운다(R383, 2026-11-03 박향근 확정).
+   * 선택 행을 복제해 아래에 세운다(R383, R384, 2026-11-04 박향근 확정). N차 재작업 자리다.
    *
-   * 클립보드를 거치지 않으므로 숨긴 목표일 열과 TSV에 안 담기는 값까지 그대로 따라온다.
-   * 업체·목표일·완료일·납기·스펙은 남기고 **결과 RESULT 그룹만 비운다.**
+   * 클립보드를 거치지 않으므로 TSV에 안 담기는 값(ORIGINAL 분석, 실측 물성)까지 따라온다.
+   * 신규 작지를 복붙으로 넣는 길은 `복사한 행 삽입`이고 그쪽은 스케줄을 그대로 가져간다.
+   * 업체와 스펙은 남기고 **날짜와 결과는 비운다.** 무엇을 만드는지만 가져오는 것이다.
    * - `flNo`: 번호는 원장에서 하나뿐이다. 복제하면 창고와 원장이 같은 번호를 두 행에서 본다.
    * - `receivedDate`, `sampleDates`: 새 행은 아직 받은 것이 없다.
    * - `requestLink`: 한 요청 옵션에는 DD 행 하나만 붙는다. 복제하면 요청 쪽 후보에서 사라진다.
@@ -2755,12 +2756,21 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       // 물려받으면 요청서에 같은 BODY 가 두 줄 나간다. 지우면 `bodyLabel` 이 `opt` 로 다시 만든다.
       delete tech.bodyNo
       delete tech.intakeSource
+      // 공정 일정은 가져오지 않는다(R384). 목표일이 따라오면 새로 친 날짜가 완료일로
+      // 들어가 1차 목표와 비교되고(R374), 네 공정 전부에 지연 괄호가 붙는다.
+      // 완료일은 실적이라 아직 안 한 공정을 완료로 세게 만든다.
+      delete tech.targetDates
+      delete tech.processDates
       return {
         ...row,
         tech,
         flNo: "",
         receivedDate: "",
         devStatus: "진행중",
+        // 납기와 접수일도 새로 받는다. 납기가 비면 원사 입고일 잠금(R376)에도 안 걸려
+        // 복제 직후 바로 칠 수 있다.
+        dueDate: "",
+        requestDate: blank.requestDate,
         // 새 행의 고유 식별자. 원본과 같은 `_src` 를 쓰면 두 행이 한 행으로 취급된다.
         _src: blank._src,
       }
@@ -2783,7 +2793,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       setRange({ anchor: firstCell, focus: { row: recordIdentity(created[created.length - 1]), col: last.id } })
       scrollCellIntoView(firstCell)
     }
-    notify(`${created.length}개 행을 복제했습니다. FL#과 수취일은 비웁니다.`)
+    notify(`${created.length}개 행을 복제했습니다. 날짜는 새로 적습니다.`)
   }
 
   const insertBlankRows = async (position: "above" | "below") => {
@@ -3700,8 +3710,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             { key: "copy", label: "복사", hint: "Ctrl+C", icon: <Copy className="size-3.5" />, run: () => void copyRange(), disabled: false },
             { key: "cut", label: "잘라내기", hint: "Ctrl+X", icon: <Scissors className="size-3.5" />, run: () => void copyRange(true), disabled: !editEnabled },
             { key: "paste", label: "붙여넣기", hint: "Ctrl+V", icon: <ClipboardPaste className="size-3.5" />, run: () => void pasteRange(), disabled: !editEnabled },
-            { key: "duplicate", label: "선택 행 복제", hint: "아래에 추가", icon: <Rows3 className="size-3.5" />, run: () => void duplicateSelectedRows(), disabled: !editEnabled },
-            { key: "insert", label: "복사한 행 삽입", hint: "아래에 추가", icon: <Rows3 className="size-3.5" />, run: () => void insertCopiedRows(), disabled: !editEnabled },
+            { key: "duplicate", label: "선택 행 복제", hint: "날짜 빼고", icon: <Rows3 className="size-3.5" />, run: () => void duplicateSelectedRows(), disabled: !editEnabled },
+            { key: "insert", label: "복사한 행 삽입", hint: "복사한 값 그대로", icon: <Rows3 className="size-3.5" />, run: () => void insertCopiedRows(), disabled: !editEnabled },
             { key: "insert-above", label: "위에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("above"), disabled: !editEnabled },
             { key: "insert-below", label: "아래에 행 삽입", hint: "선택 행 수만큼", icon: <Rows3 className="size-3.5" />, run: () => void insertBlankRows("below"), disabled: !editEnabled },
             { key: "delete-row", label: "행 삭제", hint: "선택 행 전체", icon: <Trash2 className="size-3.5" />, run: requestDeleteSelectedRows, disabled: !editEnabled },
