@@ -51,6 +51,7 @@ import { checkWarehouseFlEntry, needsFlConfirm, type WarehouseFlCheck } from "@/
 import { buildInboundCard, buildOutboundCancelCard, buildOutboundConfirmCard, notifyTeams } from "@/data/teams-notify"
 import { claimStorageNumbers, releaseStorageNumbers } from "@/data/storage-claims"
 import { useInView } from "@/lib/useInView"
+import { useViewportAnchor } from "@/lib/useViewportAnchor"
 import { addManualIntake, updateManualIntake, applyDisposalRoundCompletion, applyFabricAction, applyFabricActions, backfillFabricRecordIds, clearFabric1Cells, removeFabricRows, saveDisposalRounds, saveFabricFields, saveFabricRackNo, saveFabricRackNos, undoFabricEntry, useAppStore, type ApplyFabricActionInput, type FabricUndoEntry } from "@/store/useAppStore"
 
 type WarehouseTab = "READY" | "WAREHOUSE" | "HISTORY"
@@ -697,6 +698,7 @@ export function Warehouse() {
   const lastExtendRef = useRef("")
   const extendDragAtPointerRef = useRef<(x: number, y: number) => void>(() => undefined)
   const [cellMenu, setCellMenu] = useState<{ x: number; y: number; key: string } | null>(null)
+  const cellMenuPos = useViewportAnchor(cellMenu)
   const [viewports, setViewports] = useState<Record<string, { top: number; height: number }>>({})
   const gridRefs = useRef<Record<string, HTMLDivElement | null>>({})
   /**
@@ -2116,7 +2118,7 @@ export function Warehouse() {
 
     {cellMenu ? <>
       <div className="fixed inset-0 z-[85]" onMouseDown={() => setCellMenu(null)} onContextMenu={(event) => { event.preventDefault(); setCellMenu(null) }} />
-      <div role="menu" className="fixed z-[90] w-40 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-1 text-xs shadow-lg" style={{ left: Math.min(cellMenu.x, window.innerWidth - 176), top: Math.min(cellMenu.y, window.innerHeight - 120) }}>
+      <div role="menu" ref={cellMenuPos.ref} className="fixed z-[90] w-40 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-1 text-xs shadow-lg" style={{ left: cellMenuPos.pos?.left ?? cellMenu.x, top: cellMenuPos.pos?.top ?? cellMenu.y, visibility: cellMenuPos.pos ? "visible" : "hidden" }}>
         {teamScope === "team1" ? <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { const key = cellMenu.key; setCellMenu(null); openDetail(key) }}><Info className="size-3.5" />원단 상세</button> : null}
         <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => void copyRange()}><Copy className="size-3.5" />복사 (Ctrl+C)</button>
         <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]" onClick={() => { if (rangeRect) { setExtraCellRanges([]); setCellRange({ ar: rangeRect.top, ac: 0, fr: rangeRect.bottom, fc: visibleColumns.length - 1 }) } setCellMenu(null) }}><Rows3 className="size-3.5" />행 전체 선택</button>

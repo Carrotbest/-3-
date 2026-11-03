@@ -8,7 +8,7 @@
  * 행 높이는 사용자가 조절하되 글자 길이에 따라 자동으로 늘리지는 않는다.
  * 넘치는 셀 안에서만 세로 스크롤한다.
  */
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react"
 import { FlPerfMark } from "@/components/fabric/PerfBadge"
 import { Archive, ChevronDown, ChevronRight, ClipboardPaste, Copy, Download, Eraser, Flame, ImagePlus, Loader2, Pencil, Plus, Redo2, RotateCcw, Rows3, Scissors, Trash2, Undo2, Upload } from "lucide-react"
 import * as XLSX from "xlsx"
@@ -48,26 +48,7 @@ import { buildRequestWorkbook, mergeRequestStyles, parseRequestWorkbook, request
 import { MEMBERS, REQUEST_RESULTS, styleRemarkText, type AnalysisRequest, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
 import { loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
 import { saveAnalysisRequests, saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore, writeDevelopmentRecords } from "@/store/useAppStore"
-
-/**
- * 뷰포트 밖으로 넘치는 팝업을 안쪽으로 밀어 넣는다(R357).
- * 높이를 상수로 어림하면 항목이 늘 때마다 아래가 잘린다. 그려 놓고 실제로 재서 옮긴다.
- * 첫 칠에서는 `ready`가 거짓이라 보이지 않게 두고, 자리를 잡은 뒤에 보인다.
- */
-function useViewportAnchor(anchor: { x: number; y: number } | null, gap = 8) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
-  useLayoutEffect(() => {
-    if (!anchor) { setPos(null); return }
-    const el = ref.current
-    if (!el) return
-    const box = el.getBoundingClientRect()
-    const left = Math.max(gap, Math.min(anchor.x, window.innerWidth - box.width - gap))
-    const top = Math.max(gap, Math.min(anchor.y, window.innerHeight - box.height - gap))
-    setPos({ left, top })
-  }, [anchor, gap])
-  return { ref, pos }
-}
+import { useViewportAnchor } from "@/lib/useViewportAnchor"
 
 // ─────────────────────────────────────────────── 열 정의
 
@@ -859,6 +840,7 @@ export function FabricRequest() {
     setConfirmPrompt({ x: anchor.x, y: anchor.y, message, run, confirmLabel: options?.confirmLabel ?? "확인", danger: options?.danger ?? false })
   }
   const [bottomMenu, setBottomMenu] = useState<{ x: number; y: number } | null>(null)
+  const bottomMenuPos = useViewportAnchor(bottomMenu)
   const [undoStack, setUndoStack] = useState<RequestStyle[][]>([])
   const [redoStack, setRedoStack] = useState<RequestStyle[][]>([])
   const [replaceOpen, setReplaceOpen] = useState(false)
@@ -2457,7 +2439,7 @@ export function FabricRequest() {
 
       {bottomMenu ? <>
         <div className="fixed inset-0 z-[85]" onMouseDown={() => setBottomMenu(null)} onContextMenu={(event) => { event.preventDefault(); setBottomMenu(null) }} />
-        <div role="menu" className="fixed z-[90] min-w-44 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-1 text-xs shadow-lg" style={{ left: Math.min(bottomMenu.x, window.innerWidth - 192), top: Math.min(bottomMenu.y, window.innerHeight - 130) }}>
+        <div role="menu" ref={bottomMenuPos.ref} className="fixed z-[90] min-w-44 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-1 text-xs shadow-lg" style={{ left: bottomMenuPos.pos?.left ?? bottomMenu.x, top: bottomMenuPos.pos?.top ?? bottomMenu.y, visibility: bottomMenuPos.pos ? "visible" : "hidden" }}>
           {[
             { key: "append-one", label: "스타일 1개 추가", hint: "목록 맨 아래", icon: <Plus className="size-3.5" />, run: () => appendBlankStyles(1) },
             { key: "append-five", label: "스타일 5개 추가", hint: "목록 맨 아래", icon: <Rows3 className="size-3.5" />, run: () => appendBlankStyles(5) },

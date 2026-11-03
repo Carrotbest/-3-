@@ -34,6 +34,7 @@ import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji
 import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical, type RequestOption, type RequestStyle } from "@/data/schema"
 import { buildWeeklyReport, reportOwnerNames as reportOwnersOf, weeklyReportText, type ReportDetailLevel } from "@/data/weekly-report"
 import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, saveRequests, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
+import { useViewportAnchor } from "@/lib/useViewportAnchor"
 
 const ALL = "__all__"
 const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니다. 담당 칸이 비었거나 명단 밖인 행은 담당 드롭다운에서 그 값을 고르십시오."
@@ -1614,6 +1615,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     setRangeState(value)
   }
   const [menu, setMenu] = useState<{ x: number; y: number; kind: "cells" | "bottom" } | null>(null)          // 우클릭 메뉴 위치
+  const menuPos = useViewportAnchor(menu)
   const [undoStack, setUndoStack] = useState<UndoEntry[]>([])
   const [redoStack, setRedoStack] = useState<UndoEntry[]>([])
   const [clipNotice, setClipNotice] = useState<string | null>(null)
@@ -3702,7 +3704,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
       {menu ? <>
         <div className="fixed inset-0 z-[90]" onMouseDown={() => setMenu(null)} onContextMenu={(event) => { event.preventDefault(); setMenu(null) }} />
-        <div role="menu" className="fixed z-[91] min-w-44 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] py-1 text-sm shadow-lg" style={{ left: Math.min(menu.x, window.innerWidth - 190), top: Math.min(menu.y, window.innerHeight - (menu.kind === "bottom" ? 100 : 210)) }}>
+        <div role="menu" ref={menuPos.ref} className="fixed z-[91] min-w-44 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] py-1 text-sm shadow-lg" style={{ left: menuPos.pos?.left ?? menu.x, top: menuPos.pos?.top ?? menu.y, visibility: menuPos.pos ? "visible" : "hidden" }}>
           {(menu.kind === "bottom" ? [
             { key: "append-one", label: "행 1개 추가", hint: "목록 맨 아래", icon: <Plus className="size-3.5" />, run: () => void appendBlankRows(1), disabled: !editEnabled },
             { key: "append-five", label: "행 5개 추가", hint: "목록 맨 아래", icon: <Rows3 className="size-3.5" />, run: () => void appendBlankRows(5), disabled: !editEnabled },

@@ -456,7 +456,7 @@ input.dd-date::-webkit-calendar-picker-indicator {
   scrollbar-color: color-mix(in srgb, var(--muted-foreground) 30%, transparent) transparent;
 }
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar { width: 8px; height: 16px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
 ::-webkit-scrollbar-thumb {
@@ -465,6 +465,10 @@ input.dd-date::-webkit-calendar-picker-indicator {
   border: 2px solid transparent;
   border-radius: 999px;
 }
+
+/* 가로 스크롤바만 두 배로(R385, 2026-11-04 박향근 요구). 표를 좌우로 끄는 일이 많아
+   잡기 쉬워야 한다. 트랙 16px 에 테두리 4px 라 보이는 두께는 8px 이고 세로의 두 배다. */
+::-webkit-scrollbar-thumb:horizontal { border-width: 4px; }
 
 ::-webkit-scrollbar-thumb:hover { background-color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); }
 ::-webkit-scrollbar-corner { background: transparent; }
