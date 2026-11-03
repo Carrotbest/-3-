@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-11-01T23:59:36+00:00",
+"generated_at": "2026-11-03T02:59:50+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
@@ -9,15 +9,15 @@
 "days": {
 "7": {
 "sources": 20,
-"scanned": 609,
-"kept": 247,
-"material": 183
+"scanned": 443,
+"kept": 169,
+"material": 124
 },
 "30": {
 "sources": 22,
-"scanned": 2630,
-"kept": 1036,
-"material": 753
+"scanned": 2498,
+"kept": 993,
+"material": 728
 }
 }
 },
@@ -336,25 +336,6 @@
 },
 "daily": [
 {
-"date": "2026-10-03",
-"total": 10,
-"by": {
-"MATERIAL": 4,
-"ETC": 2,
-"RETAIL": 2,
-"FABRIC": 1,
-"YARN": 1
-}
-},
-{
-"date": "2026-10-04",
-"total": 4,
-"by": {
-"ETC": 3,
-"MATERIAL": 1
-}
-},
-{
 "date": "2026-10-05",
 "total": 31,
 "by": {
@@ -658,51 +639,22 @@
 "ETC": 3,
 "RETAIL": 2
 }
+},
+{
+"date": "2026-11-02",
+"total": 4,
+"by": {
+"MATERIAL": 2,
+"RETAIL": 2
+}
+},
+{
+"date": "2026-11-03",
+"total": 0,
+"by": {}
 }
 ],
 "momentum": [
-{
-"tag": "방글라데시",
-"label_en": "bangladesh",
-"recent": 63,
-"prior": 34,
-"delta": 29,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-5,
-15,
-14,
-24,
-13,
-12,
-14
-]
-},
-{
-"tag": "리사이클",
-"label_en": "recycled",
-"recent": 62,
-"prior": 33,
-"delta": 29,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-4,
-16,
-13,
-26,
-15,
-8,
-13
-]
-},
 {
 "tag": "바이오소재",
 "label_en": "bio-based",
@@ -715,23 +667,22 @@
 0,
 0,
 0,
-0,
 7,
 4,
 6,
 10,
 8,
-8
+8,
+0
 ]
 },
 {
 "tag": "전시회",
 "label_en": "performance days",
-"recent": 41,
-"prior": 21,
-"delta": 20,
+"recent": 39,
+"prior": 23,
+"delta": 16,
 "weeks": [
-0,
 0,
 0,
 0,
@@ -742,17 +693,38 @@
 9,
 15,
 11,
-6
+6,
+0
+]
+},
+{
+"tag": "리사이클",
+"label_en": "recycled",
+"recent": 54,
+"prior": 41,
+"delta": 13,
+"weeks": [
+0,
+0,
+0,
+0,
+4,
+16,
+13,
+26,
+15,
+8,
+13,
+0
 ]
 },
 {
 "tag": "나일론",
 "label_en": "nylon",
-"recent": 21,
-"prior": 4,
-"delta": 17,
+"recent": 19,
+"prior": 6,
+"delta": 13,
 "weeks": [
-0,
 0,
 0,
 0,
@@ -763,17 +735,38 @@
 4,
 5,
 4,
-8
+8,
+0
+]
+},
+{
+"tag": "데님",
+"label_en": "denim",
+"recent": 31,
+"prior": 20,
+"delta": 11,
+"weeks": [
+0,
+0,
+0,
+0,
+1,
+5,
+13,
+8,
+6,
+13,
+5,
+0
 ]
 },
 {
 "tag": "베트남",
 "label_en": "vietnam",
-"recent": 21,
-"prior": 6,
-"delta": 15,
+"recent": 18,
+"prior": 9,
+"delta": 9,
 "weeks": [
-0,
 0,
 0,
 0,
@@ -784,49 +777,50 @@
 3,
 6,
 8,
-4
+4,
+0
 ]
 },
 {
-"tag": "추적성",
-"label_en": "traceability",
-"recent": 15,
-"prior": 1,
-"delta": 14,
+"tag": "울",
+"label_en": "wool",
+"recent": 17,
+"prior": 9,
+"delta": 8,
 "weeks": [
 0,
 0,
 0,
 0,
-0,
-1,
-0,
-0,
+2,
+3,
+2,
+5,
 8,
-6,
-0,
-1
-]
-},
-{
-"tag": "데님",
-"label_en": "denim",
-"recent": 32,
-"prior": 19,
-"delta": 13,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
 1,
 5,
-13,
-8,
-6,
-13,
-5
+0
+]
+},
+{
+"tag": "스판덱스",
+"label_en": "spandex",
+"recent": 16,
+"prior": 8,
+"delta": 8,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+5,
+2,
+4,
+4,
+2,
+7,
+0
 ]
 },
 {
@@ -841,13 +835,13 @@
 0,
 0,
 0,
-0,
 10,
 2,
 3,
 1,
 2,
-2
+2,
+0
 ]
 },
 {
@@ -862,13 +856,13 @@
 0,
 0,
 0,
-0,
 1,
 7,
 2,
 1,
 1,
-1
+1,
+0
 ]
 },
 {
@@ -884,19 +878,19 @@
 0,
 0,
 0,
-0,
 4,
 0,
 0,
 1,
+0,
 0
 ]
 },
 {
-"tag": "GOTS",
-"label_en": "gots",
-"recent": 1,
-"prior": 3,
+"tag": "리넨",
+"label_en": "linen",
+"recent": 3,
+"prior": 5,
 "delta": -2,
 "weeks": [
 0,
@@ -904,35 +898,17 @@
 0,
 0,
 0,
+1,
+2,
 2,
 1,
-0,
-1,
-0,
+2,
 0,
 0
 ]
 }
 ],
 "fresh": [
-{
-"tag": "DPP",
-"label_en": "digital product passport",
-"n": 7,
-"first": "2026-10-05"
-},
-{
-"tag": "비스코스",
-"label_en": "viscose",
-"n": 6,
-"first": "2026-10-06"
-},
-{
-"tag": "해양유래",
-"label_en": "ocean plastic",
-"n": 2,
-"first": "2026-10-06"
-},
 {
 "tag": "폐수",
 "label_en": "wastewater",

@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-11-01T23:59:36+00:00",
+"generated_at": "2026-11-03T02:59:50+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3656,13 +3656,13 @@
 },
 {
 "period": "2026-10",
-"value": 1338.383
+"value": 1337.36
 }
 ],
-"value": 1338.383,
+"value": 1337.36,
 "period": "2026-10",
 "period_end": null,
-"prev": -1.5,
+"prev": -1.6,
 "yoy": -6.0,
 "stale": false
 },
@@ -3679,10 +3679,6 @@
 "source_name": "FRED · GDPC1",
 "source_url": "https://fred.stlouisfed.org/series/GDPC1",
 "points": [
-{
-"period": "2023-Q2",
-"value": 22577.556
-},
 {
 "period": "2023-Q3",
 "value": 22828.796
@@ -3730,13 +3726,17 @@
 {
 "period": "2026-Q2",
 "value": 24408.011
+},
+{
+"period": "2026-Q3",
+"value": 24611.077
 }
 ],
-"value": 24408.011,
-"period": "2026-Q2",
+"value": 24611.077,
+"period": "2026-Q3",
 "period_end": null,
-"prev": 0.6,
-"yoy": 2.2,
+"prev": 0.8,
+"yoy": 2.1,
 "stale": false
 },
 {
