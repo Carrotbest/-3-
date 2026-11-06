@@ -554,6 +554,12 @@ export function mergeRequestStyles(
       stage: previous.stage,
       imagePath: previous.imagePath,
       imageThumbPath: previous.imageThumbPath,
+      // 분석에서 넘어온 연결은 양식에 없는 웹 전용 값이다(R393). 물려받지 않으면 엑셀로 한 번
+      // 덮는 순간 행 머리 AN 뱃지가 사라지고, 그 스타일을 지워도 `unlinkAnalysis`가
+      // 분석 쪽 `requestReqId`를 못 풀어 그 분석 건을 다시 넘길 수 없게 된다(R360 재발).
+      analysisId: previous.analysisId,
+      analysisAnNo: previous.analysisAnNo,
+      imageFrom: previous.imageFrom,
       createdAt: previous.createdAt,
       updatedAt: new Date().toISOString(),
       // 같은 위치의 lineId를 이어받아 재업로드 뒤에도 DD 연결을 지킨다.
