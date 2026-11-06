@@ -85,6 +85,7 @@ input.dd-date::-webkit-calendar-picker-indicator {
   --chart-3: hsl(197 37% 24%);
   --chart-4: hsl(43 74% 66%);
   --chart-5: hsl(27 87% 67%);
+  --req-band-development: hsl(265 45% 48%);
   --ref-cat-1: #2a78d6;
   --ref-cat-2: #eb6834;
   --ref-cat-3: #1baf7a;

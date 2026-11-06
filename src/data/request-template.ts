@@ -12,11 +12,12 @@
 import * as XLSX from "xlsx"
 
 import { CONSTRUCTIONS, matchConstruction } from "./constructions"
+import { DD_COMPANY_OPTIONS, matchCompany } from "./dd-workflow"
 import { legacyBoardId } from "./request-board"
 import { REQUEST_RESULTS, styleRemarkText } from "./schema"
 import type { RequestOption, RequestResult, RequestStyle } from "./schema"
 
-type Band = "기본" | "ORIGINAL" | "분석" | "의뢰" | "옵션"
+type Band = "기본" | "ORIGINAL" | "분석" | "의뢰" | "개발" | "옵션"
 
 interface TemplateColumn {
   band: Band
@@ -60,11 +61,14 @@ export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
   { band: "분석", head: "Construction (개발)", width: 18, scope: "style", key: "devConstruction", screenWidth: 120 },
   { band: "분석", head: "분석 담당", width: 11, scope: "style", key: "analyst", screenWidth: 90 },
   { band: "분석", head: "Comment", width: 24, scope: "style", key: "comment", screenWidth: 160 },
-  { band: "의뢰", head: "URGENT", width: 8, scope: "style", key: "urgent", screenWidth: 64 },
   { band: "의뢰", head: "의뢰자", width: 11, scope: "style", key: "requester", screenWidth: 90 },
-  { band: "의뢰", head: "개발 POINT", aliases: ["개발"], width: 30, scope: "style", key: "devPlan", screenWidth: 200 },
   { band: "의뢰", head: "개발 담당", width: 11, scope: "style", key: "developer", screenWidth: 90 },
   { band: "의뢰", head: "결과", width: 9, scope: "style", key: "result", optional: true, screenWidth: 76 },
+  { band: "개발", head: "URGENT", width: 8, scope: "style", key: "urgent", screenWidth: 64 },
+  // 이름만 "개발요청"으로 바꿨다(R388). 옛 양식 파일을 계속 읽으려고 두 옛 이름을 alias로 남긴다.
+  { band: "개발", head: "개발요청", aliases: ["개발 POINT", "개발"], width: 30, scope: "style", key: "devPlan", screenWidth: 200 },
+  { band: "개발", head: "Key point", width: 26, scope: "style", key: "keyPoint", optional: true, screenWidth: 180 },
+  { band: "개발", head: "3팀 의견", width: 30, scope: "style", key: "teamOpinion", optional: true, screenWidth: 200 },
   { band: "옵션", head: "Opt", width: 6, scope: "option", key: "no", screenWidth: 50 },
   { band: "옵션", head: "YARN DETAIL", width: 30, scope: "option", key: "yarnDetail", screenWidth: 180 },
   { band: "옵션", head: "CONS", width: 18, scope: "option", key: "construction", optional: true, screenWidth: 130 },
@@ -73,6 +77,8 @@ export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
   { band: "옵션", head: "DYEING METHOD", width: 13, scope: "option", key: "dyeingMethod", screenWidth: 90 },
   // R291에서 스타일 단위로 옮겼다. 열 위치와 이름은 옛 양식 파일을 계속 읽기 위해 그대로 둔다.
   { band: "옵션", head: "REMARK", width: 26, scope: "style", key: "remark", screenWidth: 220 },
+  // R389. 옵션마다 다를 수 있어 scope가 option이다. 목록은 DD와 공유한다.
+  { band: "옵션", head: "CO", width: 9, scope: "option", key: "co", optional: true, screenWidth: 76 },
 ]
 
 const BAND_COLOR: Record<Band, string> = {
@@ -80,6 +86,7 @@ const BAND_COLOR: Record<Band, string> = {
   "ORIGINAL": "FF1F4E5F",
   "분석": "FF538135",
   "의뢰": "FF2E5E8C",
+  "개발": "FF7143B1",
   "옵션": "FFC55A11",
 }
 
@@ -118,6 +125,8 @@ const cellOf = (style: RequestStyle, option: RequestOption | null, key: string):
     case "requester": return style.requester || null
     case "developer": return style.developer || null
     case "devPlan": return style.devPlan || null
+    case "keyPoint": return style.keyPoint || null
+    case "teamOpinion": return style.teamOpinion || null
     case "result": return style.result ?? null
     case "remark": return styleRemarkText(style) || null
     case "no": return option ? option.no : null
@@ -126,6 +135,7 @@ const cellOf = (style: RequestStyle, option: RequestOption | null, key: string):
     case "weight": return option && option.weight !== undefined && option.weight !== "" ? option.weight : null
     case "color": return option ? option.color || null : null
     case "dyeingMethod": return option ? option.dyeingMethod || null : null
+    case "co": return option ? option.co || null : null
     default: return null
   }
 }
@@ -262,7 +272,14 @@ export async function buildRequestWorkbook(
     "   CONS는 셀의 드롭다운 목록에서 조직을 고릅니다. 표기를 맞추려고 목록 밖 값은 받지 않습니다.",
     "   W'T는 중량을 숫자로만 적습니다. 단위는 g/m2 입니다.",
     "   목록에 없는 조직이 필요하면 원단 R&D팀에 목록 추가를 요청하세요.",
-    "8. 사진과 결과 칸은 보기 전용입니다. 이 파일에서 고쳐도 웹에 올라가지 않습니다.",
+    "8. 사진 칸은 보기 전용입니다. 이 파일에서 고쳐도 웹에 올라가지 않습니다.",
+    "9. 개발 묶음은 URGENT / 개발요청 / Key point / 3팀 의견 네 칸입니다.",
+    "   개발요청에는 무엇을 개발해 달라는 요청인지, Key point에는 반드시 맞춰야 할 점을 적습니다.",
+    "   3팀 의견은 보드 작성이 끝난 뒤 원단 R&D팀이 적는 칸입니다. 비워 두고 올려도 됩니다.",
+    "   이 열이 없는 옛 양식으로 올리면 웹에 적힌 Key point와 3팀 의견은 지워지지 않고 그대로 남습니다.",
+    "10. CO는 그 옵션의 개발처입니다. 셀의 드롭다운에서 GD / 국내 / 생산 중 하나를 고릅니다.",
+    "    한 스타일 안에서도 옵션마다 다를 수 있어 옵션 줄마다 따로 적습니다.",
+    "11. 개발 담당이 여러 명이면 / 로 구분해 적습니다. 예: 김지현/변재휘",
   ]
   lines.forEach((line, index) => {
     const cell = guide.getCell(index + 1, 1)
@@ -274,7 +291,9 @@ export async function buildRequestWorkbook(
   // CONS 드롭다운. 목록이 길어 수식 문자열로 못 넣으므로 숨김 시트를 참조한다.
   const lists = workbook.addWorksheet("LISTS", { state: "hidden" })
   CONSTRUCTIONS.forEach((name, index) => { lists.getCell(index + 1, 1).value = name })
+  DD_COMPANY_OPTIONS.forEach((name, index) => { lists.getCell(index + 1, 2).value = name })
   const consColumn = columnIndex(columns, "construction") + 1
+  const coColumn = columnIndex(columns, "co") + 1
   const lastRow = Math.max(rowIndex, 3) + 500
   for (let row = 3; row < lastRow; row += 1) {
     ws.getCell(row, consColumn).dataValidation = {
@@ -285,6 +304,17 @@ export async function buildRequestWorkbook(
       errorStyle: "stop",
       errorTitle: "CONS",
       error: "목록에서 조직을 고르세요.",
+    }
+    if (coColumn > 0) {
+      ws.getCell(row, coColumn).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [`LISTS!$B$1:$B$${DD_COMPANY_OPTIONS.length}`],
+        showErrorMessage: true,
+        errorStyle: "stop",
+        errorTitle: "CO",
+        error: "목록에서 개발처를 고르세요.",
+      }
     }
   }
 
@@ -332,6 +362,11 @@ export interface RequestParseResult {
   warnings: string[]
   /** 파일에 없어서 화면이 채워야 하는 열(R354). 지금은 seq와 chart 둘이다. */
   derivedColumns: string[]
+  /**
+   * 파일에 없던 `optional` 열(R388). 옛 양식으로 재업로드할 때 이 열의 웹 입력값을
+   * 빈 값으로 덮지 않으려고 `mergeRequestStyles`에 넘긴다.
+   */
+  missingColumns: string[]
 }
 
 /**
@@ -351,12 +386,14 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
   const header = (grid[1] ?? []).map((value) => asText(value))
   const indexByKey = new Map<string, number>()
   const derived: string[] = []
+  const missing: string[] = []
   for (const column of TEMPLATE_COLUMNS) {
     const names = [column.head, ...(column.aliases ?? [])]
     const found = header.findIndex((head) => names.includes(head))
     if (found >= 0) indexByKey.set(column.key, found)
     else if (column.derivable) derived.push(column.key)
-    else if (!column.optional) throw new Error(`양식이 다릅니다. 2행에 "${column.head}" 열이 없습니다. 내려받은 양식을 그대로 쓰세요.`)
+    else if (column.optional) missing.push(column.key)
+    else throw new Error(`양식이 다릅니다. 2행에 "${column.head}" 열이 없습니다. 내려받은 양식을 그대로 쓰세요.`)
   }
 
   const at = (row: unknown[], key: string): unknown => {
@@ -364,7 +401,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
     return index === undefined ? null : row[index] ?? null
   }
 
-  const optionKeys = ["yarnDetail", "construction", "weight", "color", "dyeingMethod"]
+  const optionKeys = ["yarnDetail", "construction", "weight", "color", "dyeingMethod", "co"]
   const styles: RequestStyle[] = []
   const warnings: string[] = []
   let current: RequestStyle | null = null
@@ -400,6 +437,8 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
         requester: asText(at(row, "requester")),
         developer: asText(at(row, "developer")),
         devPlan: asText(at(row, "devPlan")),
+        keyPoint: asText(at(row, "keyPoint")),
+        teamOpinion: asText(at(row, "teamOpinion")),
         ...(asResult(at(row, "result")) ? { result: asResult(at(row, "result")) } : {}),
         remark: asText(at(row, "remark")),
         options: [],
@@ -429,7 +468,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
   }
 
   if (styles.length === 0) throw new Error("읽어 들인 스타일이 없습니다. Garment Number를 채웠는지 확인해 주세요.")
-  return { styles, warnings, derivedColumns: derived }
+  return { styles, warnings, derivedColumns: derived, missingColumns: missing }
 }
 
 function readOption(
@@ -443,6 +482,9 @@ function readOption(
   const consRaw = asText(at(row, "construction"))
   const construction = matchConstruction(consRaw)
   if (construction === null) warn(`CONS "${consRaw}"는 조직 목록에 없어 그대로 넣었습니다. 웹에서 목록 값으로 바꿔 주세요.`)
+  const coRaw = asText(at(row, "co"))
+  const co = matchCompany(coRaw)
+  if (co === null) warn(`CO "${coRaw}"는 개발처 목록에 없어 그대로 넣었습니다. 웹에서 목록 값으로 바꿔 주세요.`)
   return {
     optId: `${reqId}#${no}`,
     lineId: crypto.randomUUID(),
@@ -452,6 +494,7 @@ function readOption(
     weight: asNumber(at(row, "weight")),
     color: asText(at(row, "color")),
     dyeingMethod: asText(at(row, "dyeingMethod")),
+    co: co ?? coRaw,
   }
 }
 
@@ -464,11 +507,28 @@ export interface RequestMergeResult {
 }
 
 /**
+ * 파일에 그 열이 없을 때 기존 웹 입력값을 지켜야 하는 스타일 열(R388).
+ * `exportOnly`(사진)는 애초에 셀에 값이 없으므로 뺀다.
+ */
+const PRESERVE_IF_ABSENT = new Set(
+  TEMPLATE_COLUMNS.filter((column) => column.scope === "style" && column.optional && !column.exportOnly).map((column) => column.key),
+)
+
+/** 옵션 열 판(R389). 같은 자리(index)의 옛 값을 지킨다. */
+const PRESERVE_OPTION_IF_ABSENT = new Set(
+  TEMPLATE_COLUMNS.filter((column) => column.scope === "option" && column.optional).map((column) => column.key),
+)
+
+/**
  * 업로드분을 기존 원장에 얹는다. 같은 차트 + Garment No.면 갱신이고 아니면 추가다.
  * 갱신할 때 reqId와 사진 경로는 기존 것을 지킨다. 사진은 엑셀에 없기 때문에
  * 그냥 덮으면 재업로드마다 사진이 날아간다.
  */
-export function mergeRequestStyles(existing: readonly RequestStyle[], incoming: readonly RequestStyle[]): RequestMergeResult {
+export function mergeRequestStyles(
+  existing: readonly RequestStyle[],
+  incoming: readonly RequestStyle[],
+  missingColumns: readonly string[] = [],
+): RequestMergeResult {
   const keyOf = (style: RequestStyle) => `${style.boardId ?? legacyBoardId(style.chart)}::${style.garmentNo.trim().toLocaleUpperCase("en-US")}`
   const byKey = new Map(existing.map((style) => [keyOf(style), style]))
   const merged = [...existing]
@@ -498,14 +558,30 @@ export function mergeRequestStyles(existing: readonly RequestStyle[], incoming: 
       updatedAt: new Date().toISOString(),
       // 같은 위치의 lineId를 이어받아 재업로드 뒤에도 DD 연결을 지킨다.
       // 엑셀에서 옵션 순서를 바꾸면 연결도 그 위치의 다른 옵션으로 옮겨가는 한계가 있다.
-      options: style.options.map((option, index) => ({
-        ...option,
-        no: index + 1,
-        optId: `${previous.reqId}#${index + 1}`,
-        lineId: previous.options[index]?.lineId ?? option.lineId,
-      })),
+      options: style.options.map((option, index) => {
+        const prior = previous.options[index]
+        const next: RequestOption = {
+          ...option,
+          no: index + 1,
+          optId: `${previous.reqId}#${index + 1}`,
+          lineId: prior?.lineId ?? option.lineId,
+        }
+        // 파일에 그 열이 없으면 같은 자리의 옛 값을 지킨다(R389).
+        if (prior) {
+          for (const key of missingColumns) {
+            if (!PRESERVE_OPTION_IF_ABSENT.has(key)) continue
+            ;(next as unknown as Record<string, unknown>)[key] = (prior as unknown as Record<string, unknown>)[key]
+          }
+        }
+        return next
+      }),
     }
     previous.options.slice(style.options.length).forEach((option) => { if (option.lineId) droppedLineIds.push(option.lineId) })
+    // 옛 양식(그 열이 없는 파일)으로 재업로드해도 웹에서 적은 값을 빈 값으로 덮지 않는다(R388).
+    for (const key of missingColumns) {
+      if (!PRESERVE_IF_ABSENT.has(key)) continue
+      ;(next as unknown as Record<string, unknown>)[key] = (previous as unknown as Record<string, unknown>)[key]
+    }
     merged[merged.indexOf(previous)] = next
     updated += 1
   }

@@ -27,7 +27,7 @@ import { appendScheduleChange, dayGap, DD_DELAY_REASON_LABEL, scheduleRowKey, ty
 import { fmtDate, fmtDateMd, isDateValue, normalizeDateInput, toDate } from "@/data/format"
 import { loadViewFlag, loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
 import { ensureRequestLineIds, removeRequestLinks, requestCandidates, requestLinkIndex, requestToIntakeRecords, resolveRequestLink } from "@/data/request-link"
-import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED } from "@/data/range-tsv"
+import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED, parseTsvGrid, tsvCell } from "@/data/range-tsv"
 import { dayToneText, holidayName } from "@/data/holidays"
 import { COST_STALE_DAYS } from "@/data/cost-sheets"
 import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
@@ -2419,7 +2419,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       const cells: string[] = []
       for (let c = box.left; c <= box.right; c += 1) {
         const column = displayedColumns[c]
-        cells.push(column ? rawCellText(record, column, scope) : "")
+        cells.push(tsvCell(column ? rawCellText(record, column, scope) : ""))
       }
       lines.push(cells.join("\t"))
     }
@@ -2649,7 +2649,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
     // 담당 열이 복사 범위에 없으면 담당이 빈 행이 생겨 담당 탭 어디에도 안 뜬다.
     const blankOwner = owner === ALL ? "" : owner
-    const grid = text.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n").map((line) => line.split("\t"))
+    const grid = parseTsvGrid(text)
     const created = grid.map((line) => {
       let draft = createBlankDevRecord(blankOwner)
       line.forEach((value, index) => {
@@ -2895,7 +2895,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!text) text = clipRef.current?.text ?? ""
     if (!text) { notify("붙여넣을 내용이 없습니다.") ; return }
 
-    const grid = text.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n").map((line) => line.split("\t"))
+    const grid = parseTsvGrid(text)
     // 여러 영역에는 한 칸 값만 붙인다. 모든 선택 칸에 같은 값을 채운다(엑셀과 같다).
     if (extraRects.length) {
       if (grid.length !== 1 || grid[0].length !== 1) { notify("여러 영역에는 한 칸 값만 붙여넣을 수 있습니다."); return }

@@ -171,8 +171,12 @@ export interface RequestStyle {
   requester: string
   /** R&D 개발 담당(엑셀 P열) */
   developer: string
-  /** 엑셀 Q열 "개발" */
+  /** 엑셀 Q열. 화면 이름은 "개발요청"이다(R388). 필드명은 저장된 열 설정 때문에 그대로 둔다. */
   devPlan: string
+  /** 개발에서 반드시 맞춰야 할 점(R388). 옛 데이터에는 없다. */
+  keyPoint?: string
+  /** 3팀 의견(R388). 보드 작성이 끝난 뒤 웹에서 적는 칸이다. 옛 데이터에는 없다. */
+  teamOpinion?: string
   /**
    * REMARK. 스타일 1건의 코멘트를 여러 줄로 적는 칸(R291).
    * 값이 `undefined`면 아직 옮기지 않은 옛 데이터다. 읽을 때는 `styleRemarkText`를 쓴다.
@@ -197,7 +201,8 @@ export interface RequestStyle {
 
 export const REQUEST_BOARD_KINDS = ["시즌 개발", "바이어 미팅", "소재 시리즈", "기타"] as const
 export type RequestBoardKind = (typeof REQUEST_BOARD_KINDS)[number]
-export const REQUEST_RESULTS = ["진행중", "완료", "드롭", "보류"] as const
+/** 「묶음」은 다른 스타일에 합쳐 개발하는 건이다(R392). 그 스타일은 표에서 회색으로 덮인다. */
+export const REQUEST_RESULTS = ["진행중", "완료", "드롭", "보류", "묶음"] as const
 export type RequestResult = (typeof REQUEST_RESULTS)[number]
 
 export interface RequestBoardEvent {
@@ -274,6 +279,11 @@ export interface RequestOption {
   construction?: string
   /** W'T. 목표 중량(g/m2). 분리 전 데이터에는 없다. */
   weight?: number | ""
+  /**
+   * CO. 이 옵션의 개발처(R389). `DD_COMPANY_OPTIONS` 값만 받는다.
+   * 한 스타일 안에서도 옵션마다 다를 수 있어 스타일이 아니라 옵션에 둔다.
+   */
+  co?: string
   /** 엑셀 T열 */
   color: string
   /** 엑셀 U열 */

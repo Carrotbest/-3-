@@ -41,6 +41,18 @@ export function ddCategoryTextClass(category: string | undefined): string {
   return DD_CATEGORY_TEXT[String(category ?? "").trim().toUpperCase()] ?? ""
 }
 export const DD_COMPANY_OPTIONS = ["GD", "국내", "생산"] as const
+const companyKey = (value: string): string => value.trim().toLocaleLowerCase("en-US").replace(/[\s\-_]+/g, "")
+const COMPANY_BY_KEY = new Map(DD_COMPANY_OPTIONS.map((name) => [companyKey(name), name]))
+
+/**
+ * 사람이 친 개발처를 목록 표기로 맞춘다. 대소문자와 공백 차이는 같은 값으로 본다.
+ * 빈 값은 `""`(지정 해제), 목록에 없으면 `null`이다. `matchConstruction`과 같은 약속이다.
+ */
+export function matchCompany(raw: string): string | null {
+  const text = raw.trim()
+  if (!text) return ""
+  return COMPANY_BY_KEY.get(companyKey(text)) ?? null
+}
 export const DD_DYEING_OPTIONS = ["CSD", "PSD", "DD", "SOAP", "YD", "PFD"] as const
 export const DD_PASS_FAIL_OPTIONS = ["PASS", "FAIL"] as const
 

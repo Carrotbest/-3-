@@ -15,6 +15,7 @@ import * as XLSX from "xlsx"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { buildRequestStyleFromAnalysis, hasLiveRequestLink } from "@/data/analysis-to-request"
 import { CONSTRUCTIONS, matchConstruction } from "@/data/constructions"
+import { DD_COMPANY_OPTIONS, matchCompany } from "@/data/dd-workflow"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { buildFabricLedger } from "@/data/fabric-ledger"
 import { applyRequestLinks, clearRequestLinksByLineId, ddRecordsByLineId, ensureRequestLineIds, liveRequestLineIds, requestDdStatus } from "@/data/request-link"
@@ -45,6 +46,7 @@ import { FillHandle, selectionShadow, type CellMove, type CellRect, type CellRef
 import { downloadBlob } from "@/data/dd-export"
 import { deleteRequestImage, loadExportImages, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
 import { buildRequestWorkbook, mergeRequestStyles, parseRequestWorkbook, requestTemplateFileName } from "@/data/request-template"
+import { parseTsvGrid, tsvCell } from "@/data/range-tsv"
 import { MEMBERS, REQUEST_RESULTS, styleRemarkText, type AnalysisRequest, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
 import { loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
 import { saveAnalysisRequests, saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore, writeDevelopmentRecords } from "@/store/useAppStore"
@@ -89,11 +91,16 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
     { id: "comment", label: "Comment", width: 160, scope: "style" },
   ] },
   { key: "request", label: "의뢰", color: "var(--chart-3)", columns: [
-    { id: "urgent", label: "URGENT", width: 64, scope: "style", align: "center" },
     { id: "requester", label: "의뢰자", width: 90, scope: "style" },
-    { id: "devPlan", label: "개발 POINT", width: 200, scope: "style" },
     { id: "developer", label: "개발 담당", width: 90, scope: "style" },
     { id: "result", label: "결과", width: 76, scope: "style", align: "center" },
+  ] },
+  // R388. URGENT와 개발 POINT(devPlan)를 의뢰 밴드에서 옮겨 왔다. 필드명은 그대로다.
+  { key: "development", label: "개발", color: "var(--req-band-development)", columns: [
+    { id: "urgent", label: "URGENT", width: 64, scope: "style", align: "center" },
+    { id: "devPlan", label: "개발요청", width: 200, scope: "style" },
+    { id: "keyPoint", label: "Key point", width: 180, scope: "style" },
+    { id: "teamOpinion", label: "3팀 의견", width: 200, scope: "style" },
   ] },
   { key: "option", label: "옵션", color: "var(--warning)", columns: [
     { id: "optNo", label: "Opt", width: 50, scope: "option", align: "center" },
@@ -105,6 +112,8 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
     { id: "dyeingMethod", label: "Dyeing", width: 90, scope: "option" },
     // R291에서 스타일 단위로 옮겼다. 옵션 사이에 세로로 병합된 한 칸이 되고, 여러 줄 기록을 받는다.
     { id: "remark", label: "Remark", width: 220, scope: "style" },
+    // R389. 옵션마다 개발처가 다를 수 있어 스타일이 아니라 옵션 단위다. 목록은 DD와 공유한다.
+    { id: "co", label: "CO", width: 76, scope: "option", align: "center" },
     // 보기 전용 두 열. DD 행의 tech.requestLink를 읽어 계산하며 요청 데이터나 엑셀 양식에는 없다.
     { id: "ddStage", label: "공정", width: 96, scope: "option", align: "center" },
     { id: "ddLink", label: "FL no.", width: 150, scope: "option" },
@@ -210,6 +219,13 @@ const SORT_LABEL: Record<SortKey, string> = {
   analyst: "분석 담당",
 }
 
+/**
+ * 개발 담당은 여러 명을 `/`로 적는다(R391). 저장할 때 조각마다 앞뒤 공백을 떼고 빈 조각을 버린다.
+ * 검사해서 거부하지는 않는다. 거부하면 붙여넣기가 조용히 비어 원인을 못 찾는다.
+ */
+const splitMembers = (value: string): string[] => value.split("/").map((name) => name.trim()).filter(Boolean)
+const normalizeMembers = (value: string): string => splitMembers(value).join("/")
+
 const newId = (): string =>
   globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
@@ -233,6 +249,8 @@ const blankStyle = (): RequestStyle => {
     requester: "",
     developer: "",
     devPlan: "",
+    keyPoint: "",
+    teamOpinion: "",
     options: blankOptions(reqId),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -250,6 +268,7 @@ const blankOption = (reqId: string, no: number): RequestOption => ({
   yarnDetail: "",
   construction: "",
   weight: "",
+  co: "",
   color: "",
   dyeingMethod: "",
 })
@@ -441,7 +460,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
   const set = <K extends keyof RequestStyle>(key: K, next: RequestStyle[K]) =>
     setValue((current) => (current ? { ...current, [key]: next } : current))
 
-  const setOption = (index: number, key: "yarnDetail" | "construction" | "color" | "dyeingMethod", next: string) =>
+  const setOption = (index: number, key: "yarnDetail" | "construction" | "color" | "dyeingMethod" | "co", next: string) =>
     setValue((current) => {
       if (!current) return current
       return { ...current, options: current.options.map((option, i) => (i === index ? { ...option, [key]: next } : option)) }
@@ -462,7 +481,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
 
   const areaClass = "h-16 rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs"
 
-  const memberSelect = (label: string, key: "analyst" | "developer") =>
+  const memberSelect = (label: string, key: "analyst") =>
     field(label, (
       <Select value={value[key] || "__none"} onValueChange={(next) => set(key, next === "__none" ? "" : next)}>
         <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="선택" /></SelectTrigger>
@@ -522,13 +541,32 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
               <span className="font-medium">URGENT</span>
             </label>
             {field("의뢰자 (1팀)", <Input className="h-8 text-xs" value={value.requester} onChange={(event) => set("requester", event.target.value)} />)}
-            {memberSelect("개발 담당", "developer")}
+            {field("개발 담당", (
+              <>
+                <Input
+                  className="h-8 text-xs"
+                  list="request-developer-suggest"
+                  placeholder="여러 명이면 / 로 구분"
+                  value={value.developer}
+                  onChange={(event) => set("developer", event.target.value)}
+                />
+                <datalist id="request-developer-suggest">{ownerOptions.map((name) => <option key={name} value={name} />)}</datalist>
+              </>
+            ))}
             {memberSelect("분석 담당", "analyst")}
           </div>
 
+          <div className="mt-4 rounded border border-[var(--border)] p-3">
+            <p className="mb-2 text-xs font-semibold">개발</p>
+            <div className="grid gap-3">
+              {field("개발요청", <textarea className="h-20 w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" placeholder="무엇을 개발해 달라는 요청인지 적습니다" value={value.devPlan} onChange={(event) => set("devPlan", event.target.value)} />)}
+              {field("Key point", <textarea className="h-20 w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" placeholder="이 개발에서 반드시 맞춰야 할 점을 적습니다" value={value.keyPoint ?? ""} onChange={(event) => set("keyPoint", event.target.value)} />)}
+              {field("3팀 의견", <textarea className="h-20 w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" placeholder="보드 작성이 끝난 뒤 원단 R&D팀이 적는 칸입니다. 지금 비워 둬도 됩니다" value={value.teamOpinion ?? ""} onChange={(event) => set("teamOpinion", event.target.value)} />)}
+            </div>
+          </div>
+
           <div className="mt-3">
-            {field("개발 POINT", <textarea className="h-20 rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" value={value.devPlan} onChange={(event) => set("devPlan", event.target.value)} />)}
-            {field("Remark", <textarea className="mt-3 h-20 w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" placeholder="스타일 코멘트. 여러 줄로 적습니다" value={styleRemarkText(value)} onChange={(event) => set("remark", event.target.value)} />)}
+            {field("Remark", <textarea className="h-20 w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" placeholder="스타일 코멘트. 여러 줄로 적습니다" value={styleRemarkText(value)} onChange={(event) => set("remark", event.target.value)} />)}
           </div>
 
           <div className="mt-5 rounded border border-[var(--border)]">
@@ -552,7 +590,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
             ) : (
               <div className="divide-y divide-[var(--border)]">
                 {value.options.map((option, index) => (
-                  <div key={option.optId} className="grid grid-cols-[36px_minmax(0,1.4fr)_140px_64px_minmax(0,1fr)_90px_44px] items-center gap-2 px-3 py-2">
+                  <div key={option.optId} className="grid grid-cols-[36px_minmax(0,1.4fr)_140px_64px_minmax(0,1fr)_90px_90px_44px] items-center gap-2 px-3 py-2">
                     <span className="text-center text-xs font-semibold text-[var(--muted-foreground)]">{option.no}</span>
                     <Input className="h-8 text-xs" placeholder="Yarn Detail" value={option.yarnDetail} onChange={(event) => setOption(index, "yarnDetail", event.target.value)} />
                     <Select value={option.construction || "__none"} onValueChange={(next) => setOption(index, "construction", next === "__none" ? "" : next)}>
@@ -566,6 +604,13 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
                     <Input className="h-8 text-right text-xs" type="number" min="0" placeholder="W'T" aria-label={`옵션 ${option.no} W'T`} value={option.weight ?? ""} onChange={(event) => setOptionWeight(index, event.target.value)} />
                     <Input className="h-8 text-xs" placeholder="Color" value={option.color} onChange={(event) => setOption(index, "color", event.target.value)} />
                     <Input className="h-8 text-xs" placeholder="Dyeing" value={option.dyeingMethod} onChange={(event) => setOption(index, "dyeingMethod", event.target.value)} />
+                    <Select value={option.co || "__none"} onValueChange={(next) => setOption(index, "co", next === "__none" ? "" : next)}>
+                      <SelectTrigger className="h-8 text-xs" aria-label={`옵션 ${option.no} CO`}><SelectValue placeholder="CO" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none">선택 안함</SelectItem>
+                        {DD_COMPANY_OPTIONS.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                     <Button
                       type="button"
                       size="sm"
@@ -616,7 +661,7 @@ function PreviewDialog({ style, onClose }: { style: RequestStyle | null; onClose
 
 // ─────────────────────────────────────────────── 셀 편집
 
-type EditKind = "text" | "area" | "number" | "member" | "construction" | "result" | "toggle" | null
+type EditKind = "text" | "area" | "number" | "member" | "suggest" | "construction" | "company" | "result" | "toggle" | null
 
 /** 더블클릭으로 고칠 수 있는 열과 그 입력 방식. 사진과 옵션 번호는 자동 값이라 막는다. */
 function editKindOf(columnId: string): EditKind {
@@ -625,14 +670,19 @@ function editKindOf(columnId: string): EditKind {
     case "requester": case "color": case "dyeingMethod":
       return "text"
     case "contents": case "yarnAnalysis": case "comment":
-    case "devPlan": case "yarnDetail": case "remark":
+    case "devPlan": case "keyPoint": case "teamOpinion":
+    case "yarnDetail": case "remark":
       return "area"
     case "origWeight": case "weight":
       return "number"
-    case "analyst": case "developer":
+    case "analyst":
       return "member"
+    case "developer":
+      return "suggest"
     case "construction":
       return "construction"
+    case "co":
+      return "company"
     case "result":
       return "result"
     case "urgent":
@@ -700,6 +750,24 @@ function CellEditor({ kind, initial, members, onCommit, onCancel }: CellEditorPr
     )
   }
 
+  if (kind === "company") {
+    // 개발처는 세 값뿐이다. DD와 같은 목록을 쓴다.
+    return (
+      <Select
+        defaultOpen
+        value={value || "__none"}
+        onValueChange={(next) => { done.current = true; onCommit(next === "__none" ? "" : next) }}
+      >
+        <SelectTrigger className="h-7 w-full text-xs"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__none">선택 안함</SelectItem>
+          {value && !DD_COMPANY_OPTIONS.includes(value as (typeof DD_COMPANY_OPTIONS)[number]) ? <SelectItem value={value}>(목록 외) {value}</SelectItem> : null}
+          {DD_COMPANY_OPTIONS.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    )
+  }
+
   if (kind === "result") {
     return <Select defaultOpen value={value || "진행중"} onValueChange={(next) => { done.current = true; onCommit(next) }}><SelectTrigger className="h-7 w-full text-xs"><SelectValue /></SelectTrigger><SelectContent>{REQUEST_RESULTS.map((result) => <SelectItem key={result} value={result}>{result}</SelectItem>)}</SelectContent></Select>
   }
@@ -730,12 +798,17 @@ function CellEditor({ kind, initial, members, onCommit, onCancel }: CellEditorPr
     )
   }
   return (
-    <input
-      {...shared}
-      type={kind === "number" ? "number" : "text"}
-      onChange={(event) => setValue(event.target.value)}
-      className="h-7 w-full rounded-none border border-[var(--primary)] bg-[var(--card)] px-1 text-xs outline-none"
-    />
+    <>
+      <input
+        {...shared}
+        type={kind === "number" ? "number" : "text"}
+        list={kind === "suggest" ? "request-cell-suggest" : undefined}
+        placeholder={kind === "suggest" ? "여러 명이면 / 로 구분" : undefined}
+        onChange={(event) => setValue(event.target.value)}
+        className="h-7 w-full rounded-none border border-[var(--primary)] bg-[var(--card)] px-1 text-xs outline-none"
+      />
+      {kind === "suggest" ? <datalist id="request-cell-suggest">{members.map((name) => <option key={name} value={name} />)}</datalist> : null}
+    </>
   )
 }
 
@@ -884,7 +957,8 @@ export function FabricRequest() {
   }, [activeBoardInfo, ddRecords, requests])
 
   const ownerOptions = useMemo(() => {
-    const fromData = requests.flatMap((item) => [item.analyst, item.developer]).filter(Boolean)
+    // 개발 담당은 `/`로 여러 명이 들어 있다(R391). 쪼개서 모으지 않으면 합쳐진 글자가 목록에 뜬다.
+    const fromData = requests.flatMap((item) => [item.analyst, ...splitMembers(item.developer)]).filter(Boolean)
     return [...new Set([...MEMBERS.map((member) => member.name), ...fromData])]
   }, [requests])
 
@@ -1416,13 +1490,14 @@ export function FabricRequest() {
     }
   }, [])
 
-  type SkipReason = false | "number" | "construction" | "result"
-  type SkipCounts = { number: number; construction: number; result: number }
+  type SkipReason = false | "number" | "construction" | "company" | "result"
+  type SkipCounts = { number: number; construction: number; company: number; result: number }
   const countSkip = (counts: SkipCounts, reason: SkipReason) => { if (reason) counts[reason] += 1 }
   const noticeSkips = (counts: SkipCounts) => {
     const parts = [
       counts.number ? `숫자로 바꿀 수 없는 ${counts.number}칸` : "",
       counts.construction ? `조직 목록에 없는 ${counts.construction}칸` : "",
+      counts.company ? `개발처 목록에 없는 ${counts.company}칸` : "",
       counts.result ? `결과 목록에 없는 ${counts.result}칸` : "",
     ].filter(Boolean)
     if (parts.length) setNotice({ kind: "error", text: `${parts.join(", ")}을 건너뛰었습니다.` })
@@ -1439,6 +1514,7 @@ export function FabricRequest() {
       if (column.id === "result") { if (!REQUEST_RESULTS.includes(raw as (typeof REQUEST_RESULTS)[number])) return { next: list, skipped: "result" }; nextStyle = { ...current, result: raw as (typeof REQUEST_RESULTS)[number], resultAt: new Date().toISOString(), updatedAt: new Date().toISOString() }; const next = [...list]; next[index] = nextStyle; return { next, skipped: false } }
       if (column.id === "urgent") value = /^(y|yes|true|1|urgent|o)$/i.test(raw.trim())
       if (column.id === "origWeight") { const trimmed = raw.trim(); value = trimmed === "" ? "" : Number(trimmed); if (value !== "" && !Number.isFinite(value)) return { next: list, skipped: "number" } }
+      if (column.id === "developer") value = normalizeMembers(raw)
       nextStyle = { ...current, [column.id]: value, updatedAt: new Date().toISOString() }
     } else {
       let optionValue: string | number = raw
@@ -1454,6 +1530,11 @@ export function FabricRequest() {
         if (matched === null) return { next: list, skipped: "construction" }
         optionValue = matched
       }
+      if (column.id === "co") {
+        const matched = matchCompany(raw)
+        if (matched === null) return { next: list, skipped: "company" }
+        optionValue = matched
+      }
       let options = current.options
       if (!options[slot.optionIndex]) {
         if (options.length !== 0 || slot.optionIndex !== 0) return { next: list, skipped: false }
@@ -1464,7 +1545,7 @@ export function FabricRequest() {
     }
     const next = [...list]; next[index] = nextStyle; return { next, skipped: false }
   }
-  const applyCells = (cells: CellRef[], raw: string) => { let next = requests; const skipCounts: SkipCounts = { number: 0, construction: 0, result: 0 }; cells.forEach((cell) => { const result = updateCell(next, cell, raw); next = result.next; countSkip(skipCounts, result.skipped) }); if (next !== requests) saveMutation(next); noticeSkips(skipCounts) }
+  const applyCells = (cells: CellRef[], raw: string) => { let next = requests; const skipCounts: SkipCounts = { number: 0, construction: 0, company: 0, result: 0 }; cells.forEach((cell) => { const result = updateCell(next, cell, raw); next = result.next; countSkip(skipCounts, result.skipped) }); if (next !== requests) saveMutation(next); noticeSkips(skipCounts) }
   const cellsInRect = (area = rect) => { const cells: CellRef[] = []; if (!area) return cells; for (let r = area.top; r <= area.bottom; r += 1) for (let c = area.left; c <= area.right; c += 1) cells.push({ row: r, col: visibleColumns[c].id }); return cells }
   const clearRange = () => { if (!rect) return; let next = requests; cellsInRect().forEach((cell) => { if (!editableCell(cell)) return; next = updateCell(next, cell, "").next }); if (next !== requests) saveMutation(next) }
   const fillDown = () => { if (!rect || rect.bottom <= rect.top) return; let next = requests; for (let r = rect.top + 1; r <= rect.bottom; r += 1) for (let c = rect.left; c <= rect.right; c += 1) { const source = cellLine({ row: rect.top, col: visibleColumns[c].id }); if (source) next = updateCell(next, { row: r, col: visibleColumns[c].id }, rawValue(source, visibleColumns[c].id)).next } if (next !== requests) saveMutation(next) }
@@ -1478,7 +1559,7 @@ export function FabricRequest() {
     if (readOnly) { commitRequests(requests); return }
     if (target.bottom === source.bottom && target.right === source.right) return
     let next = requests
-    const skipCounts: SkipCounts = { number: 0, construction: 0, result: 0 }
+    const skipCounts: SkipCounts = { number: 0, construction: 0, company: 0, result: 0 }
     const write = (row: number, col: number, sourceRow: number, sourceCol: number) => {
       const column = visibleColumns[col], fromColumn = visibleColumns[sourceCol]
       if (!column || !fromColumn || !slots[row]) return
@@ -1648,6 +1729,11 @@ export function FabricRequest() {
       if (matched === null) return
       optionValue = matched
     }
+    if (columnId === "co") {
+      const matched = matchCompany(raw)
+      if (matched === null) return
+      optionValue = matched
+    }
     commitRequests(requests.map((item) => item.reqId !== style.reqId ? item : {
       ...item,
       options: item.options.map((current) => current.optId === option.optId ? { ...current, [columnId]: optionValue } : current),
@@ -1747,7 +1833,7 @@ export function FabricRequest() {
       for (let c = rect.left; c <= rect.right; c += 1) {
         const column = visibleColumns[c], slot = slots[r], line = cellLine({ row: r, col: column.id })
         const firstSlot = r === 0 || slots[r - 1]?.style.reqId !== slot?.style.reqId
-        values.push(line && (column.scope === "option" || firstSlot) ? column.id === "urgent" ? (line.style.urgent ? "Y" : "") : rawValue(line, column.id) : "")
+        values.push(tsvCell(line && (column.scope === "option" || firstSlot) ? column.id === "urgent" ? (line.style.urgent ? "Y" : "") : rawValue(line, column.id) : ""))
       }
       lines.push(values.join("\t"))
     }
@@ -1759,9 +1845,9 @@ export function FabricRequest() {
     let value = ""; try { value = await navigator.clipboard.readText() } catch { value = "" }
     if (!value) value = clipRef.current?.text ?? ""; if (!value) return
     let next = requests
-    const skipCounts: SkipCounts = { number: 0, construction: 0, result: 0 }
+    const skipCounts: SkipCounts = { number: 0, construction: 0, company: 0, result: 0 }
     if (clipRef.current?.cut) cellsInRect(clipRef.current.rect).forEach((cell) => { if (editableCell(cell)) next = updateCell(next, cell, "").next })
-    const grid = value.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n").map((line) => line.split("\t"))
+    const grid = parseTsvGrid(value)
     const singleFill = grid.length === 1 && grid[0].length === 1 && (rect.top !== rect.bottom || rect.left !== rect.right)
     if (singleFill) cellsInRect().forEach((cell) => { const result = updateCell(next, cell, grid[0][0]); next = result.next; countSkip(skipCounts, result.skipped) })
     else grid.forEach((line, r) => line.forEach((raw, c) => { const row = rect.top + r, column = visibleColumns[rect.left + c]; if (!column || !slots[row]) return; const slot = slots[row]; if (column.scope === "style" && row > 0 && slots[row - 1]?.style.reqId === slot.style.reqId) return; const result = updateCell(next, { row, col: column.id }, raw); next = result.next; countSkip(skipCounts, result.skipped) }))
@@ -1863,7 +1949,7 @@ export function FabricRequest() {
         const found = seqByGarment.get(style.garmentNo.trim().toLocaleUpperCase("en-US"))
         return { ...base, seq: found ?? nextSeq++ }
       })
-      const { merged, added, updated, droppedLineIds } = mergeRequestStyles(requests, incoming)
+      const { merged, added, updated, droppedLineIds } = mergeRequestStyles(requests, incoming, parsed.missingColumns)
       commitRequests(merged, "upload")
       // 파일에서 빠진 옵션에 DD 행이 연결돼 있으면 알리기만 한다. 업로드로 DD 연결을 자동으로 풀지 않는다.
       // 일부만 담긴 파일을 잘못 올려도 DD MASTER 쪽이 흐트러지지 않게 하려는 것이다(2026-10-13).
@@ -1898,7 +1984,7 @@ export function FabricRequest() {
         case "analyst": return style.analyst
         case "result": {
           const result = resultOf(style)
-          const tone = result === "진행중" ? "bg-[color-mix(in_srgb,var(--chart-1)_14%,transparent)] text-[var(--chart-1)]" : result === "완료" ? "bg-[color-mix(in_srgb,var(--chart-2)_16%,transparent)] text-[var(--chart-2)]" : result === "드롭" ? "bg-[var(--muted)] text-[var(--muted-foreground)] line-through" : "bg-[color-mix(in_srgb,var(--warning)_16%,transparent)] text-[var(--warning)]"
+          const tone = result === "진행중" ? "bg-[color-mix(in_srgb,var(--chart-1)_14%,transparent)] text-[var(--chart-1)]" : result === "완료" ? "bg-[color-mix(in_srgb,var(--chart-2)_16%,transparent)] text-[var(--chart-2)]" : result === "드롭" ? "bg-[var(--muted)] text-[var(--muted-foreground)] line-through" : result === "묶음" ? "bg-[var(--muted)] text-[var(--muted-foreground)]" : "bg-[color-mix(in_srgb,var(--warning)_16%,transparent)] text-[var(--warning)]"
           return <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${tone}`}>{result}</span>
         }
         case "urgent": return style.urgent
@@ -1907,6 +1993,8 @@ export function FabricRequest() {
         case "requester": return style.requester
         case "developer": return style.developer
         case "devPlan": return style.devPlan
+        case "keyPoint": return style.keyPoint ?? ""
+        case "teamOpinion": return style.teamOpinion ?? ""
         case "remark": return styleRemarkText(style)
         default: return null
       }
@@ -1919,6 +2007,7 @@ export function FabricRequest() {
       case "optNo": return <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--muted)] px-1.5 text-[10px] font-medium tabular-nums text-[var(--foreground)]">{option.no}</span>
       case "yarnDetail": return option.yarnDetail
       case "construction": return option.construction ?? ""
+      case "co": return option.co ?? ""
       case "weight": return text(option.weight)
       case "color": return option.color
       case "dyeingMethod": return option.dyeingMethod
@@ -1943,7 +2032,9 @@ export function FabricRequest() {
     const sel = selectionFor(slotIndex, column)
     // 전부 끝났으면 병합된 스타일 칸까지, 일부만 끝났으면 그 옵션 줄의 옵션 칸만 흐리게 한다.
     const closed = closedByStyle.get(line.style.reqId)
-    const dimmed = Boolean(closed && (closed.allClosed || (line.kind === "option" && closed.closed.has(line.option.optId))))
+    // 묶음은 다른 스타일에 합쳐 진행하는 건이라 옵션 공정과 무관하게 블럭 전체를 덮는다(R392).
+    const bundled = resultOf(line.style) === "묶음"
+    const dimmed = bundled || Boolean(closed && (closed.allClosed || (line.kind === "option" && closed.closed.has(line.option.optId))))
     return (
       <TableCell
         key={column.id}
@@ -2283,7 +2374,7 @@ export function FabricRequest() {
                   return runs
                 }, []).filter((run) => run > 0)
                 // 스타일의 모든 옵션이 끝났으면 블록의 모든 칸을 흐리게 한다. 액션 칸과 옵션 추가 줄도 포함이다.
-                const blockClosed = closedByStyle.get(style.reqId)?.allClosed ?? false
+                const blockClosed = (closedByStyle.get(style.reqId)?.allClosed ?? false) || resultOf(style) === "묶음"
 
                 rows.push(
                   <TableRow key={`s:${style.reqId}`} data-req-id={style.reqId} className={firstOption ? "group/opt hover:bg-[var(--accent)]" : undefined} style={{ height: hasOptionColumns ? optionRowHeight : blockHeight }}>

@@ -40,7 +40,7 @@ import { departmentMailLabel } from "@/data/departments"
 import { loadViewGroups, saveViewPref } from "@/data/view-prefs"
 import { downloadBlob } from "@/data/dd-export"
 import { DISPOSAL_REASONS, type DisposalReason } from "@/data/disposal-round"
-import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED, type IndexRect } from "@/data/range-tsv"
+import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED, tsvCell, type IndexRect } from "@/data/range-tsv"
 import { buildWarehouseWorkbook, collectWarehouseExport, warehouseExportFileName } from "@/data/warehouse-export"
 import { FabricDetailBody } from "@/routes/FabricDetail"
 import { fmtDateFull, fmtDateMd } from "@/data/format"
@@ -1730,7 +1730,7 @@ export function Warehouse() {
       const cells: string[] = []
       for (let c = area.left; c <= area.right; c += 1) {
         const column = visibleColumns[c]
-        cells.push(column ? cellValue(item, column.id) : "")
+        cells.push(tsvCell(column ? cellValue(item, column.id) : ""))
       }
       lines.push(cells.join("\t"))
     }

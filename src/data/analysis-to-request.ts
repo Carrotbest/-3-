@@ -31,6 +31,7 @@ export interface AnalysisTransferOptions {
  *
  * `garmentNo`에는 분석의 `sourceCode`를 넣는다(R353).
  * `developer`도 비운다. R&D 개발 담당은 분석 담당(`inCharge`)과 다른 사람일 수 있다.
+ * 개발 묶음 세 칸(`devPlan`, `keyPoint`, `teamOpinion`)도 비운다(R388). 사람이 적는다.
  */
 export function buildRequestStyleFromAnalysis(item: AnalysisRequest, opts: AnalysisTransferOptions): RequestStyle {
   const now = new Date().toISOString()
@@ -42,6 +43,7 @@ export function buildRequestStyleFromAnalysis(item: AnalysisRequest, opts: Analy
     yarnDetail: "",
     construction: "",
     weight: "",
+    co: "",
     color: "",
     dyeingMethod: "",
   }))
@@ -64,7 +66,11 @@ export function buildRequestStyleFromAnalysis(item: AnalysisRequest, opts: Analy
     urgent: item.requestType === "Urgent",
     requester: item.requester,
     developer: "",
+    // 개발요청과 Key point는 비워 넘긴다(2026-11-06 박향근 확정). 분석값과 개발 목표는 다르다.
     devPlan: "",
+    keyPoint: "",
+    // 3팀 의견은 보드 작성이 끝난 뒤 웹에서 적는 칸이다.
+    teamOpinion: "",
     analysisId: item.id,
     analysisAnNo: item.anNo,
     /*

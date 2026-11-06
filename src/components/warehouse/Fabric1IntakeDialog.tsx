@@ -7,6 +7,7 @@ import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, Dia
 import { Input } from "@/components/ui/input"
 import { CONSTRUCTIONS } from "@/data/constructions"
 import { parseFabric1IntakeExcel } from "@/data/fabric1-intake-excel"
+import { parseTsvGrid } from "@/data/range-tsv"
 import {
   FABRIC1_STORAGE_NO_MAX,
   FABRIC1_STORAGE_NO_MIN,
@@ -237,9 +238,7 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
     const startRow = rows.findIndex((row) => row.id === startRowId)
     if (startRow < 0 || !Number.isInteger(startColumn)) return
     event.preventDefault()
-    const lines = text.replace(/\r\n?/g, "\n").split("\n")
-    if (lines.at(-1) === "") lines.pop()
-    const grid = lines.map((line) => line.split("\t"))
+    const grid = parseTsvGrid(text)
     setRows((current) => {
       const next = current.map((row) => ({ ...row, defaults: { ...row.defaults } }))
       while (next.length < startRow + grid.length) {

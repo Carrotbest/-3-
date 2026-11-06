@@ -36,7 +36,7 @@ export function AnalysisImportDialog({ targets, boards, boardId, blockedReason, 
           {blockedReason
             ? blockedReason
             : boardId
-              ? <>고른 보드에 스타일 {targets.length}건을 만듭니다. 옵션은 빈 줄 하나로 시작하며 개발 사양은 직접 적습니다.</>
+              ? <>고른 보드에 스타일 {targets.length}건을 만듭니다. 옵션은 빈 줄 네 개로 시작하며 개발 사양은 직접 적습니다.</>
               : <>받을 보드를 고르면 스타일 {targets.length}건을 만듭니다.</>}
         </DialogDescription>
       </DialogHeader>
@@ -74,6 +74,9 @@ export function AnalysisImportDialog({ targets, boards, boardId, blockedReason, 
         </div>
         {withPhoto > 0 && !blockedReason
           ? <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">사진 {withPhoto}건은 분석 사진을 그대로 씁니다. 의뢰 화면에서 따로 올리면 그 사진으로 바뀝니다.</p>
+          : null}
+        {!blockedReason
+          ? <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">개발요청과 Key point는 비워 옵니다. 가져온 뒤 개발 묶음에서 적어 주십시오. 3팀 의견은 보드 작성이 끝난 뒤 적는 칸입니다.</p>
           : null}
       </DialogBody>
       <DialogFooter>

@@ -3,12 +3,12 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { boardKindColor, resultOf } from "@/data/request-board"
 import { PROCESS_STEP_ORDER, processStepColor, type ProcessStage } from "@/data/request-process-stage"
-import type { RequestBoard, RequestOption, RequestStyle } from "@/data/schema"
+import { REQUEST_RESULTS, type RequestBoard, type RequestOption, type RequestStyle } from "@/data/schema"
 
 export function RequestBoardHeader({ board, styles, stageOf, canManage, canDelete, onEdit, onCloseBoard, onDelete }: {
   board: RequestBoard; styles: readonly RequestStyle[]; stageOf: (option: RequestOption) => ProcessStage; canManage: boolean; canDelete: boolean; onEdit: () => void; onCloseBoard: () => void; onDelete: () => void
 }) {
-  const results = Object.fromEntries(["진행중", "완료", "드롭", "보류"].map((key) => [key, styles.filter((style) => resultOf(style) === key).length]))
+  const results = Object.fromEntries(REQUEST_RESULTS.map((key) => [key, styles.filter((style) => resultOf(style) === key).length]))
   const stages = new Map<string, { label: string; count: number; color: string }>()
   styles.flatMap((style) => style.options).forEach((option) => {
     const stage = stageOf(option)
