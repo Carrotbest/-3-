@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-11-07T00:31:02+00:00",
+"generated_at": "2026-11-08T00:03:37+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -343,7 +343,7 @@
 "period_end": "2026-06-30",
 "prev": 10.5,
 "yoy": 19.6,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_operating_amazon",
@@ -429,7 +429,7 @@
 "period_end": "2026-06-30",
 "prev": 15.1,
 "yoy": 43.2,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_inventory_amazon",
@@ -515,7 +515,7 @@
 "period_end": "2026-06-30",
 "prev": 4.5,
 "yoy": -6.5,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_revenue_aeo",
@@ -2645,7 +2645,7 @@
 "period_end": "2026-06-30",
 "prev": -6.3,
 "yoy": -3.2,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_operating_ua",
@@ -2731,7 +2731,7 @@
 "period_end": "2026-06-30",
 "prev": 238.6,
 "yoy": 1315.2,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_inventory_ua",
@@ -2817,7 +2817,7 @@
 "period_end": "2026-06-30",
 "prev": 21.3,
 "yoy": -2.9,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_revenue_urban",
@@ -4083,6 +4083,13 @@
 "news": {
 "kohls": [
 {
+"d": "2026-11-07",
+"t": "Kohl's: 소매업체는 3분기 결과를 앞두고 중립 등급으로 강등되었으며 수익 개선을 기다리고 있습니다.",
+"o": "Kohl's: Retailer Downgraded To Neutral Ahead Of Q3 Results, Awaiting Improved Earnings",
+"u": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNVUVVZElkTXp0LUp1S2cwbUJiUFNJUFZJZV9aTWtvT3pLYUZNX29zYmpGWHF6STBCSERzZHlQZ2JVWF9kRDNaalUyVWJ6anAwaE1zdlRrU0NUOC1PQVhabjA0UzkzNGhZYUZqcXBLb0ZGVVBaTll6N3hIcGxGcEtOMkZfWUU4enpBamEyZXpycHQ3NzRwZllad25jaFhkcGVid1pES0VRZ2hGOTJPeThfSm1wOFQ0U05nZzlfVnh1REZRUQ?oc=5",
+"m": "바이어 · Kohl's"
+},
+{
 "d": "2026-10-30",
 "t": "미국 소매업체 Kohl's, Stacy Taffet 임명으로 이사회 강화",
 "o": "US retailer Kohl's strengthens board with Stacy Taffet appointment",
@@ -4129,13 +4136,6 @@
 "t": "Kohl's(NYSE:KSS) 수익이 소매주에 대한 평균을 능가하는 것은 무엇입니까?",
 "o": "What Does Kohl's (NYSE:KSS) Earnings Beat Mean for Retail Stocks?",
 "u": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPR01ZUkk1ek9uUkY0bXNNamhtZzRVZ0NqRHgzU1J4TW54dTI4WDlqTGl6WVBVUjBsMzY3WXVDQjZseExQc2tlNDhZU3NaX0xqR3ZmTUlCT0szazZQb2RfZFMwbFpsUkxCWTh3d3pLekRYS0Q3RkctWWJSNkNvcHQwLTE3YWw0TnlXd3lKVlEzRzRfRjFoS2JoSkE5WkJ4QUJJZklyLXpkcw?oc=5",
-"m": "바이어 · Kohl's"
-},
-{
-"d": "2026-10-09",
-"t": "일반 상품 소매 주식의 2분기 수익 되돌아보기: Kohl's(NYSE:KSS) 대 나머지 팩",
-"o": "A Look Back at General Merchandise Retail Stocks’ Q2 Earnings: Kohl's (NYSE:KSS) Vs The Rest Of The Pack",
-"u": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNX1JaZGhhRW90WmIyR25TeVJLdGJCR2o0NHFwR09WNmZUNXNHa205U1lRd1ktOVVJZmlSNVhLZjBqVlBTT0xSUDhtYU9wcXJPWVd3MEhUTTB1MW1CMDRDbmdoM1c4bjg4Z2xNUzhJR1NkUkhnUWtua1h0WGlWZkZuQ05RdWtKaUZHN2R6YW9Wa0Z5a2xOUlBaeDNBdDh5NFh6bjNF?oc=5",
 "m": "바이어 · Kohl's"
 }
 ],
@@ -4388,6 +4388,13 @@
 },
 {
 "d": "2026-11-04",
+"t": "강세 추세가 지속됨에 따라 수익이 Costco 주가를 상승시킵니다.",
+"o": "Earnings beat lifts Costco stock price as bullish trend persists",
+"u": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPaFptTmgyS3dEYnBLZEUwNzRDZWQ1LU1LLTNCMTlkM3pKTU5NM0xjRTM0ZTloMzhXc25YS1YtdUY2TEF0c3hMSXJ5alpyXzZ1WkVuamh0ZkxuWWRVYUt0R0o5WlI0SGI4MEtIV2pjVDllVzFVaHMzbUVIVXZnTF9NcjdxUUw1aXFXT1I4RnFTc0E5VlJX?oc=5",
+"m": "바이어 · Costco"
+},
+{
+"d": "2026-11-04",
 "t": "메디큐브, 캐나다 샤퍼스 전점 입점…북미 유통망 확대",
 "o": "메디큐브, 캐나다 샤퍼스 전점 입점…북미 유통망 확대",
 "u": "http://www.ktnews.com/news/articleView.html?idxno=149909",
@@ -4419,13 +4426,6 @@
 "t": "Erste Group, Costco 도매 주식에 대한 Costco 수익 예측을 USD 25.07로 상향 조정",
 "o": "Erste Group raises Costco earnings forecast to USD 25.07 for Costco Wholesale stock",
 "u": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxQUXQwX3Y2S0Y0Q04wdVQ1QklFZVRtbjdYTEp4eW9Pak1FX3BBeGxVaFNHUm10MGhHLTRuc2JlUUQ2aVN6U1BDMW9QS09kYk9Fc3BRaXVJVF81WnpvTzFUMFVuV2NJcXFpTmtpNUx5cnNHNVk4dzVJY1pyOGt4NTRzcGFrYWIzYnBuQnNaVk9uNzFkZXRRVk5FVUhvV3pTaXJDUVgxT1JqdnN2b2REeFJEdldyalBjQkhNS0NXQnN6b01Odkl4NWt4YlZnNXdGXzRraHRJZEx1Xy1iT2NBSEhR?oc=5",
-"m": "바이어 · Costco"
-},
-{
-"d": "2026-10-26",
-"t": "Costco의 AI 검색 트래픽 급증: 온라인 판매를 촉진할 수 있을까요?",
-"o": "Costco's AI Search Traffic Soars: Can It Fuel Online Sales?",
-"u": "https://news.google.com/rss/articles/CBMiswFBVV95cUxPamxEbEZiNWpGelktdHNmb2hkdUVyUm9yM3Q1Z2IxcXpyYS1IOUsyMWNwekVzTUhkOXZMZFl5NU80cFNiaGtOenVTV2VEZEJucTZLSUlEVTZoT3RETWxFWjAzWHZzM0VGc1VMa05RTnVsMlFxSDk1Rk9ONGlVeXNYNTNiWl9yeWRwb3ZHdFZKQ3BBbXozeEtIYXZOZ1FrY3dtejlncDIyMUdjQUVBSFB5SW5TWQ?oc=5",
 "m": "바이어 · Costco"
 }
 ],
@@ -4605,6 +4605,13 @@
 ],
 "ua": [
 {
+"d": "2026-11-07",
+"t": "Under Armour Inc(UAA)(2027년 2분기) 실적 발표 하이라이트: 턴어라운드 압박으로 수익 7% 감소",
+"o": "Under Armour Inc (UAA) (Q2 2027) Earnings Call Highlights: Revenue Slips 7% as Turnaround Presses On",
+"u": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOWnlrTEp6ZDVldk1mNHVVX05LMHgzSHQybjB1MDVPNkx3Y3c5MFA1MVFKUmtlbm0xM3F5X3pES1BtWWVEVEpJZ25mNnJVNEV1bzR2X2YxendTVlFIRFNvUXliejNsMW9wRUZTUlphVS14UzdlNlJia0VDNTNmZW5oUjNQc1VYdFNneThkN3hxX1U3dw?oc=5",
+"m": "바이어 · Under Armour"
+},
+{
 "d": "2026-11-06",
 "t": "Under Armour는 2분기 수익 감소를 보고할 가능성이 높습니다. 가장 정확한 분석가들은 EEA에 앞서 예측을 수정합니다.",
 "o": "Under Armour Likely To Report Lower Q2 Revenue; These Most Accurate Analysts Revise Forecasts Ahead Of Ea",
@@ -4651,13 +4658,6 @@
 "t": "Under Armour (UA) Q3 EPS를 1c 상승; 안내를 제공합니다",
 "o": "Under Armour (UA) Tops Q3 EPS by 1c; offers guidance",
 "u": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQc00zTTdEV1VpNTZZemhTemJ2WW9ud0h4UDlQNC1QZTlxZy1kNDI2SE95QW43TzE5VXFsbzJfaGEzQmV1bl8tNklIZW1hbEIwWXlVRll4WkppakZwSlVwVmFjMnUxTmNUYXR4MDNITFh0ZGtUejg0U3lmTDlscVhGV1Nib1N6d0NMNFhoNWc2WEVBN205N2RUdXFXZXpZSi1ycXA5TC16ZUpiRWNDOVZlSg?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-11-06",
-"t": "Under Armour, 10년 동안의 수입에 빠져들다",
-"o": "Under Armour Mired in Decade-Long Earnings Rut",
-"u": "https://news.google.com/rss/articles/CBMikwFBVV95cUxPN19pV2FLR1Exby1WZGNHcEVxdTBod2tUOGEwTWJzR3R0a0xmeHI4THNoZW9zek8yY3p6MVFBbUlXcVpJNXhkRUlVNHN3OXBtZUVheXhNcGZIaXNiSHNNX2VUeHlURS1BTmtuUFczZDE3SkV6YlJpRk9UaWRJRVFONFFVY015VVFMLUZ5TWVLcjBhZUU?oc=5",
 "m": "바이어 · Under Armour"
 }
 ],

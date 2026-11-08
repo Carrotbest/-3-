@@ -4026,6 +4026,30 @@
   ]
  },
  {
+  "key": "bcba7dd1c10a48c9",
+  "title": "The Fashion Cycle Explained: How Trends Rise, Peak and Decline",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxObWg1U2Zic3JvaDFWeUF5TDNpeW96X2xscEFQLVZWZDVSWmxVVWQ1S2hlNHlIUTkwb0tHOEdGN3VaUUVlc2NUNU85UXN2UnAtSnFJUWVRdDkwMUhSTzFGeUZneWt6NkdyM2lncVJfMVVLQmxNa080akFTeUpmWmNIVnBmUjRGMlYzcG0tU3VIYlJOMlM1MVltMm40NFpHaEZ1a3c4VmJwU1E0RXFZMDIyMFRuUQ?oc=5",
+  "published": "2026-10-29",
+  "collected": "2026-11-08",
+  "summary": "The Fashion Cycle Explained: How Trends Rise, Peak and Decline Fibre2Fashion",
+  "content": "The Fashion Cycle Explained: How Trends Rise, Peak and Decline Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "bbe4c9e65e50f82e",
   "title": "What Urban Edge Properties (UE) Said on Its Q3 Earnings Call",
   "title_ko": null,
@@ -45301,6 +45325,32 @@
   ]
  },
  {
+  "key": "33a36397349e4f41",
+  "title": "| Is caprolactam duty risk: Can nylon yarn makers absorb the shock?",
+  "title_ko": "| 카프로락탐 관세 위험: 나일론 원사 제조업체가 충격을 흡수할 수 있습니까?",
+  "link": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxNVm43MzBjZmsxaURlNmhfX3RiT0V5TUd1MUN2SUJBOTdiekRzTFFyakNOeWI3a2UyMHd3aFpTT3lBaV9oalBuTzlTV1YwUk15N201YmtEelpBbkQ4WkwyNF9SQkJvSmVna1dIR2NZSVJJM1RtM015aU9TYzdLS2ZNZWFYcXVDX2lDa1lJSTN4N0tFblpBdHlSRkwybUFSal91Wlp4c2ZteGpidHpvMmp1di1BS0ZIMU5aVl9iYWNjSV8zc3Rlb21Zd2oxLXEwbUhidS1WOTVMZ3A1cVl2Q193Z0hwbw?oc=5",
+  "published": "2026-10-13",
+  "collected": "2026-11-08",
+  "summary": "| Is caprolactam duty risk: Can nylon yarn makers absorb the shock? Fibre2Fashion",
+  "content": "| Is caprolactam duty risk: Can nylon yarn makers absorb the shock? Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "나일론"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
+  ]
+ },
+ {
   "key": "3026001302590003",
   "title": "$15 Long-Sleeve Polo With Chest Pocket for Casual Fridays",
   "title_ko": null,
@@ -78651,6 +78701,32 @@
   "hits": 1,
   "sources": [
    "주제검색 · 국내소재"
+  ]
+ },
+ {
+  "key": "1b1f89c875c06750",
+  "title": "Nike earnings expected to show decline amid 80% stock drop and cautious market sentiment",
+  "title_ko": "Nike 실적은 80%의 주가 하락과 신중한 시장 심리로 인해 하락세 예상",
+  "link": "https://news.google.com/rss/articles/CBMiggFBVV95cUxNVmRPUE5SekhFci1kWXRGckU2SXdvaXU3X3BpZU0wWHFId3JrcTFsNkZEM1gyckFGemVVU3owd3pEYzZhUUw0bFh4MkZDc05GcWhXcVFqNjQwa1o0TXRIb3oyRUpwRXVKQlhnZThLeV9PdWo2a3lYd1BHMUZIa0RTZzJn?oc=5",
+  "published": "2026-10-01",
+  "collected": "2026-11-08",
+  "summary": "Nike earnings expected to show decline amid 80% stock drop and cautious market sentiment Pluang",
+  "content": "Nike earnings expected to show decline amid 80% stock drop and cautious market sentiment Pluang",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Nike",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "nike"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Nike"
   ]
  },
  {
