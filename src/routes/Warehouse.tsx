@@ -793,7 +793,8 @@ export function Warehouse() {
 
   // 열 필터를 통과한 행. 정렬을 걸지 않으면 원장이 준 대장 순서를 그대로 쓴다.
   const visibleRows = useMemo(() => {
-    const active = Object.entries(columnFilters).filter(([, values]) => values.length > 0)
+    // 빈 배열도 필터다(R411). 아무 값도 안 고른 상태라 그 열에서 통과하는 행이 없다.
+    const active = Object.entries(columnFilters)
     const filtered = active.length === 0 ? rows : rows.filter((item) =>
       active.every(([columnId, values]) => values.includes(cellValue(item, columnId as WarehouseColumnId))))
     if (!sortRule) {
@@ -1783,7 +1784,9 @@ export function Warehouse() {
 
   const filterButton = (column: WarehouseColumn) => {
     const selected = columnFilters[column.id] ?? []
-    const active = selected.length > 0 || sortRule?.col === column.id
+    // 키가 있으면 거르는 중이다. 빈 배열과 "필터 없음"을 가르는 유일한 판정이다.
+    const filtering = column.id in columnFilters
+    const active = filtering || sortRule?.col === column.id
     // 열마다 전체 행을 훑는 계산이다. 팝오버가 열린 열에서만 돌린다.
     // 닫힌 상태에서도 돌리면 이력 탭 기준 매 렌더 17만 번(4,485행 x 38열)이 된다.
     const open = filterMenu === column.id
@@ -1792,10 +1795,11 @@ export function Warehouse() {
       : []
     const query = filterSearch.trim().toLocaleLowerCase("ko-KR")
     const shown = (query ? values.filter((value) => value.toLocaleLowerCase("ko-KR").includes(query)) : values).slice(0, 400)
-    const setFilter = (next: string[]) => setColumnFilters((current) => {
+    // 빈 배열이어도 키를 남긴다. 지우면 전체 표시로 돌아가 체크가 도로 전부 켜진다.
+    const setFilter = (next: string[]) => setColumnFilters((current) => ({ ...current, [column.id]: next }))
+    const showAll = () => setColumnFilters((current) => {
       const copy = { ...current }
-      if (next.length === 0) delete copy[column.id]
-      else copy[column.id] = next
+      delete copy[column.id]
       return copy
     })
     return <Popover.Root open={open} onOpenChange={(open) => { setFilterMenu(open ? column.id : null); setFilterSearch("") }}>
@@ -1818,16 +1822,16 @@ export function Warehouse() {
           <div className="mt-2 space-y-2">
             <Input value={filterSearch} onChange={(event) => setFilterSearch(event.target.value)} placeholder="값 검색" className="h-7 text-xs" />
             <div className="flex items-center justify-between text-[11px] text-[var(--muted-foreground)]">
-              <button type="button" className="hover:underline" onClick={() => setFilter(values)}>모두 선택</button>
-              <span>{selected.length ? `${selected.length}개 선택` : "전체 표시"}</span>
+              <button type="button" className="hover:underline" onClick={showAll}>모두 선택</button>
+              <span>{filtering ? `${selected.length}개 선택` : "전체 표시"}</span>
               <button type="button" className="hover:underline" onClick={() => setFilter([])}>해제</button>
             </div>
             <div className="max-h-56 space-y-0.5 overflow-y-auto">
               {shown.map((value) => {
-                const checked = selected.length === 0 || selected.includes(value)
+                const checked = filtering ? selected.includes(value) : true
                 return <label key={value || "(빈값)"} className="flex items-center gap-2 rounded px-1 py-0.5 hover:bg-[var(--muted)]">
                   <Checkbox checked={checked} onCheckedChange={(next) => {
-                    const base = selected.length === 0 ? values : selected
+                    const base = filtering ? selected : values
                     setFilter(next === true ? [...new Set([...base, value])] : base.filter((entry) => entry !== value))
                   }} aria-label={value || "빈값"} />
                   <span className="min-w-0 flex-1 truncate">{value || <span className="text-[var(--muted-foreground)]">(빈값)</span>}</span>
