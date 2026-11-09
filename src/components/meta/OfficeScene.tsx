@@ -1300,15 +1300,18 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       box(9.5, 1.9, 0.2, materials.dark, 0, 0, 0, group)
       box(9.5, 0.12, 0.3, materials.dark, 0, -1.01, 0, group)
       ;[-4.75, 4.75].forEach((side) => cylinder(0.1, 1.9, materials.dark, side, 0, 0, group))
-      const faceMaterial = new THREE.MeshBasicMaterial({ map: textureOf(canvas), transparent: true })
+      // 뒤판 두께가 0.2라 z가 -0.1에서 0.1까지다. 글자판을 그 밖으로 빼지 않으면 판 속에 묻힌다.
+      const faceMaterial = new THREE.MeshBasicMaterial({ map: textureOf(canvas), transparent: true, depthWrite: false })
       const frontFace = new THREE.Mesh(geometries.plane, faceMaterial)
       frontFace.scale.set(9.3, 1.8, 1)
-      frontFace.position.set(0, 0, 0.09)
+      frontFace.position.set(0, 0, 0.13)
+      frontFace.renderOrder = 4
       frontFace.castShadow = false
       group.add(frontFace)
       const backFace = new THREE.Mesh(geometries.plane, faceMaterial)
       backFace.scale.set(9.3, 1.8, 1)
-      backFace.position.set(0, 0, -0.09)
+      backFace.position.set(0, 0, -0.13)
+      backFace.renderOrder = 4
       backFace.rotation.y = Math.PI
       backFace.castShadow = false
       group.add(backFace)
