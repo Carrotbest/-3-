@@ -158,7 +158,7 @@ export function Meta() {
       setSelectedRoomPath(id || null)
       setObjectId(null)
     }
-    setFocusUid(kind === "person" ? id : null)
+    setFocusUid(kind === "person" && id ? id : null)
   }, [navigate])
 
   const selectedRoom = selectedRoomPath ? routeDefinitions.find((route) => route.path === selectedRoomPath) : null
@@ -199,7 +199,7 @@ export function Meta() {
             </Suspense>
           </div>
           <p className="mt-1 text-[11px] text-[var(--muted-foreground)]">
-            끌기로 돌리고, 스페이스를 누른 채 끌면 화면이 움직입니다. 휠로 확대합니다. 육면체 표지를 누르면 그 방으로 들어갑니다.
+            끌기로 돌리고, 스페이스를 누른 채 끌면 화면이 움직입니다. 휠로 확대합니다. 육면체 표지나 사람을 누르면 그쪽으로 들어가고, 더블클릭하면 전체 화면으로 돌아옵니다.
           </p>
         </div>
 

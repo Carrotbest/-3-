@@ -2910,9 +2910,16 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE
     }
     const handleDoubleClick = () => {
-      if (!activeRoomPath) return
-      selectRoom(null)
-      onPickRef.current("room", "")
+      // 방을 고른 경우와 사람을 고른 경우 둘 다 빠져나온다.
+      if (!activeRoomPath && !selectedUid) return
+      if (activeRoomPath) {
+        selectRoom(null)
+        onPickRef.current("room", "")
+      }
+      if (selectedUid) {
+        applyFocus(null, false)
+        onPickRef.current("person", "")
+      }
       // 전체 보기로 돌아갈 때 처음 자리와 줄으로 되돌린다.
       userAdjustedView = false
       const distance = 70
