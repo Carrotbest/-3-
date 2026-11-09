@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react"
 import {
   BookOpenCheck,
   Boxes,
+  Building2,
   CalendarDays,
   Calculator,
   ClipboardList,
@@ -41,6 +42,7 @@ export interface NavigationGroup {
 
 export const routeDefinitions: RouteDefinition[] = [
   { path: "/", title: "HOME", subtitle: "원단 개발 업무 현황을 한눈에 확인합니다." },
+  { path: "/meta", title: "META", subtitle: "지금 접속한 사람들이 어느 화면에서 무엇을 하고 있는지 공간으로 봅니다." },
   { path: "/request", title: "DEVELOPMENT REQUEST", subtitle: "1팀 의뢰 건의 접수와 개발 현황을 한 원장에서 관리합니다." },
   { path: "/development", title: "PROGRESS OVERVIEW", subtitle: "개발 건의 전체 진행 현황을 확인합니다." },
   { path: "/development/workspace", title: "DD MASTER", subtitle: "Development Dashboard 전체 열과 샘플 관리 상태를 한 시트에서 관리합니다." },
@@ -69,6 +71,7 @@ export const navigationGroups: NavigationGroup[] = [
     accent: "#6366f1",
     items: [
       { label: "HOME", path: "/", icon: LayoutDashboard },
+      { label: "META", path: "/meta", icon: Building2 },
     ],
   },
   {

@@ -1,0 +1,71 @@
+import { addDoc, collection, limit, onSnapshot, orderBy, query, serverTimestamp } from "firebase/firestore"
+
+import { auth, db } from "./firebase"
+import { useAuthStore } from "./auth"
+
+/**
+ * 가상 오피스 채팅.
+ *
+ * `state/{key}` 청크 동기화에 넣지 않는다. 쌓이는 로그라 배열 통째 재업로드 구조에 두면
+ * 편집 비용이 계속 커진다. `auditLog`와 같은 이유다. `CACHE_KEYS`에도 넣지 않는다.
+ */
+export interface MetaChatMessage {
+  id: string
+  uid: string
+  name: string
+  color: string
+  text: string
+  /** 보낸 사람이 그때 있던 방 경로. 빈 문자열이면 전체 대화다. */
+  room: string
+  /** serverTimestamp. 읽을 때 Timestamp. */
+  createdAt: unknown
+}
+
+const COLLECTION = "metaChat"
+const MAX_TEXT = 200
+const READ_LIMIT = 50
+
+export function chatCreatedAtMillis(value: unknown): number | null {
+  if (!value || typeof value !== "object" || !("toMillis" in value)) return null
+  const toMillis = (value as { toMillis?: unknown }).toMillis
+  if (typeof toMillis !== "function") return null
+  const millis = toMillis.call(value)
+  return typeof millis === "number" ? millis : null
+}
+
+/**
+ * 최근 50건만 읽는다. 옛 메시지를 지우는 코드는 만들지 않는다.
+ * 서버가 없어서 정리 작업을 돌릴 데가 없고, 쌓여도 읽기는 늘 50건이라 비용이 안 는다.
+ */
+export function subscribeMetaChat(onChange: (messages: MetaChatMessage[]) => void): () => void {
+  const recent = query(collection(db, COLLECTION), orderBy("createdAt", "desc"), limit(READ_LIMIT))
+  return onSnapshot(recent, (snapshot) => {
+    const messages = snapshot.docs
+      .map((item) => ({ id: item.id, ...item.data() }) as MetaChatMessage)
+      .reverse()
+    onChange(messages)
+  }, () => onChange([]))
+}
+
+export async function sendMetaChat(text: string, room: string, name: string, color: string): Promise<boolean> {
+  const user = auth.currentUser
+  const { approval, isOwner } = useAuthStore.getState()
+  if (!user || (!isOwner && approval !== "approved")) return false
+
+  const trimmed = text.trim().slice(0, MAX_TEXT)
+  if (!trimmed) return false
+
+  try {
+    await addDoc(collection(db, COLLECTION), {
+      uid: user.uid,
+      name,
+      color,
+      text: trimmed,
+      room,
+      createdAt: serverTimestamp(),
+    })
+    return true
+  } catch {
+    return false
+  }
+}

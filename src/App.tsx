@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom"
 
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary"
@@ -41,7 +41,17 @@ import { TrendMacro } from "@/routes/TrendMacro"
 import { ensureTsSeed, migrateLocalTsIntoSync, normalizeLoadedRecords, repairTsData, setAppState, useAppStore } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
-const IMPLEMENTED_ROUTES = new Set(["/", "/request", "/development", "/rdda", "/ts", "/study", "/protocol", "/fabric-analysis", "/cost", "/fabric/:key", "/warehouse", "/calendar", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
+const Meta = lazy(() => import("@/routes/Meta").then((module) => ({ default: module.Meta })))
+
+const IMPLEMENTED_ROUTES = new Set(["/", "/meta", "/request", "/development", "/rdda", "/ts", "/study", "/protocol", "/fabric-analysis", "/cost", "/fabric/:key", "/warehouse", "/calendar", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
+
+function MetaFallback() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-sm text-[var(--muted-foreground)]">
+      가상 오피스를 불러오는 중입니다
+    </div>
+  )
+}
 
 function ScreenAccessDenied() {
   return (
@@ -179,6 +189,7 @@ function AppLayout() {
               key 를 경로로 두어 다른 화면으로 옮기면 저절로 풀린다. */}
           {canViewCurrentPath ? <RouteErrorBoundary key={pathname}><Routes>
             <Route path="/" element={<HomeGate><Home /></HomeGate>} />
+            <Route path="/meta" element={<Suspense fallback={<MetaFallback />}><Meta /></Suspense>} />
             <Route path="/development" element={<Development />} />
             <Route path="/development/:sub" element={<Development />} />
             <Route path="/rdda" element={<Rdda />} />

@@ -1,5 +1,6 @@
 export const SCREEN_PERMISSION_OPTIONS = [
   { key: "home", label: "HOME", paths: ["/"] },
+  { key: "metaOffice", label: "META", paths: ["/meta"] },
   { key: "fabricRequest", label: "DEVELOPMENT REQUEST", paths: ["/request"] },
   { key: "development", label: "PROGRESS OVERVIEW", paths: ["/development"] },
   { key: "ddMaster", label: "DD MASTER", prefixes: ["/development/"] },
@@ -70,7 +71,7 @@ export const ACCESS_LABELS: Record<ScreenAccess, string> = { none: "없음", rea
 
 /** 권한 표에 보이는 묶음. SETTING은 소유자 전용이라 표에 넣지 않는다. excelBackup은 기능이라 허용/차단 두 단계다. */
 export const ACCESS_GROUPS: { label: string; keys: ScreenPermissionKey[] }[] = [
-  { label: "업무", keys: ["home", "fabricRequest", "development", "ddMaster", "warehouse", "warehouseFabric1", "calendar"] },
+  { label: "업무", keys: ["home", "metaOffice", "fabricRequest", "development", "ddMaster", "warehouse", "warehouseFabric1", "calendar"] },
   { label: "분석·자료", keys: ["rdda", "fabricAnalysis", "costSheet", "fabricTrend", "portfolio", "processInnovation", "ts", "study", "protocol"] },
   { label: "기능", keys: ["excelBackup", "warehouseOutbound"] },
 ]
@@ -82,7 +83,7 @@ export const FEATURE_KEYS: readonly ScreenPermissionKey[] = ["excelBackup", "war
  * 바이어 기준표 개정은 소유자만 한다. Firestore 규칙도 쓰기를 소유자로 막아 두었으므로
  * 여기서 편집을 열면 화면에서만 열리고 저장은 permission denied가 난다.
  */
-export const READ_ONLY_KEYS: readonly ScreenPermissionKey[] = ["protocol"]
+export const READ_ONLY_KEYS: readonly ScreenPermissionKey[] = ["protocol", "metaOffice"]
 
 /**
  * 저장된 값이 없을 때 fallback 대신 "없음"으로 시작하는 화면(R342).
