@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-11-10T03:02:12+00:00",
+"generated_at": "2026-11-10T03:42:40+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3607,10 +3607,6 @@
 "source_url": "https://fred.stlouisfed.org/series/DEXKOUS",
 "points": [
 {
-"period": "2025-10",
-"value": 1423.08
-},
-{
 "period": "2025-11",
 "value": 1459.879
 },
@@ -3657,13 +3653,17 @@
 {
 "period": "2026-10",
 "value": 1337.36
+},
+{
+"period": "2026-11",
+"value": 1349.134
 }
 ],
-"value": 1337.36,
-"period": "2026-10",
+"value": 1349.134,
+"period": "2026-11",
 "period_end": null,
-"prev": -1.6,
-"yoy": -6.0,
+"prev": 0.9,
+"yoy": -7.6,
 "stale": false
 },
 {
@@ -3899,10 +3899,6 @@
 "source_url": "https://www.worldbank.org/en/research/commodity-markets",
 "points": [
 {
-"period": "2025-09",
-"value": 68.0
-},
-{
 "period": "2025-10",
 "value": 64.7
 },
@@ -3949,13 +3945,17 @@
 {
 "period": "2026-09",
 "value": 116.8
+},
+{
+"period": "2026-10",
+"value": 125.0
 }
 ],
-"value": 116.8,
-"period": "2026-09",
+"value": 125.0,
+"period": "2026-10",
 "period_end": null,
-"prev": 28.5,
-"yoy": 71.8,
+"prev": 7.0,
+"yoy": 93.2,
 "stale": false
 },
 {
@@ -3971,10 +3971,6 @@
 "source_name": "World Bank Commodity Markets (Pink Sheet)",
 "source_url": "https://www.worldbank.org/en/research/commodity-markets",
 "points": [
-{
-"period": "2025-09",
-"value": 1.72
-},
 {
 "period": "2025-10",
 "value": 1.68
@@ -4022,13 +4018,17 @@
 {
 "period": "2026-09",
 "value": 2.1
+},
+{
+"period": "2026-10",
+"value": 2.0
 }
 ],
-"value": 2.1,
-"period": "2026-09",
+"value": 2.0,
+"period": "2026-10",
 "period_end": null,
-"prev": -0.5,
-"yoy": 22.1,
+"prev": -4.8,
+"yoy": 19.0,
 "stale": false
 }
 ],
