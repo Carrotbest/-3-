@@ -1357,6 +1357,30 @@
   ]
  },
  {
+  "key": "cde0829d5f33d7a7",
+  "title": "Sub-Saharan Africa: Potential and Challenges in Textiles & Apparel Industry",
+  "title_ko": "사하라 이남 아프리카: 섬유 및 의류 산업의 잠재력과 과제",
+  "link": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxPR1Fra0x1SEdhY3ZCa2JwcUxocGVHTjZZWFJwUzRlSE1BWmtWZENWZXZhR01nYVFqdllvdjRIdlJNbzJoM21YS0s0NHdJZFloUV9hME1RbWo2UUh3bFFobXJrWGlnbERURzhxYlBMcFE2Rl8yVUFGRHBmWVpiQUFXQ015NTRYYS0xeVhuZXNFcWNKQmdQbHpZc2hrd0dGN045N2gtNmpDa1VlT0JKRmJuZ3dJU0MxVjlzXzdjT3BBdXRhQk11Yk0yem82SEVsVUJJTG14Y0N3?oc=5",
+  "published": "2026-10-30",
+  "collected": "2026-11-10",
+  "summary": "Sub-Saharan Africa: Potential and Challenges in Textiles & Apparel Industry Fibre2Fashion",
+  "content": "Sub-Saharan Africa: Potential and Challenges in Textiles & Apparel Industry Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "cc7ae54bd89622db",
   "title": "| India's $1 bn fabric exports face new customs rules on Nov 1",
   "title_ko": "| 인도의 10억 달러 규모 직물 수출, 11월 1일부터 새로운 관세 규정 적용",
@@ -76463,6 +76487,30 @@
   "hits": 1,
   "sources": [
    "주제검색 · 국내소재"
+  ]
+ },
+ {
+  "key": "739b9091bae117d0",
+  "title": "The Abuses in Turkish Textile Factories Supplying Major US Brands",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNSHhPRjltWWl2ZzFrRDJkZTJTUzA5Q3VGRHI2TE9pREhaR3NsT1c2Y1lLN2ZiQmphdHM0Rm5oLVFRamtrYV80LWpXS2lyeWR2OW5maUd2SlBzemg1Q2piWnBXeFRzWldHYXp4N0ZZOFIyVGFRbjE0UkRueGxmZFVtV2dXS2lzSGxVS2NRMzJNbV90YXV5aHJqczRn?oc=5",
+  "published": "2026-10-01",
+  "collected": "2026-11-10",
+  "summary": "The Abuses in Turkish Textile Factories Supplying Major US Brands New Lines Magazine",
+  "content": "The Abuses in Turkish Textile Factories Supplying Major US Brands New Lines Magazine",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · PVH",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 3,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · PVH"
   ]
  },
  {
