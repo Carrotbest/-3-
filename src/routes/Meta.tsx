@@ -1,18 +1,22 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Building2, ChevronRight, Maximize2, Send, Users } from "lucide-react"
+import { Building2, ChevronRight, Maximize2, MessageCircle, Send, Users } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 import { META_FACILITIES, META_OBJECTS } from "@/components/meta/facilities"
 import { usePresencePeople } from "@/components/meta/usePresencePeople"
 import { routeDefinitions } from "@/routes/route-config"
+import { listActions, type AuditScreen } from "@/data/audit"
 import { chatCreatedAtMillis, sendMetaChat, subscribeMetaChat, type MetaChatMessage } from "@/data/meta-chat"
-import { writePresenceMood, writePresenceSpot, type PresenceMood, type PresenceSpot, type PresenceStatus } from "@/data/presence"
+import { activityLabel, readPresenceMood, writePresenceMood, writePresenceSpot, type PresenceMood, type PresenceSpot, type PresenceStatus } from "@/data/presence"
 import { isInProgress } from "@/data/derive"
+import { buildRoomStats } from "@/data/meta-room-stats"
 import { useAppStore } from "@/store/useAppStore"
 
 const OfficeScene = lazy(() => import("@/components/meta/OfficeScene").then((module) => ({ default: module.OfficeScene })))
 
 const subtitle = routeDefinitions.find((route) => route.path === "/meta")?.subtitle ?? ""
+const ACTION_CACHE_MS = 60_000
+const actionCache = new Map<AuditScreen, { at: number; actions: unknown[] }>()
 
 const STATUS_OPTIONS: Array<{ value: PresenceStatus; label: string }> = [
   { value: "focus", label: "집중" },
@@ -34,6 +38,67 @@ function agoText(seconds: number): string {
   return minutes === 1 ? "1분 전" : `${minutes}분 전`
 }
 
+function localDateText(date = new Date()): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+function textField(record: Record<string, unknown>, keys: string[]): string {
+  for (const key of keys) {
+    const value = record[key]
+    if (typeof value === "string" && value.trim()) return value.trim()
+  }
+  return ""
+}
+
+function auditActor(record: Record<string, unknown>): string {
+  const direct = textField(record, ["actorName", "userName", "displayName", "name", "user"])
+  if (direct) return direct
+  const actor = record.actor
+  return actor && typeof actor === "object"
+    ? textField(actor as Record<string, unknown>, ["name", "displayName", "userName"])
+    : ""
+}
+
+function auditKind(record: Record<string, unknown>): string {
+  const raw = textField(record, ["action", "type", "kind", "event"])
+  const labels: Record<string, string> = {
+    create: "추가",
+    created: "추가",
+    add: "추가",
+    update: "수정",
+    updated: "수정",
+    edit: "수정",
+    delete: "삭제",
+    deleted: "삭제",
+    remove: "삭제",
+    upload: "업로드",
+    import: "가져오기",
+  }
+  return labels[raw.toLocaleLowerCase()] ?? raw
+}
+
+function actionLines(actions: unknown[]): string[] {
+  const counts = new Map<string, { actor: string; kind: string; count: number }>()
+  actions.forEach((action) => {
+    if (!action || typeof action !== "object") return
+    const record = action as Record<string, unknown>
+    const actor = auditActor(record)
+    const kind = auditKind(record)
+    if (!actor || !kind) return
+    const key = `${actor}\u0000${kind}`
+    const current = counts.get(key)
+    if (current) current.count += 1
+    else counts.set(key, { actor, kind, count: 1 })
+  })
+  return [...counts.values()]
+    .sort((left, right) => right.count - left.count || left.actor.localeCompare(right.actor, "ko-KR"))
+    .slice(0, 4)
+    .map((entry) => `${entry.actor} ${entry.kind} ${entry.count}건`)
+}
+
 function SceneFallback() {
   return (
     <div className="flex h-full items-center justify-center bg-[var(--muted)] text-sm text-[var(--muted-foreground)]">
@@ -47,16 +112,35 @@ export function Meta() {
   const [status, setStatus] = useState<PresenceStatus>("focus")
   const [mood, setMood] = useState<PresenceMood>("good")
   const [spot, setSpot] = useState<PresenceSpot | undefined>(undefined)
-  const people = usePresencePeople(status, mood, spot)
+  const people = usePresencePeople(status, mood, spot, "view")
   const [focusUid, setFocusUid] = useState<string | null>(null)
   const [selectedRoomPath, setSelectedRoomPath] = useState<string | null>(null)
   const [messages, setMessages] = useState<MetaChatMessage[]>([])
   const [draft, setDraft] = useState("")
   const [chatTab, setChatTab] = useState<"all" | "room">("all")
   const [objectId, setObjectId] = useState<string | null>(null)
+  const [objectHistory, setObjectHistory] = useState<{ screen: AuditScreen; loading: boolean; lines: string[] } | null>(null)
   const chatListRef = useRef<HTMLDivElement | null>(null)
+  // 저장값을 읽어 오기 전에는 쓰지 않는다. 쓰면 기본값(집중, 좋음)이 저장값을 덮는다.
+  const moodHydrated = useRef(false)
+  const moodTouched = useRef(false)
 
   useEffect(() => subscribeMetaChat(setMessages), [])
+
+  useEffect(() => {
+    let alive = true
+    void readPresenceMood().then((saved) => {
+      if (!alive) return
+      if (!moodTouched.current) {
+        if (saved.status) setStatus(saved.status)
+        if (saved.mood) setMood(saved.mood)
+      }
+      moodHydrated.current = true
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     const list = chatListRef.current
@@ -64,6 +148,7 @@ export function Meta() {
   }, [messages])
 
   useEffect(() => {
+    if (!moodHydrated.current) return
     void writePresenceMood(status, mood)
   }, [status, mood])
 
@@ -75,6 +160,18 @@ export function Meta() {
   const fabricOverrides = useAppStore((state) => state.fabricOverrides)
   const rdda = useAppStore((state) => state.rdda)
   const trends = useAppStore((state) => state.trends)
+  const analysisRequests = useAppStore((state) => state.analysisRequests)
+  const ts = useAppStore((state) => state.ts)
+
+  const roomStats = useMemo(() => buildRoomStats({
+    records,
+    requests,
+    analysisRequests,
+    fabricOverrides,
+    events,
+    ts,
+    trends,
+  }), [records, requests, analysisRequests, fabricOverrides, events, ts, trends])
 
   const objectCard = useMemo(() => {
     if (!objectId) return null
@@ -108,8 +205,38 @@ export function Meta() {
       lines.push({ label: "수집 기사", value: trends.length > 0 ? `${trends.length}건` : "수집 전" })
     }
 
-    return { name: meta.name, lines }
+    return { name: meta.name, lines, path: meta.path, screen: meta.screen }
   }, [objectId, records, requests, events, fabricOverrides, rdda, trends])
+
+  useEffect(() => {
+    const meta = objectId ? META_OBJECTS.find((entry) => entry.id === objectId) : null
+    if (!meta?.screen) {
+      setObjectHistory(null)
+      return
+    }
+
+    const cached = actionCache.get(meta.screen)
+    if (cached && Date.now() - cached.at < ACTION_CACHE_MS) {
+      setObjectHistory({ screen: meta.screen, loading: false, lines: actionLines(cached.actions) })
+      return
+    }
+
+    let active = true
+    setObjectHistory({ screen: meta.screen, loading: true, lines: [] })
+    const today = localDateText()
+    void listActions({ from: today, to: today, screen: meta.screen, max: 120 })
+      .then((result) => {
+        const actions = Array.isArray(result) ? result : []
+        actionCache.set(meta.screen!, { at: Date.now(), actions })
+        if (active) setObjectHistory({ screen: meta.screen!, loading: false, lines: actionLines(actions) })
+      })
+      .catch(() => {
+        if (active) setObjectHistory({ screen: meta.screen!, loading: false, lines: [] })
+      })
+    return () => {
+      active = false
+    }
+  }, [objectId])
 
   const bubbles = useMemo(() => {
     const map: Record<string, { text: string; at: number }> = {}
@@ -135,6 +262,10 @@ export function Meta() {
     if (focusUid && !people.some((person) => person.uid === focusUid)) setFocusUid(null)
   }, [focusUid, people])
 
+  const openChat = useCallback((uid: string, name: string) => {
+    window.dispatchEvent(new CustomEvent("fabric:chat-open", { detail: { uid, name } }))
+  }, [])
+
   const handlePick = useCallback((kind: "room" | "person" | "facility" | "spot" | "object", id: string, path?: string) => {
     if (kind === "facility" && path) {
       navigate(path)
@@ -158,8 +289,12 @@ export function Meta() {
       setSelectedRoomPath(id || null)
       setObjectId(null)
     }
+    if (kind === "person" && id) {
+      const target = people.find((person) => person.uid === id)
+      if (target && !target.isSelf) openChat(target.uid, target.name)
+    }
     setFocusUid(kind === "person" && id ? id : null)
-  }, [navigate])
+  }, [navigate, openChat, people])
 
   const selectedRoom = selectedRoomPath ? routeDefinitions.find((route) => route.path === selectedRoomPath) : null
   const selectedFacilities = selectedRoomPath ? META_FACILITIES.filter((facility) => facility.roomPath === selectedRoomPath) : []
@@ -195,11 +330,11 @@ export function Meta() {
         <div className="min-w-0">
           <div className="overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--card)] shadow-sm [height:clamp(280px,86vw,520px)] lg:min-h-[420px] lg:[height:calc(100vh-230px)]">
             <Suspense fallback={<SceneFallback />}>
-              <OfficeScene people={people} focusUid={focusUid} selectedRoomPath={selectedRoomPath} onPick={handlePick} bubbles={bubbles} />
+              <OfficeScene people={people} focusUid={focusUid} selectedRoomPath={selectedRoomPath} onPick={handlePick} bubbles={bubbles} roomStats={roomStats} />
             </Suspense>
           </div>
           <p className="mt-1 text-[11px] text-[var(--muted-foreground)]">
-            끌기로 돌리고, 스페이스를 누른 채 끌면 화면이 움직입니다. 휠로 확대합니다. 육면체 표지나 사람을 누르면 그쪽으로 들어가고, 더블클릭하면 전체 화면으로 돌아옵니다.
+            끌기로 돌리고, 스페이스를 누른 채 끌면 화면이 움직입니다. 휠로 확대합니다. 육면체 표지를 누르면 그 방에 불이 켜지고 다시 누르면 꺼집니다. 두 번 누르면 그쪽으로 들어가고, 빈 곳을 두 번 누르면 전체 화면으로 돌아옵니다.
           </p>
         </div>
 
@@ -261,6 +396,30 @@ export function Meta() {
                   </div>
                 ))}
               </dl>
+              {objectCard.screen ? (
+                <div className="mt-2 border-t border-[var(--border)] pt-2">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted-foreground)]">오늘 이력</p>
+                  {objectHistory?.screen === objectCard.screen && objectHistory.loading ? (
+                    <p className="text-xs text-[var(--muted-foreground)]">불러오는 중</p>
+                  ) : objectHistory?.screen === objectCard.screen && objectHistory.lines.length > 0 ? (
+                    <ul className="space-y-1 text-xs">
+                      {objectHistory.lines.map((line) => <li key={line}>{line}</li>)}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-[var(--muted-foreground)]">오늘 기록 없음</p>
+                  )}
+                </div>
+              ) : null}
+              {objectCard.path ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(objectCard.path!)}
+                  className="mt-2 inline-flex w-full items-center justify-center gap-1 rounded-[8px] border border-[var(--border)] bg-[var(--card)] px-2 py-1.5 text-xs font-medium outline-none hover:bg-[var(--muted)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+                >
+                  해당 화면으로 이동
+                  <ChevronRight className="size-3.5" aria-hidden="true" />
+                </button>
+              ) : null}
             </div>
           ) : null}
 
@@ -269,7 +428,10 @@ export function Meta() {
               <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted-foreground)]">상태</span>
               <select
                 value={status}
-                onChange={(event) => setStatus(event.target.value as PresenceStatus)}
+                onChange={(event) => {
+                  moodTouched.current = true
+                  setStatus(event.target.value as PresenceStatus)
+                }}
                 className="h-8 w-full rounded-[8px] border border-[var(--border)] bg-[var(--card)] px-2 text-xs outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
               >
                 {STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -279,7 +441,10 @@ export function Meta() {
               <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted-foreground)]">기분</span>
               <select
                 value={mood}
-                onChange={(event) => setMood(event.target.value as PresenceMood)}
+                onChange={(event) => {
+                  moodTouched.current = true
+                  setMood(event.target.value as PresenceMood)
+                }}
                 className="h-8 w-full rounded-[8px] border border-[var(--border)] bg-[var(--card)] px-2 text-xs outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
               >
                 {MOOD_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -302,25 +467,40 @@ export function Meta() {
               {orderedPeople.map((person) => {
                 const selected = person.uid === focusUid
                 return (
-                  <button
+                  <div
                     key={person.uid}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => setFocusUid(person.uid)}
-                    className={`flex w-full items-center gap-3 rounded-[10px] border px-2.5 py-2 text-left outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] ${selected ? "border-[color-mix(in_oklab,var(--gradient-1)_45%,var(--border))] bg-[color-mix(in_oklab,var(--gradient-1)_8%,var(--card))]" : "border-transparent hover:border-[var(--border)] hover:bg-[var(--muted)]/60"}`}
+                    className={`flex w-full items-center rounded-[10px] border transition-colors ${selected ? "border-[color-mix(in_oklab,var(--gradient-1)_45%,var(--border))] bg-[color-mix(in_oklab,var(--gradient-1)_8%,var(--card))]" : "border-transparent hover:border-[var(--border)] hover:bg-[var(--muted)]/60"}`}
                   >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white" style={{ backgroundColor: person.color }}>
-                      {person.name.slice(0, 1).toLocaleUpperCase("ko-KR")}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex min-w-0 items-center gap-1.5">
-                        <strong className="truncate text-sm font-medium">{person.name}</strong>
-                        {person.isSelf ? <span className="shrink-0 rounded-full bg-[var(--muted)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--muted-foreground)]">나</span> : null}
+                    <button
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setFocusUid(person.uid)}
+                      className="flex min-w-0 flex-1 items-center gap-3 rounded-[10px] px-2.5 py-2 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+                    >
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white" style={{ backgroundColor: person.color }}>
+                        {person.name.slice(0, 1).toLocaleUpperCase("ko-KR")}
                       </span>
-                      <span className="block truncate text-xs text-[var(--muted-foreground)]">{person.screen || person.path}</span>
-                    </span>
-                    <span className="shrink-0 text-[11px] tabular-nums text-[var(--muted-foreground)]">{agoText(person.ago)}</span>
-                  </button>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex min-w-0 items-center gap-1.5">
+                          <strong className="truncate text-sm font-medium">{person.name}</strong>
+                          {person.isSelf ? <span className="shrink-0 rounded-full bg-[var(--muted)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--muted-foreground)]">나</span> : null}
+                        </span>
+                        <span className="block truncate text-xs text-[var(--muted-foreground)]">{person.screen || person.path}</span>
+                        <span className="block truncate text-[10px] text-[var(--muted-foreground)]">{activityLabel(person.activity)}</span>
+                      </span>
+                      <span className="shrink-0 text-[11px] tabular-nums text-[var(--muted-foreground)]">{agoText(person.ago)}</span>
+                    </button>
+                    {!person.isSelf ? (
+                      <button
+                        type="button"
+                        onClick={() => openChat(person.uid, person.name)}
+                        className="mr-2 inline-flex shrink-0 items-center gap-1 rounded-[7px] px-2 py-1 text-[11px] font-medium text-[var(--muted-foreground)] outline-none hover:bg-[var(--card)] hover:text-[var(--foreground)] focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]"
+                      >
+                        <MessageCircle className="size-3" aria-hidden="true" />
+                        채팅
+                      </button>
+                    ) : null}
+                  </div>
                 )
               })}
             </div>

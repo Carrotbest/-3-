@@ -1,3 +1,5 @@
+import type { AuditScreen } from "@/data/audit"
+
 export interface MetaFacility {
   roomPath: string
   name: string
@@ -39,13 +41,17 @@ export interface MetaObject {
   name: string
   position: [number, number, number]
   hitSize: [number, number, number]
+  /** 이 오브젝트가 보여 줄 작업 이력의 화면. 없으면 이력을 안 읽는다. */
+  screen?: AuditScreen
+  /** 누르면 갈 화면. 없으면 이동 버튼을 안 보인다. */
+  path?: string
 }
 
 export const META_OBJECTS: MetaObject[] = [
-  { roomPath: "/warehouse", id: "warehouse-rack", name: "원단 랭", position: [-6.3, 1.5, -1.8], hitSize: [3.4, 2.4, 1.2] },
-  { roomPath: "/development/workspace", id: "dd-wall", name: "현황 모니터 벽", position: [0, 2, -4], hitSize: [7.2, 2.6, 0.6] },
-  { roomPath: "/request", id: "request-hanger", name: "원단 행거", position: [0, 1.4, -4], hitSize: [10, 1.8, 0.8] },
-  { roomPath: "/rdda", id: "rdda-screen", name: "보고 스크린", position: [0, 1.55, -4.1], hitSize: [13.3, 2.2, 0.6] },
-  { roomPath: "/trend/macro", id: "macro-ticker", name: "티커 보드", position: [0, 1.2, -5.7], hitSize: [6.4, 1.8, 0.6] },
-  { roomPath: "/calendar", id: "calendar-board", name: "월간 보드", position: [-4.1, 1.7, 0], hitSize: [0.6, 2.2, 3.2] },
+  { roomPath: "/warehouse", id: "warehouse-rack", name: "원단 랭", position: [-6.3, 1.5, -1.8], hitSize: [3.4, 2.4, 1.2], screen: "warehouse", path: "/warehouse" },
+  { roomPath: "/development/workspace", id: "dd-wall", name: "현황 모니터 벽", position: [0, 2, -4], hitSize: [7.2, 2.6, 0.6], screen: "dd", path: "/development/workspace" },
+  { roomPath: "/request", id: "request-hanger", name: "원단 행거", position: [0, 1.4, -4], hitSize: [10, 1.8, 0.8], screen: "request", path: "/request" },
+  { roomPath: "/rdda", id: "rdda-screen", name: "보고 스크린", position: [0, 1.55, -4.1], hitSize: [13.3, 2.2, 0.6], screen: "rdda", path: "/rdda" },
+  { roomPath: "/trend/macro", id: "macro-ticker", name: "티커 보드", position: [0, 1.2, -5.7], hitSize: [6.4, 1.8, 0.6], path: "/trend/macro" },
+  { roomPath: "/calendar", id: "calendar-board", name: "월간 보드", position: [-4.1, 1.7, 0], hitSize: [0.6, 2.2, 3.2], path: "/calendar" },
 ]

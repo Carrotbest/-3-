@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js"
 
 import { META_FACILITIES, META_OBJECTS } from "@/components/meta/facilities"
 import type { PresencePerson } from "@/components/meta/usePresencePeople"
-import type { PresenceMood } from "@/data/presence"
+import { activityLabel, type PresenceActivity, type PresenceMood } from "@/data/presence"
 import { routeDefinitions } from "@/routes/route-config"
 
 interface OfficeSceneProps {
@@ -13,7 +14,10 @@ interface OfficeSceneProps {
   selectedRoomPath: string | null
   onPick: (kind: "room" | "person" | "facility" | "spot" | "object", id: string, path?: string) => void
   bubbles?: Record<string, { text: string; at: number }>
+  roomStats?: Record<string, { label: string; fresh: number }>
 }
+
+type RoomStatDisplay = { label: string; fresh: number }
 
 type ZoneKey = "overview" | "sample" | "tech" | "trend" | "system"
 
@@ -84,13 +88,24 @@ const WAREHOUSE_RACKS: Array<[number, number]> = [
 
 const ROLL_LENGTHS = [0.62, 0.72, 0.82]
 
-const SECTION_SIGNS: Array<{ text: string; tone: ZoneKey; x: number; z: number; facing: number }> = [
-  { text: "DEVELOPMENT", tone: "sample", x: -22, z: -3, facing: 0 },
-  { text: "TECHNICAL", tone: "tech", x: 22, z: -3, facing: 0 },
-  { text: "LOBBY", tone: "overview", x: -22, z: 3, facing: Math.PI },
-  { text: "SHOWROOM", tone: "trend", x: 22, z: 3, facing: Math.PI },
-  { text: "SERVER", tone: "system", x: 0, z: 17, facing: 0 },
+// SERVER 간판은 2026-11-10에 뗐다. 넷만 남았고 전부 공중 글자다.
+// 검정 판 간판이 하나만 남아 혼자 어둡게 튀었다. 되살리지 말 것.
+const SECTION_SIGNS: Array<{ text: string; tone: ZoneKey; x: number; z: number }> = [
+  { text: "DEVELOPMENT", tone: "sample", x: -21.5, z: -16.5 },
+  { text: "TECHNICAL", tone: "tech", x: 21.5, z: -20.5 },
+  { text: "LOBBY", tone: "overview", x: -27.5, z: 13.5 },
+  { text: "SHOWROOM", tone: "trend", x: 21.5, z: 14.25 },
 ]
+
+// 아바타가 서는 자리. 방 중심 기준 로컬 좌표다. 적히지 않은 방은 중심에 선다.
+// 가운데에 회의 테이블이나 장비가 놓인 방은 비켜 세워야 한다.
+// 2026-11-10에 CALENDAR에서 아바타가 테이블 위에 올라서 있는 것을 박향근이 찍어 보냈다.
+// 가구를 옮기거나 방 중심을 바꾸지 말 것. 서는 자리만 옮긴다.
+const PEOPLE_SPOT: Record<string, [number, number]> = {
+  "/calendar": [3.3, 3.2],
+  "/protocol": [0, 4.0],
+  "/process-innovation": [0, 3.6],
+}
 
 const accentOf = (path: string) => ROOM_ACCENT[path] ?? ACCENT_FALLBACK
 
@@ -158,6 +173,30 @@ interface LabelOptions {
   scale?: number
 }
 
+type PropKind = "none" | "swatch" | "roll" | "tablet" | "box"
+type Motion = "still" | "type" | "lift" | "carry" | "shake"
+
+// 방마다 "작업 중"의 모습이 다르다. 없는 방은 기본값을 쓴다.
+const ROOM_WORK: Record<string, { motion: Motion; prop: PropKind }> = {
+  "/fabric-analysis": { motion: "lift", prop: "swatch" },
+  "/warehouse": { motion: "carry", prop: "roll" },
+  "/request": { motion: "lift", prop: "swatch" },
+  "/study": { motion: "lift", prop: "tablet" },
+  "/trend/fabric": { motion: "lift", prop: "tablet" },
+  "/trend/macro": { motion: "lift", prop: "tablet" },
+  "/rdda": { motion: "lift", prop: "tablet" },
+}
+const DEFAULT_WORK = { motion: "type" as Motion, prop: "none" as PropKind }
+
+const actionOf = (activity: PresenceActivity, path: string) => {
+  if (activity === "idle") return { motion: "still" as Motion, prop: "none" as PropKind }
+  if (activity === "revert") return { motion: "shake" as Motion, prop: "none" as PropKind }
+  if (activity === "upload" || activity === "intake") return { motion: "lift" as Motion, prop: "box" as PropKind }
+  if (activity === "warehouse") return { motion: "carry" as Motion, prop: "roll" as PropKind }
+  if (activity === "view") return { motion: "still" as Motion, prop: "none" as PropKind }
+  return ROOM_WORK[path] ?? DEFAULT_WORK
+}
+
 interface PersonVisual {
   data: PresencePerson
   group: THREE.Group
@@ -168,6 +207,16 @@ interface PersonVisual {
   selfRing: THREE.Mesh<THREE.RingGeometry, THREE.MeshBasicMaterial>
   focusRing: THREE.Mesh<THREE.RingGeometry, THREE.MeshBasicMaterial>
   tag: THREE.Sprite
+  moodGroup: THREE.Group
+  moodBall: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>
+  statusDot: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>
+  leftArm: THREE.Mesh<THREE.BufferGeometry, THREE.MeshLambertMaterial>
+  rightArm: THREE.Mesh<THREE.BufferGeometry, THREE.MeshLambertMaterial>
+  leftArmPivot: THREE.Group
+  rightArmPivot: THREE.Group
+  propGroup: THREE.Group
+  props: Record<PropKind, THREE.Object3D>
+  activity: PresenceActivity
   leftLeg: THREE.Mesh<THREE.BoxGeometry, THREE.MeshLambertMaterial>
   rightLeg: THREE.Mesh<THREE.BoxGeometry, THREE.MeshLambertMaterial>
   flagPole: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshLambertMaterial>
@@ -175,7 +224,7 @@ interface PersonVisual {
   flagBasePositions: Float32Array
   hit: THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial>
   avatarParts: Array<THREE.Mesh<THREE.BufferGeometry, THREE.MeshLambertMaterial>>
-  poseParts: Array<THREE.Mesh<THREE.BufferGeometry, THREE.MeshLambertMaterial>>
+  poseParts: THREE.Object3D[]
   target: THREE.Vector3
   seated: boolean
   targetSeated: boolean
@@ -187,6 +236,7 @@ interface SceneApi {
   setBubbles: (map: Record<string, { text: string; at: number }>) => void
   focusPerson: (uid: string | null, moveCamera: boolean) => void
   selectRoom: (path: string | null) => void
+  setRoomStats: (stats: Record<string, RoomStatDisplay>) => void
 }
 
 function cssValue(styles: CSSStyleDeclaration, name: string, fallback: string): string {
@@ -196,9 +246,10 @@ function cssValue(styles: CSSStyleDeclaration, name: string, fallback: string): 
 function readTheme(): SceneTheme {
   const root = document.documentElement
   const styles = getComputedStyle(root)
-  const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-  const explicitLight = root.classList.contains("light") || root.dataset.theme === "light"
-  const dark = root.classList.contains("dark") || root.dataset.theme === "dark" || (!explicitLight && systemDark)
+  // OS 설정(prefers-color-scheme)으로 되넘기지 않는다. 이 앱은 root에 dark를 붙이는 코드가 없어서
+  // 되넘기면 OS가 다크인 사람만 흰 페이지 안에 어두운 씬을 보게 된다.
+  // 나중에 앱에 테마 토글이 생기면 그 토글이 붙이는 class나 data-theme를 여기서 읽는다.
+  const dark = root.classList.contains("dark") || root.dataset.theme === "dark"
 
   return {
     bg: new THREE.Color(cssValue(styles, "--scene-bg", dark ? "#141a23" : "#eaeff6")),
@@ -248,11 +299,32 @@ function disposeObject(root: THREE.Object3D): void {
   geometries.forEach((geometry) => geometry.dispose())
 }
 
-export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubbles }: OfficeSceneProps) {
+export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubbles, roomStats }: OfficeSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const apiRef = useRef<SceneApi | null>(null)
   const onPickRef = useRef(onPick)
-  const peopleKey = people.map((person) => [person.uid, person.name, person.path, person.screen, person.color, person.isSelf, person.ago].join("\u0001")).join("\u0002")
+  const roomStatsRef = useRef(roomStats ?? {})
+  roomStatsRef.current = roomStats ?? {}
+  const statsKey = useMemo(
+    () => Object.entries(roomStats ?? {}).map(([path, stat]) => `${path}:${stat.label}:${stat.fresh}`).sort().join("|"),
+    [roomStats],
+  )
+  // 상태, 기분, 목적지가 빠지면 그 값이 바뀌어도 syncPeople이 안 돈다.
+  // 본인 항목은 ago가 늘 0이고 path도 /meta로 고정이라, 혼자 접속하면 키가 영영 안 바뀐다.
+  // 그 상태에서는 바닥을 눌러도 아바타가 안 가고 기분을 바꿔도 공이 그대로다.
+  const peopleKey = people.map((person) => [
+    person.uid,
+    person.name,
+    person.path,
+    person.screen,
+    person.color,
+    person.isSelf,
+    person.ago,
+    person.status ?? "",
+    person.mood ?? "",
+    person.activity ?? "",
+    person.spot ? `${person.spot.path},${person.spot.x},${person.spot.z},${person.spot.at}` : "",
+  ].join("\u0001")).join("\u0002")
   onPickRef.current = onPick
 
   useEffect(() => {
@@ -261,10 +333,18 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
 
     let theme = readTheme()
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.shadowMap.enabled = true
+    renderer.shadowMap.autoUpdate = false
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+    // 그림자 맵은 autoUpdate를 끈다. 장면이 바뀐 프레임에만 다시 굽는다.
+    // 두 프레임을 굽는 것은 걷기가 멈춘 마지막 자세까지 반영하기 위해서다.
+    let shadowFrames = 2
+    const markShadowDirty = () => {
+      shadowFrames = 2
+    }
 
     const scene = new THREE.Scene()
     scene.background = theme.bg
@@ -284,13 +364,16 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE
     controls.update()
 
+    // 밝은 모드 수치는 repaint에도 같은 값이 또 있다. 한쪽만 고치면 테마를 다시 칠할 때 되돌아간다.
+    // 바닥색(groundColor)이 어두우면 흰 바닥이 밑에서부터 물든다. 어둡게 보이던 가장 큰 이유다.
     const hemi = new THREE.HemisphereLight(
       theme.dark ? 0x5b7ba8 : 0xffffff,
-      theme.dark ? 0x1a222e : 0xaeb8c6,
-      theme.dark ? 0.85 : 0.58,
+      theme.dark ? 0x1a222e : 0xdde3ec,
+      theme.dark ? 0.85 : 0.84,
     )
     scene.add(hemi)
-    const sun = new THREE.DirectionalLight(0xffffff, theme.dark ? 0.8 : 0.62)
+    // 해를 낮추고 환경광을 올린다. 상자 면끼리의 명암 차가 줄어 각진 느낌이 덜하다.
+    const sun = new THREE.DirectionalLight(0xffffff, theme.dark ? 0.8 : 0.5)
     sun.position.set(26, 44, 20)
     sun.castShadow = true
     sun.shadow.mapSize.set(2048, 2048)
@@ -300,15 +383,15 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     sun.shadow.bias = -0.0008
     sun.shadow.normalBias = 0.02
     scene.add(sun)
-    const ambient = new THREE.AmbientLight(0xffffff, theme.dark ? 0.25 : 0.32)
+    const ambient = new THREE.AmbientLight(0xffffff, theme.dark ? 0.25 : 0.47)
     scene.add(ambient)
-    const fill = new THREE.DirectionalLight(0xffffff, theme.dark ? 0.3 : 0.35)
+    const fill = new THREE.DirectionalLight(0xffffff, theme.dark ? 0.3 : 0.32)
     fill.position.set(-30, 20, -25)
     scene.add(fill)
     // 켜진 방에만 진짜 광원을 배정한다. 방마다 두면 열일곩이라 셀이더 한도에 걸린다.
     const ROOM_LIGHT_COUNT = 8
     const roomLights = Array.from({ length: ROOM_LIGHT_COUNT }, () => {
-      const light = new THREE.PointLight(0xfffaf4, 0, 32, 1.2)
+      const light = new THREE.PointLight(0xeaf2ff, 0, 34, 1.2)
       light.castShadow = false
       scene.add(light)
       return light
@@ -327,13 +410,14 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       chair: new THREE.MeshLambertMaterial({ color: theme.dark ? 0x4c5664 : 0x687386 }),
       sofa: new THREE.MeshLambertMaterial({ color: theme.dark ? 0x50596a : 0x8893a6 }),
       green: new THREE.MeshLambertMaterial({ color: 0x56815b }),
-      glass: new THREE.MeshPhysicalMaterial({
+      // 상판을 한 색으로 깔면 책상 수십 개가 한 덩어리로 보인다. 세 가지를 돌려 쓴다.
+      deskWarm: new THREE.MeshLambertMaterial({ color: theme.desk.clone().lerp(theme.wood, 0.42) }),
+      deskCool: new THREE.MeshLambertMaterial({ color: theme.wall.clone().lerp(new THREE.Color(0xffffff), 0.45) }),
+      glass: new THREE.MeshLambertMaterial({
         color: theme.glass,
         transparent: true,
         opacity: theme.dark ? 0.16 : 0.22,
         depthWrite: false,
-        roughness: 0.18,
-        transmission: 0.15,
       }),
       amber: new THREE.MeshBasicMaterial({ color: 0xffd27a }),
       yellow: new THREE.MeshBasicMaterial({ color: 0xfacc15 }),
@@ -488,9 +572,14 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
 
     const geometries = {
       box: new THREE.BoxGeometry(1, 1, 1),
+      // 가구와 벽은 전부 box() 하나를 지난다. 거기 기하만 모서리 둥근 것으로 바꾸면
+      // 메시 수는 그대로 두고 장면 전체가 덜 각져 보인다. 안 보이는 히트박스와
+      // 인스턴스 메시는 geometries.box를 직접 쓰므로 영향이 없다.
+      softBox: new RoundedBoxGeometry(1, 1, 1, 2, 0.085),
       plane: new THREE.PlaneGeometry(1, 1),
       cylinder: new THREE.CylinderGeometry(1, 1, 1, 14),
       sphere: new THREE.SphereGeometry(1, 14, 10),
+      moodSphere: new THREE.SphereGeometry(1, 28, 18),
       cone: new THREE.ConeGeometry(1, 1, 14),
       ico: new THREE.IcosahedronGeometry(1, 0),
     }
@@ -514,7 +603,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       z: number,
       parent: THREE.Object3D = scene,
     ): THREE.Mesh => {
-      const mesh = new THREE.Mesh(geometries.box, material)
+      const mesh = new THREE.Mesh(geometries.softBox, material)
       mesh.scale.set(width, height, depth)
       mesh.position.set(x, y, z)
       mesh.castShadow = true
@@ -542,10 +631,44 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       return strip
     }
 
-    const ground = new THREE.Mesh(geometries.plane, materials.floor)
-    ground.scale.set(82, 58, 1)
+    // 꼭짓점 목록을 받아 모서리를 둥글린 도형을 만든다. 볼록한 곳과 오목한 곳 모두에 먹는다.
+    const roundedPolygon = (points: Array<[number, number]>, radius: number) => {
+      const shape = new THREE.Shape()
+      const count = points.length
+      const towards = (from: [number, number], to: [number, number]): [number, number] => {
+        const dx = to[0] - from[0]
+        const dy = to[1] - from[1]
+        const length = Math.hypot(dx, dy) || 1
+        const ratio = Math.min(radius, length / 2) / length
+        return [from[0] + dx * ratio, from[1] + dy * ratio]
+      }
+      for (let index = 0; index < count; index += 1) {
+        const previous = points[(index - 1 + count) % count]
+        const current = points[index]
+        const next = points[(index + 1) % count]
+        const enter = towards(current, previous)
+        const leave = towards(current, next)
+        if (index === 0) shape.moveTo(enter[0], enter[1])
+        else shape.lineTo(enter[0], enter[1])
+        shape.quadraticCurveTo(current[0], current[1], leave[0], leave[1])
+      }
+      shape.closePath()
+      return shape
+    }
+
+    // 바닥판을 모서리 둥근 도형으로 깐다. 건물 외곽이 직각 사각형으로 끝나지 않는다.
+    // 벽보다 조금 넓게 빼서 바깥으로 얇은 테두리가 돌게 한다.
+    const ground = new THREE.Mesh(
+      new THREE.ShapeGeometry(roundedPolygon([
+        [-42.4, -30.4],
+        [42.4, -30.4],
+        [42.4, 28.4],
+        [-42.4, 28.4],
+      ], 6.5)),
+      materials.floor,
+    )
     ground.rotation.x = -Math.PI / 2
-    ground.position.set(0, 0, -2)
+    ground.position.set(0, 0, 0)
     ground.receiveShadow = true
     scene.add(ground)
     const sceneDecor = new THREE.Group()
@@ -578,24 +701,109 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       const glass = addInstanced(scene, geometries.box, materials.glass, panes)
       glass.castShadow = false
       glass.renderOrder = 3
+
+      // 벽 마감. 허리벽 윗면에 가는 띠를 둘러 선을 잇고, 일정 간격으로 액자를 건다.
+      // 액자 안은 원단 색이다. 원단 회사 벽이라는 표시다.
+      const capDepth = thickness * 0.92
+      box(horizontal ? width : capDepth, 0.07, horizontal ? capDepth : depth, materials.metal, x, 0.94, z)
+      const inward = (horizontal ? (z < 0 ? 1 : -1) : (x < 0 ? 1 : -1)) * (thickness / 2 + 0.06)
+      const frames = Math.max(2, Math.round(span / 9))
+      for (let index = 0; index < frames; index += 1) {
+        const offset = -span / 2 + (index + 0.5) * (span / frames)
+        // 통로가 벽에 닿는 자리는 비운다.
+        if (Math.abs(offset) < 4.2) continue
+        const frameX = horizontal ? x + offset : x + inward
+        const frameZ = horizontal ? z + inward : z + offset
+        const swatch = new THREE.MeshLambertMaterial({ color: FABRIC_PALETTE[(index * 3 + Math.round(span)) % FABRIC_PALETTE.length] })
+        if (horizontal) {
+          box(1.7, 0.58, 0.07, materials.wood, frameX, 0.5, frameZ)
+          box(1.38, 0.38, 0.04, swatch, frameX, 0.5, frameZ + inward * 0.5)
+        } else {
+          box(0.07, 0.58, 1.7, materials.wood, frameX, 0.5, frameZ)
+          box(0.04, 0.38, 1.38, swatch, frameX + inward * 0.5, 0.5, frameZ)
+        }
+      }
     }
 
+    // 메인 복도는 호텔 로비 타일이다. 큰 정사각 타일 네 장에 가는 줄눈,
+    // 타일마다 명도를 조금씩 달리해 석재처럼 보이게 한다.
+    // ShapeGeometry의 UV는 0에서 1이 아니라 월드 좌표라 repeat로 간격을 맞춘다(2026-11-09 기록).
+    const corridorTileTexture = () => {
+      const size = 256
+      const canvas = document.createElement("canvas")
+      canvas.width = size
+      canvas.height = size
+      const context = canvas.getContext("2d")
+      if (context) {
+        const tones = ["#f2f4f8", "#e9edf3", "#eef1f6", "#e4e9f1"]
+        for (let row = 0; row < 2; row += 1) {
+          for (let column = 0; column < 2; column += 1) {
+            context.fillStyle = tones[(row * 2 + column) % tones.length]
+            context.fillRect(column * 128, row * 128, 128, 128)
+          }
+        }
+        // 줄눈
+        context.strokeStyle = "rgba(120,133,150,0.33)"
+        context.lineWidth = 3
+        for (let line = 0; line <= 2; line += 1) {
+          context.beginPath()
+          context.moveTo(line * 128, 0)
+          context.lineTo(line * 128, size)
+          context.stroke()
+          context.beginPath()
+          context.moveTo(0, line * 128)
+          context.lineTo(size, line * 128)
+          context.stroke()
+        }
+        // 석재 결
+        context.globalAlpha = 0.06
+        context.strokeStyle = "#5d6a7c"
+        for (let streak = 0; streak < 26; streak += 1) {
+          const y = Math.random() * size
+          context.beginPath()
+          context.moveTo(0, y)
+          context.lineTo(size, y + (Math.random() - 0.5) * 26)
+          context.stroke()
+        }
+        context.globalAlpha = 1
+      }
+      const texture = new THREE.CanvasTexture(canvas)
+      texture.wrapS = THREE.RepeatWrapping
+      texture.wrapT = THREE.RepeatWrapping
+      texture.repeat.set(0.55, 0.55)
+      return texture
+    }
     const corridorMaterial = new THREE.MeshLambertMaterial({
-      color: theme.floor.clone().lerp(new THREE.Color(0x000000), 0.05),
+      color: theme.floor.clone().lerp(new THREE.Color(0x000000), 0.02),
+      map: corridorTileTexture(),
       side: THREE.DoubleSide,
     })
-    const eastWestCorridor = new THREE.Mesh(geometries.plane, corridorMaterial)
-    eastWestCorridor.scale.set(82, 6, 1)
-    eastWestCorridor.rotation.x = -Math.PI / 2
-    eastWestCorridor.position.set(0, 0.012, 0)
-    eastWestCorridor.receiveShadow = true
-    sceneDecor.add(eastWestCorridor)
-    const northSouthCorridor = new THREE.Mesh(geometries.plane, corridorMaterial)
-    northSouthCorridor.scale.set(6, 48, 1)
-    northSouthCorridor.rotation.x = -Math.PI / 2
-    northSouthCorridor.position.set(0, 0.013, -7)
-    northSouthCorridor.receiveShadow = true
-    sceneDecor.add(northSouthCorridor)
+    // 통로는 직사각형 두 장이 아니라 모서리를 둥글린 십자 한 장이다.
+    // 겹치는 네 귀퉁이가 직각으로 꺾이지 않아 길이 이어져 보인다.
+    const CORRIDOR_HALF = 3
+    const corridorMesh = new THREE.Mesh(
+      // 도형을 눕히면 로컬 y가 월드 z의 반대로 간다. 세로 통로는 z -31에서 17이므로 부호를 뒤집어 적는다.
+      new THREE.ShapeGeometry(roundedPolygon([
+        [-41, CORRIDOR_HALF],
+        [-CORRIDOR_HALF, CORRIDOR_HALF],
+        [-CORRIDOR_HALF, 31],
+        [CORRIDOR_HALF, 31],
+        [CORRIDOR_HALF, CORRIDOR_HALF],
+        [41, CORRIDOR_HALF],
+        [41, -CORRIDOR_HALF],
+        [CORRIDOR_HALF, -CORRIDOR_HALF],
+        [CORRIDOR_HALF, -17],
+        [-CORRIDOR_HALF, -17],
+        [-CORRIDOR_HALF, -CORRIDOR_HALF],
+        [-41, -CORRIDOR_HALF],
+      ], 2.1)),
+      corridorMaterial,
+    )
+    corridorMesh.rotation.x = -Math.PI / 2
+    corridorMesh.position.set(0, 0.012, 0)
+    corridorMesh.receiveShadow = true
+    sceneDecor.add(corridorMesh)
+
     let labelEntries: Array<{ sprite: THREE.Sprite; text: string; options: LabelOptions; facility?: boolean; clickable?: boolean }> = []
 
     const drawMoodFace = (context: CanvasRenderingContext2D, cx: number, cy: number, mood: PresenceMood, ink: string) => {
@@ -626,12 +834,72 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       context.stroke()
     }
 
+    const STATUS_TEXT: Record<string, string> = {
+      focus: "집중",
+      meeting: "회의",
+      away: "자리 비움",
+      busy: "바쁨",
+    }
+    const MOOD_TEXT: Record<string, string> = {
+      good: "좋음",
+      normal: "보통",
+      tired: "지침",
+      stuck: "막힘",
+    }
     const STATUS_COLORS: Record<string, string> = {
       focus: "#2f9e8f",
       meeting: "#d8924a",
       away: "#9aa7b8",
       busy: "#d4564f",
     }
+
+    const MOOD_COLORS: Record<PresenceMood, string> = {
+      good: "#f5c84c",
+      normal: "#f0d9a0",
+      tired: "#aebcce",
+      stuck: "#e8a08c",
+    }
+
+    // drawMoodFace와 같은 치수를 k배로 키운 것이다. 테두리 원은 그리지 않는다. 공 자체가 얼굴이다.
+    const drawMoodEmoji = (context: CanvasRenderingContext2D, cx: number, cy: number, k: number, mood: PresenceMood, ink: string) => {
+      context.strokeStyle = ink
+      context.lineWidth = 1.4 * k
+      context.lineCap = "round"
+      context.fillStyle = ink
+      if (mood === "tired") {
+        context.fillRect(cx - 3.6 * k, cy - 2.2 * k, 2.6 * k, 1.2 * k)
+        context.fillRect(cx + 1 * k, cy - 2.2 * k, 2.6 * k, 1.2 * k)
+      } else {
+        context.beginPath()
+        context.arc(cx - 2.2 * k, cy - 1.6 * k, 0.9 * k, 0, Math.PI * 2)
+        context.fill()
+        context.beginPath()
+        context.arc(cx + 2.2 * k, cy - 1.6 * k, 0.9 * k, 0, Math.PI * 2)
+        context.fill()
+      }
+      context.beginPath()
+      if (mood === "good") context.arc(cx, cy + 0.4 * k, 3 * k, 0.15 * Math.PI, 0.85 * Math.PI)
+      else if (mood === "normal") {
+        context.moveTo(cx - 2.6 * k, cy + 2.4 * k)
+        context.lineTo(cx + 2.6 * k, cy + 2.4 * k)
+      } else if (mood === "tired") context.arc(cx, cy + 4.4 * k, 2.6 * k, 1.15 * Math.PI, 1.85 * Math.PI)
+      else context.arc(cx, cy + 2.2 * k, 1.5 * k, 0, Math.PI * 2)
+      context.stroke()
+    }
+
+    // 구의 UV는 가로가 둘레 한 바퀴다. 얼굴을 여섯 번 그려야 어느 각도에서도 정면에 얼굴이 하나 온다.
+    const moodCanvas = (mood: PresenceMood) => {
+      const canvas = document.createElement("canvas")
+      canvas.width = 768
+      canvas.height = 256
+      const context = canvas.getContext("2d")
+      if (!context) return canvas
+      context.fillStyle = MOOD_COLORS[mood]
+      context.fillRect(0, 0, 768, 256)
+      for (let cell = 0; cell < 6; cell += 1) drawMoodEmoji(context, cell * 128 + 64, 128, 8, mood, "#2b3340")
+      return canvas
+    }
+
     const drawLabel = (text: string, options: LabelOptions) => {
       const size = options.size ?? 42
       const weight = options.weight ?? 700
@@ -712,6 +980,16 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       return texture
     }
 
+    // 기분은 네 종류다. 사람마다 만들면 20메가짜리 공 하나당 3MB 텍스처가 사람 수만큼 생긴다.
+    const moodTextures = new Map<PresenceMood, THREE.CanvasTexture>()
+    const moodTextureOf = (mood: PresenceMood) => {
+      const existing = moodTextures.get(mood)
+      if (existing) return existing
+      const texture = textureOf(moodCanvas(mood))
+      moodTextures.set(mood, texture)
+      return texture
+    }
+
     const makeLabel = (text: string, options: LabelOptions): THREE.Sprite => {
       const drawing = drawLabel(text, options)
       const material = new THREE.SpriteMaterial({
@@ -751,6 +1029,12 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     }
 
     let topLabelMinSizeCount = 0
+    // 룸 기둥 명패. 켜진 판과 꺼진 판을 각각 구워 두고 상태에 따라 갈아 끼운다.
+    // 꺼진 판은 회색 바탕에 짙은 글자다. 조명은 꺼져 보이되 이름은 또렷하게 읽힌다(2026-11-10 박향근).
+    const SIGN_OFF_FACE = "#ccd5e1"
+    const SIGN_OFF_EDGE = "#97a3b4"
+    const SIGN_OFF_INK = "#4e5a6b"
+
     const roomFlag = (room: Room, parent: THREE.Object3D) => {
       const accent = accentOf(room.path)
       const font = '700 86px "Noto Sans KR", system-ui, sans-serif'
@@ -763,68 +1047,105 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       const height = 0.9
       const depth = 0.9
 
-      const baseCanvas = (size: number) => {
-        const canvas = document.createElement("canvas")
-        canvas.width = size
-        canvas.height = size === 192 ? 192 : 512
-        const context = canvas.getContext("2d")
-        if (!context) return null
-        context.fillStyle = "#ffffff"
-        context.fillRect(0, 0, canvas.width, canvas.height)
-        context.strokeStyle = accent
-        context.lineWidth = 10
-        context.strokeRect(5, 5, canvas.width - 10, canvas.height - 10)
-        context.fillStyle = accent
-        context.font = font
-        context.textAlign = "center"
-        context.textBaseline = "middle"
-        return { canvas, context }
-      }
-      const drawFitted = (context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, rotation = 0) => {
+      const drawFitted = (context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number) => {
         const textWidth = context.measureText(text).width
         const scaleX = Math.min(1, maxWidth / textWidth)
         context.save()
         context.translate(x, y)
-        context.rotate(rotation)
         context.scale(scaleX, 1)
         context.fillText(text, 0, 0)
         context.restore()
       }
 
-      const frontDrawing = baseCanvas(512)
-      const sideDrawing = baseCanvas(192)
-      const topDrawing = baseCanvas(512)
-      if (!frontDrawing || !sideDrawing || !topDrawing) return null
-      frontDrawing.canvas.height = 192
-      frontDrawing.context.fillStyle = "#ffffff"
-      frontDrawing.context.fillRect(0, 0, 512, 192)
-      frontDrawing.context.strokeStyle = accent
-      frontDrawing.context.lineWidth = 10
-      frontDrawing.context.strokeRect(5, 5, 502, 182)
-      frontDrawing.context.fillStyle = accent
-      frontDrawing.context.font = font
-      frontDrawing.context.textAlign = "center"
-      frontDrawing.context.textBaseline = "middle"
-      drawFitted(frontDrawing.context, room.title, 256, 98, 456)
+      const makeFace = (faceWidth: number, faceHeight: number, face: string, edge: string, ink: string) => {
+        const canvas = document.createElement("canvas")
+        canvas.width = faceWidth
+        canvas.height = faceHeight
+        const context = canvas.getContext("2d")
+        if (!context) return null
+        context.fillStyle = face
+        context.fillRect(0, 0, faceWidth, faceHeight)
+        context.strokeStyle = edge
+        context.lineWidth = 10
+        context.strokeRect(5, 5, faceWidth - 10, faceHeight - 10)
+        context.fillStyle = ink
+        context.font = font
+        context.textAlign = "center"
+        context.textBaseline = "middle"
+        return { canvas, context }
+      }
 
       const words = room.title.split(" ")
-      const wrapSide = sideDrawing.context.measureText(room.title).width > 136 && words.length > 1
-      const sideLines = wrapSide
-        ? [words.slice(0, Math.ceil(words.length / 2)).join(" "), words.slice(Math.ceil(words.length / 2)).join(" ")]
-        : [room.title]
-      sideLines.forEach((line, index) => {
-        const y = 96 + (index - (sideLines.length - 1) / 2) * 78
-        drawFitted(sideDrawing.context, line, 96, y, 156)
-      })
-      let topFontSize = 86
-      while (topFontSize > 44) {
-        topDrawing.context.font = `700 ${topFontSize}px "Noto Sans KR", system-ui, sans-serif`
-        if (topDrawing.context.measureText(room.title).width <= 456) break
-        topFontSize = Math.max(44, topFontSize - 4)
+
+      const buildSet = (face: string, edge: string, ink: string) => {
+        const front = makeFace(512, 192, face, edge, ink)
+        const side = makeFace(192, 192, face, edge, ink)
+        const top = makeFace(512, 512, face, edge, ink)
+        if (!front || !side || !top) return null
+        drawFitted(front.context, room.title, 256, 98, 456)
+
+        const wrapSide = side.context.measureText(room.title).width > 136 && words.length > 1
+        const sideLines = wrapSide
+          ? [words.slice(0, Math.ceil(words.length / 2)).join(" "), words.slice(Math.ceil(words.length / 2)).join(" ")]
+          : [room.title]
+        sideLines.forEach((line, index) => {
+          const y = 96 + (index - (sideLines.length - 1) / 2) * 78
+          drawFitted(side.context, line, 96, y, 156)
+        })
+
+        let topFontSize = 86
+        while (topFontSize > 44) {
+          top.context.font = `700 ${topFontSize}px "Noto Sans KR", system-ui, sans-serif`
+          if (top.context.measureText(room.title).width <= 456) break
+          topFontSize = Math.max(44, topFontSize - 4)
+        }
+        top.context.font = `700 ${topFontSize}px "Noto Sans KR", system-ui, sans-serif`
+        top.context.fillText(room.title, 256, 256)
+        return { front: front.canvas, side: side.canvas, top: top.canvas, topFontSize }
       }
-      topDrawing.context.font = `700 ${topFontSize}px "Noto Sans KR", system-ui, sans-serif`
-      topDrawing.context.fillText(room.title, 256, 256)
-      if (topFontSize === 44) topLabelMinSizeCount += 1
+
+      const onSet = buildSet("#ffffff", accent, accent)
+      const offSet = buildSet(SIGN_OFF_FACE, SIGN_OFF_EDGE, SIGN_OFF_INK)
+      if (!onSet || !offSet) return null
+      if (onSet.topFontSize === 44) topLabelMinSizeCount += 1
+
+      const buildStatSet = (stat: RoomStatDisplay, face: string, edge: string, ink: string) => {
+        const front = makeFace(512, 144, face, edge, ink)
+        const side = makeFace(144, 144, face, edge, ink)
+        const top = makeFace(512, 144, face, edge, ink)
+        if (!front || !side || !top) return null
+        const freshText = stat.fresh > 0 ? ` +${stat.fresh}` : ""
+        let fontSize = 62
+        do {
+          front.context.font = `700 ${fontSize}px "Noto Sans KR", system-ui, sans-serif`
+          fontSize -= 2
+        } while (fontSize > 38 && front.context.measureText(stat.label + freshText).width > 454)
+        const labelWidth = front.context.measureText(stat.label).width
+        const freshWidth = front.context.measureText(freshText).width
+        const startX = (512 - labelWidth - freshWidth) / 2
+        front.context.textAlign = "left"
+        front.context.fillStyle = ink
+        front.context.fillText(stat.label, startX, 74)
+        if (freshText) {
+          front.context.fillStyle = accent
+          front.context.fillText(freshText, startX + labelWidth, 74)
+        }
+        return { front: front.canvas, side: side.canvas, top: top.canvas }
+      }
+
+      const makeStatTextures = (stat: RoomStatDisplay) => {
+        const on = buildStatSet(stat, "#ffffff", accent, accent)
+        const off = buildStatSet(stat, SIGN_OFF_FACE, SIGN_OFF_EDGE, SIGN_OFF_INK)
+        if (!on || !off) return null
+        return {
+          onFront: textureOf(on.front),
+          onSide: textureOf(on.side),
+          onTop: textureOf(on.top),
+          offFront: textureOf(off.front),
+          offSide: textureOf(off.side),
+          offTop: textureOf(off.top),
+        }
+      }
 
       const group = furnitureGroup(parent, -room.w / 2 + 1.4, -room.d / 2 + 1.4)
       cylinder(0.3, 0.1, materials.metal, 0, 0.05, 0, group)
@@ -835,10 +1156,19 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       shade.position.set(0, 0.032, 0)
       group.add(shade)
 
-      const frontMaterial = new THREE.MeshBasicMaterial({ map: textureOf(frontDrawing.canvas) })
-      const sideMaterial = new THREE.MeshBasicMaterial({ map: textureOf(sideDrawing.canvas) })
-      const topMaterial = new THREE.MeshBasicMaterial({ map: textureOf(topDrawing.canvas) })
-      const bottomMaterial = new THREE.MeshBasicMaterial({ color: new THREE.Color(accent).lerp(new THREE.Color(0x000000), 0.3) })
+      const faces = {
+        onFront: textureOf(onSet.front),
+        onSide: textureOf(onSet.side),
+        onTop: textureOf(onSet.top),
+        offFront: textureOf(offSet.front),
+        offSide: textureOf(offSet.side),
+        offTop: textureOf(offSet.top),
+      }
+
+      const frontMaterial = new THREE.MeshBasicMaterial({ map: faces.offFront })
+      const sideMaterial = new THREE.MeshBasicMaterial({ map: faces.offSide })
+      const topMaterial = new THREE.MeshBasicMaterial({ map: faces.offTop })
+      const bottomMaterial = new THREE.MeshBasicMaterial({ color: new THREE.Color(SIGN_OFF_EDGE) })
       const sign = new THREE.Mesh(
         new THREE.BoxGeometry(width, height, depth),
         [sideMaterial, sideMaterial, topMaterial, bottomMaterial, frontMaterial, frontMaterial],
@@ -848,16 +1178,82 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       sign.userData = { kind: "room", id: room.path }
       group.add(sign)
 
-      const glow = new THREE.Mesh(
-        geometries.plane,
-        new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.18, depthWrite: false }),
-      )
-      glow.scale.set(width * 1.6, depth * 1.6, 1)
-      glow.rotation.x = -Math.PI / 2
-      glow.position.y = 3.4
-      glow.castShadow = false
-      group.add(glow)
-      return { group, sign }
+      let lit = false
+      let statValue = roomStatsRef.current[room.path]
+      let statTextures = statValue ? makeStatTextures(statValue) : null
+      let statFrontMaterial: THREE.MeshBasicMaterial | null = null
+      let statSideMaterial: THREE.MeshBasicMaterial | null = null
+      let statTopMaterial: THREE.MeshBasicMaterial | null = null
+      let statBottomMaterial: THREE.MeshBasicMaterial | null = null
+      if (statTextures) {
+        statFrontMaterial = new THREE.MeshBasicMaterial({ map: statTextures.offFront })
+        statSideMaterial = new THREE.MeshBasicMaterial({ map: statTextures.offSide })
+        statTopMaterial = new THREE.MeshBasicMaterial({ map: statTextures.offTop })
+        statBottomMaterial = new THREE.MeshBasicMaterial({ color: new THREE.Color(SIGN_OFF_EDGE) })
+        const statBoard = new THREE.Mesh(
+          new THREE.BoxGeometry(width * 0.62, 0.42, depth * 0.72),
+          [statSideMaterial, statSideMaterial, statTopMaterial, statBottomMaterial, statFrontMaterial, statFrontMaterial],
+        )
+        statBoard.position.y = 3.28
+        statBoard.castShadow = false
+        group.add(statBoard)
+      }
+
+      // 켜졌을 때만 깔리는 번짐. 네모난 색 판은 쓰지 않는다(2026-11-10 박향근).
+      const lampHazeMaterial = new THREE.MeshBasicMaterial({
+        color: accent,
+        map: lampHazeTexture(),
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      })
+      const haze = new THREE.Mesh(geometries.plane, lampHazeMaterial)
+      haze.scale.set(width * 3.4, depth * 3.4, 1)
+      haze.rotation.x = -Math.PI / 2
+      haze.position.y = 3.33
+      haze.castShadow = false
+      group.add(haze)
+
+      const setLit = (nextLit: boolean) => {
+        lit = nextLit
+        frontMaterial.map = lit ? faces.onFront : faces.offFront
+        sideMaterial.map = lit ? faces.onSide : faces.offSide
+        topMaterial.map = lit ? faces.onTop : faces.offTop
+        bottomMaterial.color.set(lit ? new THREE.Color(accent).lerp(new THREE.Color(0x000000), 0.3) : new THREE.Color(SIGN_OFF_EDGE))
+        frontMaterial.needsUpdate = true
+        sideMaterial.needsUpdate = true
+        topMaterial.needsUpdate = true
+        lampHazeMaterial.opacity = lit ? 0.34 : 0
+        if (statTextures && statFrontMaterial && statSideMaterial && statTopMaterial && statBottomMaterial) {
+          statFrontMaterial.map = lit ? statTextures.onFront : statTextures.offFront
+          statSideMaterial.map = lit ? statTextures.onSide : statTextures.offSide
+          statTopMaterial.map = lit ? statTextures.onTop : statTextures.offTop
+          statBottomMaterial.color.set(lit ? new THREE.Color(accent).lerp(new THREE.Color(0x000000), 0.3) : new THREE.Color(SIGN_OFF_EDGE))
+          statFrontMaterial.needsUpdate = true
+          statSideMaterial.needsUpdate = true
+          statTopMaterial.needsUpdate = true
+        }
+      }
+
+      const setRoomStat = (next: RoomStatDisplay | undefined) => {
+        if (!next || !statTextures || !statFrontMaterial || !statSideMaterial || !statTopMaterial) return
+        if (statValue?.label === next.label && statValue.fresh === next.fresh) return
+        const replacement = makeStatTextures(next)
+        if (!replacement) return
+        const previous = statTextures
+        statTextures = replacement
+        statValue = next
+        statFrontMaterial.map = lit ? replacement.onFront : replacement.offFront
+        statSideMaterial.map = lit ? replacement.onSide : replacement.offSide
+        statTopMaterial.map = lit ? replacement.onTop : replacement.offTop
+        statFrontMaterial.needsUpdate = true
+        statSideMaterial.needsUpdate = true
+        statTopMaterial.needsUpdate = true
+        Object.values(previous).forEach((texture) => texture.dispose())
+      }
+
+      return { group, sign, setLit, setRoomStat }
     }
 
     const pickables: THREE.Object3D[] = []
@@ -867,18 +1263,33 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       flag: THREE.Group | null
       facilities: THREE.Sprite[]
       objects: THREE.Object3D[]
+      setFlagLit: ((lit: boolean) => void) | null
+      setRoomStat: ((stat: RoomStatDisplay | undefined) => void) | null
       lighting: {
         beamMaterial: THREE.MeshBasicMaterial
         poolMaterial: THREE.MeshBasicMaterial
+        lineMaterial: THREE.MeshBasicMaterial
       }
     }>()
     const zoneMaterials: Array<{ room: Room; carpet: THREE.MeshLambertMaterial; baseColor: THREE.Color }> = []
 
+    // 가구를 만든 순서로 변주를 돌린다. 한 방 안에서 상판 색과 등받이 모양이 섞인다.
+    let furnitureSerial = 0
+    const DESK_TOPS = () => [materials.desk, materials.deskWarm, materials.deskCool]
     const buildDesk = (parent: THREE.Object3D, x: number, z: number) => {
-      box(2.3, 0.1, 1.15, materials.desk, x, 0.74, z, parent)
-      roundEdge(parent, 2.3, 0.05, materials.desk, x, 0.74, z + 0.575)
-      box(0.1, 0.72, 1, materials.metal, x - 1.05, 0.36, z, parent)
-      box(0.1, 0.72, 1, materials.metal, x + 1.05, 0.36, z, parent)
+      const serial = furnitureSerial++
+      const top = DESK_TOPS()[serial % 3]
+      const deep = serial % 4 === 1 ? 1.28 : serial % 4 === 3 ? 1.04 : 1.15
+      box(2.3, 0.1, deep, top, x, 0.74, z, parent)
+      roundEdge(parent, 2.3, 0.05, top, x, 0.74, z + deep / 2)
+      if (serial % 3 === 2) {
+        // 다리 하나는 원통으로 세운다. 네모 다리만 늘어서면 줄이 딱딱해 보인다.
+        cylinder(0.07, 0.72, materials.metal, x - 1.0, 0.36, z, parent)
+        cylinder(0.07, 0.72, materials.metal, x + 1.0, 0.36, z, parent)
+      } else {
+        box(0.1, 0.72, 1, materials.metal, x - 1.05, 0.36, z, parent)
+        box(0.1, 0.72, 1, materials.metal, x + 1.05, 0.36, z, parent)
+      }
       box(0.14, 0.3, 0.14, materials.metal, x, 0.94, z - 0.3, parent)
       box(1.2, 0.72, 0.07, materials.metal, x, 1.44, z - 0.3, parent)
       const screen = new THREE.Mesh(geometries.plane, screenMat())
@@ -942,34 +1353,89 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
 
     const cabinet = (parent: THREE.Object3D, x: number, z: number, rotation = 0, height = 1.3) => {
       const group = furnitureGroup(parent, x, z, rotation)
-      box(1.5, height, 0.52, materials.metal, 0, height / 2, 0, group)
-      box(1.4, 0.06, 0.46, materials.dark, 0, 0.03, 0, group)
-      box(1.56, 0.05, 0.56, materials.desk, 0, height + 0.02, 0, group)
-      roundEdge(group, 1.56, 0.04, materials.desk, 0, height + 0.02, 0.28)
-      for (let index = 0; index < 3; index += 1) box(1.34, 0.025, 0.02, materials.desk, 0, 0.25 + index * 0.34, 0.27, group)
+      // 같은 수납장이 줄줄이 서면 벽처럼 보인다. 세 가지를 돌려 쓴다.
+      const kind = furnitureSerial++ % 3
+      const body = kind === 1 ? materials.wood : materials.metal
+      const topBoard = kind === 2 ? materials.deskWarm : materials.desk
+      const width = kind === 2 ? 1.18 : 1.5
+      box(width, height, 0.52, body, 0, height / 2, 0, group)
+      box(width - 0.1, 0.06, 0.46, materials.dark, 0, 0.03, 0, group)
+      box(width + 0.06, 0.05, 0.56, topBoard, 0, height + 0.02, 0, group)
+      roundEdge(group, width + 0.06, 0.04, topBoard, 0, height + 0.02, 0.28)
+      if (kind === 0) {
+        for (let index = 0; index < 3; index += 1) box(width - 0.16, 0.025, 0.02, materials.desk, 0, 0.25 + index * 0.34, 0.27, group)
+      } else if (kind === 1) {
+        // 여닫이 두 짝. 손잡이는 세로 원통이다.
+        ;[-1, 1].forEach((side) => cylinder(0.022, height * 0.42, materials.metal, side * 0.18, height * 0.55, 0.27, group))
+      } else {
+        // 윗칸이 열린 선반.
+        box(width - 0.14, 0.05, 0.44, topBoard, 0, height * 0.62, 0.02, group)
+      }
       return group
+    }
+
+    // 의자를 세 가지로 돌린다. 같은 등받이가 줄줄이 서면 사무실이 창고처럼 보인다.
+    const officeChair = (parent: THREE.Object3D, x: number, z: number) => {
+      const serial = furnitureSerial++
+      const kind = serial % 3
+      const seat = chairMat()
+      if (kind === 0) {
+        box(0.56, 0.1, 0.54, seat, x, 0.46, z, parent)
+        box(0.54, 0.52, 0.09, seat, x, 0.74, z + 0.26, parent)
+      } else if (kind === 1) {
+        // 등받이가 낮고 넓은 것. 윗변을 원통으로 덮어 곡선으로 끝낸다.
+        box(0.6, 0.11, 0.56, seat, x, 0.45, z, parent)
+        box(0.58, 0.34, 0.08, seat, x, 0.66, z + 0.27, parent)
+        roundEdge(parent, 0.58, 0.05, seat, x, 0.83, z + 0.27)
+      } else {
+        // 기둥 둘에 등판이 떠 있는 것.
+        box(0.54, 0.1, 0.52, seat, x, 0.47, z, parent)
+        ;[-0.2, 0.2].forEach((side) => cylinder(0.025, 0.42, materials.metal, x + side, 0.68, z + 0.25, parent))
+        box(0.5, 0.26, 0.07, seat, x, 0.88, z + 0.25, parent)
+        roundEdge(parent, 0.5, 0.04, seat, x, 1.01, z + 0.25)
+      }
+      chairSupport(parent, x, z)
     }
 
     const deskUnit = (parent: THREE.Object3D, x: number, z: number, rotation = 0) => {
       const group = furnitureGroup(parent, x, z, rotation)
       buildDesk(group, 0, 0)
-      box(0.56, 0.1, 0.54, chairMat(), 0, 0.46, 0.95, group)
-      box(0.54, 0.52, 0.09, chairMat(), 0, 0.74, 1.21, group)
-      chairSupport(group, 0, 0.95)
+      officeChair(group, 0, 0.95)
       return group
     }
 
+    // 소파도 한 가지면 라운지가 전부 같아 보인다. 폭과 등받이와 다리를 세 가지로 돌린다.
     const sofaSet = (parent: THREE.Object3D, x: number, z: number, rotation = 0) => {
       const group = furnitureGroup(parent, x, z, rotation)
-      box(2.3, 0.44, 0.95, sofaMat(), 0, 0.22, 0, group)
-      box(2.14, 0.14, 0.82, chairMat(), 0, 0.47, 0.04, group)
-      box(2.3, 0.72, 0.18, sofaMat(), 0, 0.6, -0.42, group)
-      roundEdge(group, 2.3, 0.09, sofaMat(), 0, 0.96, -0.42)
-      box(0.18, 0.64, 0.95, sofaMat(), -1.12, 0.55, 0, group)
-      box(0.18, 0.64, 0.95, sofaMat(), 1.12, 0.55, 0, group)
-      ;[-1, 1].forEach((sideX) => {
-        ;[-0.36, 0.36].forEach((sideZ) => cylinder(0.04, 0.12, materials.dark, sideX, 0.06, sideZ, group))
-      })
+      const kind = furnitureSerial++ % 3
+      const body = sofaMat()
+      const cushion = kind === 1 ? sofaMat() : chairMat()
+      const widths = [2.3, 1.74, 2.62]
+      const seatWidth = widths[kind]
+      const half = seatWidth / 2
+      box(seatWidth, 0.44, 0.95, body, 0, 0.22, 0, group)
+      box(seatWidth - 0.16, 0.14, 0.82, cushion, 0, 0.47, 0.04, group)
+      if (kind === 2) {
+        // 등받이가 쿠션 두 장으로 갈린 것
+        ;[-0.52, 0.52].forEach((side) => box(seatWidth / 2 - 0.1, 0.66, 0.18, body, side * half * 0.52, 0.58, -0.42, group))
+      } else {
+        box(seatWidth, kind === 1 ? 0.58 : 0.72, 0.18, body, 0, kind === 1 ? 0.53 : 0.6, -0.42, group)
+      }
+      roundEdge(group, seatWidth, 0.09, body, 0, kind === 1 ? 0.82 : 0.96, -0.42)
+      if (kind !== 1) {
+        box(0.18, 0.64, 0.95, body, -half + 0.09, 0.55, 0, group)
+        box(0.18, 0.64, 0.95, body, half - 0.09, 0.55, 0, group)
+      } else {
+        // 팔걸이 없는 벤치형. 대신 원통 다리를 길게 뺀다.
+        ;[-1, 1].forEach((sideX) => {
+          ;[-0.34, 0.34].forEach((sideZ) => cylinder(0.045, 0.22, materials.wood, sideX * (half - 0.16), 0.11, sideZ, group))
+        })
+      }
+      if (kind !== 1) {
+        ;[-1, 1].forEach((sideX) => {
+          ;[-0.36, 0.36].forEach((sideZ) => cylinder(0.04, 0.12, kind === 2 ? materials.wood : materials.dark, sideX * (half - 0.2), 0.06, sideZ, group))
+        })
+      }
       return group
     }
 
@@ -1112,26 +1578,57 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
 
     const meetingTable = (parent: THREE.Object3D, x: number, z: number, seatCount: number) => {
       const group = furnitureGroup(parent, x, z)
+      // 원형 러그. 회의 자리를 바닥에서 한 번 묶어 주고 딱딱한 격자를 끊는다.
+      const rug = new THREE.Mesh(
+        new THREE.CircleGeometry(3.1, 28),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color(accentOf(toneRoomPath)).lerp(theme.floor, 0.68),
+          transparent: true,
+          opacity: 0.85,
+          depthWrite: false,
+        }),
+      )
+      rug.rotation.x = -Math.PI / 2
+      rug.position.y = 0.032
+      rug.renderOrder = 1
+      group.add(rug)
       cylinder(1.35, 0.07, materials.desk, 0, 0.74, 0, group)
       cylinder(0.2, 0.72, materials.dark, 0, 0.37, 0, group)
-      const seats = new THREE.InstancedMesh(geometries.box, chairMat(), seatCount)
-      const backs = new THREE.InstancedMesh(geometries.box, chairMat(), seatCount)
+      const seats = new THREE.InstancedMesh(geometries.softBox, chairMat(), seatCount)
+      const backs = new THREE.InstancedMesh(geometries.softBox, chairMat(), seatCount)
       const dummy = new THREE.Object3D()
+      // 등받이는 자리에서 바깥쪽으로 곧게 물러나야 한다. 예전에는 (sin, cos)를 더해서
+      // 자리마다 다른 방향으로 틀어졌다(2026-11-10 박향근 지적). 반지름 방향으로만 민다.
+      const seatRadius = 2.05
+      const backRadius = seatRadius + 0.24
+      const seatShapes = [
+        { seat: [0.5, 0.09, 0.5], back: [0.48, 0.46, 0.08], backY: 0.72 },
+        { seat: [0.54, 0.1, 0.52], back: [0.54, 0.32, 0.08], backY: 0.64 },
+        { seat: [0.46, 0.08, 0.48], back: [0.44, 0.56, 0.07], backY: 0.79 },
+      ] as const
+      const seatTint = new THREE.Color()
       for (let index = 0; index < seatCount; index += 1) {
         const angle = index / seatCount * Math.PI * 2
-        dummy.position.set(Math.cos(angle) * 2.05, 0.46, Math.sin(angle) * 2.05)
+        const shape = seatShapes[index % seatShapes.length]
         dummy.rotation.set(0, -angle + Math.PI / 2, 0)
-        dummy.scale.set(0.5, 0.09, 0.5)
+        dummy.position.set(Math.cos(angle) * seatRadius, 0.46, Math.sin(angle) * seatRadius)
+        dummy.scale.set(shape.seat[0], shape.seat[1], shape.seat[2])
         dummy.updateMatrix()
         seats.setMatrixAt(index, dummy.matrix)
-        dummy.position.set(Math.cos(angle) * 2.05 + Math.sin(angle) * 0.22, 0.72, Math.sin(angle) * 2.05 + Math.cos(angle) * 0.22)
-        dummy.scale.set(0.48, 0.46, 0.08)
+        dummy.position.set(Math.cos(angle) * backRadius, shape.backY, Math.sin(angle) * backRadius)
+        dummy.scale.set(shape.back[0], shape.back[1], shape.back[2])
         dummy.updateMatrix()
         backs.setMatrixAt(index, dummy.matrix)
-        chairSupport(group, Math.cos(angle) * 2.05, Math.sin(angle) * 2.05)
+        // 한 테이블 안에서도 의자 색이 조금씩 다르다.
+        seatTint.setScalar(1).offsetHSL(0, 0, (index % 4 - 1.5) * 0.045)
+        seats.setColorAt(index, seatTint)
+        backs.setColorAt(index, seatTint)
+        chairSupport(group, Math.cos(angle) * seatRadius, Math.sin(angle) * seatRadius)
       }
       seats.instanceMatrix.needsUpdate = true
       backs.instanceMatrix.needsUpdate = true
+      if (seats.instanceColor) seats.instanceColor.needsUpdate = true
+      if (backs.instanceColor) backs.instanceColor.needsUpdate = true
       seats.castShadow = true
       backs.castShadow = true
       group.add(seats, backs)
@@ -1273,7 +1770,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       group.add(face)
     }
 
-    const neonSign = (text: string, color: string, x: number, y: number, z: number, facing: number) => {
+    const skySign = (text: string, color: string, x: number, z: number) => {
       const canvas = document.createElement("canvas")
       canvas.width = 1280
       canvas.height = 256
@@ -1283,38 +1780,32 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       ctx.font = "700 132px system-ui, sans-serif"
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
+      ctx.lineJoin = "round"
+      ctx.miterLimit = 2
+      // 속을 채우지 않는다. 외곽선만 남기고 번짐으로 빛을 낸다(2026-11-10 박향근).
+      // 같은 획을 굵기와 번짐을 줄여 가며 세 번 긋는다. 네온관처럼 바깥이 퍼지고 속이 밝다.
       ctx.shadowColor = color
-      ctx.shadowBlur = 40
       ctx.strokeStyle = color
-      ctx.lineWidth = 6
+      ctx.shadowBlur = 34
+      ctx.lineWidth = 9
       ctx.strokeText(text, 640, 132)
-      ctx.fillStyle = color
-      for (let pass = 0; pass < 5; pass += 1) ctx.fillText(text, 640, 132)
-      ctx.shadowBlur = 0
-      ctx.globalAlpha = 0.6
-      ctx.fillStyle = "#ffffff"
-      ctx.fillText(text, 640, 132)
+      ctx.shadowBlur = 18
+      ctx.lineWidth = 5.5
+      ctx.strokeText(text, 640, 132)
+      ctx.shadowBlur = 7
+      ctx.globalAlpha = 0.9
+      ctx.strokeStyle = "#ffffff"
+      ctx.lineWidth = 2.2
+      ctx.strokeText(text, 640, 132)
       ctx.globalAlpha = 1
-      const group = furnitureGroup(sceneDecor, x, z, facing)
-      group.position.y = y
-      box(9.5, 1.9, 0.2, materials.dark, 0, 0, 0, group)
-      box(9.5, 0.12, 0.3, materials.dark, 0, -1.01, 0, group)
-      ;[-4.75, 4.75].forEach((side) => cylinder(0.1, 1.9, materials.dark, side, 0, 0, group))
-      // 뒤판 두께가 0.2라 z가 -0.1에서 0.1까지다. 글자판을 그 밖으로 빼지 않으면 판 속에 묻힌다.
-      const faceMaterial = new THREE.MeshBasicMaterial({ map: textureOf(canvas), transparent: true, depthWrite: false })
-      const frontFace = new THREE.Mesh(geometries.plane, faceMaterial)
-      frontFace.scale.set(9.3, 1.8, 1)
-      frontFace.position.set(0, 0, 0.13)
-      frontFace.renderOrder = 4
-      frontFace.castShadow = false
-      group.add(frontFace)
-      const backFace = new THREE.Mesh(geometries.plane, faceMaterial)
-      backFace.scale.set(9.3, 1.8, 1)
-      backFace.position.set(0, 0, -0.13)
-      backFace.renderOrder = 4
-      backFace.rotation.y = Math.PI
-      backFace.castShadow = false
-      group.add(backFace)
+      ctx.shadowBlur = 0
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: textureOf(canvas), transparent: true, depthWrite: false }))
+      // 글자 크기는 옛 간판 글자판(9.3 x 1.8)의 2배다.
+      sprite.scale.set(18.6, 3.72, 1)
+      // 방 빛기둥 꼭대기가 7.2다. 그보다 훨씬 위에 띄워 사무실과 완전히 떼어 놓는다.
+      sprite.position.set(x, 16, z)
+      sprite.renderOrder = 6
+      sceneDecor.add(sprite)
     }
 
     const tensileTester = (parent: THREE.Object3D, x: number, z: number, rotation = 0) => {
@@ -1512,9 +2003,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       for (let index = 0; index < seats; index += 1) {
         const seatX = (index - (seats - 1) / 2) * 1.6
         box(0.72, 0.46, 0.04, screenMat(), seatX, 1.4, -0.22, group).castShadow = false
-        box(0.56, 0.1, 0.54, chairMat(), seatX, 0.46, 0.95, group)
-        box(0.54, 0.52, 0.09, chairMat(), seatX, 0.74, 1.21, group)
-        chairSupport(group, seatX, 0.95)
+        officeChair(group, seatX, 0.95)
         if (index < seats - 1) {
           box(0.06, 0.42, 1.0, materials.metal, seatX + 0.8, 1.26, -0.1, group)
         }
@@ -1564,6 +2053,24 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         const ends = vertical ? [[x, z - offset], [x, z + offset]] : [[x - offset, z], [x + offset, z]]
         ends.forEach(([endX, endZ]) => cylinder(0.05, 1.3, materials.wall, endX, 0.65, endZ, parent))
       }
+    }
+
+    // 통로에 세우는 긴 화단. 화분을 하나씩 늘어놓는 것보다 메시가 적고 선이 이어져 보인다.
+    const plantBed = (parent: THREE.Object3D, x: number, z: number, length: number, alongZ = false) => {
+      const group = furnitureGroup(parent, x, z, alongZ ? Math.PI / 2 : 0)
+      box(length, 0.34, 0.8, materials.desk, 0, 0.17, 0, group)
+      box(length - 0.22, 0.06, 0.62, materials.wood, 0, 0.35, 0, group)
+      const clumps = Math.max(2, Math.round(length / 1.3))
+      for (let index = 0; index < clumps; index += 1) {
+        const offset = (index - (clumps - 1) / 2) * (length / clumps)
+        const leaf = new THREE.Mesh(geometries.ico, materials.green)
+        const size = 0.34 + (index % 3) * 0.1
+        leaf.scale.set(size, size * 1.35, size)
+        leaf.position.set(offset, 0.42 + size * 0.7, (index % 2 ? 0.12 : -0.12))
+        leaf.castShadow = true
+        group.add(leaf)
+      }
+      return group
     }
 
     const plantRow = (parent: THREE.Object3D, x: number, z: number, count: number, vertical = false) => {
@@ -1827,6 +2334,34 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       }
     }
 
+    // 방 윤곽을 사각형으로 두지 않는다. 네 모서리에 각각 다른 반지름을 주고,
+    // 일부는 직선으로 잘라 아파트 평면도처럼 제각각인 윤곽을 만든다.
+    // 깊게 파는 노치(ell)는 가구와 부딪혀서 쓰지 않는다. 모서리만 건드린다.
+    type RoomCorner = { r: number; cut: boolean }
+    // 3.0까지 깎으면 바닥이 사라진 자리에 기존 가구가 남는다. 2.4가 상한이다.
+    const CORNER_MENU = [0.7, 1.2, 1.8, 2.4]
+    const roomCornerCache = new Map<string, RoomCorner[]>()
+    const roomCorners = (room: Room): RoomCorner[] => {
+      const cached = roomCornerCache.get(room.path)
+      if (cached) return cached
+      // 벽이 선 방(창고, 서버실)은 벽이 직선이라 바닥만 둥글면 어긋나 보인다.
+      const walled = Boolean(zoneHeights[room.path])
+      const limit = Math.max(0.4, Math.min(room.w, room.d) / 2 - 0.8)
+      let hash = 2166136261
+      for (let index = 0; index < room.path.length; index += 1) {
+        hash = (Math.imul(hash ^ room.path.charCodeAt(index), 16777619) >>> 0)
+      }
+      const corners = [0, 1, 2, 3].map((index) => {
+        if (walled) return { r: Math.min(0.45, limit), cut: false }
+        const pick = CORNER_MENU[(hash >>> (index * 3)) % CORNER_MENU.length]
+        // 네 모서리 중 하나꼴로 직선 자름이 걸린다. 둥근 것과 섞여야 평면도처럼 보인다.
+        const cut = ((hash >>> (index * 2 + 15)) & 3) === 0
+        return { r: Math.min(pick, limit), cut }
+      })
+      roomCornerCache.set(room.path, corners)
+      return corners
+    }
+
     const makeRoomShape = (room: Room, width: number, depth: number, inset: number) => {
       const shape = new THREE.Shape()
       const left = -width / 2 + inset
@@ -1834,18 +2369,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       const bottom = -depth / 2 + inset
       const top = depth / 2 - inset
 
-      if (room.shape === "round") {
-        const radius = Math.min(2 - inset, (right - left) / 2, (top - bottom) / 2)
-        shape.moveTo(left + radius, bottom)
-        shape.lineTo(right - radius, bottom)
-        shape.quadraticCurveTo(right, bottom, right, bottom + radius)
-        shape.lineTo(right, top - radius)
-        shape.quadraticCurveTo(right, top, right - radius, top)
-        shape.lineTo(left + radius, top)
-        shape.quadraticCurveTo(left, top, left, top - radius)
-        shape.lineTo(left, bottom + radius)
-        shape.quadraticCurveTo(left, bottom, left + radius, bottom)
-      } else if (room.shape === "stadium") {
+      if (room.shape === "stadium") {
         const radius = (top - bottom) / 2
         const leftCenter = left + radius
         const rightCenter = right - radius
@@ -1854,69 +2378,207 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         shape.absarc(rightCenter, 0, radius, -Math.PI / 2, Math.PI / 2, false)
         shape.lineTo(leftCenter, top)
         shape.absarc(leftCenter, 0, radius, Math.PI / 2, Math.PI * 1.5, false)
-      } else if (room.shape === "chamfer") {
-        const cut = 2 - inset
-        shape.moveTo(left, bottom)
-        shape.lineTo(right - cut, bottom)
-        shape.lineTo(right, bottom + cut)
-        shape.lineTo(right, top)
-        shape.lineTo(left + cut, top)
-        shape.lineTo(left, top - cut)
-      } else if (room.shape === "ell") {
-        const notchWidth = room.w * 0.3
-        const notchDepth = room.d * 0.4
-        const cutX = -width / 2 + notchWidth + inset
-        if (room.path === "/trend/fabric") {
-          const cutY = -depth / 2 + notchDepth + inset
-          shape.moveTo(left, cutY)
-          shape.lineTo(cutX, cutY)
-          shape.lineTo(cutX, bottom)
-          shape.lineTo(right, bottom)
-          shape.lineTo(right, top)
-          shape.lineTo(left, top)
-        } else {
-          const cutY = depth / 2 - notchDepth - inset
-          shape.moveTo(left, bottom)
-          shape.lineTo(right, bottom)
-          shape.lineTo(right, top)
-          shape.lineTo(cutX, top)
-          shape.lineTo(cutX, cutY)
-          shape.lineTo(left, cutY)
-        }
-      } else {
-        shape.moveTo(left, bottom)
-        shape.lineTo(right, bottom)
-        shape.lineTo(right, top)
-        shape.lineTo(left, top)
+        shape.closePath()
+        return shape
       }
+
+      const span = Math.min(right - left, top - bottom) / 2
+      const corners = roomCorners(room).map((corner) => ({
+        cut: corner.cut,
+        r: Math.max(0.2, Math.min(corner.r - inset, span)),
+      }))
+      const [bl, br, tr, tl] = corners
+
+      shape.moveTo(left + bl.r, bottom)
+      shape.lineTo(right - br.r, bottom)
+      if (br.cut) shape.lineTo(right, bottom + br.r)
+      else shape.quadraticCurveTo(right, bottom, right, bottom + br.r)
+      shape.lineTo(right, top - tr.r)
+      if (tr.cut) shape.lineTo(right - tr.r, top)
+      else shape.quadraticCurveTo(right, top, right - tr.r, top)
+      shape.lineTo(left + tl.r, top)
+      if (tl.cut) shape.lineTo(left, top - tl.r)
+      else shape.quadraticCurveTo(left, top, left, top - tl.r)
+      shape.lineTo(left, bottom + bl.r)
+      if (bl.cut) shape.lineTo(left + bl.r, bottom)
+      else shape.quadraticCurveTo(left, bottom, left + bl.r, bottom)
 
       shape.closePath()
       return shape
     }
 
-    const createRoomLighting = (room: Room, parent: THREE.Object3D) => {
-      const beamMaterial = new THREE.MeshBasicMaterial({
-        color: 0xfbfdff,
-        transparent: true,
-        opacity: 0,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      })
-      const beam = new THREE.Mesh(
-        new THREE.ConeGeometry(Math.min(room.w, room.d) * 0.42, 7.2, 24, 1, true),
-        beamMaterial,
-      )
-      beam.position.y = 3.6
-      beam.castShadow = false
-      beam.receiveShadow = false
-      beam.renderOrder = 3
-      parent.add(beam)
+    // 형광등 색이다. 노란 기를 빼고 푸른 기를 아주 살짝 넣었다.
+    const LIGHT_COOL = 0xdce9ff
+    const ROOM_BEAM_HEIGHT = 7.2
 
-      const poolMaterial = new THREE.MeshBasicMaterial({
-        color: 0xfffdf9,
+    // 빛기둥 세로 그라데이션. 바닥이 가장 밝고 올라갈수록 사라진다.
+    // flipY가 기본 true라 캔버스 아래쪽이 v = 0, 즉 바닥이다.
+    let beamGradient: THREE.CanvasTexture | null = null
+    const beamGradientTexture = () => {
+      if (beamGradient) return beamGradient
+      const canvas = document.createElement("canvas")
+      canvas.width = 4
+      canvas.height = 128
+      const context = canvas.getContext("2d")
+      if (context) {
+        const gradient = context.createLinearGradient(0, canvas.height, 0, 0)
+        gradient.addColorStop(0, "rgba(255,255,255,1)")
+        gradient.addColorStop(0.28, "rgba(255,255,255,0.46)")
+        gradient.addColorStop(0.62, "rgba(255,255,255,0.14)")
+        gradient.addColorStop(1, "rgba(255,255,255,0)")
+        context.fillStyle = gradient
+        context.fillRect(0, 0, canvas.width, canvas.height)
+      }
+      beamGradient = new THREE.CanvasTexture(canvas)
+      return beamGradient
+    }
+
+    // 바닥 라인을 도는 빛. 가로로 한 바퀴가 u 0에서 1이고, 이 텍스처의 offset.x를
+    // 매 프레임 밀어서 빛이 둘레를 돈다. 방마다 따로 두지 않고 하나를 같이 쓴다.
+    // 흰 빛은 밝은 바닥에서 안 보여서 둘레에 무지개를 감았다(2026-11-10 박향근).
+    // 더하기 혼합을 쓰지 않는다. 바닥이 거의 흰색이라 더하면 색이 날아가고 다시 흰색이 된다.
+    let floorLineTexture: THREE.CanvasTexture | null = null
+    const floorLineMap = () => {
+      if (floorLineTexture) return floorLineTexture
+      const width = 512
+      const height = 16
+      const canvas = document.createElement("canvas")
+      canvas.width = width
+      canvas.height = height
+      const context = canvas.getContext("2d")
+      if (context) {
+        const image = context.createImageData(width, height)
+        const hueToByte = (hue: number) => {
+          // HSL에서 채도 1, 명도 0.55 고정
+          const chroma = 0.9
+          const section = ((hue % 360) + 360) % 360 / 60
+          const second = chroma * (1 - Math.abs((section % 2) - 1))
+          let rgb: [number, number, number]
+          if (section < 1) rgb = [chroma, second, 0]
+          else if (section < 2) rgb = [second, chroma, 0]
+          else if (section < 3) rgb = [0, chroma, second]
+          else if (section < 4) rgb = [0, second, chroma]
+          else if (section < 5) rgb = [second, 0, chroma]
+          else rgb = [chroma, 0, second]
+          const lift = 0.12
+          return rgb.map((value) => Math.round(Math.min(1, value + lift) * 255)) as [number, number, number]
+        }
+        for (let x = 0; x < width; x += 1) {
+          const ratio = x / width
+          const [red, green, blue] = hueToByte(ratio * 360)
+          let distance = Math.abs(ratio - 0.5)
+          if (distance > 0.5) distance = 1 - distance
+          const head = Math.exp(-Math.pow(distance / 0.06, 2))
+          const tail = Math.exp(-Math.pow(distance / 0.22, 2)) * 0.4
+          const along = Math.min(1, 0.45 + head * 0.55 + tail)
+          for (let y = 0; y < height; y += 1) {
+            const up = 1 - (height - 1 - y) / (height - 1)
+            const vertical = Math.pow(1 - up, 1.5)
+            const index = (y * width + x) * 4
+            image.data[index] = red
+            image.data[index + 1] = green
+            image.data[index + 2] = blue
+            image.data[index + 3] = Math.round(along * vertical * 255)
+          }
+        }
+        context.putImageData(image, 0, 0)
+      }
+      floorLineTexture = new THREE.CanvasTexture(canvas)
+      floorLineTexture.wrapS = THREE.RepeatWrapping
+      floorLineTexture.wrapT = THREE.ClampToEdgeWrapping
+      return floorLineTexture
+    }
+
+    // 룸 기둥 조명이 퍼지는 느낌을 내는 둥근 번짐. 가운데가 희고 가장자리로 사라진다.
+    let lampHaze: THREE.CanvasTexture | null = null
+    const lampHazeTexture = () => {
+      if (lampHaze) return lampHaze
+      const canvas = document.createElement("canvas")
+      canvas.width = 128
+      canvas.height = 128
+      const context = canvas.getContext("2d")
+      if (context) {
+        const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64)
+        gradient.addColorStop(0, "rgba(255,255,255,1)")
+        gradient.addColorStop(0.38, "rgba(255,255,255,0.5)")
+        gradient.addColorStop(0.72, "rgba(255,255,255,0.13)")
+        gradient.addColorStop(1, "rgba(255,255,255,0)")
+        context.fillStyle = gradient
+        context.fillRect(0, 0, 128, 128)
+      }
+      lampHaze = new THREE.CanvasTexture(canvas)
+      return lampHaze
+    }
+
+    // 도형 윤곽을 따라 수직으로 세운 띠를 만든다. u는 둘레를 한 바퀴 도는 0에서 1,
+    // v는 바닥 0에서 꼭대기 1이다. 도형을 눕히면 로컬 y가 월드 z의 반대로 가므로 z에 부호를 뒤집어 넣는다.
+    const makeOutlineCurtain = (shape: THREE.Shape, bottom: number, top: number) => {
+      const raw = shape.getPoints(14)
+      const points = raw.length > 1 && raw[0].distanceTo(raw[raw.length - 1]) < 1e-6 ? raw.slice(0, -1) : raw
+      const count = points.length
+      if (count < 3) return null
+      const lengths: number[] = [0]
+      for (let index = 1; index <= count; index += 1) {
+        const previous = points[index - 1]
+        const current = points[index % count]
+        lengths.push(lengths[index - 1] + previous.distanceTo(current))
+      }
+      const perimeter = lengths[count] || 1
+      const positions: number[] = []
+      const uvs: number[] = []
+      for (let index = 0; index < count; index += 1) {
+        const a = points[index]
+        const b = points[(index + 1) % count]
+        const ua = lengths[index] / perimeter
+        const ub = lengths[index + 1] / perimeter
+        const ax = a.x
+        const az = -a.y
+        const bx = b.x
+        const bz = -b.y
+        positions.push(ax, bottom, az, bx, bottom, bz, bx, top, bz)
+        uvs.push(ua, 0, ub, 0, ub, 1)
+        positions.push(ax, bottom, az, bx, top, bz, ax, top, az)
+        uvs.push(ua, 0, ub, 1, ua, 1)
+      }
+      const geometry = new THREE.BufferGeometry()
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3))
+      geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2))
+      geometry.computeVertexNormals()
+      return geometry
+    }
+
+    const createRoomLighting = (room: Room, parent: THREE.Object3D) => {
+      // 빛기둥은 원뿔이 아니라 방 바닥 모양 그대로 수직으로 올라간다(2026-11-10 박향근).
+      const beamMaterial = new THREE.MeshBasicMaterial({
+        color: LIGHT_COOL,
+        map: beamGradientTexture(),
         transparent: true,
         opacity: 0,
         depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        // 뒤쪽 벽만 그린다. 앞쪽 벽까지 그리면 바닥 쪽이 가장 밝아서 방 안의 가구를 덮는다.
+        side: THREE.BackSide,
+      })
+      const beamGeometry = makeOutlineCurtain(
+        makeRoomShape(room, room.w * 0.94, room.d * 0.94, 0.3),
+        0.04,
+        ROOM_BEAM_HEIGHT,
+      )
+      if (beamGeometry) {
+        const beam = new THREE.Mesh(beamGeometry, beamMaterial)
+        beam.castShadow = false
+        beam.receiveShadow = false
+        beam.renderOrder = 3
+        parent.add(beam)
+      }
+
+      // 방 모양 그대로 깔리는 밑바닥. 이 방이 켜졌다는 것을 면으로 알린다.
+      const poolMaterial = new THREE.MeshBasicMaterial({
+        color: LIGHT_COOL,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
       })
       const pool = new THREE.Mesh(
         new THREE.ShapeGeometry(makeRoomShape(room, room.w * 0.92, room.d * 0.92, 0)),
@@ -1928,8 +2590,29 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       pool.renderOrder = 2
       parent.add(pool)
 
+      // 바닥 라인을 도는 빛. 텍스처 offset을 밀어서 둘레를 한 바퀴 돈다.
+      const lineMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        map: floorLineMap(),
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      })
+      const lineGeometry = makeOutlineCurtain(
+        makeRoomShape(room, room.w * 0.94, room.d * 0.94, 0),
+        0.03,
+        0.38,
+      )
+      if (lineGeometry) {
+        const line = new THREE.Mesh(lineGeometry, lineMaterial)
+        line.castShadow = false
+        line.receiveShadow = false
+        line.renderOrder = 4
+        parent.add(line)
+      }
 
-      return { beamMaterial, poolMaterial }
+      return { beamMaterial, poolMaterial, lineMaterial }
     }
 
     const patternCanvas = (pattern: FloorPattern) => {
@@ -1996,7 +2679,23 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     addOuterWall(82, 0.4, 0, 27)
     addOuterWall(0.4, 58, 41, -2)
 
-    SECTION_SIGNS.forEach((sign) => neonSign(sign.text, SECTION_TONE[sign.tone].chair, sign.x, 3.6, sign.z, sign.facing))
+    // 통로 가장자리 화단. 교차부(x -3..3, z -3..3)는 비워 둔다.
+    ;[
+      { x: -33, z: -2.3, length: 5.4, alongZ: false },
+      { x: -21, z: 2.3, length: 4.6, alongZ: false },
+      { x: -11, z: -2.3, length: 3.8, alongZ: false },
+      { x: 12, z: 2.3, length: 4.2, alongZ: false },
+      { x: 22, z: -2.3, length: 5.0, alongZ: false },
+      { x: 33, z: 2.3, length: 4.6, alongZ: false },
+      { x: -2.3, z: -25, length: 5.2, alongZ: true },
+      { x: 2.3, z: -17, length: 4.4, alongZ: true },
+      { x: -2.3, z: -10, length: 3.6, alongZ: true },
+      { x: 2.3, z: 10, length: 4.0, alongZ: true },
+    ].forEach((bed) => plantBed(sceneDecor, bed.x, bed.z, bed.length, bed.alongZ))
+
+    SECTION_SIGNS.forEach((sign) => {
+      skySign(sign.text, SECTION_TONE[sign.tone].chair, sign.x, sign.z)
+    })
 
     ROOMS.forEach((room) => {
       const group = new THREE.Group()
@@ -2008,6 +2707,8 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         new THREE.ShapeGeometry(makeRoomShape(room, floorWidth, floorDepth, 0)),
         accentMaterialOf(room.path).clone(),
       )
+      // 바닥을 밝게 올린 뒤로 테두리가 형광펜처럼 떴다. 바닥 쪽으로 눅인다.
+      edgeFloor.material.color.lerp(theme.floor, 0.4)
       edgeFloor.material.side = THREE.DoubleSide
       edgeFloor.rotation.x = -Math.PI / 2
       edgeFloor.position.y = 0.02
@@ -2062,7 +2763,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
           carpetTexture.repeat.set(0.5, 0.5)
           const overlay = new THREE.Mesh(
             carpetGeometry,
-            new THREE.MeshBasicMaterial({ map: carpetTexture, color: accentOf(room.path), transparent: true, opacity: 0.08, depthWrite: false }),
+            new THREE.MeshBasicMaterial({ map: carpetTexture, color: accentOf(room.path), transparent: true, opacity: 0.14, depthWrite: false }),
           )
           overlay.rotation.x = -Math.PI / 2
           overlay.position.y = 0.029
@@ -2125,7 +2826,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       hit.userData = { kind: "floor", id: room.path }
       group.add(hit)
       pickables.push(hit)
-      roomGroups.set(room.path, { room, group, flag: flag?.group ?? null, facilities: facilityLabels, objects: objectNodes, lighting })
+      roomGroups.set(room.path, { room, group, flag: flag?.group ?? null, setFlagLit: flag?.setLit ?? null, setRoomStat: flag?.setRoomStat ?? null, facilities: facilityLabels, objects: objectNodes, lighting })
     })
 
     type BoundaryAxis = "x" | "z"
@@ -2321,12 +3022,29 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     let activeRoomPath: string | null = null
     let occupiedRoomPaths = new Set<string>()
     let frame = FIT_H
+    let frameAspect = 1
+    // 전체 보기 줌은 여기 하나다. 예전에는 같은 식이 resize, 방 선택 해제, 더블클릭 세 곳에 복사돼 있어서
+    // 한 곳만 고치면 화면이 안 바뀌었다. 평면은 가로 83, 투영된 세로가 약 47이라 더 빡빡한 축에 맞춘다.
+    const overviewZoom = () => frame * 0.98 / Math.max(47, 83 / frameAspect)
     let userAdjustedView = false
     let suppressControlChange = false
-    const roomZoom = (room: Room) => Math.min(controls.maxZoom, frame * 1.6 / Math.max(room.w, room.d))
+    // 1.6은 방이 화면을 꽉 채워 둘레가 안 보였다. 2026-11-11 박향근 "조금 멀리서".
+    const roomZoom = (room: Room) => Math.min(controls.maxZoom, frame * 1.2 / Math.max(room.w, room.d))
 
     let cameraTween: { from: THREE.Vector3; to: THREE.Vector3; fromZoom: number; toZoom: number; fromOffset: THREE.Vector3; toOffset: THREE.Vector3; progress: number } | null = null
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const IDLE_FRAME_MS = 1000 / 24
+    let lastDrawAt = 0
+    let lastInteractionAt = 0
+    let someoneWalking = false
+    const markInteraction = () => {
+      lastInteractionAt = performance.now()
+    }
+    // OrbitControls 의 change 이벤트는 감쇠가 0에 안 닿아서 영원히 뜬다.
+    // 그래서 이벤트가 아니라 카메라가 실제로 움직였는지로 깨어 있음을 정한다.
+    const prevCamPos = new THREE.Vector3()
+    const prevCamTarget = new THREE.Vector3()
+    let prevZoom = -1
     const updateControls = () => {
       suppressControlChange = true
       controls.update()
@@ -2362,8 +3080,10 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     const setRoomLit = (path: string, lit: boolean) => {
       const lighting = roomGroups.get(path)?.lighting
       if (!lighting) return
-      lighting.beamMaterial.opacity = lit ? 0.14 : 0
-      lighting.poolMaterial.opacity = lit ? 0.42 : 0
+      lighting.beamMaterial.opacity = lit ? 0.22 : 0
+      lighting.poolMaterial.opacity = lit ? 0.13 : 0
+      lighting.lineMaterial.opacity = lit ? 0.62 : 0
+      roomGroups.get(path)?.setFlagLit?.(lit)
       const zoneMaterial = zoneMaterials.find((entry) => entry.room.path === path)
       if (zoneMaterial) {
         zoneMaterial.carpet.color.copy(zoneMaterial.baseColor)
@@ -2390,7 +3110,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
           return
         }
         light.position.set(room.x, 3.4, room.z)
-        light.intensity = room.path === activeRoomPath ? 4.2 : 3
+        light.intensity = room.path === activeRoomPath ? 5.2 : 3.6
       })
     }
 
@@ -2399,7 +3119,8 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       roomGroups.forEach((entry, roomPath) => {
         const selected = roomPath === activeRoomPath
         entry.group.visible = true
-        if (entry.flag) entry.flag.visible = !selected
+        // 고른 방에서도 기둥을 남긴다. 숨기면 그 방의 기둥 조명이 같이 사라진다(2026-11-10 박향근).
+        if (entry.flag) entry.flag.visible = true
         entry.objects.forEach((node) => {
           node.visible = selected
         })
@@ -2410,12 +3131,16 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         })
       })
       refreshRoomLighting()
-      if (activeRoomPath) {
-        const room = roomGroups.get(activeRoomPath)?.room
-        if (room) focusAt(new THREE.Vector3(room.x, 0, room.z), roomZoom(room))
-      } else {
-        focusAt(new THREE.Vector3(0, 0, -2), frame * 0.94 / 58)
-      }
+      // 방을 고르는 것과 그 방으로 들어가는 것을 가른다(2026-11-11 박향근).
+      // 한 번 클릭은 불만 켜고, 줌인은 더블클릭이 zoomToRoom으로 따로 한다.
+      // 선택을 풀 때 전체 보기로 돌아가는 것은 그대로다. 전체 보기 단추와 Esc가 이 길을 쓴다.
+      if (!activeRoomPath) focusAt(new THREE.Vector3(0, 0, -2), overviewZoom())
+    }
+
+    const zoomToRoom = (path: string) => {
+      const room = roomGroups.get(path)?.room
+      if (!room) return
+      focusAt(new THREE.Vector3(room.x, 0, room.z), roomZoom(room))
     }
 
     const applyFocus = (uid: string | null, moveCamera: boolean) => {
@@ -2430,6 +3155,8 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         visual.selfRing.material.opacity = muted ? 0.16 : 0.72
         visual.focusRing.visible = selected
         visual.tag.material.opacity = muted ? 0.38 : 1
+        visual.moodBall.material.opacity = muted ? 0.3 : 1
+        visual.statusDot.material.opacity = muted ? 0.3 : 1
       })
       const selected = uid ? personVisuals.get(uid) : null
       if (moveCamera && selected) {
@@ -2466,17 +3193,15 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       visual.flagPole.position.y = poleStart + 0.31
       visual.flag.position.y = poleStart + 0.49
       visual.tag.position.y = 3.9 + offset
+      visual.moodGroup.userData.baseY = 4.45 + offset
+      markShadowDirty()
     }
 
     const updatePersonTag = (visual: PersonVisual, person: PresencePerson) => {
-      const screen = person.screen || person.path
-      const shortScreen = screen.length > 10 ? `${screen.slice(0, 10)}…` : screen
-      const text = `${person.name}${person.isSelf ? " (나)" : ""} · ${shortScreen}`
+      const text = `${person.name}${person.isSelf ? " (나)" : ""}`
       const entry = labelEntries.find((candidate) => candidate.sprite === visual.tag)
-      const nextBadge = person.status ? STATUS_COLORS[person.status] : undefined
-      if (!entry || (entry.text === text && entry.options.badgeColor === nextBadge && entry.options.mood === person.mood)) return
+      if (!entry || entry.text === text) return
       entry.text = text
-      entry.options = { ...entry.options, badgeColor: nextBadge, mood: person.mood }
       const drawing = drawLabel(text, entry.options)
       visual.tag.material.map?.dispose()
       visual.tag.material.map = textureOf(drawing.canvas)
@@ -2484,6 +3209,18 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       visual.tag.userData.baseW = drawing.width * scale
       visual.tag.userData.baseH = drawing.height * scale
       visual.tag.material.needsUpdate = true
+    }
+
+    const updateMoodEmoji = (visual: PersonVisual, person: PresencePerson) => {
+      const mood: PresenceMood = person.mood ?? "normal"
+      if (visual.moodBall.userData.mood !== mood) {
+        visual.moodBall.userData.mood = mood
+        visual.moodBall.material.map = moodTextureOf(mood)
+        visual.moodBall.material.needsUpdate = true
+      }
+      const statusColor = person.status ? STATUS_COLORS[person.status] : undefined
+      visual.statusDot.visible = Boolean(statusColor)
+      if (statusColor) visual.statusDot.material.color.set(statusColor)
     }
 
     const createPerson = (person: PresencePerson, target: THREE.Vector3, seated: boolean, phase: number): PersonVisual => {
@@ -2509,7 +3246,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       const skinMaterial = avatarMaterial(0xe8c49a)
       const accentMaterial = avatarMaterial(person.color)
       const avatarParts: Array<THREE.Mesh<THREE.BufferGeometry, THREE.MeshLambertMaterial>> = []
-      const poseParts: Array<THREE.Mesh<THREE.BufferGeometry, THREE.MeshLambertMaterial>> = []
+      const poseParts: THREE.Object3D[] = []
       // 몸만 키운다. 이름표와 고리는 바깥 그룹에 남겨 같이 커지지 않게 한다.
       const rig = new THREE.Group()
       rig.scale.setScalar(1.55)
@@ -2558,8 +3295,22 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       const rightLeg = avatarBox(0.17, 0.52, 0.2, pantsMaterial, 0.11, 0.31)
       avatarBox(0.44, 0.1, 0.26, pantsMaterial, 0, 0.62)
       const body = avatarBox(0.5, 0.56, 0.3, shirtMaterial, 0, 0.95)
-      avatarBox(0.12, 0.46, 0.16, shirtMaterial, -0.31, 0.96)
-      avatarBox(0.12, 0.46, 0.16, shirtMaterial, 0.31, 0.96)
+      const makeArm = (x: number) => {
+        const pivot = new THREE.Group()
+        pivot.position.set(x, 1.19, 0)
+        pivot.userData.standingY = 1.19
+        rig.add(pivot)
+        poseParts.push(pivot)
+        const arm = new THREE.Mesh(geometries.box, shirtMaterial)
+        arm.scale.set(0.12, 0.46, 0.16)
+        arm.position.set(0, -0.23, 0)
+        arm.castShadow = true
+        pivot.add(arm)
+        avatarParts.push(arm)
+        return { arm, pivot }
+      }
+      const left = makeArm(-0.31)
+      const right = makeArm(0.31)
       avatarCylinder(0.075, 0.1, skinMaterial, -0.31, 0.71)
       avatarCylinder(0.075, 0.1, skinMaterial, 0.31, 0.71)
       avatarCylinder(0.09, 0.08, skinMaterial, 0, 1.27)
@@ -2574,6 +3325,33 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         avatarBox(0.5, 0.05, 0.34, shirtMaterial, 0, 1.73, 0.12)
       }
       if (wearsGlasses) avatarBox(0.3, 0.03, 0.02, pantsMaterial, 0, 1.56, 0.21)
+
+      const propGroup = new THREE.Group()
+      rig.add(propGroup)
+      const swatch = new THREE.Mesh(
+        geometries.box,
+        new THREE.MeshLambertMaterial({ color: FABRIC_PALETTE[uidHash % FABRIC_PALETTE.length] }),
+      )
+      swatch.scale.set(0.28, 0.02, 0.2)
+      swatch.position.set(0, 1, 0.3)
+      const roll = new THREE.Mesh(geometries.cylinder, materials.paper)
+      roll.scale.set(0.1, 0.5, 0.1)
+      roll.rotation.z = Math.PI / 2
+      roll.position.set(0, 1.05, 0.34)
+      const tablet = new THREE.Mesh(geometries.box, screenOf("grid"))
+      tablet.scale.set(0.3, 0.02, 0.22)
+      tablet.position.set(0, 1.05, 0.3)
+      const carriedBox = new THREE.Mesh(geometries.box, materials.wood)
+      carriedBox.scale.setScalar(0.26)
+      carriedBox.position.set(0, 0.95, 0.33)
+      ;[swatch, roll, tablet, carriedBox].forEach((prop) => {
+        prop.castShadow = true
+        prop.visible = false
+        propGroup.add(prop)
+      })
+      const none = new THREE.Group()
+      none.visible = false
+      const props: Record<PropKind, THREE.Object3D> = { none, swatch, roll, tablet, box: carriedBox }
 
       const glowRing = new THREE.Mesh(
         new THREE.RingGeometry(0.34, 0.62, 28),
@@ -2631,16 +3409,34 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         flag.add(border)
       }
 
-      const screen = person.screen || person.path
-      const shortScreen = screen.length > 10 ? `${screen.slice(0, 10)}…` : screen
-      const tag = makeLabel(`${person.name}${person.isSelf ? " (나)" : ""} · ${shortScreen}`, {
-        color: person.color,
+      const tag = makeLabel(`${person.name}${person.isSelf ? " (나)" : ""}`, {
         size: 52,
         weight: 800,
         scale: 2.4,
       })
       tag.userData = { ...tag.userData, kind: "person", id: person.uid }
       group.add(tag)
+
+      const moodGroup = new THREE.Group()
+      moodGroup.position.set(0, 4.45, 0)
+      const moodBall = new THREE.Mesh(
+        geometries.moodSphere,
+        new THREE.MeshBasicMaterial({ transparent: true }),
+      )
+      moodBall.scale.setScalar(0.26)
+      moodBall.castShadow = false
+      moodBall.renderOrder = 5
+      moodGroup.add(moodBall)
+      const statusDot = new THREE.Mesh(
+        geometries.moodSphere,
+        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true }),
+      )
+      statusDot.scale.setScalar(0.1)
+      statusDot.position.set(0, 0.31, 0)
+      statusDot.castShadow = false
+      statusDot.renderOrder = 5
+      moodGroup.add(statusDot)
+      group.add(moodGroup)
 
       const hit = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ visible: false }))
       hit.scale.set(1.4, 3.6, 1.4)
@@ -2658,6 +3454,16 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         selfRing,
         focusRing,
         tag,
+        moodGroup,
+        moodBall,
+        statusDot,
+        leftArm: left.arm,
+        rightArm: right.arm,
+        leftArmPivot: left.pivot,
+        rightArmPivot: right.pivot,
+        propGroup,
+        props,
+        activity: person.activity ?? "view",
         leftLeg,
         rightLeg,
         flagPole,
@@ -2672,12 +3478,14 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         phase,
       }
       posePerson(visual, seated)
+      updateMoodEmoji(visual, person)
       scene.add(group)
       pickables.push(hit, tag)
       return visual
     }
 
     const syncPeople = (nextPeople: PresencePerson[]) => {
+      markInteraction()
       const byRoom = new Map<string, PresencePerson[]>()
       nextPeople.forEach((person) => {
         if (!roomGroups.has(person.path)) return
@@ -2694,6 +3502,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         const visualPickables = new Set<THREE.Object3D>([visual.hit, visual.tag])
         pickables.splice(0, pickables.length, ...pickables.filter((candidate) => !visualPickables.has(candidate)))
         scene.remove(visual.group)
+        visual.moodBall.material.map = null
         disposeObject(visual.group)
         personVisuals.delete(uid)
       })
@@ -2705,15 +3514,17 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         const span = Math.min(room.w - 2.4, 4.2)
         roomPeople.forEach((person, index) => {
           const spread = Math.min(room.w - 3, (roomPeople.length - 1) * 1.6)
-          const x = roomPeople.length === 1 ? 0 : -spread / 2 + (spread / (roomPeople.length - 1)) * index
+          const offset = roomPeople.length === 1 ? 0 : -spread / 2 + (spread / (roomPeople.length - 1)) * index
+          const [standX, standZ] = PEOPLE_SPOT[room.path] ?? [0, 0]
           const spot = person.spot && person.spot.path === person.path ? person.spot : null
           const target = spot
             ? new THREE.Vector3(room.x + spot.x, 0, room.z + spot.z)
-            : new THREE.Vector3(room.x + x, 0, room.z)
+            : new THREE.Vector3(room.x + standX + offset, 0, room.z + standZ)
           const seated = !spot && room.path !== "/warehouse" && room.path !== "/process-innovation" && room.path !== "/trend/fabric"
           const existing = personVisuals.get(person.uid)
           if (existing) {
             existing.data = person
+            existing.activity = person.activity ?? "view"
             existing.target.copy(target)
             existing.targetSeated = seated
             if (existing.group.position.distanceToSquared(target) > 0.0025) posePerson(existing, false)
@@ -2723,6 +3534,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
             existing.flag.material.color.set(person.color)
             existing.selfRing.visible = person.isSelf
             updatePersonTag(existing, person)
+            updateMoodEmoji(existing, person)
           } else {
             personVisuals.set(person.uid, createPerson(person, target, seated, visualIndex * 0.7))
           }
@@ -2731,6 +3543,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       })
       applyFocus(selectedUid, false)
       refreshRoomLighting()
+      markShadowDirty()
     }
 
     const BUBBLE_MS = 8_000
@@ -2790,7 +3603,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         }
         if (!bubble) {
           const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthWrite: false }))
-          sprite.position.set(0, 4.9, 0)
+          sprite.position.set(0, 5.55, 0)
           sprite.renderOrder = 6
           visual.group.add(sprite)
           bubble = { sprite, text: "" }
@@ -2809,11 +3622,16 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       })
     }
 
+    const setRoomStats = (stats: Record<string, RoomStatDisplay>) => {
+      roomGroups.forEach((entry, path) => entry.setRoomStat?.(stats[path]))
+    }
+
     apiRef.current = {
       syncPeople,
       setBubbles,
       focusPerson: applyFocus,
       selectRoom,
+      setRoomStats,
     }
 
     const raycaster = new THREE.Raycaster()
@@ -2832,7 +3650,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       return true
     }
 
-    const pickAt = (event: PointerEvent) => {
+    const pickAt = (event: MouseEvent) => {
       const bounds = canvas.getBoundingClientRect()
       pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1
       pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1
@@ -2841,9 +3659,47 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     }
 
     const handlePointerDown = (event: PointerEvent) => {
+      markInteraction()
       pointerDown = { x: event.clientX, y: event.clientY }
     }
+    // 아바타에 커서를 올리면 상태와 기분을 글자로 띄운다. 스프라이트 하나를 돌려 쓴다.
+    let hoverTag: THREE.Sprite | null = null
+    const showHoverStatus = (visual: PersonVisual | null) => {
+      if (!visual) {
+        if (hoverTag) hoverTag.visible = false
+        return
+      }
+      const person = visual.data
+      const parts = [person.name]
+      if (person.status) parts.push(STATUS_TEXT[person.status] ?? person.status)
+      if (person.mood) parts.push(MOOD_TEXT[person.mood] ?? person.mood)
+      const screen = person.screen || person.path
+      if (screen) parts.push(screen)
+      parts.push(activityLabel(person.activity))
+      const text = parts.join("   ")
+      if (!hoverTag) {
+        hoverTag = makeLabel(text, { size: 40, weight: 700, scale: 1.9 })
+        hoverTag.renderOrder = 22
+        scene.add(hoverTag)
+      } else {
+        const entry = labelEntries.find((candidate) => candidate.sprite === hoverTag)
+        if (entry && entry.text !== text) {
+          entry.text = text
+          const drawing = drawLabel(text, entry.options)
+          hoverTag.material.map?.dispose()
+          hoverTag.material.map = textureOf(drawing.canvas)
+          const scale = (entry.options.scale ?? 1) * 0.0085
+          hoverTag.userData.baseW = drawing.width * scale
+          hoverTag.userData.baseH = drawing.height * scale
+          hoverTag.material.needsUpdate = true
+        }
+      }
+      hoverTag.visible = true
+      hoverTag.position.set(visual.group.position.x, 5.15, visual.group.position.z)
+    }
+
     const handlePointerMove = (event: PointerEvent) => {
+      markInteraction()
       const now = performance.now()
       if (now - lastPointerMove < 150) return
       lastPointerMove = now
@@ -2854,8 +3710,22 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         : data?.kind === "room" || data?.kind === "person" || data?.kind === "object"
           ? "pointer"
           : "default"
+      const hovered = data?.kind === "person"
+        ? personVisuals.get((hit?.object.userData as { id?: string } | undefined)?.id ?? "") ?? null
+        : null
+      showHoverStatus(hovered)
+    }
+    const handlePointerLeave = () => showHoverStatus(null)
+    // 같은 표지를 다시 누르면 불을 끈다. 다만 더블클릭도 단일 클릭 두 번을 먼저 던지므로
+    // 끄는 것만 미뤄 두고 dblclick 이 오면 취소한다. 안 그러면 줌인 직전에 카메라가 한 번 튄다.
+    let roomOffTimer: number | null = null
+    const cancelRoomOff = () => {
+      if (roomOffTimer === null) return
+      window.clearTimeout(roomOffTimer)
+      roomOffTimer = null
     }
     const handlePointerUp = (event: PointerEvent) => {
+      markInteraction()
       if (!pointerDown) return
       const moved = Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y)
       pointerDown = null
@@ -2882,8 +3752,17 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         return
       }
       if (data.kind === "room") {
-        selectRoom(data.id)
-        onPickRef.current("room", data.id)
+        cancelRoomOff()
+        if (activeRoomPath === data.id) {
+          roomOffTimer = window.setTimeout(() => {
+            roomOffTimer = null
+            selectRoom(null)
+            onPickRef.current("room", "")
+          }, 220)
+        } else {
+          selectRoom(data.id)
+          onPickRef.current("room", data.id)
+        }
         return
       } else if (data.kind === "person") {
         applyFocus(data.id, true)
@@ -2893,8 +3772,17 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       if (data.kind !== "facility" || data.path) onPickRef.current(data.kind, data.id, data.path ?? undefined)
     }
     const handleKeyDown = (event: KeyboardEvent) => {
+      markInteraction()
       const active = document.activeElement
-      if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return
+      // 스페이스를 창 전체에서 가로채므로, 스페이스로 조작하는 요소는 비켜 줘야 한다.
+      // 드롭다운(상태, 기분)과 버튼이 여기 걸려 안 열리던 것을 2026-11-10에 고쳤다.
+      if (
+        active instanceof HTMLInputElement ||
+        active instanceof HTMLTextAreaElement ||
+        active instanceof HTMLSelectElement ||
+        active instanceof HTMLButtonElement ||
+        (active instanceof HTMLElement && active.isContentEditable)
+      ) return
       if (event.code === "Space") {
         event.preventDefault()
         controls.mouseButtons.LEFT = THREE.MOUSE.PAN
@@ -2912,9 +3800,24 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     const handleWindowBlur = () => {
       controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE
     }
-    const handleDoubleClick = () => {
+    const handleDoubleClick = (event: MouseEvent) => {
+      markInteraction()
+      cancelRoomOff()
+      // 육면체 표지를 두 번 누르면 그 방으로 들어간다(2026-11-11 박향근).
+      // 한 번 클릭은 불만 켜므로 들어가는 길이 여기 하나다.
+      const hit = pickAt(event)
+      const data = hit?.object.userData as { kind?: string; id?: string } | undefined
+      if (data?.kind === "room" && data.id && roomGroups.has(data.id)) {
+        if (activeRoomPath !== data.id) {
+          selectRoom(data.id)
+          onPickRef.current("room", data.id)
+        }
+        zoomToRoom(data.id)
+        return
+      }
+      // 고른 것이 없어도 전체 보기로 되돌린다. 캔버스 아래 안내가 그렇게 약속한다.
+      // 예전에는 여기서 조기 반환해서, 휠로만 확대한 경우 돌아갈 길이 휠밖에 없었다.
       // 방을 고른 경우와 사람을 고른 경우 둘 다 빠져나온다.
-      if (!activeRoomPath && !selectedUid) return
       if (activeRoomPath) {
         selectRoom(null)
         onPickRef.current("room", "")
@@ -2929,13 +3832,14 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       const polar = Math.PI / 4
       focusAt(
         new THREE.Vector3(0, 0, -2),
-        frame * 0.94 / 58,
+        overviewZoom(),
         new THREE.Vector3(0, Math.cos(polar) * distance, Math.sin(polar) * distance),
       )
     }
     canvas.addEventListener("dblclick", handleDoubleClick)
     canvas.addEventListener("pointerdown", handlePointerDown)
     canvas.addEventListener("pointermove", handlePointerMove)
+    canvas.addEventListener("pointerleave", handlePointerLeave)
     canvas.addEventListener("pointerup", handlePointerUp)
     window.addEventListener("keydown", handleKeyDown)
     window.addEventListener("keyup", handleKeyUp)
@@ -2948,12 +3852,16 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       renderer.setSize(width, height, false)
       const aspect = width / height
       frame = Math.max(FIT_H, FIT_W / aspect)
+      frameAspect = aspect
       camera.left = -frame * aspect / 2
       camera.right = frame * aspect / 2
       camera.top = frame / 2
       camera.bottom = -frame / 2
       if (!userAdjustedView) {
-        camera.zoom = frame * 0.94 / 58
+        // 평면은 가로 82, 투영된 세로가 약 46이다. 예전에는 세로 기준(58) 하나로만 줌을 정해서
+        // 캔버스가 가로 1.33배보다 납작하면 바깥벽과 섹션 글자가 좌우로 잘렸다.
+        // 두 축을 다 보고 더 빡빡한 쪽에 맞춘다.
+        camera.zoom = overviewZoom()
         updateControls()
       }
       camera.updateProjectionMatrix()
@@ -2983,14 +3891,16 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       materials.desk.color.copy(theme.desk)
       materials.metal.color.copy(theme.metal)
       materials.wood.color.copy(theme.wood)
+      materials.deskWarm.color.copy(theme.desk).lerp(theme.wood, 0.42)
+      materials.deskCool.color.copy(theme.wall).lerp(new THREE.Color(0xffffff), 0.45)
       materials.dark.color.copy(theme.darkFloor)
       corridorMaterial.color.copy(theme.floor).lerp(new THREE.Color(0xffffff), 0.18)
       hemi.color.set(theme.dark ? 0x5b7ba8 : 0xffffff)
-      hemi.groundColor.set(theme.dark ? 0x1a222e : 0xaeb8c6)
-      hemi.intensity = theme.dark ? 0.85 : 0.58
-      sun.intensity = theme.dark ? 0.8 : 0.62
-      ambient.intensity = theme.dark ? 0.25 : 0.32
-      fill.intensity = theme.dark ? 0.3 : 0.35
+      hemi.groundColor.set(theme.dark ? 0x1a222e : 0xdde3ec)
+      hemi.intensity = theme.dark ? 0.85 : 0.84
+      sun.intensity = theme.dark ? 0.8 : 0.5
+      ambient.intensity = theme.dark ? 0.25 : 0.47
+      fill.intensity = theme.dark ? 0.3 : 0.32
       ;(Object.keys(neonMaterials) as ZoneKey[]).forEach((zone) => {
         neonMaterials[zone].color.set(theme.neon[zone])
       })
@@ -3001,17 +3911,6 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
           entry.carpet.color.lerp(new THREE.Color(0xffffff), 0.35)
         }
       })
-      bubbleSprites.forEach((bubble) => {
-        if (!bubble.sprite.visible) return
-        if (Date.now() > (bubble.sprite.userData.until as number)) {
-          bubble.sprite.visible = false
-          return
-        }
-        const baseW = bubble.sprite.userData.baseW as number
-        const baseH = bubble.sprite.userData.baseH as number
-        if (baseW) bubble.sprite.scale.set(baseW / camera.zoom, baseH / camera.zoom, 1)
-      })
-
       labelEntries.forEach((entry) => {
         const drawing = entry.facility
           ? drawFacilityLabel(entry.text, entry.options, entry.clickable ?? false)
@@ -3025,6 +3924,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         material.needsUpdate = true
       })
       personVisuals.forEach((visual) => visual.flagPole.material.color.copy(theme.metal))
+      markShadowDirty()
     }
     const colorScheme = window.matchMedia("(prefers-color-scheme: dark)")
     colorScheme.addEventListener("change", repaint)
@@ -3036,6 +3936,10 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     let animationFrame = 0
     const tick = () => {
       animationFrame = window.requestAnimationFrame(tick)
+      const nowMs = performance.now()
+      const active = cameraTween !== null || someoneWalking || nowMs - lastInteractionAt < 500
+      if (!active && nowMs - lastDrawAt < IDLE_FRAME_MS) return
+      lastDrawAt = nowMs
       const delta = Math.min(clock.getDelta(), 0.05)
       elapsed += delta
       if (cameraTween) {
@@ -3048,10 +3952,15 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         camera.updateProjectionMatrix()
         if (cameraTween.progress >= 1) cameraTween = null
       }
+      let walkingThisFrame = false
       personVisuals.forEach((visual) => {
+        const moodBase = (visual.moodGroup.userData.baseY as number) ?? 4.45
+        visual.moodGroup.position.y = reducedMotion.matches ? moodBase : moodBase + Math.sin(elapsed * 1.6 + visual.phase) * 0.055
         const toTarget = visual.target.clone().sub(visual.group.position)
         const distance = toTarget.length()
         const walking = distance > 0.045
+        if (walking) walkingThisFrame = true
+        if (walking) markShadowDirty()
         if (walking && !reducedMotion.matches) {
           const step = Math.min(distance, delta * 5.2)
           visual.group.position.addScaledVector(toTarget.normalize(), step)
@@ -3074,6 +3983,49 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
           }
         }
 
+        if (walking) {
+          visual.propGroup.visible = false
+          visual.leftArmPivot.rotation.x = THREE.MathUtils.lerp(visual.leftArmPivot.rotation.x, 0, 0.2)
+          visual.rightArmPivot.rotation.x = THREE.MathUtils.lerp(visual.rightArmPivot.rotation.x, 0, 0.2)
+          visual.body.rotation.x = THREE.MathUtils.lerp(visual.body.rotation.x, 0, 0.2)
+          visual.body.rotation.z = THREE.MathUtils.lerp(visual.body.rotation.z, 0, 0.2)
+          visual.head.rotation.y = THREE.MathUtils.lerp(visual.head.rotation.y, 0, 0.2)
+        } else {
+          const baseAction = actionOf(visual.activity, visual.data.path)
+          const action = visual.seated && baseAction.motion === "carry"
+            ? { motion: "type" as Motion, prop: "none" as PropKind }
+            : baseAction
+          visual.propGroup.visible = action.prop !== "none"
+          ;(Object.keys(visual.props) as PropKind[]).forEach((kind) => {
+            visual.props[kind].visible = kind === action.prop
+          })
+
+          const moving = !reducedMotion.matches
+          visual.body.rotation.x = THREE.MathUtils.lerp(visual.body.rotation.x, action.motion === "type" ? 0.06 : 0, 0.2)
+          visual.body.rotation.z = 0
+          visual.head.rotation.y = THREE.MathUtils.lerp(visual.head.rotation.y, 0, 0.2)
+          if (action.motion === "type") {
+            visual.leftArmPivot.rotation.x = -0.5 + (moving ? Math.sin(elapsed * 7 - 1.6) * 0.18 : 0)
+            visual.rightArmPivot.rotation.x = -0.5 + (moving ? Math.sin(elapsed * 7 + 1.6) * 0.18 : 0)
+          } else if (action.motion === "lift") {
+            const lift = -1.15 + (moving ? Math.sin(elapsed * 1.6) * 0.07 : 0)
+            visual.leftArmPivot.rotation.x = lift
+            visual.rightArmPivot.rotation.x = lift
+          } else if (action.motion === "carry") {
+            visual.leftArmPivot.rotation.x = -1.35
+            visual.rightArmPivot.rotation.x = -1.35
+            visual.body.rotation.z = moving ? Math.sin(elapsed * 2.2) * 0.03 : 0
+          } else {
+            visual.leftArmPivot.rotation.x = THREE.MathUtils.lerp(visual.leftArmPivot.rotation.x, 0, 0.2)
+            visual.rightArmPivot.rotation.x = THREE.MathUtils.lerp(visual.rightArmPivot.rotation.x, 0, 0.2)
+            if (action.motion === "still") {
+              visual.body.rotation.z = moving ? Math.sin(elapsed * 0.8 + visual.phase) * 0.02 : 0
+            } else if (action.motion === "shake") {
+              visual.head.rotation.y = moving ? Math.sin(elapsed * 6) * 0.35 : 0
+            }
+          }
+        }
+
         const positions = visual.flag.geometry.attributes.position as THREE.BufferAttribute
         const active = visual.data.ago < 90
         const recent = visual.data.ago >= 90 && visual.data.ago < 150
@@ -3087,14 +4039,46 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         }
         positions.needsUpdate = true
       })
+      someoneWalking = walkingThisFrame
+      // 바닥 라인을 도는 빛. 텍스처 하나를 모든 방이 같이 쓰므로 한 번만 민다.
+      if (floorLineTexture && !reducedMotion.matches) {
+        floorLineTexture.offset.x = (floorLineTexture.offset.x - delta * 0.17) % 1
+      }
+      // 말풍선 크기와 8초 만료는 매 프레임 일이다. 테마를 다시 칠할 때만 돌면
+      // 풍선이 1x1 정사각형으로 눌린 채 뜨고 제때 사라지지도 않는다.
+      bubbleSprites.forEach((bubble) => {
+        if (!bubble.sprite.visible) return
+        if (Date.now() > (bubble.sprite.userData.until as number)) {
+          bubble.sprite.visible = false
+          return
+        }
+        const baseW = bubble.sprite.userData.baseW as number
+        const baseH = bubble.sprite.userData.baseH as number
+        if (baseW) bubble.sprite.scale.set(baseW / camera.zoom, baseH / camera.zoom, 1)
+      })
       labelEntries.forEach((entry) => {
         const baseW = entry.sprite.userData.baseW as number
         const baseH = entry.sprite.userData.baseH as number
         entry.sprite.scale.set(baseW / camera.zoom, baseH / camera.zoom, 1)
       })
       updateControls()
+      if (
+        prevCamPos.distanceToSquared(camera.position) > 1e-8 ||
+        prevCamTarget.distanceToSquared(controls.target) > 1e-8 ||
+        Math.abs(prevZoom - camera.zoom) > 1e-4
+      ) {
+        markInteraction()
+        prevCamPos.copy(camera.position)
+        prevCamTarget.copy(controls.target)
+        prevZoom = camera.zoom
+      }
+      if (shadowFrames > 0) {
+        renderer.shadowMap.needsUpdate = true
+        shadowFrames -= 1
+      }
       renderer.render(scene, camera)
     }
+    markShadowDirty()
     tick()
 
     return () => {
@@ -3105,7 +4089,9 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       colorScheme.removeEventListener("change", repaint)
       canvas.removeEventListener("pointerdown", handlePointerDown)
       canvas.removeEventListener("pointermove", handlePointerMove)
+      canvas.removeEventListener("pointerleave", handlePointerLeave)
       canvas.removeEventListener("dblclick", handleDoubleClick)
+      cancelRoomOff()
       canvas.removeEventListener("pointerup", handlePointerUp)
       window.removeEventListener("keydown", handleKeyDown)
       window.removeEventListener("keyup", handleKeyUp)
@@ -3113,6 +4099,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       controls.removeEventListener("change", handleControlChange)
       controls.dispose()
       disposeObject(scene)
+      moodTextures.forEach((texture) => texture.dispose())
       renderer.dispose()
     }
   }, [])
@@ -3124,6 +4111,10 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
   useEffect(() => {
     apiRef.current?.setBubbles(bubbles ?? {})
   }, [bubbles, peopleKey])
+
+  useEffect(() => {
+    apiRef.current?.setRoomStats(roomStatsRef.current)
+  }, [statsKey])
 
   useEffect(() => {
     apiRef.current?.focusPerson(focusUid, true)

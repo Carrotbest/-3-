@@ -15,6 +15,7 @@ import { addDoc, collection, getDocs, limit as fsLimit, orderBy, query, where } 
 
 import { db, auth } from "./firebase"
 import { currentUserCanEditKey, currentUserCanWrite } from "./auth"
+import { writePresenceActivity, type PresenceActivity } from "./presence"
 import type { DevRecord, FabricLedgerEvent, RequestBoard, RequestStyle } from "./schema"
 import type { TsRecord } from "./sample"
 
@@ -29,6 +30,18 @@ const MAX_CHANGES_PER_DOC = 2000
 
 export type AuditScreen = "dd" | "ts" | "request" | "warehouse" | "rdda" | "analysis"
 export type AuditKind = "edit" | "paste" | "fill" | "replace" | "clear" | "intake" | "upload" | "warehouse" | "revert"
+
+const ACTIVITY_OF_KIND: Record<AuditKind, PresenceActivity> = {
+  edit: "edit",
+  paste: "paste",
+  fill: "paste",
+  replace: "edit",
+  clear: "edit",
+  intake: "intake",
+  upload: "upload",
+  warehouse: "warehouse",
+  revert: "revert",
+}
 
 /** 셀 1개의 변경. 키를 짧게 쓴다. 문서 수천 개가 쌓이므로 이름 길이가 그대로 용량이다. */
 export interface AuditChange {
@@ -167,6 +180,8 @@ export async function logAction(input: {
   if (!currentUserCanWrite()) return
   // 읽기 권한이라 중앙 저장이 막힌 작업은 이력에도 남기지 않는다(R217).
   if (!currentUserCanEditKey(AUDIT_SCREEN_KEY[input.screen] ?? "")) return
+  // 저장 길목이 여기 하나뿐이라 화면마다 계측하지 않아도 된다.
+  void writePresenceActivity(ACTIVITY_OF_KIND[input.kind] ?? "edit")
   const user = auth.currentUser
   const base = {
     at: new Date().toISOString(),

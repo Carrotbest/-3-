@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useLocation } from "react-router-dom"
 
 import { useAuthStore } from "@/data/auth"
-import { subscribePresence, screenTitleOf, type PresenceEntry, type PresenceMood, type PresenceSpot, type PresenceStatus } from "@/data/presence"
+import { ACTIVITY_TTL_MS, subscribePresence, screenTitleOf, type PresenceActivity, type PresenceEntry, type PresenceMood, type PresenceSpot, type PresenceStatus } from "@/data/presence"
 import { MEMBERS } from "@/data/schema"
 
 export interface PresencePerson {
@@ -15,6 +15,7 @@ export interface PresencePerson {
   isSelf: boolean
   status?: PresenceStatus
   mood?: PresenceMood
+  activity?: PresenceActivity
   spot?: PresenceSpot
 }
 
@@ -45,7 +46,7 @@ function colorOf(entry: Pick<PresenceEntry, "uid" | "name">): string {
   return FALLBACK_COLORS[total % FALLBACK_COLORS.length]
 }
 
-export function usePresencePeople(selfStatus?: PresenceStatus, selfMood?: PresenceMood, selfSpot?: PresenceSpot): PresencePerson[] {
+export function usePresencePeople(selfStatus?: PresenceStatus, selfMood?: PresenceMood, selfSpot?: PresenceSpot, selfActivity: PresenceActivity = "view"): PresencePerson[] {
   const { pathname } = useLocation()
   const currentUser = useAuthStore((state) => state.user)
   const [entries, setEntries] = useState<PresenceEntry[]>([])
@@ -71,6 +72,7 @@ export function usePresencePeople(selfStatus?: PresenceStatus, selfMood?: Presen
         isSelf: false,
         status: entry.status,
         mood: entry.mood,
+        activity: entry.activityAt && now - entry.activityAt < ACTIVITY_TTL_MS ? entry.activity : "view",
         spot: entry.spot,
       }
     })
@@ -88,7 +90,8 @@ export function usePresencePeople(selfStatus?: PresenceStatus, selfMood?: Presen
       isSelf: true,
       status: selfStatus,
       mood: selfMood,
+      activity: selfActivity,
       spot: selfSpot,
     }, ...others]
-  }, [currentUser, entries, now, pathname, selfStatus, selfMood, selfSpot])
+  }, [currentUser, entries, now, pathname, selfStatus, selfMood, selfSpot, selfActivity])
 }
