@@ -2192,7 +2192,8 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         const shelfXs = [-7.5, -2.5, 2.5, 7.5]
         shelfXs.forEach((x) => bookshelf(group, x, -1.2, 0))
         shelfXs.forEach((x) => bookshelf(group, x, 1.2, Math.PI))
-        meetingTable(group, 0, 3.2, 6)
+        // 열람용 원탁과 의자를 뺐다(2026-11-11 박향근). 생긴 자리는 비워 둔다.
+        // 다른 가구로 채우지 말 것. 여백이 세련된 느낌을 만든다(R403).
         floorLamp(group, -9.5, 3.7)
         floorLamp(group, 9.5, 3.7)
         const books = Array.from({ length: 80 }, (_, index) => ({
