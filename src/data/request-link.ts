@@ -282,10 +282,17 @@ export function requestCandidates(
       || Date.parse(b.style.updatedAt) - Date.parse(a.style.updatedAt))
 }
 
-export function requestToIntakeRecords(style: RequestStyle, options: readonly RequestOption[]): DevRecord[] {
+/**
+ * 고른 의뢰 옵션을 접수 창의 DD 행으로 바꾼다.
+ *
+ * 담당은 밖에서 받는다(R431). 의뢰의 개발 담당(`style.developer`)은 "변재휘/김지현"처럼
+ * 둘일 수 있는데 그대로 복사하면 두 사람이 각각 불러온 행이 모두 양쪽 담당이 되어
+ * 서로의 탭에 겹쳐 뜬다(2026-11-12 박향근). DD 행의 담당은 언제나 한 사람이다.
+ */
+export function requestToIntakeRecords(style: RequestStyle, options: readonly RequestOption[], owner: string): DevRecord[] {
   return options.flatMap((option) => {
     if (!option.lineId) return []
-    const record = createBlankDevRecord(style.developer)
+    const record = createBlankDevRecord(owner)
     const original = originalFieldsOf(style)
     // 옵션 사양(원사, 조직, 중량, 색상, 염색, FINISH, 개발처)은 넘기지 않는다
     // (R426, 2026-11-12 박향근 확정). 그 값의 출처는 작업지시서 하나다.
@@ -294,7 +301,7 @@ export function requestToIntakeRecords(style: RequestStyle, options: readonly Re
       ...record,
       styleNo: style.garmentNo,
       buyer: style.brand,
-      owner: style.developer,
+      owner,
       planner: style.requester,
       tech: {
         ...record.tech,

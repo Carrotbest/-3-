@@ -3223,12 +3223,22 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!nextStyle) return
     const selectedIds = new Set(selectedOptions.map((option) => option.optId))
     const options = nextStyle.options.filter((option) => selectedIds.has(option.optId))
-    const recs = requestToIntakeRecords(nextStyle, options)
+    // 접수 행의 담당은 불러오는 사람 본인이다(R431). 의뢰의 개발 담당은 둘일 수 있지만
+    // DD 행의 담당은 한 사람이다. 관리자는 남의 건도 접수하므로 의뢰 담당이 한 사람이면
+    // 그 이름을 쓰고, 둘 이상이면 비워 직접 고르게 한다. 담당은 필수라 비면 저장이 막힌다.
+    const developers = ownerNames(nextStyle.developer)
+    const intakeOwner = isAdmin ? (developers.length === 1 ? developers[0] : "") : myName.trim()
+    const recs = requestToIntakeRecords(nextStyle, options, intakeOwner)
     const hadZaji = Boolean(attached)
     setIntake(recs); setIntakeOpt(0); setIntakeError(null); resetAttach()
     const notices = [
       hadZaji ? "첨부해 둔 작업지시서를 해제했습니다. 작지 값을 쓰려면 요청을 불러온 뒤에 다시 첨부하십시오." : "",
       `옵션 ${recs.length}줄을 만들고 연결했습니다. 원사와 조직, 중량, 염색, FINISH는 작업지시서를 첨부해야 채워집니다.`,
+      developers.length > 1
+        ? intakeOwner
+          ? `의뢰 개발 담당이 ${nextStyle.developer}라 이 행의 담당은 본인(${intakeOwner})으로 넣었습니다. 한 행의 담당은 한 사람입니다.`
+          : `의뢰 개발 담당이 ${nextStyle.developer}입니다. 한 행의 담당은 한 사람이라 비워 두었으니 직접 고르십시오.`
+        : "",
     ].filter(Boolean)
     setIntakeNotice(notices.length ? notices.join(" ") : null)
     setIntakeRequest({ reqId: nextStyle.reqId, chart: nextStyle.chart, garmentNo: nextStyle.garmentNo })
