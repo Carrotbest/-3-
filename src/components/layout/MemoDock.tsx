@@ -79,7 +79,6 @@ function MemoCard({ memo, replies, viewport, currentUid, currentName, isOwner, h
   const [editColor, setEditColor] = useState<MemoColor>(memo.color)
   const [editSize, setEditSize] = useState<MemoSize>(memo.size)
   const [editExpiry, setEditExpiry] = useState(memo.expiresAt)
-  const [editPinned, setEditPinned] = useState(memo.pinned)
   const [error, setError] = useState("")
   const dragRef = useRef<{ startX: number; startY: number; x: number; y: number } | null>(null)
 
@@ -136,7 +135,7 @@ function MemoCard({ memo, replies, viewport, currentUid, currentName, isOwner, h
       color: editColor,
       size: editSize,
       expiresAt: editExpiry,
-      pinned: editPinned,
+      pinned: true,
     })
     if (code) setError(saveErrorText(code))
     else {
@@ -199,7 +198,6 @@ function MemoCard({ memo, replies, viewport, currentUid, currentName, isOwner, h
           </div>
           <div className="flex items-center gap-1">
             <input type="date" className="min-w-0 flex-1 rounded border border-black/20 bg-white/55 px-1 py-0.5" value={editExpiry} onChange={(event) => setEditExpiry(event.target.value)} />
-            <label className="flex items-center gap-1 whitespace-nowrap"><input type="checkbox" checked={editPinned} onChange={(event) => setEditPinned(event.target.checked)} /> 중요</label>
             <button type="button" className="rounded bg-black/15 p-1" onClick={() => void saveEdit()} aria-label="저장"><Save className="size-3.5" /></button>
           </div>
         </div>
@@ -245,7 +243,6 @@ export function MemoDock() {
   const [newColor, setNewColor] = useState<MemoColor>("yellow")
   const [newSize, setNewSize] = useState<MemoSize>("m")
   const [newDays, setNewDays] = useState<(typeof MEMO_DAYS)[number]>(14)
-  const [newPinned, setNewPinned] = useState(false)
   const [newPosition, setNewPosition] = useState(() => ({
     x: Math.max((window.innerWidth - MEMO_SIZES.m.w) / 2, 0),
     y: Math.max((window.innerHeight - MEMO_SIZES.m.h) / 2, 0),
@@ -280,15 +277,17 @@ export function MemoDock() {
     if (lastPath.current !== location.pathname) {
       lastPath.current = location.pathname
       suppressed.current.clear()
-      const pinned = activeMemos.filter((memo) => memo.pinned && !hidden[memo.id]).map((memo) => memo.id)
-      setOpenIds(new Set(pinned))
-      setPanelOpen(pinned.length > 0)
+      // 그 화면의 살아 있는 메모는 전부 펼친다(R427, 2026-11-12 박향근 확정).
+      // 끄는 길은 두 가지다. 닫기 단추는 이 화면을 떠날 때까지, 「그만 보기」는 이 브라우저에서 계속이다.
+      const opening = activeMemos.filter((memo) => !hidden[memo.id]).map((memo) => memo.id)
+      setOpenIds(new Set(opening))
+      setPanelOpen(opening.length > 0)
       setCreating(false)
       return
     }
-    const pinned = activeMemos.filter((memo) => memo.pinned && !hidden[memo.id] && !suppressed.current.has(memo.id)).map((memo) => memo.id)
-    if (pinned.length) {
-      setOpenIds((current) => new Set([...current, ...pinned]))
+    const opening = activeMemos.filter((memo) => !hidden[memo.id] && !suppressed.current.has(memo.id)).map((memo) => memo.id)
+    if (opening.length) {
+      setOpenIds((current) => new Set([...current, ...opening]))
       setPanelOpen(true)
     }
   }, [activeMemos, hidden, location.pathname])
@@ -381,7 +380,9 @@ export function MemoDock() {
       size: newSize,
       x: Math.min(Math.max(newPosition.x / denomX, 0), 1),
       y: Math.min(Math.max(newPosition.y / denomY, 0), 1),
-      pinned: newPinned,
+      // 자동 펼침이 모든 메모에 걸리므로 이 값은 더 읽지 않는다(R427).
+      // 옛 화면이 열려 있어도 같게 보이도록 늘 true 로 쓴다. 필드는 스키마 호환으로 남긴다.
+      pinned: true,
       expiresAt: expiryKey(newDays),
       name: displayName(user),
     })
@@ -392,7 +393,6 @@ export function MemoDock() {
       setNewColor("yellow")
       setNewSize("m")
       setNewDays(14)
-      setNewPinned(false)
       setCreating(false)
     }
   }
@@ -417,7 +417,6 @@ export function MemoDock() {
           </div>
           <div className="mt-1.5 flex items-center gap-1 text-xs">
             <select className="rounded border border-black/20 bg-white/55 px-1 py-0.5" value={newDays} onChange={(event) => setNewDays(Number(event.target.value) as (typeof MEMO_DAYS)[number])}>{MEMO_DAYS.map((days) => <option key={days} value={days}>{days}일</option>)}</select>
-            <label className="flex items-center gap-1"><input type="checkbox" checked={newPinned} onChange={(event) => setNewPinned(event.target.checked)} /> 중요</label>
             <button type="button" className="ml-auto flex items-center gap-1 rounded bg-black/15 px-2 py-1 font-medium" onClick={() => void saveNew()}><Check className="size-3.5" /> 저장</button>
           </div>
         </section>
