@@ -77,6 +77,27 @@ export function OwnerCleanupDialog({ open, onOpenChange, records, onApply }: Own
     toggle(key, Boolean(value))
   }
   const selectAll = (value: boolean) => setChecked(new Set(value ? selectable.map((row) => row.key) : []))
+  /** 이 표에 나온 사람 전부. "모두 ○○로" 목록이다. */
+  const everyone = [...new Set(rows.flatMap((row) => row.choices))].sort((a, b) => a.localeCompare(b, "ko-KR"))
+  /**
+   * 그 사람을 담당으로 고를 수 있는 행을 한 번에 그 사람으로 맞춘다(R433).
+   * 담당 목록에 그 사람이 없는 행은 건드리지 않는다. 남의 행을 끌어오면 안 된다.
+   */
+  const setAllTo = (name: string) => {
+    if (!name) return
+    const hit = rows.filter((row) => row.choices.includes(name))
+    if (!hit.length) return
+    setPicks((current) => {
+      const next = new Map(current)
+      for (const row of hit) next.set(row.key, name)
+      return next
+    })
+    setChecked((current) => {
+      const next = new Set(current)
+      for (const row of hit) next.add(row.key)
+      return next
+    })
+  }
   const apply = async () => {
     const chosen = new Map(selected.map((row) => [row.key, { from: row.current, to: picks.get(row.key)! }]))
     if (!chosen.size) return
@@ -101,7 +122,7 @@ export function OwnerCleanupDialog({ open, onOpenChange, records, onApply }: Own
             <thead className="sticky top-0 bg-[var(--card)]">
               <tr className="border-b text-left">
                 <th className="px-2 py-2"><label className="flex items-center gap-1.5 whitespace-nowrap"><Checkbox checked={allSelected} onCheckedChange={(value) => selectAll(value === true)} />모두 선택</label></th>
-                <th className="px-2 py-2">Style No.</th><th className="px-2 py-2">Opt</th><th className="px-2 py-2">FL#</th><th className="px-2 py-2">현재 담당</th><th className="px-2 py-2">접수자</th><th className="px-2 py-2">접수 일시</th><th className="px-2 py-2">접수 뒤 편집</th><th className="px-2 py-2">바꿀 담당</th>
+                <th className="px-2 py-2">Style No.</th><th className="px-2 py-2">Opt</th><th className="px-2 py-2">FL#</th><th className="px-2 py-2">현재 담당</th><th className="px-2 py-2">접수자</th><th className="px-2 py-2">접수 일시</th><th className="px-2 py-2">접수 뒤 편집</th><th className="px-2 py-2"><span className="flex items-center gap-2 whitespace-nowrap">바꿀 담당<select aria-label="바꿀 담당 일괄 지정" className="h-7 rounded-md border bg-[var(--card)] px-1.5 text-[11px] font-normal" value="" onChange={(event) => { setAllTo(event.target.value); event.target.value = "" }}><option value="">모두 …로</option>{everyone.map((name) => <option key={name} value={name}>모두 {name}로</option>)}</select></span></th>
               </tr>
             </thead>
             <tbody>{rows.map((row) => <tr key={row.key} className="border-b last:border-b-0">
