@@ -378,7 +378,7 @@ function getHighlightArticles(articles: TrendArticle[]) {
   const cut = daysAgo(21)
   return FEATURE_CATEGORIES.flatMap((category) => articles
     .filter((article) => article.c === category && article.d >= cut)
-    .sort((a, b) => heatScore(b) - heatScore(a) || b.d.localeCompare(a.d)).slice(0, 4))
+    .sort((a, b) => heatScore(b) - heatScore(a) || b.d.localeCompare(a.d)).slice(0, 6))
 }
 
 function HighlightGrid({ rows, stars, onStar }: {
