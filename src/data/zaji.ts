@@ -274,6 +274,12 @@ function parseGd(rows: Grid): Zaji {
       // 색상 번호(No)로 접으면 한 색상에 걸린 Part 가 통째로 1건이 된다.
       // FSR260901105 는 BODY 6개 x 2색이라 12건이 맞는데 2건으로 줄던 사고가 있었다.
       // 병합 셀로 같은 Part+Color 가 여러 행에 반복되는 것만 1건으로 합친다.
+      // 색상마다 Part 목록 전체를 깔아 두고 실제 의뢰 조합에만 Quantity 를 적는 양식이 있다.
+      // 그 경우 수량 칸이 곧 의뢰 여부다. 수량이 한 건도 없는 작지는 예전처럼 Part+Color 를 모두 받는다.
+      let hasQuantity = false
+      for (let r = header + 1; r < limit; r++) {
+        if (g.at(r, cols["Part"]) && g.at(r, cols["Quantity"])) { hasQuantity = true; break }
+      }
       const seen = new Set<string>()
       let lastColor = ""
       for (let r = header + 1; r < limit; r++) {
@@ -281,6 +287,7 @@ function parseGd(rows: Grid): Zaji {
         if (color) lastColor = color
         const part = g.at(r, cols["Part"])
         if (!part) continue
+        if (hasQuantity && !g.at(r, cols["Quantity"])) continue
         const key = `${part}::${lastColor}`
         if (seen.has(key)) { z.dupRemoved += 1; continue }
         seen.add(key)
