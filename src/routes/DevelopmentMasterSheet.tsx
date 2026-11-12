@@ -1,6 +1,6 @@
 import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
 import { FlPerfMark } from "@/components/fabric/PerfBadge"
-import { CalendarDays, Calculator, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, Unlink, X } from "lucide-react"
+import { CalendarDays, Calculator, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, Unlink, Users, X } from "lucide-react"
 import { Popover } from "radix-ui"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
@@ -10,6 +10,7 @@ import { ReadOnlyBanner } from "@/components/layout/ReadOnlyBanner"
 import { ShinyActionButton } from "@/components/ui/shiny-action-button"
 import { ColumnFilterMenu } from "@/components/data-table/ColumnFilterMenu"
 import { RequestPickerDialog } from "@/components/dd/RequestPickerDialog"
+import { OwnerCleanupDialog } from "@/components/dd/OwnerCleanupDialog"
 import { CostSheetDialog } from "@/components/dd/CostSheetDialog"
 import { StyleHoverLayer, type StyleHoverLayerHandle } from "@/components/data-table/StyleHoverLayer"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -3216,6 +3217,34 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       if (zajiInputRef.current) zajiInputRef.current.value = ""
     }
   }
+  const [ownerCleanupOpen, setOwnerCleanupOpen] = useState(false)
+  /**
+   * 묶음 담당 행의 담당만 한 사람으로 바꾼다(R432). 담당 외의 칸은 건드리지 않는다.
+   *
+   * **계획을 세운 뒤 담당이 바뀐 행은 건너뛴다.** 대화상자를 열어 둔 사이에 누가 손봤다는
+   * 뜻이고, 그냥 덮으면 그 손질이 사라진다. 바꿀 것이 하나도 없으면 저장도 하지 않는다.
+   * 순서 고정(`freezeOrder`)은 끈다. 담당은 정렬에 쓰이지 않아 건드릴 이유가 없고,
+   * 켜 두면 손대지도 않은 행의 `sortOrder` 까지 다시 쓴다.
+   */
+  const applyOwnerCleanup = async (picks: Map<string, { from: string; to: string }>) => {
+    if (!picks.size) return
+    let changed = 0
+    let skipped = 0
+    await commitRecords((rows) => {
+      const next = rows.map((row) => {
+        const pick = picks.get(recordIdentity(row))
+        if (!pick) return row
+        if (row.owner !== pick.from) { skipped += 1; return row }
+        if (row.owner === pick.to) return row
+        changed += 1
+        return { ...row, owner: pick.to }
+      })
+      return changed ? next : rows
+    }, false)
+    notify(skipped
+      ? `담당 ${changed}행을 바꿨습니다. ${skipped}행은 그 사이 담당이 바뀌어 건너뛰었습니다.`
+      : `담당 ${changed}행을 한 사람으로 바꿨습니다.`)
+  }
   const importRequest = (style: RequestStyle, selectedOptions: RequestOption[]) => {
     const { next, changed } = ensureRequestLineIds(requests)
     if (changed) saveRequests(next)
@@ -3554,6 +3583,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           aria-pressed={targetColumnsShown}
           title={targetColumnsShown ? "공정 목표일 열 네 개를 접습니다" : "공정 목표일 열 네 개를 펼쳐 입력합니다"}
           onClick={toggleTargetColumns}><CalendarDays className="size-4" />목표일 {targetColumnsShown ? "접기" : "펼치기"}</Button>
+        {isAdmin ? <Button type="button" size="sm" variant="outline" title="담당이 두 사람으로 적힌 행을 접수자 기준으로 한 사람씩 정리합니다" onClick={() => setOwnerCleanupOpen(true)}><Users className="size-4" />담당 묶음 정리</Button> : null}
         <Button type="button" size="sm" variant="outline" onClick={() => { setFdsYdsNotice(null); setFdsYdsOpen(true) }}><Mail className="size-4" />FDS/YDS 요청</Button>
         <Button type="button" size="sm" variant="outline" disabled={exporting} title="화면에 보이는 순서 그대로 DD 엑셀 양식으로 내보냅니다" onClick={() => void exportExcel()}>{exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}엑셀 내보내기</Button>
         {canBackup ? <Button type="button" size="sm" variant="outline" disabled={backupExporting} title="DD 전체와 창고 상태·이력, 샘플대장을 필드 그대로 엑셀로 내려받습니다" onClick={() => void exportBackup()}>{backupExporting ? <Loader2 className="size-4 animate-spin" /> : <DatabaseBackup className="size-4" />}엑셀 백업</Button> : null}
@@ -4004,6 +4034,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     </Dialog>
 
     <RequestPickerDialog open={requestPickerOpen} onOpenChange={setRequestPickerOpen} requests={requests} records={records} styleNo={sharedDraft?.styleNo ?? ""} initialReqId={requestPickerInitialReqId} onConfirm={importRequest} />
+    <OwnerCleanupDialog open={ownerCleanupOpen} onOpenChange={setOwnerCleanupOpen} records={records} onApply={applyOwnerCleanup} />
     <CostSheetDialog open={costRows.length > 0} onOpenChange={(open) => { if (!open) setCostRows([]) }} rows={costRows} canEdit={editEnabled} onSaved={(rowKey, ref) => void applyCostRef(rowKey, ref)} storageNoFor={(target) => { const item = ledgerByRecord.get(recordIdentity(target)); return item?.storageNo ? storageNoLabel(item) : "" }} />
 
     {/* 전체 항목 수정(64열) — 담당 칸의 확대 아이콘으로 진입. 데이터 입력 화면. */}
