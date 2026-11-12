@@ -757,6 +757,27 @@ export const ownerDisplayName = (name: string): string =>
     })
     .join("/")
 
+/**
+ * 담당 값을 사람 단위로 쪼갠다(R430). "변재휘/김지현"은 병행 개발 건이라 두 사람 각각의 것이다.
+ * 집계와 필터는 실이름으로 맞추므로 여기서 표시명으로 바꾸지 않는다. 표시명이 필요하면 바깥에서 씌운다.
+ * 빈 조각과 중복은 버린다.
+ */
+export const ownerNames = (value: string | null | undefined): string[] => {
+  const seen = new Set<string>()
+  for (const part of String(value ?? "").split("/")) {
+    const trimmed = part.trim()
+    if (trimmed) seen.add(trimmed)
+  }
+  return [...seen]
+}
+
+/** 그 담당 값이 이 사람의 것인지. 공백은 무시한다. 빈 이름은 늘 거짓이다. */
+export const ownerIncludes = (value: string | null | undefined, name: string): boolean => {
+  const target = String(name ?? "").replace(/\s+/g, "")
+  if (!target) return false
+  return ownerNames(value).some((part) => part.replace(/\s+/g, "") === target)
+}
+
 /** 민감 필드 — sensitiveUnlocked 가 false면 화면에 그리지 않는다 */
 export const SENSITIVE_FIELDS = ["unitPrice", "vendor", "vendorCode"] as const
 

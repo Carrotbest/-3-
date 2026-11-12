@@ -84,6 +84,7 @@ import {
   DEFAULT_COLUMNS,
   FIELDS,
   ownerDisplayName,
+  ownerIncludes,
   RETIRED_MEMBERS,
   STATUS,
   type CompletedSample,
@@ -862,7 +863,7 @@ function DevelopmentOverview({ records }: { records: readonly DevRecord[] }) {
                   trend={ownerTrends[name] ?? []}
                   source={ownerSources[name] ?? EMPTY_OWNER_SOURCE}
                   onCollapse={() => toggleOwner(name)}
-                  onOpen={() => setListPopup({ title: `${ownerCardDisplayName(name)} 개발 목록`, description: `진행중 ${active.filter((row) => row.owner === name).length.toLocaleString("ko-KR")}건`, rows: active.filter((row) => row.owner === name) })}
+                  onOpen={() => setListPopup({ title: `${ownerCardDisplayName(name)} 개발 목록`, description: `진행중 ${active.filter((row) => ownerIncludes(row.owner, name)).length.toLocaleString("ko-KR")}건`, rows: active.filter((row) => ownerIncludes(row.owner, name)) })}
                 />
               </Reveal>
             ))}

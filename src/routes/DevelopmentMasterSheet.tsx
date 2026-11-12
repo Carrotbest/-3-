@@ -31,7 +31,7 @@ import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED, parseTsvGr
 import { dayToneText, holidayName } from "@/data/holidays"
 import { COST_STALE_DAYS } from "@/data/cost-sheets"
 import { applyZajiHeader, applyZajiOption, fillZajiHeaderBlanks, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
-import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical, type RequestOption, type RequestStyle } from "@/data/schema"
+import { MEMBERS, ownerDisplayName, ownerIncludes, ownerNames, type DevRecord, type DevTechnical, type RequestOption, type RequestStyle } from "@/data/schema"
 import { buildWeeklyReport, reportOwnerNames as reportOwnersOf, weeklyReportText, type ReportDetailLevel } from "@/data/weekly-report"
 import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, saveRequests, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
 import { useViewportAnchor } from "@/lib/useViewportAnchor"
@@ -44,11 +44,7 @@ const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니�
  * 계정 이름이 비어 있으면 어느 탭도 고치지 못한다. 관리자만 예외다.
  * 집계와 필터는 실이름을 쓰므로 여기서도 표시명(ownerDisplayName)이 아니라 원문으로 맞춘다.
  */
-const matchesOwnerName = (ownerValue: string, userName: string): boolean => {
-  const me = userName.replace(/\s+/g, "")
-  if (!me) return false
-  return ownerValue.split("/").some((part) => part.replace(/\s+/g, "") === me)
-}
+const matchesOwnerName = (ownerValue: string, userName: string): boolean => ownerIncludes(ownerValue, userName)
 const COL_WIDTHS_STORAGE_KEY = "dd-col-widths-v2"
 const OPEN_GROUPS_STORAGE_KEY = "dd-open-groups-v1"
 /** 열 하나씩 숨기기(R264). 개인 브라우저에만 남는 값이며 key는 열 id, 값은 숨김 여부다. */
@@ -1674,7 +1670,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }, [])
 
   const scoped = useMemo(() => categoryScope ? records.filter((row) => row.category === categoryScope) : records, [categoryScope, records])
-  const ownerOptions = useMemo(() => [...new Set(scoped.map((row) => row.owner).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko-KR")), [scoped])
+  // 담당 드롭다운은 사람 단위다(R430). "변재휘/김지현" 같은 묶음 값은 목록에 세우지 않고 토큰으로 풀어 넣는다.
+  const ownerOptions = useMemo(() => [...new Set(scoped.flatMap((row) => ownerNames(row.owner)))].sort((a, b) => a.localeCompare(b, "ko-KR")), [scoped])
   // 메인 담당별 개발 건수(진행중·전체)와 팀 전체 합계. 네임카드에 표시하고, 클릭하면 담당 필터로 이어진다.
   const ownerStats = useMemo(() => {
     const byOwner = new Map<string, { total: number; active: number }>(MAIN_DEVELOPERS.map((name) => [name, { total: 0, active: 0 }]))
@@ -1683,10 +1680,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       const active = (row.devStatus || row.stage) === "진행중"
       all.total += 1
       if (active) all.active += 1
-      const stat = byOwner.get(row.owner)
-      if (!stat) continue
-      stat.total += 1
-      if (active) stat.active += 1
+      // 병행 건은 두 사람 각각 1건이다. 그래서 네임카드 합이 전체보다 클 수 있다.
+      for (const name of ownerNames(row.owner)) {
+        const stat = byOwner.get(name)
+        if (!stat) continue
+        stat.total += 1
+        if (active) stat.active += 1
+      }
     }
     return { byOwner, all }
   }, [scoped])
@@ -1742,7 +1742,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   const passesBaseFilters = (record: DevRecord, exceptColumnId?: string): boolean => {
-    if (owner !== ALL && record.owner !== owner) return false
+    if (owner !== ALL && !ownerIncludes(record.owner, owner)) return false
     // 전체 탭은 진행 중인 건만 본다. 담당 탭은 숨김을 켰을 때만 감춘다.
     if ((owner === ALL || hideClosed) && status === ALL && isClosedRecord(record)) return false
     if (status !== ALL && (record.devStatus || record.stage) !== status) return false
@@ -3434,13 +3434,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           return compareManualOrder(a.record, b.record) || a.index - b.index
         })
         .map(({ record }) => record)
-      const owners = [...new Set(base.map((record) => record.owner).filter(Boolean))]
+      const owners = [...new Set(base.flatMap((record) => ownerNames(record.owner)))]
         .sort((a, b) => a.localeCompare(b, "ko-KR"))
       const stamp = new Date().toLocaleDateString("ko-KR")
       const sheets: DdExportSheet[] = [
         { name: "전체현황", title: `DEVELOPMENT DASHBOARD 전체현황 (${base.length}건, ${stamp} 내보냄)`, rows: base },
         ...owners.map((name) => {
-          const rows = base.filter((record) => record.owner === name)
+          const rows = base.filter((record) => ownerIncludes(record.owner, name))
           return { name: ownerDisplayName(name), title: `DEVELOPMENT DASHBOARD ${ownerDisplayName(name)} (${rows.length}건, ${stamp} 내보냄)`, rows }
         }),
       ]

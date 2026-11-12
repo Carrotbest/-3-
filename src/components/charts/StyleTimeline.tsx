@@ -3,7 +3,7 @@ import { CalendarDays, ChevronDown, ChevronRight } from "lucide-react"
 
 import { styleTimeline, type StyleTimelineOption, type StyleTimelineRow } from "@/data/derive"
 import { daysLeft, fmtDateFull, toDate } from "@/data/format"
-import { ownerDisplayName, type DevRecord } from "@/data/schema"
+import { ownerDisplayName, ownerIncludes, type DevRecord } from "@/data/schema"
 import { useInView } from "@/lib/useInView"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -98,7 +98,7 @@ export function StyleTimeline({ records, today, onSelect, hideOwnerCategoryFilte
   const categories = useMemo(() => [...new Set(rows.map((row) => row.category))].sort((a, b) => (a || "미지정").localeCompare(b || "미지정", "ko-KR")), [rows])
   const cutoff = rangeStart(today, range)
   const visibleRows = rows.filter((row) =>
-    (owner === ALL || (owner === EMPTY ? !row.owner : row.owner === owner))
+    (owner === ALL || (owner === EMPTY ? !row.owner : ownerIncludes(row.owner, owner)))
     && (category === ALL || (category === EMPTY ? !row.category : row.category === category))
     && states.has(row.state)
     && (!cutoff || dateValue(row.end) >= cutoff.getTime()),

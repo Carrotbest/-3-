@@ -8,6 +8,8 @@ import {
   httpsMaterialLink,
   MEMBERS,
   ownerDisplayName,
+  ownerIncludes,
+  ownerNames,
   SAMPLE_OWNERS,
   type DevRecord,
   type CompletedSample,
@@ -385,7 +387,7 @@ export function byOwnerDetailed(records: readonly DevRecord[]): OwnerDetailedDat
   ]
 
   return SAMPLE_OWNERS.map((member) => {
-    const owned = records.filter((record) => record.owner === member.name)
+    const owned = records.filter((record) => ownerIncludes(record.owner, member.name))
     const split = devTypeSplit(owned)
     return {
       id: member.id,
@@ -428,13 +430,13 @@ export function categoryStyleList(
     const current = grouped.get(key)
     if (current) {
       current.options += 1
-      if (record.owner && !current.owners.includes(record.owner)) current.owners.push(record.owner)
+      for (const name of ownerNames(record.owner)) if (!current.owners.includes(name)) current.owners.push(name)
       if (record.buyer && !current.buyer) current.buyer = record.buyer
       if (record.season && !current.season) current.season = record.season
     } else {
       grouped.set(key, {
         styleNo: key,
-        owners: record.owner ? [record.owner] : [],
+        owners: ownerNames(record.owner),
         buyer: record.buyer,
         season: record.season,
         options: 1,
@@ -557,13 +559,18 @@ export function ownerLaneBoard(rows: readonly DevRecord[], today = new Date()): 
   const knownOwners: string[] = SAMPLE_OWNERS.map((member) => member.name)
   const ownerOrder = [...knownOwners]
   const ownerSet = new Set(ownerOrder)
-  const ownerName = (record: DevRecord) => record.owner.trim() || "미지정"
+  // 병행 건은 두 레인에 모두 선다(R430). 담당이 비면 "미지정" 레인 하나다.
+  const ownerNamesOf = (record: DevRecord): string[] => {
+    const names = ownerNames(record.owner)
+    return names.length ? names : ["미지정"]
+  }
 
   for (const record of activeRows) {
-    const owner = ownerName(record)
-    if (!ownerSet.has(owner)) {
-      ownerSet.add(owner)
-      ownerOrder.push(owner)
+    for (const owner of ownerNamesOf(record)) {
+      if (!ownerSet.has(owner)) {
+        ownerSet.add(owner)
+        ownerOrder.push(owner)
+      }
     }
   }
 
@@ -574,13 +581,15 @@ export function ownerLaneBoard(rows: readonly DevRecord[], today = new Date()): 
   }
 
   for (const record of activeRows) {
-    const owner = ownerName(record)
     const stageIndex = boardStagePosition(record)
     const styleNo = record.styleNo.trim() || "Style 미기재"
-    const stageGroups = grouped.get(owner)![stageIndex]
-    const styleRecords = stageGroups.get(styleNo)
-    if (styleRecords) styleRecords.push(record)
-    else stageGroups.set(styleNo, [record])
+    for (const owner of ownerNamesOf(record)) {
+      const stageGroups = grouped.get(owner)![stageIndex]
+      const styleRecords = stageGroups.get(styleNo)
+      if (styleRecords) styleRecords.push(record)
+      else stageGroups.set(styleNo, [record])
+    }
+    // 단계 합계는 행 수다. 레인 루프 밖에서 한 번만 올린다(R430).
     stageTotals[stageIndex] += 1
   }
 
@@ -1339,12 +1348,14 @@ export function ownerMonthlyFlTrend(
   })
   const monthSet = new Set(months)
   const owners = [...ownerList]
-  const ownerSet = new Set(owners)
   const counts = new Map<string, Map<string, number>>(owners.map((owner) => [owner, new Map()]))
   for (const reg of mergedFlRegistrations(records, samples)) {
-    if (!ownerSet.has(reg.owner) || !monthSet.has(reg.month)) continue
-    const bucket = counts.get(reg.owner)!
-    bucket.set(reg.month, (bucket.get(reg.month) ?? 0) + 1)
+    if (!monthSet.has(reg.month)) continue
+    for (const name of ownerNames(reg.owner)) {
+      const bucket = counts.get(name)
+      if (!bucket) continue
+      bucket.set(reg.month, (bucket.get(reg.month) ?? 0) + 1)
+    }
   }
   return Object.fromEntries(owners.map((owner) => [
     owner,
@@ -1394,19 +1405,20 @@ export function ownerFlSourceBreakdown(
     const date = new Date(today.getFullYear(), today.getMonth() - (span - 1) + index, 1)
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
   }))
-  const ownerSet = new Set<string>(owners)
   const acc = new Map<string, { gd: number; domestic: number; production: number; purchase: number; etc: number }>(
     owners.map((owner) => [owner, { gd: 0, domestic: 0, production: 0, purchase: 0, etc: 0 }]),
   )
   for (const reg of mergedFlRegistrations(records, samples)) {
-    if (!months.has(reg.month) || !ownerSet.has(reg.owner)) continue
-    const bucket = acc.get(reg.owner)
-    if (!bucket) continue
-    if (reg.type === "gd") bucket.gd += 1
-    else if (reg.type === "domestic") bucket.domestic += 1
-    else if (reg.type === "production") bucket.production += 1
-    else if (reg.type === "purchase") bucket.purchase += 1
-    else bucket.etc += 1
+    if (!months.has(reg.month)) continue
+    for (const name of ownerNames(reg.owner)) {
+      const bucket = acc.get(name)
+      if (!bucket) continue
+      if (reg.type === "gd") bucket.gd += 1
+      else if (reg.type === "domestic") bucket.domestic += 1
+      else if (reg.type === "production") bucket.production += 1
+      else if (reg.type === "purchase") bucket.purchase += 1
+      else bucket.etc += 1
+    }
   }
 
   return Object.fromEntries(owners.map((owner) => {
@@ -1648,7 +1660,7 @@ export const byCategory = (records: readonly DevRecord[]): CountDatum[] =>
 export const byOwner = (records: readonly DevRecord[]): CountDatum[] =>
   MEMBERS.map((member) => ({
     label: member.name,
-    count: records.filter((record) => record.owner === member.name).length,
+    count: records.filter((record) => ownerIncludes(record.owner, member.name)).length,
   }))
 
 /** 담당자 기준 내 업무 — 마감 급한 순 */
@@ -1659,7 +1671,7 @@ export function myTasks(
   today = new Date(),
 ): DerivedTask[] {
   return records
-    .filter((record) => record.owner === owner && statusOf(record, today) !== "done")
+    .filter((record) => ownerIncludes(record.owner, owner) && statusOf(record, today) !== "done")
     .map((record) => ({
       ...record,
       _status: statusOf(record, today),

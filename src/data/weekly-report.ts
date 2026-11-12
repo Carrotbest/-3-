@@ -25,7 +25,7 @@
 import { normalizeCategory } from "./xlsx-parsers"
 import { isInProgress } from "./derive"
 import { toDate } from "./format"
-import { ownerDisplayName, type DevRecord } from "./schema"
+import { ownerDisplayName, ownerNames, type DevRecord } from "./schema"
 
 /** 보고서 카테고리 순서와 표기. DD의 `CATEGORIES` 네 값을 보고서 어휘로 옮긴다. */
 const REPORT_CATEGORIES: Array<{ key: string; label: string }> = [
@@ -66,7 +66,15 @@ const requestKey = (record: DevRecord): string | null => {
   return date ? dayKey(date) : null
 }
 
-const ownerOf = (record: DevRecord): string => ownerDisplayName(record.owner).trim() || "담당 미지정"
+/**
+ * 담당 표시명을 사람 단위로 쪼갠다(R430). "변재휘/김지현"은 병행 건이라 두 사람 각각 1건으로 센다.
+ * 담당별 줄의 합이 팀 전체 건수보다 커진다. 2026-11-12 박향근 확정이다.
+ * 표시명 기준인 것은 담당 탭 목록과 필터가 전부 표시명으로 돌기 때문이다.
+ */
+const ownersOf = (record: DevRecord): string[] => {
+  const names = ownerNames(ownerDisplayName(record.owner))
+  return names.length ? names : ["담당 미지정"]
+}
 
 export interface WeeklyReportOwnerRow {
   owner: string
@@ -270,7 +278,7 @@ export function buildWeeklyReport(
   const to = dayKey(today)
   const counted = records
     .filter(isCounted)
-    .filter((record) => !owner || ownerOf(record) === owner)
+    .filter((record) => !owner || ownersOf(record).includes(owner))
 
   const inRange = (key: string | null): boolean => Boolean(key && key >= from && key <= to)
 
@@ -295,10 +303,11 @@ export function buildWeeklyReport(
 
   const ownerMap = new Map<string, WeeklyReportOwnerRow>()
   const bump = (record: DevRecord, field: "progress" | "done") => {
-    const name = ownerOf(record)
-    const row = ownerMap.get(name) ?? { owner: name, progress: 0, done: 0 }
-    row[field] += 1
-    ownerMap.set(name, row)
+    for (const name of ownersOf(record)) {
+      const row = ownerMap.get(name) ?? { owner: name, progress: 0, done: 0 }
+      row[field] += 1
+      ownerMap.set(name, row)
+    }
   }
   progressRows.forEach((record) => bump(record, "progress"))
   doneRows.forEach((record) => bump(record, "done"))
