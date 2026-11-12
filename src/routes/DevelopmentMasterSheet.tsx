@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { useAuthStore } from "@/data/auth"
 import { FABRIC_STATUS_META, buildFabricLedger, storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord, isStoppedRecord, matchCompany, matchDyeingSide, stoppedStatusLabel } from "@/data/dd-workflow"
+import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord, isStoppedRecord, stoppedStatusLabel } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
@@ -3223,15 +3223,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!nextStyle) return
     const selectedIds = new Set(selectedOptions.map((option) => option.optId))
     const options = nextStyle.options.filter((option) => selectedIds.has(option.optId))
-    const unknownDye = options.filter((option) => matchDyeingSide(option.dyeingMethod) === null).length
-    const unknownCo = options.filter((option) => matchCompany(option.co ?? "") === null).length
     const recs = requestToIntakeRecords(nextStyle, options)
     const hadZaji = Boolean(attached)
     setIntake(recs); setIntakeOpt(0); setIntakeError(null); resetAttach()
     const notices = [
       hadZaji ? "첨부해 둔 작업지시서를 해제했습니다. 작지 값을 쓰려면 요청을 불러온 뒤에 다시 첨부하십시오." : "",
-      unknownDye ? `염색 방식 ${unknownDye}칸은 DD 목록(CSD, PSD, DD, SOAP, YD, PFD) 밖이라 비워 두었습니다.` : "",
-      unknownCo ? `개발처 ${unknownCo}칸은 목록(GD, 국내, 생산) 밖이라 비워 두었습니다.` : "",
+      `옵션 ${recs.length}줄을 만들고 연결했습니다. 원사와 조직, 중량, 염색, FINISH는 작업지시서를 첨부해야 채워집니다.`,
     ].filter(Boolean)
     setIntakeNotice(notices.length ? notices.join(" ") : null)
     setIntakeRequest({ reqId: nextStyle.reqId, chart: nextStyle.chart, garmentNo: nextStyle.garmentNo })

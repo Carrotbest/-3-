@@ -286,25 +286,18 @@ export function requestToIntakeRecords(style: RequestStyle, options: readonly Re
   return options.flatMap((option) => {
     if (!option.lineId) return []
     const record = createBlankDevRecord(style.developer)
-    const company = companyFieldsOf(option.co)
-    const finishText = String(option.finish ?? "").trim()
     const original = originalFieldsOf(style)
+    // 옵션 사양(원사, 조직, 중량, 색상, 염색, FINISH, 개발처)은 넘기지 않는다
+    // (R426, 2026-11-12 박향근 확정). 그 값의 출처는 작업지시서 하나다.
+    // 여기서 넘기는 것은 스타일 단위 값과 연결뿐이고, 옵션 수만큼 행이 선다.
     return [{
       ...record,
       styleNo: style.garmentNo,
       buyer: style.brand,
       owner: style.developer,
       planner: style.requester,
-      color: option.color,
-      dyeing: matchDyeingSide(option.dyeingMethod) || "",
-      construction: option.construction ?? "",
-      weight: option.weight ?? "",
-      ...(company.devType ? { devType: company.devType } : {}),
       tech: {
         ...record.tech,
-        yarnDetail: option.yarnDetail,
-        ...(company.co ? { development: { ...record.tech?.development, co: company.co } } : {}),
-        ...(finishText ? { finishingSlots: { ...record.tech?.finishingSlots, a: finishText } } : {}),
         ...(Object.keys(original).length ? { original: { ...record.tech?.original, ...original } } : {}),
         requestLink: { reqId: style.reqId, lineId: option.lineId },
       },
