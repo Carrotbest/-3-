@@ -54,6 +54,20 @@ export function matchCompany(raw: string): string | null {
   return COMPANY_BY_KEY.get(companyKey(text)) ?? null
 }
 export const DD_DYEING_OPTIONS = ["CSD", "PSD", "DD", "SOAP", "YD", "PFD"] as const
+const dyeingKey = (value: string): string => value.trim().toLocaleUpperCase("en-US").replace(/[\s\-_]+/g, "")
+const DYEING_BY_KEY = new Map<string, (typeof DD_DYEING_OPTIONS)[number]>(DD_DYEING_OPTIONS.map((name) => [dyeingKey(name), name]))
+// 2026-10-01 확정(R281)에서 SD 는 CSD 로 들어간다. 작지 파서도 같은 약속이다.
+DYEING_BY_KEY.set("SD", "CSD")
+
+/**
+ * 사람이 친 염색 방식을 DD Dyeing Side 목록 표기로 맞춘다.
+ * 빈 값은 빈 문자열, 목록 밖은 null 이다. matchCompany 와 같은 약속이다.
+ */
+export function matchDyeingSide(value: string | undefined): string | null {
+  const raw = String(value ?? "").trim()
+  if (!raw) return ""
+  return DYEING_BY_KEY.get(dyeingKey(raw)) ?? null
+}
 export const DD_PASS_FAIL_OPTIONS = ["PASS", "FAIL"] as const
 
 /**

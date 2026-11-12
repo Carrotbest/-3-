@@ -530,6 +530,31 @@ export function applyZajiHeader(record: DevRecord, z: Zaji): DevRecord {
   }
 }
 
+/**
+ * 작지 공통(헤더) 값으로 **빈 칸만** 채운다(R425, 2026-11-12 박향근 확정).
+ *
+ * DEVELOPMENT REQUEST 에서 먼저 가져온 접수에 쓴다. 의뢰에서 온 값을 작지가 덮으면 안 되고,
+ * 의뢰에 없는 Season 과 납기는 작지에 있으니 비어 있을 때만 받는다.
+ * `applyZajiHeader` 는 전부 덮으므로 요청 연결이 없는 접수에만 쓴다. 두 함수를 합치지 말 것.
+ */
+export function fillZajiHeaderBlanks(record: DevRecord, z: Zaji): DevRecord {
+  const blank = (value: unknown): boolean => String(value ?? "").trim() === ""
+  const co = z.co === "GD" || z.co === "국내" ? z.co : ""
+  let tech: DevTechnical = { ...record.tech }
+  if (co && blank(tech.development?.co)) tech = { ...tech, development: { ...tech.development, co } }
+  if (z.developer && blank(tech.development?.developer)) tech = { ...tech, development: { ...tech.development, developer: z.developer } }
+  if (z.brand && blank(tech.original?.brand)) tech = { ...tech, original: { ...tech.original, brand: z.brand } }
+  return {
+    ...record,
+    styleNo: blank(record.styleNo) ? (z.style || record.styleNo) : record.styleNo,
+    season: blank(record.season) ? (z.season || record.season) : record.season,
+    dueDate: blank(record.dueDate) ? (z.due || record.dueDate) : record.dueDate,
+    saNo: z.fmt === "국내" && blank(record.saNo) ? (z.number || record.saNo) : record.saNo,
+    devType: record.devType ?? (co || undefined),
+    tech,
+  }
+}
+
 /** 작지의 특정 옵션(part·color)을 레코드에 반영한다. 헤더 필드는 건드리지 않는다. */
 export function applyZajiOption(record: DevRecord, z: Zaji, index: number): DevRecord {
   const o = z.options[index]

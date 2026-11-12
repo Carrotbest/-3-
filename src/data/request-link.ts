@@ -1,4 +1,4 @@
-import { createBlankDevRecord, isCompletedFlNo } from "@/data/dd-workflow"
+import { createBlankDevRecord, isCompletedFlNo, matchCompany, matchDyeingSide } from "@/data/dd-workflow"
 import { daysLeft, toDate } from "@/data/format"
 import type { DevRecord, RequestOption, RequestStyle } from "@/data/schema"
 import { normalizeStyleKey, scoreStyleForRows, suggestStylesForRows, type StyleMatch } from "@/data/request-link-match"
@@ -28,6 +28,47 @@ export function resolveRequestLink(index: Map<string, RequestLinkTarget>, record
 }
 
 export interface LinkPair { rowId: string; optId: string | null }
+
+/** 의뢰 옵션의 CO 를 DD 의 두 표현으로 옮긴다. 해석 못 한 값과 빈 값은 아무것도 넣지 않는다. */
+function companyFieldsOf(co: string | undefined): { co?: string; devType?: "GD" | "국내" } {
+  const matched = matchCompany(co ?? "")
+  if (!matched) return {}
+  if (matched === "GD" || matched === "국내") return { co: matched, devType: matched }
+  // 생산은 devType 에 넣을 자리가 없다. tech.development.co 에만 둔다.
+  return { co: matched }
+}
+
+/**
+ * 의뢰 스타일의 ORIGINAL 분석을 DD 의 `tech.original` 모양으로 바꾼다(R424).
+ * 빈 값은 키를 아예 만들지 않는다. 값 없는 키를 만들면 Firestore 가 그 문서를 거부한다(R340).
+ * `devConstruction`(분석의 개발 조직)과 `analyst`(분석 담당)는 DD 에 받을 칸이 없어 넘기지 않는다.
+ */
+function originalFieldsOf(style: RequestStyle) {
+  const brand = String(style.brand ?? "").trim()
+  const contents = String(style.contents ?? "").trim()
+  const construction = String(style.origConstruction ?? "").trim()
+  const yarn = String(style.yarnAnalysis ?? "").trim()
+  const comments = String(style.comment ?? "").trim()
+  const weight = typeof style.origWeight === "number" && Number.isFinite(style.origWeight) ? style.origWeight : undefined
+  return {
+    ...(brand ? { brand } : {}),
+    ...(contents ? { contents } : {}),
+    ...(construction ? { construction } : {}),
+    ...(yarn ? { yarn } : {}),
+    ...(comments ? { comments } : {}),
+    ...(weight !== undefined ? { weight } : {}),
+  }
+}
+
+/** 이미 값이 있는 칸은 빼고 빈 칸만 남긴다. 연결의 빈 칸 채우기가 남의 값을 덮지 않게 한다. */
+function emptyOnly<T extends Record<string, unknown>>(current: Record<string, unknown> | undefined, patch: T): T {
+  const out: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(patch)) {
+    const now = current?.[key]
+    if (now === undefined || now === null || now === "") out[key] = value
+  }
+  return out as T
+}
 
 const rowIdOf = (record: DevRecord): string => `${record._src.sheet}::${record._src.row}`
 const numericOrder = (value: string): number => {
@@ -73,13 +114,19 @@ export function applyRequestLinks(records: readonly DevRecord[], style: RequestS
     const option = style.options.find((item) => item.optId === optId)
     if (!option?.lineId) return record
     linked += 1
+    const company = companyFieldsOf(option.co)
+    const companyEmpty = !String(record.tech?.development?.co ?? "").trim() && !String(record.devType ?? "").trim()
+    const finishText = String(option.finish ?? "").trim()
+    const finishEmpty = !String(record.tech?.finishingSlots?.a ?? "").trim()
+    const originalPatch = fillEmpty ? emptyOnly(record.tech?.original as Record<string, unknown> | undefined, originalFieldsOf(style)) : {}
     const filled = fillEmpty ? {
       buyer: record.buyer || style.brand,
       planner: record.planner || style.requester,
       color: record.color || option.color,
-      dyeing: record.dyeing || option.dyeingMethod,
+      dyeing: record.dyeing || (matchDyeingSide(option.dyeingMethod) || ""),
       construction: record.construction || option.construction || "",
       weight: record.weight === "" ? option.weight ?? "" : record.weight,
+      ...(companyEmpty && company.devType ? { devType: company.devType } : {}),
     } : {}
     return {
       ...record,
@@ -87,6 +134,9 @@ export function applyRequestLinks(records: readonly DevRecord[], style: RequestS
       tech: {
         ...record.tech,
         ...(fillEmpty ? { yarnDetail: record.tech?.yarnDetail || option.yarnDetail } : {}),
+        ...(fillEmpty && companyEmpty && company.co ? { development: { ...record.tech?.development, co: company.co } } : {}),
+        ...(fillEmpty && finishEmpty && finishText ? { finishingSlots: { ...record.tech?.finishingSlots, a: finishText } } : {}),
+        ...(Object.keys(originalPatch).length ? { original: { ...record.tech?.original, ...originalPatch } } : {}),
         requestLink: { reqId: style.reqId, lineId: option.lineId },
       },
     }
@@ -236,6 +286,9 @@ export function requestToIntakeRecords(style: RequestStyle, options: readonly Re
   return options.flatMap((option) => {
     if (!option.lineId) return []
     const record = createBlankDevRecord(style.developer)
+    const company = companyFieldsOf(option.co)
+    const finishText = String(option.finish ?? "").trim()
+    const original = originalFieldsOf(style)
     return [{
       ...record,
       styleNo: style.garmentNo,
@@ -243,12 +296,16 @@ export function requestToIntakeRecords(style: RequestStyle, options: readonly Re
       owner: style.developer,
       planner: style.requester,
       color: option.color,
-      dyeing: option.dyeingMethod,
+      dyeing: matchDyeingSide(option.dyeingMethod) || "",
       construction: option.construction ?? "",
       weight: option.weight ?? "",
+      ...(company.devType ? { devType: company.devType } : {}),
       tech: {
         ...record.tech,
         yarnDetail: option.yarnDetail,
+        ...(company.co ? { development: { ...record.tech?.development, co: company.co } } : {}),
+        ...(finishText ? { finishingSlots: { ...record.tech?.finishingSlots, a: finishText } } : {}),
+        ...(Object.keys(original).length ? { original: { ...record.tech?.original, ...original } } : {}),
         requestLink: { reqId: style.reqId, lineId: option.lineId },
       },
     }]

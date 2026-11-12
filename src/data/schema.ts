@@ -289,6 +289,13 @@ export interface RequestOption {
   /** 엑셀 U열 */
   dyeingMethod: string
   /**
+   * FINISH. 가공과 편직 사양을 함께 적는 자유 입력 칸이다(R423).
+   * PRINT, BRUSH 같은 가공과 FEEDER STP 같은 편직 사양을 한 칸에 적는다(2026-11-12 박향근 확정).
+   * DD 로 넘어갈 때 Finishing A(`tech.finishingSlots.a`)로 들어간다. 옛 데이터에는 없다.
+   * `DevTechnical.finish`(brush, chemical)와 이름만 같고 다른 값이다.
+   */
+  finish?: string
+  /**
    * 옛 옵션별 REMARK. R291에서 스타일 단위(`RequestStyle.remark`)로 옮겼다.
    * 새로 쓰지 않는다. 옛 데이터를 읽어 합쳐 보여 주는 용도로만 남긴다.
    */

@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { useAuthStore } from "@/data/auth"
 import { FABRIC_STATUS_META, buildFabricLedger, storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord, isStoppedRecord, stoppedStatusLabel } from "@/data/dd-workflow"
+import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord, isStoppedRecord, matchCompany, matchDyeingSide, stoppedStatusLabel } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
@@ -30,7 +30,7 @@ import { ensureRequestLineIds, removeRequestLinks, requestCandidates, requestLin
 import { combineRangeTsv, formatStatNumber, MULTI_RANGE_COPY_BLOCKED, parseTsvGrid, tsvCell } from "@/data/range-tsv"
 import { dayToneText, holidayName } from "@/data/holidays"
 import { COST_STALE_DAYS } from "@/data/cost-sheets"
-import { applyZajiHeader, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
+import { applyZajiHeader, applyZajiOption, fillZajiHeaderBlanks, parseZaji, zajiToRecord, type Zaji } from "@/data/zaji"
 import { MEMBERS, ownerDisplayName, type DevRecord, type DevTechnical, type RequestOption, type RequestStyle } from "@/data/schema"
 import { buildWeeklyReport, reportOwnerNames as reportOwnersOf, weeklyReportText, type ReportDetailLevel } from "@/data/weekly-report"
 import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, saveRequests, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
@@ -3184,9 +3184,31 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     setAttaching(true); setAttachError(null)
     try {
       const z = await parseZaji(file)
-      const recs = z.options.length ? z.options.map((_, index) => zajiToRecord(z, index)) : [applyZajiHeader(createBlankDevRecord(), z)]
-      setAttached(z); setIntake(recs); setIntakeOpt(0); setIntakeRequest(null)
-      setIntakeError("작업지시서를 첨부해 DEVELOPMENT REQUEST 연결을 해제했습니다.")
+      // 요청에서 먼저 가져온 접수면 작지는 옵션만 얹는다(R425, 2026-11-12 박향근 확정).
+      // DD 는 대개 작지가 나온 뒤에 쓰므로 요청 불러오기와 작지 첨부가 거의 같은 시점이다.
+      // 그때마다 연결이 끊기면 보드와 DD 가 갈라진다. 요청 없이 작지부터 넣는 길은 예전 그대로다.
+      const base = intake
+      if (intakeRequest && base && base.length > 0 && z.options.length > 0) {
+        const paired = Math.min(base.length, z.options.length)
+        const merged = base.map((record, index) => (index < paired ? applyZajiOption(fillZajiHeaderBlanks(record, z), z, index) : record))
+        // 작지 옵션이 더 많으면 행으로 더한다. 그 행에는 짝이 될 의뢰 옵션이 없어 연결을 달지 않는다.
+        const extra = z.options.slice(paired).map((_, offset) => {
+          const seed = applySharedFields(merged[0], createBlankDevRecord(merged[0].owner))
+          const { requestLink: _unlinked, ...techWithoutLink } = seed.tech ?? {}
+          return applyZajiOption(fillZajiHeaderBlanks({ ...seed, tech: techWithoutLink }, z), z, paired + offset)
+        })
+        const leftover = base.length - paired
+        setAttached(z); setIntake([...merged, ...extra]); setIntakeOpt(0)
+        setIntakeNotice([
+          `작업지시서 옵션 ${paired}건을 접수 옵션에 반영했습니다. DEVELOPMENT REQUEST 연결은 그대로 둡니다.`,
+          extra.length ? `작지 옵션 ${extra.length}건은 짝이 없어 행으로 더했습니다. 그 행에는 요청 연결이 없습니다.` : "",
+          leftover ? `접수 옵션 ${leftover}건은 작지에 짝이 없어 그대로 두었습니다.` : "",
+        ].filter(Boolean).join(" "))
+      } else {
+        const recs = z.options.length ? z.options.map((_, index) => zajiToRecord(z, index)) : [applyZajiHeader(createBlankDevRecord(), z)]
+        setAttached(z); setIntake(recs); setIntakeOpt(0); setIntakeRequest(null); setIntakeNotice(null)
+        setIntakeError("작업지시서를 첨부해 DEVELOPMENT REQUEST 연결을 해제했습니다.")
+      }
     } catch (err) {
       setAttachError(err instanceof Error ? err.message : "작지 파싱에 실패했습니다.")
     } finally {
@@ -3201,8 +3223,17 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (!nextStyle) return
     const selectedIds = new Set(selectedOptions.map((option) => option.optId))
     const options = nextStyle.options.filter((option) => selectedIds.has(option.optId))
+    const unknownDye = options.filter((option) => matchDyeingSide(option.dyeingMethod) === null).length
+    const unknownCo = options.filter((option) => matchCompany(option.co ?? "") === null).length
     const recs = requestToIntakeRecords(nextStyle, options)
+    const hadZaji = Boolean(attached)
     setIntake(recs); setIntakeOpt(0); setIntakeError(null); resetAttach()
+    const notices = [
+      hadZaji ? "첨부해 둔 작업지시서를 해제했습니다. 작지 값을 쓰려면 요청을 불러온 뒤에 다시 첨부하십시오." : "",
+      unknownDye ? `염색 방식 ${unknownDye}칸은 DD 목록(CSD, PSD, DD, SOAP, YD, PFD) 밖이라 비워 두었습니다.` : "",
+      unknownCo ? `개발처 ${unknownCo}칸은 목록(GD, 국내, 생산) 밖이라 비워 두었습니다.` : "",
+    ].filter(Boolean)
+    setIntakeNotice(notices.length ? notices.join(" ") : null)
     setIntakeRequest({ reqId: nextStyle.reqId, chart: nextStyle.chart, garmentNo: nextStyle.garmentNo })
     setRequestPickerOpen(false)
   }

@@ -46,6 +46,7 @@ import { FillHandle, selectionShadow, type CellMove, type CellRect, type CellRef
 import { downloadBlob } from "@/data/dd-export"
 import { deleteRequestImage, loadExportImages, requestImageUrl, uploadRequestImage, validateRequestImage } from "@/data/request-image"
 import { buildRequestWorkbook, mergeRequestStyles, parseRequestWorkbook, requestTemplateFileName } from "@/data/request-template"
+import { applyOptionPlan, buildOptionWorkbook, optionSheetFileName, parseOptionWorkbook, planOptionUpdate, type OptionPlan } from "@/data/request-option-sheet"
 import { parseTsvGrid, tsvCell } from "@/data/range-tsv"
 import { MEMBERS, REQUEST_RESULTS, styleRemarkText, type AnalysisRequest, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
 import { loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
@@ -110,6 +111,8 @@ const COLUMN_GROUPS: readonly RequestGroup[] = [
     { id: "weight", label: "W'T", width: 64, scope: "option", align: "right" },
     { id: "color", label: "Color", width: 120, scope: "option" },
     { id: "dyeingMethod", label: "Dyeing", width: 90, scope: "option" },
+    // R423. 가공(PRINT, BRUSH)과 편직 사양(FEEDER STP)을 한 칸에 적는다. 자유 입력이다.
+    { id: "finish", label: "Finish", width: 140, scope: "option" },
     // R291에서 스타일 단위로 옮겼다. 옵션 사이에 세로로 병합된 한 칸이 되고, 여러 줄 기록을 받는다.
     { id: "remark", label: "Remark", width: 220, scope: "style" },
     // R389. 옵션마다 개발처가 다를 수 있어 스타일이 아니라 옵션 단위다. 목록은 DD와 공유한다.
@@ -271,6 +274,7 @@ const blankOption = (reqId: string, no: number): RequestOption => ({
   co: "",
   color: "",
   dyeingMethod: "",
+  finish: "",
 })
 
 /** 새 스타일은 옵션 4줄로 시작한다(R370, 2026-10-29 박향근 확정). */
@@ -280,6 +284,16 @@ const blankOptions = (reqId: string, count = DEFAULT_OPTION_COUNT): RequestOptio
 
 const text = (value: string | number | undefined): string =>
   value === undefined || value === "" ? "" : String(value)
+
+const OPTION_CHANGE_LABEL: Record<string, string> = {
+  yarnDetail: "YARN DETAIL",
+  construction: "CONS",
+  weight: "W'T",
+  color: "COLOR",
+  dyeingMethod: "DYEING METHOD",
+  finish: "FINISH",
+  co: "CO",
+}
 
 const replaceText = (source: string, find: string, replacement: string, matchCase: boolean): string => {
   if (!find) return source
@@ -460,7 +474,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
   const set = <K extends keyof RequestStyle>(key: K, next: RequestStyle[K]) =>
     setValue((current) => (current ? { ...current, [key]: next } : current))
 
-  const setOption = (index: number, key: "yarnDetail" | "construction" | "color" | "dyeingMethod" | "co", next: string) =>
+  const setOption = (index: number, key: "yarnDetail" | "construction" | "color" | "dyeingMethod" | "finish" | "co", next: string) =>
     setValue((current) => {
       if (!current) return current
       return { ...current, options: current.options.map((option, i) => (i === index ? { ...option, [key]: next } : option)) }
@@ -590,7 +604,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
             ) : (
               <div className="divide-y divide-[var(--border)]">
                 {value.options.map((option, index) => (
-                  <div key={option.optId} className="grid grid-cols-[36px_minmax(0,1.4fr)_140px_64px_minmax(0,1fr)_90px_90px_44px] items-center gap-2 px-3 py-2">
+                  <div key={option.optId} className="grid grid-cols-[36px_minmax(0,1.4fr)_140px_64px_minmax(0,1fr)_90px_120px_90px_44px] items-center gap-2 px-3 py-2">
                     <span className="text-center text-xs font-semibold text-[var(--muted-foreground)]">{option.no}</span>
                     <Input className="h-8 text-xs" placeholder="Yarn Detail" value={option.yarnDetail} onChange={(event) => setOption(index, "yarnDetail", event.target.value)} />
                     <Select value={option.construction || "__none"} onValueChange={(next) => setOption(index, "construction", next === "__none" ? "" : next)}>
@@ -604,6 +618,7 @@ function RequestEditor({ open, draft, ownerOptions, boardName, onClose, onSave }
                     <Input className="h-8 text-right text-xs" type="number" min="0" placeholder="W'T" aria-label={`옵션 ${option.no} W'T`} value={option.weight ?? ""} onChange={(event) => setOptionWeight(index, event.target.value)} />
                     <Input className="h-8 text-xs" placeholder="Color" value={option.color} onChange={(event) => setOption(index, "color", event.target.value)} />
                     <Input className="h-8 text-xs" placeholder="Dyeing" value={option.dyeingMethod} onChange={(event) => setOption(index, "dyeingMethod", event.target.value)} />
+                    <Input className="h-8 text-xs" placeholder="Finish" value={option.finish ?? ""} onChange={(event) => setOption(index, "finish", event.target.value)} />
                     <Select value={option.co || "__none"} onValueChange={(next) => setOption(index, "co", next === "__none" ? "" : next)}>
                       <SelectTrigger className="h-8 text-xs" aria-label={`옵션 ${option.no} CO`}><SelectValue placeholder="CO" /></SelectTrigger>
                       <SelectContent>
@@ -667,7 +682,7 @@ type EditKind = "text" | "area" | "number" | "member" | "suggest" | "constructio
 function editKindOf(columnId: string): EditKind {
   switch (columnId) {
     case "garmentNo": case "brand": case "origConstruction": case "devConstruction":
-    case "requester": case "color": case "dyeingMethod":
+    case "requester": case "color": case "dyeingMethod": case "finish":
       return "text"
     case "contents": case "yarnAnalysis": case "comment":
     case "devPlan": case "keyPoint": case "teamOpinion":
@@ -934,10 +949,12 @@ export function FabricRequest() {
   const [hiddenMenuOpen, setHiddenMenuOpen] = useState(false)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null)
+  const [optionPlan, setOptionPlan] = useState<OptionPlan | null>(null)
   // Link 열 미연결 칩을 더블클릭하면 그 옵션에 맞는 DD 행 후보를 고른다(R262).
   const [ddPick, setDdPick] = useState<{ style: RequestStyle; option: RequestOption } | null>(null)
   const [focusedReqId, setFocusedReqId] = useState<string | null>(null)
   const uploadRef = useRef<HTMLInputElement | null>(null)
+  const optionUploadRef = useRef<HTMLInputElement | null>(null)
 
   const openBoards = useMemo(() => requestBoards.filter((board) => board.status === "진행").sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "ko-KR")), [requestBoards])
   const activeBoardInfo = activeBoard === ALL_BOARDS || activeBoard === ARCHIVE_VIEW ? null : openBoards.find((board) => board.boardId === activeBoard) ?? null
@@ -1187,7 +1204,7 @@ export function FabricRequest() {
    * R293부터 빈 줄도 되묻는다. 휴지통 버튼이 Opt 칸 안에 있어 잘못 누르기 쉽다.
    */
   const removeOption = (style: RequestStyle, option: RequestOption, anchor: { x: number; y: number }) => {
-    const filled = [option.yarnDetail, option.construction, option.weight, option.color, option.dyeingMethod].some((value) => text(value).trim())
+    const filled = [option.yarnDetail, option.construction, option.weight, option.color, option.dyeingMethod, option.finish].some((value) => text(value).trim())
     const warning = filled ? "\n적어 둔 값이 함께 지워집니다." : ""
     setRowMenu(null)
     askConfirm(anchor, `옵션 ${option.no}번을 삭제할까요?${warning}`, () => {
@@ -1962,6 +1979,48 @@ export function FabricRequest() {
     }
   }
 
+  const downloadOptionTemplate = async () => {
+    if (!activeBoardInfo) return
+    setNotice(null)
+    try {
+      const prepared = ensureRequestLineIds(requests)
+      if (prepared.changed && !commitRequests(prepared.next)) return
+      const boardStyles = prepared.next.filter((style) => style.boardId === activeBoard)
+      downloadBlob(await buildOptionWorkbook(boardStyles), optionSheetFileName(activeBoardInfo.name))
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "옵션 양식을 만들지 못했습니다." })
+    }
+  }
+
+  const ingestOptions = async (file: File | undefined) => {
+    if (!file || readOnly || !activeBoardInfo) return
+    setNotice(null)
+    try {
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true })
+      const parsed = parseOptionWorkbook(workbook)
+      const plan = planOptionUpdate(requests, activeBoard, parsed.rows)
+      setOptionPlan({ ...plan, warnings: [...parsed.warnings, ...plan.warnings] })
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "옵션 파일을 읽지 못했습니다." })
+    }
+  }
+
+  const applyOptions = () => {
+    if (!optionPlan) return
+    const result = applyOptionPlan(requests, optionPlan)
+    const changed = result.next.some((style, index) => style !== requests[index])
+    const saved = changed ? commitRequests(result.next, "upload") : false
+    if (changed && !saved) return
+    const conflictNotice = result.conflicts.length
+      ? ` 그 사이 팀원이 고친 스타일 ${result.conflicts.length}건은 적용하지 않았습니다. 파일을 다시 올려 주세요.`
+      : ""
+    setNotice({
+      kind: result.conflicts.length && !changed ? "error" : "ok",
+      text: `${changed ? "화면에 반영했습니다. 서버 저장은 상단 동기화 표시로 확인하십시오." : "적용할 변경이 없습니다."}${conflictNotice}`,
+    })
+    setOptionPlan(null)
+  }
+
   const cellValue = (line: Line, column: RequestColumn): ReactNode => {
     if (line.kind === "style") {
       if (column.scope === "option") return null
@@ -2011,6 +2070,7 @@ export function FabricRequest() {
       case "weight": return text(option.weight)
       case "color": return option.color
       case "dyeingMethod": return option.dyeingMethod
+      case "finish": return option.finish ?? ""
       default: return null
     }
   }
@@ -2167,11 +2227,24 @@ export function FabricRequest() {
             className="hidden"
             onChange={(event) => { void ingest(event.target.files?.[0]); event.target.value = "" }}
           />
+          <input
+            ref={optionUploadRef}
+            type="file"
+            accept=".xlsx,.xls"
+            className="hidden"
+            onChange={(event) => { void ingestOptions(event.target.files?.[0]); event.target.value = "" }}
+          />
           <Button type="button" size="sm" variant="outline" onClick={() => void downloadTemplate()}>
             <Download className="size-4" />양식 내려받기
           </Button>
           {!readOnly ? <Button type="button" size="sm" variant="outline" onClick={() => uploadRef.current?.click()}>
             <Upload className="size-4" />업로드
+          </Button> : null}
+          {activeBoard !== ALL_BOARDS ? <Button type="button" size="sm" variant="outline" onClick={() => void downloadOptionTemplate()}>
+            <Download className="size-4" />옵션 양식
+          </Button> : null}
+          {activeBoard !== ALL_BOARDS && !readOnly ? <Button type="button" size="sm" variant="outline" onClick={() => optionUploadRef.current?.click()}>
+            <Upload className="size-4" />옵션 채우기
           </Button> : null}
         </div> : null}
       </div>
@@ -2538,6 +2611,45 @@ export function FabricRequest() {
           ].map((item) => <button key={item.key} type="button" role="menuitem" onClick={item.run} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--muted)]"><span className="text-[var(--muted-foreground)]">{item.icon}</span><span className="flex-1">{item.label}</span><span className="text-[10px] text-[var(--muted-foreground)]">{item.hint}</span></button>)}
         </div>
       </> : null}
+
+      <Dialog open={optionPlan !== null} onOpenChange={(open) => { if (!open) setOptionPlan(null) }}>
+        <DialogContent className="w-[94vw] max-w-3xl">
+          <DialogHeader><DialogTitle>옵션 채우기 미리보기</DialogTitle></DialogHeader>
+          <DialogBody className="grid max-h-[70vh] gap-4 overflow-y-auto text-sm">
+            <p className="rounded-lg bg-[var(--muted)] px-3 py-2 font-medium">
+              스타일 {optionPlan?.styles.length ?? 0}건, 칸 {optionPlan?.changedFields ?? 0}개를 바꾸고 옵션 {optionPlan?.appendedLines ?? 0}줄을 새로 넣습니다.
+            </p>
+            <div className="grid gap-2">
+              {optionPlan?.styles.map((style) => <div key={style.reqId} className="grid gap-2 rounded-lg border border-[var(--border)] p-3 sm:grid-cols-[160px_1fr]">
+                <div className="font-mono text-xs font-semibold">{style.garmentNo}</div>
+                <div className="grid gap-2">
+                  {style.lines.map((line, index) => <div key={`${line.lineId ?? "new"}-${line.no}-${index}`} className="rounded-md bg-[color-mix(in_srgb,var(--muted)_55%,transparent)] px-2.5 py-2 text-xs">
+                    <div className="mb-1 flex items-center gap-2 font-semibold">
+                      <span>Opt {line.no}</span>
+                      {line.kind === "append" ? <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">새 옵션</Badge> : null}
+                    </div>
+                    <div className="grid gap-1 text-[var(--muted-foreground)]">
+                      {line.changes.map((change) => <span key={change.key}><strong className="text-[var(--foreground)]">{OPTION_CHANGE_LABEL[change.key]}:</strong> {change.before || "(빈칸)"} 에서 {change.after}</span>)}
+                    </div>
+                  </div>)}
+                </div>
+              </div>)}
+            </div>
+            <details className="rounded-lg border border-[var(--border)] px-3 py-2">
+              <summary className="cursor-pointer font-medium">건너뜀 {optionPlan?.skipped.length ?? 0}건</summary>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-[var(--muted-foreground)]">{optionPlan?.skipped.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ul>
+            </details>
+            <details className="rounded-lg border border-[var(--border)] px-3 py-2">
+              <summary className="cursor-pointer font-medium">경고 {optionPlan?.warnings.length ?? 0}건</summary>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-[var(--muted-foreground)]">{optionPlan?.warnings.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ul>
+            </details>
+          </DialogBody>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOptionPlan(null)}>취소</Button>
+            <Button type="button" disabled={!optionPlan || optionPlan.changedFields === 0} onClick={applyOptions}>적용</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={replaceOpen} onOpenChange={setReplaceOpen}>
         <DialogContent className="w-[92vw] max-w-lg">

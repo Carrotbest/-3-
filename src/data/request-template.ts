@@ -75,6 +75,8 @@ export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
   { band: "옵션", head: "W'T", width: 8, scope: "option", key: "weight", optional: true, screenWidth: 64 },
   { band: "옵션", head: "COLOR", width: 18, scope: "option", key: "color", screenWidth: 120 },
   { band: "옵션", head: "DYEING METHOD", width: 13, scope: "option", key: "dyeingMethod", screenWidth: 90 },
+  // R423. 가공과 편직 사양을 한 칸에 적는다. optional 이라 이 열이 없는 옛 양식도 읽고 기존 값을 지킨다.
+  { band: "옵션", head: "FINISH", width: 20, scope: "option", key: "finish", optional: true, screenWidth: 140 },
   // R291에서 스타일 단위로 옮겼다. 열 위치와 이름은 옛 양식 파일을 계속 읽기 위해 그대로 둔다.
   { band: "옵션", head: "REMARK", width: 26, scope: "style", key: "remark", screenWidth: 220 },
   // R389. 옵션마다 다를 수 있어 scope가 option이다. 목록은 DD와 공유한다.
@@ -135,6 +137,7 @@ const cellOf = (style: RequestStyle, option: RequestOption | null, key: string):
     case "weight": return option && option.weight !== undefined && option.weight !== "" ? option.weight : null
     case "color": return option ? option.color || null : null
     case "dyeingMethod": return option ? option.dyeingMethod || null : null
+    case "finish": return option ? option.finish || null : null
     case "co": return option ? option.co || null : null
     default: return null
   }
@@ -401,7 +404,7 @@ export function parseRequestWorkbook(workbook: XLSX.WorkBook): RequestParseResul
     return index === undefined ? null : row[index] ?? null
   }
 
-  const optionKeys = ["yarnDetail", "construction", "weight", "color", "dyeingMethod", "co"]
+  const optionKeys = ["yarnDetail", "construction", "weight", "color", "dyeingMethod", "finish", "co"]
   const styles: RequestStyle[] = []
   const warnings: string[] = []
   let current: RequestStyle | null = null
@@ -494,6 +497,7 @@ function readOption(
     weight: asNumber(at(row, "weight")),
     color: asText(at(row, "color")),
     dyeingMethod: asText(at(row, "dyeingMethod")),
+    finish: asText(at(row, "finish")),
     co: co ?? coRaw,
   }
 }
