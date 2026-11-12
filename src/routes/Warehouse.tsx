@@ -2109,7 +2109,7 @@ export function Warehouse() {
       <div className="shrink-0 border-t border-[var(--border)] px-3 py-2 text-xs text-[var(--muted-foreground)]">{hiddenOnly ? "선택 삭제로 감춘 행입니다. 골라서 되살리면 감추기 직전 상태로 돌아갑니다." : `체크박스로 여러 건을 고른 뒤 위 버튼으로 처리합니다. · ${TAB_META[tab].description} 창고보관 탭에서는 R&D No. 칸을 더블클릭해 번호를 고칠 수 있습니다.`}</div>
     </div>}
 
-    {selectionStats || selectionNotice ? <div role="status" className="pointer-events-none fixed bottom-4 right-6 z-[75] flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--muted-foreground)] shadow-md">
+    {selectionStats || selectionNotice ? <div role="status" className="pointer-events-none fixed bottom-20 right-6 z-[75] flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--muted-foreground)] shadow-md">
       {selectionNotice ? <span className="text-[var(--foreground)]">{selectionNotice}</span> : null}
       {selectionStats ? <>
         <span>개수 <strong className="tabular-nums text-[var(--foreground)]">{selectionStats.count.toLocaleString("ko-KR")}</strong></span>

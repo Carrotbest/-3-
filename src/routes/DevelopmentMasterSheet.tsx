@@ -3718,10 +3718,10 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         </table>
         <StyleHoverLayer ref={styleHoverRef} containerRef={gridScrollRef} toneOf={styleToneOf} />
         {!filtered.length ? <div className="p-12 text-center text-sm text-[var(--muted-foreground)]">{scoped.length ? "조건에 맞는 DD 행이 없습니다." : "DD를 업로드하거나 신규 작지를 접수해 현황판을 시작하세요."}</div> : null}
-        <div data-grid-bottom-area aria-hidden="true" className="h-28 min-w-full" />
+        <div data-grid-bottom-area aria-hidden="true" className="h-32 min-w-full" />
       </div>
 
-      {selectionStats ? <div role="status" aria-label="선택 셀 요약" className="pointer-events-none fixed bottom-4 right-6 z-[75] flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--muted-foreground)] shadow-md">
+      {selectionStats ? <div role="status" aria-label="선택 셀 요약" className="pointer-events-none fixed bottom-20 right-6 z-[75] flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs text-[var(--muted-foreground)] shadow-md">
         <span>개수 <strong className="tabular-nums text-[var(--foreground)]">{selectionStats.count.toLocaleString("ko-KR")}</strong></span>
         {selectionStats.numeric ? <>
           <span>합계 <strong className="tabular-nums text-[var(--foreground)]">{formatStatNumber(selectionStats.sum)}</strong></span>
