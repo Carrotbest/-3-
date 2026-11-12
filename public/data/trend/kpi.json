@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-11-11T00:59:28+00:00",
+"generated_at": "2026-11-12T02:05:23+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -859,7 +859,7 @@
 "period_end": "2026-07-04",
 "prev": -9.6,
 "yoy": 5.2,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_operating_carters",
@@ -945,7 +945,7 @@
 "period_end": "2026-07-04",
 "prev": 392.3,
 "yoy": 3395.0,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_inventory_carters",
@@ -1031,7 +1031,7 @@
 "period_end": "2026-07-04",
 "prev": 24.0,
 "yoy": -6.7,
-"stale": false
+"stale": true
 },
 {
 "metric": "buyer_revenue_costco",
@@ -4141,6 +4141,13 @@
 ],
 "aeo": [
 {
+"d": "2026-11-11",
+"t": "수익이 아메리칸 이글 주식의 변화를 이길 것인가?",
+"o": "Will Earnings Beats Change American Eagle Stock Narrative",
+"u": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxNOXdLUUo3cDNOZHN6ZkNOZTN3ZTZzVDRfUHNtbzBNbnNQbzhwR2VWZWN0bTYyUkJRUjUtN3pjWnZrVHJNRXRHWE9sTUkxM19DMUxFdHAwOVFYQVE0bHpHOWQ3TlQ2Yi1DTk9Vc2tXMlU4bHBhR19xSHZKQVZUYVBfQmJIVVZibmtBRF9mWTJuc2RaSldRTW13OWJ6clU1Z0dnQjA3VmZxUzlnRVVpQUlIOHE4N1lSZEhqMVdZeFJTaGtqVDJzcm9CbmpRZHpSd0diN2fSAdcBQVVfeXFMTVlQWkl3bUh5ZnphR21mS3B6Vklkd1cxNDMzSEhhTDJrQUtodVFGRGt6cEtuNG9NejJVSEctaU96UnBFSHltZmMyX2M0SGI3OXZvcEFqV09qcEJWc0FQeHh2WnZJNGc5MnVCb2l3SmlHdWdLSXBYMW9NMGlfcjhJb0M5VXIxcU9pTDVEUlBFeERxNU1Bc3NxenBRRmVycnpxcnJsMVdoak9iTmtTdWVBLTF6a3R0SjFUR1dFRElUZWlpU3MwY2dQUS02enEwcTJlR1pQV19VQW8?oc=5",
+"m": "바이어 · American Eagle"
+},
+{
 "d": "2026-11-01",
 "t": "아메리칸 이글 아웃피터스(AEO)의 실적 추이는 동료에 비해 저렴해 보입니다.",
 "o": "American Eagle Outfitters (AEO) Following Earnings Beats Looks Cheap Versus Peers",
@@ -4188,16 +4195,16 @@
 "o": "American Eagle (AEO): Buy, Sell, or Hold Post Q2 Earnings?",
 "u": "https://news.google.com/rss/articles/CBMilwFBVV95cUxOMUg2aEtPMk4zOU5PakctSkFOUmxJMWVkMjVTdW5xOVNHRzItRVZ4Ykl1SktfQ2NMQVhkUFlrQUVuSG8wbUoxbzZCX0tQTXJXMGdPbWtsdUFYZXF3bEJFbjJTME10Z3Awc0pXYUxJYXM4UllrN3YxdDg1ejNmSzFBQmJqS1NVaGVNZHFSQW1qaFpHSVU2UV9j?oc=5",
 "m": "바이어 · American Eagle"
-},
-{
-"d": "2026-10-01",
-"t": "더 나은 매장 트래픽이 American Eagle의 판매 회복을 지원할 수 있습니까?",
-"o": "Can Better Store Traffic Support American Eagle's Sales Recovery?",
-"u": "https://news.google.com/rss/articles/CBMipAFBVV95cUxQWmREQWR0NGo0WXIyeUxxUmNmVzVHRzBEakxLTDEzUHNkdG5QelZpaXdxLVdBWUZFcVNtMlUyMXJfOG5BSTYxVVlfZUxzaF9JcDZha1A1X1lVbWdSN1pxRmxMX3hsRDh0MFRfVFZZVmVrdzdNVDVid214eE5LV19zc2YtQWVPSS15TG1mYm4xUXNyY2d6R0dfX2xSd2lLSlZvSEN2dw?oc=5",
-"m": "바이어 · American Eagle"
 }
 ],
 "anf": [
+{
+"d": "2026-11-11",
+"t": "UBS가 target 가격을 인상함에 따라 Abercrombie 및 Fitch는 분기별 예측을 상회할 것으로 예상됩니다.",
+"o": "Abercrombie & Fitch expected to beat quarterly forecasts as UBS lifts price target",
+"u": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxNZlBtR2U1ejVvWU51VVZqa1VtWlcteFhKcFRrdlg1UXo4U3VCcEp4TURkSjdkZnc3VWNGMGxUZExnRzFGWk91QUhicVhGWm9CcDQ2dk1CaXRhMndMS3MzLVdLUGZ5Y3JzSHp5MmRwX21WZVlGZE5DSHY4VWxRTHR4bWlSeVdTb0Q4VzUyeTdBTEE3dVlhZ0sxbjk3QngwcV82aUE0WW9TQy1Za2t0eVJwcTd2b3lqRVh2RWxBbXBlUjB3Z0Q5RENGUkpCcGpuODQyQmtMUGV4UUFIV1NDLWVqSmlsd0x1UQ?oc=5",
+"m": "바이어 · Abercrombie & Fitch"
+},
 {
 "d": "2026-11-02",
 "t": "2026년 1분기 Abercrombie 및 Fitch 공동 수익 통화 기록",
@@ -4245,13 +4252,6 @@
 "t": "Abercrombie 및 Fitch(ANF)는 수익 낙관론 구축으로 완전히 가치가 있습니까?",
 "o": "Is Abercrombie & Fitch (ANF) Fully Valued As Earnings Optimism Builds?",
 "u": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPczFocWEwYzFSNi1WcTdLUlhxcUpUSkkxZDdsaFl5a0xta3RvTXFfQ3lDZXlCQkpmNWltQmx0bDctZU9JZjk1ZVBkWDRneExtTlg3cjdfU0JMNHVIZUJOemV2WDVMSnNwS180ajZkUUFocWs5dm90QmJ6Yk5xcTFnSDlqUTQ5ZTNRckhoX0c4cXVveU5xNlZzajExUUNCS01fOV80MFlEblo3MnJGQjhUNThPYVZiZ0I0Z0NpRU5tdnBYMlVUM2tXNnlXONIB0AFBVV95cUxNSXBjbEJLR25uQ2xicTNZXzBtaF9Ibk5FWmR3Nm44ekUxd0hJVGJWUjR5S1A3ZVJIek5uUWtaQkZ6N0swWjM3Q29MbXdwZXZ3RWgwOFJfTV82R2U0VVY5eFBBMGNqY29vRWtaSTdFX1RVbkNHUEU3NzdBQVNUTkF3ZWE2ZGlpT2pUTlk4NldRVFlzdGl6ZExPZy1vejhYNVhIWGhqOUZrNDJ2cnF6YXlqVTB4RlB3bUVlNlQ0SDJqSk5uVlZkMGFKckxhOWt2U19i?oc=5",
-"m": "바이어 · Abercrombie & Fitch"
-},
-{
-"d": "2026-10-20",
-"t": "Abercrombie 및 Fitch 주식은 American Eagle의 9.09에 비해 13.85배의 수익으로 거래됩니다.",
-"o": "Abercrombie & Fitch stock trades at 13.85 times earnings versus American Eagle's 9.09",
-"u": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNMjAyMnB6b1R2TUMwYjh3dHdJMDFhOENxcGdZR0taYWl2TVByXzZ5WlJaTUowNW5GWVJuaGphTVZQXzMxNGt2SG8yaTZpZjVLdlZSU0hZYUw5OHA4Y3RaUlVqbTliYjJBNFdqeXZ0YXl1ZXZGY210NXo0eEhfR2Ztek5LdzFwZzdSUGtDRVItNGRrQVpKcGF3YVJEbUs1Q2RDM1o2UWRnQ1BBaF83XzZlcTlDOFcyb29mSmtRaUpySnlzQQ?oc=5",
 "m": "바이어 · Abercrombie & Fitch"
 }
 ],
@@ -4315,6 +4315,27 @@
 ],
 "nike": [
 {
+"d": "2026-11-11",
+"t": "한국 기능성 섬유, 미국서 수출상담 213건…100건 이상 후속 협의",
+"o": "한국 기능성 섬유, 미국서 수출상담 213건…100건 이상 후속 협의",
+"u": "http://www.ktnews.com/news/articleView.html?idxno=150096",
+"m": "한국섬유신문"
+},
+{
+"d": "2026-11-11",
+"t": "발수성 레트로 스니커즈: Nike, 무연탄색으로 P-6000 신발을 감싸다 Cordura",
+"o": "Water-Repellent Retro Sneakers: Nike Wraps the P-6000 Shoe in Anthracite Cordura",
+"u": "https://news.google.com/rss/articles/CBMic0FVX3lxTE8xSVY3ZDUySjUwc1U3SXJENjRwSmxRZTlQZ0V1MFNyVjF6QXctZzlKYU1fZmk1N0lFTTZORVBhSWtnb2xETmpMenB4SS0wZF9qam1pVWNLVnRSM3hpa0J0NGN0QjJCOE1sX01yMU9RQjBKcnc?oc=5",
+"m": "주제검색 · 염색가공"
+},
+{
+"d": "2026-11-11",
+"t": "중국: 투명성은 높아졌지만 배출량은 여전히 ​​증가",
+"o": "China: More transparency but emissions still rise",
+"u": "https://www.ecotextile.com/2026111167214/news/features/china-more-transparency-but-emissions-still-rise/",
+"m": "Ecotextile News"
+},
+{
 "d": "2026-11-10",
 "t": "Bank of America는 회복이 2028년으로 연기됨에 따라 Nike 수익 예측을 하향 조정했습니다.",
 "o": "Bank of America cuts Nike earnings forecast as recovery pushed back to 2028",
@@ -4337,37 +4358,16 @@
 },
 {
 "d": "2026-11-10",
+"t": "Bank of America가 수익 전망을 하향 조정함에 따라 Nike 판매 회복이 지연됨",
+"o": "Nike sales recovery pushed back as Bank of America cuts earnings forecast",
+"u": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxPR1dvZ3ZOTk9keGtTTXJvcnhtTGt4LTdzSWxoUWE2eExaN2MxR2lLWTJ5ZjNOcEJmWk51TlRNN2ZSZXRpdVpZSTdoSkR5cGZiZWJ4S0lUYkhwdkx4ZWlwazVZU0h0V211VnNlNVBnWFFoZmFEWjZQcVp2QnFhM3c5M1Mydml4YUt0b0M4SHMtUVpGa3RSRDliNDFqc090N0kwVW96RzFacW5rX2JoMjJDcUJiN01lSGhxeVFrR3ZzNThOM1pVUTRlSUlndU5jSjRPcWJnQTM0REFwZE5v?oc=5",
+"m": "바이어 · Nike"
+},
+{
+"d": "2026-11-10",
 "t": "Nike가 새로운 철권 콜라보를 방금 선보였나요?",
 "o": "Did Nike Just Tease a New Tekken Collab?",
 "u": "https://news.google.com/rss/articles/CBMiigFBVV95cUxQMVU1Z2tvZHJlWHQ0Tm8tRGhHY1Z2T3IwMHlOVkJZUGRKNklHQkJBVTA3akV5Nm1DQkIwdGZvV1VkMzJmZXdJYmR4cnlIN1pzRENJMHg3OUxJN0V1a0steUlNMGdmSlN3SHZEU1NrMlVSeWNrVzJVY1VDY3pqcmxWY1BULU9Xc0RMS1E?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-11-09",
-"t": "다가오는 Nike Sb 출시 - Nike SB x Eric Koston Apparel 컬렉션 출시일. Nike SNKRS",
-"o": "Upcoming Nike Sb Releases - Nike SB x Eric Koston Apparel Collection Release Date. Nike SNKRS",
-"u": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9HcGdiM0tTM0k1S05fQUo1d1pRYkdHc1FLM1lOTHhsREo2OU1HWnVnc3pvclJXdmFsZ0d3Yk9NZENHbXkyR1doX181ZElKdmUtWWdJ?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-11-09",
-"t": "[글로벌세아그룹]나이키 핵심 파트너 '테그라Tegra'",
-"o": "[글로벌세아그룹]나이키 핵심 파트너 '테그라Tegra'",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=82200",
-"m": "국제섬유신문"
-},
-{
-"d": "2026-11-08",
-"t": "수익 압박으로 인해 Nike(NKE) 투자 사례가 바뀔 수 있음",
-"o": "Earnings Pressure Might Change The Case For Investing In Nike (NKE)",
-"u": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNakg3UWN0RnpWRUw4VkdFemp2Z281ZHdoWkoxVW1NWHpGWTVZM29KdUUwa2lkZEFWakFCa3ZGNXBLeV8zV0tKb3pwTEN4YTlwNDBLZjA3NTBLZUlPemt2NVFITE1HWGNJYWgtczQzcV8xa3AxWGxNYk5Senp0dVJyRlRJbDRESVdGa0gzTERTMEVDSGhhNVZrMnl2N1hwMmhyc1hPc1BHcGxMUEw5NTg4Z09TeUVNWURPMnZSMElRdmpHZ2xTeWxsQtIBzgFBVV95cUxNOVhSa2lPNGU1VV9UTTVoWjhLR3NpaG9OWmRmNVdNS3JsRFM5RFpJcFRJdFQxdXgyUXF1QUNiYUVaSUFTd2t1NHBCOWtPdTdma3hLNlI0d0s2OUIxYXhKRW5IVXcxLXBLM2JZNHk4bVRxMExTSjVEZkx4RjB3Uy1XaGVRQzFVYmRqVmdWR3pnc1k4WHpxbXRWdHBhZzBBTHJoSWhMaVJ4U3ZMWHFvZ2xtOThFZS1hY0FjZ3pINEdOVVdLVElIYVp5dl9tOXVmQQ?oc=5",
-"m": "바이어 · Nike"
-},
-{
-"d": "2026-11-06",
-"t": "Carhartt WIP와 Nike가 의류와 Air Max Goadome Low 콜라보레이션 컬렉션을 위해 재결합했습니다.",
-"o": "Carhartt WIP and Nike Reunite for Apparel and Air Max Goadome Low Collaboration Collection",
-"u": "https://news.google.com/rss/articles/CBMiswFBVV95cUxNWmI3aVlhUUtVZDlqRERkLXhnQWhoQTB2ZjJCMkZTZHdDdFg1ZElINDlIeFlQZm9zX0NvNUtSWlMwQTViOHNLa19RbnN2aWJZNDRqMUIxelJ3QllSLXl4OUlJNHU2VzVjbEx3ZFA4cVlSNWg3TC1zVTdsdDZKbFhiVy02Nm01MUxPRzR0Y3pyMExndHJVM1V1VV9NcFU1NndKSW11SFBFaU9pemFCNF9PNGNGYw?oc=5",
 "m": "바이어 · Nike"
 }
 ],
@@ -4547,6 +4547,34 @@
 ],
 "walmart": [
 {
+"d": "2026-11-11",
+"t": "Walmart 주식: BofA, 수익 전 target를 139달러로 인상",
+"o": "Walmart stock: BofA lifts target to 139 dollars before earnings",
+"u": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxNaWJ5TnFCT1Q2YkNoaWJkLWhjcEEybVlkc3ZrSlA0SEQ1Z2p3cTBMWHFVZjI2bXc0czlreWZGcUc3T1drS2dER3lUNWtuWlIzOWZBRGJrVE5ETVpnd3BTS2NldTF0Q2VoVExuVGxocW5XeGktLWdlbEZ0OVlwMkg2OC14WlB2RFRzaGdJN01FZG9iZ1J5UXpxNzZ3VVVUdVNMd1RHLTNCcHNiSktMNjN0a0lEZy1HcjdvdFJBb1lTUHFMazA?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-11-11",
+"t": "Walmart는 더 높은 기대치로 수익을 창출합니다.",
+"o": "Walmart Heads Into Earnings With Higher Guidance Expectations",
+"u": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNVmZYRGtvZ2NPdE9OMXp6TGJDTjhZVXpkY3FuWmMzMjFOWkk0NVVYQS1oa3BYQXEtM2p2TS1Ud2MyZjhYNHd4ZkljREJfOTlKcUZjZG8za1pXOWdEM1FfeWl5YzdXMzIweDA1Q2dmZGhmQjlWMnFiZWM2UVF4RkhZeWdNTWdYOUtWNUZ4RElJSzRTYjZz?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-11-11",
+"t": "Walmart는 11월 19일 수익 이전에 BofA, Barclays 및 Baird Lift 목표로 Edge Lower를 공유합니다.",
+"o": "Walmart Shares Edge Lower as BofA, Barclays and Baird Lift Targets Before Nov. 19 Earnings",
+"u": "https://news.google.com/rss/articles/CBMidkFVX3lxTE8xM3ZHWm9TNjZCcnlESkxpOTZINE9tdHNsRDRNdUNPaGU4STJqcDI4ZGZpbHU1Ui1uMG5fRUo4LTdnMGNjWjYyVVN5VEZYVkVIYlZMTlVQTmg0VC13T2d3OERwVFZYQTQtbnhwSWpxUkREVlk4cXc?oc=5",
+"m": "바이어 · Walmart"
+},
+{
+"d": "2026-11-11",
+"t": "다음 주 3분기 실적을 앞두고 또 다른 강세 브로커 업그레이드에도 불구하고 Walmart 주식(WMT) 하락",
+"o": "Walmart Stock (WMT) Slips Despite Another Bullish Broker Upgrade Ahead of Q3 Earnings Next Week",
+"u": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNQ2dRZDktdkROTzlhM3FILWl3MWYwdjZaUmh5MDU4OGphRHFWWXcycURfZTJ6dmxILVpTcGlnMF9iNFgxY1dnUEE4aUNNUGpVOWxzVHNRbE5ReV9wU0hXSldWSEpBLUdyR2F2ZWZLOFF0N3FjUm94TTRJdE5XS0ZMN2JaYVhuemF0ZXItOExRR2ZRWDY3VDIza1VNZWJZSEIySE85Q1pkQWRVU25BQVlDY014NFhpeWVVcVJfUnVrU2w?oc=5",
+"m": "바이어 · Walmart"
+},
+{
 "d": "2026-11-10",
 "t": "Walmart 및 Target는 45대 17의 평가 격차로 수익을 창출합니다.",
 "o": "Walmart and Target Head Into Earnings With a 45-vs-17 Valuation Gap",
@@ -4573,43 +4601,29 @@
 "o": "Walmart stock: BMO lifts target as earnings focus shifts to GMV",
 "u": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxPN0tUajRWZkw1SGxHdWhKSmNaRzY4a1ZFV1hsLW8zUGFrdmRyQUUxWVlGVzFzVXlNY0l5TTNNMTRPdjBLT2tXQmdSXzVaV3RPaW9zbGk4Ui1GaTRxdGFBN2ctRDhONldqMVYxUjluOXNtUVZmTlNNekJCdkowMU4ta1A4WUZmOUxKSW93MGtuaEF6b3BxM1pVWm9SOXlvaTA3WFFrQzF0WHpFNVpBV05GY2p0N1NwQ3FqYkZSUWFOMXhSRWc?oc=5",
 "m": "바이어 · Walmart"
-},
-{
-"d": "2026-11-10",
-"t": "Walmart는 수익보다 앞서 업그레이드되었습니다. 이 소매 주식은 돌파 준비가 되어 있습니다",
-"o": "Walmart Upgraded Ahead Of Earnings; These Retail Stocks Are Breakout Ready",
-"u": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOYkU1TnBpR0VTTWtndkF3eFpHNE9YNDVhdjVVX3QyeV9udzg0blgwNV9JWm9MSDNuZzBhRl9qUkJTYnc5eFEySlNrQk5oVm95bk16TDR3VzBvem1JVVhNanRqQ0dDOE9adk00RjdqekhUUVVITllTNGh3bEdRUWVRYks1R1FTZFNYM2phZUNaYWc?oc=5",
-"m": "바이어 · Walmart"
-},
-{
-"d": "2026-11-10",
-"t": "Walmart 주식(WMT)은 가격에도 불구하고 하락합니다. 다음 주 3분기 실적을 앞두고 Target 업그레이드",
-"o": "Walmart Stock (WMT) Slips Despite Price Target Upgrades Ahead of Q3 Earnings Next Week",
-"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQaVRfTjZlSUZJUXZHYVVWaExQakR5aFMybk5IZ1BwU3BfQUc4Vm45Tmd1V1pqOEV3dHp5czd4a3pGRTFCZlVsUm5JNG95QjUxWmRyaWozNURvQ2YxLTNfSl9NNHNvUDlSZXpUSU1NWWp0bW5ZS19XLXFQY3hybUR5MnZfcTZNN3YxUklMbXZXTVpoSG9rTll4NzFGelFvcG9aRmVPUXVhRnN4SHNGR3c1eDJBeUc?oc=5",
-"m": "바이어 · Walmart"
-},
-{
-"d": "2026-11-09",
-"t": "NPI, 전직 Walmart 소싱 임원을 소매 전략 주도에 추가",
-"o": "NPI Adds Former Walmart Sourcing Executive to Lead Retail Strategy",
-"u": "https://news.google.com/rss/articles/CBMingFBVV95cUxPMWE0MHFZemxYMzR3TUJTaGtLdzctUkp2dlgwN20tUmV4MGNqcllxM1lONW1tdmFhX3ZCU0Nrc3M1Wmt0d2tYeEhPcUZyMzRHcUdieWZpb3UwdF9XUDVKWk82RUxzWWNiaWF0ZlZrZ002MVRTZkMtQ2hQXzBtTlI3RnFfZHQwbkhCLTJiSHJpeVQ5cWN5OERQNURvYVo5Zw?oc=5",
-"m": "바이어 · Walmart"
-},
-{
-"d": "2026-11-09",
-"t": "다음 주 수익을 앞두고 Walmart의 비정상적인 풋 옵션 거래량 - WMT가 하락할 예정입니까?",
-"o": "Unusual Put Options Volume in Walmart Ahead of Earnings Next Week - Is WMT Set to Drop?",
-"u": "https://news.google.com/rss/articles/CBMixwFBVV95cUxOWVQ1Ymg1cThjSUpaZHNSUnhHNkI5YTJoVHJRbWNRTS1nOFRBMDVzdzR2YWk4RVh6VU9QZ052ckdJZWQ3Y3pOdHJaQjJvR2QtWWhwM3pTNWQ3QThMLUhZeXdfMG9vN1ZrTG1IeWw2ZXNyWl82VjFHbzZ4VEZhYUU2bWtaQ1doNGxSYXdpcDUtTVBVLVdWc1F3RWw4LXpiY3FaZW1zUzRWM0FqUWV6Y21CUk1FeXhudFFLZHVRZ3IxV2hzUENnQ1Zj?oc=5",
-"m": "바이어 · Walmart"
 }
 ],
 "ua": [
+{
+"d": "2026-11-11",
+"t": "| Under Armour는 브랜드 재설정을 위해 축구 스파이크화와 Tech Helix에 투자했습니다.",
+"o": "| Under Armour bets on Football cleats and Tech Helix to reset its brand",
+"u": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxOcUpLTFo4SGRFNjQ5LUtnSHplWnJkZVpNLVRvWG9SdnIzSzVqd1JBS0hqYkJPd0JUX2NTc1pFYmZJV1hVelMtcnJWblZ6YmxVd2NHakJjYWlHb3ZIVF9LdEtEUVppdWtneGNrMFowUzZRcmVLQ3NES0hLM0RaTWluYS01RjYtMC1iZWwzdlhLZlppOEdWd1NfLVlMV1RlZ0d1ak1RNVlLbFFTalZRdnVGUk5XRkpleXZxNTNwRE15NXcyM2ZqY25KMUlmWG1waVQ0bkFlaXptelFVSVhBX003a3RZS19hdVRRUXBJ?oc=5",
+"m": "Fibre2Fashion"
+},
 {
 "d": "2026-11-09",
 "t": "美패션업계, 관세 환급에 ‘반짝’…전쟁·고유가 변수는 여전해",
 "o": "美패션업계, 관세 환급에 ‘반짝’…전쟁·고유가 변수는 여전해",
 "u": "http://www.ktnews.com/news/articleView.html?idxno=150032",
 "m": "한국섬유신문"
+},
+{
+"d": "2026-11-09",
+"t": "Under Armour, 매출 및 이익 하락으로 전망 하향 조정",
+"o": "Under Armour trims outlook as sales and profits dip",
+"u": "https://news.google.com/rss/articles/CBMitAFBVV95cUxNX3REWVpuYXM0d2ZNU0ZRQ1lMV0Q5eW9kVnNzZUxNZURBdDlxS1hGZ0pDckV6SHdiUERVMnBoQ3JqUTB1dnp1cVB2WjAyd0JiaENHUHJGeVdwaXVCT3FMNGRodkhXRmdOMzNoRGNXUDlIMU1uRFNLVXVTd0U4a292N0JuRmZ4QXJZM1pOMlRBaGRqczFEVnV5TE1iTC05c3VSQnpaV2VuQnVDSVUtSU1ZX2NtRy0?oc=5",
+"m": "바이어 · Under Armour"
 },
 {
 "d": "2026-11-09",
@@ -4644,20 +4658,6 @@
 "t": "Under Armour 주식은 지침을 낮춘 후 강세 사례가 변경되었습니다.",
 "o": "Under Armour Stock Has The Bull Case Changed After Lowered Guidance",
 "u": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNZVNaR3hvRUM3ZnpuNEI0OUhCbWRJQXUwM1N3aVhmTi0ySnU0SXFVeXlUblowMDRfMF9NZ3R0OXlNYnVucWlHMFhUcklXSnV2OEhOTGFELWlZUlNmM2pmTkVJRXhzR3k0VXdiaklyaUc1MW5fMWZ4bEkxZG5PaUVhbXZFTnhwbW5PWjlsS2xiQXdndWVVVVZJQg?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-11-07",
-"t": "Under Armour Inc(UAA)(2027년 2분기) 실적 발표 하이라이트: Reven",
-"o": "Under Armour Inc (UAA) (Q2 2027) Earnings Call Highlights: Reven",
-"u": "https://news.google.com/rss/articles/CBMizgFBVV95cUxPUThyZU00SGZzdWhDaGJFRnp6bHRVaHJSUjVxZmxRczRNT0ZqcDBYSW1QSVo4REdhaVVFNlE5SE5lNFRpZWR6Tl9ORGdZQ0c5eDRWRC15bHVYNlAxMWpsY05SWFFENFBDcHQ5U3d6d3pua2ZwVzBELXMteVhmc2F2eDJndVRaT05wcU5XU2pmX1dhYkxOZ1c5SUtVbmtSVFk4RkNTczlVSFQ1MEFiX3c3dk50ZUVGcDgtSXgySWQyUVpfWWtWTWwtVjhwaXFjQQ?oc=5",
-"m": "바이어 · Under Armour"
-},
-{
-"d": "2026-11-06",
-"t": "Under Armour는 2분기 수익 감소를 보고할 가능성이 높습니다. 가장 정확한 분석가들은 EEA에 앞서 예측을 수정합니다.",
-"o": "Under Armour Likely To Report Lower Q2 Revenue; These Most Accurate Analysts Revise Forecasts Ahead Of Ea",
-"u": "https://news.google.com/rss/articles/CBMimgJBVV95cUxQbEI5R0dFOFNmVnNfYWdpTzduM2plLVR2Zi1QajRXeTVEcXd6bndBTkdiLW02NzRHaWw3SlJ3VXJOR3JEYjdkbTR2UXJiRVdwWFpZZ3VXRmF3bnM1bkNKX0NJekpUSVp6dV9jQW5ObmI5QVo2bnZJYU5YSGM5cDhCWmZZbkVLcG8tallfNGNKRl8tWHZzMVQ4RkNsNnQxMENZam94c2paaDk4cEFKNHdDdjBoTnNuQlB2U1l0bmZselhhbW5nV0IwY2UwYTJWLWZrdEF0QU93dmZOVlZJbXkwaWU0SEoxZnpNci1ScW9vMzlMUVVqYVhZaHdjaUZtYzZaVlV2dE9sX2lmUDUzS1puNGFDTlpkLWNURmc?oc=5",
 "m": "바이어 · Under Armour"
 }
 ],
