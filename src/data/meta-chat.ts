@@ -24,11 +24,9 @@ export interface MetaChatMessage {
   /** 받는 사람 이름. 보낸 시점의 이름을 그대로 둔다. */
   toName?: string
 }
-
 const COLLECTION = "metaChat"
 const MAX_TEXT = 200
 const READ_LIMIT = 30
-const LAST_READ_KEY = "fabric.chat.lastRead.v1"
 
 export function chatCreatedAtMillis(value: unknown): number | null {
   if (!value || typeof value !== "object" || !("toMillis" in value)) return null
@@ -106,28 +104,4 @@ export async function sendMetaChat(
   } catch {
     return false
   }
-}
-
-export function chatLastReadAt(uid: string): number {
-  try {
-    const values = JSON.parse(localStorage.getItem(LAST_READ_KEY) ?? "{}") as Record<string, unknown>
-    return typeof values[uid] === "number" ? values[uid] : 0
-  } catch {
-    return 0
-  }
-}
-
-export function markChatRead(uid: string, at: number): void {
-  try {
-    const values = JSON.parse(localStorage.getItem(LAST_READ_KEY) ?? "{}") as Record<string, unknown>
-    values[uid] = at
-    localStorage.setItem(LAST_READ_KEY, JSON.stringify(values))
-  } catch {
-    // 사생활 보호 모드 등 localStorage를 쓸 수 없는 환경에서는 읽음 저장만 생략한다.
-  }
-}
-
-export function unreadChatCount(messages: MetaChatMessage[], uid: string): number {
-  const since = chatLastReadAt(uid)
-  return messages.filter((message) => message.uid !== uid && (chatCreatedAtMillis(message.createdAt) ?? 0) > since).length
 }

@@ -262,8 +262,8 @@ export function Meta() {
     if (focusUid && !people.some((person) => person.uid === focusUid)) setFocusUid(null)
   }, [focusUid, people])
 
-  const openChat = useCallback((uid: string, name: string) => {
-    window.dispatchEvent(new CustomEvent("fabric:chat-open", { detail: { uid, name } }))
+  const openChat = useCallback((_uid: string, name: string) => {
+    setDraft((current) => (current.startsWith(`${name} `) ? current : `${name} ${current}`))
   }, [])
 
   const handlePick = useCallback((kind: "room" | "person" | "facility" | "spot" | "object", id: string, path?: string) => {

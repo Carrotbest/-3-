@@ -8,7 +8,7 @@ import { Topbar } from "@/components/layout/Topbar"
 import { ReadOnlyGuard, SyncStatusNotice } from "@/components/layout/ReadOnlyGuard"
 import { HomeGate } from "@/components/layout/HomeGate"
 import { ScheduleReminder } from "@/components/layout/ScheduleReminder"
-import { TeamChatDock } from "@/components/layout/TeamChatDock"
+import { MemoDock } from "@/components/layout/MemoDock"
 import { UpdateBanner } from "@/components/layout/UpdateBanner"
 import { IntegrityNoticeDialog } from "@/components/layout/IntegrityNoticeDialog"
 import { ParsingOverlay } from "@/components/upload/ParsingOverlay"
@@ -223,7 +223,7 @@ function AppLayout() {
       </div>
       <ParsingOverlay />
       <IntegrityNoticeDialog />
-      <TeamChatDock />
+      <MemoDock />
       <ScheduleReminder />
       <UpdateBanner />
     </div>
