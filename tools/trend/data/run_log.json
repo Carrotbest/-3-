@@ -1,15 +1,5 @@
 [
  {
-  "at": "2026-09-21T23:41:46+00:00",
-  "kind": "collect",
-  "ok": 37,
-  "fail": 1,
-  "new": 157,
-  "kept": 61,
-  "hits": 9,
-  "translated": 57
- },
- {
   "at": "2026-09-22T00:13:08+00:00",
   "kind": "kpi",
   "points": 360
@@ -558,5 +548,15 @@
   "kept": 28,
   "hits": 1,
   "translated": 35
+ },
+ {
+  "at": "2026-11-15T00:27:33+00:00",
+  "kind": "collect",
+  "ok": 16,
+  "fail": 22,
+  "new": 13,
+  "kept": 7,
+  "hits": 2,
+  "translated": 7
  }
 ]

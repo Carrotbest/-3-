@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-14T01:07:39+00:00",
+ "generated_at": "2026-11-15T00:37:30+00:00",
  "sources": [
   {
    "name": "Knitting Industry",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -14,7 +14,7 @@
    "name": "Innovation in Textiles",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -23,7 +23,7 @@
    "name": "Textile World",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -32,7 +32,7 @@
    "name": "Ecotextile News",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -42,7 +42,7 @@
    "region": "해외",
    "via": "direct",
    "last_ok": "2026-11-13T01:31:51+00:00",
-   "fail_count": 1,
+   "fail_count": 2,
    "last_error": "HTTP 403",
    "resting": false
   },
@@ -50,7 +50,7 @@
    "name": "The Interline",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -59,7 +59,7 @@
    "name": "EURATEX",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -69,7 +69,7 @@
    "region": "해외",
    "via": "direct",
    "last_ok": "2026-11-11T00:55:59+00:00",
-   "fail_count": 3,
+   "fail_count": 4,
    "last_error": "HTTP 404",
    "resting": false
   },
@@ -77,7 +77,7 @@
    "name": "Textile Today",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -86,7 +86,7 @@
    "name": "Textile Focus",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -95,7 +95,7 @@
    "name": "Apparel Insider",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -104,7 +104,7 @@
    "name": "Indian Textile Magazine",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -113,7 +113,7 @@
    "name": "Retail Dive",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -122,7 +122,7 @@
    "name": "McKinsey Insights",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -131,7 +131,7 @@
    "name": "WWD",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -140,7 +140,7 @@
    "name": "한국섬유신문",
    "region": "국내",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -149,7 +149,7 @@
    "name": "국제섬유신문",
    "region": "국내",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -159,8 +159,8 @@
    "region": "해외",
    "via": "googlenews",
    "last_ok": "2026-11-13T01:31:51+00:00",
-   "fail_count": 1,
-   "last_error": "빈 피드",
+   "fail_count": 2,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -168,8 +168,8 @@
    "region": "해외",
    "via": "googlenews",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -177,15 +177,15 @@
    "region": "해외",
    "via": "googlenews",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
    "name": "Apparel Resources",
    "region": "해외",
    "via": "direct",
-   "last_ok": "2026-11-14T01:05:49+00:00",
+   "last_ok": "2026-11-15T00:27:33+00:00",
    "fail_count": 0,
    "last_error": null,
    "resting": false
@@ -195,8 +195,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -204,8 +204,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -213,8 +213,8 @@
    "region": "국내",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -222,8 +222,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -231,8 +231,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -240,8 +240,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -249,8 +249,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -258,8 +258,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -267,8 +267,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -276,8 +276,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -285,8 +285,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -294,8 +294,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -303,8 +303,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -312,8 +312,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -321,8 +321,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -330,8 +330,8 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   },
   {
@@ -339,26 +339,16 @@
    "region": "해외",
    "via": "googlenews_query",
    "last_ok": "2026-11-14T01:05:49+00:00",
-   "fail_count": 0,
-   "last_error": null,
+   "fail_count": 1,
+   "last_error": "HTTP 503",
    "resting": false
   }
  ],
- "healthy": 35,
+ "healthy": 16,
  "source_total": 38,
- "archive_total": 9865,
- "archive_relevant": 2883,
+ "archive_total": 9878,
+ "archive_relevant": 2890,
  "runs": [
-  {
-   "at": "2026-10-31T23:49:24+00:00",
-   "kind": "collect",
-   "ok": 36,
-   "fail": 2,
-   "new": 48,
-   "kept": 5,
-   "hits": 6,
-   "translated": 20
-  },
   {
    "at": "2026-11-01T23:58:35+00:00",
    "kind": "collect",
@@ -478,6 +468,16 @@
    "kept": 28,
    "hits": 1,
    "translated": 35
+  },
+  {
+   "at": "2026-11-15T00:27:33+00:00",
+   "kind": "collect",
+   "ok": 16,
+   "fail": 22,
+   "new": 13,
+   "kept": 7,
+   "hits": 2,
+   "translated": 7
   }
  ]
 }

@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-11-14T01:07:39+00:00",
+"generated_at": "2026-11-15T00:37:30+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
-"filtered_out": 6136,
+"filtered_out": 6140,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 21,
-"scanned": 539,
-"kept": 209,
-"material": 152
+"scanned": 529,
+"kept": 211,
+"material": 155
 },
 "30": {
 "sources": 22,
-"scanned": 2520,
-"kept": 968,
-"material": 696
+"scanned": 2407,
+"kept": 928,
+"material": 667
 }
 }
 },
@@ -25,33 +25,33 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 482
+"n": 479
 },
 {
 "key": "RETAIL",
-"n": 404
+"n": 403
 },
 {
 "key": "FABRIC",
-"n": 244
+"n": 245
 },
 {
 "key": "ETC",
-"n": 188
+"n": 192
 },
 {
 "key": "CHEMICAL",
-"n": 101
+"n": 99
 },
 {
 "key": "YARN",
-"n": 81
+"n": 82
 }
 ],
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 454
+"n": 453
 },
 {
 "key": "Fibre2Fashion",
@@ -63,11 +63,11 @@
 },
 {
 "key": "국제섬유신문",
-"n": 115
+"n": 113
 },
 {
 "key": "Textile Focus",
-"n": 107
+"n": 109
 },
 {
 "key": "Innovation in Textiles",
@@ -75,7 +75,7 @@
 },
 {
 "key": "Textile Today",
-"n": 86
+"n": 88
 },
 {
 "key": "Knitting Industry",
@@ -86,11 +86,11 @@
 "n": 53
 },
 {
-"key": "Indian Textile Magazine",
-"n": 50
+"key": "Textile World",
+"n": 48
 },
 {
-"key": "Textile World",
+"key": "Indian Textile Magazine",
 "n": 48
 },
 {
@@ -99,7 +99,7 @@
 },
 {
 "key": "Apparel Resources",
-"n": 35
+"n": 36
 },
 {
 "key": "Apparel Insider",
@@ -137,19 +137,19 @@
 "tags": [
 {
 "key": "방글라데시",
-"n": 93
-},
-{
-"key": "리사이클",
-"n": 87
+"n": 94
 },
 {
 "key": "전시회",
 "n": 85
 },
 {
+"key": "리사이클",
+"n": 85
+},
+{
 "key": "데님",
-"n": 46
+"n": 47
 },
 {
 "key": "바이오소재",
@@ -184,12 +184,12 @@
 "n": 21
 },
 {
-"key": "T2T",
+"key": "탄소",
 "n": 20
 },
 {
-"key": "탄소",
-"n": 19
+"key": "T2T",
+"n": 20
 },
 {
 "key": "추적성",
@@ -197,7 +197,7 @@
 },
 {
 "key": "효성",
-"n": 18
+"n": 17
 },
 {
 "key": "자카드",
@@ -208,11 +208,11 @@
 "n": 12
 },
 {
-"key": "r-PET",
-"n": 12
+"key": "리오셀",
+"n": 11
 },
 {
-"key": "리오셀",
+"key": "r-PET",
 "n": 11
 },
 {
@@ -248,15 +248,15 @@
 "n": 7
 },
 {
-"key": "코팅라미",
-"n": 7
-},
-{
 "key": "비스코스",
 "n": 7
 },
 {
 "key": "면가",
+"n": 6
+},
+{
+"key": "코팅라미",
 "n": 6
 },
 {
@@ -335,16 +335,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-10-16",
-"total": 40,
-"by": {
-"RETAIL": 16,
-"MATERIAL": 15,
-"FABRIC": 8,
-"YARN": 1
-}
-},
 {
 "date": "2026-10-17",
 "total": 10,
@@ -655,6 +645,16 @@
 },
 {
 "date": "2026-11-14",
+"total": 7,
+"by": {
+"ETC": 4,
+"YARN": 1,
+"FABRIC": 1,
+"MATERIAL": 1
+}
+},
+{
+"date": "2026-11-15",
 "total": 0,
 "by": {}
 }
@@ -684,9 +684,9 @@
 {
 "tag": "데님",
 "label_en": "denim",
-"recent": 29,
+"recent": 30,
 "prior": 17,
-"delta": 12,
+"delta": 13,
 "weeks": [
 0,
 0,
@@ -699,7 +699,7 @@
 13,
 5,
 7,
-4
+5
 ]
 },
 {
@@ -724,48 +724,6 @@
 ]
 },
 {
-"tag": "베트남",
-"label_en": "vietnam",
-"recent": 20,
-"prior": 9,
-"delta": 11,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-2,
-3,
-6,
-9,
-4,
-3,
-2
-]
-},
-{
-"tag": "나일론",
-"label_en": "nylon",
-"recent": 20,
-"prior": 10,
-"delta": 10,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-1,
-4,
-6,
-4,
-8,
-2,
-5
-]
-},
-{
 "tag": "부직포",
 "label_en": "nonwoven",
 "recent": 17,
@@ -787,24 +745,24 @@
 ]
 },
 {
-"tag": "방글라데시",
-"label_en": "bangladesh",
-"recent": 51,
-"prior": 42,
-"delta": 9,
+"tag": "탄소",
+"label_en": "carbon footprint",
+"recent": 15,
+"prior": 5,
+"delta": 10,
 "weeks": [
 0,
 0,
 0,
 0,
 0,
-7,
-24,
-13,
-12,
-15,
-11,
-11
+1,
+3,
+1,
+2,
+2,
+5,
+6
 ]
 },
 {
@@ -829,6 +787,48 @@
 ]
 },
 {
+"tag": "나일론",
+"label_en": "nylon",
+"recent": 19,
+"prior": 11,
+"delta": 8,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+1,
+4,
+6,
+4,
+8,
+2,
+5
+]
+},
+{
+"tag": "관세",
+"label_en": "tariff",
+"recent": 9,
+"prior": 1,
+"delta": 8,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+1,
+0,
+0,
+6,
+2,
+1
+]
+},
+{
 "tag": "추적성",
 "label_en": "traceability",
 "recent": 4,
@@ -850,31 +850,31 @@
 ]
 },
 {
-"tag": "효성",
-"label_en": "hyosung",
-"recent": 7,
-"prior": 11,
-"delta": -4,
+"tag": "리사이클",
+"label_en": "recycled",
+"recent": 40,
+"prior": 45,
+"delta": -5,
 "weeks": [
 0,
 0,
 0,
 0,
 0,
-3,
-0,
-8,
-2,
-1,
 4,
-0
+26,
+15,
+8,
+13,
+10,
+9
 ]
 },
 {
-"tag": "리사이클",
-"label_en": "recycled",
-"recent": 42,
-"prior": 45,
+"tag": "효성",
+"label_en": "hyosung",
+"recent": 7,
+"prior": 10,
 "delta": -3,
 "weeks": [
 0,
@@ -882,13 +882,13 @@
 0,
 0,
 0,
-6,
-26,
-15,
+2,
+0,
 8,
-13,
-10,
-9
+2,
+1,
+4,
+0
 ]
 },
 {
@@ -914,6 +914,12 @@
 }
 ],
 "fresh": [
+{
+"tag": "코팅라미",
+"label_en": "coating",
+"n": 6,
+"first": "2026-10-19"
+},
 {
 "tag": "스트레치",
 "label_en": "stretch recovery",
@@ -957,6 +963,12 @@
 "first": "2026-10-20"
 },
 {
+"tag": "LCA",
+"label_en": "life cycle assessment",
+"n": 1,
+"first": "2026-11-14"
+},
+{
 "tag": "bluesign",
 "label_en": "bluesign",
 "n": 1,
@@ -988,6 +1000,160 @@
 }
 ],
 "articles": [
+{
+"id": "ed36562eff7f10ea",
+"d": "2026-11-14",
+"t": "147개 RMG 공장 완전 폐쇄 선언: BGMEA",
+"o": "147 RMG factories declared fully closed: BGMEA",
+"u": "https://textilefocus.com/147-rmg-factories-declared-fully-closed-bgmea/",
+"s": "Bangladesh Garment Manufacturers and Exporters Association (BGMEA) President Mahmud Hasan Khan has said a total of 147 garment factories across the country have been declared fully closed amid ongoing protests by garment workers demanding a minimum wage. He disclosed the information while speaking t",
+"c": "ETC",
+"x": "Bangladesh Garment Manufacturers and Exporters Association (BGMEA) President Mahmud Hasan Khan has said a total of 147 garment factories across the country have been declared fully closed amid ongoing protests by garment workers demanding a minimum wage. He disclosed the information while speaking to the media on Saturday afternoon. The BGMEA chief said a vested quarter is deliberately trying to create unrest in the garment sector. As a result, normal factory operations were being disrupted, seriously affecting the country’s major source of export earnings. He said 55 factories in Savar and Ashulia had to remain closed today (Saturday) under Section 13(1) of the Labour Act due to the workers’ unrest, which has continued for more than two weeks. Meanwhile, 92 factories are running partial production. He warned that continued unrest in the garment sector would make it difficult to continue discussions on wage increases at the wage board. However, business owners will present their wage proposal at the wage board tomorrow (Sunday). The BGMEA president also said that workers’ federations are failing to bring the situation under control. The post 147 RMG factories declared fully closed: BGMEA appeared first on Textile Focus .",
+"i": "https://textilefocus.com/wp-content/uploads/2026/11/1794652829-211ecfa60dddb25a1d775f44d18b6ac6.webp",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 7,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "e9f5197bd81c5013",
+"d": "2026-11-14",
+"t": "Filatex India는 2027 회계연도 2분기에 21%의 매출 성장을 기록했으며 PAT는 12.4% 증가했습니다.",
+"o": "Filatex India reports 21% revenue growth in Q2 FY ’27, PAT rises 12.4%",
+"u": "https://apparelresources.com/business-news/manufacturing/filatex-india-reports-21-revenue-growth-q2-fy-27-pat-rises-12-4/",
+"s": "Filatex India Limited, a manufacturer of polyester filament yarn, reported a 21.22% year-on-year (YoY) increase in standalone revenue from operations to Rs. 1,304.19 crore (US $138 million) for the second quarter ended 30th September 2026 (Q2 FY ’27), compared with Rs. 1,075.93 crore (US $114 millio",
+"c": "YARN",
+"x": "Filatex India Limited, a manufacturer of polyester filament yarn, reported a 21.22% year-on-year (YoY) increase in standalone revenue from operations to Rs. 1,304.19 crore (US $138 million) for the second quarter ended 30th September 2026 (Q2 FY ’27), compared with Rs. 1,075.93 crore (US $114 million) in the corresponding quarter of the previous financial year. […] The post Filatex India reports 21% revenue growth in Q2 FY ’27, PAT rises 12.4% appeared first on Apparel Resources .",
+"i": "https://apparelresources.com/wp-content/uploads/2026/11/Filatex-India-reports-21-revenue-growth-in-Q2-FY-27-PAT-rises-12.4.jpg",
+"g": [],
+"m": "Apparel Resources",
+"r": "해외",
+"v": 9,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Apparel Resources"
+]
+},
+{
+"id": "8ea07e17a74b0e02",
+"d": "2026-11-14",
+"t": "산업 공학과 린(Lean) 제조로 의류 매장 효율성 향상",
+"o": "Industrial engineering and lean manufacturing drive apparel floor efficiency",
+"u": "https://textiletoday.com.bd/industrial-engineering-and-lean-manufacturing-drive-apparel-floor-efficiency",
+"s": "Rethinking shop-floor agility and eliminating hidden operational bottlenecks anchored a specialized technical seminar at the Textile Innovation Expo 2026 in Dhaka. Held at the International Conventio...",
+"c": "ETC",
+"x": "Rethinking shop-floor agility and eliminating hidden operational bottlenecks anchored a specialized technical seminar at the Textile Innovation Expo 2026 in Dhaka. Held at the International Convention City Bashundhara (ICCB) on November 14, the session titled \"Industrial Engineering for Smarter, Leaner and Efficient Apparel Manufacturing\" explored how precision engineering can reshape garment production economics. Figure: The seminar concluded with an expression of gratitude to the speakers, and Engr. Ehsanul Karim Kaiser, Chairman, Textile Innovation Exchange (TIE), handed over mementos to the distinguished guests. The session attracted top industry leaders, industrial and production engineers, consultants, and technology experts to discuss modern approaches to reducing waste, optimizing line balancing, and improving delivery reliability in readymade garment (RMG) factories. Modern apparel manufacturers face intense pressure to enhance operational efficiency, product quality, and delivery speed while optimizing the use of manpower, materials, and machinery. Industrial engineers highlighted that common factory challenges—such as bottlenecks, excessive material handling, work-in-progress (WIP) buildup, line imbalances, and avoidable rework—often negate the advantages of expanding production capacity. During the session, speakers emphasized that implementing lean manufacturing principles, 5S methodologies, effective production planning, and digital line monitoring tools can successfully resolve these shop-floor inefficiencies. Experts noted that improving line balancing, reducing cycle times, and tracking real-time OEE (Overall Equipment Effectiveness) metrics are vital for maintaining competitive margins in global markets. Furthermore, achieving long-term operational imp",
+"i": "/storage/uploads/2026/11/industrialengineeri_17946803782640.jpg",
+"g": [],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "87724a26f9e185e8",
+"d": "2026-11-14",
+"t": "Argon Denims Ltd.는 제조 우수성 혁신으로 DSL Textile Innovation Award 2026을 수상했습니다.",
+"o": "Argon Denims Ltd. wins the DSL Textile Innovation Award 2026 for innovation in manufacturing excellence",
+"u": "https://textiletoday.com.bd/argon-denims-ltd-wins-the-dsl-textile-innovation-award-2026-for-innovation-in-manufacturing-excellence",
+"s": "Argon Denims Ltd., a flagship concern of Evince Group, has been honored with the Diamond Award in the Manufacturing Innovation category at the DSL Presents Textile Innovation Awards 2026. The gala...",
+"c": "FABRIC",
+"x": "Argon Denims Ltd., a flagship concern of Evince Group, has been honored with the Diamond Award in the Manufacturing Innovation category at the DSL Presents Textile Innovation Awards 2026. The gala ceremony took place on November 13 at the International Convention City Bashundhara (ICCB) in Dhaka, organized by Textile Innovation Exchange (TIE) in collaboration with the Institution of Textile Engineers and Technologists (ITET), in association with BKMEA and BGBA, and implemented by Textile Today Innovation Hub (TTIH). Figure: Argon Denims Ltd. wins the DSL Textile Innovation Award 2026 for innovation in manufacturing excellence. Major Md. Enamur Rahman Talukder (Retd), General Manager of HR, Admin & Compliance, received the award on behalf of Argon Denims Ltd. Argon powers the factory floor with 98.5% A-grade quality, 100% clean chemistry compliance, Bureau Veritas-validated Eco-Rich dyeing, waterless sizing of ecru warp yarn, precision flow-controlled washing, and closed-loop condensate recovery—proving that true manufacturing excellence is built on innovation, quality, and purpose. Held alongside the TIE–ITET Textile Innovation Expo 2026, the awards recognized 18 organizations—nine Platinum and nine Diamond winners—across seven categories for driving productivity, competitiveness, and sustainability in Bangladesh's textile and apparel sector. Chaired by Prof. Dr. Engr. Ayub Nabi Khan, Vice Chancellor of BUFT, the event was graced by Sanjida Islam Tulee, MP, alongside prominent industry leaders, academicians, and trade body representatives as special guests. A.S.M. Tareq Amin, Member Secretary, Textile Innovation Exchange, led the award announcements and shared the vision behind the initiative, while Enamul Hafiz Latifee, Strategic and Reporting Lead at TIE, moderated an",
+"i": "/storage/uploads/2026/11/argondenimsltdwin_17946514652761.jpg",
+"g": [
+"데님"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "29a9d6fa35e74434",
+"d": "2026-11-14",
+"t": "섬유 리더들은 지속적인 성장을 위해 체계적인 혁신, 데이터 공유, 가치 추가를 요구합니다.",
+"o": "Textile leaders call for systemic innovation, data sharing, and value addition to sustain growth",
+"u": "https://textiletoday.com.bd/textile-leaders-call-for-systemic-innovation-data-sharing-and-value-addition-to-sustain-growth",
+"s": "Industry leaders and trade experts emphasized building a structured innovation ecosystem, accelerating supply chain data sharing, and strengthening industry-academia collaboration at a high-level pl...",
+"c": "ETC",
+"x": "Industry leaders and trade experts emphasized building a structured innovation ecosystem, accelerating supply chain data sharing, and strengthening industry-academia collaboration at a high-level plenary seminar in Dhaka today. Held at the International Convention City Bashundhara (ICCB) on November 14 during the Textile Innovation Expo 2026, the session titled \"Strategy for Systemic Innovation Implementation\" brought together policymakers, factory executives, and global brand representatives. They discussed practical strategies to address high business costs, bank interest rates, and energy challenges while transitioning toward high-value manufacturing. Figure 1: The session titled \"Strategy for Systemic Innovation Implementation\" brought together policymakers, factory executives, and global brand representatives. Bangladesh's textile and apparel sector is entering a decisive transition ahead of LDC graduation, which will eventually end duty-free market access. Global sourcing dynamics are rapidly reshaping due to Fourth Industrial Revolution (IR4) technologies, Environmental, Social, and Governance (ESG) rules, due diligence mandates, traceability, Digital Product Passport (DPP) requirements, and tariff uncertainty. Figure 2: Engr. ATM Mahbubul Alam Milton, Executive Director, Masco Group and Steering Board Member, Textile Innovation Exchange (TIE) Engr. ATM Mahbubul Alam Milton, Executive Director, Masco Group and Steering Board Member, Textile Innovation Exchange (TIE), delivered the keynote presentation. He highlighted various types of innovation, including open, incremental, radical, architectural, and disruptive innovation, and outlined a structured innovation model comprising idea generation, evaluation, impact assessment, R&D and testing, and commercialization.",
+"i": "/storage/uploads/2026/11/textileleaderscall_17946494871515.jpg",
+"g": [],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "14e51b0223de9433",
+"d": "2026-11-14",
+"t": "폴리에스테르 티셔츠는 면보다 58% 더 많은 탄소를 배출합니다.",
+"o": "Polyester T-Shirts produce 58% more emissions than cotton",
+"u": "https://apparelinsider.com/polyester-t-shirts-produce-58-more-emissions-than-cotton/",
+"s": "MONTREAL – Polyester T-Shirts generate almost 58 per cent more greenhouse gas emissions than cotton equivalents a new life-cycle assessment (LCA) foubd. However, the researchers caution that neither fibre is environmentally preferable across every impact category. The study, published in the journal",
+"c": "MATERIAL",
+"x": "MONTREAL – Polyester T-Shirts generate almost 58 per cent more greenhouse gas emissions than cotton equivalents a new life-cycle assessment (LCA) foubd. However, the researchers caution that neither fibre is environmentally preferable across every impact category. The study, published in the journal Cleaner Waste Systems, calculated emissions of 9.62kg of carbon dioxide equivalent (CO₂e) for a polyester T-shirt, compared with 6.10kg for a cotton garment. This is Premium Content Only users with Online and Print subscription can access this. If you are a Free Subscriber, click here to upgrade. If you already have Online or Print subscription Login To Unlock The Content! Remember Me Lost your password? Don't have an account? Register The post Polyester T-Shirts produce 58% more emissions than cotton appeared first on Apparel Insider .",
+"i": "https://apparelinsider.com/wp-content/uploads/2025/06/page-3-image-scaled.jpg",
+"g": [
+"LCA",
+"탄소"
+],
+"m": "Apparel Insider",
+"r": "해외",
+"v": 14,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Apparel Insider"
+]
+},
+{
+"id": "0431e40c3de14974",
+"d": "2026-11-14",
+"t": "CMAI와 NIFT VisioNxt, 국내 주요 의류 허브 전반에 걸쳐 패션 예측 및 AI 주도 디자인 역량 강화를 위해 협력",
+"o": "CMAI and NIFT VisioNxt Join Hands to Strengthen Fashion Forecasting and AI-led Design Capabilities Across Key Apparel Hubs in the Country",
+"u": "https://textilefocus.com/cmai-and-nift-visionxt-join-hands-to-strengthen-fashion-forecasting-and-ai-led-design-capabilities-across-key-apparel-hubs-in-the-country/",
+"s": "The Clothing Manufacturers Association of India (CMAI) and NIFT VisioNxt, a unit of the National Institute of Fashion Technology (NIFT), under the Ministry of Textiles, Government of India, have joined hands to strengthen knowledge exchange, industry collaboration and professional capabilities in fa",
+"c": "ETC",
+"x": "The Clothing Manufacturers Association of India (CMAI) and NIFT VisioNxt, a unit of the National Institute of Fashion Technology (NIFT), under the Ministry of Textiles, Government of India, have joined hands to strengthen knowledge exchange, industry collaboration and professional capabilities in fashion forecasting and design. A Memorandum of Understanding (MOU) between the two organisations was signed on 12th of November 2026 marking an important step towards bringing research-driven fashion intelligence and emerging technological capabilities closer to India’s apparel industry. Speaking on the occasion, Santosh Katariya, President, CMAI, said, “The Indian apparel industry is operating in a market where consumer preferences, technology and design sensibilities are changing rapidly. For manufacturers and brands, understanding these shifts early and translating them into commercially relevant collections is extremely important. This collaboration with NIFT VisioNxt will bring industry closer to structured trend intelligence, India-centric fashion insights and emerging AI-enabled tools will help them make more informed design and product development decisions.” As part of this collaboration, the two organisations will introduce a series of Masterclasses on Fashion Forecasting for the Indian Market, integrating Artificial Intelligence (AI), Emotional Intelligence (EI), Cultural Insights and Market Intelligence. The initiative aims to equip apparel manufacturers, brands, designers and industry professionals with the knowledge and tools to interpret emerging trends and translate them into commercially relevant design and product development strategies. Ms. Tanu Kashyap, IAS, Director General, NIFT, stated, “Through VisioNxt, NIFT is committed to strengthening India’s indige",
+"i": "https://textilefocus.com/wp-content/uploads/2026/11/CMAI.webp",
+"g": [],
+"m": "Textile Focus",
+"r": "해외",
+"v": 10,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
 {
 "id": "f2ff504b69dd57a1",
 "d": "2026-11-13",
@@ -2287,11 +2453,12 @@
 "m": "Indian Textile Magazine",
 "r": "해외",
 "v": 12,
-"h": 1,
+"h": 2,
 "w": "material",
 "e": [],
 "ms": [
-"Indian Textile Magazine"
+"Indian Textile Magazine",
+"Textile Focus"
 ]
 },
 {
@@ -33874,162 +34041,6 @@
 "e": [],
 "ms": [
 "한국섬유신문"
-]
-},
-{
-"id": "c0bdc3f0475bce5e",
-"d": "2026-09-30",
-"t": "가공이 인도의 차세대 섬유 성장 개척지가 되다: Monforts",
-"o": "Finishing Becomes India’s Next Textile Growth Frontier: Monforts",
-"u": "https://www.indiantextilemagazine.in/finishing-becomes-indias-next-textile-growth-frontier-monforts/",
-"s": "By K. Gopalakrishnan Advanced finishing, coating and dyeing technologies are enabling Indian textile manufacturers to move beyond volume-driven production towards higher-value, specialised and more sustainable fabrics, says Daniel Rütten, Area… The post Finishing Becomes India’s Next Textile Growth ",
-"c": "CHEMICAL",
-"x": "By K. Gopalakrishnan Advanced finishing, coating and dyeing technologies are enabling Indian textile manufacturers to move beyond volume-driven production towards higher-value, specialised and more sustainable fabrics, says Daniel Rütten, Area Sales Manager – Asia, Monforts. India’s textile industry is entering a phase in which competitiveness will increasingly depend not only on manufacturing scale, but on the ability to produce differentiated, functional and higher-value fabrics with greater efficiency and consistency. For Monforts, one of Germany’s established names in textile finishing technology, this evolution is creating significant opportunities in India, particularly across advanced finishing, coating, dyeing and drying. Daniel Rütten, Area Sales Manager – Asia, Monforts With more than six decades of presence in India, Monforts continues to see the country as one of its most important markets. The company is witnessing continued investment in conventional woven and knitted apparel and home-textile applications, while demand is expanding into technical textiles, activewear, sportswear, filtration and automotive fabrics. At the same time, manufacturers are placing greater emphasis on energy, water and chemical consumption, automation and consistent quality. According to Daniel Rütten, Area Sales Manager – Asia, Monforts , this changing investment landscape is shifting the emphasis from productivity alone towards a broader equation combining productivity, lower operating costs, flexibility and the capability to manufacture increasingly sophisticated products. The following are excerpts from an exclusive interview with Mr. Daniel Rütten, Area Sales Manager – Asia, Monforts, in which he discusses India’s evolving textile finishing landscape, the growing importance o",
-"i": "https://www.indiantextilemagazine.in/wp-content/uploads/2026/09/Monforts-1.png",
-"g": [
-"코팅라미"
-],
-"m": "Indian Textile Magazine",
-"r": "해외",
-"v": 10,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Indian Textile Magazine"
-]
-},
-{
-"id": "ba8ec4c89ef931b2",
-"d": "2026-09-30",
-"t": "[New]무신사스탠다드x효성티앤씨 ‘리커버리 웨어’ 첫선",
-"o": "[New]무신사스탠다드x효성티앤씨 ‘리커버리 웨어’ 첫선",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81953",
-"s": "무신사 스탠다드와 효성티앤씨가 손잡고 웰니스 웨어 시장을 공략할 ‘리커버리(Recovery)’ 컬렉션을 공개했다.무신사 스탠다드는 휴식과 재충전을 일상의 중요한 가치로 인식하는 젊은 소비층의 라이프스타일 변화에 주목해 이번 컬렉션을 기획했다. 리커버리 웨어의 핵심인 소재의 기능적 특성에 무신사 스탠다드만의 미니멀한 디자인과 높은 실용성을 결합해, 일상에서도 자연스럽게 활용할 수 있는 패션 아이템으로 리커버리 웨어의 영역을 넓힌다는 구상이다. 새롭게 출시하는 리커버리 라운지 웨어는 글로벌 섬유 기업 효성티앤씨와 공동 개발한 기능성 소",
-"c": "MATERIAL",
-"x": "무신사 스탠다드와 효성티앤씨가 손잡고 웰니스 웨어 시장을 공략할 ‘리커버리(Recovery)’ 컬렉션을 공개했다.무신사 스탠다드는 휴식과 재충전을 일상의 중요한 가치로 인식하는 젊은 소비층의 라이프스타일 변화에 주목해 이번 컬렉션을 기획했다. 리커버리 웨어의 핵심인 소재의 기능적 특성에 무신사 스탠다드만의 미니멀한 디자인과 높은 실용성을 결합해, 일상에서도 자연스럽게 활용할 수 있는 패션 아이템으로 리커버리 웨어의 영역을 넓힌다는 구상이다. 새롭게 출시하는 리커버리 라운지 웨어는 글로벌 섬유 기업 효성티앤씨와 공동 개발한 기능성 소",
-"i": "https://cdn.itnk.co.kr/news/photo/202609/81953_53599_2613.jpg",
-"g": [
-"효성"
-],
-"m": "국제섬유신문",
-"r": "국내",
-"v": 14,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"국제섬유신문"
-]
-},
-{
-"id": "b637ed2a04c3a07d",
-"d": "2026-09-30",
-"t": "기후변화 시대, 수경재배가 ‘면화 생산지도’ 바꿀까",
-"o": "기후변화 시대, 수경재배가 ‘면화 생산지도’ 바꿀까",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=148961",
-"s": "스페인 농업기술 기업 마그테크(Magtech)와 H&M그룹이 토양 없이 면화를 재배하는 ‘수경재배 코튼(Hydroponic Cotton)’을 실제 의류 생산 단계까지 끌어올렸다. 스페인에서 생산한 첫 5톤 규모의 면화가 품질검사를 통과해 의류로 제작됐으며, 현재 인도에 두 번째 수경재배 시설을 구축하고 있다. 기존 면화 농업이 안고 있는 물·농지·농약 의존도를 낮추면서 섬유 원료 생산지를 다변화할 수 있을지 주목된다.마그테크와 H&M그룹의 ‘순환혁신연구소(Circular Innovation Lab)’가 공동으로 추진하는 수경재배 면",
-"c": "MATERIAL",
-"x": "스페인 농업기술 기업 마그테크(Magtech)와 H&M그룹이 토양 없이 면화를 재배하는 ‘수경재배 코튼(Hydroponic Cotton)’을 실제 의류 생산 단계까지 끌어올렸다. 스페인에서 생산한 첫 5톤 규모의 면화가 품질검사를 통과해 의류로 제작됐으며, 현재 인도에 두 번째 수경재배 시설을 구축하고 있다. 기존 면화 농업이 안고 있는 물·농지·농약 의존도를 낮추면서 섬유 원료 생산지를 다변화할 수 있을지 주목된다.마그테크와 H&M그룹의 ‘순환혁신연구소(Circular Innovation Lab)’가 공동으로 추진하는 수경재배 면",
-"i": "http://www.ktnews.com/news/thumbnail/202609/148961_131143_5030_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 14,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "a52f892aef61918f",
-"d": "2026-09-30",
-"t": "Carbios 재활용 기술, 주요 브랜드의 지지를 얻다",
-"o": "Carbios recycling tech wins backing from major brands",
-"u": "https://apparelinsider.com/carbios-recycling-tech-wins-backing-from-major-brands/",
-"s": "CLERMONT-FERRAND – Patagonia, PUMA and Salomon have announced the completion of a major textile recycling project with Carbios. The three tested whether the French company’s enzymatic recycling technology can provide polyester suitable for use in conventional apparel manufacturing. The project broug",
-"c": "MATERIAL",
-"x": "CLERMONT-FERRAND – Patagonia, PUMA and Salomon have announced the completion of a major textile recycling project with Carbios. The three tested whether the French company’s enzymatic recycling technology can provide polyester suitable for use in conventional apparel manufacturing. The project brought the brands together with companies covering different stages of the European textile supply chain. This included polymer production and yarn spinning through to knitting, dyeing and garment manufacture. This is Premium Content Only users with Online and Print subscription can access this. If you are a Free Subscriber, click here to upgrade. If you already have Online or Print subscription Login To Unlock The Content! Remember Me Lost your password? Don't have an account? Register The post Carbios recycling tech wins backing from major brands appeared first on Apparel Insider .",
-"i": "https://apparelinsider.com/wp-content/uploads/2023/09/rpet-scaled.jpg",
-"g": [
-"리사이클"
-],
-"m": "Apparel Insider",
-"r": "해외",
-"v": 10,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Apparel Insider"
-]
-},
-{
-"id": "a2b53b831eeccfd8",
-"d": "2026-09-30",
-"t": "[공고]경기패션창작스튜디오, 12기 입주 디자이너 모집",
-"o": "[공고]경기패션창작스튜디오, 12기 입주 디자이너 모집",
-"u": "https://www.itnk.co.kr/news/articleView.html?idxno=81952",
-"s": "국내 패션 인재 개발 양성소로 주목받고 있는 경기패션창작스튜디오가 12기 신규 입주디자이너를 모집한다.경기패션창작스튜디오는 경기도와 양주시의 지원을 바탕으로 한국패션디자이너연합회가 운영하는 패션 디자이너 인큐베이팅 플랫폼으로, 2016년 3월 개관했다.미취업·프리랜서·초기 창업 디자이너 등을 대상으로 창작공간을 제공하고, 시제품 제작부터 브랜드 사업화, 국내외 유통 및 글로벌 진출까지 체계적인 인큐베이팅 프로그램을 지원해 경쟁력 있는 패션 브랜드로 성장할 수 있도록 돕고 있다.특히 운영국인 한국패션디자이너연합회(회장 이상봉)는 최근",
-"c": "RETAIL",
-"x": "국내 패션 인재 개발 양성소로 주목받고 있는 경기패션창작스튜디오가 12기 신규 입주디자이너를 모집한다.경기패션창작스튜디오는 경기도와 양주시의 지원을 바탕으로 한국패션디자이너연합회가 운영하는 패션 디자이너 인큐베이팅 플랫폼으로, 2016년 3월 개관했다.미취업·프리랜서·초기 창업 디자이너 등을 대상으로 창작공간을 제공하고, 시제품 제작부터 브랜드 사업화, 국내외 유통 및 글로벌 진출까지 체계적인 인큐베이팅 프로그램을 지원해 경쟁력 있는 패션 브랜드로 성장할 수 있도록 돕고 있다.특히 운영국인 한국패션디자이너연합회(회장 이상봉)는 최근",
-"i": "https://cdn.itnk.co.kr/news/photo/202609/81952_53598_2343.jpg",
-"g": [],
-"m": "국제섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"국제섬유신문"
-]
-},
-{
-"id": "9dbd0e65cc0945f3",
-"d": "2026-09-30",
-"t": "Carbios는 복잡한 섬유 폐기물을 재활용 폴리에스테르 티셔츠로 전환합니다.",
-"o": "Carbios turns complex textile waste into recycled polyester T-shirts",
-"u": "https://textiletoday.com.bd/carbios-turns-complex-textile-waste-into-recycled-polyester-t-shirts",
-"s": "Carbios has demonstrated a complete European fiber-to-fiber production chain that converts complex textile and plastic waste into finished polyester T-shirts. This marks a step from laboratory recycli...",
-"c": "MATERIAL",
-"x": "Carbios has demonstrated a complete European fiber-to-fiber production chain that converts complex textile and plastic waste into finished polyester T-shirts. This marks a step from laboratory recycling toward industrial textile applications. The French biotechnology company worked with Patagonia, PUMA and Salomon through its Fiber-to-Fiber Consortium to process difficult waste streams containing polyester blends such as cotton and elastane, as well as dyes, finishes and silicones. These materials are among the more challenging textile waste streams for conventional recycling. The latest demonstration builds on significant process data generated at Carbios’ Clermont-Ferrand facility. In July 2026, the company reported more than 95% conversion within 24 hours when processing complex post-consumer textile waste. It had also completed its 100th production batch, demonstrating what it described as robust and reproducible performance under conditions representative of industrial operations. For the latest garment demonstration, Carbios converted complex waste into high-purity monomers. Selenis in Portugal then repolymerized them into more than 1 ton of recycled PET, branded EnzyTex. The material was spun into yarn by ANTEX in Spain, knitted into Interlock fabric by Henitex in France, dyed by TAD, and finally made into T-shirts by ToptexCube of Chamatex Group. Carbios is now moving from technology validation toward commercial deployment. The company has expanded its licensing offering to the textile market, while its planned Longlaville industrial facility in France targets production startup in the first half of 2028, subject to project financing and finalization.",
-"i": "/storage/uploads/2026/9/carbiosturnscomple_17907415008485.jpg",
-"g": [
-"r-PET",
-"리사이클"
-],
-"m": "Textile Today",
-"r": "해외",
-"v": 11,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Today"
-]
-},
-{
-"id": "9b450be9cf93d256",
-"d": "2026-09-30",
-"t": "SYAHI JET: 인도의 디지털 섬유 인쇄 분야의 다음 장을 열다",
-"o": "SYAHI JET: Powering India’s Next Chapter in Digital Textile Printing",
-"u": "https://www.indiantextilemagazine.in/syahi-jet-powering-indias-next-chapter-in-digital-textile-printing/",
-"s": "As digital textile printing enters a new phase of growth, Orange Group introduces SYAHI JET — a Made-in-India ink platform designed to support diverse applications across the evolving textile-printing ecosystem.… The post SYAHI JET: Powering India’s Next Chapter in Digital Textile Printing appeared ",
-"c": "CHEMICAL",
-"x": "As digital textile printing enters a new phase of growth, Orange Group introduces SYAHI JET — a Made-in-India ink platform designed to support diverse applications across the evolving textile-printing ecosystem. Aayush Rathi, Director, Orange Group The Indian textile industry has always been defined by its ability to evolve. From traditional printing techniques to increasingly sophisticated digital production systems, technology has continuously changed the way textiles are designed, produced and brought to market. Today, the industry stands at another important inflection point. Digital textile printing is no longer simply an alternative to conventional printing. It is becoming an increasingly important part of the industry’s future. And according to Aayush Rathi, Director, Orange Group, the opportunity ahead is significant, with the digital textile printing market expected to witness substantial growth over the next three years. It is against this backdrop that Orange Group has introduced SYAHI JET, A word deeply rooted in India’s language and culture. Meaning ink, it represents the beginning of every story, every design and every innovation. Today, that spirit takes a new form. Bringing together ink innovations and application expertise to address the diverse requirements of modern digital textile printing. A New Chapter Begins with SYAHI JET The launch of SYAHI JET represents more than the introduction of an ink product. It reflects Orange Group’s broader vision of strengthening the digital textile printing ecosystem through Made-in-India, in-house R&D and application-focused ink solutions. According to the SYAHI JET portfolio, the company’s advanced ink range has been developed through in-house R&D with a focus on colour performance, consistency and efficiency, whi",
-"i": "https://www.indiantextilemagazine.in/wp-content/uploads/2026/09/Syahi-1-scaled.jpg",
-"g": [],
-"m": "Indian Textile Magazine",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Indian Textile Magazine"
 ]
 }
 ]
