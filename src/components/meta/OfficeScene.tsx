@@ -141,6 +141,10 @@ const FABRIC_PALETTE = [...FABRIC_COLORS, "#c9b4d4", "#8fb8a8", "#d9a9a0", "#a8b
 
 const FIT_H = 78
 const FIT_W = 128
+const META_FOV = 24
+const FOV_TAN = Math.tan((META_FOV * Math.PI) / 180 / 2)
+const ZOOM_MIN = 0.55
+const ZOOM_MAX = 26
 
 interface SceneTheme {
   bg: THREE.Color
@@ -348,9 +352,13 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
 
     const scene = new THREE.Scene()
     scene.background = theme.bg
-    scene.fog = theme.dark ? new THREE.Fog(theme.bg, 150, 320) : null
+    // 원근으로 바꾸며 카메라가 멀어졌다. 전체 보기에서는 여전히 안 낀다.
+    scene.fog = theme.dark ? new THREE.Fog(theme.bg, 260, 560) : null
 
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 400)
+    // 직교는 멀고 가까운 것이 같은 크기로 그려져 위아래 원근이 실제와 다르다(2026-11-16 박향근).
+    // 화각이 좁은 원근이라 아이소메트릭 느낌은 지키고 수렴만 생긴다.
+    // near/far 는 updateCameraPlanes 가 거리에 따라 매 프레임 다시 정한다.
+    const camera = new THREE.PerspectiveCamera(META_FOV, 1, 1, 600)
     camera.position.set(0, 70, 68)
 
     const controls = new OrbitControls(camera, canvas)
@@ -359,8 +367,6 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     controls.dampingFactor = 0.08
     controls.minPolarAngle = 0
     controls.maxPolarAngle = Math.PI / 2
-    controls.minZoom = 0.55
-    controls.maxZoom = 26
     controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE
     controls.update()
 
@@ -368,12 +374,12 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     // 바닥색(groundColor)이 어두우면 흰 바닥이 밑에서부터 물든다. 어둡게 보이던 가장 큰 이유다.
     const hemi = new THREE.HemisphereLight(
       theme.dark ? 0x5b7ba8 : 0xffffff,
-      theme.dark ? 0x1a222e : 0xdde3ec,
-      theme.dark ? 0.85 : 0.84,
+      theme.dark ? 0x1a222e : 0xe9e3d8,
+      theme.dark ? 0.85 : 0.72,
     )
     scene.add(hemi)
-    // 해를 낮추고 환경광을 올린다. 상자 면끼리의 명암 차가 줄어 각진 느낌이 덜하다.
-    const sun = new THREE.DirectionalLight(0xffffff, theme.dark ? 0.8 : 0.5)
+    // 해와 채움광의 차이로 둥근 모서리와 면의 입체감을 살린다.
+    const sun = new THREE.DirectionalLight(0xffffff, theme.dark ? 0.8 : 0.68)
     sun.position.set(26, 44, 20)
     sun.castShadow = true
     sun.shadow.mapSize.set(2048, 2048)
@@ -383,15 +389,15 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     sun.shadow.bias = -0.0008
     sun.shadow.normalBias = 0.02
     scene.add(sun)
-    const ambient = new THREE.AmbientLight(0xffffff, theme.dark ? 0.25 : 0.47)
+    const ambient = new THREE.AmbientLight(0xffffff, theme.dark ? 0.25 : 0.36)
     scene.add(ambient)
-    const fill = new THREE.DirectionalLight(0xffffff, theme.dark ? 0.3 : 0.32)
+    const fill = new THREE.DirectionalLight(0xffffff, theme.dark ? 0.3 : 0.26)
     fill.position.set(-30, 20, -25)
     scene.add(fill)
     // 켜진 방에만 진짜 광원을 배정한다. 방마다 두면 열일곩이라 셀이더 한도에 걸린다.
     const ROOM_LIGHT_COUNT = 8
     const roomLights = Array.from({ length: ROOM_LIGHT_COUNT }, () => {
-      const light = new THREE.PointLight(0xeaf2ff, 0, 34, 1.2)
+      const light = new THREE.PointLight(0xffe3b0, 0, 34, 1.2)
       light.castShadow = false
       scene.add(light)
       return light
@@ -407,9 +413,11 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       dark: new THREE.MeshLambertMaterial({ color: theme.darkFloor }),
       paper: new THREE.MeshLambertMaterial({ color: theme.dark ? 0xcdd4de : 0xeceff4 }),
       board: new THREE.MeshLambertMaterial({ color: theme.dark ? 0xd7dde6 : 0xf7f9fc }),
-      chair: new THREE.MeshLambertMaterial({ color: theme.dark ? 0x4c5664 : 0x687386 }),
+      chair: new THREE.MeshLambertMaterial({ color: theme.dark ? 0x4c5664 : 0x708099 }),
       sofa: new THREE.MeshLambertMaterial({ color: theme.dark ? 0x50596a : 0x8893a6 }),
-      green: new THREE.MeshLambertMaterial({ color: 0x56815b }),
+      // 장면의 잎이 전부 이 둘을 쓴다. 어두운 올리브색 하나였던 것을 밝은 두 톤으로 가른다.
+      green: new THREE.MeshLambertMaterial({ color: 0x4f9c61 }),
+      greenFresh: new THREE.MeshLambertMaterial({ color: 0x6bb57e }),
       // 상판을 한 색으로 깔면 책상 수십 개가 한 덩어리로 보인다. 세 가지를 돌려 쓴다.
       deskWarm: new THREE.MeshLambertMaterial({ color: theme.desk.clone().lerp(theme.wood, 0.42) }),
       deskCool: new THREE.MeshLambertMaterial({ color: theme.wall.clone().lerp(new THREE.Color(0xffffff), 0.45) }),
@@ -423,11 +431,11 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       yellow: new THREE.MeshBasicMaterial({ color: 0xfacc15 }),
     }
     const SECTION_TONE: Record<ZoneKey, { chair: string; carpet: FloorPattern }> = {
-      sample: { chair: "#3d8f86", carpet: "grid" },
-      tech: { chair: "#b5664a", carpet: "herringbone" },
-      overview: { chair: "#4a6fb5", carpet: "plain" },
-      trend: { chair: "#9a5aa8", carpet: "stripe" },
-      system: { chair: "#6b7686", carpet: "grid" },
+      sample: { chair: "#3da89b", carpet: "grid" },
+      tech: { chair: "#c9704f", carpet: "herringbone" },
+      overview: { chair: "#5280cc", carpet: "plain" },
+      trend: { chair: "#a964bb", carpet: "stripe" },
+      system: { chair: "#7a8698", carpet: "grid" },
     }
 
     let activeZone: ZoneKey = "overview"
@@ -446,7 +454,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     const sofaMat = () => {
       const existing = sofaMaterials.get(toneRoomPath)
       if (existing) return existing
-      const base = new THREE.Color(accentOf(toneRoomPath)).lerp(new THREE.Color(0xffffff), theme.dark ? 0.18 : 0.55)
+      const base = new THREE.Color(accentOf(toneRoomPath)).lerp(new THREE.Color(0xffffff), theme.dark ? 0.18 : 0.44)
       const created = new THREE.MeshLambertMaterial({ color: base })
       sofaMaterials.set(toneRoomPath, created)
       return created
@@ -1466,7 +1474,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       cylinder(0.3 * size, 0.42 * size, materials.desk, 0, 0.21 * size, 0, group)
       for (let index = 0; index < 6; index += 1) {
         const angle = index / 6 * Math.PI * 2
-        const leaf = new THREE.Mesh(geometries.ico, materials.green)
+        const leaf = new THREE.Mesh(geometries.ico, index % 2 ? materials.greenFresh : materials.green)
         leaf.scale.set(0.22 * size, (0.28 + index % 2 * 0.08) * size, 0.22 * size)
         leaf.position.set(Math.cos(angle) * 0.22 * size, (0.8 + index % 2 * 0.2) * size, Math.sin(angle) * 0.22 * size)
         leaf.castShadow = true
@@ -1582,7 +1590,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       const rug = new THREE.Mesh(
         new THREE.CircleGeometry(3.1, 28),
         new THREE.MeshBasicMaterial({
-          color: new THREE.Color(accentOf(toneRoomPath)).lerp(theme.floor, 0.68),
+          color: new THREE.Color(accentOf(toneRoomPath)).lerp(theme.floor, 0.58),
           transparent: true,
           opacity: 0.85,
           depthWrite: false,
@@ -1677,7 +1685,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     }
 
     const roomFloorColor = (room: Room) => {
-      return theme.floor.clone().lerp(new THREE.Color(accentOf(room.path)), 0.04)
+      return theme.floor.clone().lerp(new THREE.Color(accentOf(room.path)), 0.11)
     }
 
     const addRoomWalls = (room: Room, group: THREE.Group, wallHeight: number) => {
@@ -2063,7 +2071,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       const clumps = Math.max(2, Math.round(length / 1.3))
       for (let index = 0; index < clumps; index += 1) {
         const offset = (index - (clumps - 1) / 2) * (length / clumps)
-        const leaf = new THREE.Mesh(geometries.ico, materials.green)
+        const leaf = new THREE.Mesh(geometries.ico, index % 3 === 1 ? materials.greenFresh : materials.green)
         const size = 0.34 + (index % 3) * 0.1
         leaf.scale.set(size, size * 1.35, size)
         leaf.position.set(offset, 0.42 + size * 0.7, (index % 2 ? 0.12 : -0.12))
@@ -2408,8 +2416,8 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       return shape
     }
 
-    // 형광등 색이다. 노란 기를 빼고 푸른 기를 아주 살짝 넣었다.
-    const LIGHT_COOL = 0xdce9ff
+    // 사람이 켜진 방으로 읽도록 따뜻한 조명색을 쓴다.
+    const LIGHT_WARM = 0xffe6c4
     const ROOM_BEAM_HEIGHT = 7.2
 
     // 빛기둥 세로 그라데이션. 바닥이 가장 밝고 올라갈수록 사라진다.
@@ -2551,7 +2559,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     const createRoomLighting = (room: Room, parent: THREE.Object3D) => {
       // 빛기둥은 원뿔이 아니라 방 바닥 모양 그대로 수직으로 올라간다(2026-11-10 박향근).
       const beamMaterial = new THREE.MeshBasicMaterial({
-        color: LIGHT_COOL,
+        color: LIGHT_WARM,
         map: beamGradientTexture(),
         transparent: true,
         opacity: 0,
@@ -2575,7 +2583,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
 
       // 방 모양 그대로 깔리는 밑바닥. 이 방이 켜졌다는 것을 면으로 알린다.
       const poolMaterial = new THREE.MeshBasicMaterial({
-        color: LIGHT_COOL,
+        color: LIGHT_WARM,
         transparent: true,
         opacity: 0,
         depthWrite: false,
@@ -2764,7 +2772,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
           carpetTexture.repeat.set(0.5, 0.5)
           const overlay = new THREE.Mesh(
             carpetGeometry,
-            new THREE.MeshBasicMaterial({ map: carpetTexture, color: accentOf(room.path), transparent: true, opacity: 0.14, depthWrite: false }),
+            new THREE.MeshBasicMaterial({ map: carpetTexture, color: accentOf(room.path), transparent: true, opacity: 0.18, depthWrite: false }),
           )
           overlay.rotation.x = -Math.PI / 2
           overlay.position.y = 0.029
@@ -3027,12 +3035,35 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     // 전체 보기 줌은 여기 하나다. 예전에는 같은 식이 resize, 방 선택 해제, 더블클릭 세 곳에 복사돼 있어서
     // 한 곳만 고치면 화면이 안 바뀌었다. 평면은 가로 83, 투영된 세로가 약 47이라 더 빡빡한 축에 맞춘다.
     const overviewZoom = () => frame * 0.98 / Math.max(47, 83 / frameAspect)
+    // 직교 때의 줌 값을 그대로 쓴다. 보이는 세로 길이(frame / zoom)를 그만큼 담는 카메라 거리로 바꾼다.
+    const distanceForZoom = (zoom: number) => frame / zoom / (2 * FOV_TAN)
+    const currentZoom = () => frame / (Math.max(2, camera.position.distanceTo(controls.target)) * 2 * FOV_TAN)
+    // 바닥은 겹판이고 층 간격이 0.002~0.005다. near 를 작은 값으로 고정하면 멀리서 볼 때
+    // 깊이 정밀도가 모자라 카펫과 방 테두리가 아른거린다. 거리에 비례해 near 를 민다.
+    const updateCameraPlanes = () => {
+      const distance = Math.max(2, camera.position.distanceTo(controls.target))
+      camera.near = distance * 0.05
+      camera.far = distance * 3 + 260
+      camera.updateProjectionMatrix()
+    }
+    // 바라보는 방향은 두고 거리만 줌 값에 맞춘다.
+    const applyZoom = (zoom: number) => {
+      const direction = camera.position.clone().sub(controls.target)
+      const length = direction.length() || 1
+      camera.position.copy(controls.target).addScaledVector(direction.divideScalar(length), distanceForZoom(zoom))
+    }
+    const spriteWorld = new THREE.Vector3()
+    const sizeSprite = (sprite: THREE.Sprite, baseW: number, baseH: number) => {
+      const distance = camera.position.distanceTo(sprite.getWorldPosition(spriteWorld))
+      const k = (2 * FOV_TAN * distance) / frame
+      sprite.scale.set(baseW * k, baseH * k, 1)
+    }
     let userAdjustedView = false
     let suppressControlChange = false
     // 1.6은 방이 화면을 꽉 채워 둘레가 안 보였다. 2026-11-11 박향근 "조금 멀리서".
-    const roomZoom = (room: Room) => Math.min(controls.maxZoom, frame * 1.2 / Math.max(room.w, room.d))
+    const roomZoom = (room: Room) => Math.min(ZOOM_MAX, frame * 1.2 / Math.max(room.w, room.d))
 
-    let cameraTween: { from: THREE.Vector3; to: THREE.Vector3; fromZoom: number; toZoom: number; fromOffset: THREE.Vector3; toOffset: THREE.Vector3; progress: number } | null = null
+    let cameraTween: { from: THREE.Vector3; to: THREE.Vector3; fromOffset: THREE.Vector3; toOffset: THREE.Vector3; progress: number } | null = null
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
     const IDLE_FRAME_MS = 1000 / 24
     let lastDrawAt = 0
@@ -3045,7 +3076,6 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     // 그래서 이벤트가 아니라 카메라가 실제로 움직였는지로 깨어 있음을 정한다.
     const prevCamPos = new THREE.Vector3()
     const prevCamTarget = new THREE.Vector3()
-    let prevZoom = -1
     const updateControls = () => {
       suppressControlChange = true
       controls.update()
@@ -3056,24 +3086,25 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
     }
     controls.addEventListener("change", handleControlChange)
 
-    const focusAt = (target: THREE.Vector3, zoom = camera.zoom, offset?: THREE.Vector3) => {
+    const focusAt = (target: THREE.Vector3, zoom = currentZoom(), offset?: THREE.Vector3) => {
       const next = target.clone().setY(0)
+      const currentOffset = camera.position.clone().sub(controls.target)
+      // 호출하는 쪽이 주는 offset 은 이제 방향만 쓴다. 길이는 zoom 이 정한다.
+      const source = offset ? offset.clone() : currentOffset
+      if (source.lengthSq() < 1e-8) source.set(0, 1, 1)
+      const toOffset = source.normalize().multiplyScalar(distanceForZoom(zoom))
       if (reducedMotion.matches) {
         controls.target.copy(next)
-        camera.zoom = zoom
-        if (offset) camera.position.copy(next).add(offset)
-        camera.updateProjectionMatrix()
+        camera.position.copy(next).add(toOffset)
+        updateCameraPlanes()
         updateControls()
         return
       }
-      const currentOffset = camera.position.clone().sub(controls.target)
       cameraTween = {
         from: controls.target.clone(),
         to: next,
-        fromZoom: camera.zoom,
-        toZoom: zoom,
         fromOffset: currentOffset,
-        toOffset: offset ? offset.clone() : currentOffset,
+        toOffset,
         progress: 0,
       }
     }
@@ -3169,6 +3200,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
           const azimuth = Math.hypot(dx, dz) < 0.2 ? Math.atan2(1, 1) : Math.atan2(dx, dz)
           const polar = 0.9
           const distance = 70
+          // 길이는 focusAt 이 zoom 으로 다시 정한다. 방향만 쓴다.
           const offset = new THREE.Vector3(
             Math.sin(polar) * Math.sin(azimuth) * distance,
             Math.cos(polar) * distance,
@@ -3830,6 +3862,7 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       // 전체 보기로 돌아갈 때 처음 자리와 줄으로 되돌린다.
       userAdjustedView = false
       const distance = 70
+      // 길이는 focusAt 이 zoom 으로 다시 정한다. 방향만 쓴다.
       const polar = Math.PI / 4
       focusAt(
         new THREE.Vector3(0, 0, -2),
@@ -3854,18 +3887,15 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       const aspect = width / height
       frame = Math.max(FIT_H, FIT_W / aspect)
       frameAspect = aspect
-      camera.left = -frame * aspect / 2
-      camera.right = frame * aspect / 2
-      camera.top = frame / 2
-      camera.bottom = -frame / 2
+      camera.aspect = aspect
+      controls.minDistance = distanceForZoom(ZOOM_MAX)
+      controls.maxDistance = distanceForZoom(ZOOM_MIN)
       if (!userAdjustedView) {
-        // 평면은 가로 82, 투영된 세로가 약 46이다. 예전에는 세로 기준(58) 하나로만 줌을 정해서
-        // 캔버스가 가로 1.33배보다 납작하면 바깥벽과 섹션 글자가 좌우로 잘렸다.
-        // 두 축을 다 보고 더 빡빡한 쪽에 맞춘다.
-        camera.zoom = overviewZoom()
+        // 평면은 가로 83, 투영된 세로가 약 47이다. 두 축을 다 보고 더 빡빡한 쪽에 맞춘다.
+        applyZoom(overviewZoom())
         updateControls()
       }
-      camera.updateProjectionMatrix()
+      updateCameraPlanes()
     }
     const resizeObserver = new ResizeObserver(resize)
     resizeObserver.observe(canvas)
@@ -3876,10 +3906,10 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       scene.background = theme.bg
       if (theme.dark) {
         if (scene.fog instanceof THREE.Fog) {
-          scene.fog.near = 150
-          scene.fog.far = 320
+          scene.fog.near = 260
+          scene.fog.far = 560
         } else {
-          scene.fog = new THREE.Fog(theme.bg, 150, 320)
+          scene.fog = new THREE.Fog(theme.bg, 260, 560)
         }
       } else {
         scene.fog = null
@@ -3897,11 +3927,11 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
       materials.dark.color.copy(theme.darkFloor)
       corridorMaterial.color.copy(theme.floor).lerp(new THREE.Color(0xffffff), 0.18)
       hemi.color.set(theme.dark ? 0x5b7ba8 : 0xffffff)
-      hemi.groundColor.set(theme.dark ? 0x1a222e : 0xdde3ec)
-      hemi.intensity = theme.dark ? 0.85 : 0.84
-      sun.intensity = theme.dark ? 0.8 : 0.5
-      ambient.intensity = theme.dark ? 0.25 : 0.47
-      fill.intensity = theme.dark ? 0.3 : 0.32
+      hemi.groundColor.set(theme.dark ? 0x1a222e : 0xe9e3d8)
+      hemi.intensity = theme.dark ? 0.85 : 0.72
+      sun.intensity = theme.dark ? 0.8 : 0.68
+      ambient.intensity = theme.dark ? 0.25 : 0.36
+      fill.intensity = theme.dark ? 0.3 : 0.26
       ;(Object.keys(neonMaterials) as ZoneKey[]).forEach((zone) => {
         neonMaterials[zone].color.set(theme.neon[zone])
       })
@@ -3947,10 +3977,11 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         cameraTween.progress = Math.min(1, cameraTween.progress + delta * 2.6)
         const eased = 1 - (1 - cameraTween.progress) ** 3
         controls.target.lerpVectors(cameraTween.from, cameraTween.to, eased)
-        camera.zoom = THREE.MathUtils.lerp(cameraTween.fromZoom, cameraTween.toZoom, eased)
-        const blended = cameraTween.fromOffset.clone().lerp(cameraTween.toOffset, eased)
-        camera.position.copy(controls.target).add(blended)
-        camera.updateProjectionMatrix()
+        const direction = cameraTween.fromOffset.clone().normalize()
+          .lerp(cameraTween.toOffset.clone().normalize(), eased).normalize()
+        const length = THREE.MathUtils.lerp(cameraTween.fromOffset.length(), cameraTween.toOffset.length(), eased)
+        camera.position.copy(controls.target).addScaledVector(direction, length)
+        updateCameraPlanes()
         if (cameraTween.progress >= 1) cameraTween = null
       }
       let walkingThisFrame = false
@@ -4055,23 +4086,22 @@ export function OfficeScene({ people, focusUid, selectedRoomPath, onPick, bubble
         }
         const baseW = bubble.sprite.userData.baseW as number
         const baseH = bubble.sprite.userData.baseH as number
-        if (baseW) bubble.sprite.scale.set(baseW / camera.zoom, baseH / camera.zoom, 1)
+        if (baseW) sizeSprite(bubble.sprite, baseW, baseH)
       })
       labelEntries.forEach((entry) => {
         const baseW = entry.sprite.userData.baseW as number
         const baseH = entry.sprite.userData.baseH as number
-        entry.sprite.scale.set(baseW / camera.zoom, baseH / camera.zoom, 1)
+        sizeSprite(entry.sprite, baseW, baseH)
       })
       updateControls()
+      updateCameraPlanes()
       if (
         prevCamPos.distanceToSquared(camera.position) > 1e-8 ||
-        prevCamTarget.distanceToSquared(controls.target) > 1e-8 ||
-        Math.abs(prevZoom - camera.zoom) > 1e-4
+        prevCamTarget.distanceToSquared(controls.target) > 1e-8
       ) {
         markInteraction()
         prevCamPos.copy(camera.position)
         prevCamTarget.copy(controls.target)
-        prevZoom = camera.zoom
       }
       if (shadowFrames > 0) {
         renderer.shadowMap.needsUpdate = true
