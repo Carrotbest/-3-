@@ -30150,6 +30150,30 @@
   ]
  },
  {
+  "key": "6a1a051fc52e4ddb",
+  "title": "HNS 2026 | Huawei Launches Newly Upgraded Stellar Intelligent Fabric for the European Market | Corporate",
+  "title_ko": "HNS 2026 | 화웨이, 유럽 시장을 위해 새롭게 업그레이드된 Stellar 지능형 패브릭 출시 | 기업",
+  "link": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxPUC1KdHJoRHF1YkpzNFdfakpWaEVzdWozOXBTWXg4Q2pNNFlVdVJhS09WVlpFQ294dGRpUjdrenE2X0RKUzdueUkzUWxQLWlFa2xka0FvdEt0M0JyTmZfTGpwN01tSWNXRDRhdGVWSXIyT2sxZkNnOFFUR1Bac2kwdVUwU1lFejhwWm5GNGdYdGdLVkVaRzVJTkkzN2Y1QlZoQjVmTXpISUdSbnBFaFFIeE1HT2otYkJ6dzh0UTJUUjFfV241NTVZcUpyemJLWHNDTkVsc1JFeGgyeWkyVXRBcjd6eDduZHpkaUF5WmJyNHh4ME00Z0NHMjM3WjZaYWs?oc=5",
+  "published": "2026-10-19",
+  "collected": "2026-11-17",
+  "summary": "HNS 2026 | Huawei Launches Newly Upgraded Stellar Intelligent Fabric for the European Market | Corporate EQS News",
+  "content": "HNS 2026 | Huawei Launches Newly Upgraded Stellar Intelligent Fabric for the European Market | Corporate EQS News",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "FABRIC",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
+  ]
+ },
+ {
   "key": "683b50e593ee133c",
   "title": "美 의류 실효관세율 22.7%로 상승",
   "title_ko": null,
@@ -44937,9 +44961,10 @@
   "score": 9,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "EURATEX"
+   "EURATEX",
+   "Textile Focus"
   ]
  },
  {
