@@ -1,5 +1,5 @@
 {
-"generated_at": "2026-11-17T03:18:35+00:00",
+"generated_at": "2026-11-17T04:04:56+00:00",
 "cards": [
 {
 "metric": "buyer_revenue_anf",
@@ -3656,14 +3656,14 @@
 },
 {
 "period": "2026-11",
-"value": 1349.134
+"value": 1345.109
 }
 ],
-"value": 1349.134,
+"value": 1345.109,
 "period": "2026-11",
 "period_end": null,
-"prev": 0.9,
-"yoy": -7.6,
+"prev": 0.6,
+"yoy": -7.9,
 "stale": false
 },
 {
@@ -3753,10 +3753,6 @@
 "source_url": "https://fred.stlouisfed.org/series/CPIAPPSL",
 "points": [
 {
-"period": "2025-08",
-"value": 131.694
-},
-{
 "period": "2025-09",
 "value": 132.411
 },
@@ -3803,13 +3799,17 @@
 {
 "period": "2026-09",
 "value": 136.875
+},
+{
+"period": "2026-10",
+"value": 136.985
 }
 ],
-"value": 136.875,
-"period": "2026-09",
+"value": 136.985,
+"period": "2026-10",
 "period_end": null,
-"prev": 0.3,
-"yoy": 3.4,
+"prev": 0.1,
+"yoy": null,
 "stale": false
 },
 {
