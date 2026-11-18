@@ -215,7 +215,10 @@ export async function buildDdWorkbook(sheets: readonly DdExportSheet[]): Promise
         const cell = row.getCell(index + 1)
         cell.value = column.value(record)
         cell.font = { size: 9 }
-        cell.alignment = { vertical: "middle" }
+        // 줄바꿈이 든 값은 wrapText 를 켜야 엑셀에서도 여러 줄로 보인다. 안 켜면 한 줄로 뭉친다.
+        cell.alignment = typeof cell.value === "string" && cell.value.includes("\n")
+          ? { vertical: "top", wrapText: true }
+          : { vertical: "middle" }
         cell.border = {
           top: { style: "hair", color: { argb: BORDER } }, bottom: { style: "hair", color: { argb: BORDER } },
           left: { style: "hair", color: { argb: BORDER } }, right: { style: "hair", color: { argb: BORDER } },

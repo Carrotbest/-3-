@@ -795,7 +795,16 @@ function CellEditor({ kind, initial, members, onCommit, onCancel }: CellEditorPr
       if (event.key === "Escape" || event.key === "Enter" || event.key === "Tab") event.stopPropagation()
       if (event.key === "Escape") { event.preventDefault(); cancel() }
       else if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); commit(undefined, true) }
-      else if (event.key === "Enter" && kind === "area" && event.altKey) return
+      // Alt+Enter 는 칸 안 줄바꿈이다. 크롬이 수식키 조합을 삼키는 경우가 있어 직접 넣는다.
+      else if (event.key === "Enter" && kind === "area" && event.altKey) {
+        event.preventDefault()
+        const el = event.currentTarget as HTMLTextAreaElement
+        const start = el.selectionStart ?? el.value.length
+        const end = el.selectionEnd ?? start
+        const next = `${el.value.slice(0, start)}\n${el.value.slice(end)}`
+        setValue(next)
+        requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = start + 1 })
+      }
       else if (event.key === "Enter" || event.key === "Tab") {
         event.preventDefault()
         commit(event.key === "Enter" ? event.shiftKey ? "up" : "down" : event.shiftKey ? "left" : "right")

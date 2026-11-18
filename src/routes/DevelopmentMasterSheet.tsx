@@ -1230,6 +1230,21 @@ const isLockedCell = (record: DevRecord, column: MasterColumn, canEditLocked = f
   || (column.id === "dueDate" && !canEditLocked && isDueDateLocked(record))
 
 /**
+ * 이 열이 칸 안 줄바꿈(Alt+Enter)을 받는가. 엑셀은 모든 칸이 받지만 여기서는 자유 글자 열만 연다.
+ * 날짜·숫자·선택형은 `isAcceptableCellValue` 가 줄바꿈 든 값을 거부해 값이 조용히 안 들어간다.
+ * `suggest` 열(담당·Buyer)은 제안 목록이 `<input list>` 에만 붙어 textarea 로 못 바꾼다.
+ * `styleNo` 와 `flNo` 는 REQUEST·샘플대장과 맞추는 키라 줄바꿈이 섞이면 매칭이 조용히 깨진다.
+ */
+const MULTILINE_BLOCKED_IDS = new Set(["flNo", "styleNo"])
+function isMultilineColumn(column: MasterColumn): boolean {
+  if (MULTILINE_BLOCKED_IDS.has(column.id)) return false
+  if (column.date || column.number || column.suggest) return false
+  if (column.options && column.options.length) return false
+  if (COMPUTED_COLUMN_IDS.has(column.id)) return false
+  return true
+}
+
+/**
  * 인라인 편집기 네 종류(날짜·수기·선택·제안)가 공유하는 키 처리.
  *
  * **전파를 멈추는 것이 핵심이다.** 표 단축키는 window 의 keydown 리스너(`onKey`)가 받고,
@@ -1241,12 +1256,27 @@ const isLockedCell = (record: DevRecord, column: MasterColumn, canEditLocked = f
  *
  * 네 곳에 같은 코드를 두면 한 곳만 고치고 지나가기 쉬워 함수로 묶는다.
  */
-function editorKeyHandler<T extends HTMLInputElement | HTMLSelectElement>(
+function editorKeyHandler<T extends HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
   onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void,
   onCancel: () => void,
+  multiline = false,
 ) {
   return (event: ReactKeyboardEvent<T>) => {
     if (event.key === "Escape" || event.key === "Enter" || event.key === "Tab") event.stopPropagation()
+    // Alt+Enter 는 칸 안 줄바꿈이다. 확정하지 않는다.
+    // 브라우저 기본 동작에 맡기지 않고 직접 넣는다. 크롬은 textarea 에서 Alt+Enter 를
+    // 수식키 조합으로 보고 아무 글자도 넣지 않는 경우가 있다.
+    if (multiline && event.key === "Enter" && event.altKey && !event.ctrlKey && !event.metaKey) {
+      event.preventDefault()
+      const el = event.currentTarget as HTMLTextAreaElement
+      const start = el.selectionStart ?? el.value.length
+      const end = el.selectionEnd ?? start
+      el.value = `${el.value.slice(0, start)}\n${el.value.slice(end)}`
+      el.selectionStart = el.selectionEnd = start + 1
+      // 높이 자동 조절(`onInput`)을 깨운다. defaultValue 로 도는 비제어 입력이라 안전하다.
+      el.dispatchEvent(new Event("input", { bubbles: true }))
+      return
+    }
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); onCommit(event.currentTarget.value, undefined, true) }
     else if (event.key === "Escape") { event.preventDefault(); onCancel() }
     else if (event.key === "Enter" || event.key === "Tab") {
@@ -1291,6 +1321,41 @@ function InlineFlNoEditor({ initialValue, onCommit, onCancel }: { initialValue: 
   </div>
 }
 
+/** 편집기가 아래로 자랄 수 있는 최대 높이(px). 넘으면 편집기 안에서 스크롤한다. */
+const MULTILINE_EDITOR_MAX_H = 240
+
+/**
+ * 자유 글자 칸의 인라인 편집기. 엑셀처럼 Alt+Enter 로 줄을 늘린다.
+ *
+ * **편집기는 `absolute` 로 아래 행을 덮으며 자란다.** 표 행 높이는 편집하는 동안 바뀌지 않는다.
+ * 행이 늘어나는 것은 확정한 뒤 셀이 여러 줄로 그려질 때다. 편집 중에 행을 늘리면 아래 행들이
+ * 글자마다 밀려 내려가 커서가 따라다니는 것처럼 보인다.
+ */
+function InlineTextEditor({ initialValue, onCommit, onCancel }: { initialValue: string; onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void; onCancel: () => void }) {
+  const ref = useRef<HTMLTextAreaElement>(null)
+  const grow = (el: HTMLTextAreaElement | null) => {
+    if (!el) return
+    el.style.height = "auto"
+    el.style.height = `${Math.min(Math.max(el.scrollHeight, 32), MULTILINE_EDITOR_MAX_H)}px`
+  }
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    el.setSelectionRange(el.value.length, el.value.length)
+    grow(el)
+  }, [])
+  return <textarea
+    ref={ref}
+    autoFocus
+    rows={1}
+    defaultValue={initialValue}
+    onInput={(event) => grow(event.currentTarget)}
+    onBlur={(event) => onCommit(event.target.value)}
+    onKeyDown={editorKeyHandler(onCommit, onCancel, true)}
+    className="absolute left-0 top-0 z-50 w-full resize-none overflow-y-auto rounded-none border-0 bg-[var(--card)] px-1.5 py-[7px] text-xs leading-snug text-[var(--foreground)] outline-none ring-2 ring-inset ring-[var(--ring)]"
+  />
+}
+
 /** 그리드 셀 인라인 편집기. 선택형=드롭다운, 날짜=데이트피커, 그 외=수기(제안 목록 포함). */
 function InlineEditor({ record, column, options, initial, onCommit, onCancel }: { record: DevRecord; column: MasterColumn; options?: readonly string[]; initial?: string; onCommit: (raw: string, move?: CellMove, fillRange?: boolean) => void; onCancel: () => void }) {
   const value = String(column.value(record, null) ?? "")
@@ -1299,6 +1364,7 @@ function InlineEditor({ record, column, options, initial, onCommit, onCancel }: 
   const opts = options && options.length ? options : undefined
   if (column.date) return <InlineDateEditor initialValue={initialValue} onCommit={onCommit} onCancel={onCancel} />
   if (column.id === "flNo") return <InlineFlNoEditor initialValue={initialValue} onCommit={onCommit} onCancel={onCancel} />
+  if (isMultilineColumn(column)) return <InlineTextEditor initialValue={initialValue} onCommit={onCommit} onCancel={onCancel} />
   if (initial !== undefined) {
     return <input autoFocus type={column.number ? "number" : "text"} defaultValue={initialValue} className={cls} onBlur={(event) => onCommit(event.target.value)} onKeyDown={editorKeyHandler(onCommit, onCancel)} />
   }
@@ -1409,9 +1475,12 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
     // 왜 안 되는지 알 길이 없다. beginCellEdit 가 권한을 보고 안내를 띄운다.
     if (!fixed) onEdit()
   }
+  // 줄바꿈이 든 칸만 줄 수만큼 세로로 벌린다. 표의 `h-8` 은 table-cell 에서 최소 높이라
+  // 내용이 길면 행이 저절로 늘어난다. 한 줄짜리 칸은 지금처럼 잘라서 보여 준다(`truncate`).
+  const wrapped = typeof content === "string" && content.includes("\n")
   return <td data-col-id={column.id} title={column.id === "dueDate" && fixed && isDueDateLocked(record)
     ? "원사가 입고되어 납기가 확정됐습니다. 바꾸려면 관리자에게 요청하세요."
-    : typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative h-8 max-w-0 truncate border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
+    : typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative h-8 max-w-0 ${wrapped ? "whitespace-pre-wrap break-words [overflow-wrap:anywhere] py-1 align-top leading-snug" : "truncate"} border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
 })
 
 function EditorGroup({ label, color, columns, draft, onChange, optionsById, layout, requiredIds, readOnly }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; layout?: "schedule" | "data"; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {

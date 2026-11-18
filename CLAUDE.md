@@ -15,6 +15,12 @@
 ## DD MASTER (`src/routes/DevelopmentMasterSheet.tsx`)
 - `/development/workspace` = 살아있는 현황판(74열·9그룹, 담당·Status·Style 좌측 고정). 이 라우트만 `App.tsx`에서 폭 제약 해제.
 - 인라인 편집(셀 더블클릭, 타입별). 수식·대장연결 열은 수정 불가. 담당 칸 ⤢ → 74열 수정 모달.
+- **셀 편집 키는 엑셀과 같다**(R437, 2026-11-18). Enter 확정+아래, Shift+Enter 위, Tab 오른쪽, Shift+Tab 왼쪽, Ctrl+Enter 범위 채우기, Esc 취소는 그 전부터 있었고 **Alt+Enter 칸 안 줄바꿈**이 더해졌다. 판정은 `isMultilineColumn` 하나이고 **자유 글자 열만 연다.** 날짜·숫자·선택형은 `isAcceptableCellValue`가 줄바꿈 든 값을 거부해 값이 조용히 안 들어가고, `suggest` 열(담당·Buyer)은 제안 목록이 `<input list>`에만 붙어 textarea로 못 바꾼다. `styleNo`와 `flNo`는 REQUEST·샘플대장과 맞추는 키라 줄바꿈이 섞이면 매칭이 조용히 깨진다(`MULTILINE_BLOCKED_IDS`). **그 둘을 열지 말 것.**
+  - **Alt+Enter는 브라우저 기본 동작에 맡기지 않고 직접 넣는다.** 크롬이 textarea에서 수식키 조합을 삼키고 아무 글자도 안 넣는 경우가 있다. `editorKeyHandler`의 `multiline` 분기와 REQUEST `CellEditor`의 `area` 분기가 같은 식으로 `selectionStart` 자리에 `\n`을 끼운다.
+  - **편집기(`InlineTextEditor`)는 `absolute`로 아래 행을 덮으며 자란다**(상한 240px). 표 행 높이는 편집하는 동안 바뀌지 않는다. 행이 늘어나는 것은 확정한 뒤다. 편집 중에 행을 늘리면 아래 행이 글자마다 밀려 내려간다.
+  - **표는 줄바꿈이 든 칸만 줄 수만큼 벌린다**(`wrapped`). `h-8`은 table-cell에서 최소 높이라 행이 저절로 늘어난다. 한 줄짜리 칸은 `truncate` 그대로다. **열 전체를 `whitespace-pre-wrap`으로 돌리지 말 것.** 긴 한 줄 값까지 접혀 표 전체 행 높이가 들쭉날쭉해진다. 행 머리와 고정 3열은 같은 `<tr>`이라 따라 늘어난다. 고칠 필요 없다.
+  - 클립보드는 손대지 않았다. `range-tsv.ts`가 RFC4180 따옴표로 여러 줄 칸을 이미 올바로 주고받는다(R390). 엑셀 내보내기는 줄바꿈이 든 칸에만 `wrapText`를 켠다(`dd-export.ts`).
+  - **창고, 1팀 입고 대화상자, 74열 수정 모달, 접수 그리드는 아직 아니다**(R438 예정). 창고는 Enter가 확정만 하고 아래로 안 간다.
 - **선택형 열은 드롭다운에 띄운 목록과 저장 검증 목록이 반드시 같아야 한다**(R280). `allowedFor(column, optionsById)`가 그 하나의 목록이고 `isAcceptableCellValue`·`updateRecordCell`에 모두 넘긴다. 예전에는 표시가 `optionsById`(상수+데이터 값), 검증이 `column.options`(상수)라 데이터에만 있던 `CSD`를 고르면 **아무 메시지 없이** 값이 안 들어갔다. 검증 가드 자체는 없애지 말 것. 날짜 열에 글자, 숫자 열에 문자가 붙여넣기로 들어가는 것을 이 가드가 막는다. 거부되면 이제 `notify`로 알린다.
 - **Dyeing Side 목록은 CSD·PSD·DD·SOAP·YD·PFD 여섯으로 닫혔다**(2026-10-01 박향근 확정, R281). `SD`와 `기타`와 `CPB`는 폐기했다. 이 열만 `optionsById`에서 데이터 값을 합치지 않는다. 합치면 폐기한 값이 목록에 되살아난다. 작지 파서 `matchDyeing`도 `SD`→`CSD`로 넣고 CPB는 빈칸으로 둔다. **모르는 값을 넣느니 빈칸이다. TBD 같은 자리표시자를 만들지 말 것.**
 - **멈춘 행(HOLD·DROP·REJECT)의 FL# 칸에는 그 상태를 붉은 글자로 적는다**(R317, 2026-10-07 박향근 확정). 번호가 왜 비었는지 그 자리에서 알게 하려는 것이다. 판정과 글자는 `dd-workflow.ts`의 `stoppedStatusLabel` 하나에서 나오고 `isStoppedRecord`도 그 함수를 본다. **창고 FL 칸이 같은 글자를 비춘다. 창고는 보기만 하고 수정은 DD에서 한다.** FDS·YDS는 날짜 칸이라 `N/A` 그대로다. **표시 전용이다. 이 글자를 셀 값으로 저장하지 말 것.** 2026-10-02에 DD FL 칸에 `DROP`을 붙여넣어 창고보관 3건이 사라졌다(창고 섹션 참조). 창고의 `cellRawValue`도 손대지 말 것. 편집 초기값, 복사, 검색, 정렬, 창고팀 엑셀이 거기서 나온다.
@@ -378,6 +384,7 @@
 - 2026-10-08 현재 Firestore 304건이다. 색인 459건에서 섬유 용어 43건(용어집은 별도 web book 화면으로 만든다), 단가와 가격, 카톡 사진, url, zip, 중복, 사내 진행 현황 엑셀, 방적 사진과 영상 낱장 등 113건을 뺐고 방적 사진 폴더 링크 1건을 더했다. 분류, 주제, 화면용 제목은 클로드가 본문 발췌를 읽고 붙였다. 박향근 최종 검토 전이다. 첫 투입과 분류 반영은 비밀번호 대신 Firebase CLI 로그인(IAM, 규칙 우회)으로 했다.
 
 ## 잔여 작업
+- 셀 편집 키 2단계(R438): 창고 Enter 확정+아래 이동, 1팀 입고 대화상자 Enter 이동, DD 74열 수정 모달과 접수 그리드 Alt+Enter. R437이 DD 그리드와 REQUEST만 했다.
 - 자료 라이브러리: 박향근 분류 검토(검토용 엑셀), 본문 전문 검색, 섬유 용어집 web book 화면.
 - RDDA 월 재계산·KPI 대조, RDDA REPORT 파싱.
 - DEVELOPMENT 담당자 process status 재배치(미결).
