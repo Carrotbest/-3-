@@ -1,5 +1,5 @@
 import { ownerDisplayName, type DevRecord } from "@/data/schema"
-import { isCompletedFlNo } from "@/data/dd-workflow"
+import { developmentNoOf, isCompletedFlNo } from "@/data/dd-workflow"
 import { isInProgress } from "@/data/derive"
 import { fmtDate } from "@/data/format"
 
@@ -49,7 +49,7 @@ const dateText = (value: unknown): string => text(value) ? fmtDate(value) : ""
 
 /** 표의 STYLE 칸에 넣는 값. GD#/SA# 한 곳에서만 만든다(추출 조건과 표시가 어긋나면 안 된다). */
 const styleNoOf = (record: DevRecord): string =>
-  text(record.tech?.development?.developmentNo || record.gdNo || record.saNo)
+  text(developmentNoOf(record))
 
 /**
  * 추출 조건을 바꾸려면 여기 한 곳만 고친다.

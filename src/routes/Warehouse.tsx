@@ -33,7 +33,7 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/compon
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { firstWarehouseDenial, type WarehouseActor, type WarehouseRule } from "@/data/warehouse-policy"
 import { buildFabricLedger, FABRIC1_STORAGE_NO_MAX, FABRIC1_STORAGE_NO_MIN, fabricRecordIdentity, isFabric1Item, latestActiveOutbound, STORAGE_NO_MAX, STORAGE_NO_WRAP, storageNoLabel, storageNumberOf, warehouseOrderKey, warehouseSequenceStart, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { stoppedStatusLabel } from "@/data/dd-workflow"
+import { arrangeNoOf, developmentNoOf, stoppedStatusLabel } from "@/data/dd-workflow"
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { departmentMailLabel } from "@/data/departments"
@@ -70,7 +70,7 @@ const TAB_META: Record<WarehouseTab, { label: string; description: string }> = {
   HISTORY: { label: "이력", description: "전량 소진 또는 폐기된 원단" },
 }
 
-type WarehouseColumnId = "storageNo" | "styleNo" | "flNo" | "millRef" | "owner" | "stock" | "confirm" | "lifecycle" | "rackNo"
+type WarehouseColumnId = "storageNo" | "styleNo" | "developmentNo" | "arrangeNo" | "flNo" | "millRef" | "owner" | "stock" | "confirm" | "lifecycle" | "rackNo"
   | "season" | "buyer" | "category" | "requestDate" | "completedAt"
   | "originalRef" | "planner" | "yarnDetail" | "construction" | "content" | "weight" | "color" | "dyeing" | "flSource" | "supplier" | "priceYd" | "priceLb" | "dueDate"
   | "yarnMill" | "yarnDate" | "knittingMill" | "knittingDate" | "dyeingMill" | "dyeingDate" | "finishingMill" | "finishingDate"
@@ -112,6 +112,8 @@ const COLUMN_GROUPS: readonly WarehouseGroup[] = [
     { id: "planner", label: "Requester", width: 84 },
     { id: "owner", label: "Developer", width: 84 },
     { id: "styleNo", label: "Style/#", width: 108 },
+    { id: "developmentNo", label: "GD#/SA#", width: 108 },
+    { id: "arrangeNo", label: "Arrange#", width: 100 },
     { id: "flNo", label: "FL.#", width: 100 },
     { id: "yarnDetail", label: "Yarn", width: 220 },
     { id: "construction", label: "Cons.", width: 124 },
@@ -390,6 +392,8 @@ function cellValue(item: FabricLedgerItem, id: WarehouseColumnId): string {
   switch (id) {
     case "storageNo": return item.storageNo
     case "styleNo": return item.styleNo
+    case "developmentNo": return developmentNoOf(record)
+    case "arrangeNo": return arrangeNoOf(record)
     case "flNo": return item.flNo
     case "millRef": return item.fields.millRef ?? ""
     case "owner": return item.owner
@@ -747,7 +751,7 @@ export function Warehouse() {
     return base
       .filter((item) => !(unconfirmedOnly && tab === "WAREHOUSE" && !hiddenOnly) || !item.confirmedAt)
       .filter((item) => !query || [
-      item.storageNo, item.styleNo, item.flNo, item.season, item.category, item.buyer, item.owner,
+      item.storageNo, item.styleNo, developmentNoOf(item.record), arrangeNoOf(item.record), item.flNo, item.season, item.category, item.buyer, item.owner,
       item.fields.millRef,
       item.sample?.ledger?.seasonRaw, item.sample?.ledger?.categoryRaw, item.sample?.ledger?.originalRef,
       item.construction, item.lastOutbound?.to, item.lastOutbound?.division, item.note,
@@ -1254,6 +1258,8 @@ export function Warehouse() {
       ? <TextCell value={item.rackNo} mono />
       : <span className="text-[10px] text-[var(--muted-foreground)]" title="더블클릭해서 Rack No. 입력">미지정</span>
     if (id === "styleNo") return <TextCell value={item.styleNo} mono />
+    if (id === "developmentNo") return <TextCell value={cellValue(item, "developmentNo")} mono />
+    if (id === "arrangeNo") return <TextCell value={cellValue(item, "arrangeNo")} mono />
     if (id === "flNo") {
       // 멈춘 행은 번호 대신 상태를 비춘다(2026-10-07 박향근 확정). DD MASTER FL# 칸과 같은 글자다.
       // 창고는 보기만 하는 화면이고 수정은 DD에서 한다. 표시 전용이라 원장 값은 빈칸 그대로다.
@@ -1554,6 +1560,22 @@ export function Warehouse() {
       const cell = document.querySelector<HTMLElement>(`td[data-row-index="${rowIndex}"][data-col-index="${colIndex}"]`)
       cell?.scrollIntoView({ block: "nearest", inline: "nearest" })
     })
+  }
+
+  /**
+   * 칸을 확정한 뒤 선택을 한 칸 옮긴다(엑셀과 같다). Enter 는 아래, Shift+Enter 는 위,
+   * Tab 은 오른쪽, Shift+Tab 은 왼쪽이다. 끝에 닿으면 그 자리에 머문다.
+   * 좌표는 `visibleRows`·`visibleColumns` 기준이고 이것은 화살표 이동(`onCellNavigation`)과 같은 기준이다.
+   * 가상 스크롤이라도 행 render 의 `index` 는 `start + offset` 이라 전체 기준 번호다.
+   */
+  const moveEditedSelection = (rowIndex: number, colIndex: number, rowDelta: number, colDelta: number) => {
+    if (!visibleRows.length || !visibleColumns.length) return
+    const nextRow = Math.min(Math.max(rowIndex + rowDelta, 0), visibleRows.length - 1)
+    const nextCol = Math.min(Math.max(colIndex + colDelta, 0), visibleColumns.length - 1)
+    setCellRange({ ar: nextRow, ac: nextCol, fr: nextRow, fc: nextCol })
+    setExtraCellRanges([])
+    setSelectedCell({ row: visibleRows[nextRow].key, col: visibleColumns[nextCol].id })
+    scrollCellIntoView(nextRow, nextCol)
   }
 
   useEffect(() => {
@@ -1974,7 +1996,13 @@ export function Warehouse() {
                             // 편집기 키가 표 단축키로 번지지 않게 막는다(CLAUDE.md 인라인 편집기 주의).
                             if (event.key === "Escape" || event.key === "Enter" || event.key === "Tab") event.stopPropagation()
                             if (event.key === "Escape") { event.preventDefault(); setEditCell(null) }
-                            else if (event.key === "Enter" || event.key === "Tab") { event.preventDefault(); event.currentTarget.blur() }
+                            else if (event.key === "Enter" || event.key === "Tab") {
+                              event.preventDefault()
+                              // blur 가 onBlur 로 저장을 돌리고 편집을 닫는다. 그 뒤에 선택만 옮긴다.
+                              // 엑셀과 같이 옮긴 칸의 편집기를 열지는 않는다.
+                              event.currentTarget.blur()
+                              moveEditedSelection(index, colIndex, event.key === "Enter" ? (event.shiftKey ? -1 : 1) : 0, event.key === "Tab" ? (event.shiftKey ? -1 : 1) : 0)
+                            }
                           }}
                         />
                       : coreCell(item, column.id)}

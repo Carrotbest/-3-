@@ -227,6 +227,32 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
     requestAnimationFrame(() => document.getElementById(`${next.id}-storageNo`)?.focus())
   }
 
+  /**
+   * 엑셀처럼 Enter 로 아래 줄 같은 칸에 내려간다. Shift+Enter 는 위다.
+   * **칸마다 달지 않고 표 하나에 걸어 위임한다.** 칸이 열세 개라 각각 달면 한 곳을 빠뜨린다.
+   * 자리는 `tr[data-row-id]` 와 `td[data-paste-column]` 으로 찾는다. 붙여넣기가 쓰는 표식과 같다.
+   * 마지막 줄에서 Enter 는 줄을 늘리지 않고 칸을 떠나기만 한다. 줄 늘리기는 Tab 담당이다(`handleLastTab`).
+   */
+  const handleGridKeyDown = (event: KeyboardEvent<HTMLTableElement>) => {
+    if (event.key !== "Enter") return
+    const target = event.target
+    if (!(target instanceof HTMLInputElement)) return
+    const cell = target.closest<HTMLElement>("[data-paste-column]")
+    const rowElement = target.closest<HTMLElement>("[data-row-id]")
+    if (!cell || !rowElement) return
+    const column = cell.dataset.pasteColumn
+    const index = rows.findIndex((row) => row.id === rowElement.dataset.rowId)
+    if (index === -1) return
+    event.preventDefault()
+    const nextIndex = event.shiftKey ? index - 1 : index + 1
+    if (nextIndex < 0 || nextIndex >= rows.length) { target.blur(); return }
+    const nextRow = document.querySelector<HTMLElement>(`[data-row-id="${rows[nextIndex].id}"]`)
+    const nextInput = nextRow?.querySelector<HTMLInputElement>(`[data-paste-column="${column}"] input`)
+    if (!nextInput) return
+    nextInput.focus()
+    nextInput.select()
+  }
+
   const handlePaste = (event: ClipboardEvent<HTMLTableElement>) => {
     const text = event.clipboardData.getData("text")
     if (!text.includes("\t") && !/[\r\n]/.test(text)) return
@@ -391,7 +417,7 @@ export function Fabric1IntakeDialog({ open, onOpenChange, ledger, defaultOwner, 
       <DialogBody className="min-h-0 overflow-hidden">
         {error ? <p role="alert" className="mb-2 text-sm text-[var(--destructive)]">{error}</p> : null}
         <div className="max-h-[calc(88vh-13rem)] overflow-auto rounded-[var(--radius)] border border-[var(--border)]">
-          <table className="w-max min-w-full table-fixed border-collapse text-xs" onPaste={handlePaste}>
+          <table className="w-max min-w-full table-fixed border-collapse text-xs" onPaste={handlePaste} onKeyDown={handleGridKeyDown}>
             <colgroup>
               <col className="w-9" /><col className="w-[84px]" /><col className="w-[120px]" /><col className="w-11" />
               <col className="w-[120px]" /><col className="w-[120px]" /><col className="w-[140px]" /><col className="w-[200px]" />

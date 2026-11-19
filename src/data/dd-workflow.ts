@@ -83,6 +83,22 @@ export function isGdRecord(record: DevRecord): boolean {
   return String(record.tech?.development?.co || record.devType || "").trim().toUpperCase() === "GD"
 }
 
+/**
+ * GD#/SA# 한 값. `tech.development.developmentNo` 가 먼저고, 없으면 엑셀 업로드 경로가
+ * 개발처에 따라 갈라 넣는 `gdNo`·`saNo` 를 본다.
+ * **DD 표, 엑셀 내보내기, FDS/YDS 요청서, 창고 표가 같은 값을 보여야 한다.**
+ * 식을 각자 들고 있으면 한 곳만 고치고 지나가기 쉽다.
+ */
+export function developmentNoOf(record: DevRecord | null | undefined): string {
+  if (!record) return ""
+  return String(record.tech?.development?.developmentNo || record.gdNo || record.saNo || "")
+}
+
+/** Arrange#. DD 표의 `arrangeNo` 열과 같은 값이다. 폴백이 없다. */
+export function arrangeNoOf(record: DevRecord | null | undefined): string {
+  return String(record?.tech?.arrangeNo ?? "")
+}
+
 export function isCompletedFlNo(flNo: string | undefined): boolean {
   return /^FL\d{8}$/.test(String(flNo ?? "").replace(/\s+/g, "").toUpperCase())
 }

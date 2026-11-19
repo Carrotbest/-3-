@@ -2,6 +2,7 @@
 // 레이아웃(행 구성·병합·색·열너비)은 실제 DD 파일에서 그대로 옮겨 왔다. 수식은 넣지 않고 값만 쓴다.
 import type { DevRecord } from "./schema"
 import { ownerDisplayName } from "./schema"
+import { developmentNoOf } from "./dd-workflow"
 
 /** 대분류 머리(엑셀 3행). 색은 실제 DD 파일 값 그대로다. */
 const GROUP_BANDS: { label: string; from: number; to: number; color: string }[] = [
@@ -73,7 +74,7 @@ const COLUMNS: ExportColumn[] = [
 
   { head: "Developer", width: 8.2, value: (r) => str(r.tech?.development?.developer || r.owner) },
   { head: "Co", width: 6.2, value: (r) => str(r.tech?.development?.co || r.devType) },
-  { head: "GD#/SA#", width: 9.2, value: (r) => str(r.tech?.development?.developmentNo || r.gdNo || r.saNo) },
+  { head: "GD#/SA#", width: 9.2, value: (r) => str(developmentNoOf(r)) },
   { head: "Arrange#", width: 10.2, value: (r) => str(r.tech?.arrangeNo) },
   { head: "Yarn Detail", width: 90.7, value: (r) => str(r.tech?.yarnDetail) },
   { head: "Cons.", width: 15.2, value: (r) => str(r.construction) },

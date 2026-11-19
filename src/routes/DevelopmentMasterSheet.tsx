@@ -1,4 +1,4 @@
-import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
+import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react"
 import { FlPerfMark } from "@/components/fabric/PerfBadge"
 import { CalendarDays, Calculator, ClipboardList, DatabaseBackup, Eye, EyeOff, Download, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardPaste, Columns3, Copy, Eraser, ExternalLink, FilterX, Loader2, Mail, Maximize2, Paperclip, Plus, Redo2, RotateCcw, Rows3, Save, Scissors, Search, Trash2, TriangleAlert, Undo2, Unlink, Users, X } from "lucide-react"
 import { Popover } from "radix-ui"
@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { backupFileName, buildExcelBackup } from "@/data/backup-export"
 import { useAuthStore } from "@/data/auth"
 import { FABRIC_STATUS_META, buildFabricLedger, storageNoLabel, type FabricLedgerItem } from "@/data/fabric-ledger"
-import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, isCompletedFlNo, isGdRecord, isStoppedRecord, stoppedStatusLabel } from "@/data/dd-workflow"
+import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEING_OPTIONS, DD_PASS_FAIL_OPTIONS, DD_SEASON_OPTIONS, DD_STATUS_OPTIONS, ddCategoryTextClass, ddStatusStyle, ddWarnings, developmentNoOf, isCompletedFlNo, isGdRecord, isStoppedRecord, stoppedStatusLabel } from "@/data/dd-workflow"
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
@@ -328,7 +328,7 @@ const GROUPS: MasterGroup[] = [
   {
     key: "detail", label: "개발 DETAIL", color: "var(--chart-3)", columns: [
       { id: "co", label: "Co", width: 62, align: "center", value: (row) => row.tech?.development?.co || row.devType, options: DD_COMPANY_OPTIONS },
-      { id: "developmentNo", label: "GD#/SA#", width: 108, mono: true, value: (row) => row.tech?.development?.developmentNo || row.gdNo || row.saNo },
+      { id: "developmentNo", label: "GD#/SA#", width: 108, mono: true, value: (row) => developmentNoOf(row) },
       { id: "arrangeNo", label: "Arrange#", width: 100, mono: true, value: (row) => row.tech?.arrangeNo },
       { id: "yarnDetail", label: "Yarn Detail", width: 200, value: (row) => row.tech?.yarnDetail },
       { id: "construction", label: "Cons.", width: 128, value: (row) => row.construction },
@@ -647,6 +647,46 @@ const INTAKE_OPTION_COLUMNS: MasterColumn[] = [
     .map((column) => ({ ...column, width: INTAKE_GRID_WIDTHS[column.id] ?? column.width, label: INTAKE_GRID_LABELS[column.id] ?? column.label })),
 ]
 
+/**
+ * 수정 모달과 접수 그리드가 함께 쓰는 여러 줄 입력칸.
+ * Alt+Enter 로 줄을 바꾸고 그냥 Enter 는 칸을 떠난다. `GuardedTextInput` 과 같은 약속이다.
+ * 이 앱에서 Enter 는 언제나 확정이다. textarea 기본 동작(Enter 가 줄바꿈)에 맡기지 않는다.
+ * 높이는 내용을 따라가고 상한을 넘으면 칸 안에서 구른다.
+ */
+function AutoGrowTextarea({ value, disabled, className, maxHeight = 160, onChange }: { value: string; disabled?: boolean; className?: string; maxHeight?: number; onChange: (raw: string) => void }) {
+  const ref = useRef<HTMLTextAreaElement>(null)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    el.style.height = "auto"
+    el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`
+  }, [value, maxHeight])
+  return <textarea
+    ref={ref}
+    rows={1}
+    value={value}
+    disabled={disabled}
+    onChange={(event) => onChange(event.target.value)}
+    onKeyDown={(event) => {
+      if (event.key !== "Enter") return
+      event.stopPropagation()
+      if (event.altKey && !event.ctrlKey && !event.metaKey) {
+        event.preventDefault()
+        const el = event.currentTarget
+        const start = el.selectionStart ?? el.value.length
+        const end = el.selectionEnd ?? start
+        onChange(`${el.value.slice(0, start)}\n${el.value.slice(end)}`)
+        // 제어 입력이라 값이 부모를 거쳐 돌아온 뒤에 커서를 되돌려야 한다.
+        requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = start + 1 })
+        return
+      }
+      event.preventDefault()
+      event.currentTarget.blur()
+    }}
+    className={`resize-none overflow-y-auto ${className ?? ""}`}
+  />
+}
+
 /** 옵션 그리드의 한 칸. 라벨 없이 입력만 넣는다. 항상 편집 상태라 더블클릭이 필요 없다. */
 function IntakeCell({ column, record, optionsById, onChange }: { column: MasterColumn; record: DevRecord; optionsById: Record<string, readonly string[]>; onChange: (next: DevRecord) => void }) {
   const value = String(column.value(record, null) ?? "")
@@ -666,6 +706,7 @@ function IntakeCell({ column, record, optionsById, onChange }: { column: MasterC
     <datalist id={`dl-intake-${column.id}`}>{(options ?? []).map((option) => <option key={option} value={option} />)}</datalist>
   </>
   if (column.id === "flNo" || column.id === "color") return <GuardedTextInput column={column} value={value} disabled={disabled} className={box} floatingHint onCommit={set} />
+  if (isMultilineColumn(column)) return <AutoGrowTextarea value={value} disabled={disabled} onChange={set} className={`${box} min-h-7 py-1 leading-snug`} maxHeight={120} />
   return <input type={column.number ? "number" : "text"} value={value} disabled={disabled} onChange={(event) => set(event.target.value)} className={box} />
 }
 
@@ -1180,6 +1221,7 @@ function EditorField({ column, draft, onChange, optionsById, requiredIds, readOn
   if (options && options.length && !column.suggest) return <div className="grid min-w-0 gap-1">{label}<Select value={value || ALL} onValueChange={(next) => set(next === ALL ? "" : next)} disabled={disabled}><SelectTrigger aria-invalid={invalid} className={`text-sm ${invalidClass}`}><SelectValue placeholder="선택" /></SelectTrigger><SelectContent><SelectItem value={ALL}>미입력</SelectItem>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div>
   if (column.suggest) return <div className="grid min-w-0 gap-1">{label}<Input list={`dl-${column.id}`} value={value} disabled={disabled} aria-invalid={invalid} onChange={(event) => set(event.target.value)} className={`text-sm ${invalidClass}`} /><datalist id={`dl-${column.id}`}>{(options ?? []).map((option) => <option key={option} value={option} />)}</datalist></div>
   if (column.id === "flNo" || column.id === "color") return <div className="grid min-w-0 gap-1">{label}<GuardedTextInput column={column} value={value} disabled={disabled} onCommit={set} className={`text-sm ${disabled ? "bg-[var(--muted)]" : ""} ${column.mono ? "font-mono" : ""} ${invalidClass}`} /></div>
+  if (isMultilineColumn(column)) return <div className="grid min-w-0 gap-1">{label}<AutoGrowTextarea value={value} disabled={disabled} onChange={set} className={`flex min-h-9 w-full rounded-[var(--radius)] border border-[var(--input)] bg-transparent px-3 py-1.5 text-sm leading-6 text-[var(--foreground)] shadow-sm outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none ${disabled ? "bg-[var(--muted)]" : ""} ${invalidClass}`} /></div>
   return <div className="grid min-w-0 gap-1">{label}<Input type={column.number ? "number" : "text"} value={value} disabled={disabled} aria-invalid={invalid} onChange={(event) => set(event.target.value)} className={`text-sm ${disabled ? "bg-[var(--muted)]" : ""} ${invalidClass}`} /></div>
 }
 

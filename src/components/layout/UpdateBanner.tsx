@@ -18,7 +18,7 @@ function isEditing(): boolean {
 }
 
 export function UpdateBanner() {
-  const { available } = useUpdateAvailable()
+  const { available, notes } = useUpdateAvailable()
   const [saving, setSaving] = useState(false)
   // 새 버전이 떠도 편집 중이면 바로 막지 않는다. 편집을 마치거나 유예가 끝나면 막는다(R288 보완).
   const [blocking, setBlocking] = useState(false)
@@ -97,6 +97,14 @@ export function UpdateBanner() {
         className="w-full max-w-md rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-6 text-[var(--foreground)] shadow-xl"
       >
         <h2 id="update-dialog-title" className="text-lg font-semibold">새 버전이 배포되었습니다</h2>
+        {notes.length ? (
+          <div className="mt-4 rounded-[calc(var(--radius)-2px)] border border-[var(--border)] bg-[var(--muted)] px-3 py-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">이번 변경</p>
+            <ul className="mt-1 list-disc space-y-0.5 pl-4 text-sm leading-6 text-[var(--foreground)]">
+              {notes.map((note) => <li key={note}>{note}</li>)}
+            </ul>
+          </div>
+        ) : null}
         <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
           여러 부서가 같은 데이터를 쓰고 있어 새로고침한 뒤에 계속 사용할 수 있습니다. 이미 저장한 내용은 서버 전송을 마친 뒤 새로고침합니다. 저장하지 않고 열어 둔 입력 창의 내용은 남지 않습니다.
         </p>
