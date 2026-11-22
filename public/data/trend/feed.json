@@ -1,23 +1,23 @@
 {
-"generated_at": "2026-11-21T01:52:51+00:00",
+"generated_at": "2026-11-22T00:44:27+00:00",
 "window_days": 120,
 "total": 1500,
 "translated": 1500,
-"filtered_out": 6665,
+"filtered_out": 6672,
 "intake": {
 "source_total": 24,
 "days": {
 "7": {
 "sources": 21,
-"scanned": 595,
-"kept": 231,
-"material": 151
+"scanned": 594,
+"kept": 229,
+"material": 149
 },
 "30": {
 "sources": 22,
-"scanned": 2546,
-"kept": 964,
-"material": 681
+"scanned": 2454,
+"kept": 930,
+"material": 662
 }
 }
 },
@@ -25,11 +25,11 @@
 "categories": [
 {
 "key": "MATERIAL",
-"n": 466
+"n": 463
 },
 {
 "key": "RETAIL",
-"n": 419
+"n": 418
 },
 {
 "key": "FABRIC",
@@ -37,11 +37,11 @@
 },
 {
 "key": "ETC",
-"n": 179
+"n": 182
 },
 {
 "key": "CHEMICAL",
-"n": 97
+"n": 98
 },
 {
 "key": "YARN",
@@ -51,22 +51,22 @@
 "sources": [
 {
 "key": "한국섬유신문",
-"n": 470
+"n": 469
 },
 {
 "key": "Fibre2Fashion",
-"n": 187
+"n": 186
 },
 {
 "key": "국제섬유신문",
 "n": 115
 },
 {
-"key": "Ecotextile News",
+"key": "Textile Focus",
 "n": 110
 },
 {
-"key": "Textile Focus",
+"key": "Ecotextile News",
 "n": 108
 },
 {
@@ -75,7 +75,7 @@
 },
 {
 "key": "Textile Today",
-"n": 88
+"n": 90
 },
 {
 "key": "Knitting Industry",
@@ -95,7 +95,7 @@
 },
 {
 "key": "Apparel Resources",
-"n": 39
+"n": 40
 },
 {
 "key": "Indian Textile Magazine",
@@ -127,7 +127,7 @@
 },
 {
 "key": "Textile Exchange",
-"n": 3
+"n": 2
 },
 {
 "key": "EURATEX",
@@ -136,12 +136,12 @@
 ],
 "tags": [
 {
-"key": "전시회",
+"key": "방글라데시",
 "n": 89
 },
 {
-"key": "방글라데시",
-"n": 87
+"key": "전시회",
+"n": 89
 },
 {
 "key": "리사이클",
@@ -173,7 +173,7 @@
 },
 {
 "key": "탄소",
-"n": 23
+"n": 24
 },
 {
 "key": "보온",
@@ -330,16 +330,6 @@
 ]
 },
 "daily": [
-{
-"date": "2026-10-23",
-"total": 31,
-"by": {
-"FABRIC": 4,
-"MATERIAL": 10,
-"RETAIL": 16,
-"ETC": 1
-}
-},
 {
 "date": "2026-10-24",
 "total": 4,
@@ -651,6 +641,15 @@
 },
 {
 "date": "2026-11-21",
+"total": 7,
+"by": {
+"CHEMICAL": 1,
+"MATERIAL": 3,
+"ETC": 3
+}
+},
+{
+"date": "2026-11-22",
 "total": 0,
 "by": {}
 }
@@ -680,9 +679,9 @@
 {
 "tag": "방글라데시",
 "label_en": "bangladesh",
-"recent": 54,
-"prior": 33,
-"delta": 21,
+"recent": 53,
+"prior": 36,
+"delta": 17,
 "weeks": [
 0,
 0,
@@ -695,7 +694,7 @@
 15,
 11,
 13,
-12
+14
 ]
 },
 {
@@ -764,9 +763,9 @@
 {
 "tag": "탄소",
 "label_en": "carbon footprint",
-"recent": 17,
+"recent": 18,
 "prior": 6,
-"delta": 11,
+"delta": 12,
 "weeks": [
 0,
 0,
@@ -779,7 +778,7 @@
 2,
 5,
 6,
-4
+5
 ]
 },
 {
@@ -825,8 +824,71 @@
 ]
 },
 {
-"tag": "추적성",
-"label_en": "traceability",
+"tag": "바이오소재",
+"label_en": "bio-based",
+"recent": 17,
+"prior": 24,
+"delta": -7,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+5,
+10,
+9,
+8,
+6,
+2,
+1
+]
+},
+{
+"tag": "데님",
+"label_en": "denim",
+"recent": 23,
+"prior": 26,
+"delta": -3,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+7,
+6,
+13,
+5,
+7,
+5,
+6
+]
+},
+{
+"tag": "베트남",
+"label_en": "vietnam",
+"recent": 12,
+"prior": 15,
+"delta": -3,
+"weeks": [
+0,
+0,
+0,
+0,
+0,
+0,
+6,
+9,
+4,
+3,
+2,
+3
+]
+},
+{
+"tag": "효성",
+"label_en": "hyosung",
 "recent": 7,
 "prior": 10,
 "delta": -3,
@@ -836,75 +898,12 @@
 0,
 0,
 0,
-4,
-6,
 0,
-1,
-0,
-4,
-2
-]
-},
-{
-"tag": "비스코스",
-"label_en": "viscose",
-"recent": 2,
-"prior": 5,
-"delta": -3,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-3,
+8,
 2,
-0,
-1,
-0,
-1
-]
-},
-{
-"tag": "면가",
-"label_en": "cotton price",
-"recent": 1,
-"prior": 4,
-"delta": -3,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-0,
-2,
-2,
-0,
-0,
-1,
-0
-]
-},
-{
-"tag": "DPP",
-"label_en": "digital product passport",
-"recent": 4,
-"prior": 6,
-"delta": -2,
-"weeks": [
-0,
-0,
-0,
-0,
-0,
-1,
 1,
 4,
 0,
-1,
-1,
 2
 ]
 }
@@ -990,6 +989,164 @@
 }
 ],
 "articles": [
+{
+"id": "de22c731398b09a7",
+"d": "2026-11-21",
+"t": "CSIR-CLRI, 기술 섬유 파일럿 공장 공개",
+"o": "CSIR-CLRI Unveils Technical Textile Pilot Plant",
+"u": "https://apparelresources.com/business-news/manufacturing/csir-clri-unveils-technical-textile-pilot-plant/",
+"s": "The CSIR-Central Leather Research Institute (CSIR-CLRI), Chennai, has inaugurated a Technical Textile Pilot Plant and unveiled a High Resolution 600 MHz Nuclear Magnetic Resonance (NMR) Spectrometer to strengthen its research and development capabilities. The institute also transferred two indigenou",
+"c": "CHEMICAL",
+"x": "The CSIR-Central Leather Research Institute (CSIR-CLRI), Chennai, has inaugurated a Technical Textile Pilot Plant and unveiled a High Resolution 600 MHz Nuclear Magnetic Resonance (NMR) Spectrometer to strengthen its research and development capabilities. The institute also transferred two indigenous technologies to industry, focusing on carbon footprint assessment and sustainable leather finishing. The developments took place […] The post CSIR-CLRI Unveils Technical Textile Pilot Plant appeared first on Apparel Resources .",
+"i": "https://apparelresources.com/wp-content/uploads/2026/11/CSIR-CLRI-Unveils-Technical-Textile-Pilot-Plant.jpg",
+"g": [
+"탄소"
+],
+"m": "Apparel Resources",
+"r": "해외",
+"v": 12,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Apparel Resources"
+]
+},
+{
+"id": "d995bba63e64ea13",
+"d": "2026-11-21",
+"t": "피마 면 폐기물을 활용한 Recover™ 및 Supima target 재활용 섬유 생산",
+"o": "Recover™and Supima target recycled fiber production from Pima cotton waste",
+"u": "https://textiletoday.com.bd/recover-and-supima-target-recycled-fibre-production-from-pima-cotton-waste",
+"s": "Recover, a global recycled cotton fiber producer, has partnered with Supima, the organization promoting American-grown Pima cotton, to develop recycled fibers and yarns from Supima cotton production w...",
+"c": "MATERIAL",
+"x": "Recover, a global recycled cotton fiber producer, has partnered with Supima, the organization promoting American-grown Pima cotton, to develop recycled fibers and yarns from Supima cotton production waste. The partnership aims to create a new range of recycled Supima fibers and yarns for premium textiles. It will combine Supima's premium cotton identity and global brand network with Recover's recycling technology, production capabilities, and traceability systems. The initiative will give production waste from American-grown Pima cotton a second life in new textile products. The partners will also explore applications for recycled Supima cotton across a wider range of premium yarns and garments, expanding its use beyond traditional recycled cotton applications. Supima has represented American-grown Pima cotton for more than 70 years and works with over 1,000 licensees globally. The partnership could create new sourcing opportunities for brands seeking recycled materials with verified origins. Traceability will be a major part of the collaboration. The recycled material will be digitally tracked through TextileGenesis, allowing brands to monitor its journey through the supply chain. Oritain will independently verify the cotton's origin through forensic testing. Both virgin and recycled cotton used in the offering will originate from Supima cotton. This approach aims to strengthen transparency and provide brands with greater confidence in recycled material claims. \"SUPIMA® is known for the quality of its cotton. Recover™ brings the ability to recycle it at global scale, with traceability and transparency. Together, we want to shape the future of cotton recycling by giving SUPIMA® production waste a second life in new textiles,\" said Enes Adak, co-CEO and Chief Product Off",
+"i": "/storage/uploads/2026/11/recoverandsupimat_17952375345355.jpg",
+"g": [
+"리사이클"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "886afa92243a1a8c",
+"d": "2026-11-21",
+"t": "U.S. Cotton Trust Protocol은 면 추적성과 지속 가능성 투명성을 강화하기 위해 청구 프레임워크를 업데이트합니다.",
+"o": "U.S. Cotton Trust Protocol updates claim framework to strengthen cotton traceability and sustainability transparency",
+"u": "https://textiletoday.com.bd/us-cotton-trust-protocol-updates-claim-framework-to-strengthen-cotton-traceability-and-sustainability-transparency",
+"s": "The U.S. Cotton Trust Protocol has introduced an updated claims framework to help fashion and apparel brands communicate cotton sourcing, sustainability performance and regenerative farming practices...",
+"c": "MATERIAL",
+"x": "The U.S. Cotton Trust Protocol has introduced an updated claims framework to help fashion and apparel brands communicate cotton sourcing, sustainability performance and regenerative farming practices through verified data and supply chain documentation. The initiative aims to strengthen transparency and ensure that sustainability claims accurately reflect the cotton used in products. For years, the term “sustainable” has been widely used in fashion marketing as a general description covering product origin, environmental performance, and farming practices. Courtesy: Collected However, this broad approach is changing as consumers increasingly demand specific information about where their clothing comes from and how raw materials are produced. At the same time, regulators in major global markets are placing greater emphasis on evidence-based environmental claims. Brands are increasingly expected to support sustainability statements with documented information rather than relying on general marketing language. The U.S. Cotton Trust Protocol offers a structured approach to addressing these challenges through three distinct, traceable fiber categories: Tracked U.S. Cotton, Protocol Cotton and U.S. Regen™ Cotton. Each category provides different sourcing and verification options while maintaining a common foundation of verified U.S. origin, quality and supply chain confidence. Three categories for verified cotton sourcing Tracked U.S. Cotton serves as the foundation for the other two categories. Recognized for its quality and consistency, this cotton is supported by verified U.S. origin and tracked throughout the supply chain through the U.S. Cotton Trust Protocol's proprietary traceability solution. For fashion and apparel brands, this system provides documented support for ",
+"i": "/storage/uploads/2026/11/uscottontrustprot_17952506742554.jpg",
+"g": [
+"추적성"
+],
+"m": "Textile Today",
+"r": "해외",
+"v": 9,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "3c4de6b6203c1743",
+"d": "2026-11-21",
+"t": "QC 서클, TQM 및 지속적인 개선에 관한 글로벌 컨벤션이 다카에서 개최되었습니다.",
+"o": "Global Convention on QC Circles, TQM and Continuous Improvement Held in Dhaka",
+"u": "https://textilefocus.com/global-convention-on-qc-circles-tqm-and-continuous-improvement-held-in-dhaka/",
+"s": "Dhaka, 21 November 2026: The 51st International Convention on Quality Control Circles (ICQCC 2026) successfully concluded in Dhaka on 20 November under the theme “QCC for Sustainable Development.” Jointly organized by the Bangladesh Society for Total Quality Management (BSTQM) and the University of ",
+"c": "ETC",
+"x": "Dhaka, 21 November 2026: The 51st International Convention on Quality Control Circles (ICQCC 2026) successfully concluded in Dhaka on 20 November under the theme “QCC for Sustainable Development.” Jointly organized by the Bangladesh Society for Total Quality Management (BSTQM) and the University of Asia Pacific (UAP), the three-day convention brought together around 8,000 participants and 793 Quality Control Circle (QCC) teams from 16 countries and regions. Among them, 141 teams participated onsite and 652 teams joined virtually. The closing ceremony, held at Pan Pacific Sonargaon Dhaka, was attended by distinguished quality professionals, industry leaders, academics and international delegates. Addressing the ceremony, A K M Shamsul Huda, President of BSTQM and Convener of ICQCC 2026, said that hosting the convention in Bangladesh for the third time reflects the country’s growing commitment to quality, productivity and continuous improvement. He thanked all participating teams, judges, volunteers, sponsors and stakeholders for their valuable contributions. A key event alongside the convention was the ICQCC Coordination Committee Meeting (CCM), held at Pan Pacific Sonargaon Dhaka and chaired by A K M Shamsul Huda. Representatives from 12 ICQCC member organizations participated both onsite and online, including BSTQM (Bangladesh), CAQ (China), IQMA (Indonesia), JUSE (Japan), KSA (South Korea), MPC (Malaysia), PQCRA (Taiwan), QCFI (India), QPAP (Philippines), QCHQ (Thailand), SGPA (Singapore) and SLAAQP (Sri Lanka). Distinguished participants included Masato Onodera, Managing Director and Secretary General, and Kazutoshi Maeda, Deputy General Manager, of the Union of Japanese Scientists and Engineers (JUSE), Japan. The meeting reviewed annual activities and confirmed the ",
+"i": "https://textilefocus.com/wp-content/uploads/2026/11/ICQCC-CCM-2026.JPG-scaled.jpeg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
+{
+"id": "20754493def03c12",
+"d": "2026-11-21",
+"t": "Norrøna와 Uluu는 기능성 의류용 해초 기반 섬유를 개발합니다.",
+"o": "Norrøna and Uluu develop seaweed-based fiber for performance apparel",
+"u": "https://textiletoday.com.bd/norrona-and-uluu-develop-seaweed-based-fibre-for-performance-apparel",
+"s": "Norwegian outdoor clothing brand Norrøna has partnered with Australian materials company Uluu to develop a seaweed-based fiber for performance apparel. The project aims to create an alternative to con...",
+"c": "MATERIAL",
+"x": "Norwegian outdoor clothing brand Norrøna has partnered with Australian materials company Uluu to develop a seaweed-based fiber for performance apparel. The project aims to create an alternative to conventional plastic-based synthetic fibers, with the eventual goal of using the material in Norrøna products. Figure: Uluu uses seaweed to produce polyhydroxyalkanoate (PHA), a natural polymer that can serve as an alternative to conventional plastics. The partnership focuses on developing a bio-based material that can meet the durability and performance requirements of outdoor clothing while reducing dependence on fossil-based materials. Uluu uses seaweed to produce polyhydroxyalkanoate (PHA), a natural polymer that can serve as an alternative to conventional plastics. The production process involves fermenting sugars extracted from seaweed in saltwater to create the material, which can then be processed into fibers. Seaweed offers several potential advantages as a raw material. It can be harvested without agricultural land and requires minimal freshwater and fertilizer. This could reduce pressure on land and freshwater resources compared with some conventional raw materials. The resulting material is designed to biodegrade without releasing persistent plastic fibers into the environment. However, its environmental performance will need to be verified through appropriate testing. Norrøna and Uluu have already spun fibers using seaweed-derived Uluu PHA as a core ingredient. Norrøna will now test the material for durability and other performance requirements before considering its use in commercial products. Performance will be a major factor in determining its commercial potential. Outdoor apparel requires materials that can withstand demanding conditions. Strength, abrasion r",
+"i": "/storage/uploads/2026/11/norronaanduluudev_1795236752352.png",
+"g": [],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today"
+]
+},
+{
+"id": "0e364bcb2e9d0e93",
+"d": "2026-11-21",
+"t": "Transfar의 전략, 시장 포지셔닝 및 글로벌 야망에 대한 Paul Cowell의 설명",
+"o": "Paul Cowell on Transfar's strategy, market positioning and global ambitions",
+"u": "https://textiletoday.com.bd/paul-cowell-on-transfars-strategy-market-positioning-and-global-ambitions",
+"s": "Transfar Chemicals, part of the Transfar Group, is an established global player in textile chemicals, focusing on innovative solutions that connect cleaner chemistry, smarter processing and enhanced t...",
+"c": "ETC",
+"x": "Transfar Chemicals, part of the Transfar Group, is an established global player in textile chemicals, focusing on innovative solutions that connect cleaner chemistry, smarter processing and enhanced textile performance. Under the positioning “Textile Solutions. Engineered for Life.”, the company is advancing its approach through three strategic pillars: Ingredient Integrity, Smart Process Chemistry through the TransOra platform, and Purposeful Function. Figure: Paul Cowell, Brand Director at Transfar Chemicals. Leading this strategic direction is Paul Cowell, Brand Director at Transfar Chemicals, who brings more than 35 years of experience in textile chemistry and senior leadership roles at ICI, BASF, DyStar, bluconnection and Archroma. Based in Singapore, his expertise spans strategic marketing, R&D, sustainability and global brand engagement. In an exclusive interview with Amzad Hossain Monir, Business Team Lead of Textile Today, Paul Cowell shares Transfar's strategic vision, technological priorities, market approach and growth ambitions, offering valuable insights for our readers on the evolving role of textile chemistry in the global textile and apparel industry. Textile Today: How does Transfar intend to further strengthen its position in the global textile chemical industry? What makes its approach different in delivering value to textile manufacturers and international brands? Paul Cowell : Transfar has forty years of history, 13 manufacturing bases, nine innovation and R&D centres and more than 6,000 active partners in over 80 countries, within a group of more than 16,000 employees. The new strategy builds on that base and gives mills and brands a clear way to judge every product by what it delivers. Each product is qualified against three pillars: Ingredient I",
+"i": "/storage/uploads/2026/11/paulcowellontrans_17952629453286.png",
+"g": [],
+"m": "Textile Today",
+"r": "해외",
+"v": 8,
+"h": 2,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Today",
+"주제검색 · 염색가공"
+]
+},
+{
+"id": "033477c9487c2c87",
+"d": "2026-11-21",
+"t": "국가 순환 섬유 전략, Bangladesh 최종 협의 단계 진입",
+"o": "National Circular Textile Strategy Enters Final Consultation Stage in Bangladesh",
+"u": "https://textilefocus.com/national-circular-textile-strategy-enters-final-consultation-stage-in-bangladesh/",
+"s": "The Government of Bangladesh and the United Nations Industrial Development Organization (UNIDO), through the SWITCH to Circular Economy Value Chains (SWITCH2CE) project, convened a national consultation to review the draft National Circular Textile Strategy for Bangladesh and gather further stakehol",
+"c": "ETC",
+"x": "The Government of Bangladesh and the United Nations Industrial Development Organization (UNIDO), through the SWITCH to Circular Economy Value Chains (SWITCH2CE) project, convened a national consultation to review the draft National Circular Textile Strategy for Bangladesh and gather further stakeholder recommendations. Organised in collaboration with the Ministry of Commerce, the event brought together government representatives, industry associations, brands, manufacturers, development partners and technical experts. This consultation marked the next stage in an ongoing process that began with an initial stakeholder meeting in April 2026 . Chatham House, SWITCH2CE’s global policy partner, leads the development of the National Circular Textile Strategy in collaboration with local partners and under the leadership of the Ministry of Commerce. The latest consultation focused on refining the draft strategy and identifying priorities for its finalisation and endorsement. Mr. Sharf Uddin Ahmed Choudhury, Secretary of the Ministry of Commerce, attending the consultation as a Chief Guest, highlighted that circular textile is an imperative to retain Bangladesh’s post-graduation global competitiveness. The National Circular Textile Strategy should be instrumental to achieve sustainability in the production ecosystem. Opening the event, Mr. Alamgir Hossain, UNIDO Country Representative, highlighted that the transition from linear to circular business models presents a significant opportunity to enhance competitiveness, drive innovation, and foster sustainable prosperity. He noted that Bangladesh’s Circular Textile Strategy aims to provide a clear direction for both industry and the financial sector, offering targeted measures to strengthen the sector’s competitiveness and support",
+"i": "https://textilefocus.com/wp-content/uploads/2026/11/7N9A7976.jpg",
+"g": [
+"방글라데시"
+],
+"m": "Textile Focus",
+"r": "해외",
+"v": 11,
+"h": 1,
+"w": "material",
+"e": [],
+"ms": [
+"Textile Focus"
+]
+},
 {
 "id": "fe43e5139974c044",
 "d": "2026-11-20",
@@ -33879,159 +34036,6 @@
 "e": [],
 "ms": [
 "국제섬유신문"
-]
-},
-{
-"id": "c9426d2931a66ab7",
-"d": "2026-10-07",
-"t": "면 추적성 데이터가 진에서 멈춤 – 보고",
-"o": "Cotton traceability data stops at gins – report",
-"u": "https://www.ecotextile.com/2026100766078/news/shows-events/cotton-traceability-data-stops-at-gins-report/",
-"s": "New research calls for standardised gin-level records and deeper relationships with cotton-growing communities PARIS — Cotton brands can often trace […] The post Cotton traceability data stops at gins – report appeared first on Ecotextile News .",
-"c": "MATERIAL",
-"x": "New research calls for standardised gin-level records and deeper relationships with cotton-growing communities PARIS — Cotton brands can often trace […] The post Cotton traceability data stops at gins – report appeared first on Ecotextile News .",
-"i": "https://www.ecotextile.com/wp-content/uploads/2026/09/Gin.jpg",
-"g": [
-"추적성"
-],
-"m": "Ecotextile News",
-"r": "해외",
-"v": 12,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Ecotextile News"
-]
-},
-{
-"id": "c7b15e3e5ec57828",
-"d": "2026-10-07",
-"t": "Fashion for Good, 재활용 면 사용 확대를 위해 Cotton Reloop Matrix 출시",
-"o": "Fashion for Good launches Cotton Reloop Matrix to scale recycled cotton use",
-"u": "https://textiletoday.com.bd/fashion-for-good-launches-cotton-reloop-matrix-to-scale-recycled-cotton-use",
-"s": "Fashion for Good has launched the Cotton Reloop Matrix Project to improve the use of mechanically recycled cotton in textile production. The project aims to connect the capabilities of cotton recycle...",
-"c": "MATERIAL",
-"x": "Fashion for Good has launched the Cotton Reloop Matrix Project to improve the use of mechanically recycled cotton in textile production. The project aims to connect the capabilities of cotton recyclers with the quality requirements of fashion brands. It will also address gaps in testing and data sharing across the supply chain. Major stakeholders, including Arvind, Bestseller, C&A, Interloop, Reformation, Shahi, and Uster, are taking part in the project. The initiative has two main tracks. The first will assess recycled cotton yarn performance for knit and woven fabrics. It will focus on whether the yarn is suitable for its intended use rather than comparing it directly with virgin cotton. The project will also explore performance levels beyond the current typical 10% recycled cotton blend limit. The second track will include trials to produce 10 demonstration fabrics and conduct five process-optimization trials. The findings will be published in an open-source Standard Operating Procedure (SOP). This will help standardize spinning parameters across different supply chains. The project aims to create clearer quality benchmarks and help overcome fiber degradation challenges. It could support wider and more commercial use of recycled cotton in the global textile industry.",
-"i": "/storage/uploads/2026/10/fashionforgoodlau_17913472477368.png",
-"g": [
-"리사이클"
-],
-"m": "Textile Today",
-"r": "해외",
-"v": 11,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Today"
-]
-},
-{
-"id": "c6cbeab1cb295061",
-"d": "2026-10-07",
-"t": "MMLG, 신세계 천안아산점 신규 매장…충남권 접점 확대",
-"o": "MMLG, 신세계 천안아산점 신규 매장…충남권 접점 확대",
-"u": "http://www.ktnews.com/news/articleView.html?idxno=149150",
-"s": "캐주얼 브랜드 엠엠엘지(MMLG)가 신세계백화점 천안아산점 B관 1층 하이퍼그라운드에 신규 매장을 오픈한다.이번 매장은 충남권 고객과의 오프라인 접점을 확대하기 위해 마련됐다. 엠엠엘지는 신세계 천안아산점 입점을 통해 지역 고객과의 직접적인 소통을 강화하고 신규 시즌 제품을 선보일 계획이다.매장 오픈을 기념한 프로모션도 진행한다. 신상품은 최대 20%, 전 상품은 최대 40% 할인하며 행사 기간 10만 원 이상 구매 시 신상품을 포함한 구매 상품에 10% 추가 할인을 적용한다.신세계백화점이 진행하는 상품권 증정 행사도 함께 적용된다",
-"c": "RETAIL",
-"x": "캐주얼 브랜드 엠엠엘지(MMLG)가 신세계백화점 천안아산점 B관 1층 하이퍼그라운드에 신규 매장을 오픈한다.이번 매장은 충남권 고객과의 오프라인 접점을 확대하기 위해 마련됐다. 엠엠엘지는 신세계 천안아산점 입점을 통해 지역 고객과의 직접적인 소통을 강화하고 신규 시즌 제품을 선보일 계획이다.매장 오픈을 기념한 프로모션도 진행한다. 신상품은 최대 20%, 전 상품은 최대 40% 할인하며 행사 기간 10만 원 이상 구매 시 신상품을 포함한 구매 상품에 10% 추가 할인을 적용한다.신세계백화점이 진행하는 상품권 증정 행사도 함께 적용된다",
-"i": "http://www.ktnews.com/news/thumbnail/202610/149150_131531_189_v150.jpg",
-"g": [],
-"m": "한국섬유신문",
-"r": "국내",
-"v": 6,
-"h": 1,
-"w": "retail",
-"e": [],
-"ms": [
-"한국섬유신문"
-]
-},
-{
-"id": "c508fcead49a5c89",
-"d": "2026-10-07",
-"t": "마하라슈트라의 목화 재배자들에게 재생 관행을 제공하고 지원",
-"o": "Empowering and Equipping Cotton Farmers with Regenerative Practices in Maharashtra",
-"u": "https://textileexchange.org/empowering-and-equipping-cotton-farmers-with-regenerative-practices-in-maharashtra/",
-"s": "Words by Zoë Goodhead, with photography by Abhishek Khedekar In villages in the Amravati region in Maharashtra, India, farmers are coming together to share knowledge and learn regenerative practices for […] The post Empowering and Equipping Cotton Farmers with Regenerative Practices in Maharashtra a",
-"c": "MATERIAL",
-"x": "Words by Zoë Goodhead, with photography by Abhishek Khedekar In villages in the Amravati region in Maharashtra, India, farmers are coming together to share knowledge and learn regenerative practices for their small-scale cotton farms. As the scheme grows, they are discovering that these practices can not only save them money, but also save their soil. At Nagpur airport, welcome signs declare it the City of Oranges, but driving through the Maharashtra landscape towards the Amravati region, it’s not just orange trees that can be seen growing in the fields, but cotton, with balls of white catching the light of the sun. The connection with this cotton is deeply felt by those who spend their days sowing, growing, and picking it. Madhuri Anil Dugane, from Kati, a small village in Amravati, describes her special relationship with the soil. “My connection with the soil feels like one between a mother and a daughter,” she explains in Marathi, the local language. “Unless you work hard at it, unless you love your mother, how can you expect to get anything out of it?” Madhuri has always lived in Kati, surrounded by cotton fields. She now lives with her husband and two children, farming cotton on her own land and also picking up shifts as a laborer on other nearby farms for extra income. Along with others in her village, she has recently signed up to CottonConnect’s REEL Regenerative program. CottonConnect works with local partner Apeksha Homoeo Society to roll out the program in villages across the region, working with around 4,500 farmers in just this area alone. This is just one of many projects for Apeksha, a local charitable organization ensuring the sustainable development of women, children, farmers, and landless communities. Under the stewardship of Apeksha and CottonConnect",
-"i": "https://textileexchange.org/app/uploads/2026/10/DSC2789-large-1-1.png",
-"g": [],
-"m": "Textile Exchange",
-"r": "해외",
-"v": 8,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Exchange"
-]
-},
-{
-"id": "ae4d0158c96098c2",
-"d": "2026-10-07",
-"t": "면화는 변화하는 글로벌 섬유 산업에 여전히 중요한 역할을 하고 있습니다.",
-"o": "Cotton remains vital to a changing global textile industry",
-"u": "https://textiletoday.com.bd/cotton-remains-vital-to-a-changing-global-textile-industry",
-"s": "World Cotton Day 2026 is being observed on October 7, highlighting the continued importance of cotton to global agriculture, textile production, international trade and the livelihoods of millions of...",
-"c": "MATERIAL",
-"x": "World Cotton Day 2026 is being observed on October 7, highlighting the continued importance of cotton to global agriculture, textile production, international trade and the livelihoods of millions of people. The United Nations officially designated October 7 as World Cotton Day through a resolution adopted by the UN General Assembly on August 30, 2021. The initiative was originally proposed by four major African cotton-producing countries—Benin, Burkina Faso, Chad and Mali, collectively known as the Cotton-4. The day aims to raise global awareness of cotton’s contribution to economic development and highlight the challenges faced by farmers, producers, processors and workers across the cotton value chain. The Food and Agriculture Organization of the United Nations (FAO), International Trade Centre, UN Conference on Trade and Development and International Cotton Advisory Committee supported the initiative before its formal adoption by the UN. Cotton remains one of the world's most important natural fibers and a key raw material for the global textile and apparel industry. Around 80% of cotton is used for clothing, while another 15% is used for home textiles and other household products, according to FAO data. Beyond its role as a textile fiber, cotton is an important source of income for millions of farming households. Around 24 million producers are involved in cotton cultivation globally, while the wider sector supports more than 100 million families through farming, processing, manufacturing and trade. For many developing economies, cotton exports are also an important source of foreign exchange. As a result, changes in global cotton prices, production and demand can have a direct impact on farmers and national economies. Global cotton production remains substantial. ",
-"i": "/storage/uploads/2026/10/cottonremainsvital_17913770069323.png",
-"g": [],
-"m": "Textile Today",
-"r": "해외",
-"v": 8,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Textile Today"
-]
-},
-{
-"id": "a97fd488ec823db5",
-"d": "2026-10-07",
-"t": "인도 DCTI, 첫 미팅에서 섬유 경쟁력 집중",
-"o": "India's DCTI focuses on textile competitiveness at first meeting",
-"u": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxOelRaODBsVnVoVGQxeTlYdWJQaFZ2ZkRTUVFIUHpHQ05VdlQ4S3FxQmlHN0JxanI3TlV2OUVkVVE2ZUxUTWk0UVR4Q0JiNUkyemFBcXNmWEdJNUZDLXZkOU85SXg3OVYtVXRYN0kzZ3I5a3RvR0d4LXplTWVwa0FZUU85S0hsb29uQnBESzJzV3M4NWpkRmtMT2tRYzJvRzdvTWhaSUR5R2RJclJ4QWdJLUNqTm4yaHBxVkhaZ3N6clZIRlhRSWppckU3bWdSSk8yNjdsOTZHSmJlN2U1b2tENmI3NzJhdWM?oc=5",
-"s": "India's DCTI focuses on textile competitiveness at first meeting Fibre2Fashion",
-"c": "MATERIAL",
-"x": "India's DCTI focuses on textile competitiveness at first meeting Fibre2Fashion",
-"i": "",
-"g": [],
-"m": "Fibre2Fashion",
-"r": "해외",
-"v": 7,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Fibre2Fashion"
-]
-},
-{
-"id": "a917f4a393b281ab",
-"d": "2026-10-07",
-"t": "유기농 면에 영향을 미치는 치솟는 비용",
-"o": "Soaring costs impacting organic cotton",
-"u": "https://www.ecotextile.com/2026100766264/news/environment/soaring-costs-impacting-organic-cotton/",
-"s": "Cotonea partner cooperatives have dropped organic certification as tighter EU and certifier rules push smallholder certification costs up BEMPFLINGEN – […] The post Soaring costs impacting organic cotton appeared first on Ecotextile News .",
-"c": "MATERIAL",
-"x": "Cotonea partner cooperatives have dropped organic certification as tighter EU and certifier rules push smallholder certification costs up BEMPFLINGEN – […] The post Soaring costs impacting organic cotton appeared first on Ecotextile News .",
-"i": "https://www.ecotextile.com/wp-content/uploads/2026/10/African-organic-cotton.jpg",
-"g": [
-"오가닉코튼"
-],
-"m": "Ecotextile News",
-"r": "해외",
-"v": 8,
-"h": 1,
-"w": "material",
-"e": [],
-"ms": [
-"Ecotextile News"
 ]
 }
 ]
