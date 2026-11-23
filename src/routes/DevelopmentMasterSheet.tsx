@@ -1666,8 +1666,6 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   // 펼침/접힘은 개인 브라우저에 남는다. 팀원 화면에는 영향을 주지 않는다.
   // 전체 미리보기 안내 말풍선. 담당 카드 아래에 떠올랐다가 1초 뒤 서서히 사라진다.
   // 전용 행을 두면 표가 그만큼 밀리므로 카드에 겹쳐 띄운다.
-  const [hintMounted, setHintMounted] = useState(false)
-  const [hintShown, setHintShown] = useState(false)
   const [openGroups, setOpenGroups] = useState(() => loadViewGroups(OPEN_GROUPS_STORAGE_KEY, DEFAULT_OPEN))
   const [hiddenColumns, setHiddenColumns] = useState(() => loadViewGroups(HIDDEN_COLUMNS_STORAGE_KEY, DEFAULT_HIDDEN))
   const [hiddenMenuOpen, setHiddenMenuOpen] = useState(false)
@@ -1676,20 +1674,20 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   useEffect(() => { saveViewPref(FINISHING_OPEN_STORAGE_KEY, finishingOpen) }, [finishingOpen])
   const [search, setSearch] = useState("")
   const [owner, setOwner] = useState(ALL)
+  const [previewNotice, setPreviewNotice] = useState(false)
+  // 전체 미리보기는 읽기 전용이다(R310). 모르고 칸을 두드리는 일이 잦아
+  // 탭을 고를 때마다 화면 가운데에 3초 알린다(2026-11-23 박향근 지시).
   useEffect(() => {
-    if (owner !== ALL) { setHintMounted(false); setHintShown(false); return }
-    setHintMounted(true)
-    // 한 프레임 뒤에 켜야 트랜지션이 처음부터 그려진다. 같은 프레임에 켜면 튀어나오는 느낌이 없다.
-    const raf = requestAnimationFrame(() => setHintShown(true))
-    const fade = window.setTimeout(() => setHintShown(false), 1000)
-    const drop = window.setTimeout(() => setHintMounted(false), 1800)
-    return () => { cancelAnimationFrame(raf); window.clearTimeout(fade); window.clearTimeout(drop) }
+    if (owner !== ALL) { setPreviewNotice(false); return }
+    setPreviewNotice(true)
+    const timer = window.setTimeout(() => setPreviewNotice(false), 3000)
+    return () => window.clearTimeout(timer)
   }, [owner])
   const [status, setStatus] = useState(ALL)
   const [sortBy, setSortBy] = useState<{ col: string; dir: "asc" | "desc" } | null>(null)
   const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({})
-  // 담당 탭에서 완료·DROP·REJECT 를 감출지. 전체 탭은 항상 감춘다.
-  const [hideClosed, setHideClosed] = useState(false)
+  // 담당 탭도 기본이 완료 제외다(2026-11-23 박향근 지시). 끄는 것은 도구줄 토글이다.
+  const [hideClosed, setHideClosed] = useState(true)
   const [replaceOpen, setReplaceOpen] = useState(false)
   const [findValue, setFindValue] = useState("")
   const [replaceValue, setReplaceValue] = useState("")
@@ -3630,18 +3628,16 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   return <div className="flex min-h-0 flex-1 flex-col gap-2 -mx-4 sm:-mx-6 lg:-mx-8" style={{ "--grid-selection": "#217346" } as CSSProperties}>
+    {previewNotice ? (
+      <div className="pointer-events-none fixed inset-0 z-[95] flex items-center justify-center">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-6 py-4 text-center shadow-lg">
+          <p className="text-base font-semibold">미리보기 전용</p>
+          <p className="mt-1 text-xs text-[var(--muted-foreground)]">담당을 선택하면 수정할 수 있습니다.</p>
+        </div>
+      </div>
+    ) : null}
     <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
       <div className="relative flex flex-wrap items-center gap-1.5" aria-label="주요 개발 담당">
-        {hintMounted ? (
-          <div
-            role="status"
-            className={`pointer-events-none absolute left-0 top-full z-50 mt-2 flex max-w-[min(560px,88vw)] items-center gap-2 rounded-[var(--radius)] border border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_14%,var(--card))] px-3 py-2 text-xs text-[var(--foreground)] shadow-lg transition-[opacity,transform] ${hintShown ? "translate-y-0 scale-100 opacity-100 duration-200 ease-out" : "-translate-y-1 scale-95 opacity-0 duration-700 ease-in"}`}
-          >
-            <span aria-hidden="true" className="absolute -top-1.5 left-6 size-3 rotate-45 border-l border-t border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_14%,var(--card))]" />
-            <TriangleAlert className="size-4 shrink-0 text-[var(--warning)]" />
-            <span><strong className="font-semibold">전체 미리보기입니다. 수정할 수 없습니다.</strong> 위에서 담당 카드를 고르면 그 담당의 건만 보이고 셀을 고칠 수 있습니다.</span>
-          </div>
-        ) : null}
         {[{ key: ALL, label: "전체", initial: "전", stat: ownerStats.all }, ...MAIN_DEVELOPERS.map((name) => ({ key: name, label: name, initial: name.charAt(0), stat: ownerStats.byOwner.get(name) ?? { total: 0, active: 0 } }))].map((card) => {
           const on = owner === card.key
           const isAll = card.key === ALL

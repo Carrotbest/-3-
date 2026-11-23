@@ -20,7 +20,7 @@ import { currentUserCanEditKey, useAuthStore } from "@/data/auth"
 import { buildFabricLedger } from "@/data/fabric-ledger"
 import { applyRequestLinks, clearRequestLinksByLineId, ddRecordsByLineId, ensureRequestLineIds, liveRequestLineIds, requestDdStatus } from "@/data/request-link"
 import { isDroppedStage, isFlCompletedStage, requestProcessStage, type ProcessStage } from "@/data/request-process-stage"
-import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindColor, buildBoardArchive, canDeleteBoard, canManageBoard, closeBoard, migrateChartsToBoards, nextBoardSeq, removeBoardWithStyles, reopenBoard, resultOf } from "@/data/request-board"
+import { ALL_BOARDS, ARCHIVE_VIEW, appendRequestHistory, boardEvent, boardKindColor, buildBoardArchive, canDeleteBoard, canEditTeam1Only, canManageBoard, closeBoard, migrateChartsToBoards, nextBoardSeq, removeBoardWithStyles, reopenBoard, resultOf } from "@/data/request-board"
 import type { AuditKind } from "@/data/audit"
 
 import { ProcessStageChip } from "@/components/request/ProcessStageChip"
@@ -678,8 +678,12 @@ function PreviewDialog({ style, onClose }: { style: RequestStyle | null; onClose
 
 type EditKind = "text" | "area" | "number" | "member" | "suggest" | "construction" | "company" | "result" | "toggle" | null
 
+/** 1팀만 고칠 수 있다(2026-11-23 박향근 확정). Remark와 결과 열. */
+const TEAM1_ONLY_COLUMNS = new Set(["remark", "result"])
+
 /** 더블클릭으로 고칠 수 있는 열과 그 입력 방식. 사진과 옵션 번호는 자동 값이라 막는다. */
-function editKindOf(columnId: string): EditKind {
+function editKindOf(columnId: string, team1: boolean): EditKind {
+  if (!team1 && TEAM1_ONLY_COLUMNS.has(columnId)) return null
   switch (columnId) {
     case "garmentNo": case "brand": case "origConstruction": case "devConstruction":
     case "requester": case "color": case "dyeingMethod": case "finish":
@@ -845,6 +849,8 @@ export function FabricRequest() {
   const analysisRequests = useAppStore((state) => state.analysisRequests)
   const authUser = useAuthStore((state) => state.user)
   const isOwner = useAuthStore((state) => state.isOwner)
+  const department = useAuthStore((state) => state.department)
+  const team1 = canEditTeam1Only(department, isOwner)
   const boardMigrationRef = useRef(false)
   useEffect(() => {
     if (boardMigrationRef.current || !currentUserCanEditKey("requests") || requests.length === 0 || requests.every((request) => request.boardId)) return
@@ -898,7 +904,7 @@ export function FabricRequest() {
       type="button"
       title="더블클릭하면 연결할 DD 행 후보를 보여줍니다"
       onMouseDown={(event) => event.stopPropagation()}
-      onDoubleClick={(event) => { event.stopPropagation(); setDdPick({ style, option }) }}
+      onDoubleClick={(event) => { event.stopPropagation(); if (!team1) { setNotice({ kind: "error", text: "DD 공정 연결은 1팀만 할 수 있습니다." }); return } setDdPick({ style, option }) }}
       className="whitespace-nowrap text-[10px] font-medium text-[var(--destructive)] underline-offset-2 hover:underline"
     >미연결</button>
     const status = requestDdStatus(ddByLine, option)
@@ -1365,7 +1371,7 @@ export function FabricRequest() {
     }
     return picked
   }, [range, slots])
-  const editableCell = (cell: CellRef) => cell.col !== "image" && editKindOf(cell.col) !== null && (cellLine(cell) !== null || visibleColumns[colIndexOf.get(cell.col) ?? -1]?.scope === "option")
+  const editableCell = (cell: CellRef) => cell.col !== "image" && editKindOf(cell.col, team1) !== null && (cellLine(cell) !== null || visibleColumns[colIndexOf.get(cell.col) ?? -1]?.scope === "option")
   const setCellAnchor = (cell: CellRef, extend = false) => setRange((current) => extend && current ? { ...current, focus: cell } : { anchor: cell, focus: cell })
   const selectWholeRow = (row: number, extend = false) => {
     const first = visibleColumns[0]?.id, last = visibleColumns.at(-1)?.id
@@ -1530,7 +1536,7 @@ export function FabricRequest() {
   }
   const updateCell = (list: RequestStyle[], cell: CellRef, raw: string): { next: RequestStyle[]; skipped: SkipReason } => {
     const slot = slots[cell.row], column = visibleColumns[colIndexOf.get(cell.col) ?? -1]
-    if (!slot || !column || column.id === "image" || editKindOf(column.id) === null) return { next: list, skipped: false }
+    if (!slot || !column || column.id === "image" || editKindOf(column.id, team1) === null) return { next: list, skipped: false }
     const index = list.findIndex((item) => item.reqId === slot.style.reqId)
     if (index < 0) return { next: list, skipped: false }
     const current = list[index]
@@ -2093,7 +2099,7 @@ export function FabricRequest() {
     rowSpan?: number,
   ): ReactNode => {
     const fixed = FIXED_COLUMNS.some((item) => item.id === column.id)
-    const kind = editKindOf(column.id)
+    const kind = editKindOf(column.id, team1)
     const editable = kind !== null
     const cellRef = { row: slotIndex, col: column.id }
     const editing = editable && editCell?.row === slotIndex && editCell.col === column.id && kind !== "toggle"
@@ -2112,7 +2118,7 @@ export function FabricRequest() {
         data-slot-index={slotIndex}
         className={`relative min-w-0 overflow-hidden border-b border-r border-[var(--border)] p-0 align-top text-xs ${sel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,var(--card))]" : dimmed ? CLOSED_CELL_BG : column.id === "remark" ? "bg-[color-mix(in_srgb,var(--warning)_7%,var(--card))]" : "bg-[var(--card)]"} ${isOption ? "" : "border-b-[color-mix(in_srgb,var(--foreground)_16%,var(--border))]"} ${fixed ? "sticky z-10" : ""} ${readOnly ? "cursor-default" : "cursor-cell"} ${inFillPreview(slotIndex, column.id) ? "outline outline-1 outline-dashed outline-[var(--grid-selection)] -outline-offset-1" : ""}`}
         style={{ height, width: widthOf(column), boxShadow: selectionShadow(sel), ...(fixed ? { left: fixedLeft(column.id) } : null) }}
-        title={isOption ? String(rawValue(line, column.id) ?? "") : editable ? "더블클릭해서 수정" : undefined}
+        title={isOption ? String(rawValue(line, column.id) ?? "") : editable ? "더블클릭해서 수정" : !team1 && TEAM1_ONLY_COLUMNS.has(column.id) ? "Remark와 결과는 1팀만 고칠 수 있습니다." : undefined}
         onMouseDown={(event) => onCellMouseDown(event, cellRef)}
         onMouseEnter={() => onCellEnter(cellRef)}
         onContextMenu={(event) => { event.preventDefault(); setCellAnchor(cellRef); setRowMenu({ x: event.clientX, y: event.clientY, cell: cellRef }) }}
@@ -2679,7 +2685,8 @@ export function FabricRequest() {
         stage={stageTarget?.stage ?? null}
         title={stageTarget?.title ?? ""}
         linkedCount={stageTarget ? 1 + requestDdStatus(ddByLine, stageTarget.option).extra : 0}
-        canEdit={currentUserCanEditKey("records")}
+        canEdit={currentUserCanEditKey("records") && team1}
+        denyReason={!team1 ? "DD 공정 연결은 1팀만 할 수 있습니다." : undefined}
         onOpenDd={() => {
           if (!stageTarget?.rowId) return
           navigate(`/development/workspace?focus=${encodeURIComponent(stageTarget.rowId)}`)

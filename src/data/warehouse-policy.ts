@@ -43,13 +43,16 @@ export function warehouseDenial(actor: WarehouseActor, rule: WarehouseRule, item
       return item.intakeByEmail
         ? "R&D No.는 입고를 등록한 사람만 고칠 수 있습니다."
         : "등록자 기록이 없는 원단이라 R&D No.는 관리자만 고칠 수 있습니다."
-    case "yds":
-    case "rack": {
-      const label = rule === "yds" ? "보유 재고" : "Rack No."
+    // Rack No.는 창고팀만 입력하고 고친다(2026-11-23 박향근 지시).
+    // 선반에 실물을 꽂는 쪽이 창고팀 하나뿐이라 입고 등록자에게도 열어 두지 않는다.
+    // `confirm`과 같은 모양이다. `locks.rackNo`를 볼 필요가 없어졌다(창고팀만 쓰니 늘 창고팀 값이다).
+    case "rack":
+      return settlement ? null : "Rack No.는 창고팀만 입력하고 고칠 수 있습니다."
+    case "yds": {
       if (settlement) return null
-      if (rule === "yds" ? item.locks.yds : item.locks.rackNo) return `${label}는 창고팀이 입력한 값이라 창고팀만 고칠 수 있습니다.`
+      if (item.locks.yds) return "보유 재고는 창고팀이 입력한 값이라 창고팀만 고칠 수 있습니다."
       if (sameEmail(item.intakeByEmail, actor.email)) return null
-      return `${label}는 입고를 등록한 사람과 창고팀만 고칠 수 있습니다.`
+      return "보유 재고는 입고를 등록한 사람과 창고팀만 고칠 수 있습니다."
     }
   }
 }

@@ -13,12 +13,13 @@ interface ProcessStageDialogProps {
   linkedCount: number
   /** DD MASTER 편집 권한. 없으면 두 버튼을 비활성한다. */
   canEdit: boolean
+  denyReason?: string
   onUnlink: () => void
   onRelink: () => void
   onOpenDd: () => void
 }
 
-export function ProcessStageDialog({ open, onOpenChange, stage, title, linkedCount, canEdit, onUnlink, onRelink, onOpenDd }: ProcessStageDialogProps) {
+export function ProcessStageDialog({ open, onOpenChange, stage, title, linkedCount, canEdit, denyReason, onUnlink, onRelink, onOpenDd }: ProcessStageDialogProps) {
   if (!stage?.linked) return null
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -72,8 +73,8 @@ export function ProcessStageDialog({ open, onOpenChange, stage, title, linkedCou
         </DialogBody>
         <DialogFooter className="flex-wrap justify-between">
           <div className="flex gap-2">
-            <Button type="button" variant="outline" disabled={!canEdit} title={!canEdit ? "DD MASTER 편집 권한이 필요합니다" : undefined} style={{ color: "var(--destructive)" }} onClick={onUnlink}>연결 해제</Button>
-            <Button type="button" variant="outline" disabled={!canEdit} title={!canEdit ? "DD MASTER 편집 권한이 필요합니다" : undefined} onClick={onRelink}>연결 변경</Button>
+            <Button type="button" variant="outline" disabled={!canEdit} title={!canEdit ? (denyReason ?? "DD MASTER 편집 권한이 필요합니다") : undefined} style={{ color: "var(--destructive)" }} onClick={onUnlink}>연결 해제</Button>
+            <Button type="button" variant="outline" disabled={!canEdit} title={!canEdit ? (denyReason ?? "DD MASTER 편집 권한이 필요합니다") : undefined} onClick={onRelink}>연결 변경</Button>
           </div>
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>닫기</Button>

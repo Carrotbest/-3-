@@ -267,7 +267,23 @@
 - 부서 기본값은 `DEPARTMENTS` 한 곳(통합원단부 1·2·3팀, 정산관리팀, 사업부서). **3팀이 원단 R&D(우리 팀)다**(2026-09-17 사용자 확인). 1팀은 디자인·마케팅 성격의 소싱 위주 팀으로 FABRIC REQUEST를 쓰는 유관부서다. 가입 화면에서 부서를 골라 신청하면 그 부서 기본 권한이 문서에 들어가고, 승인하면 바로 적용된다. 승인 대기 중에는 신청 문서의 access를 믿지 않고 부서 기본값을 보인다(소유자가 손댄 뒤 `permissionsUpdatedAt`부터는 저장값). 승인은 권한이 하나 이상일 때만 된다.
 - HOME은 우리 팀 KPI라 `HomeGate`가 `access.home === "read"`이면 블러로 가린다. 호버는 보이고 클릭·키 입력은 막는다. 관리 화면에서 HOME 단계 이름은 없음/블러/공개다. 가림일 뿐 데이터는 브라우저에 있으므로 전사 배포 전에는 HOME 구성을 따로 만든다.
 - 읽기 권한 적용은 세 겹이다. `pushCache`가 `currentUserCanEditKey`로 중앙 저장을 막고 화면 값을 마지막 중앙 값으로 되돌린다. 키와 화면의 대응은 `CACHE_KEY_SCREENS`다. `ReadOnlyGuard`가 셀 더블클릭·붙여넣기·지우기·끌어놓기를 막는다. `logAction`도 같은 판정으로 이력을 남기지 않는다. 새 저장 키를 만들면 `CACHE_KEY_SCREENS`에 더해야 한다. 빠지면 소유자만 저장된다.
-- **아직 Firestore 규칙에는 반영하지 않았다.** 서버는 승인 여부만 본다. 규칙 반영은 보안 점검 C 항목으로 남아 있다.
+- **화면 권한 위에 부서별·사람별 규칙이 한 겹 더 있다**(R440~R443, 2026-11-23 박향근 지시). 화면 권한이 `edit`이어도 아래 조건에 걸리면 막힌다. **판정 함수를 화면마다 복사하지 말 것.** 각 규칙은 함수 하나에서 나온다.
+  | 대상 | 규칙 | 함수 |
+  |---|---|---|
+  | FABRIC ANALYSIS 의뢰 쪽(새 의뢰, 의뢰 정보, 의뢰 사진, 의뢰 확정, 작성으로 되돌리기) | 1팀 | `canEditAnalysisRequest` |
+  | FABRIC ANALYSIS 분석 쪽(결과 칸, 분석 사진, 완료 처리, 의뢰로 되돌리기, 개발 의뢰로 넘기기) | 3팀 | `canEditAnalysisResult` |
+  | DEVELOPMENT REQUEST Remark·결과 열, DD 공정 연결 | 1팀 | `canEditTeam1Only` |
+  | DEVELOPMENT REQUEST 보드 종결·다시 열기·삭제 | 관리자 | `canManageBoard`, `canDeleteBoard` |
+  | DD MASTER 행 편집 | 그 행 담당 | `canEditRow`, `editEnabled` (R319) |
+  | COST SHEET 「이 버전 고치기」 | 그 버전 작성자 | `canOverwriteCostSheet` |
+  | COST SHEET 「새 버전으로 저장」 | 편집 권한자 누구나. 남의 그룹이면 확인 한 번 | `costSheetOwnerEmail` |
+  | 창고 입고 확인·Rack No. | 정산관리팀 | `warehouseDenial`의 `confirm`, `rack` |
+  전부 관리자(앱 소유자)가 예외다. **분석 의뢰는 3팀이 만들지 않는다**(2026-11-23 확정). **2팀은 DEVELOPMENT REQUEST가 읽기다.**
+- **DEVELOPMENT REQUEST의 1팀 전용 열은 `editKindOf` 한 곳에서 막는다.** 호출처가 셋(표 그리기, 키보드·붙여넣기 대상 판정, 쓰기)이고 인자에 기본값을 주지 않아 하나라도 빠뜨리면 컴파일이 멈춘다. **기본값을 주지 말 것.** 화면만 막고 쓰기를 열어 두면 붙여넣기로 뚫린다.
+- **의뢰자(`requester`)는 자유 입력이고 계정과 연결되지 않는다.** 한 보드 안에 담당자가 여럿이라 신규 생성 때 로그인 이름을 넣지 않는다(2026-11-23 확정). 그래서 이 화면에서는 사람 단위 규칙을 세울 수 없고 부서 단위까지가 한계다.
+- **결과 자동 완료(R359)에는 1팀 조건을 걸지 않는다.** 사람이 고치는 값이 아니라 기계가 올리는 값이다. 걸면 1팀이 화면을 열고 있을 때만 돌아 결과가 들쭉날쭉해진다.
+- **Firestore 규칙으로 막히는 것은 `costSheets`뿐이다.** 문서 하나가 버전 하나라 `resource.data.by`를 볼 수 있다(R443). `state/{docId}`는 화면 하나가 문서 하나라 행 단위 담당을 규칙으로 표현할 방법이 없다. **위 표의 나머지는 전부 브라우저 안에서만 막는 실수 방지다.** 서버 강제는 저장 키를 화면 그룹별로 쪼개야 가능하고 동기화를 다시 짜는 공사다(보안 점검 C 항목).
+- **`firestore.rules`는 수동 배포다.** `.github/workflows`에 firebase 배포가 없다. 고쳐 놓고 안 올리면 파일과 돌아가는 규칙이 다르다. `firebase deploy --only firestore:rules`.
 - **BUYER PROTOCOLS는 읽기만 연다**(R342, 2026-10-21 박향근 확정). 바이어 기밀 문서다. 예전에는 여섯 군데(`ownerOnly`, 라우트 하드 게이트, 두 구독 훅, 규칙 두 컬렉션)로 소유자만 보게 막혀 있었고 권한 키 자체가 없어 SETTING에서 조정할 수단이 없었다. 지금은 `protocol` 키가 생겨 사람별로 준다. **`READ_ONLY_KEYS`라 권한 표에 없음·읽기 두 단계만 뜬다.** 규칙이 쓰기를 소유자로 막으므로 편집을 열면 화면만 열리고 저장이 거부된다. 기준표 개정(REVIEW 탭)은 편집 권한자에게만 보인다. `protocolReview`는 소유자 전용 그대로다.
 - **권한 키를 새로 더할 때 `normalizeScreenAccess`의 fallback이 `edit`인 것을 기억할 것**(R342). 저장값이 없으면 전원이 그 화면을 **편집으로** 갖는다. COST SHEET가 그래서 바로 열렸다. 기밀 화면은 `DEFAULT_NONE_KEYS`에 넣어 "없음"으로 시작시킨다. 넣지 않으면 키를 더하는 순간 승인 사용자 전원에게 열린다.
 - R223: 창고 권한은 세 축으로 갈린다. `warehouse`가 3팀 스코프와 라우팅, `warehouseFabric1`이 1팀 스코프, `warehouseOutbound`가 출고 요청 메일(데이터를 저장하지 않는 기능이라 별도 축)이다. 1팀은 3팀 화면에서 읽기와 출고 요청만, 1팀 화면에서는 편집한다. 창고팀은 두 팀을 모두 편집한다. **라우팅 `ReadOnlyGuard`는 `/warehouse`에서 두 권한 중 높은 쪽을 보도록 `useScreenAccess`가 합치고, 스코프별 방어는 `Warehouse.tsx`의 `canEditScope` 하나로 한다.** 버튼이나 표 편집에 새 진입점을 만들 때 이 값을 빠뜨리면 1팀과 3팀 판단이 섞인다.

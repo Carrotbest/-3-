@@ -100,6 +100,27 @@ export function latestByGroup(docs: readonly CostSheetDoc[]): CostSheetDoc[] {
   return [...latest.values()].sort((left, right) => right.at - left.at)
 }
 
+/**
+ * 그룹의 주인. 버전 1을 만든 사람이다(2026-11-23 방향 확정).
+ * 최신 버전의 by로 보면 관리자가 한 번 고친 순간 주인이 바뀐다.
+ * 버전 번호가 같으면 먼저 저장된 쪽이며, 목록이 비면 빈 문자열이다.
+ */
+export function costSheetOwnerEmail(versions: readonly CostSheetDoc[]): string {
+  const first = [...versions].sort((left, right) => left.version - right.version || left.at - right.at)[0]
+  return first?.by ?? ""
+}
+
+/**
+ * 이 버전을 덮어쓸 수 있는가. 그 버전을 만든 사람과 관리자만.
+ * 새 버전을 더하는 것은 이 판정과 무관하다. 그쪽은 편집 권한만 요구한다.
+ */
+export function canOverwriteCostSheet(doc: CostSheetDoc | null, email: string | null | undefined, isOwner: boolean): boolean {
+  if (isOwner) return true
+  if (!doc) return false
+  const mine = (email ?? "").trim().toLowerCase()
+  return Boolean(mine) && doc.by.trim().toLowerCase() === mine
+}
+
 export function isCostSheetStale(doc: CostSheetDoc, now = Date.now()): boolean {
   return now - doc.at > COST_STALE_DAYS * 86400000
 }

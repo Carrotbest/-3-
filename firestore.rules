@@ -109,13 +109,19 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // 원가계산서는 버전이 쌓이는 이력이라 state가 아닌 별도 컬렉션이다.
-    // 수정은 허용하되 새 문서는 로그인 이메일을 작성자로 기록한다.
+    // 버전 하나가 문서 하나다. 덮어쓰기는 그 버전을 만든 사람과 관리자만(2026-11-23 방향 확정).
+    // 새 버전은 create라 누구나 만들 수 있고, create 때 남의 이름으로 못 만든다.
+    // by, version, groupId를 못 바꾸게 묶어서 남의 버전이 되는 것으로 돌려놓고 고치는 길을 막는다.
     match /costSheets/{docId} {
       allow read: if isApproved();
       allow create: if isApproved()
                     && request.resource.data.by == request.auth.token.email;
-      allow update: if isApproved();
+      allow update: if isOwner()
+                    || (isApproved()
+                        && resource.data.by == request.auth.token.email
+                        && request.resource.data.by == resource.data.by
+                        && request.resource.data.version == resource.data.version
+                        && request.resource.data.groupId == resource.data.groupId);
       allow delete: if isOwner();
     }
 

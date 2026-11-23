@@ -117,3 +117,20 @@ export function analysisWeeklySeries(list: readonly AnalysisRequest[], today = n
     }
   })
 }
+
+/**
+ * 의뢰 쪽을 고칠 수 있는가(2026-11-23 박향근 지시). 1팀과 관리자다.
+ * 의뢰 만들기, 의뢰 칸 수정, 의뢰 사진, 「의뢰 확정」과 「작성으로 되돌리기」가 여기에 든다.
+ * 3팀은 분석 의뢰를 만들지 않는다.
+ */
+export function canEditAnalysisRequest(department: string | null | undefined, isOwner: boolean): boolean {
+  return isOwner || department === "fabric1"
+}
+
+/**
+ * 분석 결과 쪽을 고칠 수 있는가. 3팀과 관리자다.
+ * 결과 칸, 분석 사진, 「완료 처리」와 「의뢰로 되돌리기」, 「개발 의뢰로 넘기기」가 여기에 든다.
+ */
+export function canEditAnalysisResult(department: string | null | undefined, isOwner: boolean): boolean {
+  return isOwner || department === "fabric3"
+}

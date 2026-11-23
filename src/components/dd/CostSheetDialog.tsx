@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { compareCostSheets, isCostSheetStale, listCostSheets, saveCostSheet, updateCostSheet, type CostSheetDoc } from "@/data/cost-sheets"
+import { useAuthStore } from "@/data/auth"
+import { canOverwriteCostSheet, compareCostSheets, costSheetOwnerEmail, isCostSheetStale, listCostSheets, saveCostSheet, updateCostSheet, type CostSheetDoc } from "@/data/cost-sheets"
 import { costSheetFileName, exportCostSheetWorkbook } from "@/data/cost-export"
 import { downloadBlob } from "@/data/dd-export"
 import { computeFabricCost, type CostFee, type CostInput, type CostYarnLine, type FabricCostSheet, type FeeGroup, type FeeUnit, type YarnPriceUnit } from "@/data/fabric-cost"
@@ -122,12 +123,20 @@ export function CostSheetDialog({ open, onOpenChange, rows, canEdit, onSaved, st
   const [busy, setBusy] = useState(false)
   const [printing, setPrinting] = useState(false)
   const [error, setError] = useState("")
+  const [confirmNewVersion, setConfirmNewVersion] = useState(false)
   const [, setAutoYarns] = useState<boolean[]>([])
   const [openSpecRows, setOpenSpecRows] = useState<number[]>([])
   const row = rows[Math.min(active, Math.max(0, rows.length - 1))]
   const current = versions.find((item) => item.id === selectedId) ?? null
+  const authEmail = useAuthStore((state) => state.user?.email ?? "")
+  const isAdmin = useAuthStore((state) => state.isOwner)
+  const groupOwner = useMemo(() => costSheetOwnerEmail(versions), [versions])
+  const canOverwrite = canOverwriteCostSheet(current, authEmail, isAdmin)
+  // 남의 계산서에 새 버전을 올리려는가. 새 그룹(버전 0건)이면 주인이 없다.
+  const otherOwner = Boolean(groupOwner) && !isAdmin && groupOwner.toLowerCase() !== authEmail.trim().toLowerCase()
 
   const loadVersion = (doc: CostSheetDoc) => {
+    setConfirmNewVersion(false)
     setSelectedId(doc.id)
     setInput(normalizeInputModes(structuredClone(doc.sheet.input)))
     setAutoYarns(doc.sheet.input.yarns.map(() => false))
@@ -233,6 +242,8 @@ export function CostSheetDialog({ open, onOpenChange, rows, canEdit, onSaved, st
   })
   const saveNew = async () => {
     if (!ratioValid) return
+    // 남의 계산서에 새 버전을 올리면 DD 행의 원가 표시가 그 값으로 바뀐다. 한 번 더 묻는다.
+    if (otherOwner && !confirmNewVersion) { setConfirmNewVersion(true); return }
     setSaving(true); setError("")
     try {
       const saved = await saveCostSheet({
@@ -242,10 +253,11 @@ export function CostSheetDialog({ open, onOpenChange, rows, canEdit, onSaved, st
         sheet: buildSheet(), ...(blend ? { blend: { labelText: blend.labelText, label: blend.label } } : {}), note,
       })
       setVersions((items) => [saved, ...items]); setSelectedId(saved.id); onSaved(rowKeyOf(row), refOf(saved))
-    } catch (error) { setError(`계산서 저장에 실패했습니다. 다시 시도해 주세요.${errorTail(error)}`) } finally { setSaving(false) }
+    } catch (error) { setError(`계산서 저장에 실패했습니다. 다시 시도해 주세요.${errorTail(error)}`) } finally { setSaving(false); setConfirmNewVersion(false) }
   }
   const overwrite = async () => {
     if (!current || !ratioValid) return
+    if (!canOverwrite) { setError(`v${current.version}은 ${current.by || "다른 사람"}이 만든 버전이라 고칠 수 없습니다. 새 버전으로 저장해 주세요.`); return }
     setSaving(true); setError("")
     try {
       const updated = { ...current, sheet: buildSheet(), ...(blend ? { blend: { labelText: blend.labelText, label: blend.label } } : { blend: undefined }), note }
@@ -254,11 +266,12 @@ export function CostSheetDialog({ open, onOpenChange, rows, canEdit, onSaved, st
     } catch (error) { setError(`계산서 수정에 실패했습니다. 다시 시도해 주세요.${errorTail(error)}`) } finally { setSaving(false) }
   }
 
+  const closeDialog = () => { setPrinting(false); setConfirmNewVersion(false); onOpenChange(false) }
   const field = "h-8 px-2 text-xs"
-  return <Dialog open={open} onOpenChange={(next) => { if (!next) setPrinting(false); if (!saving) onOpenChange(next) }}>
+  return <Dialog open={open} onOpenChange={(next) => { if (!next) { if (!saving) closeDialog() } else if (!saving) onOpenChange(next) }}>
     <DialogContent className="flex max-h-[92vh] w-[96vw] max-w-none flex-col xl:w-[900px]">
       <DialogHeader>
-        <div className="flex flex-wrap items-center gap-2 pr-8"><DialogTitle className="flex flex-wrap items-baseline gap-2"><span className="text-[10px] font-normal tracking-[0.18em] text-[var(--muted-foreground)]">사전 원가계산서</span><span>{row.flNo?.trim() || "FL 미등록"}</span>{storageNo ? <span className="text-xs font-normal text-[var(--muted-foreground)]">R&amp;D No. {storageNo}</span> : null}</DialogTitle>
+        <div className="flex flex-wrap items-center gap-2 pr-8"><DialogTitle className="flex flex-wrap items-baseline gap-2"><span className="text-[10px] font-normal tracking-[0.18em] text-[var(--muted-foreground)]">사전 원가계산서</span><span>{row.flNo?.trim() || "FL 미등록"}</span>{storageNo ? <span className="text-xs font-normal text-[var(--muted-foreground)]">R&amp;D No. {storageNo}</span> : null}{groupOwner ? <span className="text-xs font-normal text-[var(--muted-foreground)]">주인 {groupOwner}</span> : null}</DialogTitle>
           {current && isCostSheetStale(current) ? <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">계산일이 {Math.floor((Date.now() - current.at) / 86400000)}일 지났습니다</span> : null}
         </div>
         <DialogDescription>국내·생산 원단의 원사와 공정료를 계산합니다.</DialogDescription>
@@ -323,7 +336,7 @@ export function CostSheetDialog({ open, onOpenChange, rows, canEdit, onSaved, st
           <div><Label className="text-[11px]">메모</Label><textarea disabled={!canEdit} value={note} onChange={(event) => setNote(event.target.value)} rows={2} className="mt-1 w-full rounded border border-[var(--input)] bg-transparent px-3 py-2 text-sm disabled:opacity-50" /></div>
         </section>
       </DialogBody>
-      <DialogFooter><span role="alert" className="mr-auto text-xs text-[var(--destructive)]">{error}</span><Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void saveExcel()}><Download className="size-4" />엑셀</Button><Button type="button" size="sm" variant="outline" onClick={() => setPrinting(true)}><Printer className="size-4" />인쇄</Button><Button type="button" size="sm" variant="outline" onClick={() => { setPrinting(false); onOpenChange(false) }}>닫기</Button>{current ? <Button type="button" size="sm" variant="outline" disabled={!canEdit || saving || !ratioValid} onClick={() => void overwrite()}><Save className="size-4" />이 버전 고치기</Button> : null}<Button type="button" size="sm" disabled={!canEdit || saving || !ratioValid} onClick={() => void saveNew()}><Save className="size-4" />{current ? "새 버전으로 저장" : "저장"}</Button></DialogFooter>
+      <DialogFooter>{confirmNewVersion ? <span className="mr-auto text-xs text-[var(--warning)]">{groupOwner}이(가) 만든 계산서입니다. 새 버전을 올리면 DD 행의 원가 표시가 바뀝니다. 버튼을 한 번 더 누르면 저장합니다.</span> : null}<span role="alert" className="mr-auto text-xs text-[var(--destructive)]">{error}</span><Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void saveExcel()}><Download className="size-4" />엑셀</Button><Button type="button" size="sm" variant="outline" onClick={() => setPrinting(true)}><Printer className="size-4" />인쇄</Button><Button type="button" size="sm" variant="outline" onClick={closeDialog}>닫기</Button>{current ? <Button type="button" size="sm" variant="outline" disabled={!canEdit || !canOverwrite || saving || !ratioValid} title={!canOverwrite ? `v${current.version}은 ${current.by || "다른 사람"}이 만든 버전이라 고칠 수 없습니다. 새 버전으로 저장해 주세요.` : undefined} onClick={() => void overwrite()}><Save className="size-4" />이 버전 고치기</Button> : null}<Button type="button" size="sm" disabled={!canEdit || saving || !ratioValid} onClick={() => void saveNew()}><Save className="size-4" />{confirmNewVersion ? "확인, 새 버전 저장" : current ? "새 버전으로 저장" : "저장"}</Button></DialogFooter>
       {printing ? <CostSheetPrintSheet doc={outputDoc()} onDone={() => setPrinting(false)} /> : null}
     </DialogContent>
   </Dialog>

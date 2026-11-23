@@ -134,12 +134,27 @@ export function migrateChartsToBoards(
   }
 }
 
+/**
+ * 보드 종결과 보관함에서 다시 열기 권한(2026-11-23 박향근 확정). 관리자만이다.
+ * 종결은 진행중인 스타일의 결과를 함께 정리해야 하는데 결과 열이 1팀 전용이 됐고,
+ * 3팀이 만든 보드를 3팀이 종결하지 못하는 상태가 생긴다. 그래서 종결은 관리자 하나로 모은다.
+ * 인자 `board`와 `email`은 호출부를 그대로 두려고 남긴다.
+ */
 export function canManageBoard(
-  board: RequestBoard,
-  email: string | null | undefined,
+  _board: RequestBoard,
+  _email: string | null | undefined,
   isOwner: boolean,
 ): boolean {
-  return isOwner || board.createdBy === email
+  return isOwner
+}
+
+/**
+ * DEVELOPMENT REQUEST 안에서 1팀 전용인 동작인가(2026-11-23 박향근 확정).
+ * Remark 열, 결과 열, DD 공정 연결 만들기가 여기에 걸린다.
+ * 보드 만들기와 나머지 칸 작성은 1팀과 3팀 모두 한다.
+ */
+export function canEditTeam1Only(department: string | null | undefined, isOwner: boolean): boolean {
+  return isOwner || department === "fabric1"
 }
 
 export function canDeleteBoard(

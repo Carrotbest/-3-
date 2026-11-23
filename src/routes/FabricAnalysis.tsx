@@ -19,7 +19,7 @@ import { useAuthStore, useScreenAccess } from "@/data/auth"
 import { openAnalysisFinishedMail, openAnalysisRequestMail } from "@/data/analysis-mail"
 import { isAnalysisPrintable } from "@/data/analysis-print"
 import { analysisChartFileName, buildRequestStyleFromAnalysis, hasLiveRequestLink, pickTransferable, transferSkipNotice } from "@/data/analysis-to-request"
-import { analysisLeadDays, analysisTodayValue, analysisWeeklySeries, canDeleteAnalysis } from "@/data/fabric-analysis"
+import { analysisLeadDays, analysisTodayValue, analysisWeeklySeries, canDeleteAnalysis, canEditAnalysisRequest, canEditAnalysisResult } from "@/data/fabric-analysis"
 import { buildRequestWorkbook } from "@/data/request-template"
 import { loadAnalysisRecipients } from "@/data/mail-recipients"
 import type { MailAddress } from "@/data/mail-draft"
@@ -56,6 +56,10 @@ export function FabricAnalysis() {
   const canEdit = access === "edit"
   const isOwner = useAuthStore((state) => state.isOwner)
   const user = useAuthStore((state) => state.user)
+  const department = useAuthStore((state) => state.department)
+  // 의뢰는 1팀, 분석 결과는 3팀이다. 화면 편집 권한과 함께 본다.
+  const canRequest = canEdit && canEditAnalysisRequest(department, isOwner)
+  const canAnalyze = canEdit && canEditAnalysisResult(department, isOwner)
   const defaultName = user?.displayName || user?.email?.split("@")[0] || ""
   const [activeState, setActiveState] = useState<AnalysisState | typeof ALL>(ALL)
   const [urgentOnly, setUrgentOnly] = useState(false)
@@ -148,7 +152,8 @@ export function FabricAnalysis() {
   // 완료 건을 완료 탭 밖에서 고치는 길은 이것으로 함께 막힌다.
   // 삭제와 메일은 가리지 않는다. 권한만 보는 것이 R301에서 정한 규칙이다.
   const previewOnly = activeState === ALL
-  const detailCanEdit = canEdit && !previewOnly
+  const detailCanEditRequest = canRequest && !previewOnly
+  const detailCanEditResult = canAnalyze && !previewOnly
   const monthPrefix = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
   const recentStart = Date.now() - 90 * 86_400_000
   const leadDays = rows.map((item) => ({ item, days: analysisLeadDays(item) })).filter(({ item, days }) => days != null && new Date(`${item.finishedAt}T00:00:00`).getTime() >= recentStart).map(({ days }) => days as number)
@@ -344,18 +349,18 @@ export function FabricAnalysis() {
         {/* 그 탭에서 쓸 수 없는 버튼은 뜨지 않는다(R348). 탭마다 보이는 행은 한 상태뿐이다. */}
         <div className="flex min-h-9 flex-1 flex-wrap items-center justify-center gap-2 text-sm">{!previewOnly && selected.size ? <>
           <span className="rounded-md bg-teal-500/10 px-2 py-1">{selected.size}건 선택</span>
-          {activeState === "작성" && canEdit ? <Button size="sm" className="bg-teal-600 text-white hover:bg-teal-700" onClick={() => confirmRequests(draftSelected)}><Mail />의뢰 확정</Button> : null}
+          {activeState === "작성" && canRequest ? <Button size="sm" className="bg-teal-600 text-white hover:bg-teal-700" onClick={() => confirmRequests(draftSelected)}><Mail />의뢰 확정</Button> : null}
           {activeState === "의뢰" ? <Button size="sm" className="bg-teal-600 text-white hover:bg-teal-700" onClick={requestMail}><Mail />의뢰 메일 발송</Button> : null}
-          {activeState === "의뢰" && canEdit ? <Button size="sm" variant="outline" onClick={() => completeRequests(requestedSelected)}>완료 처리</Button> : null}
-          {activeState === "의뢰" && canEdit ? <Button size="sm" variant="outline" onClick={() => revertToDraft(requestedSelected)}>작성으로 되돌리기</Button> : null}
+          {activeState === "의뢰" && canAnalyze ? <Button size="sm" variant="outline" onClick={() => completeRequests(requestedSelected)}>완료 처리</Button> : null}
+          {activeState === "의뢰" && canRequest ? <Button size="sm" variant="outline" onClick={() => revertToDraft(requestedSelected)}>작성으로 되돌리기</Button> : null}
           {activeState === "완료" ? <Button size="sm" className="bg-teal-600 text-white hover:bg-teal-700" onClick={finishedMail}><Mail />완료 메일 발송</Button> : null}
-          {activeState === "완료" && canEdit ? <Button size="sm" variant="outline" disabled={!finishedSelected.length} title="고른 완료 건을 DEVELOPMENT REQUEST 스타일로 만듭니다" onClick={transferToRequest}><Send />개발 의뢰로 넘기기</Button> : null}
+          {activeState === "완료" && canAnalyze ? <Button size="sm" variant="outline" disabled={!finishedSelected.length} title="고른 완료 건을 DEVELOPMENT REQUEST 스타일로 만듭니다" onClick={transferToRequest}><Send />개발 의뢰로 넘기기</Button> : null}
           {activeState === "완료" ? <Button size="sm" variant="outline" disabled={!finishedSelected.length} title="의뢰 양식 그대로의 엑셀로 받습니다" onClick={() => void downloadRequestChart()}><FileSpreadsheet />엑셀 차트 내려받기</Button> : null}
-          {activeState === "완료" && canEdit ? <Button size="sm" variant="outline" onClick={() => revertToRequested(finishedSelected)}>의뢰로 되돌리기</Button> : null}
+          {activeState === "완료" && canAnalyze ? <Button size="sm" variant="outline" onClick={() => revertToRequested(finishedSelected)}>의뢰로 되돌리기</Button> : null}
           {canEdit ? <Button size="sm" variant="outline" disabled={!deletableSelected.length} title={deletableSelected.length ? "선택한 의뢰를 지웁니다" : "만든 사람과 관리자만 지울 수 있습니다"} onClick={deleteSelected}><Trash2 />삭제</Button> : null}
           <Button size="sm" variant="outline" disabled={!printableSelected.length} title="완료 건은 분석 리포트, 그 밖에는 분석 의뢰서로 나갑니다" onClick={() => startPrint(printableSelected)}><Printer />출력</Button>
         </> : null}</div>
-        <div className="flex items-center gap-2 lg:w-full lg:max-w-xl">{canEdit && activeState === "작성" ? <ShinyActionButton tone="teal" icon={<Plus />} onClick={() => { setEditRecord(null); setRequestOpen(true) }}>새 분석 의뢰</ShinyActionButton> : null}<Input className="min-w-0 flex-1" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="AN No. · Source code · Brand · Requester 검색" /></div></div>
+        <div className="flex items-center gap-2 lg:w-full lg:max-w-xl">{canRequest && activeState === "작성" ? <ShinyActionButton tone="teal" icon={<Plus />} onClick={() => { setEditRecord(null); setRequestOpen(true) }}>새 분석 의뢰</ShinyActionButton> : null}<Input className="min-w-0 flex-1" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="AN No. · Source code · Brand · Requester 검색" /></div></div>
         {urgentOnly ? <p className="text-xs text-rose-600">Urgent 대기만 표시 중</p> : null}
         {notice ? <p className="text-sm text-[var(--muted-foreground)]">{notice}</p> : null}
       </CardHeader>
@@ -379,12 +384,12 @@ export function FabricAnalysis() {
             })
           }}
         ><Checkbox className="data-[state=checked]:border-teal-600 data-[state=checked]:bg-teal-600" checked={selected.has(item.id)} onCheckedChange={() => setSelected((current) => { const next = new Set(current); next.has(item.id) ? next.delete(item.id) : next.add(item.id); return next })} aria-label={`${item.anNo} 선택`} /></TableCell>}
-        <TableCell><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] ${stateClass[item.state]}`}><i className={`size-1.5 rounded-full ${stateDot[item.state]}`} />{item.state}</span></TableCell><TableCell><ImageThumb path={item.imageThumbPath || item.imagePath} label={item.anNo} /></TableCell><TableCell className="font-medium tabular-nums">{item.anNo}{hasLiveRequestLink(item, liveReqIds) ? <span className="ml-1.5 rounded-sm bg-sky-500/15 px-1 py-0.5 text-[10px] font-medium text-sky-700 dark:text-sky-300" title="개발 의뢰로 넘긴 건입니다">REQ</span> : null}</TableCell><TableCell>{item.requestedAt || "-"}</TableCell><TableCell>{item.requestType === "Urgent" ? <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[11px] text-rose-700 dark:text-rose-300">Urgent</span> : "Normal"}</TableCell><TableCell>{item.requester}</TableCell><TableCell>{item.brand || "-"}</TableCell><TableCell>{item.sourceCode || "-"}</TableCell><TableCell>{item.construction || "-"}</TableCell><TableCell>{item.contents || "-"}</TableCell><TableCell>{item.weight === "" ? "-" : item.weight}</TableCell><TableCell className="max-w-56 truncate">{item.description}</TableCell><TableCell>{item.inCharge || "-"}</TableCell><TableCell>{item.finishedAt || "-"}</TableCell><TableCell className="max-w-64 truncate">{item.yarnDescription || item.commentRnd || "-"}</TableCell><TableCell onClick={(event) => event.stopPropagation()}>{previewOnly ? null : item.state === "작성" && canEdit ? <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={(event) => { event.stopPropagation(); confirmRequests([item]) }}>의뢰</Button> : item.state === "의뢰" && canEdit ? <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={(event) => { event.stopPropagation(); completeRequests([item]) }}>완료</Button> : item.state === "완료" ? <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={(event) => { event.stopPropagation(); void openAnalysisFinishedMail([item], recipients).then((result) => showNotice(result === "mailto" ? "본문을 복사했습니다. Outlook 새 메일 본문 첫 줄에서 Ctrl+V 하세요. 서명은 그 아래 그대로 남습니다." : "클립보드 복사에 실패해 .eml 파일을 내려받았습니다.")) }}>메일</Button> : null}</TableCell>
+        <TableCell><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] ${stateClass[item.state]}`}><i className={`size-1.5 rounded-full ${stateDot[item.state]}`} />{item.state}</span></TableCell><TableCell><ImageThumb path={item.imageThumbPath || item.imagePath} label={item.anNo} /></TableCell><TableCell className="font-medium tabular-nums">{item.anNo}{hasLiveRequestLink(item, liveReqIds) ? <span className="ml-1.5 rounded-sm bg-sky-500/15 px-1 py-0.5 text-[10px] font-medium text-sky-700 dark:text-sky-300" title="개발 의뢰로 넘긴 건입니다">REQ</span> : null}</TableCell><TableCell>{item.requestedAt || "-"}</TableCell><TableCell>{item.requestType === "Urgent" ? <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[11px] text-rose-700 dark:text-rose-300">Urgent</span> : "Normal"}</TableCell><TableCell>{item.requester}</TableCell><TableCell>{item.brand || "-"}</TableCell><TableCell>{item.sourceCode || "-"}</TableCell><TableCell>{item.construction || "-"}</TableCell><TableCell>{item.contents || "-"}</TableCell><TableCell>{item.weight === "" ? "-" : item.weight}</TableCell><TableCell className="max-w-56 truncate">{item.description}</TableCell><TableCell>{item.inCharge || "-"}</TableCell><TableCell>{item.finishedAt || "-"}</TableCell><TableCell className="max-w-64 truncate">{item.yarnDescription || item.commentRnd || "-"}</TableCell><TableCell onClick={(event) => event.stopPropagation()}>{previewOnly ? null : item.state === "작성" && canRequest ? <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={(event) => { event.stopPropagation(); confirmRequests([item]) }}>의뢰</Button> : item.state === "의뢰" && canAnalyze ? <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={(event) => { event.stopPropagation(); completeRequests([item]) }}>완료</Button> : item.state === "완료" ? <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={(event) => { event.stopPropagation(); void openAnalysisFinishedMail([item], recipients).then((result) => showNotice(result === "mailto" ? "본문을 복사했습니다. Outlook 새 메일 본문 첫 줄에서 Ctrl+V 하세요. 서명은 그 아래 그대로 남습니다." : "클립보드 복사에 실패해 .eml 파일을 내려받았습니다.")) }}>메일</Button> : null}</TableCell>
       </TableRow>) : <TableRow><TableCell colSpan={previewOnly ? 16 : 17} className="h-32 text-center text-[var(--muted-foreground)]">표시할 분석 의뢰가 없습니다.</TableCell></TableRow>}</TableBody></Table></div></CardContent>
     </Card>
 
     <AnalysisRequestDialog open={requestOpen} onOpenChange={setRequestOpen} record={editRecord} requester={defaultName} requesterEmail={user?.email ?? ""} onSaved={(saved) => { if (editRecord) setDetail(saved) }} />
-    <AnalysisDetailDialog record={detail} canEdit={detailCanEdit} defaultInCharge={defaultName} recipients={recipients} onOpenChange={(open) => { if (!open) setDetail(null) }} onSave={saveOne} onPrint={(record) => startPrint([record])} onEditRequest={(selectedRecord) => { setDetail(null); setEditRecord(selectedRecord); setRequestOpen(true) }} />
+    <AnalysisDetailDialog record={detail} canEditRequest={detailCanEditRequest} canEditResult={detailCanEditResult} defaultInCharge={defaultName} recipients={recipients} onOpenChange={(open) => { if (!open) setDetail(null) }} onSave={saveOne} onPrint={(record) => startPrint([record])} onEditRequest={(selectedRecord) => { setDetail(null); setEditRecord(selectedRecord); setRequestOpen(true) }} />
     {printJob ? <AnalysisPrintDeck records={printJob} onDone={() => setPrintJob(null)} /> : null}
   </section>
 }
