@@ -3710,6 +3710,30 @@
   ]
  },
  {
+  "key": "e489ea78fc3b457a",
+  "title": "UK to raise minimum wages across age groups from April 2027",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMizgFBVV95cUxPM1o0NzdpUDVYcTd6N3JCcTdKaUc2TWFHM2s2by1UNms1QmZHZTdtbElZQVlUcHVkSzlvY1BkVzc0ZVJkZ1lpaGhneTBBNnFuMjdGOEhpOGxlMkN0cmpjTkRTcVNFS1BjTkNRQUlQckpZejkwbEpzSUtDdDBUbWxBR0NrYkVLVFhhYWhzWEpmeUFBMUlPTktLWHZHSTVOOWpySzZMX1QzN1FtRVJaVTB0QThtOURrX21jUC0zckR2bmNMYkk1eUVXRXEydS1CUQ?oc=5",
+  "published": "2026-10-29",
+  "collected": "2026-11-24",
+  "summary": "UK to raise minimum wages across age groups from April 2027 Fibre2Fashion",
+  "content": "UK to raise minimum wages across age groups from April 2027 Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "e16d233db382100a",
   "title": "3 Penny Stocks With Revenue Growth Up To 34%",
   "title_ko": null,
@@ -5685,10 +5709,11 @@
   "score": 14,
   "relevant": true,
   "gate": "material",
-  "hits": 2,
+  "hits": 3,
   "sources": [
    "Textile Today",
-   "주제검색 · 신소재"
+   "주제검색 · 신소재",
+   "주제검색 · 염색가공"
   ]
  },
  {
@@ -7044,6 +7069,33 @@
   "hits": 1,
   "sources": [
    "Ecotextile News"
+  ]
+ },
+ {
+  "key": "e2b8e1ce11ebcebf",
+  "title": "| PC yarn prices rise in India; polyester, viscose & cotton fall",
+  "title_ko": "| 인도 PC 원사 가격 상승; 폴리에스테르, 비스코스, 면 가을",
+  "link": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxPRFJ2aWpCQjZOblhPM0I3RldXN0tsNW10WHM4N2ljbmxJSjZIaUdxYXVEcXJYdHZkS0FiUkFlQXZpbmJmT0dwQzY5dXBsZ01FYUd2N3lOQ1RrbEE1OVVDdWNicGRWemdmNUxjY193YWtEdDAxMF85V3dnSnFmY0lyLTFSTzluLVB1MloxejhoaXk5VFBNZjZ2VnJXVXk1emFVTFlGSC1YNGI0MFFYbzhOZ1NwLTNkQnBOODAtMGxQLThnNmdDNkpTdURZRFYyUU1sNGFGa0hjQ3BuQmR5Sm5KYQ?oc=5",
+  "published": "2026-10-28",
+  "collected": "2026-11-24",
+  "summary": "| PC yarn prices rise in India; polyester, viscose & cotton fall Fibre2Fashion",
+  "content": "| PC yarn prices rise in India; polyester, viscose & cotton fall Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "비스코스",
+   "원사가격"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -11819,6 +11871,54 @@
   ]
  },
  {
+  "key": "417666dbcb171d88",
+  "title": "ICE cotton tumbles as rising stocks and firm dollar pressure prices",
+  "title_ko": "ICE 면화는 주가 상승과 확고한 달러 압력으로 하락",
+  "link": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxOMjJ6bmVzLXZoWEpTNGhsRlJRWE1XTzAzODZabDFPQTdTSUZsX1ItUV90X1VvMlNrbUFvYnM5VGJEdGlkc3BVN1d6R1Qtc0ZHNDFKR21rZjNUemctbWxxdDBkcEZwZWI2VmVMSVFjNl9HR3ZkMnd1Xzd3cWd1WHdzeG44cHl0TlRIVGlOa25weDg1elVIdlVRcGgwZHRpaktJay1MY3YzUGNuMlduNFVUa01BVEpzWk1tN0hJOThIZy05NUdFRmMwT0t2T0luVDJkdGZBaA?oc=5",
+  "published": "2026-10-27",
+  "collected": "2026-11-24",
+  "summary": "ICE cotton tumbles as rising stocks and firm dollar pressure prices Fibre2Fashion",
+  "content": "ICE cotton tumbles as rising stocks and firm dollar pressure prices Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "40d8af8ba46e2ed8",
+  "title": "Energy Transition in Textile Manufacturing: Regional Progress and Gaps",
+  "title_ko": "섬유 제조의 에너지 전환: 지역적 발전과 격차",
+  "link": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxPeVc1ZThXdXFxb1QyWTIxeU5LTmtVdFRZRHBGdmQ3bm5rdllLWGhaQ0ZNOF9nTHJvUzcxbmQ2SnRHUUZCTTJQcmRwN1JvNmI4MXJCSXN2M0dadXA4akJkN3dmRlB2ZVFOTTNLZFpZRkVxaHVteDJEcVdNdTBqby1lY19YZlBoUXBrUmdIMXF0UGdZZG1sVndPb3JBblRhZW1NZGNxRzhJajZ1UmFYSURJNU5mQWNoMHJ0WEItWHFtS292cVRyUTdHTUlYX3U5c0NkV0dn?oc=5",
+  "published": "2026-10-27",
+  "collected": "2026-11-24",
+  "summary": "Energy Transition in Textile Manufacturing: Regional Progress and Gaps Fibre2Fashion",
+  "content": "Energy Transition in Textile Manufacturing: Regional Progress and Gaps Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "4029e0d04e6a3fc7",
   "title": "Woolmark launches Return to Real platform for Merino wool",
   "title_ko": "울마크(Woolmark), 메리노 울용 리턴 투 리얼(Return to Real) 플랫폼 출시",
@@ -13413,6 +13513,30 @@
   ]
  },
  {
+  "key": "9fd8c543fe3cfa2a",
+  "title": "| PTA, polyester melt prices down in India; mixed trend in China",
+  "title_ko": "| PTA, 인도 폴리에스테르 용해 가격 하락; 중국의 혼합 추세",
+  "link": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxQMzA3UUs0S1Z2TnUzbFd6bDRtWVFnNXp6WEZab185SDBTZTlTV2VLT2R4Zk5ZV2ZSbUtyd0JYZUg3M3BhMk9HeEphbmVMd3lNOUtUNnFBYmNkT0ZsT3U0ZFdMdWRwc1BWZ0lEbkRKTVY2RkNZOVZLbGlEWGZkcGdSU1B0SEdKTk93SkdsWjUzWGFRRzFWdlhsMDNLdF9ldzZiOFFSQ1Z0VlNoUm9venJvTUlXd1VQSDNVOG0wazdHcTFxRlB2X09IaHFEek1FX3gyQWVtSGY0dmhjZVR1OTZTNEthdw?oc=5",
+  "published": "2026-10-26",
+  "collected": "2026-11-24",
+  "summary": "| PTA, polyester melt prices down in India; mixed trend in China Fibre2Fashion",
+  "content": "| PTA, polyester melt prices down in India; mixed trend in China Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "9bcd50665fe18718",
   "title": "[정희로운칼럼] 아라미드 강국의 역설",
   "title_ko": "[정희로운칼럼] 아라미드 강국의 역설",
@@ -13436,6 +13560,32 @@
   "hits": 1,
   "sources": [
    "국제섬유신문"
+  ]
+ },
+ {
+  "key": "99dcd58a579c7029",
+  "title": "태광산업 나일론·대한화섬 폴리에스터 결합 ‘에이스포라 에코’ 친환경 소재로 거듭 진화",
+  "title_ko": "태광산업 나일론·대한화섬 폴리에스터 결합 ‘에이스포라 에코’ 친환경 소재로 거듭 진화",
+  "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1tRkxMeEtfVzR1cDZhb0M3aE1HMnN3WmpvTi1BSlB6TUFRREltRFNMSzNGQUJPUVVBNnZIT25oa0kxX19aQUVWcGtCT0J0ZGF2dmhwRzRCOVU3b1BqV3VnX2JBbkxSQjg0aGtreg?oc=5",
+  "published": "2026-10-26",
+  "collected": "2026-11-24",
+  "summary": "태광산업 나일론·대한화섬 폴리에스터 결합 ‘에이스포라 에코’ 친환경 소재로 거듭 진화 중소기업신문",
+  "content": "태광산업 나일론·대한화섬 폴리에스터 결합 ‘에이스포라 에코’ 친환경 소재로 거듭 진화 중소기업신문",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 국내소재",
+  "region": "국내",
+  "category": "MATERIAL",
+  "tags": [
+   "나일론"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 국내소재"
   ]
  },
  {
@@ -13683,6 +13833,30 @@
   "score": 4,
   "relevant": false,
   "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "89d2235a1ecc9e68",
+  "title": "| North India's cotton yarn market stable, liquidity remains tight",
+  "title_ko": "| 인도 북부 면사 시장은 안정적이고 유동성은 여전히 ​​부족함",
+  "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxNclFUZEEwMW03NzJPTmFkcEJ3NkVjSmk3M0tzeVg0dURJS0ZmZjltMWtYMlpKYjJReUVrWWVaSDZLOWIwNlRnUzFzVy1BYTZjLU50VTR3V2Q1a19kam1yN3l2SnNuQ3J1WWFGUlNHcmZnY1hSSUtLNEhwWmZiWDJwd0hWOFdDSUtRZWhhbUJlTXVjOGJ5RHJ0QjNnLU4xdEUxdDlVZFZuS05rYUpDTlFkdzN4eUVRbmNqd19rOFZ5TkpWRmJ6bmFINTQzT3YxVjV5b2NocjRkLVdNUTVVWDI5UlpKUmtpdGc?oc=5",
+  "published": "2026-10-26",
+  "collected": "2026-11-24",
+  "summary": "| North India's cotton yarn market stable, liquidity remains tight Fibre2Fashion",
+  "content": "| North India's cotton yarn market stable, liquidity remains tight Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
   "hits": 1,
   "sources": [
    "Fibre2Fashion"
@@ -14380,6 +14554,32 @@
   "hits": 1,
   "sources": [
    "바이어 · Nike"
+  ]
+ },
+ {
+  "key": "5cbca8ea9d4400c1",
+  "title": "태광산업·대한화섬, 재활용 넘어 바이오 소재까지… 친환경 원사 개발 확대",
+  "title_ko": "태광산업·대한화섬, 재활용 넘어 바이오 소재까지… 친환경 원사 개발 확대",
+  "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE16VTRQZG0tSzZ5ZmdLUXhGRlU5QmRrNnlmZE0zRFFGVnFES1BGM2p5aUR1akd6N3dCMGRkRnFMZEE0TGVoVTAwXzBBdFBDWHF6Y084V3BKTWk2cFBVQ2p1cUVtZ1N2Sk9BN2FkU3pZREw?oc=5",
+  "published": "2026-10-26",
+  "collected": "2026-11-24",
+  "summary": "태광산업·대한화섬, 재활용 넘어 바이오 소재까지… 친환경 원사 개발 확대 비즈트리뷴",
+  "content": "태광산업·대한화섬, 재활용 넘어 바이오 소재까지… 친환경 원사 개발 확대 비즈트리뷴",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 국내소재",
+  "region": "국내",
+  "category": "YARN",
+  "tags": [
+   "바이오소재"
+  ],
+  "entities": [],
+  "score": 13,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 국내소재"
   ]
  },
  {
@@ -16118,9 +16318,10 @@
   "score": 2,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Textile Today"
+   "Textile Today",
+   "주제검색 · 염색가공"
   ]
  },
  {
@@ -17393,9 +17594,10 @@
   "score": 5,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Textile Today"
+   "Textile Today",
+   "주제검색 · 염색가공"
   ]
  },
  {
@@ -17887,6 +18089,30 @@
   "hits": 1,
   "sources": [
    "한국섬유신문"
+  ]
+ },
+ {
+  "key": "da94f0f47345eaea",
+  "title": "| South Indian cotton yarn sentiment improves, Mumbai prices rise",
+  "title_ko": "| 인도 남부 면사 정서 개선, 뭄바이 가격 상승",
+  "link": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxNT3pfX3hFbk9BSm5waUtKTTVPeUdmNlN3dlVrblIzTFF2bUNENWZVMHYzc2o5Y1RUVThRbkI3TmszbVAzR0NTRmhtQ2ZQcUNydEpneTRuWU5NODhPR1FwYmpMX2dmSWQ5LTVOaWM2RWNLbVl4bS12V1Z3a3FLeUU3bmVkQ1p4cWc3WUNhRnNybFJYQUlvUEdaZ2hELTBwYWI1UGh6X1YyeE84SVhuQ2cwTmFUX0NEejZPNHJjSFZnUmRldjlxZ0xqS1NPeEMzd0ZaaVdSeUF5ZVhfVm5SeFdWejkyNGEwZw?oc=5",
+  "published": "2026-10-23",
+  "collected": "2026-11-24",
+  "summary": "| South Indian cotton yarn sentiment improves, Mumbai prices rise Fibre2Fashion",
+  "content": "| South Indian cotton yarn sentiment improves, Mumbai prices rise Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
   ]
  },
  {
@@ -19826,6 +20052,30 @@
   ]
  },
  {
+  "key": "1f744e626b35b16f",
+  "title": "Athletic apparel stocks fall sharply as retail selloff spreads, signaling cautious holiday spending ahead.",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxQWmNMSUVWRGxuYlAzc0tyVnVmV1hIUm9CX1VhQm9LYXl6Q1RxeDlSMW4wR1pxVU9xeWNYdTNZblVqbnI4M1RUMi1yNi1FVHBPaXY4a0RFSi1od3ZOM1JGZVVVRFNGb1lLa1phVFdBS3A5MEFiNmdqalJzd3A2SzBRNTZQV2Y3STBkeTFUTW1fWFNmN1hPSDVv?oc=5",
+  "published": "2026-10-23",
+  "collected": "2026-11-24",
+  "summary": "Athletic apparel stocks fall sharply as retail selloff spreads, signaling cautious holiday spending ahead. Pluang",
+  "content": "Athletic apparel stocks fall sharply as retail selloff spreads, signaling cautious holiday spending ahead. Pluang",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Under Armour",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Under Armour"
+  ]
+ },
+ {
   "key": "1db2840f13621f2b",
   "title": "France's Showroomprivé returns to Q3 revenue growth",
   "title_ko": null,
@@ -20634,6 +20884,30 @@
   "hits": 1,
   "sources": [
    "Just Style"
+  ]
+ },
+ {
+  "key": "cf4ff97cc94ab0cf",
+  "title": "Dr. Refael Aharon Launches New Waste Mining Platform",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPZXQ2MHNnZnBwZEdOLXNCYzZucEgtLUU0VXNFRGxQcEs4Vk15ZUJjRDJ1T3pHYlplNGFfREUzbFdoN2ZQUVV5NXJaNTJyeURPbEFXV19Zcm5odmZ5ZGNqX1c5SG5lWF9rU3VRUEJhQzFVcl9tMnplV0FWTEp2S0NpTEEtd1g5a01OanIyaGhhLUlwamMtTE8zeGVGRmMxX2JJZ0Y1V1pvNnM?oc=5",
+  "published": "2026-10-22",
+  "collected": "2026-11-24",
+  "summary": "Dr. Refael Aharon Launches New Waste Mining Platform Kitsap Sun",
+  "content": "Dr. Refael Aharon Launches New Waste Mining Platform Kitsap Sun",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -22626,6 +22900,30 @@
   ]
  },
  {
+  "key": "30553e43f161901f",
+  "title": "R|Elan × HUEMN reimagine the language of modern athleisure at Lakmē Fashion Week in partnership with FDCI",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE1EMEsweWhRVks3RkZrRE50LVJEd1VDX20yb2x2NXlaalRLejV2SnlGel9PY0hva09uczJCY3RmeWpwMDYxREtTXzlXbWJDVEZJeDluTHBwWHluTUlhc3dzUl93?oc=5",
+  "published": "2026-10-22",
+  "collected": "2026-11-24",
+  "summary": "R|Elan × HUEMN reimagine the language of modern athleisure at Lakmē Fashion Week in partnership with FDCI IFAB MEDIA",
+  "content": "R|Elan × HUEMN reimagine the language of modern athleisure at Lakmē Fashion Week in partnership with FDCI IFAB MEDIA",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
+  ]
+ },
+ {
   "key": "2fb6f6cb1f8c8c32",
   "title": "연선플러스, 한국 패션브랜드 일본 수출시장 개척 나서",
   "title_ko": "연선플러스, 한국 패션브랜드 일본 수출시장 개척 나서",
@@ -22888,6 +23186,30 @@
   "score": 10,
   "relevant": true,
   "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
+  "key": "21b70da19b21e2f5",
+  "title": "| US apparel imports from Peru fall 10.4% as supplier trends diverge",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxQSDh5UHYyQzBvMjBDd3RpenJJZnVJbHZFd003VldPMFg3OXRnbFJsYkNlRnVhUEN5SEExMUZfbm9SNjByeDBrTkM2Vk1ObnJWTnRBdHgwaFdwSnFBTEZoaF9nMU9Kc1lEaDBSLVl3MkE2RERFLWNFMUtBRkZQZ2c1WE5pd3MtNjlOSXN5Y0p3a2hhSDhGM3FTNDBqTzh0S0dSaDBuSjA5Qk9ud2o1cVhacGExMVUtdmpPYVRRVFhfXzZlZ3RUSVNuQ0xZdWhOZVhNTWhEcThBSjFKcW5aY2MxaFp3XzItbXNLNjRlTHJxaW4?oc=5",
+  "published": "2026-10-22",
+  "collected": "2026-11-24",
+  "summary": "| US apparel imports from Peru fall 10.4% as supplier trends diverge Fibre2Fashion",
+  "content": "| US apparel imports from Peru fall 10.4% as supplier trends diverge Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
   "hits": 1,
   "sources": [
    "Fibre2Fashion"
@@ -24492,6 +24814,33 @@
   ]
  },
  {
+  "key": "8db66e7c89d44847",
+  "title": "| Polyester & viscose yarn prices fall in India amid weak demand",
+  "title_ko": "| 인도 수요 감소로 폴리에스터 및 비스코스 원사 가격 하락",
+  "link": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxOUXdLME9BT1BSYjRSVlNkMWZhTG5Gem8tNmEycktLcEFpYnB2MjlETnNiU0ZkVVlsZkNIZ0hhMzVkeUozUW44U3lGa2Q1aFRxMlpXbXRQNG1qNEo4RkMzTE9TVU10dHZwTmhIU1pLZUE0dUlsTDJ3R0RiWXphWURCcWVLSHlFTERNVGtpVExMUWRFaERKXzNZWUJPZ2ZXU2FyVUFoVVVka1g5ajdQQ096aFgzRmJ5RXp0THB4WUpPbUtCX3pCOFZXZzVaeUhlRm9aZHZUWlVJY21Mc2p6SGtFRkFIYw?oc=5",
+  "published": "2026-10-21",
+  "collected": "2026-11-24",
+  "summary": "| Polyester & viscose yarn prices fall in India amid weak demand Fibre2Fashion",
+  "content": "| Polyester & viscose yarn prices fall in India amid weak demand Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [
+   "비스코스",
+   "원사가격"
+  ],
+  "entities": [],
+  "score": 10,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "8bb840100c611269",
   "title": "Archroma, Prosperity Textile partner for sustainable denim innovation",
   "title_ko": "Archroma, 지속 가능한 데님 혁신을 위한 Prosperity Textile 파트너",
@@ -24637,6 +24986,30 @@
   "hits": 1,
   "sources": [
    "Apparel Resources"
+  ]
+ },
+ {
+  "key": "7b4b73b98e60a117",
+  "title": "Rewarding move away from MMCF: Canopy unveils new Hot Button criteria",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxNV250Q0o0Mkd2bnZzVjhXUlNQOVUxcEZnUUp3VDctdm9SWnQxT2RYZXJNcXBmV1BDRVdiZEwxbGpKSjdTSVJ3WmhlNEFleGRxb0lvQVdXVUhaQVBZWVNiOWVlUk1KUU9MX1dSWkFNQnE2UFVrcWt0S2Jjbl9BdEVvTjVoUklCbnZsM1BjZVZDRk9IeWFMN1BWRTI5SVZtQlB0TTR3T3pia09fQQ?oc=5",
+  "published": "2026-10-21",
+  "collected": "2026-11-24",
+  "summary": "Rewarding move away from MMCF: Canopy unveils new Hot Button criteria Green Retail World",
+  "content": "Rewarding move away from MMCF: Canopy unveils new Hot Button criteria Green Retail World",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -24932,6 +25305,30 @@
   "hits": 1,
   "sources": [
    "한국섬유신문"
+  ]
+ },
+ {
+  "key": "56295fd090f99045",
+  "title": "Lahore heritage initiative trains next generation of conservation specialists",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOdDh2MTBDeXl0QTV6enpDOS1jT1ZzeEVQTEhqXzZsUm9RbW1RTUlldlFyRzRlTGF4TkwzMGVCYU0zSDFWVzkzTU55a0RsRXJVVjR5ajlxTmhBTzk4NlZObVZDLVBweW5Hakl5N0dzeUppZ1NQeTM5ekhwOVA2amRSaFZDSGhJa3BmUDJad2NDbE90VXBEWVV6UThZekVGcnNTMklFbWotajhOblZRaDRFWXh5ZHNqWllHa0paQ2RQXy1DVWJ4aklkTnJPYmZKTmkx?oc=5",
+  "published": "2026-10-21",
+  "collected": "2026-11-24",
+  "summary": "Lahore heritage initiative trains next generation of conservation specialists AP News",
+  "content": "Lahore heritage initiative trains next generation of conservation specialists AP News",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -34664,6 +35061,32 @@
   ]
  },
  {
+  "key": "60f8a2d8184db3f8",
+  "title": "Costco Stock Rides Membership Surge and Digital Sales Toward Best Week Since May",
+  "title_ko": "Costco 주가 상승으로 회원 급증 및 디지털 판매가 5월 이후 최고의 주를 향하여",
+  "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFB0UnZsZG9ZWWctRTRldGs5emNjczExaVFWMC1lMDQ4ajVaS2Z4Q3I3NXdZU25kT0NiR3hidjdrQmxlZDlfU3VZa3pYZWxfajk4ZXlBWW5mSGFUQjM3V2V6VThFUnVYUXlNT2pmRXFqNUlLdUN0SGc?oc=5",
+  "published": "2026-10-16",
+  "collected": "2026-11-24",
+  "summary": "Costco Stock Rides Membership Surge and Digital Sales Toward Best Week Since May BigGo Finance",
+  "content": "Costco Stock Rides Membership Surge and Digital Sales Toward Best Week Since May BigGo Finance",
+  "image": "",
+  "image_tried": null,
+  "source": "바이어 · Costco",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [
+   "costco"
+  ],
+  "score": 0,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "바이어 · Costco"
+  ]
+ },
+ {
   "key": "5e57efff320dc40c",
   "title": "데상트, 이스트로그와 두 번째 협업…윈드브레이커부터 헤비다운까지",
   "title_ko": "데상트, 이스트로그와 두 번째 협업…윈드브레이커부터 헤비다운까지",
@@ -38251,6 +38674,30 @@
   "hits": 1,
   "sources": [
    "Apparel Resources"
+  ]
+ },
+ {
+  "key": "4c919271083c2f17",
+  "title": "At Jio's IPO, next-generation Ambanis take the reins",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxOUlhGUlFjMXRKTWZ0dGJDLWJZRGcxS09pMDNZR0xMbk15NDRUSkduTzZnTUNqUFBBaFFZUXJpMVlLVHhCYnRuTnowVVpKUmlvWm5hZFJGZ2NITnpHdHVyRlF5TFRSSC1jR3BMOXBTZ05Tc2I0M2JtOThkeGE4ODN0V3Z6MVpQTVV5LVZPVi1BZlZ3UlBtZmV3eDB6a1oxRXRDa3fSAa8BQVVfeXFMTk1pQnRST3EyRVlDUE1UdmNKVGRBX0dXcWFMZ3FyeUY3bWU1REdqQ2V5WTFHUTY1LUk0QlkyUFBlNHRwOURTeWJhNU9NaVlfOU5oMnRXd1U5X0QxdEdKOUJrOUZpV0V2RXB2ajN0bW5qa0pGVjB0c1lEYmNSbngwREQtSkQ4Tk1RVVBmT3QxeHBJTFhCMHdFeHEzZWxBQ1hadDZacElwX3NxWU0yNmJ3RQ?oc=5",
+  "published": "2026-10-15",
+  "collected": "2026-11-24",
+  "summary": "At Jio's IPO, next-generation Ambanis take the reins Fortune India",
+  "content": "At Jio's IPO, next-generation Ambanis take the reins Fortune India",
+  "image": "",
+  "image_tried": null,
+  "source": "주제검색 · 신소재",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 1,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "주제검색 · 신소재"
   ]
  },
  {
@@ -43657,6 +44104,30 @@
   ]
  },
  {
+  "key": "bf9e600be2ba1eb9",
+  "title": "| Why textile mills stay at 71% capacity despite export growth",
+  "title_ko": "| 수출 증가에도 불구하고 섬유 공장의 생산 능력이 71%로 유지되는 이유",
+  "link": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxOSjNaRS1zM1BmT3d1ZEYtQ3MzclJGTGk3SGkzVl9nMHk1WXFZT2xDT2pwX1dnT1lmcGN0YnJSUVJFdUZjWGRIcWc2SUFjTUxfck54S3FxdlpQRmxrSDdEZ0dmMUlSOEUxblpIVmpsc3VmRklZR3hEZGlpVndyUTRDM1M3cTBldmJnWU9CZlVUTVZyRVlKTVI3TmNxOHQ2NGV3T3JGVXdOQjRWN3cwSWlNbmItdnczQ3MyVWwxTnBGV3B6OE54NXphNlZNZ2ZtSkszMlhkYXl3RGpFQlF6QTg0RkVXdkJaaXJlY3c?oc=5",
+  "published": "2026-10-13",
+  "collected": "2026-11-24",
+  "summary": "| Why textile mills stay at 71% capacity despite export growth Fibre2Fashion",
+  "content": "| Why textile mills stay at 71% capacity despite export growth Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "MATERIAL",
+  "tags": [],
+  "entities": [],
+  "score": 7,
+  "relevant": true,
+  "gate": "material",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "be366d1b5b01e6c3",
   "title": "Lux Industries: Seven Decades of Trust, Built for the Next Era of Growth",
   "title_ko": null,
@@ -45716,9 +46187,10 @@
   "score": 10,
   "relevant": true,
   "gate": "material",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "주제검색 · 신소재"
+   "주제검색 · 신소재",
+   "Fibre2Fashion"
   ]
  },
  {
