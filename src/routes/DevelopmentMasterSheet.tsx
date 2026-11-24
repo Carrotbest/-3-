@@ -51,6 +51,9 @@ const OPEN_GROUPS_STORAGE_KEY = "dd-open-groups-v1"
 /** 열 하나씩 숨기기(R264). 개인 브라우저에만 남는 값이며 key는 열 id, 값은 숨김 여부다. */
 const HIDDEN_COLUMNS_STORAGE_KEY = "dd-hidden-cols-v1"
 const FINISHING_OPEN_STORAGE_KEY = "dd-finishing-open-v1"
+const FREEZE_STORAGE_KEY = "dd-freeze-v1"
+const FREEZE_EDGE = "color-mix(in srgb, var(--foreground) 32%, transparent)"
+type Freeze = { rows: number; cols: number }
 const MIN_COLUMN_WIDTH = 56
 /** 더 이상 진행하지 않는 상태. 전체 탭에서는 감추고, 담당 탭에서는 위로 올려 흐리게 보여 준다. */
 const CLOSED_STATUSES = new Set(["완료", "DROP", "REJECT"])
@@ -294,6 +297,8 @@ const PINNED_COLUMNS: MasterColumn[] = [
   { id: "status", label: "Status", width: 108, options: DD_STATUS_OPTIONS, value: (row) => row.devStatus || row.stage },
   { id: "styleNo", label: "Style No.", width: 140, mono: true, value: (row) => row.styleNo },
 ]
+/** 담당·Status·Style No. 는 늘 고정이다. 사용자가 고르는 경계는 이 값 아래로 못 내려간다. */
+const MIN_FREEZE_COLS = PINNED_COLUMNS.length
 
 /** COST 칸의 단가 표기. 반올림해 소수점 둘째 자리까지만 보인다(2026-10-21 박향근 지시). */
 const costMoney = (value: number | undefined | null): string =>
@@ -1453,6 +1458,9 @@ interface GridCellProps {
   selMoveEdge: boolean
   fillPreview: boolean
   dimmed: boolean
+  frozenLeft?: number
+  frozenTop?: number
+  edgeStyle?: CSSProperties
   moveStyle?: CSSProperties
   options?: readonly string[]
   editSeed?: string
@@ -1465,7 +1473,7 @@ interface GridCellProps {
  * 선택이 한 칸 움직일 때 표 전체가 다시 그려지지 않도록 memo 로 감싼다.
  * 그래서 props 는 전부 원시값이거나 참조가 고정된 값이어야 한다(CellSel 객체를 그대로 넘기면 memo 가 깨진다).
  */
-const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, dimmed, moveStyle, options, editSeed, editEnabled, canEditLocked, actions }: GridCellProps) {
+const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, active, selIn, selActive, selTop, selBottom, selLeft, selRight, selHandle, selMoveEdge, fillPreview, dimmed, frozenLeft, frozenTop, edgeStyle, moveStyle, options, editSeed, editEnabled, canEditLocked, actions }: GridCellProps) {
   const costClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => () => { if (costClickTimer.current) clearTimeout(costClickTimer.current) }, [])
   const sel: CellSel = { inRange: selIn, isActive: selActive, top: selTop, bottom: selBottom, left: selLeft, right: selRight, handle: selHandle, moveEdge: selMoveEdge }
@@ -1479,6 +1487,8 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const fixed = isLockedCell(record, column, canEditLocked)
   const align = `${alignOf(column) === "center" ? "text-center" : "text-left"} ${column.number ? "tabular-nums" : ""}`
   const highlight = sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : ""
+  const frozen = frozenLeft !== undefined || frozenTop !== undefined
+  const zClass = frozenLeft !== undefined && frozenTop !== undefined ? "z-[22]" : frozenTop !== undefined ? "z-[21]" : frozenLeft !== undefined ? "z-20" : ""
   // 종료된 행의 회색은 클래스로는 다른 배경 클래스에 밀리므로 인라인으로 덮는다. 글자색은 건드리지 않는다.
   const dimStyle = dimmed && !sel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null
   // 셀마다 도는 코드다. 대상 열일 때만 column.value 를 부른다(전체 셀이 5천 개 규모).
@@ -1497,9 +1507,9 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const overdueStyle = scheduleProcess && !sel.inRange && scheduleToneOf(record, scheduleProcess) === "overdue"
     ? { backgroundColor: OVERDUE_SCHEDULE_BG }
     : null
-  const selectionStyle = { width, minWidth: width, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...companyColorStyle, ...pastScheduleStyle, ...overdueStyle, ...dimStyle }
+  const selectionStyle = { width, minWidth: width, ...(frozenLeft !== undefined ? { left: frozenLeft } : null), ...(frozenTop !== undefined ? { top: frozenTop } : null), ...edgeStyle, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...companyColorStyle, ...pastScheduleStyle, ...overdueStyle, ...dimStyle }
   if (editEnabled && active && !fixed) {
-    return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
+    return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative ${frozen ? `sticky ${zClass} bg-[var(--card)] group-hover:bg-[var(--accent)]` : ""} h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
   }
   const content = column.id === "storageNo" && ledger?.storageNo
     ? <div className="relative min-w-0 pr-4"><span className="block truncate">{ledger.storageNo}</span><Link to={`/fabric/${encodeURIComponent(ledger.key)}`} title="원단 상세 보기" aria-label={`${ledger.storageNo} 원단 상세 보기`} onMouseDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} className="pointer-events-none absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:pointer-events-auto group-hover:opacity-100"><ExternalLink className="size-3.5" /></Link></div>
@@ -1522,7 +1532,7 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const wrapped = typeof content === "string" && content.includes("\n")
   return <td data-col-id={column.id} title={column.id === "dueDate" && fixed && isDueDateLocked(record)
     ? "원사가 입고되어 납기가 확정됐습니다. 바꾸려면 관리자에게 요청하세요."
-    : typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative h-8 max-w-0 ${wrapped ? "whitespace-pre-wrap break-words [overflow-wrap:anywhere] py-1 align-top leading-snug" : "truncate"} border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
+    : typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative ${frozen ? `sticky ${zClass} bg-[var(--card)] group-hover:bg-[var(--accent)]` : ""} h-8 max-w-0 ${wrapped ? "whitespace-pre-wrap break-words [overflow-wrap:anywhere] py-1 align-top leading-snug" : "truncate"} border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
 })
 
 function EditorGroup({ label, color, columns, draft, onChange, optionsById, layout, requiredIds, readOnly }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; layout?: "schedule" | "data"; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {
@@ -1669,9 +1679,20 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const [openGroups, setOpenGroups] = useState(() => loadViewGroups(OPEN_GROUPS_STORAGE_KEY, DEFAULT_OPEN))
   const [hiddenColumns, setHiddenColumns] = useState(() => loadViewGroups(HIDDEN_COLUMNS_STORAGE_KEY, DEFAULT_HIDDEN))
   const [hiddenMenuOpen, setHiddenMenuOpen] = useState(false)
+  const [freezeMenuOpen, setFreezeMenuOpen] = useState(false)
   const [finishingOpen, setFinishingOpen] = useState(() => loadViewFlag(FINISHING_OPEN_STORAGE_KEY, false))
+  const [freeze, setFreeze] = useState<Freeze>(() => {
+    const stored = loadViewNumbers(FREEZE_STORAGE_KEY, 0, 200)
+    return {
+      rows: Number.isInteger(stored.rows) ? stored.rows : 0,
+      cols: Number.isInteger(stored.cols) ? Math.max(stored.cols, MIN_FREEZE_COLS) : MIN_FREEZE_COLS,
+    }
+  })
+  const theadRef = useRef<HTMLTableSectionElement | null>(null)
+  const [frozenRowTops, setFrozenRowTops] = useState<number[]>([])
   useEffect(() => { saveViewPref(OPEN_GROUPS_STORAGE_KEY, openGroups) }, [openGroups])
   useEffect(() => { saveViewPref(FINISHING_OPEN_STORAGE_KEY, finishingOpen) }, [finishingOpen])
+  useEffect(() => { saveViewPref(FREEZE_STORAGE_KEY, freeze) }, [freeze])
   const [search, setSearch] = useState("")
   const [owner, setOwner] = useState(ALL)
   const [previewNotice, setPreviewNotice] = useState(false)
@@ -1720,7 +1741,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     setExtraRanges((current) => current.length ? [] : current)
     setRangeState(value)
   }
-  const [menu, setMenu] = useState<{ x: number; y: number; kind: "cells" | "bottom" } | null>(null)          // 우클릭 메뉴 위치
+  const [menu, setMenu] = useState<{ x: number; y: number; kind: "cells" | "bottom"; cell?: CellRef } | null>(null)          // 우클릭 메뉴 위치
   const menuPos = useViewportAnchor(menu)
   const [undoStack, setUndoStack] = useState<UndoEntry[]>([])
   const [redoStack, setRedoStack] = useState<UndoEntry[]>([])
@@ -1938,6 +1959,13 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
    * recentIntakeRows 는 "신규" 표시와 접수 직후 스크롤 위치에만 쓴다.
    */
   const filtered = ordered
+  // 하한이 상한을 이긴다. 그룹을 전부 접으면 displayedColumns 가 세 열뿐이라
+  // length - 1 이 2가 되는데, 그때도 세 열은 고정이고 흐를 것이 없는 것이 정상이다.
+  const freezeCols = Math.min(
+    Math.max(freeze.cols, MIN_FREEZE_COLS),
+    Math.max(MIN_FREEZE_COLS, displayedColumns.length - 1),
+  )
+  const freezeRows = Math.max(0, Math.min(freeze.rows, Math.max(0, filtered.length - 1)))
   const pendingIntakeScrollRef = useRef<string | null>(null)
   useEffect(() => {
     const target = pendingIntakeScrollRef.current
@@ -2044,9 +2072,40 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     try { window.localStorage.removeItem(COL_WIDTHS_STORAGE_KEY) } catch { /* 저장소를 사용할 수 없어도 기본 너비로 초기화한다. */ }
   }
 
-  // 핀 고정 열도 너비 조절 대상이므로 sticky left 오프셋을 현재 너비로 계산한다.
-  const pinnedLeft = (index: number) => ROW_HEADER_WIDTH + PINNED_COLUMNS.slice(0, index).reduce((sum, column) => sum + widthOf(column), 0)
-  const pinnedTotal = PINNED_COLUMNS.reduce((sum, column) => sum + widthOf(column), 0)
+  // 고정 열도 너비 조절 대상이므로 sticky left 오프셋을 현재 너비로 계산한다.
+  // index 는 displayedColumns 안의 자리다. PINNED_COLUMNS 가 그 앞 세 자리를 차지한다.
+  const frozenLeft = (index: number) => ROW_HEADER_WIDTH + displayedColumns.slice(0, index).reduce((sum, column) => sum + widthOf(column), 0)
+  const frozenTotal = displayedColumns.slice(0, freezeCols).reduce((sum, column) => sum + widthOf(column), 0)
+  const isFrozenCol = (index: number) => index < freezeCols
+  const freezeColEdge = (index: number): CSSProperties | null => index === freezeCols - 1 ? { borderRight: `2px solid ${FREEZE_EDGE}` } : null
+  const freezeRowEdge = (rowIdx: number): CSSProperties | null => rowIdx === freezeRows - 1 ? { borderBottom: `2px solid ${FREEZE_EDGE}` } : null
+
+  useLayoutEffect(() => {
+    const head = theadRef.current
+    if (!head) { setFrozenRowTops((cur) => cur.length ? [] : cur); return }
+    const measure = () => {
+      const table = head.closest("table")
+      const rows = table ? [...table.querySelectorAll<HTMLElement>("tbody tr[data-row-id]")].slice(0, freezeRows) : []
+      const tops: number[] = []
+      let acc = head.getBoundingClientRect().height
+      rows.forEach((tr) => { tops.push(acc); acc += tr.getBoundingClientRect().height })
+      // ResizeObserver 안에서 같은 값을 다시 넣으면 무한 루프가 된다. 길이와 값이 같으면 건너뛴다.
+      setFrozenRowTops((cur) => cur.length === tops.length && cur.every((v, i) => Math.abs(v - tops[i]) < 0.5) ? cur : tops)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(head)
+    const table = head.closest("table")
+    if (table) table.querySelectorAll<HTMLElement>("tbody tr[data-row-id]").forEach((tr, i) => { if (i < freezeRows) observer.observe(tr) })
+    return () => observer.disconnect()
+  }, [freezeRows, filtered.length, displayedColumns.length, colWidths])
+
+  const groupStartIndex = new Map<string, number>()
+  let nextGroupIndex = PINNED_COLUMNS.length
+  visibleGroups.forEach((group) => {
+    groupStartIndex.set(group.key, nextGroupIndex)
+    nextGroupIndex += group.columns.length
+  })
 
   const stopDragAutoScroll = () => {
     if (dragAutoScrollFrameRef.current !== null) window.cancelAnimationFrame(dragAutoScrollFrameRef.current)
@@ -2208,6 +2267,17 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   // ── 셀 범위 선택 · 엑셀식 복사/붙여넣기 ────────────────────────────────
   const rowIndexOf = useMemo(() => new Map(filtered.map((record, index) => [recordIdentity(record), index])), [filtered])
   const colIndexOf = useMemo(() => new Map(displayedColumns.map((column, index) => [column.id, index])), [displayedColumns])
+  const freezeActive = freeze.rows > 0 || freezeCols > MIN_FREEZE_COLS
+  const freezeAt = (cell: CellRef | null) => {
+    if (!cell) return
+    const rowIdx = rowIndexOf.get(cell.row)
+    const colIdx = colIndexOf.get(cell.col)
+    if (rowIdx === undefined || colIdx === undefined) return
+    // 고른 셀의 왼쪽 열과 위쪽 행이 언다. 고정 3열 안쪽을 골라도 세 열은 그대로다.
+    setFreeze({ rows: rowIdx, cols: Math.max(colIdx, MIN_FREEZE_COLS) })
+  }
+  const freezeAtSelection = () => freezeAt(range?.focus ?? null)
+  const clearFreeze = () => setFreeze({ rows: 0, cols: MIN_FREEZE_COLS })
 
   /** 앵커·포커스를 행·열 인덱스 사각형으로 바꾼다. 필터로 행이 사라졌으면 null. */
   const rangeToRect = (value: SelectionRange | null): CellRect | null => {
@@ -2388,11 +2458,22 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       cell.scrollIntoView({ block: "nearest", inline: "nearest" })
       const scroller = cell.closest<HTMLElement>("[data-route-scroll-root]")
       const colIndex = colIndexOf.get(cellRef.col)
-      if (!scroller || colIndex === undefined || colIndex < PINNED_COLUMNS.length) return
+      if (!scroller || colIndex === undefined) return
       const cellBox = cell.getBoundingClientRect()
       const scrollBox = scroller.getBoundingClientRect()
-      const stickyEdge = scrollBox.left + ROW_HEADER_WIDTH + pinnedTotal
-      if (cellBox.left < stickyEdge) scroller.scrollLeft -= stickyEdge - cellBox.left
+      if (colIndex >= freezeCols) {
+        const stickyEdge = scrollBox.left + ROW_HEADER_WIDTH + frozenTotal
+        if (cellBox.left < stickyEdge) scroller.scrollLeft -= stickyEdge - cellBox.left
+      }
+      // 고정 행 안의 셀은 늘 보이므로 보정하지 않는다. 빼면 그 행으로 들어갈 때마다
+      // 제 높이만큼 위로 튄다(가로의 colIndex >= freezeCols 가드와 같은 이유다).
+      const rowIndex = rowIndexOf.get(cellRef.row)
+      if (rowIndex !== undefined && rowIndex < frozenRowTops.length) return
+      const headH = theadRef.current?.getBoundingClientRect().height ?? 0
+      const frozenRows = theadRef.current?.closest("table")?.querySelectorAll<HTMLElement>("tbody tr[data-row-id]")
+      const lastFrozenRow = frozenRowTops.length ? frozenRows?.[frozenRowTops.length - 1] : undefined
+      const frozenBottom = scrollBox.top + (frozenRowTops.length ? frozenRowTops[frozenRowTops.length - 1] + (lastFrozenRow?.getBoundingClientRect().height ?? 0) : headH)
+      if (cellBox.top < frozenBottom) scroller.scrollTop -= frozenBottom - cellBox.top
     })
   }
 
@@ -3118,7 +3199,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const inside = rect !== null && rowIdx !== undefined && colIdx !== undefined
       && rowIdx >= rect.top && rowIdx <= rect.bottom && colIdx >= rect.left && colIdx <= rect.right
     if (!inside) setCellAnchor(rowId, colId)
-    setMenu({ x: event.clientX, y: event.clientY, kind: "cells" })
+    setMenu({ x: event.clientX, y: event.clientY, kind: "cells", cell: { row: rowId, col: colId } })
   }
 
   /**
@@ -3676,6 +3757,16 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
           <Button type="button" size="sm" variant="ghost" className="rounded-none border-r border-[var(--border)]" onClick={() => applyPreset("process")}>공정·결과</Button>
           <Button type="button" size="sm" variant="ghost" className="rounded-none" onClick={() => applyPreset("all")}><Columns3 className="size-4" />전체 64열</Button>
         </div>
+        <span className="relative shrink-0">
+          <Button type="button" size="sm" variant="outline" aria-expanded={freezeMenuOpen} onClick={() => setFreezeMenuOpen((current) => !current)}>틀 고정<ChevronDown className="size-4" /></Button>
+          {freezeMenuOpen ? <>
+            <span className="fixed inset-0 z-[80]" onMouseDown={() => setFreezeMenuOpen(false)} />
+            <span className="absolute left-0 top-full z-[81] mt-1 block w-36 rounded-[8px] border border-[var(--border)] bg-[var(--card)] p-1 shadow-lg">
+              <button type="button" disabled={!range?.focus} title={!range?.focus ? "고정할 셀을 먼저 고르십시오" : undefined} onClick={() => { freezeAtSelection(); setFreezeMenuOpen(false) }} className="block w-full rounded px-2 py-1 text-left text-[11px] hover:bg-[var(--muted)] disabled:cursor-not-allowed disabled:opacity-50">틀 고정</button>
+              <button type="button" disabled={!freezeActive} title={!freezeActive ? "추가로 고정된 행과 열이 없습니다" : undefined} onClick={() => { clearFreeze(); setFreezeMenuOpen(false) }} className="block w-full rounded px-2 py-1 text-left text-[11px] hover:bg-[var(--muted)] disabled:cursor-not-allowed disabled:opacity-50">틀 고정 취소</button>
+            </span>
+          </> : null}
+        </span>
         {saveState === "idle" ? null : <span role="status" className={`mr-0.5 whitespace-nowrap rounded-full px-2 py-1 text-[11px] font-medium ${saveState === "error" ? "bg-[var(--destructive)] text-white" : "bg-[var(--muted)] text-[var(--muted-foreground)]"}`}>{saveState === "error" ? "저장 실패" : saveState === "saved" ? "저장됨" : "저장 중"}</span>}
         <div className="inline-flex shrink-0 overflow-hidden rounded-[calc(var(--radius)-2px)] border border-[var(--border)]" role="group" aria-label="편집 도구">
         <Button type="button" size="sm" variant="ghost" className="rounded-none border-r border-[var(--border)]" disabled={!undoStack.length} title={undoStack.length ? "이전 편집 되돌리기 (Ctrl+Z)" : "되돌릴 편집이 없습니다"} onClick={() => void undoLast()}><Undo2 className="size-4" />되돌리기</Button>
@@ -3737,17 +3828,53 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
         setMenu({ x: event.clientX, y: event.clientY, kind: "bottom" })
       }} className={`relative min-h-0 flex-1 overflow-auto ${editEnabled ? "" : "bg-[color-mix(in_srgb,var(--muted)_35%,transparent)]"}`}>
         <table data-dd-master-grid onMouseMove={onGridMouseMove} onMouseLeave={() => { if (!moveDragRef.current) setMoveHover(null) }} className="select-none border-separate border-spacing-0 text-left [&_input]:select-text [&_textarea]:select-text">
-          <thead className="sticky top-0 z-30 bg-[var(--card)] shadow-sm">
+          <thead ref={theadRef} className="sticky top-0 z-30 bg-[var(--card)] shadow-sm">
             <tr className="h-6">
               <th rowSpan={3} className="sticky left-0 z-40 border-b border-r border-[var(--border)] bg-[var(--muted)] text-center text-[10px] font-normal text-[var(--muted-foreground)]" style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH }} />
-              {PINNED_COLUMNS.map((column, index) => { const width = widthOf(column), active = Boolean(columnFilters[column.id]); return <th key={column.id} rowSpan={3} onClick={() => toggleColumnSort(column.id)} className={`relative sticky z-40 cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width, left: pinnedLeft(index) }}><span className="flex items-center justify-center gap-1 px-3"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> })}
-              {visibleGroups.map((group) => <th key={group.key} colSpan={group.columns.length} rowSpan={group.columns.some((column) => column.sub) ? 1 : 2} className="relative border-b border-r border-[var(--border)] px-2 text-center text-[11px] font-semibold" style={{ color: group.color, background: `color-mix(in srgb, ${group.color} 12%, var(--card))` }}><span>{group.label}</span>{group.key === "detail" ? <button type="button" aria-label={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} aria-pressed={finishingOpen} title={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} onClick={(event) => { event.stopPropagation(); setFinishingOpen((current) => !current) }} className="absolute right-3 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none hover:bg-[var(--muted)]">{finishingOpen ? "-" : "+"}</button> : null}<span aria-hidden="true" title={`${group.label} 너비 조절`} onMouseDown={(event) => startGroupResize(group.columns, event)} className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th>)}
+              {PINNED_COLUMNS.map((column, index) => {
+                const width = widthOf(column), active = Boolean(columnFilters[column.id]), colFrozen = isFrozenCol(index)
+                return <th key={column.id} rowSpan={3} onClick={() => toggleColumnSort(column.id)} className={`relative ${colFrozen ? "sticky z-40" : ""} cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width, ...(colFrozen ? { left: frozenLeft(index), ...(freezeColEdge(index) ?? {}) } : {}) }}><span className="flex items-center justify-center gap-1 px-3"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th>
+              })}
+              {visibleGroups.flatMap((group) => {
+                const g0 = groupStartIndex.get(group.key) ?? PINNED_COLUMNS.length
+                const frozenInGroup = Math.max(0, Math.min(group.columns.length, freezeCols - g0))
+                const rowSpan = group.columns.some((column) => column.sub) ? 1 : 2
+                const className = "relative border-b border-r border-[var(--border)] px-2 text-center text-[11px] font-semibold"
+                const style = { color: group.color, background: `color-mix(in srgb, ${group.color} 12%, var(--card))` }
+                const controls = <>{group.key === "detail" ? <button type="button" aria-label={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} aria-pressed={finishingOpen} title={finishingOpen ? "Finishing 열 접기" : "Finishing 열 펼치기"} onClick={(event) => { event.stopPropagation(); setFinishingOpen((current) => !current) }} className="absolute right-3 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none hover:bg-[var(--muted)]">{finishingOpen ? "-" : "+"}</button> : null}<span aria-hidden="true" title={`${group.label} 너비 조절`} onMouseDown={(event) => startGroupResize(group.columns, event)} className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></>
+                if (frozenInGroup === 0) return <th key={group.key} colSpan={group.columns.length} rowSpan={rowSpan} className={className} style={style}><span>{group.label}</span>{controls}</th>
+                if (frozenInGroup === group.columns.length) return <th key={group.key} colSpan={group.columns.length} rowSpan={rowSpan} className={`${className} sticky z-40`} style={{ ...style, left: frozenLeft(g0), ...(freezeColEdge(g0 + group.columns.length - 1) ?? {}) }}><span>{group.label}</span>{controls}</th>
+                return [
+                  <th key={`${group.key}-head-left`} colSpan={frozenInGroup} rowSpan={rowSpan} className={`${className} sticky z-40`} style={{ ...style, left: frozenLeft(g0), ...(freezeColEdge(g0 + frozenInGroup - 1) ?? {}) }}><span>{group.label}</span></th>,
+                  <th key={`${group.key}-head-right`} colSpan={group.columns.length - frozenInGroup} rowSpan={rowSpan} className={className} style={style}><span>{group.label}</span>{controls}</th>,
+                ]
+              })}
             </tr>
             <tr className="h-6">
-              {visibleGroups.filter((group) => group.columns.some((column) => column.sub)).flatMap((group) => subRuns(group.columns).map((run, index) => <th key={`${group.key}-sub-${index}`} colSpan={run.span} className="border-b border-r border-[var(--border)] px-2 text-center text-[10px] font-semibold" style={{ color: run.label ? group.color : "transparent", background: `color-mix(in srgb, ${group.color} ${run.label ? 18 : 12}%, var(--card))` }}>{run.label || "·"}</th>))}
+              {visibleGroups.filter((group) => group.columns.some((column) => column.sub)).flatMap((group) => {
+                const g0 = groupStartIndex.get(group.key) ?? PINNED_COLUMNS.length
+                let runOffset = 0
+                return subRuns(group.columns).flatMap((run, index) => {
+                  const runStart = g0 + runOffset
+                  runOffset += run.span
+                  const frozenInRun = Math.max(0, Math.min(run.span, freezeCols - runStart))
+                  const className = "border-b border-r border-[var(--border)] px-2 text-center text-[10px] font-semibold"
+                  const style = { color: run.label ? group.color : "transparent", background: `color-mix(in srgb, ${group.color} ${run.label ? 18 : 12}%, var(--card))` }
+                  if (frozenInRun === 0) return <th key={`${group.key}-sub-${index}`} colSpan={run.span} className={className} style={style}>{run.label || "·"}</th>
+                  if (frozenInRun === run.span) return <th key={`${group.key}-sub-${index}`} colSpan={run.span} className={`${className} sticky z-40`} style={{ ...style, left: frozenLeft(runStart), ...(freezeColEdge(runStart + run.span - 1) ?? {}) }}>{run.label || "·"}</th>
+                  return [
+                    <th key={`${group.key}-sub-${index}-left`} colSpan={frozenInRun} className={`${className} sticky z-40`} style={{ ...style, left: frozenLeft(runStart), ...(freezeColEdge(runStart + frozenInRun - 1) ?? {}) }}>{run.label || "·"}</th>,
+                    <th key={`${group.key}-sub-${index}-right`} colSpan={run.span - frozenInRun} className={className} style={style}>{run.label || "·"}</th>,
+                  ]
+                })
+              })}
             </tr>
             <tr className="h-8">
-              {visibleGroups.flatMap((group) => group.columns.map((column) => { const width = widthOf(column), active = Boolean(columnFilters[column.id]); return <th key={`${group.key}-${column.id}`} onClick={() => toggleColumnSort(column.id)} className={`group/col relative cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width }}><span className="flex items-center justify-center gap-1 px-3"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><button type="button" aria-label={`${column.label} 열 숨기기`} title={`${column.label} 열 숨기기`} onClick={(event) => { event.stopPropagation(); hideColumn(column.id) }} className="absolute left-0.5 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none opacity-0 transition-opacity hover:bg-[var(--muted)] group-hover/col:opacity-100">−</button><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th> }))}
+              {visibleGroups.flatMap((group) => group.columns.map((column) => {
+                const width = widthOf(column), active = Boolean(columnFilters[column.id]), idx = colIndexOf.get(column.id)
+                const colFrozen = idx !== undefined && isFrozenCol(idx)
+                return <th key={`${group.key}-${column.id}`} onClick={() => toggleColumnSort(column.id)} className={`group/col relative ${colFrozen ? "sticky z-40" : ""} cursor-pointer border-b border-r border-[var(--border)] px-2 text-xs font-normal ${active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"} ${colInRange(column.id) ? "bg-[color-mix(in_srgb,var(--primary)_6%,var(--muted))]" : "bg-[var(--muted)]"} text-center`} style={{ width, minWidth: width, ...(colFrozen && idx !== undefined ? { left: frozenLeft(idx), ...(freezeColEdge(idx) ?? {}) } : {}) }}><span className="flex items-center justify-center gap-1 px-3"><span className="min-w-0 truncate">{column.label}</span>{sortIcon(column.id)}<ColumnFilterMenu label={column.label} active={active} sortDir={sortBy?.col === column.id ? sortBy.dir : null} loadOptions={() => loadColumnOptions(column)} selected={columnFilters[column.id] ?? null} onSort={(dir) => setSortBy({ col: column.id, dir })} onApply={(next) => setColumnFilters((current) => { const copy = { ...current }; if (next) copy[column.id] = next; else delete copy[column.id]; return copy })} /></span><button type="button" aria-label={`${column.label} 열 숨기기`} title={`${column.label} 열 숨기기`} onClick={(event) => { event.stopPropagation(); hideColumn(column.id) }} className="absolute left-0.5 top-1/2 inline-flex size-4 -translate-y-1/2 items-center justify-center rounded border border-current bg-[var(--card)] text-[10px] leading-none opacity-0 transition-opacity hover:bg-[var(--muted)] group-hover/col:opacity-100">−</button><span aria-hidden="true" onMouseDown={(event) => startColumnResize(column, event)} onClick={(event) => event.stopPropagation()} className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none transition-colors hover:bg-[var(--primary)]" /></th>
+              }))}
             </tr>
           </thead>
           <tbody>
@@ -3760,6 +3887,9 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
               const rowDimmed = isClosedRecord(record)
               const isActive = (colId: string) => editCell?.row === rowId && editCell?.col === colId
               const rowIdx = rowIndexOf.get(rowId)
+              const rowFrozen = rowIdx !== undefined && rowIdx < frozenRowTops.length
+              const rowTop = rowFrozen ? frozenRowTops[rowIdx] : undefined
+              const rowEdge = rowFrozen ? freezeRowEdge(rowIdx) : null
               const rowSelected = rect !== null && rowIdx !== undefined && rowIdx >= rect.top && rowIdx <= rect.bottom
               const wholeRowSelected = rect !== null && rect.left === 0 && rect.right === displayedColumns.length - 1
               const cellSel = (colId: string): CellSel => {
@@ -3808,14 +3938,15 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   onRowMouseDown(rowId, event)
                 }}
                 className="group bg-[var(--card)] transition-colors hover:bg-[var(--accent)]">
-                <td data-row-header onContextMenu={(event) => { event.preventDefault(); if (!rowSelected) selectWholeRow(rowId); setMenu({ x: event.clientX, y: event.clientY, kind: "cells" }) }} title="클릭: 행 전체 선택 · 끌기: 여러 행 선택" className={`sticky left-0 z-20 h-8 cursor-pointer select-none border-b border-r border-[var(--border)] text-center text-[10px] tabular-nums ${rowHeaderSel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)] text-[var(--foreground)]" : "bg-[var(--muted)] text-[var(--muted-foreground)] group-hover:bg-[var(--accent)]"}`} style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH, boxShadow: selectionShadow(rowHeaderSel), cursor: rowHeaderSel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, -1, true), ...(rowDimmed && !rowHeaderSel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null) }}>{(rowIdx ?? 0) + 1}</td>
+                <td data-row-header onContextMenu={(event) => { event.preventDefault(); if (!rowSelected) selectWholeRow(rowId); setMenu({ x: event.clientX, y: event.clientY, kind: "cells" }) }} title="클릭: 행 전체 선택 · 끌기: 여러 행 선택" className={`sticky left-0 ${rowFrozen ? "z-[23]" : "z-20"} h-8 cursor-pointer select-none border-b border-r border-[var(--border)] text-center text-[10px] tabular-nums ${rowHeaderSel.inRange ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)] text-[var(--foreground)]" : "bg-[var(--muted)] text-[var(--muted-foreground)] group-hover:bg-[var(--accent)]"}`} style={{ width: ROW_HEADER_WIDTH, minWidth: ROW_HEADER_WIDTH, ...(rowFrozen ? { top: rowTop } : null), ...(rowEdge ?? {}), boxShadow: selectionShadow(rowHeaderSel), cursor: rowHeaderSel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, -1, true), ...(rowDimmed && !rowHeaderSel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null) }}>{(rowIdx ?? 0) + 1}</td>
                 {PINNED_COLUMNS.map((column, index) => {
-                  const left = pinnedLeft(index)
                   const width = widthOf(column)
                   const sel = cellSel(column.id)
                   const preview = inFillPreview(rowIdx, column.id)
-                  const stickyBase = `relative sticky z-20 h-8 border-b border-r border-[var(--border)] ${sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : "bg-[var(--card)] group-hover:bg-[var(--accent)]"} ${preview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${index === 0 ? `border-l-4 ${rowStyle.row}` : ""}`
-                  const cellStyle = { width, minWidth: width, left, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1), ...(rowDimmed && !sel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null) }
+                  const colFrozen = isFrozenCol(index)
+                  const z = rowFrozen && colFrozen ? "z-[22]" : rowFrozen ? "z-[21]" : colFrozen ? "z-20" : "z-0"
+                  const stickyBase = `relative ${rowFrozen || colFrozen ? "sticky" : ""} ${z} h-8 border-b border-r border-[var(--border)] ${sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : "bg-[var(--card)] group-hover:bg-[var(--accent)]"} ${preview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${index === 0 ? `border-l-4 ${rowStyle.row}` : ""}`
+                  const cellStyle = { width, minWidth: width, ...(colFrozen ? { left: frozenLeft(index) } : null), ...(rowFrozen ? { top: rowTop } : null), ...(freezeColEdge(index) ?? {}), ...(rowEdge ?? {}), boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1), ...(rowDimmed && !sel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null) }
                   const active = isActive(column.id)
                   if (editEnabled && active) return <td key={column.id} data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} className={`${stickyBase} p-0`} style={cellStyle}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} initial={editSeed} onCommit={(raw, move, fillRange) => void commitCell(record, column, raw, move, fillRange)} onCancel={cancelCellEdit} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} /></td>
                   if (column.id === "status") return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined} className={`${stickyBase} px-1.5`} style={cellStyle}><StatusChip record={record} disabled={!editEnabled} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} /></td>
@@ -3854,9 +3985,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                 })}
                 {visibleGroups.flatMap((group) => group.columns.map((column) => {
                   const cs = cellSel(column.id)
+                  const idx = colIndexOf.get(column.id) ?? -1
+                  const colEdge = freezeColEdge(idx)
+                  const edgeStyle = colEdge || rowEdge ? { ...(colEdge ?? {}), ...(rowEdge ?? {}) } : undefined
                   return <GridCell key={`${group.key}-${column.id}`} record={record} column={column} rowId={rowId} width={widthOf(column)} ledger={linked} active={isActive(column.id)}
                     selIn={cs.inRange} selActive={cs.isActive} selTop={cs.top} selBottom={cs.bottom} selLeft={cs.left} selRight={cs.right} selHandle={cs.handle} selMoveEdge={cs.moveEdge}
-                    fillPreview={inFillPreview(rowIdx, column.id)} dimmed={rowDimmed} moveStyle={movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1)}
+                    fillPreview={inFillPreview(rowIdx, column.id)} dimmed={rowDimmed} frozenLeft={idx >= 0 && isFrozenCol(idx) ? frozenLeft(idx) : undefined} frozenTop={rowTop} edgeStyle={edgeStyle} moveStyle={movePreviewStyle(rowIdx, idx)}
                     options={optionsById[column.id] ?? column.options} editSeed={editSeed} editEnabled={editEnabled} canEditLocked={isAdmin} actions={gridActions} />
                 }))}
               </tr>
@@ -3900,6 +4034,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
             <span className="text-[11px] text-[var(--muted-foreground)]">{item.hint}</span>
           </button>)}
           {menu.kind === "cells" ? <><div className="my-1 h-px bg-[var(--border)]" />
+          <button type="button" role="menuitem" onClick={() => { setMenu(null); freezeAt(menu.cell ?? range?.focus ?? null) }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)]"><span className="text-[var(--muted-foreground)]"><Columns3 className="size-3.5" /></span><span className="flex-1">틀 고정</span></button>
+          <button type="button" role="menuitem" disabled={!freezeActive} onClick={() => { setMenu(null); clearFreeze() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Columns3 className="size-3.5" /></span><span className="flex-1">틀 고정 취소</span></button>
           <button type="button" role="menuitem" disabled={!editEnabled || !linkTargetRows().some((row) => row.tech?.requestLink)} title={!editEnabled ? editDeniedMessage : undefined} onClick={() => { setMenu(null); void unlinkSelectedRequests() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Unlink className="size-3.5" /></span><span className="flex-1">요청 연결 해제</span><span className="text-[11px] text-[var(--muted-foreground)]">선택 행</span></button>
           <div className="my-1 h-px bg-[var(--border)]" />
           <button type="button" role="menuitem" disabled={!costTargetRows().length} title={!costTargetRows().length ? "국내 또는 생산 건을 선택하십시오" : undefined} onClick={() => { setMenu(null); openCostSheet() }} className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"><span className="text-[var(--muted-foreground)]"><Calculator className="size-3.5" /></span><span className="flex-1">사전 원가계산…</span><span className="text-[11px] text-[var(--muted-foreground)]">국내 건</span></button>

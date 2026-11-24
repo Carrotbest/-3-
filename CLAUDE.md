@@ -20,6 +20,14 @@
   - **편집기(`InlineTextEditor`)는 `absolute`로 아래 행을 덮으며 자란다**(상한 240px). 표 행 높이는 편집하는 동안 바뀌지 않는다. 행이 늘어나는 것은 확정한 뒤다. 편집 중에 행을 늘리면 아래 행이 글자마다 밀려 내려간다.
   - **표는 줄바꿈이 든 칸만 줄 수만큼 벌린다**(`wrapped`). `h-8`은 table-cell에서 최소 높이라 행이 저절로 늘어난다. 한 줄짜리 칸은 `truncate` 그대로다. **열 전체를 `whitespace-pre-wrap`으로 돌리지 말 것.** 긴 한 줄 값까지 접혀 표 전체 행 높이가 들쭉날쭉해진다. 행 머리와 고정 3열은 같은 `<tr>`이라 따라 늘어난다. 고칠 필요 없다.
   - 클립보드는 손대지 않았다. `range-tsv.ts`가 RFC4180 따옴표로 여러 줄 칸을 이미 올바로 주고받는다(R390). 엑셀 내보내기는 줄바꿈이 든 칸에만 `wrapText`를 켠다(`dd-export.ts`).
+- **틀 고정도 엑셀과 같다**(R444~R445, 2026-11-25). 머리말 세 줄과 `#` 행 번호 열은 엑셀의 열·행 머리글이라 **설정과 무관하게 늘 붙어 있다.** 틀 고정이 정하는 것은 데이터 행과 데이터 열뿐이다. 저장은 `view-prefs`의 `dd-freeze-v1`(`{ rows, cols }`, `cols`는 `displayedColumns` 기준 절대 경계)이고 개인 브라우저 값이다. 팀원 화면에 영향을 주지 않는다.
+  - **담당·Status·Style No. 세 열은 늘 고정이다**(2026-11-25 박향근 확정). 경계의 하한이 `MIN_FREEZE_COLS = PINNED_COLUMNS.length`이고 `틀 고정 취소`도 0이 아니라 그 값으로 되돌린다. **하한을 숫자 3으로 박지 말 것.** 고정 열이 늘면 같이 따라와야 한다. R444에서 세 열을 풀 수 있게 열었다가 **그 자리가 어느 행을 보고 있는지 알려 주는 좌표라** R445에서 되돌렸다.
+  - **고정 여부 판정(`freezeActive`)은 클램프를 거친 `freezeCols`를 본다.** R444는 `freeze.cols !== 0`으로 봤는데 기본값이 3이라 **늘 참이었고, 메뉴 첫 항목이 영영 `틀 고정 취소`로만 떠서 `틀 고정`을 부를 길이 아예 없었다.** 그 하나를 누르면 멀쩡하던 세 열까지 풀렸다. **라벨이 토글되는 메뉴를 다시 만들지 말 것.** 세 열이 늘 남으므로 "취소"가 완전한 해제가 아니다. 지금은 `틀 고정`과 `틀 고정 취소` 두 항목이고 도구줄 드롭다운과 셀 우클릭 양쪽에 있다. 우클릭은 `menu.cell`로 **그 자리에서 누른 셀**을 쓴다.
+  - **`colSpan` 머리말은 고정 경계에서 쪼갠다.** 그룹 라벨 줄과 하위 라벨 줄 둘 다다. 한 칸을 반만 sticky로 만들 수 없다. 쪼갠 두 조각 모두 라벨을 쓰고(오른쪽으로 스크롤했을 때 그룹 이름이 사라지면 안 된다) **Finishing `+/-` 버튼과 그룹 너비 손잡이는 오른쪽 조각에만** 붙인다. 둘 다 그룹의 오른쪽 끝에 있어야 한다. `rowSpan`은 두 조각이 같은 값을 쓴다. 반쪽끼리 따로 계산하면 2행과 어긋난다.
+  - **고정 행의 `top`은 실측이다**(`frozenRowTops`, `ResizeObserver`). **행 높이를 32로 박지 말 것.** Alt+Enter 줄바꿈을 확정한 행은 그보다 높고(R437), 머리말 높이도 보이는 그룹에 하위 열이 있느냐에 따라 `rowSpan`이 1이나 2로 바뀌어 달라진다. 측정 결과를 `setState`할 때 **같은 값이면 건너뛰는 분기를 빼지 말 것.** `ResizeObserver` 안에서 무한 루프가 된다. 의존성은 원시값(`filtered.length`, `displayedColumns.length`)으로 둔다. 배열을 그대로 넣으면 매 렌더 새 배열이라 옵저버를 렌더마다 떼었다 붙인다.
+  - **`GridCell`의 고정 칸에는 배경을 명시한다.** 그 `td`에는 배경 클래스가 없고 `<tr>`의 `bg-[var(--card)]`가 깔아 주는데, sticky가 되면 그 칸이 떠서 **아래 행이 그대로 비친다.** 이번 작업에서 가장 틀리기 쉬운 자리였다.
+  - **가로는 `colIndex >= freezeCols`, 세로는 고정 행 여부로 스크롤 보정을 건너뛴다**(`scrollCellIntoView`). 고정된 칸은 늘 보이므로 보정할 것이 없다. 세로 가드를 빼면 키보드로 고정 행에 들어갈 때마다 화면이 그 행 높이만큼 위로 튄다.
+  - `PINNED_COLUMNS` 상수는 그대로 둔다. 접수 그리드(`INTAKE_CORE`), 너비 조절(`RESIZABLE_COLUMNS`), 74열 수정 모달 `고정 핵심`이 쓴다. **그 셋은 사용자의 틀 고정 설정을 따라가면 안 된다.** 표가 아닌 다른 화면이다.
   - **R438이 나머지 화면에 넓혔다.** 74열 수정 모달과 접수 옵션 그리드는 `AutoGrowTextarea` 하나를 같이 쓴다. 거기서는 **Alt+Enter가 줄바꿈이고 그냥 Enter는 칸을 떠난다.** 표가 아니라 폼이라 옮길 다음 칸이 없다. `GuardedTextInput`과 같은 약속이다. 1팀 신규 입고 창은 Enter로 아래 줄 같은 칸에 내려간다. 핸들러를 칸마다 달지 않고 `<table>` 하나에 걸어 `tr[data-row-id]`와 `td[data-paste-column]`으로 자리를 찾는다. 칸이 열세 개라 각각 달면 한 곳을 빠뜨린다.
   - **창고는 Enter·Tab 이동만이고 Alt+Enter는 없다**(R438). 창고 표는 가상 스크롤이라 `ROW_HEIGHT = 32`를 고정으로 놓고 `viewport.top / ROW_HEIGHT`로 보이는 구간을 계산한다. **행이 늘어나면 스크롤 계산이 통째로 어긋난다.** 저장은 되는데 화면에 첫 줄만 보이는 값을 만드느니 열지 않는 쪽을 골랐다(2026-11-18). 여는 길은 가상 스크롤을 걷거나 행 높이를 실측으로 바꾸는 것 둘뿐이다. 이동은 `moveEditedSelection` 하나이고 좌표 기준이 화살표 이동(`onCellNavigation`)과 같은 `visibleRows`·`visibleColumns`다. 가상 스크롤이라도 행 render의 `index`는 `start + offset`이라 전체 기준 번호다.
 - **선택형 열은 드롭다운에 띄운 목록과 저장 검증 목록이 반드시 같아야 한다**(R280). `allowedFor(column, optionsById)`가 그 하나의 목록이고 `isAcceptableCellValue`·`updateRecordCell`에 모두 넘긴다. 예전에는 표시가 `optionsById`(상수+데이터 값), 검증이 `column.options`(상수)라 데이터에만 있던 `CSD`를 고르면 **아무 메시지 없이** 값이 안 들어갔다. 검증 가드 자체는 없애지 말 것. 날짜 열에 글자, 숫자 열에 문자가 붙여넣기로 들어가는 것을 이 가드가 막는다. 거부되면 이제 `notify`로 알린다.
@@ -360,7 +368,7 @@
 ## 보기 설정 (`src/data/view-prefs.ts`)
 - 열 너비와 그룹 펼침/접힘은 **개인 브라우저(localStorage)에만** 남는다. `CACHE_KEYS`에 없어 Firestore로 안 올라간다. 한 사람이 바꿔도 팀원 화면은 그대로다.
 - 계정이 아니라 브라우저에 붙는다. 공용 PC에서는 앞사람 설정이 보이고, 다른 PC로 가면 기본값에서 시작한다.
-- 키: `dd-col-widths-v2`, `dd-intake-col-widths-v1`, `dd-open-groups-v1`, `dd-hidden-cols-v1`, `dd-finishing-open-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `fabric.request.rowHeights`, `fabric.request.hiddenCols`, `fabric.request.activeBoard`, `home-today-briefing-hidden-v1`, `calendar-reminder-v1`.
+- 키: `dd-col-widths-v2`, `dd-intake-col-widths-v1`, `dd-open-groups-v1`, `dd-hidden-cols-v1`, `dd-finishing-open-v1`, `dd-freeze-v1`, `warehouse-col-widths-v1`, `warehouse-open-groups-v1`, `fabric.request.colWidths`, `fabric.request.openGroups`, `fabric.request.rowHeights`, `fabric.request.hiddenCols`, `fabric.request.activeBoard`, `home-today-briefing-hidden-v1`, `calendar-reminder-v1`.
 - 검색·필터·정렬·탭·선택은 일부러 저장하지 않는다. 남아 있으면 다음에 열었을 때 행이 왜 안 보이는지 헷갈린다.
 - **예외: DD MASTER 행 드래그 순서(`sortOrder`)는 레코드에 저장돼 팀 전체가 공유한다.** 보기 설정이 아니다.
 
