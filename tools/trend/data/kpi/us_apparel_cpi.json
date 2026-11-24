@@ -11,7 +11,7 @@
  "stale_days": null,
  "source_name": "FRED · CPIAPPSL",
  "source_url": "https://fred.stlouisfed.org/series/CPIAPPSL",
- "fetched_at": "2026-11-17T04:04:55+00:00",
+ "fetched_at": "2026-11-24T05:25:26+00:00",
  "points": [
   {
    "period": "2021-07",
