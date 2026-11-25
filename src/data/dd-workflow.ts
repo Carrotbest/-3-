@@ -203,7 +203,25 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
     const devStatus = flDone && (!currentStatus || currentStatus === "진행중")
       ? "완료"
       : record.devStatus
-    return { ...record, devStatus, opt: hasStyleNo ? formula?.opt ?? record.opt : "", stage, processReached, tech }
+    const nextOpt = hasStyleNo ? formula?.opt ?? record.opt : ""
+    const nextOptionProgress = hasStyleNo ? formula?.optionProgress ?? record.tech?.optionProgress : ""
+    // 계산 결과가 전과 같으면 입력 객체를 그대로 돌려준다.
+    // 새 객체를 만들면 셀 하나를 고칠 때 모든 레코드 행까지 참조가 바뀌고,
+    // DD MASTER의 GridCell memo가 전부 무력해진다(R447).
+    const unchanged =
+      record.devStatus === devStatus
+      && record.opt === nextOpt
+      && record.stage === stage
+      && record.processReached !== undefined
+      && record.processReached.yarn === processReached.yarn
+      && record.processReached.knitting === processReached.knitting
+      && record.processReached.dyeing === processReached.dyeing
+      && record.processReached.finishing === processReached.finishing
+      && record.tech !== undefined
+      && record.tech.optionProgress === nextOptionProgress
+      && (!record.tech.actual || record.tech.actual.balance === balance)
+    if (unchanged) return record
+    return { ...record, devStatus, opt: nextOpt, stage, processReached, tech }
   })
 }
 

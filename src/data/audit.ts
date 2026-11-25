@@ -131,6 +131,8 @@ export function diffByKey<T>(
       changes.push({ k: key, c: "*", b: "", a: "(추가)" })
       return
     }
+    // 같은 객체면 바뀐 것이 없다. R447 이후 안 바뀐 행은 참조가 그대로 온다.
+    if (old === item) return
     const flatOld = flatten(old)
     const flatNew = flatten(item)
     const fields = new Set([...Object.keys(flatOld), ...Object.keys(flatNew)])

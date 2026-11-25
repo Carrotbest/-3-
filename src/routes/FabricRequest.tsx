@@ -1242,6 +1242,20 @@ export function FabricRequest() {
   const visibleColumns = readOnly ? [...FIXED_COLUMNS, boardColumn, ...visibleGroups.flatMap((group) => group.columns)] : [...FIXED_COLUMNS, ...visibleGroups.flatMap((group) => group.columns)]
   const tableWidth = visibleColumns.reduce((sum, column) => sum + widthOf(column), 0) + ACTION_WIDTH + ROW_NO_WIDTH
   const slots = visible.flatMap((style) => Array.from({ length: Math.max(1, style.options.length) }, (_, optionIndex) => ({ style, optionIndex, option: style.options[optionIndex] })))
+  // 스타일별 시작 슬롯 번호. 렌더당 한 번만 만든다.
+  // 스타일마다 slots.findIndex 를 돌리면 비교가 스타일 수의 제곱으로 는다(R449).
+  const styleStartByReqId = new Map<string, number>()
+  slots.forEach((slot, index) => {
+    if (!styleStartByReqId.has(slot.style.reqId)) styleStartByReqId.set(slot.style.reqId, index)
+  })
+  const optionColumns = visibleColumns.filter((column) => column.scope === "option")
+  const hasOptionColumns = optionColumns.length > 0
+  // 옵션 사이에 세로 병합된 스타일 열(Remark)이 있으므로 옵션 추가 줄은 연속 구간마다 칸을 나눈다(R291).
+  const addRowSpans = visibleColumns.reduce<number[]>((runs, column) => {
+    if (column.scope === "option") runs.push((runs.pop() ?? 0) + 1)
+    else if (runs.at(-1) !== 0) runs.push(0)
+    return runs
+  }, []).filter((run) => run > 0)
 
   /**
    * 흐림 판정 색인. 렌더당 한 번만 만든다.
@@ -1454,7 +1468,7 @@ export function FabricRequest() {
     if (rowDragRef.current) {
       const rowHead = target.closest<HTMLElement>("[data-row-start]")
       const slotIndex = cellEl ? Number(cellEl.dataset.slotIndex) : -1
-      const start = rowHead ? Number(rowHead.dataset.rowStart) : slotIndex >= 0 ? slots.findIndex((slot) => slot.style.reqId === slots[slotIndex]?.style.reqId) : -1
+      const start = rowHead ? Number(rowHead.dataset.rowStart) : slotIndex >= 0 && slots[slotIndex] ? (styleStartByReqId.get(slots[slotIndex].style.reqId) ?? -1) : -1
       const key = `row:${start}`
       if (start < 0 || lastExtendRef.current === key) return
       lastExtendRef.current = key
@@ -2443,8 +2457,6 @@ export function FabricRequest() {
             <TableBody>
               {visible.flatMap((style, styleIndex) => {
                 const styleLine: Line = { kind: "style", style }
-                const optionColumns = visibleColumns.filter((column) => column.scope === "option")
-                const hasOptionColumns = optionColumns.length > 0
                 const optionSlots = Math.max(1, style.options.length)
                 const rowSpan = hasOptionColumns ? optionSlots + 1 : 1
                 const defaultOptionRowHeight = Math.max(OPTION_ROW_HEIGHT, Math.floor((STYLE_ROW_HEIGHT - ADD_ROW_HEIGHT) / optionSlots))
@@ -2453,14 +2465,8 @@ export function FabricRequest() {
                 const optionRowHeight = hasOptionColumns ? Math.max(OPTION_ROW_HEIGHT, Math.floor((requestedBlockHeight - ADD_ROW_HEIGHT) / optionSlots)) : requestedBlockHeight
                 const blockHeight = hasOptionColumns ? optionRowHeight * optionSlots + ADD_ROW_HEIGHT : requestedBlockHeight
                 const firstOption = style.options[0]
-                const styleStart = slots.findIndex((slot) => slot.style.reqId === style.reqId)
+                const styleStart = styleStartByReqId.get(style.reqId) ?? -1
                 const rows: ReactNode[] = []
-                // 옵션 사이에 세로 병합된 스타일 열(Remark)이 있으므로 옵션 추가 줄은 연속 구간마다 칸을 나눈다(R291).
-                const addRowSpans = visibleColumns.reduce<number[]>((runs, column) => {
-                  if (column.scope === "option") runs.push((runs.pop() ?? 0) + 1)
-                  else if (runs.at(-1) !== 0) runs.push(0)
-                  return runs
-                }, []).filter((run) => run > 0)
                 // 스타일의 모든 옵션이 끝났으면 블록의 모든 칸을 흐리게 한다. 액션 칸과 옵션 추가 줄도 포함이다.
                 const blockClosed = (closedByStyle.get(style.reqId)?.allClosed ?? false) || resultOf(style) === "묶음"
 

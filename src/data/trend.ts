@@ -139,6 +139,16 @@ async function readJson<T>(name: string): Promise<T | null> {
 }
 
 export const loadTrendFeed = () => readJson<TrendFeed>("feed.json")
+
+/**
+ * HOME 전용. 기사 다섯 건만 담은 작은 파일을 읽는다(R451).
+ * `home.json`은 빌드 때 만들어지는 파일이라 없을 수 있다. 그때는 feed.json으로 떨어진다.
+ */
+export const loadTrendHome = async (): Promise<TrendFeed | null> => {
+  const small = await readJson<TrendFeed>("home.json")
+  return small ?? loadTrendFeed()
+}
+
 export const loadTrendKpi = () => readJson<TrendKpi>("kpi.json")
 export const loadTrendStatus = () => readJson<TrendStatus>("status.json")
 

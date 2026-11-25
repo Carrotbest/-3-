@@ -38,6 +38,11 @@ import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, saveRequests, useA
 import { useViewportAnchor } from "@/lib/useViewportAnchor"
 
 const ALL = "__all__"
+/**
+ * 정렬 비교용 Collator. 모듈 전역에서 한 번만 만들어 반복 생성 비용을 피한다.
+ */
+const KO_COLLATOR_NUMERIC = new Intl.Collator("ko-KR", { numeric: true })
+const KO_COLLATOR = new Intl.Collator("ko-KR")
 const EDIT_DISABLED_MESSAGE = "담당을 선택한 뒤 수정할 수 있습니다. 담당 칸이 비었거나 명단 밖인 행은 담당 드롭다운에서 그 값을 고르십시오."
 /**
  * 담당 탭의 담당 값과 로그인한 계정 이름을 맞춘다(R319).
@@ -527,10 +532,10 @@ function compareRequestDate(a: DevRecord, b: DevRecord): number {
   const right = sortable(b)
   if (left.rank !== right.rank) return left.rank - right.rank
   if (left.rank === 0 && left.time !== right.time) return left.time - right.time
-  if (left.rank === 1 && left.text !== right.text) return left.text.localeCompare(right.text, "ko-KR", { numeric: true })
-  const styleOrder = a.styleNo.localeCompare(b.styleNo, "ko-KR", { numeric: true })
+  if (left.rank === 1 && left.text !== right.text) return KO_COLLATOR_NUMERIC.compare(left.text, right.text)
+  const styleOrder = KO_COLLATOR_NUMERIC.compare(a.styleNo, b.styleNo)
   if (styleOrder) return styleOrder
-  const optionOrder = String(a.opt).localeCompare(String(b.opt), "ko-KR", { numeric: true })
+  const optionOrder = KO_COLLATOR_NUMERIC.compare(String(a.opt), String(b.opt))
   if (optionOrder) return optionOrder
   return a._src.row - b._src.row
 }
@@ -1802,7 +1807,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
   const scoped = useMemo(() => categoryScope ? records.filter((row) => row.category === categoryScope) : records, [categoryScope, records])
   // 담당 드롭다운은 사람 단위다(R430). "변재휘/김지현" 같은 묶음 값은 목록에 세우지 않고 토큰으로 풀어 넣는다.
-  const ownerOptions = useMemo(() => [...new Set(scoped.flatMap((row) => ownerNames(row.owner)))].sort((a, b) => a.localeCompare(b, "ko-KR")), [scoped])
+  const ownerOptions = useMemo(() => [...new Set(scoped.flatMap((row) => ownerNames(row.owner)))].sort((a, b) => KO_COLLATOR.compare(a, b)), [scoped])
   // 메인 담당별 개발 건수(진행중·전체)와 팀 전체 합계. 네임카드에 표시하고, 클릭하면 담당 필터로 이어진다.
   const ownerStats = useMemo(() => {
     const byOwner = new Map<string, { total: number; active: number }>(MAIN_DEVELOPERS.map((name) => [name, { total: 0, active: 0 }]))
@@ -1827,7 +1832,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     const memberNames = MEMBERS.map((member) => member.name)
     const distinct = (get: (record: DevRecord) => unknown) => [...new Set(records.map((record) => (get(record) == null ? "" : String(get(record))).trim()).filter(Boolean))]
     const union = (base: readonly string[], values: string[]) => [...new Set([...base, ...values])]
-    const sortKo = (values: string[]) => [...values].sort((a, b) => a.localeCompare(b, "ko-KR", { numeric: true }))
+    const sortKo = (values: string[]) => [...values].sort((a, b) => KO_COLLATOR_NUMERIC.compare(a, b))
     return {
       season: union(DD_SEASON_OPTIONS, sortKo(distinct((record) => record.season))),
       category: union(DD_CATEGORY_OPTIONS, distinct((record) => record.category)),
@@ -1869,7 +1874,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       if (a === undefined || b === undefined) return a === b ? 0 : a === undefined ? 1 : -1
       return a - b
     }
-    return String(leftValue).localeCompare(String(rightValue), "ko-KR", { numeric: true })
+    return KO_COLLATOR_NUMERIC.compare(String(leftValue), String(rightValue))
   }
 
   const passesBaseFilters = (record: DevRecord, exceptColumnId?: string): boolean => {
@@ -1877,10 +1882,10 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     // 전체 탭은 진행 중인 건만 본다. 담당 탭은 숨김을 켰을 때만 감춘다.
     if ((owner === ALL || hideClosed) && status === ALL && isClosedRecord(record)) return false
     if (status !== ALL && (record.devStatus || record.stage) !== status) return false
-    const query = search.trim().toLocaleLowerCase("ko-KR")
+    const query = search.trim().toLowerCase()
     const linked = ledgerByRecord.get(recordIdentity(record)) ?? null
-    if (query && !allColumns.some((column) => String(column.value(record, linked) ?? "").toLocaleLowerCase("ko-KR").includes(query))
-      && !String(record.tech?.development?.developer ?? "").toLocaleLowerCase("ko-KR").includes(query)) return false
+    if (query && !allColumns.some((column) => String(column.value(record, linked) ?? "").toLowerCase().includes(query))
+      && !String(record.tech?.development?.developer ?? "").toLowerCase().includes(query)) return false
     return Object.entries(columnFilters).every(([columnId, selected]) => {
       if (columnId === exceptColumnId) return true
       const column = allColumns.find((candidate) => candidate.id === columnId)
@@ -3644,27 +3649,27 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     try {
       // 담당 필터만 걷어내고 화면과 같은 정렬·검색 조건을 그대로 쓴다.
       // 전체현황 시트가 비어 보이지 않게 하되, 소팅한 순서는 화면 그대로 유지한다.
-      const query = search.trim().toLocaleLowerCase("ko-KR")
+      const query = search.trim().toLowerCase()
       const sortColumn = sortBy ? allColumns.find((column) => column.id === sortBy.col) : undefined
       const base = scoped.filter((record) => {
         if (status !== ALL && (record.devStatus || record.stage) !== status) return false
         if (!query) return true
         const linked = ledgerByRecord.get(recordIdentity(record)) ?? null
-        return allColumns.some((column) => String(column.value(record, linked) ?? "").toLocaleLowerCase("ko-KR").includes(query))
+        return allColumns.some((column) => String(column.value(record, linked) ?? "").toLowerCase().includes(query))
       }).map((record, index) => ({ record, index }))
         .sort((a, b) => {
           if (sortBy && sortColumn) {
             const left = String(sortColumn.value(a.record, null) ?? "").trim()
             const right = String(sortColumn.value(b.record, null) ?? "").trim()
             if (!left !== !right) return left ? -1 : 1
-            const order = left.localeCompare(right, "ko-KR", { numeric: true })
+            const order = KO_COLLATOR_NUMERIC.compare(left, right)
             if (order) return sortBy.dir === "asc" ? order : -order
           }
           return compareManualOrder(a.record, b.record) || a.index - b.index
         })
         .map(({ record }) => record)
       const owners = [...new Set(base.flatMap((record) => ownerNames(record.owner)))]
-        .sort((a, b) => a.localeCompare(b, "ko-KR"))
+        .sort((a, b) => KO_COLLATOR.compare(a, b))
       const stamp = new Date().toLocaleDateString("ko-KR")
       const sheets: DdExportSheet[] = [
         { name: "전체현황", title: `DEVELOPMENT DASHBOARD 전체현황 (${base.length}건, ${stamp} 내보냄)`, rows: base },

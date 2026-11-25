@@ -301,11 +301,20 @@ function revertBlockedKey(key: CacheKey): void {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("fabric:readonly-blocked", { detail: { key } }))
 }
 
+/** `records__3` 같은 청크 문서 id에서 원래 키 이름(`records`)을 뽑는다. */
+function keyOfDocId(id: string): string {
+  const sep = id.lastIndexOf("__")
+  return sep >= 0 && /^\d+$/.test(id.slice(sep + 2)) ? id.slice(0, sep) : id
+}
+
 /**
  * 스냅샷 전체에서 각 키의 값을 재조립해 store와 로컬 캐시에 반영한다.
  * 중앙에 존재하는 키 목록을 돌려준다(최초 시딩 판단에 사용).
  */
-function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }[]): Set<string> {
+function applySnapshot(
+  docs: { id: string; data: () => Record<string, unknown> }[],
+  touched: ReadonlySet<string> | null = null,
+): Set<string> {
   const metas = new Map<string, number>()
   const chunks = new Map<string, Map<number, string>>()
 
@@ -330,6 +339,10 @@ function applySnapshot(docs: { id: string; data: () => Record<string, unknown> }
     if (!CACHE_KEY_SET.has(key)) return
     if (SKIP_SYNC_KEYS.has(key)) return
     lastChunkCount.set(key, n)
+    // 청크 수는 모든 키에 대해 최신이어야 해서 건너뛰기보다 앞에 둔다.
+    // 이번 스냅샷에서 안 바뀐 키는 조립하지 않는다. 어차피 아래 JSON.stringify 비교에서
+    // 똑같다고 걸러질 값이라, 파싱과 병합과 직렬화 두 번이 통째로 헛일이다(R448).
+    if (touched && !touched.has(key)) return
     const parts = chunks.get(key)
     if (!parts || parts.size < n) return // 아직 일부 청크 미수신 — 다음 스냅샷을 기다린다.
     let json = ""
@@ -418,7 +431,10 @@ export function startStateSync(): Promise<void> {
     unsubscribe = onSnapshot(
       collection(db, COLLECTION),
       (snap) => {
-        const remoteKeys = applySnapshot(snap.docs)
+        const changes = snap.docChanges()
+        // 첫 스냅샷은 모든 문서가 added 로 와서 전 키가 들어온다. 그다음부터는 바뀐 키만 조립한다.
+        const touched = new Set(changes.map((change) => keyOfDocId(change.doc.id)))
+        const remoteKeys = applySnapshot(snap.docs, touched)
         openGate()
         void autoSeedMissingKeys(remoteKeys)
         if (!resolved) {

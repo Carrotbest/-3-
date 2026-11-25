@@ -22,26 +22,26 @@ import { loadLedgerArchive } from "@/data/ledger-archive"
 import { initNavSeen, markNavSeen } from "@/data/nav-badges"
 import { canAccessScreenPath } from "@/data/screen-permissions"
 import { cn } from "@/lib/utils"
-import { Development } from "@/routes/Development"
 import { Home } from "@/routes/Home"
-import { Calendar } from "@/routes/Calendar"
 import { PlaceholderPage } from "@/routes/PlaceholderPage"
-import { Rdda } from "@/routes/Rdda"
-import { Setting } from "@/routes/Setting"
-import { BuyerProtocols } from "@/routes/BuyerProtocols"
-import { TechnicalReferences } from "@/routes/TechnicalReferences"
-import { TS } from "@/routes/TS"
-import { FabricAnalysis } from "@/routes/FabricAnalysis"
-import { CostSheets } from "@/routes/CostSheets"
-import { FabricDetail } from "@/routes/FabricDetail"
-import { FabricRequest } from "@/routes/FabricRequest"
-import { Warehouse } from "@/routes/Warehouse"
-import { Portfolio } from "@/routes/Portfolio"
-import { TrendFabric } from "@/routes/TrendFabric"
-import { TrendMacro } from "@/routes/TrendMacro"
 import { ensureTsSeed, migrateLocalTsIntoSync, normalizeLoadedRecords, repairTsData, setAppState, useAppStore } from "@/store/useAppStore"
 import { routeDefinitions } from "@/routes/route-config"
 
+const Development = lazy(() => import("@/routes/Development").then((module) => ({ default: module.Development })))
+const Rdda = lazy(() => import("@/routes/Rdda").then((module) => ({ default: module.Rdda })))
+const TS = lazy(() => import("@/routes/TS").then((module) => ({ default: module.TS })))
+const TechnicalReferences = lazy(() => import("@/routes/TechnicalReferences").then((module) => ({ default: module.TechnicalReferences })))
+const BuyerProtocols = lazy(() => import("@/routes/BuyerProtocols").then((module) => ({ default: module.BuyerProtocols })))
+const FabricAnalysis = lazy(() => import("@/routes/FabricAnalysis").then((module) => ({ default: module.FabricAnalysis })))
+const CostSheets = lazy(() => import("@/routes/CostSheets").then((module) => ({ default: module.CostSheets })))
+const FabricDetail = lazy(() => import("@/routes/FabricDetail").then((module) => ({ default: module.FabricDetail })))
+const FabricRequest = lazy(() => import("@/routes/FabricRequest").then((module) => ({ default: module.FabricRequest })))
+const Warehouse = lazy(() => import("@/routes/Warehouse").then((module) => ({ default: module.Warehouse })))
+const Calendar = lazy(() => import("@/routes/Calendar").then((module) => ({ default: module.Calendar })))
+const Setting = lazy(() => import("@/routes/Setting").then((module) => ({ default: module.Setting })))
+const Portfolio = lazy(() => import("@/routes/Portfolio").then((module) => ({ default: module.Portfolio })))
+const TrendFabric = lazy(() => import("@/routes/TrendFabric").then((module) => ({ default: module.TrendFabric })))
+const TrendMacro = lazy(() => import("@/routes/TrendMacro").then((module) => ({ default: module.TrendMacro })))
 const Meta = lazy(() => import("@/routes/Meta").then((module) => ({ default: module.Meta })))
 
 const IMPLEMENTED_ROUTES = new Set(["/", "/meta", "/request", "/development", "/rdda", "/ts", "/study", "/protocol", "/fabric-analysis", "/cost", "/fabric/:key", "/warehouse", "/calendar", "/setting", "/trend/portfolio", "/trend/fabric", "/trend/macro"])
@@ -50,6 +50,14 @@ function MetaFallback() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center rounded-[var(--radius)] bg-[var(--muted)] text-sm text-[var(--muted-foreground)]">
       가상 오피스를 불러오는 중입니다
+    </div>
+  )
+}
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center text-sm text-[var(--muted-foreground)]">
+      화면을 불러오는 중입니다
     </div>
   )
 }
@@ -143,14 +151,16 @@ function AppLayout() {
       // 샘플관리대장 아카이브는 "비었을 때만 채우는 씨앗"이다. 이미 값이 있으면 건드리지 않는다.
       // 배포할 때마다 웹에서 쌓은 데이터가 되돌아가면 안 된다. 갱신은 화면에서 엑셀을 올려서 하고,
       // 그 값이 Firestore로 팀에 퍼진다. 아카이브는 신규 PC나 캐시를 지운 경우를 위한 출발점일 뿐이다.
-      const archive = await loadLedgerArchive()
-      if (!current) return
       const existingCompleted = useAppStore.getState().completed
       const needsLedgerSeed = !Array.isArray(existingCompleted) || existingCompleted.length === 0
-      if (archive && archive.length > 0 && needsLedgerSeed) {
-        setAppState({ completed: archive })
-        // 로컬에만 둔다. 씨앗을 Firestore로 올리면 팀이 공유하는 최신 값을 덮을 수 있다.
-        await saveCacheLocal("completed", archive)
+      if (needsLedgerSeed) {
+        const archive = await loadLedgerArchive()
+        if (!current) return
+        if (archive && archive.length > 0) {
+          setAppState({ completed: archive })
+          // 로컬에만 둔다. 씨앗을 Firestore로 올리면 팀이 공유하는 최신 값을 덮을 수 있다.
+          await saveCacheLocal("completed", archive)
+        }
       }
       await ensureTsSeed()
       // 팀 공유 전환 전 localStorage에만 있던 TS 등록·수정 건을 1회 합친다.
@@ -188,7 +198,7 @@ function AppLayout() {
           <SyncStatusNotice />
           {/* 렌더 예외를 여기서 막는다. 없으면 React 가 루트를 언마운트해 화면 전체가 백지가 된다.
               key 를 경로로 두어 다른 화면으로 옮기면 저절로 풀린다. */}
-          {canViewCurrentPath ? <RouteErrorBoundary key={pathname}><Routes>
+          {canViewCurrentPath ? <RouteErrorBoundary key={pathname}><Suspense fallback={<RouteFallback />}><Routes>
             <Route path="/" element={<HomeGate><Home /></HomeGate>} />
             <Route path="/meta" element={<Suspense fallback={<MetaFallback />}><Meta /></Suspense>} />
             <Route path="/development" element={<Development />} />
@@ -218,7 +228,7 @@ function AppLayout() {
               />
             ))}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes></RouteErrorBoundary> : <ScreenAccessDenied />}
+          </Routes></Suspense></RouteErrorBoundary> : <ScreenAccessDenied />}
         </main>
       </div>
       <ParsingOverlay />

@@ -544,7 +544,10 @@ export function Warehouse() {
   const overrides = useAppStore((state) => state.fabricOverrides)
   const fabricEvents = useAppStore((state) => state.fabricEvents)
   const disposalRounds = useAppStore((state) => state.disposalRounds)
-  const ledger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents), [fabricEvents, overrides, records, samples])
+  // 같은 입력으로 두 번 만들던 것을 한 번만 만들고 가른다(R449).
+  // includeRemoved 는 fabric-ledger.ts 마지막에 거르기만 해서, 가르기는 결과가 같다.
+  const fullLedger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents, { includeRemoved: true }), [fabricEvents, overrides, records, samples])
+  const ledger = useMemo(() => fullLedger.filter((item) => item.status !== "REMOVED"), [fullLedger])
   const suggestFabric1Numbers = useCallback((count: number) => nextStorageNumbers(ledger, count, "team1"), [ledger])
   const scopedLedger = useMemo(() => ledger.filter((item) => isFabric1Item(item) === (teamScope === "team1")), [ledger, teamScope])
   const rackDashTargets = useMemo(() => {
@@ -565,9 +568,9 @@ export function Warehouse() {
    * 목록에서 숨긴(REMOVED) 항목. 되살리기 화면에서만 쓴다.
    * 채번과 통계는 위 `ledger` 를 그대로 보게 두어야 한다. 숨긴 번호까지 점유로 세면 채번이 달라진다.
    */
-  const hiddenLedger = useMemo(() => buildFabricLedger(records, samples, overrides, fabricEvents, { includeRemoved: true })
+  const hiddenLedger = useMemo(() => fullLedger
     .filter((item) => item.status === "REMOVED" && isFabric1Item(item) === (teamScope === "team1")),
-  [fabricEvents, overrides, records, samples, teamScope])
+  [fullLedger, teamScope])
   const hiddenCount = hiddenLedger.length
   /** 3팀 번호 순환을 전제하는 곳(폐기 라운드)이 쓰는 목록. 팀 전환과 무관하게 항상 3팀만이다. */
   const team3Ledger = useMemo(() => ledger.filter((item) => !isFabric1Item(item)), [ledger])

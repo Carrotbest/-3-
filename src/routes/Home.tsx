@@ -44,7 +44,7 @@ import {
 import { fmtDateFull } from "@/data/format"
 import { stageOf, type ChemicalCategory, type ChemicalPortfolio } from "@/data/chemical"
 import { referenceToMaterial, useRecentReferences } from "@/data/references"
-import { loadTrendFeed, loadTrendKpi, type TrendFeed, type TrendKpi } from "@/data/trend"
+import { loadTrendHome, loadTrendKpi, type TrendFeed, type TrendKpi } from "@/data/trend"
 import { SAMPLE_OWNERS, type DevRecord, type MaterialItem, type MaterialKind } from "@/data/schema"
 import { hoverLift } from "@/lib/motion"
 import { HOME_GLASS_HOVER, HOME_GLASS_STATIC, HOME_GLASS_SURFACE } from "@/lib/home-surface"
@@ -873,7 +873,7 @@ export function Home() {
 
   useEffect(() => {
     let active = true
-    Promise.all([loadTrendFeed(), loadTrendKpi()])
+    Promise.all([loadTrendHome(), loadTrendKpi()])
       .then(([feed, kpi]) => {
         if (!active) return
         setTrendFeed(feed)

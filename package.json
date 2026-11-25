@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/build-trend-home.mjs",
+    "predev": "node scripts/build-trend-home.mjs",
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "export:html": "tsc --noEmit && vite build --base=./ && node scripts/export-standalone.mjs",
