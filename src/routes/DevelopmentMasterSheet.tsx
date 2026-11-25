@@ -85,8 +85,13 @@ const ownerColor = (name: string): string => {
 }
 
 interface CellRef { row: string; col: string }
-/** `rowStart`·`rowEnd` 는 Home·End 로 그 행의 양 끝 칸, `sheetStart`·`sheetEnd` 는 Ctrl 을 함께 눌러 표의 양 끝 칸이다(R456). */
-type CellMove = "up" | "down" | "left" | "right" | "rowStart" | "rowEnd" | "sheetStart" | "sheetEnd"
+/** `rowStart`·`rowEnd` 는 Home·End 로 그 행의 양 끝 칸, `sheetStart`·`sheetEnd` 는 Ctrl 을 함께 눌러 표의 양 끝 칸이다(R456).
+ *  `block*` 은 Ctrl+방향키로 데이터 블록 끝, `page*` 는 PageUp·PageDown 으로 한 화면이다(R457). */
+type CellMove =
+  | "up" | "down" | "left" | "right"
+  | "rowStart" | "rowEnd" | "sheetStart" | "sheetEnd"
+  | "blockUp" | "blockDown" | "blockLeft" | "blockRight"
+  | "pageUp" | "pageDown"
 
 interface CellRect {
   top: number
@@ -1772,6 +1777,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const zajiInputRef = useRef<HTMLInputElement>(null)
   const resizeCleanupRef = useRef<(() => void) | null>(null)
   const gridScrollRef = useRef<HTMLDivElement>(null)
+  /** Ctrl+F 가 여기로 포커스를 보낸다(R457). */
+  const searchRef = useRef<HTMLInputElement>(null)
   const styleHoverRef = useRef<StyleHoverLayerHandle>(null)
   const hoverTimerRef = useRef<number | null>(null)
 
@@ -2453,6 +2460,16 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       : { anchor: { row: rowId, col: first.id }, focus: { row: rowId, col: last.id } })
   }
 
+  /** Ctrl+Space. `selectWholeRow` 의 짝이고 보이는 행 전체를 잡는다(R457). */
+  const selectWholeColumn = (colId: string, extend = false) => {
+    const first = filtered[0], last = filtered[filtered.length - 1]
+    if (!first || !last) return
+    const top = recordIdentity(first), bottom = recordIdentity(last)
+    setRange((current) => extend && current
+      ? { anchor: { row: top, col: current.anchor.col }, focus: { row: bottom, col: colId } }
+      : { anchor: { row: top, col: colId }, focus: { row: bottom, col: colId } })
+  }
+
   const setCellAnchor = (row: string, col: string) => {
     // Ctrl+mousedown 직후 이어지는 셀 click은 선택을 새로 잡지 않는다(추가 영역을 지키기 위해).
     if (additiveClickRef.current) return
@@ -2540,6 +2557,59 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     clearFocus()
   }, [focusRowId, records.length, scoped])
 
+  /**
+   * PageUp·PageDown 한 번에 넘길 행 수. 보이는 행들의 **실제 높이 평균**으로 센다.
+   *
+   * **행 높이를 32 로 박지 말 것.** Alt+Enter 로 줄바꿈을 확정한 행은 그보다 높다(R437).
+   * 창고가 쓰는 `ROW_HEIGHT = 32` 고정 방식은 그래서 이 표에 못 쓴다.
+   * 머리말은 sticky 라 보이는 높이에서 빼고, 마지막 한 줄은 셀이 잘려 올라가는 걸 피하려고 뺀다.
+   */
+  const pageRows = (): number => {
+    const scroller = gridScrollRef.current
+    const rows = scroller?.querySelectorAll<HTMLElement>("tbody tr[data-row-id]")
+    if (!scroller || !rows?.length) return 10
+    let total = 0
+    rows.forEach((row) => { total += row.getBoundingClientRect().height })
+    const average = total / rows.length
+    if (!(average > 0)) return 10
+    const view = scroller.clientHeight - (theadRef.current?.getBoundingClientRect().height ?? 0)
+    return Math.max(1, Math.floor(view / average) - 1)
+  }
+
+  /**
+   * Ctrl+방향키가 갈 자리. **엑셀 규칙 그대로다.**
+   *
+   * 다음 칸이 비었으면 값이 있는 첫 칸까지 건너가고, 없으면 끝까지 간다.
+   * 다음 칸에 값이 있으면 값이 이어지는 **블록의 마지막 칸**까지 간다.
+   *
+   * 단순히 행·열 끝으로 보내지 않는 이유는 그건 Ctrl+Home·Ctrl+End 가 이미 한다(R456).
+   * DD 는 빈 칸이 많은 표라 값이 모인 덩어리 사이를 건너가는 엑셀 규칙이 실제로 의미가 있다.
+   *
+   * 값 판정은 `rawCellText` 로 완료일이 비고 목표일만 잡힌 칸은 화면의 기울임꼴로 보이는데
+   * 그 함수가 목표일을 폴백으로 돌려주므로 **보이는 대로 값이 있는 칸으로 친다.**
+   * `column.value` 를 직접 부르면 그 칸이 빈 칸으로 잡혀 화면 결과와 어긋난다.
+   */
+  const blockTarget = (rowIndex: number, colIndex: number, step: 1 | -1, vertical: boolean): number => {
+    const limit = (vertical ? filtered.length : displayedColumns.length) - 1
+    const from = vertical ? rowIndex : colIndex
+    if (limit < 0) return from
+    const filled = (at: number): boolean => {
+      const record = vertical ? filtered[at] : filtered[rowIndex]
+      const column = vertical ? displayedColumns[colIndex] : displayedColumns[at]
+      return Boolean(record && column && rawCellText(record, column).trim())
+    }
+    const next = from + step
+    if (next < 0 || next > limit) return from
+    if (!filled(next)) {
+      let cursor = next
+      while (cursor >= 0 && cursor <= limit && !filled(cursor)) cursor += step
+      return cursor < 0 || cursor > limit ? (step < 0 ? 0 : limit) : cursor
+    }
+    let cursor = next
+    while (cursor + step >= 0 && cursor + step <= limit && filled(cursor + step)) cursor += step
+    return cursor
+  }
+
   /** 방향키는 가장자리에서 멈추고, Tab만 행 끝에서 다음/이전 행으로 순환한다. */
   const moveSelection = (direction: CellMove, extend = false, wrap = false, origin?: CellRef) => {
     const rowCount = filtered.length
@@ -2562,6 +2632,12 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     else if (direction === "rowEnd") colIndex = colCount - 1
     else if (direction === "sheetStart") { rowIndex = 0; colIndex = 0 }
     else if (direction === "sheetEnd") { rowIndex = rowCount - 1; colIndex = colCount - 1 }
+    // PageUp·PageDown. 한 화면 행 수는 실측이다(R457).
+    else if (direction === "pageUp") rowIndex = Math.max(0, rowIndex - pageRows())
+    else if (direction === "pageDown") rowIndex = Math.min(rowCount - 1, rowIndex + pageRows())
+    // Ctrl+방향키. 엑셀과 같은 규칙이다(R457). 아래 blockTarget 주석 참고.
+    else if (direction === "blockUp" || direction === "blockDown") rowIndex = blockTarget(rowIndex, colIndex, direction === "blockUp" ? -1 : 1, true)
+    else if (direction === "blockLeft" || direction === "blockRight") colIndex = blockTarget(rowIndex, colIndex, direction === "blockLeft" ? -1 : 1, false)
     else if (direction === "right") {
       if (wrap && colIndex === colCount - 1 && rowIndex < rowCount - 1) { rowIndex += 1; colIndex = 0 }
       else colIndex = Math.min(colCount - 1, colIndex + 1)
@@ -3302,13 +3378,42 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     if (mod && key === "z" && event.shiftKey) { event.preventDefault(); void redoLast(); return }
     if (mod && key === "z") { event.preventDefault(); void undoLast(); return }
     if (mod && key === "y") { event.preventDefault(); void redoLast(); return }
+    if (mod && key === "f") { event.preventDefault(); searchRef.current?.focus(); searchRef.current?.select(); return }
+    if (mod && key === "a") {
+      event.preventDefault()
+      const firstRow = filtered[0], lastRow = filtered[filtered.length - 1]
+      const firstCol = displayedColumns[0], lastCol = displayedColumns[displayedColumns.length - 1]
+      if (!firstRow || !lastRow || !firstCol || !lastCol) return
+      setRange({ anchor: { row: recordIdentity(firstRow), col: firstCol.id }, focus: { row: recordIdentity(lastRow), col: lastCol.id } })
+      return
+    }
+    if (mod && key === ";") {
+      event.preventDefault()
+      if (!editEnabled) { notify(editDeniedMessage); return }
+      const focus = range?.focus
+      const rowIndex = focus ? rowIndexOf.get(focus.row) : undefined
+      const colIndex = focus ? colIndexOf.get(focus.col) : undefined
+      const record = rowIndex === undefined ? undefined : filtered[rowIndex]
+      const column = colIndex === undefined ? undefined : displayedColumns[colIndex]
+      if (!record || !column) return
+      if (!column.date) { notify("날짜 열에서만 오늘 날짜를 넣습니다."); return }
+      if (isLockedCell(record, column, isAdmin)) { notify("고칠 수 없는 칸입니다."); return }
+      const now = new Date()
+      // 저장 형식은 `YYYY-MM-DD` 이고 **로컬 날짜**다. `toISOString()` 을 쓰지 말 것.
+      // 그 값은 UTC 라 한국(UTC+9)에서는 오전 9시 전에 어제 날짜가 들어간다.
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+      void commitCell(record, column, today)
+      return
+    }
     if (event.key === "Escape") { setCopyMark(null); setRange(null); setMenu(null); setFocusedRowId(null); return }
     if (event.key === "Delete" || event.key === "Backspace") { if (rect) { event.preventDefault(); void clearRange() }; return }
+    if (mod && event.code === "Space") { if (range) { event.preventDefault(); selectWholeColumn(range.focus.col, event.shiftKey) }; return }
     if (event.shiftKey && event.code === "Space") { if (range) { event.preventDefault(); selectWholeRow(range.focus.row) }; return }
     if (event.key.startsWith("Arrow")) {
       event.preventDefault()
-      const direction = event.key.slice(5).toLowerCase() as CellMove
-      moveSelection(direction, event.shiftKey)
+      const arrow = event.key.slice(5) as "Up" | "Down" | "Left" | "Right"
+      // Ctrl+방향키는 데이터 블록 끝으로 간다(R457). 그냥 방향키는 한 칸이다.
+      moveSelection(mod ? `block${arrow}` as CellMove : arrow.toLowerCase() as CellMove, event.shiftKey)
       return
     }
     // Home·End 는 그 행의 양 끝 칸, Ctrl 을 함께 누르면 표의 양 끝 칸이다. 엑셀과 같다(R456).
@@ -3317,6 +3422,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       event.preventDefault()
       const home = event.key === "Home"
       moveSelection(mod ? (home ? "sheetStart" : "sheetEnd") : (home ? "rowStart" : "rowEnd"), event.shiftKey)
+      return
+    }
+    if (event.key === "PageUp" || event.key === "PageDown") {
+      event.preventDefault()
+      moveSelection(event.key === "PageUp" ? "pageUp" : "pageDown", event.shiftKey)
       return
     }
     if (event.key === "Tab") { event.preventDefault(); moveSelection(event.shiftKey ? "left" : "right", false, true); return }
@@ -3821,7 +3931,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
     <div className="flex min-h-0 flex-1 flex-col border-y border-[var(--border)] bg-[var(--card)]">
       <div className="flex flex-wrap items-center gap-1.5 border-b border-[var(--border)] p-2">
-        <label className="relative block w-44 shrink-0"><span className="sr-only">DD 전체 열 검색</span><Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="전체 열 검색" className="h-7 pl-8 text-[11px]" /></label>
+        <label className="relative block w-44 shrink-0"><span className="sr-only">DD 전체 열 검색</span><Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input ref={searchRef} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="전체 열 검색" className="h-7 pl-8 text-[11px]" /></label>
         <Select value={owner} onValueChange={setOwner}><SelectTrigger className="h-7 w-28 shrink-0 text-[11px]"><SelectValue placeholder="담당" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 담당</SelectItem>{ownerOptions.map((item) => <SelectItem key={item} value={item}>{ownerDisplayName(item)}</SelectItem>)}</SelectContent></Select>
         <Select value={status} onValueChange={setStatus}><SelectTrigger className="h-7 w-28 shrink-0 text-[11px]"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value={ALL}>전체 Status</SelectItem>{statusOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
         <Button type="button" size="sm" variant="outline" className="h-7 shrink-0 px-2 text-[11px]" onClick={() => { setSearch(""); setOwner(ALL); setStatus(ALL); setColumnFilters({}) }}><RotateCcw className="size-3.5" />초기화</Button>
