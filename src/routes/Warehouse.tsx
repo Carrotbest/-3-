@@ -1550,12 +1550,12 @@ export function Warehouse() {
       if (scroller) {
         const box = scroller.getBoundingClientRect()
         const headBottom = Math.max(box.top, scroller.querySelector("thead")?.getBoundingClientRect().bottom ?? box.top)
-        const up = dragScrollSpeed(headBottom + 24 - pointer.y)
-        const down = dragScrollSpeed(pointer.y - (box.bottom - 48))
+        const up = dragScrollSpeed(pointer.y - headBottom, 24)
+        const down = dragScrollSpeed(box.bottom - pointer.y, 48)
         if (up > 0) scroller.scrollTop -= up * step
         else if (down > 0) scroller.scrollTop += down * step
-        const left = dragScrollSpeed(box.left + 80 - pointer.x)
-        const right = dragScrollSpeed(pointer.x - (box.right - 48))
+        const left = dragScrollSpeed(pointer.x - box.left, 80)
+        const right = dragScrollSpeed(box.right - pointer.x, 48)
         if (left > 0) scroller.scrollLeft -= left * step
         else if (right > 0) scroller.scrollLeft += right * step
         const x = Math.min(Math.max(pointer.x, box.left + 2), box.right - 14)

@@ -85,7 +85,8 @@ const ownerColor = (name: string): string => {
 }
 
 interface CellRef { row: string; col: string }
-type CellMove = "up" | "down" | "left" | "right"
+/** `rowStart`·`rowEnd` 는 Home·End 로 그 행의 양 끝 칸, `sheetStart`·`sheetEnd` 는 Ctrl 을 함께 눌러 표의 양 끝 칸이다(R456). */
+type CellMove = "up" | "down" | "left" | "right" | "rowStart" | "rowEnd" | "sheetStart" | "sheetEnd"
 
 interface CellRect {
   top: number
@@ -2134,14 +2135,14 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       const scroller = gridScrollRef.current
       if (scroller) {
         const box = scroller.getBoundingClientRect()
-        const up = dragScrollSpeed(box.top + 48 - pointer.y)
-        const down = dragScrollSpeed(pointer.y - (box.bottom - 48))
+        const up = dragScrollSpeed(pointer.y - box.top, 48)
+        const down = dragScrollSpeed(box.bottom - pointer.y, 48)
         if (up > 0) scroller.scrollTop -= up * step
         else if (down > 0) scroller.scrollTop += down * step
         const wholeRowDrag = moveDrag?.wholeRows === true || rowSelectingRef.current
         if (!wholeRowDrag) {
-          const left = dragScrollSpeed(box.left + 80 - pointer.x)
-          const right = dragScrollSpeed(pointer.x - (box.right - 48))
+          const left = dragScrollSpeed(pointer.x - box.left, 80)
+          const right = dragScrollSpeed(box.right - pointer.x, 48)
           if (left > 0) scroller.scrollLeft -= left * step
           else if (right > 0) scroller.scrollLeft += right * step
         }
@@ -2556,6 +2557,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
 
     if (direction === "up") rowIndex = Math.max(0, rowIndex - 1)
     else if (direction === "down") rowIndex = Math.min(rowCount - 1, rowIndex + 1)
+    // Home·End 와 Ctrl 조합. 보이는 행과 열 기준이라 거른 행, 숨긴 열, 접은 그룹은 건너뛴다(R456).
+    else if (direction === "rowStart") colIndex = 0
+    else if (direction === "rowEnd") colIndex = colCount - 1
+    else if (direction === "sheetStart") { rowIndex = 0; colIndex = 0 }
+    else if (direction === "sheetEnd") { rowIndex = rowCount - 1; colIndex = colCount - 1 }
     else if (direction === "right") {
       if (wrap && colIndex === colCount - 1 && rowIndex < rowCount - 1) { rowIndex += 1; colIndex = 0 }
       else colIndex = Math.min(colCount - 1, colIndex + 1)
@@ -3303,6 +3309,14 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       event.preventDefault()
       const direction = event.key.slice(5).toLowerCase() as CellMove
       moveSelection(direction, event.shiftKey)
+      return
+    }
+    // Home·End 는 그 행의 양 끝 칸, Ctrl 을 함께 누르면 표의 양 끝 칸이다. 엑셀과 같다(R456).
+    // 방향키와 같이 Shift 를 누르면 선택이 거기까지 넓어진다.
+    if (event.key === "Home" || event.key === "End") {
+      event.preventDefault()
+      const home = event.key === "Home"
+      moveSelection(mod ? (home ? "sheetStart" : "sheetEnd") : (home ? "rowStart" : "rowEnd"), event.shiftKey)
       return
     }
     if (event.key === "Tab") { event.preventDefault(); moveSelection(event.shiftKey ? "left" : "right", false, true); return }
