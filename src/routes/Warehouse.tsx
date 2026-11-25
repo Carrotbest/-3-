@@ -50,6 +50,7 @@ import { FABRIC1_INTAKE_SHEET, WEB_INTAKE_SHEET } from "@/data/schema"
 import { checkWarehouseFlEntry, needsFlConfirm, type WarehouseFlCheck } from "@/data/warehouse-fl-check"
 import { buildInboundCard, buildOutboundCancelCard, buildOutboundConfirmCard, notifyTeams } from "@/data/teams-notify"
 import { claimStorageNumbers, releaseStorageNumbers } from "@/data/storage-claims"
+import { dragScrollSpeed, dragScrollStep } from "@/lib/drag-scroll"
 import { useInView } from "@/lib/useInView"
 import { useViewportAnchor } from "@/lib/useViewportAnchor"
 import { addManualIntake, updateManualIntake, applyDisposalRoundCompletion, applyFabricAction, applyFabricActions, backfillFabricRecordIds, clearFabric1Cells, removeFabricRows, saveDisposalRounds, saveFabricFields, saveFabricRackNo, saveFabricRackNos, undoFabricEntry, useAppStore, type ApplyFabricActionInput, type FabricUndoEntry } from "@/store/useAppStore"
@@ -1537,18 +1538,26 @@ export function Warehouse() {
   const startDragAutoScroll = (clientX: number, clientY: number) => {
     dragPointerRef.current = { x: clientX, y: clientY }
     if (dragFrameRef.current !== null) return
-    const tick = () => {
+    let lastAt = performance.now()
+    const tick = (now: number) => {
       dragFrameRef.current = null
       const pointer = dragPointerRef.current
       if (!pointer || !cellDragRef.current) return
+      // 프레임 간격을 직접 재서 px/초로 민다. 프레임이 늦어도 속도가 유지된다(R454).
+      const step = dragScrollStep(now, lastAt)
+      lastAt = now
       const scroller = gridRefs.current[tab]
       if (scroller) {
         const box = scroller.getBoundingClientRect()
         const headBottom = Math.max(box.top, scroller.querySelector("thead")?.getBoundingClientRect().bottom ?? box.top)
-        if (pointer.y < headBottom + 24) scroller.scrollTop -= 16
-        else if (pointer.y > box.bottom - 48) scroller.scrollTop += 16
-        if (pointer.x < box.left + 80) scroller.scrollLeft -= 16
-        else if (pointer.x > box.right - 48) scroller.scrollLeft += 16
+        const up = dragScrollSpeed(headBottom + 24 - pointer.y)
+        const down = dragScrollSpeed(pointer.y - (box.bottom - 48))
+        if (up > 0) scroller.scrollTop -= up * step
+        else if (down > 0) scroller.scrollTop += down * step
+        const left = dragScrollSpeed(box.left + 80 - pointer.x)
+        const right = dragScrollSpeed(pointer.x - (box.right - 48))
+        if (left > 0) scroller.scrollLeft -= left * step
+        else if (right > 0) scroller.scrollLeft += right * step
         const x = Math.min(Math.max(pointer.x, box.left + 2), box.right - 14)
         const y = Math.min(Math.max(pointer.y, headBottom + 2), box.bottom - 14)
         extendDragAtPointerRef.current(x, y)

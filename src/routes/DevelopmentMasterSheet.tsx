@@ -35,6 +35,7 @@ import { applyZajiHeader, applyZajiOption, fillZajiHeaderBlanks, parseZaji, zaji
 import { MEMBERS, ownerDisplayName, ownerIncludes, ownerNames, type DevRecord, type DevTechnical, type RequestOption, type RequestStyle } from "@/data/schema"
 import { buildWeeklyReport, reportOwnerNames as reportOwnersOf, weeklyReportText, type ReportDetailLevel } from "@/data/weekly-report"
 import { saveDevelopmentIntakeRecords, saveDevelopmentRecord, saveRequests, useAppStore, flushDevelopmentRecords, writeDevelopmentRecords } from "@/store/useAppStore"
+import { dragScrollSpeed, dragScrollStep } from "@/lib/drag-scroll"
 import { useViewportAnchor } from "@/lib/useViewportAnchor"
 
 const ALL = "__all__"
@@ -2120,20 +2121,30 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   const startDragAutoScroll = (clientX: number, clientY: number) => {
     lastDragPointerRef.current = { x: clientX, y: clientY }
     if (dragAutoScrollFrameRef.current !== null) return
-    const tick = () => {
+    let lastAt = performance.now()
+    const tick = (now: number) => {
       dragAutoScrollFrameRef.current = null
       const pointer = lastDragPointerRef.current
       const moveDrag = moveDragRef.current
       const dragActive = Boolean(moveDrag || fillDragRef.current || rowSelectingRef.current || selectingRef.current)
       if (!pointer || !dragActive) return
-      const scroller = document.querySelector<HTMLElement>("[data-route-scroll-root]")
+      // 프레임 간격을 직접 재서 px/초로 민다. 프레임이 늦어도 속도가 유지된다(R453).
+      const step = dragScrollStep(now, lastAt)
+      lastAt = now
+      const scroller = gridScrollRef.current
       if (scroller) {
         const box = scroller.getBoundingClientRect()
-        if (pointer.y < box.top + 48) scroller.scrollTop -= 16
-        else if (pointer.y > box.bottom - 48) scroller.scrollTop += 16
+        const up = dragScrollSpeed(box.top + 48 - pointer.y)
+        const down = dragScrollSpeed(pointer.y - (box.bottom - 48))
+        if (up > 0) scroller.scrollTop -= up * step
+        else if (down > 0) scroller.scrollTop += down * step
         const wholeRowDrag = moveDrag?.wholeRows === true || rowSelectingRef.current
-        if (!wholeRowDrag && pointer.x < box.left + 80) scroller.scrollLeft -= 16
-        else if (!wholeRowDrag && pointer.x > box.right - 48) scroller.scrollLeft += 16
+        if (!wholeRowDrag) {
+          const left = dragScrollSpeed(box.left + 80 - pointer.x)
+          const right = dragScrollSpeed(pointer.x - (box.right - 48))
+          if (left > 0) scroller.scrollLeft -= left * step
+          else if (right > 0) scroller.scrollLeft += right * step
+        }
       }
       // 스크롤 뒤 포인터 아래 대상을 매 프레임 다시 찾아, 마우스가 멈춰도 선택·미리보기를 확장한다.
       gridMouseRef.current.moveAt(pointer.x, pointer.y)

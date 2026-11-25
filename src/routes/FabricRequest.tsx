@@ -51,6 +51,7 @@ import { parseTsvGrid, tsvCell } from "@/data/range-tsv"
 import { MEMBERS, REQUEST_RESULTS, styleRemarkText, type AnalysisRequest, type DevRecord, type RequestArchive, type RequestBoard, type RequestOption, type RequestResult, type RequestStyle } from "@/data/schema"
 import { loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
 import { saveAnalysisRequests, saveRequestArchive, saveRequestBoards, saveRequests, saveRequestsAndBoards, useAppStore, writeDevelopmentRecords } from "@/store/useAppStore"
+import { dragScrollSpeed, dragScrollStep } from "@/lib/drag-scroll"
 import { useViewportAnchor } from "@/lib/useViewportAnchor"
 
 // ─────────────────────────────────────────────── 열 정의
@@ -1489,19 +1490,27 @@ export function FabricRequest() {
       pointerRef.current = null
       lastExtendRef.current = ""
     }
-    const tick = () => {
+    let lastAt = performance.now()
+    const tick = (now: number) => {
       autoScrollFrameRef.current = null
       const pointer = pointerRef.current
       const scroller = scrollRef.current
       if (!pointer || !scroller || !dragRef.current) return
+      // 프레임 간격을 직접 재서 px/초로 민다. 프레임이 늦어도 속도가 유지된다(R454).
+      const step = dragScrollStep(now, lastAt)
+      lastAt = now
       const box = scroller.getBoundingClientRect()
       // 머리글은 sticky라 표 위쪽 가장자리는 머리글 아래 선으로 본다.
       const headBottom = Math.max(box.top, scroller.querySelector("thead")?.getBoundingClientRect().bottom ?? box.top)
-      if (pointer.y < headBottom + 24) scroller.scrollTop -= 16
-      else if (pointer.y > box.bottom - 48) scroller.scrollTop += 16
+      const up = dragScrollSpeed(headBottom + 24 - pointer.y)
+      const down = dragScrollSpeed(pointer.y - (box.bottom - 48))
+      if (up > 0) scroller.scrollTop -= up * step
+      else if (down > 0) scroller.scrollTop += down * step
       if (!rowDragRef.current) {
-        if (pointer.x < box.left + 80) scroller.scrollLeft -= 16
-        else if (pointer.x > box.right - 48) scroller.scrollLeft += 16
+        const left = dragScrollSpeed(box.left + 80 - pointer.x)
+        const right = dragScrollSpeed(pointer.x - (box.right - 48))
+        if (left > 0) scroller.scrollLeft -= left * step
+        else if (right > 0) scroller.scrollLeft += right * step
       }
       // 포인터가 표 밖으로 나가도 가장 가까운 안쪽 칸으로 선택을 넓힌다. 스크롤바 폭만큼 안으로 당긴다.
       const x = Math.min(Math.max(pointer.x, box.left + 2), box.right - 14)
@@ -1512,7 +1521,11 @@ export function FabricRequest() {
     const move = (event: MouseEvent) => {
       if (!dragRef.current) return
       pointerRef.current = { x: event.clientX, y: event.clientY }
-      if (autoScrollFrameRef.current === null) autoScrollFrameRef.current = window.requestAnimationFrame(tick)
+      if (autoScrollFrameRef.current === null) {
+        // 드래그가 새로 시작할 때 기준 시각을 다시 잡는다. 안 잡으면 지난 드래그와의 간격이 섞여 들어간다(R454).
+        lastAt = performance.now()
+        autoScrollFrameRef.current = window.requestAnimationFrame(tick)
+      }
     }
     const up = () => {
       const fillSource = fillRef.current

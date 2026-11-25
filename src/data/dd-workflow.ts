@@ -103,7 +103,8 @@ export function isCompletedFlNo(flNo: string | undefined): boolean {
   return /^FL\d{8}$/.test(String(flNo ?? "").replace(/\s+/g, "").toUpperCase())
 }
 
-const normalizedStatus = (record: DevRecord): string => String(record.devStatus ?? "").trim().toUpperCase()
+const normalizedStatusText = (status: string | undefined): string => String(status ?? "").trim().toUpperCase()
+const normalizedStatus = (record: DevRecord): string => normalizedStatusText(record.devStatus)
 const identity = (record: DevRecord): string => `${record._src.sheet}::${record._src.row}`
 
 /**
@@ -142,10 +143,31 @@ function reached(value: string | undefined, today: Date): boolean {
 }
 
 /**
+ * 이번 계산에서 정해질 DD Status. 그룹을 묶기 전에 한 번 돌려 각 행의 최종 값을 먼저 정한다(R452).
+ * 옵션 진행률이 그 패스에서 올라간 완료까지 세야 해서다.
+ *
+ * 자동으로는 올리기만 한다. 유효한 FL#이 들어오면 완료로 올린다.
+ * **사람이 고른 상태는 절대 내리지 않는다.** FL 없이 YDS만 입고해 두는 경우가 있어
+ * 수동 완료를 그대로 둬야 한다. HOLD·DROP·REJECT도 같은 이유로 유지한다.
+ */
+function resolvedDevStatus(record: DevRecord): string | undefined {
+  const currentStatus = normalizedStatus(record)
+  return isCompletedFlNo(record.flNo) && (!currentStatus || currentStatus === "진행중")
+    ? "완료"
+    : record.devStatus
+}
+
+/**
  * 담당자 DD의 행 수식을 웹 데이터에 재현한다.
  * C열 옵션순번, AN열 완료/전체, AR열 실측 Balance(퍼센트 숫자)와 공정 도달 상태를 매 저장 때 다시 계산한다.
  */
 export function recalculateDevelopmentRecords(records: readonly DevRecord[], today = new Date()): DevRecord[] {
+  // 완료 판정을 그룹보다 먼저 돌린다(R452). 예전에는 그룹에서 done을 센 뒤 아래 map에서 완료로 올려,
+  // FL#을 처음 넣어 저장한 직후에는 "0 / 2"로 보이다가 그 Style을 다시 저장할 때에야 "1 / 2"가 됐다.
+  // 같은 입력으로 두 번 불러야 수렴했다. **순서를 되돌리지 말 것.**
+  const statuses = new Map<string, string | undefined>()
+  records.forEach((record) => statuses.set(identity(record), resolvedDevStatus(record)))
+
   const groups = new Map<string, DevRecord[]>()
   records.forEach((record) => {
     const styleNo = record.styleNo.normalize("NFKC").trim().toUpperCase()
@@ -160,7 +182,7 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
   const calculated = new Map<string, { opt: string; optionProgress: string }>()
   groups.forEach((group) => {
     const sorted = [...group].sort((left, right) => left._src.row - right._src.row)
-    const done = sorted.filter((record) => normalizedStatus(record) === "완료").length
+    const done = sorted.filter((record) => normalizedStatusText(statuses.get(identity(record))) === "완료").length
     sorted.forEach((record, index) => calculated.set(identity(record), { opt: String(index + 1), optionProgress: `${done} / ${sorted.length}` }))
   })
 
@@ -196,13 +218,8 @@ export function recalculateDevelopmentRecords(records: readonly DevRecord[], tod
       optionProgress: hasStyleNo ? formula?.optionProgress ?? record.tech?.optionProgress : "",
       actual: record.tech?.actual ? { ...record.tech.actual, balance } : record.tech?.actual,
     }
-    // 자동으로는 올리기만 한다. 유효한 FL#이 들어오면 완료로 올린다.
-    // **사람이 고른 상태는 절대 내리지 않는다.** FL 없이 YDS만 입고해 두는 경우가 있어
-    // 수동 완료를 그대로 둬야 한다. HOLD·DROP·REJECT도 같은 이유로 유지한다.
-    const currentStatus = normalizedStatus(record)
-    const devStatus = flDone && (!currentStatus || currentStatus === "진행중")
-      ? "완료"
-      : record.devStatus
+    // 판정은 위 resolvedDevStatus 하나다. 여기서 다시 세우지 말 것(R452).
+    const devStatus = statuses.get(identity(record)) ?? record.devStatus
     const nextOpt = hasStyleNo ? formula?.opt ?? record.opt : ""
     const nextOptionProgress = hasStyleNo ? formula?.optionProgress ?? record.tech?.optionProgress : ""
     // 계산 결과가 전과 같으면 입력 객체를 그대로 돌려준다.
