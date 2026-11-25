@@ -24,6 +24,7 @@ import { createBlankDevRecord, DD_CATEGORY_OPTIONS, DD_COMPANY_OPTIONS, DD_DYEIN
 import { buildDdWorkbook, ddExportFileName, downloadBlob, type DdExportSheet } from "@/data/dd-export"
 import { optionSequenceText, styleTimeline } from "@/data/derive"
 import { bodyLabel, buildFdsYdsWorkbook, collectFdsYdsRows, copyFdsYdsTable, FDS_YDS_COLUMNS, fdsYdsFileName } from "@/data/fds-yds-request"
+import { fillSeriesValues } from "@/data/fill-series"
 import { appendScheduleChange, dayGap, DD_DELAY_REASON_LABEL, scheduleRowKey, type DdDelayReason, type DdProcess } from "@/data/dd-schedule"
 import { fmtDate, fmtDateMd, isDateValue, normalizeDateInput, toDate } from "@/data/format"
 import { loadViewFlag, loadViewGroups, loadViewNumbers, saveViewPref } from "@/data/view-prefs"
@@ -293,9 +294,9 @@ function replaceText(source: string, find: string, replacement: string, matchCas
   return result
 }
 
-function FillHandle({ visible, onMouseDown }: { visible: boolean; onMouseDown: (event: ReactMouseEvent<HTMLSpanElement>) => void }) {
+function FillHandle({ visible, onMouseDown, onDoubleClick }: { visible: boolean; onMouseDown: (event: ReactMouseEvent<HTMLSpanElement>) => void; onDoubleClick: (event: ReactMouseEvent<HTMLSpanElement>) => void }) {
   if (!visible) return null
-  return <span data-fill-handle aria-hidden="true" onMouseDown={onMouseDown} className="absolute -bottom-1 -right-1 z-30 size-[7px] cursor-crosshair border border-white bg-[var(--grid-selection)]" />
+  return <span data-fill-handle aria-hidden="true" onMouseDown={onMouseDown} onDoubleClick={onDoubleClick} className="absolute -bottom-1 -right-1 z-30 size-[7px] cursor-crosshair border border-white bg-[var(--grid-selection)]" />
 }
 
 function ledgerStatus(ledger: FabricLedgerItem | null): ReactNode {
@@ -892,6 +893,10 @@ function createEmptyGridRecord(owner = ""): DevRecord {
 
 const COMPUTED_COLUMN_IDS = new Set(["opt", "optionProgress", "actualBalance", "costUsdPerYd", "costUsdPerKg", "costAt"])
 
+/** Columns whose identifiers or option values must never be invented by series fill. */
+const SERIES_BLOCKED_IDS = new Set(["flNo", "styleNo"])
+const seriesAllowed = (column: MasterColumn): boolean => !SERIES_BLOCKED_IDS.has(column.id) && !column.options
+
 const TECH_PATHS: Record<string, string[]> = {
   project: ["project"],
   origBrand: ["original", "brand"], origContents: ["original", "contents"], origConstruction: ["original", "construction"], origWeight: ["original", "weight"], origYarn: ["original", "yarn"], origComments: ["original", "comments"],
@@ -1451,6 +1456,7 @@ interface GridActions {
   contextMenu: (event: ReactMouseEvent<HTMLTableCellElement>, rowId: string, colId: string) => void
   openCostSheet: (rowId: string) => void
   fillStart: (event: ReactMouseEvent<HTMLSpanElement>) => void
+  fillDoubleClick: (event: ReactMouseEvent<HTMLSpanElement>) => void
 }
 
 interface GridCellProps {
@@ -1495,6 +1501,7 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const onCancel = () => actions.cancel()
   const onContextMenu = (event: ReactMouseEvent<HTMLTableCellElement>) => actions.contextMenu(event, rowId, column.id)
   const onFillStart = actions.fillStart
+  const onFillDoubleClick = actions.fillDoubleClick
   const costClickable = column.id === "flNo" && isCompletedFlNo(record.flNo) && isDomesticCostRecord(record)
   const fixed = isLockedCell(record, column, canEditLocked)
   const align = `${alignOf(column) === "center" ? "text-center" : "text-left"} ${column.number ? "tabular-nums" : ""}`
@@ -1521,7 +1528,7 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
     : null
   const selectionStyle = { width, minWidth: width, ...(frozenLeft !== undefined ? { left: frozenLeft } : null), ...(frozenTop !== undefined ? { top: frozenTop } : null), ...edgeStyle, boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...moveStyle, ...companyColorStyle, ...pastScheduleStyle, ...overdueStyle, ...dimStyle }
   if (editEnabled && active && !fixed) {
-    return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative ${frozen ? `sticky ${zClass} bg-[var(--card)] group-hover:bg-[var(--accent)]` : ""} h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
+    return <td data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) onSelect() }} className={`relative ${frozen ? `sticky ${zClass} bg-[var(--card)] group-hover:bg-[var(--accent)]` : ""} h-8 border-b border-r border-[var(--border)] p-0 ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""}`} style={selectionStyle}><InlineEditor record={record} column={column} options={options} initial={editSeed} onCommit={onCommit} onCancel={onCancel} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} onDoubleClick={onFillDoubleClick} /></td>
   }
   const content = column.id === "storageNo" && ledger?.storageNo
     ? <div className="relative min-w-0 pr-4"><span className="block truncate">{ledger.storageNo}</span><Link to={`/fabric/${encodeURIComponent(ledger.key)}`} title="원단 상세 보기" aria-label={`${ledger.storageNo} 원단 상세 보기`} onMouseDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} className="pointer-events-none absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded p-0.5 text-[var(--muted-foreground)] opacity-0 transition-opacity hover:bg-[var(--muted)] hover:text-[var(--foreground)] group-hover:pointer-events-auto group-hover:opacity-100"><ExternalLink className="size-3.5" /></Link></div>
@@ -1544,7 +1551,7 @@ const GridCell = memo(function GridCell({ record, column, rowId, width, ledger, 
   const wrapped = typeof content === "string" && content.includes("\n")
   return <td data-col-id={column.id} title={column.id === "dueDate" && fixed && isDueDateLocked(record)
     ? "원사가 입고되어 납기가 확정됐습니다. 바꾸려면 관리자에게 요청하세요."
-    : typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative ${frozen ? `sticky ${zClass} bg-[var(--card)] group-hover:bg-[var(--accent)]` : ""} h-8 max-w-0 ${wrapped ? "whitespace-pre-wrap break-words [overflow-wrap:anywhere] py-1 align-top leading-snug" : "truncate"} border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} /></td>
+    : typeof displayedContent === "string" ? displayedContent : undefined} onClick={handleClick} onContextMenu={onContextMenu} onDoubleClick={handleDoubleClick} className={`relative ${frozen ? `sticky ${zClass} bg-[var(--card)] group-hover:bg-[var(--accent)]` : ""} h-8 max-w-0 ${wrapped ? "whitespace-pre-wrap break-words [overflow-wrap:anywhere] py-1 align-top leading-snug" : "truncate"} border-b border-r border-[var(--border)] px-2 text-xs font-normal ${column.mono ? "font-mono" : ""} ${align} ${highlight} ${fillPreview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${fixed ? `${sel.inRange ? "" : "bg-[color-mix(in_srgb,var(--muted)_30%,transparent)]"} text-[var(--muted-foreground)]` : editEnabled ? "cursor-cell hover:bg-[color-mix(in_srgb,var(--primary)_7%,transparent)]" : ""}`} style={selectionStyle}>{displayedContent}<FillHandle visible={editEnabled && sel.handle} onMouseDown={onFillStart} onDoubleClick={onFillDoubleClick} /></td>
 })
 
 function EditorGroup({ label, color, columns, draft, onChange, optionsById, layout, requiredIds, readOnly }: { label: string; color?: string; columns: MasterColumn[]; draft: DevRecord; onChange: (next: DevRecord) => void; optionsById: Record<string, readonly string[]>; layout?: "schedule" | "data"; requiredIds?: ReadonlySet<string>; readOnly?: boolean }) {
@@ -2425,6 +2432,22 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     startDragAutoScroll(event.clientX, event.clientY)
   }
 
+  /** Fills downward only while the adjacent anchor column remains non-empty. */
+  const fillToBlockEnd = () => {
+    if (!editEnabled) { notify(editDeniedMessage); return }
+    if (!rect) return
+    const anchor = displayedColumns[rect.left > 0 ? rect.left - 1 : rect.right + 1]
+    if (!anchor) { notify("기준으로 삼을 옆 열이 없습니다."); return }
+    let bottom = rect.bottom
+    while (bottom + 1 < filtered.length) {
+      const record = filtered[bottom + 1]
+      if (!record || !rawCellText(record, anchor).trim()) break
+      bottom += 1
+    }
+    if (bottom <= rect.bottom) { notify("아래로 채울 행이 없습니다."); return }
+    void commitFill(rect, { ...rect, bottom })
+  }
+
   const inFillPreview = (row: number | undefined, colId: string): boolean => {
     if (row === undefined) return false
     const col = colIndexOf.get(colId)
@@ -2829,18 +2852,49 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
       if (next !== draft) { edits.set(identity, next); changed += 1 }
     }
 
+    const writeValue = (rowIndex: number, colIndex: number, value: string) => {
+      const record = filtered[rowIndex]
+      const column = displayedColumns[colIndex]
+      if (!record || !column || isLockedCell(record, column, isAdmin)) return
+      const identity = recordIdentity(record)
+      const draft = edits.get(identity) ?? record
+      const next = updateRecordCell(draft, column, value, allowedFor(column, optionsById))
+      if (next !== draft) { edits.set(identity, next); changed += 1 }
+    }
+
+    const seriesFor = (colIndex: number, rowIndex: number, vertical: boolean, count: number): string[] | null => {
+      const column = displayedColumns[colIndex]
+      if (!column || !seriesAllowed(column)) return null
+      const length = vertical ? source.bottom - source.top + 1 : source.right - source.left + 1
+      const picked: string[] = []
+      for (let index = 0; index < length; index += 1) {
+        const record = vertical ? filtered[source.top + index] : filtered[rowIndex]
+        const targetColumn = vertical ? column : displayedColumns[source.left + index]
+        if (!record || !targetColumn) return null
+        if (!vertical && !seriesAllowed(targetColumn)) return null
+        picked.push(rawCellText(record, targetColumn, scope))
+      }
+      return fillSeriesValues(picked, count)
+    }
+
     if (target.bottom > source.bottom) {
       const height = source.bottom - source.top + 1
-      for (let row = source.bottom + 1; row <= target.bottom; row += 1) {
-        const sourceRow = source.top + ((row - source.top) % height)
-        for (let col = source.left; col <= source.right; col += 1) write(row, col, sourceRow, col)
+      const count = target.bottom - source.bottom
+      for (let col = source.left; col <= source.right; col += 1) {
+        const series = seriesFor(col, source.top, true, count)
+        for (let row = source.bottom + 1; row <= target.bottom; row += 1) {
+          if (series) writeValue(row, col, series[row - source.bottom - 1])
+          else write(row, col, source.top + ((row - source.top) % height), col)
+        }
       }
     } else if (target.right > source.right) {
       const width = source.right - source.left + 1
+      const count = target.right - source.right
       for (let row = source.top; row <= source.bottom; row += 1) {
+        const series = seriesFor(source.left, row, false, count)
         for (let col = source.right + 1; col <= target.right; col += 1) {
-          const sourceCol = source.left + ((col - source.left) % width)
-          write(row, col, row, sourceCol)
+          if (series) writeValue(row, col, series[col - source.right - 1])
+          else write(row, col, row, source.left + ((col - source.left) % width))
         }
       }
     }
@@ -3825,8 +3879,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
   }
 
   // GridCell 은 memo 라 콜백 참조가 고정돼야 한다. 최신 상태는 ref 로 읽고 객체 자체는 한 번만 만든다.
-  const gridActionsRef = useRef({ setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, openCostSheetByRowId, startFill })
-  gridActionsRef.current = { setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, openCostSheetByRowId, startFill }
+  const gridActionsRef = useRef({ setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, openCostSheetByRowId, startFill, fillToBlockEnd })
+  gridActionsRef.current = { setCellAnchor, beginCellEdit, commitCell, cancelCellEdit, openCellMenu, openCostSheetByRowId, startFill, fillToBlockEnd }
   const gridActions = useMemo<GridActions>(() => ({
     select: (rowId, colId) => gridActionsRef.current.setCellAnchor(rowId, colId),
     edit: (rowId, colId) => gridActionsRef.current.beginCellEdit({ row: rowId, col: colId }),
@@ -3835,6 +3889,11 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
     contextMenu: (event, rowId, colId) => gridActionsRef.current.openCellMenu(event, rowId, colId),
     openCostSheet: (rowId) => gridActionsRef.current.openCostSheetByRowId(rowId),
     fillStart: (event) => gridActionsRef.current.startFill(event),
+    fillDoubleClick: (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      gridActionsRef.current.fillToBlockEnd()
+    },
   }), [])
 
   const confirmDeleteRecord = async () => {
@@ -4088,8 +4147,8 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                   const stickyBase = `relative ${rowFrozen || colFrozen ? "sticky" : ""} ${z} h-8 border-b border-r border-[var(--border)] ${sel.inRange && !sel.isActive ? "bg-[color-mix(in_srgb,var(--grid-selection)_8%,transparent)]" : "bg-[var(--card)] group-hover:bg-[var(--accent)]"} ${preview ? "outline outline-1 outline-dashed outline-[var(--grid-selection)]" : ""} ${index === 0 ? `border-l-4 ${rowStyle.row}` : ""}`
                   const cellStyle = { width, minWidth: width, ...(colFrozen ? { left: frozenLeft(index) } : null), ...(rowFrozen ? { top: rowTop } : null), ...(freezeColEdge(index) ?? {}), ...(rowEdge ?? {}), boxShadow: selectionShadow(sel), cursor: sel.moveEdge ? "move" : undefined, ...movePreviewStyle(rowIdx, colIndexOf.get(column.id) ?? -1), ...(rowDimmed && !sel.inRange ? { backgroundColor: DIMMED_ROW_BG } : null) }
                   const active = isActive(column.id)
-                  if (editEnabled && active) return <td key={column.id} data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} className={`${stickyBase} p-0`} style={cellStyle}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} initial={editSeed} onCommit={(raw, move, fillRange) => void commitCell(record, column, raw, move, fillRange)} onCancel={cancelCellEdit} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} /></td>
-                  if (column.id === "status") return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined} className={`${stickyBase} px-1.5`} style={cellStyle}><StatusChip record={record} disabled={!editEnabled} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} /></td>
+                  if (editEnabled && active) return <td key={column.id} data-col-id={column.id} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} className={`${stickyBase} p-0`} style={cellStyle}><InlineEditor record={record} column={column} options={optionsById[column.id] ?? column.options} initial={editSeed} onCommit={(raw, move, fillRange) => void commitCell(record, column, raw, move, fillRange)} onCancel={cancelCellEdit} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} onDoubleClick={gridActions.fillDoubleClick} /></td>
+                  if (column.id === "status") return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onClick={(event) => { if (!event.shiftKey) selectCell(column.id) }} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined} className={`${stickyBase} px-1.5`} style={cellStyle}><StatusChip record={record} disabled={!editEnabled} /><FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} onDoubleClick={gridActions.fillDoubleClick} /></td>
                   return <td key={column.id} data-col-id={column.id} onContextMenu={(event) => openCellMenu(event, rowId, column.id)} onDoubleClick={editEnabled ? () => beginCellEdit({ row: rowId, col: column.id }) : undefined}
                      onMouseEnter={column.id === "styleNo" ? (event) => {
                        if (event.buttons !== 0 || moveDragRef.current || editCell) return
@@ -4120,7 +4179,7 @@ export function DevelopmentMasterSheet({ categoryScope = null }: { categoryScope
                       : column.id === "styleNo"
                         ? (() => { const target = resolveRequestLink(requestIndex, record); return <span className="flex items-center gap-1 truncate" title={warnings.map((warning) => warning.label).join(" · ") || undefined}>{isRecent ? <span className="shrink-0 rounded-full bg-[linear-gradient(110deg,#06b6d4,#2563eb_55%,#7c3aed)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.04em] text-white">신규</span> : null}<span className="truncate">{text(record.styleNo)}</span>{target === "missing" ? <span title="연결된 요청 스타일 또는 옵션을 찾을 수 없습니다. 우클릭 > 요청 연결 해제로 정리하세요." className="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold tracking-wide text-[var(--destructive)] bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)]">REQ?</span> : target ? <button type="button" title={`DEVELOPMENT REQUEST · ${target.style.chart} · #${target.style.seq} · Opt ${target.option.no} · 클릭해서 열기`} onMouseDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); navigate(`/request?focus=${target.style.reqId}`) }} className="shrink-0 rounded px-1 py-0.5 text-[8px] font-bold tracking-wide text-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--primary)_22%,transparent)]">REQ</button> : null}{warnings.length ? <TriangleAlert className="size-3.5 shrink-0 text-[var(--destructive)]" /> : null}</span> })()
                         : <span className="truncate">{text(column.value(record, linked))}</span>}
-                    <FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} />
+                    <FillHandle visible={editEnabled && sel.handle} onMouseDown={startFill} onDoubleClick={gridActions.fillDoubleClick} />
                   </td>
                 })}
                 {visibleGroups.flatMap((group) => group.columns.map((column) => {
