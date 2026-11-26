@@ -8010,6 +8010,30 @@
   ]
  },
  {
+  "key": "a174f3579793ee04",
+  "title": "| Acrylic fibre gains 0.4% as propylene jumps 9%: What comes next?",
+  "title_ko": null,
+  "link": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxQczIxeGpGYlM5ZjlSVlVsT3dhRmpfUEc4NVd6T2RSZU5TakYxaXdHb1JtaGdUNUJlTUNuT2hmSTRjY0RKSnV2dWk0cW5hbGVWLW9waUZCcFMxWGFTMmZYSzZRNExNUTVKUTNyNkdoVTFoWDU4Z0RBUFZyVW5NTTlEWnJnY2dnSHBhQVJJeDVlUkxWbUd5R09qcDNELWpabU9leDVhcGxvaTVDRF9IclVWVFotejgzOVJHS1hnUlZ1VkZMczIzcjhiaVFhLUkxMjNIUzZVdDVwZjBLMF9LZ2tyQ3JxZE8?oc=5",
+  "published": "2026-10-28",
+  "collected": "2026-11-26",
+  "summary": "| Acrylic fibre gains 0.4% as propylene jumps 9%: What comes next? Fibre2Fashion",
+  "content": "| Acrylic fibre gains 0.4% as propylene jumps 9%: What comes next? Fibre2Fashion",
+  "image": "",
+  "image_tried": null,
+  "source": "Fibre2Fashion",
+  "region": "해외",
+  "category": "ETC",
+  "tags": [],
+  "entities": [],
+  "score": 4,
+  "relevant": false,
+  "gate": "none",
+  "hits": 1,
+  "sources": [
+   "Fibre2Fashion"
+  ]
+ },
+ {
   "key": "9fde79d9df77b239",
   "title": "Hansae Strengthens U.S. Market Edge via Guatemala Vertical Integration",
   "title_ko": null,
@@ -13745,7 +13769,7 @@
   "summary": "Bangladesh’s garment exporters fear prolonged protests in France, Italy and other European countries could weaken consumer spending and reduce orders […] The post Bangladesh’s apparel orders in jeapordy amid European protests appeared first on Ecotextile News .",
   "content": "Bangladesh’s garment exporters fear prolonged protests in France, Italy and other European countries could weaken consumer spending and reduce orders […] The post Bangladesh’s apparel orders in jeapordy amid European protests appeared first on Ecotextile News .",
   "image": "",
-  "image_tried": "2026-10-27T00:07:14+00:00",
+  "image_tried": "2026-11-26T03:18:06+00:00",
   "source": "Ecotextile News",
   "region": "해외",
   "category": "ETC",
@@ -14791,7 +14815,7 @@
   "summary": "Australia’s industrial chemicals regulator has opened a public consultation on a draft evaluation of per- and polyfluoroalkyl substances (PFAS) imported […] The post Australia opens consultation on PFAS use appeared first on Ecotextile News .",
   "content": "Australia’s industrial chemicals regulator has opened a public consultation on a draft evaluation of per- and polyfluoroalkyl substances (PFAS) imported […] The post Australia opens consultation on PFAS use appeared first on Ecotextile News .",
   "image": "",
-  "image_tried": "2026-10-27T00:07:14+00:00",
+  "image_tried": "2026-11-26T03:18:06+00:00",
   "source": "Ecotextile News",
   "region": "해외",
   "category": "CHEMICAL",
@@ -15403,7 +15427,7 @@
   "collected": "2026-10-27",
   "summary": "AMSTERDAM – Brightfiber Textiles has stopped fibre production at its Amsterdam facility, saying the operation is not financially viable without new investment. The post Brightfiber Textiles halts Amsterdam production appeared first on Apparel Insider .",
   "content": "AMSTERDAM – Brightfiber Textiles has stopped fibre production at its Amsterdam facility, saying the operation is not financially viable without new investment. This is Premium Content Only users with Online and Print subscription can access this. If you are a Free Subscriber, click here to upgrade. If you already have Online or Print subscription Login To Unlock The Content! Remember Me Lost your password? Don't have an account? Register The post Brightfiber Textiles halts Amsterdam production appeared first on Apparel Insider .",
-  "image": "",
+  "image": "https://apparelinsider.com/wp-content/uploads/2024/09/shutterstock_2282512163-1-1-scaled.jpg",
   "image_tried": "2026-10-27T00:07:14+00:00",
   "source": "Apparel Insider",
   "region": "해외",
@@ -15552,7 +15576,7 @@
   "summary": "Luxury fashion technology company Vêtir has been awarded a patent covering its digital closet, AI conversational styling model and wardrobe […] The post Vêtir patents AI styling platform appeared first on Ecotextile News .",
   "content": "Luxury fashion technology company Vêtir has been awarded a patent covering its digital closet, AI conversational styling model and wardrobe […] The post Vêtir patents AI styling platform appeared first on Ecotextile News .",
   "image": "",
-  "image_tried": "2026-10-27T00:07:14+00:00",
+  "image_tried": "2026-11-26T03:18:06+00:00",
   "source": "Ecotextile News",
   "region": "해외",
   "category": "ETC",
@@ -45710,9 +45734,10 @@
   "score": 2,
   "relevant": false,
   "gate": "none",
-  "hits": 1,
+  "hits": 2,
   "sources": [
-   "Textile Today"
+   "Textile Today",
+   "바이어 · American Eagle"
   ]
  },
  {
@@ -45886,10 +45911,11 @@
   "score": 10,
   "relevant": true,
   "gate": "material",
-  "hits": 2,
+  "hits": 3,
   "sources": [
    "주제검색 · 염색가공",
-   "Textile Today"
+   "Textile Today",
+   "주제검색 · 신소재"
   ]
  },
  {

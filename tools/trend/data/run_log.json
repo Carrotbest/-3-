@@ -1,15 +1,5 @@
 [
  {
-  "at": "2026-10-03T00:02:03+00:00",
-  "kind": "collect",
-  "ok": 37,
-  "fail": 1,
-  "new": 140,
-  "kept": 34,
-  "hits": 0,
-  "translated": 51
- },
- {
   "at": "2026-10-03T23:23:28+00:00",
   "kind": "collect",
   "ok": 37,
@@ -558,5 +548,15 @@
   "kept": 56,
   "hits": 3,
   "translated": 120
+ },
+ {
+  "at": "2026-11-26T03:15:04+00:00",
+  "kind": "collect",
+  "ok": 36,
+  "fail": 2,
+  "new": 174,
+  "kept": 42,
+  "hits": 8,
+  "translated": 68
  }
 ]
